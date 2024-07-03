@@ -285,10 +285,9 @@ class DashboardController extends Controller
 
     public function getDataUserAkses()
     {
-        // $users = User::where('is_active', 1)->get();
-        $permissions = Permission::all();
-        dd($permissions);
-        return view('pages.master-data.user.akses-user', compact('permissions'));
+        $roles = Role::all();
+
+        return view('pages.master-data.user.akses-user', compact('roles'));
     }
 
     public function getAllAttendances()
@@ -1280,63 +1279,63 @@ class DashboardController extends Controller
             25
         );
 
-            $attendances = [];
+        $attendances = [];
 
-            if (!$employee) {
-                return response()->json([
-                    'error' => 'Employee not found'
-                ], 404);
-            }
-            $total_late_in = 0;
-            $total_hadir = $employee->attendance->where('clock_in', '!=', null)->where('is_day_off', null)
-                ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
-                ->count();
-            $total_hari = Attendance::where('employee_id', $id_pegawai)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
-                ->count();
-            $total_libur = Attendance::where('employee_id', $id_pegawai)->where('is_day_off',1)->where('day_off_request_id', null)->where('attendance_code_id', null)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
-                ->count();
-            $total_izin = 0;
-            $total_absent = $employee->attendance->where('clock_in', null)->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])->count();
-            $total_cuti = 0;
-            $total_sakit = 0;
-            $absensi_pegawai = $employee->attendance->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()]);
+        if (!$employee) {
+            return response()->json([
+                'error' => 'Employee not found'
+            ], 404);
+        }
+        $total_late_in = 0;
+        $total_hadir = $employee->attendance->where('clock_in', '!=', null)->where('is_day_off', null)
+            ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+            ->count();
+        $total_hari = Attendance::where('employee_id', $id_pegawai)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+            ->count();
+        $total_libur = Attendance::where('employee_id', $id_pegawai)->where('is_day_off', 1)->where('day_off_request_id', null)->where('attendance_code_id', null)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+            ->count();
+        $total_izin = 0;
+        $total_absent = $employee->attendance->where('clock_in', null)->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])->count();
+        $total_cuti = 0;
+        $total_sakit = 0;
+        $absensi_pegawai = $employee->attendance->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()]);
 
-            foreach ($absensi_pegawai as $absensi) {
-                if ($absensi->attendance_code_id != null || $absensi->day_off_request_id != null) {
-                    if ($absensi->attendance_code_id == 1) {
-                        $total_izin += 1;
-                    } elseif ($absensi->attendance_code_id == 2) {
-                        $total_sakit += 1;
-                    } elseif ($absensi->attendance_code_id != 1 && $absensi->attendance_code_id != 2) {
-                        $total_cuti += 1;
-                    } elseif ($absensi->attendance_code_id == null || $absensi->attendance_code_id == "") {
-                        // Jika attendance_code_id di Attendance tidak ada, cek di DayOffRequest melalui relasi day_off
-                        if ($absensi->day_off) {
-                            // Cek apakah day_off_request memiliki attendance_code_id yang diinginkan
-                            if ($absensi->day_off->attendance_code_id == 1) {
-                                $total_izin += 1;
-                            } elseif ($absensi->day_off->attendance_code_id == 2) {
-                                $total_sakit += 1;
-                            } else {
-                                $total_cuti += 1;
-                            }
+        foreach ($absensi_pegawai as $absensi) {
+            if ($absensi->attendance_code_id != null || $absensi->day_off_request_id != null) {
+                if ($absensi->attendance_code_id == 1) {
+                    $total_izin += 1;
+                } elseif ($absensi->attendance_code_id == 2) {
+                    $total_sakit += 1;
+                } elseif ($absensi->attendance_code_id != 1 && $absensi->attendance_code_id != 2) {
+                    $total_cuti += 1;
+                } elseif ($absensi->attendance_code_id == null || $absensi->attendance_code_id == "") {
+                    // Jika attendance_code_id di Attendance tidak ada, cek di DayOffRequest melalui relasi day_off
+                    if ($absensi->day_off) {
+                        // Cek apakah day_off_request memiliki attendance_code_id yang diinginkan
+                        if ($absensi->day_off->attendance_code_id == 1) {
+                            $total_izin += 1;
+                        } elseif ($absensi->day_off->attendance_code_id == 2) {
+                            $total_sakit += 1;
+                        } else {
+                            $total_cuti += 1;
                         }
                     }
                 }
-
-                $total_late_in += $absensi->late_clock_in;
             }
-            // Push data ke dalam array attendances
-            $attendances = [
-                'total_hari' => $total_hari,
-                'total_hadir' => $total_hadir,
-                'total_telat' => $total_late_in,
-                'total_izin' => $total_izin,
-                'total_sakit' => $total_sakit,
-                'total_absent' => $total_absent,
-                'total_cuti' => $total_cuti,
-                'total_libur' => $total_libur,
-            ];
+
+            $total_late_in += $absensi->late_clock_in;
+        }
+        // Push data ke dalam array attendances
+        $attendances = [
+            'total_hari' => $total_hari,
+            'total_hadir' => $total_hadir,
+            'total_telat' => $total_late_in,
+            'total_izin' => $total_izin,
+            'total_sakit' => $total_sakit,
+            'total_absent' => $total_absent,
+            'total_cuti' => $total_cuti,
+            'total_libur' => $total_libur,
+        ];
 
         return view('pages.kpi.penilaian.show', compact('pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir', 'attendances'));
     }

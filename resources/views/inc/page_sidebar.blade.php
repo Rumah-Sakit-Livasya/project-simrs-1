@@ -328,7 +328,7 @@
             @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('manager'))
                 {{-- @canany(['view companies', 'create companies', 'edit companies', 'delete companies']) --}}
                 <li
-                    class="{{ set_active_mainmenu(['dashboard/company', 'dashboard/banks', 'dashboard/bank-employees', 'dashboard/day-off', 'dashboard/organizations', 'dashboard/structures', 'dashboard/job-level', 'dashboard/job-position', 'dashboard/users', 'dashboard/roles']) }}">
+                    class="{{ set_active_mainmenu(['dashboard/company', 'dashboard/banks', 'dashboard/bank-employees', 'dashboard/day-off', 'dashboard/organizations', 'dashboard/structures', 'dashboard/job-level', 'dashboard/job-position', '/users', 'dashboard/roles']) }}">
                     <a href="#" title="Master Data" data-filter-tags="master data">
                         <i class='bx bx-cube'></i>
                         <span class="nav-link-text">Master Data</span>
@@ -419,7 +419,7 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="{{ set_active_mainmenu(['dashboard/users', 'dashboard/roles']) }}">
+                        <li class="{{ set_active_mainmenu(['users', 'dashboard/roles']) }}">
                             <a href="#" title="User Akses" data-filter-tags="user akses">
                                 <i class='fal fa-address-card'></i>
                                 <span class="nav-link-text">User Akses</span>
@@ -430,8 +430,8 @@
                                         <span class="nav-link-text">Roles</span>
                                     </a>
                                 </li>
-                                <li class="{{ set_active('dashboard/users') }}">
-                                    <a href="/dashboard/users" title="List User" data-filter-tags="list user">
+                                <li class="{{ set_active('users') }}">
+                                    <a href="{{ route('users') }}" title="List User" data-filter-tags="list user">
                                         <span class="nav-link-text">List User</span>
                                     </a>
                                 </li>
