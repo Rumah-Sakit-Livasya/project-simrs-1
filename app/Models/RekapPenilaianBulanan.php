@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class RekapPenilaianBulanan extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['employee_id', 'group_penilaian_id', 'periode', 'tahun', 'total_nilai', 'keterangan', 'catatan','komentar_pegawai', 'komentar_penilai', 'komentar_pejabat_penilai'];
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
+    public function group_penilaian()
+    {
+        return $this->belongsTo(GroupPenilaian::class, 'group_penilaian_id');
+    }
+}
