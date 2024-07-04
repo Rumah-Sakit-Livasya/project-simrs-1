@@ -28,10 +28,10 @@
                                             <!-- we wrap header title inside a span tag with utility padding -->
                                             <div class="card-title font-weight-bold">{{ $row->name }}</div>
                                             <div class="custom-control d-flex custom-switch ml-auto">
-                                                <input id="demo-switch-{{ $row->id }}" type="checkbox"
+                                                <input id="roles-{{ $row->id }}" type="checkbox"
                                                     class="custom-control-input" checked="checked">
                                                 <label class="custom-control-label fw-500"
-                                                    for="demo-switch-{{ $row->id }}"></label>
+                                                    for="roles-{{ $row->id }}"></label>
                                             </div>
                                         </div>
                                         <div class="card-body d-flex pr-2 align-items-center flex-wrap">
@@ -41,10 +41,10 @@
                                                         <span>{{ $col->name }}</span><br>
                                                     </div>
                                                     <div class="custom-control d-flex custom-switch">
-                                                        <input id="demo-switch-{{ $row->id }}" type="checkbox"
+                                                        <input id="permissions-{{ $col->id }}" type="checkbox"
                                                             class="custom-control-input" checked="checked">
                                                         <label class="custom-control-label fw-500"
-                                                            for="demo-switch-{{ $row->id }}"></label>
+                                                            for="permissions-{{ $col->id }}"></label>
                                                     </div>
                                                 @endforeach
                                             @else

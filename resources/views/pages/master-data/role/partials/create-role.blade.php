@@ -5,14 +5,14 @@
                 enctype="multipart/form-data">
                 @method('post')
                 @csrf
-                <div class="modal-header">
+                <div class="modal-header pb-0">
                     <h5 class="modal-title">Tambah Role</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true"><i class="fal fa-times"></i></span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
+                    <div class="form-group mb-2">
                         <label for="name">Nama Role</label>
                         <input type="text" value="{{ old('name') }}"
                             class="form-control @error('name') is-invalid @enderror" id="name" name="name"
@@ -21,7 +21,7 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                    <div class="form-group">
+                    <div class="form-group my-2">
                         <label for="guard_name">Guard Name</label>
                         <input type="guard_name" value="{{ old('guard_name') }}"
                             class="form-control @error('guard_name') is-invalid @enderror" id="guard_name"
