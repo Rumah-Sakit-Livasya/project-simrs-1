@@ -20,7 +20,7 @@ class CompanySeeder extends Seeder
         // Rs Livaysa
         // latitude = -6.764976435287691 
         // longitude = 108.17786913965288
-        DB::table('company')->insert([
+        DB::table('companies')->insert([
             'name' => 'Rumah Sakit Livasya',
             'phone_number' => '(0233) 8668019',
             'email' => 'contact@livasya.com',
@@ -35,7 +35,7 @@ class CompanySeeder extends Seeder
             'longitude' => 108.17786913965288,
             'radius' => 1
         ]);
-        DB::table('company')->insert([
+        DB::table('companies')->insert([
             'name' => 'PT Livasya Sudjono Bersaudara',
             'phone_number' => '(0233) 8668019',
             'email' => 'pt@gmail.com',
@@ -50,7 +50,7 @@ class CompanySeeder extends Seeder
             'longitude' => 108.17786913965288,
             'radius' => 1
         ]);
-        DB::table('company')->insert([
+        DB::table('companies')->insert([
             'name' => 'Kolonial Guest House',
             'phone_number' => '(0233) 8668019',
             'email' => 'kolonial@gmail.com',

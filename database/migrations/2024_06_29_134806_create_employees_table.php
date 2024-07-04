@@ -68,7 +68,7 @@ return new class extends Migration
             $table->string('jaminan_pensiun_date')->nullable();
             $table->string('sip')->nullable();
             $table->string('expire_sip')->nullable();
-            $table->string('foto');
+            $table->string('foto')->nullable();
             $table->boolean('is_active')->default(1);
             $table->string('ttd')->nullable();
             $table->timestamps();

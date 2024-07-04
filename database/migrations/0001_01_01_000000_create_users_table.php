@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->boolean('is_active')->default(1);
-            $table->string('avatar');
+            $table->string('avatar')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
