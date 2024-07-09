@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,7 +10,9 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles {
+        HasRoles::hasPermissionTo as traitHasPermissionTo;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -25,6 +26,23 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+
+    /**
+     * Override hasPermissionTo method to allow super admin to bypass permissions
+     *
+     * @param string|int|\Spatie\Permission\Contracts\Permission $permission
+     * @param string|null $guardName
+     * @return bool
+     */
+    public function hasPermissionTo($permission, $guardName = null): bool
+    {
+        if ($this->hasRole('super admin')) {
+            return true;
+        }
+
+        // Call hasPermissionTo from HasRoles trait
+        return $this->traitHasPermissionTo($permission, $guardName);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

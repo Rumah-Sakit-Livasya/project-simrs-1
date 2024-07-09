@@ -19,6 +19,7 @@ use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\LocationController;
 use App\Http\Controllers\API\PayrollApiController;
 use App\Http\Controllers\API\PayrollComponentController;
+use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\SalaryController;
 use App\Http\Controllers\BotMessageController;
 use App\Http\Controllers\DeductionController;
@@ -27,6 +28,7 @@ use App\Models\PayrollComponent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Maatwebsite\Excel\Row;
+use Spatie\Permission\Models\Permission;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,6 +92,13 @@ Route::prefix('dashboard')->group(function () {
         // Route::put('/update/{id}', [OrganizationController::class, 'update']);
         // Route::get('/get/{id}', [OrganizationController::class, 'getOrganization']);
         // Route::get('/delete/{id}', [OrganizationController::class, 'destroy']);
+    });
+
+    Route::prefix('permissions')->group(function () {
+        Route::post('/store', [PermissionController::class, 'store'])->name('permissions.store');
+        Route::get('/get/{id}', [PermissionController::class, 'getPermission'])->name('permissions.get');
+        Route::put('/get/{id}', [PermissionController::class, 'update'])->name('permissions.update');
+        Route::get('/delete/{id}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
     });
 
     Route::prefix('role')->group(function () {

@@ -86,6 +86,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/akses', [DashboardController::class, 'getDataUserAkses'])->name('users.akses');
     });
 
+    Route::prefix('roles-permissions')->group(function () {
+        Route::get('/permissions', [DashboardController::class, 'getDataPermissions'])->name('permissions');
+        Route::get('/roles', [DashboardController::class, 'getDataRoles'])->name('masterdata.roles');
+    });
+
     Route::prefix('outsource')->group(function () {
         Route::get("/attendances", [DashboardController::class, 'getAttendancesOutsourcing'])->name("attendances.outsource");
         Route::post("/attendances", [AttendanceController::class, 'clock_in_outsource'])->name("clockin.outsource");

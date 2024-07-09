@@ -36,33 +36,58 @@ function toHijriah($tanggal)
     return $hijriah;
 }
 
-function set_active($uri, $output = 'active')
-{
-    if (is_array($uri)) {
-        foreach ($uri as $u) {
-            if (Request::is($u)) {
-                return $output;
+// function set_active($uri, $output = 'active')
+// {
+//     if (is_array($uri)) {
+//         foreach ($uri as $u) {
+//             if (Request::is($u)) {
+//                 return $output;
+//             }
+//         }
+//     } else {
+//         if (Request::is($uri)) {
+//             return $output;
+//         }
+//     }
+// }
+
+// function set_active_mainmenu($uri, $output = 'active open')
+// {
+//     if (is_array($uri)) {
+//         foreach ($uri as $u) {
+//             if (Request::is($u)) {
+//                 return $output;
+//             }
+//         }
+//     } else {
+//         if (Request::is($uri)) {
+//             return $output;
+//         }
+//     }
+// }
+
+if (!function_exists('set_active')) {
+    function set_active($paths, $class = 'active')
+    {
+        foreach ((array) $paths as $path) {
+            if (Request::is(trim($path, '/') . '*')) {
+                return $class;
             }
         }
-    } else {
-        if (Request::is($uri)) {
-            return $output;
-        }
+        return '';
     }
 }
 
-function set_active_mainmenu($uri, $output = 'active open')
-{
-    if (is_array($uri)) {
-        foreach ($uri as $u) {
-            if (Request::is($u)) {
-                return $output;
+if (!function_exists('set_active_mainmenu')) {
+    function set_active_mainmenu($paths, $class = 'active open')
+    {
+        foreach ((array) $paths as $path) {
+            // Periksa jika URL parent cocok dengan salah satu URL children atau path children
+            if (Request::is(trim($path, '/') . '*') || in_array(request()->path(), $paths)) {
+                return $class;
             }
         }
-    } else {
-        if (Request::is($uri)) {
-            return $output;
-        }
+        return '';
     }
 }
 

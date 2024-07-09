@@ -9,15 +9,10 @@ class Menu extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'url', 'icon', 'permission', 'parent_id'];
+    protected $fillable = ['title', 'url', 'icon', 'parent_id', 'sort_order', 'permission'];
 
     public function children()
     {
-        return $this->hasMany(Menu::class, 'parent_id');
-    }
-
-    public function parent()
-    {
-        return $this->belongsTo(Menu::class, 'parent_id');
+        return $this->hasMany(Menu::class, 'parent_id')->orderBy('sort_order');
     }
 }

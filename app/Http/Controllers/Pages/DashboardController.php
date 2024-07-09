@@ -270,8 +270,9 @@ class DashboardController extends Controller
     public function  getDataRoles()
     {
         $roles = Role::all();
+        $permissions = Permission::all();
         $getNotify = $this->getNotify();
-        return view('pages.master-data.role.index', compact('roles', 'getNotify'));
+        return view('pages.master-data.role.index', compact('roles', 'permissions', 'getNotify'));
     }
 
     public function  getDataUsers()
@@ -1380,5 +1381,11 @@ class DashboardController extends Controller
     {
         $aspek_penilaians = AspekPenilaian::all();
         return view('pages.kpi.aspek_penilaian.index', compact('aspek_penilaians'));
+    }
+
+    public function getDataPermissions()
+    {
+        $permissions = Permission::all();
+        return view('pages.master-data.permissions.index', compact('permissions'));
     }
 }

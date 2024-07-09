@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Role')
+@section('title', 'Menu')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row mb-5">
@@ -7,7 +7,7 @@
                 <button type="button" class="btn btn-primary waves-effect waves-themed mr-2" data-backdrop="static"
                     data-keyboard="false" data-toggle="modal" data-target="#tambah-role" title="Tambah Role">
                     <span class="fal fa-plus-circle mr-1"></span>
-                    Tambah Role
+                    Tambah Menu
                 </button>
             </div>
         </div>
@@ -17,7 +17,7 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Tabel Roles
+                            Tabel Menu
                         </h2>
                     </div>
                     <div class="panel-container show">

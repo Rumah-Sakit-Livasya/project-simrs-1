@@ -12,8 +12,13 @@ class RoleController extends Controller
     public function getRole($id)
     {
         try {
-            $role = Role::findOrFail($id);
-            return response()->json($role, 200);
+            $role = Role::findById($id);
+            $permissions = $role->getPermissionNames();
+
+            return response()->json([
+                'role' => $role,
+                'permissions' => $permissions
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'No result'
@@ -79,14 +84,17 @@ class RoleController extends Controller
      */
     public function destroy($id)
     {
+        // dd($id);
         try {
-            $role = Role::find($id);
+            $role = Role::findById($id);
+            if (!$role) {
+                return response()->json(['error' => 'Role tidak ditemukan'], 404);
+            }
             $role->delete();
-            //return response
             return response()->json(['message' => 'Role Berhasil di Hapus!']);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'No result'
+                'error' => $e->getMessage()
             ], 404);
         }
     }
