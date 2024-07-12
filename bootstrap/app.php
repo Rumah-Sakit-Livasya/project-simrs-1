@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'superadmin' => \App\Http\Middleware\SuperAdminMiddleware::class,
+            'check.api.credentials' => \App\Http\Middleware\CheckApiCredentials::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

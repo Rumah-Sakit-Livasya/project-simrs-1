@@ -16,13 +16,12 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="Tanggal">Nama</label>
-                                <select class="select2 form-control w-100" id="employee_id_tambah"
-                                        name="employee_id">
-                                        @foreach ($employees as $item)
-                                            <option value="{{ $item->id }}">{{ $item->fullname }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                <select class="select2 form-control w-100" id="employee_id_tambah" name="employee_id">
+                                    @foreach ($employees as $item)
+                                        <option value="{{ $item->id }}">{{ $item->fullname }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -89,7 +88,7 @@
                     <button type="submit" class="btn btn-sm btn-primary">
                         <div class="ikon-tambah">
                             <span class="fal fa-plus-circle mr-1"></span>
-                            Update
+                            Tambah
                         </div>
                         <div class="span spinner-text d-none">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

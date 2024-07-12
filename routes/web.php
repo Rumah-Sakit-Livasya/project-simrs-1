@@ -17,17 +17,8 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WhatsappController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use PHPUnit\Event\Code\Test;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
 
 Route::get('/', [AuthenticatedSessionController::class, 'create'])
     ->middleware('guest')
@@ -40,86 +31,23 @@ Route::middleware('auth')->group(function () {
     // Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Dashboard
-    Route::get("/dashboard", [DashboardController::class, 'index'])->name("dashboard");
 
     Route::prefix('dashboard')->group(function () {
-        Route::get("/ttd", function () {
-            return view('pages.kpi.penilaian.partials.ttd');
-        })->name('ttd');
+        Route::get("/", [DashboardController::class, 'index'])->name("dashboard");
         Route::get("/locations", [DashboardController::class, 'getDataLocations'])->name("locations");
         Route::get("/profile", [DashboardController::class, 'getDataUser'])->name("profile");
-        // Route::get("/users", [DashboardController::class, 'getDataUsers'])->name("users");
-        Route::get("/roles", [DashboardController::class, 'getDataRoles'])->name("roles");
-        Route::get("/all-requests", [DashboardController::class, 'getDataRequests'])->name("admin.requests");
-        Route::get("/company", [CompanyController::class, 'index'])->name("company");
-        Route::prefix('company')->group(function () {
-            Route::get('/get/{id}', [ApiCompanyController::class, 'getCompany']);
-            Route::post('/store', [ApiCompanyController::class, 'store']);
-            Route::put('/update/{id}', [ApiCompanyController::class, 'update']);
-            Route::put('/update-location/{id}', [ApiCompanyController::class, 'updateLocation']);
-        });
-        Route::prefix('reports')->group(function () {
-            Route::get('/attendances', [ReportController::class, 'attendanceReports'])->name('reports.attendance');
-            Route::post('/attendances', [ReportController::class, 'filterAttendanceReports'])->name('reports.filter.attendance');
-        });
-        Route::get("/attendances", [DashboardController::class, 'getAllAttendances'])->name("admin.attendances");
-        Route::get("/attendances/employee/{id}", [DashboardController::class, 'getEmployeeAttendance'])->name("show.employee.attendance");
         Route::get("/attendances/employee/{id}/payroll", [DashboardController::class, 'getEmployeeAttendancePayroll'])->name("show.employee.attendance.payroll");
-        Route::get("/organizations", [DashboardController::class, 'getDataOrganizations'])->name("organization");
-        Route::get("/job-level", [DashboardController::class, 'getDataJobLevels'])->name("job-level");
-        Route::get("/job-position", [DashboardController::class, 'getDataJobPositions'])->name("job-position");
-        Route::get("/employees", [DashboardController::class, 'getDataEmployees'])->name("employees");
-        Route::post('/employees', [DashboardController::class, 'pegawaiNonAktifList'])->name('get.non-aktif-pegawai');
-        Route::get("/day-off", [DashboardController::class, 'getDataHolidays'])->name("day-off");
-        Route::get("/attendance-codes", [DashboardController::class, 'getDataAttendanceCodes'])->name("attendance-codes");
-        Route::get("/shifts", [DashboardController::class, 'getDataShifts'])->name("shifts");
-        Route::get("/banks", [DashboardController::class, 'getDataBanks'])->name("banks");
-        Route::get("/bank-employees", [DashboardController::class, 'getDataBankEmployees'])->name("bank-employees");
-        Route::get("/structures", [DashboardController::class, 'getDataStructures'])->name("structures");
-        Route::get("/management-shift", [DashboardController::class, 'getManagementShift'])->name("management-shift");
-        Route::get("/management-shift/edit/{id}", [DashboardController::class, 'editManagementShift'])->name("edit-management-shift");
     });
 
-    Route::prefix('users')->group(function () {
-        Route::get('/', [DashboardController::class, 'getDataUsers'])->name('users');
-        Route::get('/akses', [DashboardController::class, 'getDataUserAkses'])->name('users.akses');
-    });
 
-    Route::prefix('roles-permissions')->group(function () {
-        Route::get('/permissions', [DashboardController::class, 'getDataPermissions'])->name('permissions');
-        Route::get('/roles', [DashboardController::class, 'getDataRoles'])->name('masterdata.roles');
-    });
-
-    Route::prefix('outsource')->group(function () {
-        Route::get("/attendances", [DashboardController::class, 'getAttendancesOutsourcing'])->name("attendances.outsource");
-        Route::post("/attendances", [AttendanceController::class, 'clock_in_outsource'])->name("clockin.outsource");
-        Route::post("/attendances/store", [AttendanceController::class, 'storeAttendanceOutsourcing'])->name("attendances.outsource.store");
-        Route::get("/attendances/all", [DashboardController::class, 'getAttendancesOutsourcingAll'])->name("attendances.outsource.all");
-        Route::post("/attendances/clock_out", [AttendanceController::class, 'clock_out_outsource'])->name("clockout.outsource");
-    });
-
-    Route::prefix('kpi')->group(function () {
-        Route::prefix('master-data')->group(function () {
-            Route::get('/group-penilaian/bulanan', [DashboardController::class, 'getGroupPenilaian'])->name('kpi.get.group-penilaian');
-            Route::get('/group-penilaian/bulanan/{id}/edit', [DashboardController::class, 'editGroupPenilaian'])->name('kpi.edit.group-penilaian');
-            Route::get('/group-penilaian/rekap/bulanan', [DashboardController::class, 'rekapPenilaianBulanan'])->name('kpi.rekap.penilaian.bulanan');
-            Route::get('/group-penilaian/bulanan/tambah', [DashboardController::class, 'tbhGroupPenilaian'])->name('kpi.tbh.group-penilaian');
-            Route::get('/group-penilaian/bulanan/tambah/{id}', [DashboardController::class, 'tbhPenilaian'])->name('kpi.tbh.penilaian');
-            Route::get('/group-penilaian/bulanan/{id_form}/{id_pegawai}/{periode}/{tahun}/show', [DashboardController::class, 'showPenilaianBulanan'])->name('kpi.show.penilaian.bulanan');
-            Route::get('/aspek-penilaian', [DashboardController::class, 'getAspekPenilaian'])->name('kpi.get.aspek-penilaian');
-            Route::get('/aspek-penilaian/tambah', [DashboardController::class, 'tbhAspekPenilaian'])->name('kpi.tbh.aspek-penilaian');
-            Route::get('/indikator-penilaian', [DashboardController::class, 'getIndikatorPenilaian'])->name('kpi.get.indikator-penilaian');
-        });
-    });
-
-    Route::prefix('monitoring')->group(function () {
-        Route::get("/", [MonitoringController::class, 'index'])->name("monitoring");
-    });
-
-    Route::prefix('employee')->group(function () {
-        Route::get("/attendances", [DashboardController::class, 'getAttendances'])->name("attendances");
-        Route::get("/attendances/filter/", [DashboardController::class, 'getAttendancesFilter'])->name('attendances.filter');
+    /*
+    |--------------------------------------------------------------------------
+    |  ABSENSI
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('attendances')->group(function () {
+        Route::get("/", [DashboardController::class, 'getAttendances'])->name("attendances");
+        Route::get("/filter", [DashboardController::class, 'getAttendancesFilter'])->name('attendances.filter');
         Route::get("/attendance-requests", [DashboardController::class, 'attendanceRequest'])->name("attendance-requests");
         Route::get("/attendance-requests/{id}", [DashboardController::class, 'getAttendanceRequest'])->name("attendance-requests.get");
 
@@ -136,8 +64,80 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/edit-profil/{id}', [UpdateProfileController::class, 'show'])->name('get.image');
         Route::post('/update-profil/{id}', [UpdateProfileController::class, 'update'])->name('update.image');
-    });
 
+        Route::prefix('outsource')->group(function () {
+            Route::get("/", [DashboardController::class, 'getAttendancesOutsourcing'])->name("monitoring.attendances.outsource");
+            Route::post("/", [AttendanceController::class, 'clock_in_outsource'])->name("clockin.outsource");
+            Route::post("/store", [AttendanceController::class, 'storeAttendanceOutsourcing'])->name("attendances.outsource.store");
+            Route::post("/clock_out", [AttendanceController::class, 'clock_out_outsource'])->name("clockout.outsource");
+        });
+
+        Route::prefix('reports')->group(function () {
+            Route::get('/', [ReportController::class, 'attendanceReports'])->name('attendances.reports');
+            Route::post('/', [ReportController::class, 'filterAttendanceReports'])->name('attendances.reports.filter');
+        });
+    });
+    /* END ABSENSI ----------------------------------------------------------------------------*/
+
+
+    /*
+    |--------------------------------------------------------------------------
+    |  MONITORING
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('monitoring')->group(function () {
+        Route::get("/attendances", [DashboardController::class, 'getAllAttendances'])->name("monitoring.attendances");
+        Route::get("/attendances/employee/{id}", [DashboardController::class, 'getEmployeeAttendance'])->name("monitoring.attendances.show");
+        Route::prefix('outsource')->group(function () {
+            Route::get("/attendances/all", [DashboardController::class, 'getAttendancesOutsourcingAll'])->name("monitoring.attendances.outsource.all");
+        });
+        Route::get("/all-requests", [DashboardController::class, 'getDataRequests'])->name("monitoring.all.requests");
+    });
+    /* END MONITORING ----------------------------------------------------------------------------*/
+
+
+    /*
+    |--------------------------------------------------------------------------
+    |  PEGAWAI
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('employees')->group(function () {
+        Route::get("/", [DashboardController::class, 'getDataEmployees'])->name("employees");
+        Route::post('/', [DashboardController::class, 'pegawaiNonAktifList'])->name('get.non-aktif-pegawai');
+        Route::get("/management-shift", [DashboardController::class, 'getManagementShift'])->name("management-shift");
+        Route::get("/management-shift/edit/{id}", [DashboardController::class, 'editManagementShift'])->name("edit-management-shift");
+    });
+    /* END PEGAWAI ----------------------------------------------------------------------------*/
+
+    /*
+    |--------------------------------------------------------------------------
+    |  PENILAIAN
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('penilaian')->group(function () {
+        Route::get('/daftar-form', [DashboardController::class, 'getGroupPenilaian'])->name('kpi.get.form-penilaian');
+        Route::get('/form-penilaian/{id}/edit', [DashboardController::class, 'editGroupPenilaian'])->name('kpi.edit.form-penilaian');
+        Route::get('/reports', [DashboardController::class, 'rekapPenilaianBulanan'])->name('kpi.rekap.penilaian.bulanan');
+        Route::get('/form-penilaian/tambah', [DashboardController::class, 'tbhGroupPenilaian'])->name('kpi.tbh.form-penilaian');
+        Route::get('/form-penilaian/tambah/{id}', [DashboardController::class, 'tbhPenilaian'])->name('kpi.tbh.penilaian');
+        Route::get('/form-penilaian/{id_form}/{id_pegawai}/{periode}/{tahun}/show', [DashboardController::class, 'showPenilaianBulanan'])->name('kpi.show.penilaian.bulanan');
+        Route::get('/aspek-penilaian', [DashboardController::class, 'getAspekPenilaian'])->name('kpi.get.aspek-penilaian');
+        Route::get('/aspek-penilaian/tambah', [DashboardController::class, 'tbhAspekPenilaian'])->name('kpi.tbh.aspek-penilaian');
+        Route::get('/indikator-penilaian', [DashboardController::class, 'getIndikatorPenilaian'])->name('kpi.get.indikator-penilaian');
+
+
+        Route::get("/ttd", function () {
+            return view('pages.kpi.penilaian.partials.ttd');
+        })->name('ttd');
+    });
+    /* END PENILAIAN --------------------------------------------------------*/
+
+
+    /*
+    |--------------------------------------------------------------------------
+    |  PAYROLL
+    |--------------------------------------------------------------------------
+    */
     Route::prefix('payroll')->group(function () {
         Route::get("/allowance", [PayrollController::class, 'allowancePayroll'])->name("allowance.payroll");
         Route::get("/deduction", [PayrollController::class, 'deductionPayroll'])->name("deduction.payroll");
@@ -148,22 +148,113 @@ Route::middleware('auth')->group(function () {
         Route::get("/show", [PayrollController::class, 'showPayroll'])->name('payroll.slip-gaji.show');
         Route::get("/show/print", [PayrollController::class, 'printShowPayroll'])->name('payroll.slip-gaji.show.print');
     });
+    /* END PAYROLL --------------------------------------------------------*/
+
+
+    /*
+    |--------------------------------------------------------------------------
+    |  WHATSAPP
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('whatsapp')->group(function () {
+        Route::get('/', function () {
+            return view('pages.whatsapp.index');
+        })->name('whatsapp');
+        Route::get('/broadcast', function () {
+            return view('pages.whatsapp.index');
+        })->name('broadcast');
+        Route::get('/group_kontak', function () {
+            return view('pages.whatsapp.index');
+        })->name('group_kontak');
+        Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('whatsapp.send');
+    });
+    /* END PAYROLL --------------------------------------------------------*/
+
+
+    /*
+    |--------------------------------------------------------------------------
+    |  MASTER DATA
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('master-data')->group(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | PERUSAHAAN
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('companies')->group(function () {
+            Route::get("/", [CompanyController::class, 'index'])->name("companies");
+            Route::get('/get/{id}', [ApiCompanyController::class, 'getCompany']);
+            Route::post('/store', [ApiCompanyController::class, 'store']);
+            Route::put('/update/{id}', [ApiCompanyController::class, 'update']);
+            Route::put('/update-location/{id}', [ApiCompanyController::class, 'updateLocation']);
+        });
+        Route::get("/organizations", [DashboardController::class, 'getDataOrganizations'])->name("organization");
+        Route::get("/structures", [DashboardController::class, 'getDataStructures'])->name("structures");
+        Route::get("/job-level", [DashboardController::class, 'getDataJobLevels'])->name("job-level");
+        Route::get("/job-position", [DashboardController::class, 'getDataJobPositions'])->name("job-position");
+        /*END PERUSAHAAN ---------------------------------------------------------*/
+
+        /*
+        |--------------------------------------------------------------------------
+        | MANAJEMEN WAKTU
+        |--------------------------------------------------------------------------
+        */
+        Route::get("/day-off", [DashboardController::class, 'getDataHolidays'])->name("day-off");
+        Route::get("/attendance-codes", [DashboardController::class, 'getDataAttendanceCodes'])->name("attendance-codes");
+        Route::get("/shift-codes", [DashboardController::class, 'getDataShifts'])->name("shifts");
+        /*END MANAJEMEN WAKTU ------------------------------------------------------*/
+
+        /*
+        |--------------------------------------------------------------------------
+        | MASTER BANK
+        |--------------------------------------------------------------------------
+        */
+        Route::get("/banks", [DashboardController::class, 'getDataBanks'])->name("banks");
+        Route::get("/bank-employees", [DashboardController::class, 'getDataBankEmployees'])->name("bank-employees");
+        /*END MASTER BANK---------------------------------------------------------*/
+
+        /*
+        |--------------------------------------------------------------------------
+        | MASTER TARIF
+        |--------------------------------------------------------------------------
+        */
+
+        /*--------------------------------------------------------------------------*/
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | MENU SIDEBAR
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('daftar-menu')->group(function () {
+            Route::get('/', [DashboardController::class, 'getDataMenus'])->name('master-data.menu');
+        });
+        /*--------------------------------------------------------------------------*/
+
+        /*
+        |--------------------------------------------------------------------------
+        | USERS AKSES
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('roles-permissions')->group(function () {
+            Route::get('/permissions', [DashboardController::class, 'getDataPermissions'])->name('permissions');
+            Route::get('/roles', [DashboardController::class, 'getDataRoles'])->name('roles');
+        });
+
+        Route::prefix('users')->group(function () {
+            Route::get('/', [DashboardController::class, 'getDataUsers'])->name('users');
+            Route::get('/akses', [DashboardController::class, 'getDataUserAkses'])->name('users.akses');
+        });
+        /*END USERS AKSES --------------------------------------------------------*/
+    });
+    /* END MASTER DATA --------------------------------------------------------*/
 
     Route::get('/optimize', function () {
         Artisan::call('optimize');
         return 'optimize complete';
     });
-
-    Route::get('/whatsapp', function () {
-        return view('pages.whatsapp.index');
-    })->name('whatsapp');
-    Route::get('/whatsapp/broadcast', function () {
-        return view('pages.whatsapp.index');
-    })->name('broadcast');
-    Route::get('/whatsapp/group_kontak', function () {
-        return view('pages.whatsapp.index');
-    })->name('group_kontak');
-    Route::post('/whatsapp/send', [WhatsappController::class, 'sendMessage'])->name('whatsapp.send');
 });
 
 

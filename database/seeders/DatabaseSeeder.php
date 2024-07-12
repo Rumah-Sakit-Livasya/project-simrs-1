@@ -14,14 +14,15 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RolePermissionSeeder::class);
-        $this->call(BankSeeder::class);
-        $this->call(OrganizationSeeder::class);
-        $this->call(CompanySeeder::class);
-        $this->call(JobLevelSeeder::class);
-        $this->call(JobPositionSeeder::class);
-        $this->call(EmployeeSeeder::class);
-        $this->call(UserSeeder::class);
-        $this->call(AttendanceCodeSeeder::class);
-        $this->call(ShiftSeeder::class);
+        $this->call(MenusTableSeeder::class);
+        // $this->call(BankSeeder::class);
+        // $this->call(OrganizationSeeder::class);
+        // $this->call(CompanySeeder::class);
+        // $this->call(JobLevelSeeder::class);
+        // $this->call(JobPositionSeeder::class);
+        // $this->call(EmployeeSeeder::class);
+        // $this->call(UserSeeder::class);
+        // $this->call(AttendanceCodeSeeder::class);
+        // $this->call(ShiftSeeder::class);
     }
 }

@@ -16,7 +16,7 @@
                             <div class="form-group">
                                 <label for="employee_id">Pilih Pegawai</label>
                                 <select class="select2 form-control w-100  @error('employee_id') is-invalid @enderror"
-                                    id="employee_id" name="employee_id">
+                                    id="employee_id_outsource" name="employee_id">
                                     <option value=""></option>
                                     @foreach ($employees as $employee)
                                         <option value="{{ $employee->id }}">{{ $employee->fullname }}</option>

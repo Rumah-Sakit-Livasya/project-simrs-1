@@ -244,8 +244,8 @@
                         location.reload();
                     }, 1000);
                 } catch (error) {
-                    showErrorAlert(error.message);
                     $('#tambah-permission').modal('hide');
+                    showErrorAlert(error.message);
                 }
             });
 

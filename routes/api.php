@@ -17,6 +17,7 @@ use App\Http\Controllers\API\StructureController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\LocationController;
+use App\Http\Controllers\API\MenuController;
 use App\Http\Controllers\API\PayrollApiController;
 use App\Http\Controllers\API\PayrollComponentController;
 use App\Http\Controllers\API\PermissionController;
@@ -212,5 +213,12 @@ Route::prefix('dashboard')->group(function () {
         Route::post('/run-payroll', [PayrollApiController::class, 'runPayroll'])->name("api.run");
         Route::delete('/delete/{id}', [PayrollApiController::class, 'destroy'])->name("api.delete.payroll");
     });
+
+    Route::prefix('menu')->group(function () {
+        Route::get('/get/{id}', [MenuController::class, 'getDataMenu'])->name('master-data.menu.get');
+        Route::post('/store', [MenuController::class, 'store'])->name('master-data.menu.store');
+        Route::post('/update/{id}', [MenuController::class, 'update'])->name('master-data.menu.update');
+        Route::delete('/delete/{id}', [MenuController::class, 'destroy'])->middleware('check.api.credentials')->name('master-data.menu.delete');
+    });
 });
-Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(\App\Http\Middleware\CheckAuthorizationBot::class)->name('bot.kirim-pesan');
+// Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(\App\Http\Middleware\CheckAuthorizationBot::class)->name('bot.kirim-pesan');

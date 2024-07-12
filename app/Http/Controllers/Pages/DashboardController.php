@@ -19,6 +19,7 @@ use App\Models\Holiday;
 use App\Models\JobLevel;
 use App\Models\JobPosition;
 use App\Models\Location;
+use App\Models\Menu;
 use App\Models\Organization;
 use App\Models\PayrollComponent;
 use App\Models\RekapPenilaianBulanan;
@@ -273,6 +274,13 @@ class DashboardController extends Controller
         $permissions = Permission::all();
         $getNotify = $this->getNotify();
         return view('pages.master-data.role.index', compact('roles', 'permissions', 'getNotify'));
+    }
+
+    public function  getDataMenus()
+    {
+        $menus = Menu::all();
+        $getNotify = $this->getNotify();
+        return view('pages.master-data.menu.index', compact('menus', 'getNotify'));
     }
 
     public function  getDataUsers()
@@ -895,7 +903,7 @@ class DashboardController extends Controller
 
     public function getAttendances()
     {
-        // dd(auth()->user()->can('view.tests'));
+        // dd(auth()->user()->getRoleNames());
         if (auth()->user()->employee->employment_status == 'Outsource') {
             return redirect()->route('attendances.outsource');
         }

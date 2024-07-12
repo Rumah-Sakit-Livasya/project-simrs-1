@@ -70,7 +70,7 @@ if (!function_exists('set_active')) {
     function set_active($paths, $class = 'active')
     {
         foreach ((array) $paths as $path) {
-            if (Request::is(trim($path, '/') . '*')) {
+            if (Request::is(trim($path, '/'))) {
                 return $class;
             }
         }
@@ -83,7 +83,7 @@ if (!function_exists('set_active_mainmenu')) {
     {
         foreach ((array) $paths as $path) {
             // Periksa jika URL parent cocok dengan salah satu URL children atau path children
-            if (Request::is(trim($path, '/') . '*') || in_array(request()->path(), $paths)) {
+            if (Request::is(trim($path, '/')) || in_array(request()->path(), $paths)) {
                 return $class;
             }
         }

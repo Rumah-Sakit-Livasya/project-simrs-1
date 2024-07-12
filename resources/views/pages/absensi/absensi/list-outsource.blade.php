@@ -147,6 +147,9 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         $(document).ready(function() {
+            $('.select2').select2({
+                dropdownParent: $('#tambah-absensi-modal')
+            });
 
             $('#tambah-absensi').click(function() {
                 $('#tambah-absensi-modal').modal('show')
@@ -242,89 +245,5 @@
                 ]
             });
         });
-    </script>
-
-    <script>
-        // uploadButton.addEventListener('click', async () => {
-        //     // context.drawImage(video, 0, 0, 640, 480);
-        //     // Membalikkan gambar hasil tangkapan secara horizontal
-        //     toggleSpinner('upload', true);
-        //     context.scale(-1, 1);
-        //     context.drawImage(video, -canvas.width, 0, 640, 480);
-        //     const dataURL = canvas.toDataURL('image/png');
-        //     const formData = new FormData();
-        //     const location = latitude + ", " + longitude;
-        //     formData.append('image', dataURL);
-        //     formData.append('location', location);
-        //     formData.append('latitude', latitude);
-        //     formData.append('longitude', longitude);
-
-        //     try {
-        //         const response = await fetch('/outsource/attendances', {
-        //             method: 'POST',
-        //             body: formData,
-        //             headers: {
-        //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        //             }
-        //         });
-
-        //         const result = await response.json();
-        //         if (response.ok) {
-        //             console.log('Success:', result);
-        //             $('#clockin-modal').modal('hide');
-        //             toggleSpinner('upload', false);
-        //             showSuccessAlert(response.message);
-        //             setTimeout(function() {
-        //                 console.log('Reloading the page now.');
-        //                 window.location.reload();
-        //             }, 1000);
-
-        //         } else {
-        //             toggleSpinner('upload', false);
-        //             $('#clockin-modal').modal('hide');
-        //             showErrorAlert(result.error);
-        //         }
-        //     } catch (error) {
-        //         showErrorAlert(error.error);
-        //     }
-        // });
-
-        // clock_out.addEventListener('click', async () => {
-        //     toggleSpinner('clock_out', true);
-        //     const formData = new FormData();
-        //     const location = latitude + ", " + longitude;
-        //     formData.append('location', location);
-        //     formData.append('latitude', latitude);
-        //     formData.append('longitude', longitude);
-
-        //     $('#clock_in').prop('disabled', true);
-        //     $('#clock_in').find('.spinner-text').removeClass('d-none');
-        //     try {
-        //         const response = await fetch('/outsource/attendances/clock_out', {
-        //             method: 'POST',
-        //             body: formData,
-        //             headers: {
-        //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        //             }
-        //         });
-
-        //         const result = await response.json();
-        //         if (response.ok) {
-        //             toggleSpinner('clock_out', false);
-        //             showSuccessAlert(response.message);
-        //             setTimeout(function() {
-        //                 console.log('Reloading the page now.');
-        //                 window.location.reload();
-        //             }, 1000);
-
-        //         } else {
-        //             console.error('Error:', result);
-        //             $('#clockin-modal').modal('hide');
-        //             showErrorAlert(result.error);
-        //         }
-        //     } catch (error) {
-        //         showErrorAlert(error.error);
-        //     }
-        // });
     </script>
 @endsection

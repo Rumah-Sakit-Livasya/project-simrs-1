@@ -3,7 +3,6 @@
     $childrenUrls = $menu->children->pluck('url')->toArray();
     // Tambahkan juga URL parent menu
     $urls = array_merge([$menu->url], $childrenUrls);
-
     // Set class active main menu berdasarkan array URL children
     $isActive = $menu->children->count() > 0 ? set_active_mainmenu($urls) : set_active($menu->url);
 @endphp
@@ -17,7 +16,8 @@
     </a>
     @if ($menu->children->count() > 0)
         <ul>
-            @foreach ($menu->children as $child)
+            {{-- @dd($urls) Uncomment to debug --}}
+            @foreach ($menu->children as $i => $child)
                 @include('inc.partials.menu', ['menu' => $child])
             @endforeach
         </ul>

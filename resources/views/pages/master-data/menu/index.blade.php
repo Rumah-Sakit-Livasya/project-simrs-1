@@ -1,11 +1,24 @@
 @extends('inc.layout')
 @section('title', 'Menu')
+@section('extended-css')
+    <style>
+        #dt-basic-example thead th,
+        #dt-basic-example tbody td,
+        #dt-basic-example tfoot th {
+            vertical-align: middle;
+        }
+
+        a.link_nama:hover {
+            text-decoration: underline !important;
+        }
+    </style>
+@endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row mb-5">
             <div class="col-xl-12">
                 <button type="button" class="btn btn-primary waves-effect waves-themed mr-2" data-backdrop="static"
-                    data-keyboard="false" data-toggle="modal" data-target="#tambah-role" title="Tambah Role">
+                    data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah Menu">
                     <span class="fal fa-plus-circle mr-1"></span>
                     Tambah Menu
                 </button>
@@ -27,26 +40,32 @@
                                 <thead>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
-                                        <th style="white-space: nowrap">Nama Role</th>
-                                        {{-- <th style="white-space: nowrap">Rolename</th> --}}
-                                        <th style="white-space: nowrap">Guard Name</th>
+                                        <th style="white-space: nowrap">Menu</th>
+                                        <th style="white-space: nowrap">URL</th>
+                                        <th style="white-space: nowrap">Icon</th>
+                                        <th style="white-space: nowrap">Parent ID</th>
+                                        <th style="white-space: nowrap">Sort Order</th>
+                                        <th style="white-space: nowrap">Permission</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($roles as $role)
+                                    @foreach ($menus as $item)
                                         <tr>
                                             <td style="white-space: nowrap">{{ $loop->iteration }}</td>
                                             <td style="white-space: nowrap">
-                                                {{ strlen($role->name) <= 3 ? strtoupper($role->name) : ucfirst($role->name) }}
+                                                {{ $item->title ?? '-' }}
                                             </td>
-                                            {{-- <td style="white-space: nowrap">{{ $role->rolename }}</td> --}}
-                                            <td style="white-space: nowrap">{{ ucfirst($role->guard_name) }}</td>
-
+                                            <td style="white-space: nowrap">{{ $item->url ?? '-' }}</td>
+                                            <td style="white-space: nowrap">{{ $item->icon ?? '-' }}</td>
+                                            <td style="white-space: nowrap">{{ $item->parent_id ?? '-' }}</td>
+                                            <td style="white-space: nowrap">{{ $item->sort_order ?? '-' }}</td>
+                                            <td style="white-space: nowrap">{{ $item->permission ?? '-' }}</td>
                                             <td style="white-space: nowrap">
                                                 <button type="button" data-backdrop="static" data-keyboard="false"
                                                     class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
-                                                    data-id="{{ $role->id }}" title="Ubah">
+                                                    data-id="{{ $item->id }}" title="Ubah"
+                                                    onclick="handleEditButtonClick(event)">
                                                     <span class="fal fa-pencil ikon-edit"></span>
                                                     <div class="span spinner-text d-none">
                                                         <span class="spinner-border spinner-border-sm" role="status"
@@ -56,18 +75,9 @@
                                                 </button>
                                                 <button type="button" data-backdrop="static" data-keyboard="false"
                                                     class="badge mx-1 badge-success p-2 border-0 text-white btn-hapus"
-                                                    data-id="{{ $role->id }}" title="Hapus">
+                                                    data-id="{{ $item->id }}" title="Hapus"
+                                                    onclick="handleHapusButtonClick(event)">
                                                     <span class="fal fa-trash ikon-hapus"></span>
-                                                    <div class="span spinner-text d-none">
-                                                        <span class="spinner-border spinner-border-sm" role="status"
-                                                            aria-hidden="true"></span>
-                                                        Loading...
-                                                    </div>
-                                                </button>
-                                                <button type="button" data-backdrop="static" data-keyboard="false"
-                                                    class="badge mx-1 badge-warning p-2 border-0 text-white btn-akses"
-                                                    data-id="{{ $role->id }}" title="Assign Permissions">
-                                                    <span class="fal fa-universal-access ikon-akses"></span>
                                                     <div class="span spinner-text d-none">
                                                         <span class="spinner-border spinner-border-sm" role="status"
                                                             aria-hidden="true"></span>
@@ -77,15 +87,16 @@
                                             </td>
                                         </tr>
                                     @endforeach
-                                    @include('pages.master-data.role.partials.update-role')
-                                    @include('pages.master-data.role.partials.create-role')
-                                    @include('pages.master-data.role.partials.assign-permissions')
                                 </tbody>
                                 <tfoot>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
-                                        <th style="white-space: nowrap">Nama Role</th>
-                                        <th style="white-space: nowrap">Email</th>
+                                        <th style="white-space: nowrap">Menu</th>
+                                        <th style="white-space: nowrap">URL</th>
+                                        <th style="white-space: nowrap">Icon</th>
+                                        <th style="white-space: nowrap">Parent ID</th>
+                                        <th style="white-space: nowrap">Sort Order</th>
+                                        <th style="white-space: nowrap">Permission</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </tfoot>
@@ -97,91 +108,162 @@
             </div>
         </div>
     </main>
+    @include('pages.master-data.menu.partials.create')
+    @include('pages.master-data.menu.partials.edit')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
-    <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script><!-- FixedColumns JS -->
     <script>
-        /* demo scripts for change table color */
-        /* change background */
-        $(document).ready(function() {
+        // Fungsi untuk menangani klik tombol edit
+        async function handleEditButtonClick(event) {
+            event.preventDefault();
+            let button = $(event.currentTarget);
+            console.log('clicked');
+            let id = button.attr('data-id');
+            button.find('.ikon-edit').hide();
+            button.find('.spinner-text').removeClass('d-none');
+            $('#update-form').attr('data-id', id);
+            try {
+                let response = await fetch(`/api/dashboard/menu/get/${id}`);
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+                let data = await response.json();
+                button.find('.ikon-edit').show();
+                button.find('.spinner-text').addClass('d-none');
+                $('#ubah-data').modal('show');
+                $('#ubah-data #title').val(data.menu.title);
+                $('#ubah-data #url').val(data.menu.url);
+                $('#ubah-data #icon').val(data.menu.icon);
+                $('#ubah-data #parent_id').val(data.menu.parent_id).select2({
+                    dropdownParent: $('#ubah-data')
+                });
+                $('#ubah-data #sort_order').val(data.menu.sort_order);
+                $('#ubah-data #permission').val(data.menu.permission);
+            } catch (error) {
+                $('#ubah-data').modal('hide');
+                showErrorAlert(error.message);
+            }
+        }
 
-            $('.btn-edit').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                console.log('clicked');
-                let id = button.attr('data-id');
-                button.find('.ikon-edit').hide();
-                button.find('.spinner-text').removeClass('d-none');
+        async function handleHapusButtonClick(event) {
+            event.preventDefault();
+            let button = $(event.currentTarget);
 
-                $.ajax({
-                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                    url: `/api/dashboard/role/get/${id}`, // Isi dengan url/path file php yang dituju
-                    dataType: "json",
-                    success: function(data) {
-                        button.find('.ikon-edit').show();
-                        button.find('.spinner-text').addClass('d-none');
-                        $('#ubah-role').modal('show');
-                        $('#ubah-role #name').val(data.name)
-                        $('#ubah-role #email').val(data.email)
-                    },
-                    error: function(xhr) {
-                        showErrorAlert(xhr.responseText);
+            if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+
+                return;
+            }
+
+            let id = button.attr('data-id');
+            button.find('.ikon-hapus').hide();
+            button.find('.spinner-text').removeClass('d-none');
+
+            try {
+                let response = await fetch(`/api/dashboard/menu/delete/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Username': 'fizar*#',
+                        'Password': '#*ganteng'
                     }
                 });
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+                let result = await response.json();
+                button.find('.ikon-hapus').show();
+                button.find('.spinner-text').addClass('d-none');
+                showSuccessAlert(result.message);
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
+            } catch (error) {
+                showErrorAlert(error.message);
+            }
+        }
 
-                $('#update-form').on('submit', function(e) {
-                    e.preventDefault();
-                    let formData = $(this).serialize();
-                    $.ajax({
-                        type: "POST",
-                        url: '/api/dashboard/role/update/' + id,
-                        data: formData,
-                        beforeSend: function() {
-                            $('#update-form').find('.ikon-edit').hide();
-                            $('#update-form').find('.spinner-text')
-                                .removeClass(
-                                    'd-none');
-                        },
-                        success: function(response) {
-                            $('#ubah-role').modal('hide');
-                            showSuccessAlert(response.message);
-                            setTimeout(function() {
-                                location.reload();
-                            }, 500);
-                        },
-                        error: function(xhr) {
-                            showErrorAlert(xhr.responseText);
-                        }
-                    });
+        // Fungsi untuk menangani pengiriman formulir pembaruan
+        async function handleUpdateFormSubmit(event) {
+            event.preventDefault();
+            let formData = new URLSearchParams(new FormData(event.currentTarget)).toString();
+            let id = $(event.currentTarget).attr('data-id');
+
+            try {
+                $('#update-form').find('.ikon-edit').hide();
+                $('#update-form').find('.spinner-text').removeClass('d-none');
+
+                let response = await fetch(`/api/dashboard/menu/update/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: formData
+                });
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+                let result = await response.json();
+                $('#ubah-data').modal('hide');
+                showSuccessAlert(result.message);
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
+            } catch (error) {
+                $('#ubah-data').modal('hide');
+                showErrorAlert(error.message);
+            }
+        }
+
+        $(document).ready(function() {
+
+            $('#update-form').on('submit', handleUpdateFormSubmit);
+
+            $(function() {
+                $('.select2').select2({
+                    placeholder: 'Pilih Data Berikut',
+                    dropdownParent: $('#tambah-data')
                 });
             });
 
-            $('#store-form').on('submit', function(e) {
+            $('#store-form').on('submit', async function(e) {
                 e.preventDefault();
-                let formData = $(this).serialize();
-                $.ajax({
-                    type: "POST",
-                    url: '/api/dashboard/role/store',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#store-form').find('.ikon-tambah').hide();
-                        $('#store-form').find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        $('#store-form').find('.ikon-edit').show();
-                        $('#store-form').find('.spinner-text').addClass('d-none');
-                        $('#tambah-role').modal('hide');
-                        showSuccessAlert(response.message)
-                        setTimeout(function() {
-                            location.reload();
-                        }, 500);
-                    },
-                    error: function(xhr) {
-                        showErrorAlert(xhr.responseText);
+                let formData = new FormData(this); // Menggunakan FormData untuk mengirim data form
+
+                try {
+                    // Tampilkan spinner sebelum permintaan dimulai
+                    $('#store-form').find('.ikon-tambah').hide();
+                    $('#store-form').find('.spinner-text').removeClass('d-none');
+
+                    // Lakukan permintaan menggunakan fetch
+                    let response = await fetch('/api/dashboard/menu/store', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    // Pastikan respons statusnya sukses (200-299)
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                });
+
+                    // Parsing response JSON
+                    let result = await response.json();
+
+                    // Sembunyikan spinner dan tampilkan ikon edit
+                    $('#store-form').find('.ikon-tambah').show();
+                    $('#store-form').find('.spinner-text').addClass('d-none');
+                    $('#tambah-data').modal('hide');
+
+                    // Tampilkan pesan sukses dan reload halaman
+                    showSuccessAlert(result.message);
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                } catch (error) {
+                    // Tampilkan pesan error jika terjadi kesalahan
+                    $('#tambah-data').modal('hide');
+                    showErrorAlert(error.message || 'Terjadi kesalahan, silakan coba lagi.');
+                }
             });
 
             $('#store-assign-permissions-form').on('submit', function(e) {
@@ -193,44 +275,13 @@
                     data: formData,
                     beforeSend: function() {
                         $('#store-form').find('.ikon-tambah').hide();
-                        $('#store-form').find('.spinner-text').removeClass(
-                            'd-none');
+                        $('#store-form').find('.spinner-text').removeClass('d-none');
                     },
                     success: function(response) {
                         $('#store-form').find('.ikon-edit').show();
                         $('#store-form').find('.spinner-text').addClass('d-none');
                         $('#tambah-role').modal('hide');
-                        showSuccessAlert(response.message)
-                        setTimeout(function() {
-                            location.reload();
-                        }, 500);
-                    },
-                    error: function(xhr) {
-                        showErrorAlert(xhr.responseText);
-                    }
-                });
-            });
-
-            $('.btn-hapus').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                if (!confirm('Yakin ingin menghapus ini?')) {
-                    // Jika pengguna memilih "Tidak", proses penghapusan dibatalkan
-                    return;
-                }
-                let id = button.attr('data-id');
-                $.ajax({
-                    type: "GET",
-                    url: '/api/dashboard/role/delete/' + id,
-                    beforeSend: function() {
-                        button.find('.ikon-hapus').hide();
-                        button.find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        button.find('.ikon-hapus').show();
-                        button.find('.spinner-text').addClass('d-none');
-                        showSuccessAlert(response.message)
+                        showSuccessAlert(response.message);
                         setTimeout(function() {
                             location.reload();
                         }, 500);
@@ -245,8 +296,6 @@
                 e.preventDefault();
                 let button = $(this);
                 let roleId = button.attr('data-id');
-
-
                 getRoleData(roleId, button);
             });
 
@@ -288,8 +337,36 @@
                 }
             }
 
-            $('#dt-basic-example').dataTable({
-                responsive: true
+            $('.btn-edit').on('click', handleEditButtonClick);
+
+            function initializeDataTable(isResponsive) {
+                $('#dt-basic-example').DataTable({
+                    destroy: true, // Destroy any existing table instances
+                    responsive: isResponsive,
+                    scrollX: !isResponsive,
+                    fixedColumns: {
+                        leftColumns: 2,
+                        rightColumns: 1
+                    }
+                });
+            }
+
+            function checkScreenSize() {
+                if (window.matchMedia("(max-width: 768px)").matches) {
+                    // Mobile screen
+                    initializeDataTable(true);
+                } else {
+                    // Desktop screen
+                    initializeDataTable(false);
+                }
+            }
+
+            // Initialize DataTable on load
+            checkScreenSize();
+
+            // Reinitialize DataTable on window resize
+            $(window).resize(function() {
+                checkScreenSize();
             });
 
             $('.js-thead-colors a').on('click', function() {

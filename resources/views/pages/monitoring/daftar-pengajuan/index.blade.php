@@ -117,7 +117,8 @@
                                         <th style="white-space: nowrap">Tanggal</th>
                                         <th style="white-space: nowrap">Keterangan</th>
                                         <th style="white-space: nowrap">Status</th>
-                                        @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                        @if (auth()->user()->hasRole('super admin') ||
+                                                auth()->user()->can(['monitoring edit pengajuan absensi', 'monitoring delete pengajuan absensi']))
                                             <th style="white-space: nowrap">Action</th>
                                         @endif
                                     </tr>
@@ -146,7 +147,8 @@
                                                     -
                                                 @endisset
                                             </td>
-                                            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                            @if (auth()->user()->hasRole('super admin') ||
+                                                    auth()->user()->can(['monitoring edit pengajuan absensi', 'monitoring delete pengajuan absensi']))
                                                 <td>
                                                     <button data-backdrop="static" data-keyboard="false"
                                                         class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
@@ -162,7 +164,7 @@
                                                     </button>
                                                     <button type="button" data-backdrop="static" data-keyboard="false"
                                                         onclick="btnDelete(event)" data-aksi="day-off"
-                                                        class="badge mx-1 badge-success p-2 border-0 text-white btn-hapus"
+                                                        class="badge mx-1 badge-danger p-2 border-0 text-white btn-hapus"
                                                         data-id="{{ $row->id }}" title="Hapus">
                                                         <span class="fal fa-trash ikon-hapus"></span>
                                                         <div class="span spinner-text d-none">
@@ -182,7 +184,8 @@
                                         <th style="white-space: nowrap">Tanggal</th>
                                         <th style="white-space: nowrap">Keterangan</th>
                                         <th style="white-space: nowrap">Status</th>
-                                        @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                        @if (auth()->user()->hasRole('super admin') ||
+                                                auth()->user()->can(['monitoring edit pengajuan absensi', 'monitoring delete pengajuan absensi']))
                                             <th style="white-space: nowrap">Action</th>
                                         @endif
                                     </tr>
@@ -214,7 +217,8 @@
                                         <th style="white-space: nowrap">CLock In</th>
                                         <th style="white-space: nowrap">Clock Out</th>
                                         <th style="white-space: nowrap">Status</th>
-                                        @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                        @if (auth()->user()->hasRole('super admin') ||
+                                                auth()->user()->can(['monitoring edit pengajuan absensi', 'monitoring delete pengajuan absensi']))
                                             <th style="white-space: nowrap">Action</th>
                                         @endif
                                     </tr>
@@ -253,33 +257,39 @@
                                                         class="badge {{ $row->is_approved == 'Pending' ? 'badge-warning' : ($row->is_approved == 'Disetujui' ? 'badge-success' : ($row->is_approved == 'Ditolak' ? 'badge-danger' : ($row->is_approved == 'Verifikasi' ? 'badge-primary' : ''))) }}">
                                                         {{ $row->is_approved }} </span>
                                                 </td>
-                                                @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                                @if (auth()->user()->hasRole('super admin') ||
+                                                        auth()->user()->can(['monitoring edit pengajuan absensi', 'monitoring delete pengajuan absensi']))
                                                     <td>
-                                                        <button data-backdrop="static" data-keyboard="false"
-                                                            class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
-                                                            data-id="{{ $row->id }}" title="Edit Absensi"
-                                                            data-name="{{ $row->employee->fullname }}"
-                                                            data-employee-id="{{ $row->employee->id }}"
-                                                            data-aksi="attendance" onclick="btnEdit(event)">
-                                                            <span class="fal fa-pencil ikon-edit"></span>
-                                                            <div class="span spinner-text d-none">
-                                                                <span class="spinner-border spinner-border-sm"
-                                                                    role="status" aria-hidden="true"></span>
-                                                            </div>
-                                                        </button>
-                                                        <button type="button" data-backdrop="static"
-                                                            data-keyboard="false" data-aksi="attendance"
-                                                            class="badge mx-1 badge-success p-2 border-0 text-white btn-hapus"
-                                                            data-id="{{ $row->id }}" title="Hapus"
-                                                            onclick="btnDelete(event)">
-                                                            <span class="fal fa-trash ikon-hapus"></span>
-                                                            <div class="span spinner-text d-none">
-                                                                <span class="spinner-border spinner-border-sm"
-                                                                    role="status" aria-hidden="true"></span>
-                                                            </div>
-                                                        </button>
+                                                        @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit pengajuan absensi'))
+                                                            <button data-backdrop="static" data-keyboard="false"
+                                                                class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
+                                                                data-id="{{ $row->id }}" title="Edit Absensi"
+                                                                data-name="{{ $row->employee->fullname }}"
+                                                                data-employee-id="{{ $row->employee->id }}"
+                                                                data-aksi="attendance" onclick="btnEdit(event)">
+                                                                <span class="fal fa-pencil ikon-edit"></span>
+                                                                <div class="span spinner-text d-none">
+                                                                    <span class="spinner-border spinner-border-sm"
+                                                                        role="status" aria-hidden="true"></span>
+                                                                </div>
+                                                            </button>
+                                                        @endif
+                                                        @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring delete pengajuan absensi'))
+                                                            <button type="button" data-backdrop="static"
+                                                                data-keyboard="false" data-aksi="attendance"
+                                                                class="badge mx-1 badge-danger p-2 border-0 text-white btn-hapus"
+                                                                data-id="{{ $row->id }}" title="Hapus"
+                                                                onclick="btnDelete(event)">
+                                                                <span class="fal fa-trash ikon-hapus"></span>
+                                                                <div class="span spinner-text d-none">
+                                                                    <span class="spinner-border spinner-border-sm"
+                                                                        role="status" aria-hidden="true"></span>
+                                                                </div>
+                                                            </button>
+                                                        @endif
                                                     </td>
                                                 @endif
+
                                             </tr>
                                         @endif
                                     @endforeach
@@ -292,7 +302,8 @@
                                         <th style="white-space: nowrap">Clock In</th>
                                         <th style="white-space: nowrap">Clock Out</th>
                                         <th style="white-space: nowrap">Status</th>
-                                        @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                        @if (auth()->user()->hasRole('super admin') ||
+                                                auth()->user()->can(['monitoring edit pengajuan absensi', 'monitoring delete pengajuan absensi']))
                                             <th style="white-space: nowrap">Action</th>
                                         @endif
                                     </tr>
@@ -304,11 +315,9 @@
                 </div>
             </div>
         </div>
-        @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
-            @include('pages.monitoring.daftar-pengajuan.partials.edit-attendance')
-            @include('pages.monitoring.daftar-pengajuan.partials.edit-day-off')
-            @include('pages.monitoring.daftar-pengajuan.partials.tambah-day-off')
-        @endif
+        @include('pages.monitoring.daftar-pengajuan.partials.edit-attendance')
+        @include('pages.monitoring.daftar-pengajuan.partials.edit-day-off')
+        @include('pages.monitoring.daftar-pengajuan.partials.tambah-day-off')
 
     </main>
 @endsection
@@ -318,8 +327,8 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+
     <script>
-        // Preview Image Update Profile
         let dataId = null;
 
         function previewImageAbsen() {
@@ -390,7 +399,8 @@
                         spinnerText.classList.add('d-none');
                         $('#edit-pengajuan-libur').modal('show');
                         $('#update-day-off-req-form #name').val(name)
-                        $('#update-day-off-req-form #attendance_code_id').val(data.attendance_code_id)
+                        $('#update-day-off-req-form #attendance_code_id').val(data
+                                .attendance_code_id)
                             .select2({
                                 dropdownParent: $('#edit-pengajuan-libur')
                             });
@@ -403,7 +413,8 @@
                             startDate: startDate,
                             endDate: endDate
                         }, function(start, end, label) {
-                            console.log("A new date selection was made: " + start.format('YYYY-MM-DD') +
+                            console.log("A new date selection was made: " + start.format(
+                                    'YYYY-MM-DD') +
                                 ' to ' + end
                                 .format('YYYY-MM-DD'));
                         });
@@ -476,9 +487,10 @@
                                 inputClockOut.disabled = false;
                             }
                         });
-                        $('#update-form-attendance #is_approved_attendance').val(data.is_approved).select2({
-                            dropdownParent: $('#edit-pengajuan-absen'),
-                        });
+                        $('#update-form-attendance #is_approved_attendance').val(data.is_approved)
+                            .select2({
+                                dropdownParent: $('#edit-pengajuan-absen'),
+                            });
                         // $('#ubah-data #name').val(data.name);
                         if (data.file != null) {
                             $('#update-form-attendance .img-preview').attr('src',
@@ -551,12 +563,7 @@
                 });
             }
         }
-    </script>
 
-
-    <script>
-        /* demo scripts for change table color */
-        /* change background */
         $(document).ready(function() {
 
             $('#update-day-off-req-form').on('submit', function(e) {
@@ -632,6 +639,7 @@
             });
 
             $('#tambah_pengajuan_cuti').click(function() {
+                console.log('clicked');
                 $('#tambah-pengajuan-cuti-modal').modal('show');
                 $('#attendance_code_id_tambah').select2({
                     dropdownParent: $('#tambah-pengajuan-cuti-modal')
@@ -688,17 +696,19 @@
 
                     $.ajax({
                         type: "POST",
-                        url: '/employee/request/day-off',
+                        url: '/attendances/request/day-off',
                         data: formData,
                         processData: false,
                         contentType: false,
                         beforeSend: function() {
                             $('#tambah-day-off-req-form').find('.ikon-tambah').hide();
-                            $('#tambah-day-off-req-form').find('.spinner-text').removeClass('d-none');
+                            $('#tambah-day-off-req-form').find('.spinner-text').removeClass(
+                                'd-none');
                         },
                         success: function(response) {
                             $('#tambah-day-off-req-form').find('.ikon-tambah').show();
-                            $('#tambah-day-off-req-form').find('.spinner-text').addClass('d-none');
+                            $('#tambah-day-off-req-form').find('.spinner-text').addClass(
+                                'd-none');
                             $('#tambah-pengajuan-cuti-modal').modal('hide');
                             showSuccessAlert(response.message)
                             setTimeout(function() {
@@ -707,7 +717,8 @@
                         },
                         error: function(xhr) {
                             $('#tambah-day-off-req-form').find('.ikon-tambah').show();
-                            $('#tambah-day-off-req-form').find('.spinner-text').addClass('d-none');
+                            $('#tambah-day-off-req-form').find('.spinner-text').addClass(
+                                'd-none');
                             $('#tambah-pengajuan-cuti-modal').modal('hide');
                             let errorMessage =
                                 "Terjadi kesalahan saat menyimpan data."; // Pesan default

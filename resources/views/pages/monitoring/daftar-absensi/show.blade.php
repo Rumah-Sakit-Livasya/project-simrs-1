@@ -140,7 +140,7 @@
                                             <th style="white-space: nowrap">Early Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>
@@ -210,7 +210,7 @@
                                                         -
                                                     @endisset
                                                 </td>
-                                                @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                                @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                     <td>
                                                         <a href="#" data-backdrop="static" data-keyboard="false"
                                                             class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
@@ -240,7 +240,7 @@
                                             <th style="white-space: nowrap">Early Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>

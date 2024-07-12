@@ -102,7 +102,7 @@
                                             <th style="white-space: nowrap">Early Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>
@@ -120,7 +120,7 @@
                                                             class="rounded-circle mr-2" alt=""
                                                             style="width: 40px; z-index: 100;">
                                                     @endif
-                                                    <a href="{{ route('show.employee.attendance', $row->employee_id) }}"
+                                                    <a href="{{ route('monitoring.attendances.show', $row->employee_id) }}"
                                                         class="link_nama">
                                                         {{ $row->employees->fullname }}
                                                     </a>
@@ -186,7 +186,7 @@
                                                         -
                                                     @endisset
                                                 </td>
-                                                @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                                @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                     <td style="vertical-align: middle;">
                                                         <a href="#" data-backdrop="static" data-keyboard="false"
                                                             class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
@@ -214,7 +214,7 @@
                                             <th style="white-space: nowrap">Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>
@@ -248,7 +248,7 @@
                                             <th style="white-space: nowrap">Tanggal</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>
@@ -260,7 +260,7 @@
                                                     {{-- <td>{{ $loop->iteration }}</td> --}}
                                                     <td style="white-space: nowrap">
 
-                                                        <a href="{{ route('show.employee.attendance', $row->employee_id) }}"
+                                                        <a href="{{ route('monitoring.attendances.show', $row->employee_id) }}"
                                                             class="link_nama">
 
                                                             {{ $row->employees->fullname }}
@@ -281,7 +281,7 @@
                                                             -
                                                         @endif
                                                     </td>
-                                                    @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                                    @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                         <td>
                                                             <a href="#" data-backdrop="static"
                                                                 data-keyboard="false"
@@ -307,7 +307,7 @@
                                             <th style="white-space: nowrap">Tanggal</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>
@@ -340,7 +340,7 @@
                                             <th style="white-space: nowrap">Shift</th>
                                             <th style="white-space: nowrap">Time In</th>
                                             <th style="white-space: nowrap">Time Out</th>
-                                            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>
@@ -352,7 +352,7 @@
                                                     {{-- <td>{{ $loop->iteration }}</td> --}}
                                                     <td style="white-space: nowrap">
 
-                                                        <a href="{{ route('show.employee.attendance', $row->employee_id) }}"
+                                                        <a href="{{ route('monitoring.attendances.show', $row->employee_id) }}"
                                                             class="link_nama">
 
                                                             {{ $row->employees->fullname }}
@@ -373,7 +373,7 @@
                                                     <td style="white-space: nowrap">
                                                         {{ $row->shift->time_out }}
                                                     </td>
-                                                    @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                                    @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                         <td>
                                                             <a href="#" data-backdrop="static"
                                                                 data-keyboard="false"
@@ -400,7 +400,7 @@
                                             <th style="white-space: nowrap">Shift</th>
                                             <th style="white-space: nowrap">Time In</th>
                                             <th style="white-space: nowrap">Time Out</th>
-                                            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>
@@ -413,7 +413,7 @@
                 </div>
             </div>
         </div>
-        @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+        @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
             @include('pages.monitoring.daftar-absensi.partials.edit')
         @endif
 
