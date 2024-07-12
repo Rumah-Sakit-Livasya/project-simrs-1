@@ -256,10 +256,10 @@
                 <div class="form-group row" style="font-size: 0.8rem !important;">
                     <div class="col-md-12 mb-3">
                         <label>Nomor Induk Pegawai*</label>
-                        <input type="text" class="form-control @error('employee_id') is-invalid @enderror"
-                            autocomplete="off" name="employee_id" placeholder="2024xxxxx"
-                            value="{{ old('employee_id') }}">
-                        @error('employee_id')
+                        <input type="text" class="form-control @error('employee_code') is-invalid @enderror"
+                            autocomplete="off" name="employee_code" placeholder="2024xxxxx"
+                            value="{{ old('employee_code') }}">
+                        @error('employee_code')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
