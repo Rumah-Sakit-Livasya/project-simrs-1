@@ -32,11 +32,11 @@ class AttendanceController extends Controller
         try {
             // dd($request);
             // Kolonial
-            // latitude = -6.763461746615957, 
+            // latitude = -6.763461746615957,
             // longitude = 108.16947348181606
 
             // Rs Livaysa
-            // latitude = -6.764976435287691 
+            // latitude = -6.764976435287691
             // longitude = 108.17786913965288
 
             // Ruko Hana Sakura
@@ -314,6 +314,10 @@ class AttendanceController extends Controller
 
             // Buat nama file unik
             $fileName = time() . '.png';
+
+            if (!$request->has('image')) {
+                $fileName = null;
+            }
 
             // Simpan nama file ke database
             $attendance_outsource = AttendanceOutsource::create([

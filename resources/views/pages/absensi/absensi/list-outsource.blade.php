@@ -166,7 +166,7 @@
                         const formData = new FormData(this);
 
                         // Mengirimkan data menggunakan fetch API
-                        const response = await fetch('/outsource/attendances/store', {
+                        const response = await fetch('/attendances/outsource/store', {
                             method: 'POST',
                             body: formData,
                             headers: {
@@ -194,6 +194,7 @@
                             showErrorAlert(result.error);
                         }
                     } catch (error) {
+                        $('#tambah-absensi-modal').modal('hide');
                         showErrorAlert(error.message || 'An error occurred');
                     }
                 }
