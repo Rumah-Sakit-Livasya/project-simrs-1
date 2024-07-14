@@ -105,12 +105,14 @@
         /* demo scripts for change table color */
         /* change background */
         $(document).ready(function() {
-
+            let roleId;
+            let roleName;
             $('.btn-edit').click(function(e) {
                 e.preventDefault();
                 let button = $(this);
                 console.log('clicked');
                 let id = button.attr('data-id');
+                roleId = id;
                 button.find('.ikon-edit').hide();
                 button.find('.spinner-text').removeClass('d-none');
 
@@ -130,30 +132,31 @@
                     }
                 });
 
-                $('#update-form').on('submit', function(e) {
-                    e.preventDefault();
-                    let formData = $(this).serialize();
-                    $.ajax({
-                        type: "POST",
-                        url: '/api/dashboard/role/update/' + id,
-                        data: formData,
-                        beforeSend: function() {
-                            $('#update-form').find('.ikon-edit').hide();
-                            $('#update-form').find('.spinner-text')
-                                .removeClass(
-                                    'd-none');
-                        },
-                        success: function(response) {
-                            $('#ubah-role').modal('hide');
-                            showSuccessAlert(response.message);
-                            setTimeout(function() {
-                                location.reload();
-                            }, 500);
-                        },
-                        error: function(xhr) {
-                            showErrorAlert(xhr.responseText);
-                        }
-                    });
+            });
+
+            $('#update-form').on('submit', function(e) {
+                e.preventDefault();
+                let formData = $(this).serialize();
+                $.ajax({
+                    type: "POST",
+                    url: '/api/dashboard/role/update/' + roleId,
+                    data: formData,
+                    beforeSend: function() {
+                        $('#update-form').find('.ikon-edit').hide();
+                        $('#update-form').find('.spinner-text')
+                            .removeClass(
+                                'd-none');
+                    },
+                    success: function(response) {
+                        $('#ubah-role').modal('hide');
+                        showSuccessAlert(response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        showErrorAlert(xhr.responseJSON.message);
+                    }
                 });
             });
 
@@ -189,7 +192,7 @@
                 let formData = $(this).serialize();
                 $.ajax({
                     type: "POST",
-                    url: '/api/dashboard/role/store',
+                    url: '/api/dashboard/role/assignPermissions/' + roleName,
                     data: formData,
                     beforeSend: function() {
                         $('#store-form').find('.ikon-tambah').hide();
@@ -199,14 +202,15 @@
                     success: function(response) {
                         $('#store-form').find('.ikon-edit').show();
                         $('#store-form').find('.spinner-text').addClass('d-none');
-                        $('#tambah-role').modal('hide');
+                        $('#assign-permissions').modal('hide');
                         showSuccessAlert(response.message)
                         setTimeout(function() {
                             location.reload();
-                        }, 500);
+                        }, 1000);
                     },
                     error: function(xhr) {
-                        showErrorAlert(xhr.responseText);
+                        $('#assign-permissions').modal('hide');
+                        showErrorAlert(xhr.responseJSON.message);
                     }
                 });
             });
@@ -245,8 +249,6 @@
                 e.preventDefault();
                 let button = $(this);
                 let roleId = button.attr('data-id');
-
-
                 getRoleData(roleId, button);
             });
 
@@ -277,7 +279,7 @@
                     button.find('.spinner-text').addClass('d-none');
                     $('#assign-permissions').modal('show');
                     $('#assign-permissions #name').val(data.role.name);
-                    console.log(data.permissions);
+                    roleName = data.role.name;
                     $('#assign-permissions #permissions').val(data.permissions).select2({
                         dropdownParent: $('#assign-permissions'),
                         placeholder: 'Pilih permissions'

@@ -122,7 +122,7 @@
 
                     $.ajax({
                         type: "POST",
-                        url: '/employee/request/attendance',
+                        url: '/attendances/request/attendance',
                         data: formData,
                         processData: false,
                         contentType: false,

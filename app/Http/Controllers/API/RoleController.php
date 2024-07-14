@@ -98,4 +98,11 @@ class RoleController extends Controller
             ], 404);
         }
     }
+
+    public function assignPermissions($roleName)
+    {
+        $role = Role::findByName($roleName);
+        // Assign permissions ke role
+        $role->syncPermissions(request()->permissions);
+    }
 }

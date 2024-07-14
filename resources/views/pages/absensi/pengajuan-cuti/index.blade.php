@@ -335,7 +335,7 @@
 
                     $.ajax({
                         type: "POST",
-                        url: '/employee/request/day-off',
+                        url: '/attendances/request/day-off',
                         data: formData,
                         processData: false,
                         contentType: false,
@@ -377,7 +377,7 @@
                 let id = $(this).attr('data-id');
                 $.ajax({
                     type: "PUT",
-                    url: '/employee/approve/day-off/' + id,
+                    url: '/attendances/approve/day-off/' + id,
                     data: formData,
                     beforeSend: function() {
                         $('#approve-request').find('.ikon-edit').hide();

@@ -104,7 +104,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: '/employee/request/day-off',
+                    url: '/attendances/request/day-off',
                     data: formData,
                     processData: false,
                     contentType: false,
@@ -144,7 +144,7 @@
 
                 $.ajax({
                     type: "PUT",
-                    url: '/employee/approve/day-off/' + id,
+                    url: '/attendances/approve/day-off/' + id,
                     data: formData,
                     beforeSend: function() {
                         $('#btn-accept').find('.ikon').hide();
@@ -183,7 +183,7 @@
 
                 $.ajax({
                     type: "PUT",
-                    url: '/employee/reject/day-off/' + id,
+                    url: '/attendances/reject/day-off/' + id,
                     data: formData,
                     beforeSend: function() {
                         $('#btn-tolak').find('.ikon').hide();

@@ -109,7 +109,7 @@
 
                 $.ajax({
                     type: "PUT",
-                    url: '/employee/approve/attendance/' + id,
+                    url: '/attendances/approve/attendance/' + id,
                     data: formData,
                     beforeSend: function() {
                         $('#btn-accept').find('.ikon').hide();
@@ -148,7 +148,7 @@
 
                 $.ajax({
                     type: "PUT",
-                    url: '/employee/reject/attendance/' + id,
+                    url: '/attendances/reject/attendance/' + id,
                     data: formData,
                     beforeSend: function() {
                         $('#btn-tolak').find('.ikon').hide();
