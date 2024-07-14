@@ -59,6 +59,7 @@ class PermissionController extends Controller
             // Validasi input
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255|unique:permissions,name',
+                'group' => 'required|string|max:255'
             ]);
 
             if ($validator->fails()) {

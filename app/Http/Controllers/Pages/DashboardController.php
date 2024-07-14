@@ -1393,7 +1393,7 @@ class DashboardController extends Controller
 
     public function getDataPermissions()
     {
-        $permissions = Permission::all();
+        $permissions = Permission::orderBy('group')->get();
         return view('pages.master-data.permissions.index', compact('permissions'));
     }
 }

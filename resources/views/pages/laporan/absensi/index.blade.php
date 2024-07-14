@@ -157,7 +157,7 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form action="{{ route('reports.filter.attendance') }}" method="POST">
+                            <form action="{{ route('attendances.reports.filter') }}" method="POST">
                                 @method('POST')
                                 @csrf
                                 <div class="row" id="step-1">

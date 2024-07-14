@@ -12,12 +12,21 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
+                    <div class="form-group mb-2">
                         <label for="name">Nama</label>
                         <input type="text" value="{{ old('name', $item->name) }}"
                             class="form-control @error('name') is-invalid @enderror" id="name" name="name"
                             placeholder="Nama Permission">
                         @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="group">Group</label>
+                        <input type="text" value="{{ old('group') }}"
+                            class="form-control @error('group') is-invalid @enderror" id="group" name="group"
+                            placeholder="Nama Permission">
+                        @error('group')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

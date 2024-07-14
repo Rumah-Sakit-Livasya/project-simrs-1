@@ -28,8 +28,8 @@
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
                                         <th style="white-space: nowrap">Permission</th>
-                                        {{-- <th style="white-space: nowrap">Rolename</th> --}}
                                         <th style="white-space: nowrap">Guard Name</th>
+                                        <th style="white-space: nowrap">Group Name</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </thead>
@@ -40,8 +40,8 @@
                                             <td style="white-space: nowrap">
                                                 {{ strlen($item->name) <= 3 ? strtoupper($item->name) : ucfirst($item->name) }}
                                             </td>
-                                            {{-- <td style="white-space: nowrap">{{ $item->itemname }}</td> --}}
                                             <td style="white-space: nowrap">{{ ucfirst($item->guard_name) }}</td>
+                                            <td style="white-space: nowrap">{{ $item->group }}</td>
 
                                             <td style="white-space: nowrap">
                                                 <button type="button" data-backdrop="static" data-keyboard="false"
@@ -71,9 +71,9 @@
                                 <tfoot>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
-                                        <th style="white-space: nowrap">Nama Role</th>
-                                        {{-- <th style="white-space: nowrap">Rolename</th> --}}
-                                        <th style="white-space: nowrap">Email</th>
+                                        <th style="white-space: nowrap">Permission</th>
+                                        <th style="white-space: nowrap">Guard Name</th>
+                                        <th style="white-space: nowrap">Group Name</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </tfoot>
@@ -125,6 +125,7 @@
                     button.find('.spinner-text').addClass('d-none');
                     $('#ubah-permission').modal('show');
                     $('#ubah-permission #name').val(data.permission.name);
+                    $('#ubah-permission #group').val(data.permission.group);
                 } catch (error) {
                     // Menangani error dan menampilkan pesan error
                     showErrorAlert(error.message);

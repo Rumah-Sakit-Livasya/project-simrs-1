@@ -22,7 +22,6 @@ class MenuController extends Controller
             ], 200);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Terjadi kesalahan saat menambahkan menu.',
                 'message' => $e->getMessage(),
             ], 500);
         }
@@ -48,7 +47,9 @@ class MenuController extends Controller
             if ($validator->fails()) {
                 $errors = $validator->errors();
                 $errorMessage = $errors->first(); // Get the first error message
-                throw new \Exception($errorMessage);
+                return response()->json([
+                    'message' => $errorMessage
+                ], 422);
             }
 
             $menu = Menu::create([
@@ -59,15 +60,16 @@ class MenuController extends Controller
                 'sort_order' => request()->sort_order,
                 'permission' => request()->permission,
             ]);
+
             // Create permission if it doesn't exist
-            $permission = Permission::firstOrCreate(['name' => request()->permission]);
+            $permission = Permission::firstOrCreate(['name' => request()->permission, 'group' => 'no group']);
 
             // Return response
             return response()->json(['message' => 'Menu Berhasil di Tambahkan!']);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e->getMessage()
-            ], 404);
+                'message' => $e->getMessage()
+            ], 422);
         }
     }
 
@@ -91,22 +93,32 @@ class MenuController extends Controller
             if ($validator->fails()) {
                 $errors = $validator->errors();
                 $errorMessage = $errors->first(); // Get the first error message
-                throw new \Exception($errorMessage);
+                return response()->json([
+                    'error' => $errorMessage
+                ], 422);
             }
 
             $menu = Menu::findOrFail($id);
-            $permission = Permission::findByName($menu->permission);
+            $permissionName = request()->permission;
+
+            // Check if the new permission exists or create it
+            $permission = Permission::firstOrCreate(['name' => $permissionName, 'guard_name' => 'web'], ['group' => 'no group']);
+
+            // Update the menu with new data
             $menu->update([
                 'title' => request()->title,
                 'url' => request()->url,
                 'parent_id' => request()->parent_id,
                 'icon' => request()->icon,
                 'sort_order' => request()->sort_order,
-                'permission' => request()->permission,
+                'permission' => $permissionName,
             ]);
 
-            $permission->update(['name' => request()->permission]);
-            // Create permission if it doesn't exist
+            // Update permission name if it has changed
+            if ($menu->permission !== $permissionName) {
+                $existingPermission = Permission::findByName($menu->permission);
+                $existingPermission->update(['name' => $permissionName]);
+            }
 
             // Return response
             return response()->json(['message' => 'Menu Berhasil di Update!']);
@@ -116,6 +128,7 @@ class MenuController extends Controller
             ], 404);
         }
     }
+
 
     public function destroy($id)
     {

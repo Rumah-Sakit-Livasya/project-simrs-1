@@ -241,30 +241,34 @@
                         body: formData
                     });
 
-                    // Pastikan respons statusnya sukses (200-299)
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
                     // Parsing response JSON
                     let result = await response.json();
 
-                    // Sembunyikan spinner dan tampilkan ikon edit
+                    // Sembunyikan spinner dan tampilkan ikon tambah
                     $('#store-form').find('.ikon-tambah').show();
                     $('#store-form').find('.spinner-text').addClass('d-none');
-                    $('#tambah-data').modal('hide');
+
+                    if (!response.ok) {
+                        throw new Error(result.message || 'Terjadi kesalahan, silakan coba lagi.');
+                    }
 
                     // Tampilkan pesan sukses dan reload halaman
                     showSuccessAlert(result.message);
+                    $('#tambah-data').modal('hide');
                     setTimeout(function() {
                         location.reload();
                     }, 1000);
                 } catch (error) {
-                    // Tampilkan pesan error jika terjadi kesalahan
+                    // Sembunyikan spinner dan tampilkan ikon tambah
+                    $('#store-form').find('.ikon-tambah').show();
+                    $('#store-form').find('.spinner-text').addClass('d-none');
                     $('#tambah-data').modal('hide');
+
+                    // Tampilkan pesan error jika terjadi kesalahan
                     showErrorAlert(error.message || 'Terjadi kesalahan, silakan coba lagi.');
                 }
             });
+
 
             $('#store-assign-permissions-form').on('submit', function(e) {
                 e.preventDefault();
