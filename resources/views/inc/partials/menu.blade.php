@@ -18,7 +18,9 @@
         <ul>
             {{-- @dd($urls) Uncomment to debug --}}
             @foreach ($menu->children as $i => $child)
-                @include('inc.partials.menu', ['menu' => $child])
+                @can($child->permission)
+                    @include('inc.partials.menu', ['menu' => $child])
+                @endcan
             @endforeach
         </ul>
     @endif
