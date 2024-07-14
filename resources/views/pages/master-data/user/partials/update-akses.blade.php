@@ -15,7 +15,6 @@
                     <div class="form-group">
                         <label for="Pegawai">Pegawai</label>
                         <select class="select2 form-control w-100 " id="role" name="role">
-                            <option value=""></option>
                             @foreach ($roles as $role)
                                 <option value="{{ $role->id }}">
                                     {{ strlen($role->name) < 3 ? strtoupper($role->name) : ucfirst($role->name) }}

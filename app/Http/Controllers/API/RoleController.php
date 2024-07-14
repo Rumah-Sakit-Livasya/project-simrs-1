@@ -21,8 +21,8 @@ class RoleController extends Controller
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'No result'
-            ], 404);
+                'error' => $e->getMessage()
+            ]);
         }
     }
 

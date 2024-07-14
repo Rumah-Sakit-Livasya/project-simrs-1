@@ -179,23 +179,31 @@
                 idUser = userId;
                 button.find('.ikon-akses').hide();
                 button.find('.spinner-text').removeClass('d-none');
-
-                $.ajax({
-                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                    url: `/api/dashboard/role/get/${roleId}`, // Isi dengan url/path file php yang dituju
-                    dataType: "json",
-                    success: function(data) {
-                        button.find('.ikon-akses').show();
-                        button.find('.spinner-text').addClass('d-none');
-                        $('#ubah-akses').modal('show');
-                        $('#ubah-akses #role').val(data.id).select2({
-                            dropdownParent: $('#ubah-akses')
-                        });
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
-                });
+                console.log(roleId);
+                if (roleId == null || roleId == "") {
+                    $('#ubah-akses').modal('show');
+                    $('#ubah-akses #role').select2({
+                        dropdownParent: $('#ubah-akses')
+                    });
+                } else {
+                    $.ajax({
+                        type: "GET", // Method pengiriman data bisa dengan GET atau POST
+                        url: "/api/dashboard/role/get/" +
+                            roleId, // Isi dengan url/path file php yang dituju
+                        dataType: "json",
+                        success: function(data) {
+                            button.find('.ikon-akses').show();
+                            button.find('.spinner-text').addClass('d-none');
+                            $('#ubah-akses').modal('show');
+                            $('#ubah-akses #role').val(data.role.id).select2({
+                                dropdownParent: $('#ubah-akses')
+                            });
+                        },
+                        error: function(xhr) {
+                            showErrorAlert(xhr.responseJSON.message);
+                        }
+                    });
+                }
             });
 
             $('#akses-form').on('submit', function(e) {
