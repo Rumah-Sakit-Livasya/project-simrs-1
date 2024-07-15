@@ -77,6 +77,17 @@
                                                         Loading...
                                                     </div>
                                                 </button>
+                                                <a href="{{ route('users.assignPermissions') }}" type="button"
+                                                    data-backdrop="static" data-keyboard="false"
+                                                    class="badge mx-1 badge-warning p-2 border-0 text-white btn-add-permissions"
+                                                    data-user-id="{{ $user->id }}" title="Assign Permissions">
+                                                    <span class="fal fa-universal-access ikon-add-permissions"></span>
+                                                    <div class="span spinner-text d-none">
+                                                        <span class="spinner-border spinner-border-sm" role="status"
+                                                            aria-hidden="true"></span>
+                                                        Loading...
+                                                    </div>
+                                                </a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -118,6 +129,43 @@
                     dropdownParent: $('#tambah-user')
                 });
             });
+
+            // $('.btn-add-permissions').click(function(e) {
+            //     e.preventDefault();
+            //     let button = $(this);
+            //     let userId = button.attr('data-user-id');
+            //     idUser = userId;
+            //     button.find('.ikon-add-permissions').hide();
+            //     button.find('.spinner-text').removeClass('d-none');
+
+
+            // });
+
+            // async function fetchUserData(idUser, button) {
+            //     try {
+            //         const response = await fetch(`/api/dashboard/user/get/${idUser}`, {
+            //             method: 'GET',
+            //             headers: {
+            //                 'Content-Type': 'application/json'
+            //             }
+            //         });
+
+            //         if (!response.ok) {
+            //             throw new Error('Network response was not ok');
+            //         }
+
+            //         const data = await response.json();
+
+            //         button.querySelector('.ikon-add-permissions').style.display = 'block';
+            //         button.querySelector('.spinner-text').classList.add('d-none');
+            //         $('#ubah-akses').modal('show');
+            //         $('#ubah-akses #role').val(data.role.id).select2({
+            //             dropdownParent: $('#ubah-akses')
+            //         });
+            //     } catch (error) {
+            //         showErrorAlert(error.message);
+            //     }
+            // }
 
             $('.btn-edit').click(function(e) {
                 e.preventDefault();
@@ -250,7 +298,7 @@
                         showSuccessAlert(response.message)
                         setTimeout(function() {
                             location.reload();
-                        }, 500);
+                        }, 1000);
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);
@@ -277,7 +325,7 @@
                         showSuccessAlert(response.message)
                         setTimeout(function() {
                             location.reload();
-                        }, 500);
+                        }, 1000);
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);

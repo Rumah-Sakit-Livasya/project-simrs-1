@@ -7,7 +7,10 @@ use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -16,10 +19,10 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
-            return response()->json($user, 200);
+            return response()->json(['data' => $user], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'No result'
+                'error' => $e->getMessage()
             ], 404);
         }
     }
@@ -120,6 +123,49 @@ class UserController extends Controller
             return response()->json([
                 'error' => 'No result'
             ], 404);
+        }
+    }
+
+    public function storePermissions(Request $request)
+    {
+        try {
+            // Validate the request
+            $request->validate([
+                'permissions' => 'required|array',
+                'permissions.*' => 'exists:permissions,id',
+                'user_id' => 'required|exists:users,id'
+            ]);
+
+            // Get the authenticated user (you might be passing user ID, adjust accordingly)
+            $user = User::findOrFail($request->user_id); // or User::find($request->user_id) if you pass user ID
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'User not found.',
+                ], 404);
+            }
+            // Fetch permission names by their IDs
+            $permissionNames = Permission::whereIn('id', $request->permissions)->pluck('name')->toArray();
+
+            // Sync the permissions
+            $user->syncPermissions($permissionNames);
+
+            return response()->json([
+                'message' => 'Permissions assigned successfully!',
+            ], 200);
+        } catch (ValidationException $e) {
+            // Handle validation exceptions
+            return response()->json([
+                'message' => 'Validation error.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Error assigning permissions: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 }

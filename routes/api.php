@@ -115,6 +115,7 @@ Route::prefix('dashboard')->group(function () {
         Route::put('/update-akses/{user:id}', [UserController::class, 'updateRole']);
         Route::get('/get/{id}', [UserController::class, 'getUser']);
         Route::get('/delete/{id}', [UserController::class, 'destroy']);
+        Route::post('/assign-permissions', [UserController::class, 'storePermissions']);
     });
     Route::prefix('job-level')->group(function () {
         Route::post('/store', [JobLevelController::class, 'store']);

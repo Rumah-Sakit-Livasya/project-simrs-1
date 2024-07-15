@@ -296,7 +296,17 @@ class DashboardController extends Controller
     {
         $roles = Role::all();
 
-        return view('pages.master-data.user.akses-user', compact('roles'));
+        return view('pages.master-data.user.assign-permissions', compact('roles'));
+    }
+
+    public function getDataAssignPermissions($id)
+    {
+        $user = User::findOrFail($id);
+        $user_name = $user->name;
+        $user_id = $user->id;
+        $userPermissions = $user->getAllPermissions()->pluck('id')->toArray();
+        $permissions = Permission::orderBy('group')->get()->groupBy('group');
+        return view('pages.master-data.user.assign-permissions', compact('user_name', 'user_id', 'permissions', 'userPermissions'));
     }
 
     public function getAllAttendances()

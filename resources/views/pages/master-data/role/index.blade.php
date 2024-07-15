@@ -102,8 +102,6 @@
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
-        /* demo scripts for change table color */
-        /* change background */
         $(document).ready(function() {
             let roleId;
             let roleName;

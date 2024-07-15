@@ -245,7 +245,8 @@ Route::middleware('auth')->group(function () {
 
         Route::prefix('users')->group(function () {
             Route::get('/', [DashboardController::class, 'getDataUsers'])->name('users');
-            Route::get('/akses', [DashboardController::class, 'getDataUserAkses'])->name('users.akses');
+            // Route::get('/akses', [DashboardController::class, 'getDataUserAkses'])->name('users.akses');
+            Route::get('/assign-permissions/{id}', [DashboardController::class, 'getDataAssignPermissions'])->name('users.assignPermissions');
         });
         /*END USERS AKSES --------------------------------------------------------*/
     });
