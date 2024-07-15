@@ -122,8 +122,8 @@
                         button.find('.ikon-edit').show();
                         button.find('.spinner-text').addClass('d-none');
                         $('#ubah-role').modal('show');
-                        $('#ubah-role #name').val(data.name)
-                        $('#ubah-role #email').val(data.email)
+                        $('#ubah-role #name').val(data.role.name)
+                        $('#ubah-role #email').val(data.role.guard_name)
                     },
                     error: function(xhr) {
                         showErrorAlert(xhr.responseText);

@@ -77,7 +77,7 @@
                                                         Loading...
                                                     </div>
                                                 </button>
-                                                <a href="{{ route('users.assignPermissions') }}" type="button"
+                                                <a href="{{ route('users.assignPermissions', $user->id) }}" type="button"
                                                     data-backdrop="static" data-keyboard="false"
                                                     class="badge mx-1 badge-warning p-2 border-0 text-white btn-add-permissions"
                                                     data-user-id="{{ $user->id }}" title="Assign Permissions">
