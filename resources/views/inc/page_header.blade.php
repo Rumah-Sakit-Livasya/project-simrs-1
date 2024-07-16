@@ -457,7 +457,8 @@
             <a href="javascript:void(0)" data-toggle="dropdown" title="{{ auth()->user()->email }}"
                 class="header-icon d-flex align-items-center justify-content-center ml-2">
                 @if (auth()->user()->employee->foto && Storage::exists('public/employee/profile/' . auth()->user()->employee->foto))
-                    <img src="{{ '/' . auth()->user()->employee->foto }}" class="rounded-circle" alt=""
+                    <img src="{{ asset('storage/employee/profile/' . auth()->user()->employee->foto) }}"
+                        class="rounded-circle" alt=""
                         style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;">
                 @else
                     <img src="{{ auth()->user()->employee->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
