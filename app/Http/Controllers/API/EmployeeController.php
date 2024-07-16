@@ -81,7 +81,7 @@ class EmployeeController extends Controller
     {
         try {
             // Validasi input
-            $validator = $this->validate(request(), [
+            $validator = request()->validate([
                 'fullname' => 'required|string|max:255',
                 'gender' => 'required|in:Laki-laki,Perempuan',
                 'mobile_phone' => 'required|string|max:15',
@@ -113,7 +113,7 @@ class EmployeeController extends Controller
     {
         try {
             // Validasi input
-            $validator = $this->validate(request(), [
+            $validator = request()->validate([
                 'organization_id' => 'nullable',
             ]);
 
@@ -156,7 +156,7 @@ class EmployeeController extends Controller
     {
         try {
             // Validasi input
-            $validator = $this->validate(request(), [
+            $validator = request()->validate([
                 'approval_line' => 'nullable',
                 'approval_line_parent' => [
                     'nullable',
@@ -192,7 +192,7 @@ class EmployeeController extends Controller
     {
         try {
             // Validasi input
-            $validator = $this->validate(request(), [
+            $validator = request()->validate([
                 'identity_type' => 'required|string|max:255',
                 'postal_code' => 'required|string|max:255',
                 'identity_number' => 'nullable|string|max:255',
@@ -411,8 +411,6 @@ class EmployeeController extends Controller
 
         return Excel::download(new SalaryExport($organizationId, $employeeId), 'salary.xlsx');
     }
-
-
 
     public function importSalary(Request $request)
     {

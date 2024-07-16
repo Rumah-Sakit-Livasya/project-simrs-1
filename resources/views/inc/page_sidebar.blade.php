@@ -21,7 +21,8 @@
             </div>
         </div>
         <div class="info-card">
-            @if (auth()->user()->employee->foto != null)
+            @if (auth()->user()->employee->foto != null &&
+                    Storage::exists('public/employee/profile/' . auth()->user()->employee->foto))
                 <img src="{{ '/' . auth()->user()->employee->foto }}" class="rounded-circle img-thumbnail"
                     alt="" style="width: 55px; height: 55px; object-fit: cover; z-index: 100;">
             @else

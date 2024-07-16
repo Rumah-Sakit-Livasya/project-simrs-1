@@ -45,7 +45,7 @@
                                 <option value="2030">2030</option>
                             </select>
                         </div>
-                        @if (auth()->user()->hasRole('admin'))
+                        @if (auth()->user()->hasRole('super admin'))
                             <div class="form-group col">
                                 <label class="form-label" for="organization">
                                     Unit / Organisasi

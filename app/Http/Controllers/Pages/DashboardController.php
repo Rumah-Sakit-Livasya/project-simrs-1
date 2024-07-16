@@ -85,7 +85,7 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('manager')) {
+        if (auth()->user()->hasRole('super admin') || auth()->user()->hasRole('manager')) {
             $day_off = Attendance::where('is_day_off', 1)->where('date', now()->format('Y-m-d'))->get();
         } else {
             $day_off = Attendance::join('employees', 'attendances.employee_id', '=', 'employees.id')
@@ -698,7 +698,7 @@ class DashboardController extends Controller
     }
     public function getManagementShift()
     {
-        if (auth()->user()->hasRole('admin')) {
+        if (auth()->user()->hasRole('super admin')) {
             $employees = Employee::where('is_active', 1)->get();
             $organizations = Organization::all();
         } else if (auth()->user()->hasRole('pj')) {

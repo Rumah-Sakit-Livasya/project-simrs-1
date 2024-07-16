@@ -88,7 +88,7 @@ class ShiftController extends Controller
         // return dd($user);
         $user = User::where('id', $request->user_id)->first();
 
-        if ($user->hasRole('admin')) {
+        if ($user->hasRole('super admin')) {
             if ($request->organization_id === null) {
                 // Ambil data karyawan berdasarkan organization_id
                 $employees = Employee::where('is_active', 1)->select('id', 'email', 'fullname') // Memilih hanya kolom yang dibutuhkan
