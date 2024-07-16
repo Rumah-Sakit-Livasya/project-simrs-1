@@ -1090,7 +1090,7 @@ class DashboardController extends Controller
     {
         $getNotify = $this->getNotify();
         $attendance_requests = AttendanceRequest::where('id', $id)->latest()->get();
-        if ($attendance_requests[0]->approved_line_child == auth()->user()->employee_id || $attendance_requests[0]->approved_line_parent == auth()->user()->employee_id || auth()->user()->hasRole('Admin')) {
+        if ($attendance_requests[0]->approved_line_child == auth()->user()->employee_id || $attendance_requests[0]->approved_line_parent == auth()->user()->employee_id || auth()->user()->hasRole('super admin')) {
             return view('pages.absensi.pengajuan-absensi.show', compact('attendance_requests', 'getNotify'));
         } else {
             return redirect()->route('attendance-requests')->with('error', 'Tidak bisa mengakses halaman ini!');
