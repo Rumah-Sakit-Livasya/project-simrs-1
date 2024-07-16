@@ -1061,7 +1061,7 @@ class DashboardController extends Controller
     public function getDayOffRequest($id)
     {
         $day_off_requests = DayOffRequest::where('id', $id)->get();
-        if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr')) {
+        if (auth()->user()->hasRole('super admin') || auth()->user()->hasRole('hr')) {
 
             $getNotify = $this->getNotify();
             $attendance_code = AttendanceCode::all();
