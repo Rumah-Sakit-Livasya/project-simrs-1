@@ -159,7 +159,7 @@ class DayOffRequestController extends Controller
             if (isset($employee->approval_line) && !isset($employee->approval_line_parent)) {
                 $is_approved = "Verifikasi";
             }
-            if(isset(request()->is_approved)) {
+            if (isset(request()->is_approved)) {
                 $is_approved = request()->is_approved;
             }
             if (request()->hasFile('photo')) {
@@ -180,7 +180,7 @@ class DayOffRequestController extends Controller
                     'is_approved' => $is_approved,
                 ]);
 
-                $messages .= 'https://internal.livasya.com/employee/day-off-requests/' . $day_off_request->id;
+                $messages .= 'https://internal.livasya.com/attendances/day-off-requests/' . $day_off_request->id;
             } else {
                 $day_off_request = DayOffRequest::create([
                     'attendance_code_id' => request()->attendance_code_id,
@@ -193,7 +193,7 @@ class DayOffRequestController extends Controller
                     'is_approved' => $is_approved,
                 ]);
 
-                $messages .= 'https://internal.livasya.com/employee/day-off-requests/' . $day_off_request->id;
+                $messages .= 'https://internal.livasya.com/attendances/day-off-requests/' . $day_off_request->id;
             }
 
             if ($is_approved == "Disetujui") {
@@ -264,7 +264,7 @@ class DayOffRequestController extends Controller
         $messages .= "Clock Out  : " . ($day_off_request->end_date ?? "-") . "\n";
         $messages .= "Keterangan : " . ($day_off_request->description ?? "-") . "\n";
         $messages .= "\nTolong acc melalui website Smart HR atau melalui link berikut: \n\n";
-        $messages .= 'https://internal.livasya.com/employee/day-off-requests/' . $day_off_request->id;
+        $messages .= 'https://internal.livasya.com/attendances/day-off-requests/' . $day_off_request->id;
 
 
 

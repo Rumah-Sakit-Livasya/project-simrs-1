@@ -28,8 +28,8 @@ Route::post('/', [AuthenticatedSessionController::class, 'store']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    // Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 
     Route::prefix('dashboard')->group(function () {
@@ -61,9 +61,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/request/day-off', [DayOffRequestController::class, 'store']);
         Route::put('/approve/day-off/{id}', [DayOffRequestController::class, 'approve']);
         Route::put('/reject/day-off/{id}', [DayOffRequestController::class, 'reject']);
-
-        Route::get('/edit-profil/{id}', [UpdateProfileController::class, 'show'])->name('get.image');
-        Route::post('/update-profil/{id}', [UpdateProfileController::class, 'update'])->name('update.image');
 
         Route::prefix('outsource')->group(function () {
             Route::get("/", [DashboardController::class, 'getAttendancesOutsourcing'])->name("monitoring.attendances.outsource");
@@ -106,6 +103,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [DashboardController::class, 'pegawaiNonAktifList'])->name('get.non-aktif-pegawai');
         Route::get("/management-shift", [DashboardController::class, 'getManagementShift'])->name("management-shift");
         Route::get("/management-shift/edit/{id}", [DashboardController::class, 'editManagementShift'])->name("edit-management-shift");
+        Route::get('/edit-profil/{id}', [UpdateProfileController::class, 'show'])->name('get.image');
+        Route::post('/update-profil/{id}', [UpdateProfileController::class, 'update'])->name('update.image');
     });
     /* END PEGAWAI ----------------------------------------------------------------------------*/
 

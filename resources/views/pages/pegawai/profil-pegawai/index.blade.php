@@ -47,7 +47,7 @@
 
             $.ajax({
                 type: 'GET',
-                url: '/employee/edit-profil/' + employeeId,
+                url: '/employees/edit-profil/' + employeeId,
                 // data: formData,
                 // contentType: false,
                 // processData: false,
@@ -76,7 +76,7 @@
 
             $.ajax({
                 type: 'post', // Sesuaikan dengan method form
-                url: '/employee/update-profil/' + employeeId,
+                url: '/employees/update-profil/' + employeeId,
                 data: formData,
                 processData: false,
                 contentType: false,

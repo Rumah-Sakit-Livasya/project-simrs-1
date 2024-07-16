@@ -241,7 +241,7 @@ class AttendanceRequestController extends Controller
                     'description' => request()->description,
                 ]);
 
-                $messages .= 'https://internal.livasya.com/employee/attendance-requests/' . $attendance_request->id;
+                $messages .= 'https://internal.livasya.com/attendances/attendance-requests/' . $attendance_request->id;
             } else {
                 $attendance_request = AttendanceRequest::create([
                     'employee_id' => request()->employee_id,
@@ -254,7 +254,7 @@ class AttendanceRequestController extends Controller
                     'description' => request()->description,
                     'is_approved' => $is_approved,
                 ]);
-                $messages .= 'https://internal.livasya.com/employee/attendance-requests/' . $attendance_request->id;
+                $messages .= 'https://internal.livasya.com/attendances/attendance-requests/' . $attendance_request->id;
             }
 
             if ($is_approved == "Disetujui") {
@@ -336,7 +336,7 @@ class AttendanceRequestController extends Controller
         $messages .= "Clock Out  : " . ($attendance_request->clockout ?? "-") . "\n";
         $messages .= "Keterangan : " . ($attendance_request->description ?? "-") . "\n";
         $messages .= "\nTolong acc melalui website Smart HR atau melalui link berikut: \n\n";
-        $messages .= 'https://internal.livasya.com/employee/attendance-requests/' . $attendance_request->id;
+        $messages .= 'https://internal.livasya.com/attendances/attendance-requests/' . $attendance_request->id;
 
         // dd($attendance_request);
         if (auth()->user()->hasRole('Admin')) {

@@ -5,11 +5,8 @@ namespace App\Http\Controllers\Pages;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use Illuminate\Support\Str;
-
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Time;
 
 class UpdateProfileController extends Controller
 {
@@ -24,35 +21,22 @@ class UpdateProfileController extends Controller
         $employee = Employee::where('id', auth()->user()->employee->id)->first();
         $nama = Str::slug($employee->fullname);
 
-        if ($request->hasFile('foto')) {
-            $foto = $request->file('foto');
-            $extension = $foto->getClientOriginalExtension();
-            $file_name = time() . '_' . $nama . '.' . $extension;
-            $path = public_path('profile/' . $nama);
+        if (request()->hasFile('foto')) {
+            // Upload file
+            $image = request()->file('foto');
+            $imageName = $nama . '_profile_' . time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs('public/employee/profile/', $imageName);
 
-            // Check ukuran file
-            $fileSize = $foto->getSize(); // Ukuran dalam bytes
-            $shouldCompress = $fileSize > 1024 * 1024; // 1 MB = 1024 * 1024 bytes
-
-            // Jika perlu mengompres
-            if ($shouldCompress) {
-                $img = \Image::make($foto)->encode($extension, 75); // Mengompres dengan kualitas 75
-            } else {
-                $img = \Image::make($foto);
+            // Hapus foto yang ada jika ada
+            if ($employee->foto) {
+                // Hapus foto yang ada dari penyimpanan
+                Storage::delete('public/img/pengajuan/cuti/' . $employee->foto);
             }
 
-            // Buat direktori jika belum ada
-            if (!file_exists($path)) {
-                mkdir($path, 0777, true);
-            }
-
-            // Simpan gambar di dalam direktori
-            $img->save($path . '/' . $file_name);
-
-            // Update kolom foto di database
-            $employee->update(['foto' => 'profile/' . $nama . '/' . $file_name]);
-
-            return back();
+            // Update company with new image
+            $employee->update([
+                'foto' => $imageName,
+            ]);
         }
     }
 }
