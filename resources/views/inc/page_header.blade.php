@@ -474,8 +474,8 @@
                         <a href="{{ route('profile') }}">
                             <span class="mr-2">
                                 @if (auth()->user()->employee->foto)
-                                    <img src="{{ '/' . auth()->user()->employee->foto }}" class="rounded-circle"
-                                        alt=""
+                                    <img src="{{ asset('storage/employee/profile/' . auth()->user()->employee->foto) }}"
+                                        class="rounded-circle" alt=""
                                         style="width: 55px; height: 55px; object-fit: cover; z-index: 100;">
                                 @else
                                     <img src="{{ auth()->user()->employee->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
@@ -486,7 +486,7 @@
                         <a href="{{ route('profile') }}">
                             <div class="info-card-text">
                                 <div class="fs-lg text-truncate text-truncate-lg text-white">
-                                    {{ auth()->user()->name }}
+                                    {{ \Illuminate\Support\Str::limit(auth()->user()->name, 15) }}
                                 </div>
                                 <span
                                     class="text-truncate text-truncate-md opacity-80 text-white">{{ auth()->user()->email }}</span>
