@@ -293,8 +293,13 @@
                                                     <a href="{{ route('day-off-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            <span class="profile-image rounded-circle d-inline-block"
-                                                                style="background-image: url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}')"></span>
+                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @else
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @endif
                                                         </span>
                                                         <span class="d-flex flex-column flex-1 ml-1">
                                                             <span class="name">{{ $row->employee->fullname }} <span
@@ -318,8 +323,13 @@
                                                     <a href="{{ route('day-off-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            <span class="profile-image rounded-circle d-inline-block"
-                                                                style="background-image: url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}')"></span>
+                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @else
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @endif
                                                         </span>
                                                         <span class="d-flex flex-column flex-1 ml-1">
                                                             <span class="name">{{ $row->employee->fullname }} <span
@@ -340,8 +350,13 @@
                                                     <a href="{{ route('day-off-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            <span class="profile-image rounded-circle d-inline-block"
-                                                                style="background-image: url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}')"></span>
+                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @else
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @endif
                                                         </span>
                                                         <span class="d-flex flex-column flex-1 ml-1">
                                                             <span class="name">{{ $row->employee->fullname }} <span
@@ -373,8 +388,13 @@
                                                     <a href="{{ route('attendance-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            <span class="profile-image rounded-circle d-inline-block"
-                                                                style="background-image: url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}')"></span>
+                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @else
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @endif
                                                         </span>
                                                         <span class="d-flex flex-column flex-1 ml-1">
                                                             <span class="name">{{ $row->employee->fullname }} <span
@@ -399,8 +419,13 @@
                                                     <a href="{{ route('attendance-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            <span class="profile-image rounded-circle d-inline-block"
-                                                                style="background-image: url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}')"></span>
+                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @else
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @endif
                                                         </span>
                                                         <span class="d-flex flex-column flex-1 ml-1">
                                                             <span class="name">{{ $row->employee->fullname }} <span
@@ -422,8 +447,13 @@
                                                     <a href="{{ route('attendance-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            <span class="profile-image rounded-circle d-inline-block"
-                                                                style="background-image: url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}')"></span>
+                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @else
+                                                                <span class="profile-image rounded-circle d-block"
+                                                                    style="background-image:url('{{ $row->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}'); background-size: cover; margin-top: -6px"></span>
+                                                            @endif
                                                         </span>
                                                         <span class="d-flex flex-column flex-1 ml-1">
                                                             <span class="name">{{ $row->employee->fullname }} <span

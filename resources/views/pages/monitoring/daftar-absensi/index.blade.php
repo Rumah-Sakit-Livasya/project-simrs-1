@@ -111,8 +111,8 @@
                                         @foreach ($attendance_today as $row)
                                             <tr>
                                                 <td style="white-space: nowrap">
-                                                    @if ($row->employees->foto != null)
-                                                        <img src="{{ '/' . $row->employees->foto }}"
+                                                    @if ($row->employees->foto != null && Storage::exists('public/employee/profile/' . $row->employees->foto))
+                                                        <img src="{{ asset('storage/employee/profile/' . $row->employees->foto) }}"
                                                             class="rounded-circle mr-2" alt=""
                                                             style="width: 40px; height: 40px; object-fit: cover; z-index: 100;">
                                                     @else

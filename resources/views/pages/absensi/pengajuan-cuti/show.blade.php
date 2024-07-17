@@ -9,8 +9,14 @@
                         <div class="card-body pb-4 px-4">
                             <div class="d-flex flex-row pb-3 pt-2  border-top-0 border-left-0 border-right-0">
                                 <div class="d-inline-block align-middle status status-success mr-3">
-                                    <span class="profile-image rounded-circle d-block"
-                                        style="background-image:url('{{ $item->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}'); background-size: cover; margin-top: -6px"></span>
+                                    @if ($item->employee->foto != null && Storage::exists('public/employee/profile/' . $item->employee->foto))
+                                        <span class="profile-image rounded-circle d-block"
+                                            style="background-image:url('{{ asset('storage/employee/profile/' . $item->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
+                                    @else
+                                        <span class="profile-image rounded-circle d-block"
+                                            style="background-image:url('{{ $item->employee->gender == 'Laki-laki' ? asset('img/demo/avatars/avatar-c.png') : asset('img/demo/avatars/avatar-p.png') }}'); background-size: cover; margin-top: -6px"></span>
+                                    @endif
+
                                 </div>
                                 <h5 class="mb-0 flex-1 text-dark fw-500">
                                     {{ $item->employee->fullname }}

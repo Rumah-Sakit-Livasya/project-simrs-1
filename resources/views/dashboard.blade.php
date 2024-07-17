@@ -171,9 +171,9 @@
                                     class="btn-show-day-off" data-id="{{ $item->id }}"
                                     title="{{ $item->day_off->attendance_code->description ?? ($item->attendance_code->description ?? 'Libur') }}">
                                     <div class="daftar-pegawai text-center d-inline-block ml-1 mr-1">
-                                        @if ($item->employees->foto != null)
-                                            <img src="{{ '/' . $item->employees->foto }}" class="rounded-circle mr-2"
-                                                alt=""
+                                        @if ($item->employees->foto != null && Storage::exists('public/employee/profile/' . $item->employees->foto))
+                                            <img src="{{ asset('storage/employee/profile/' . $item->employees->foto) }}"
+                                                class="rounded-circle mr-2" alt=""
                                                 style="width: 60px; height: 60px; object-fit: cover; z-index: 100;">
                                         @else
                                             <img src="{{ $item->employees->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
