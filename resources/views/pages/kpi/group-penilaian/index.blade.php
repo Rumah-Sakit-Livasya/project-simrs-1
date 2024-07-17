@@ -46,7 +46,7 @@
     <main id="js-page-content" role="main" class="page-content">
         <div class="row mb-5">
             <div class="col-xl-12">
-                <a type="button" href="{{ route('kpi.tbh.group-penilaian') }}"
+                <a type="button" href="{{ route('kpi.tbh.form-penilaian') }}"
                     class="btn btn-primary waves-effect waves-themed" title="Tambah Penilaian">
                     <span class="fal fa-plus-circle mr-1"></span>
                     Tambah Group Form Penilaian

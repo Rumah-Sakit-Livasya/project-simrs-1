@@ -263,51 +263,6 @@
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/statistics/chartist/chartist.js"></script>
-    {{-- <script>
-
-        /* stacked bar */
-        let data = @json($attendancesAllMonths);
-        // console.log(data)
-        let result = [];
-        Object.values(data).forEach(monthData => {
-            let monthArray = [];
-            Object.values(monthData).forEach(value => {
-                monthArray.push(value);
-            });
-            result.push(monthArray);
-        });
-        let formattedResult = [];
-
-        for (let i = 0; i < result[0].length; i++) {
-            let columnValues = [];
-            for (let j = 0; j < result.length; j++) {
-                columnValues.push(result[j][i]);
-            }
-            formattedResult.push(columnValues);
-        }
-        var stackedBar = function() {
-            new Chartist.Bar('#stackedBar', {
-                labels: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September',
-                    'Oktober', 'November', 'Desember'
-                ],
-                series: formattedResult
-            }, {
-                stackBars: true,
-                axisY: {
-                    labelInterpolationFnc: function(value) {
-                        return (value);
-                    }
-                }
-            }).on('draw', function(data) {
-                if (data.type === 'bar') {
-                    data.element.attr({
-                        style: 'stroke-width: 30px'
-                    });
-                }
-            });
-        }
-        /* stacked bar -- end */
-    </script> --}}
 
     <script>
         /* demo scripts for change table color */
