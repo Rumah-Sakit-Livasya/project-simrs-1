@@ -599,10 +599,7 @@ class DashboardController extends Controller
 
     public function getDataEmployees()
     {
-        $employees = Employee::all();
-        if (auth()->user()->hasRole('hr')) {
-            $employees = Employee::where('company_id', auth()->user()->employee->company_id)->where('is_active', 1)->get();
-        }
+        $employees = Employee::where('is_active', 1)->get();
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
         $jobPosition = JobPosition::all();
