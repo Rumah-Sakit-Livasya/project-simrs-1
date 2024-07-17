@@ -90,7 +90,7 @@
                                                 {{ $row->employee_pejabat_penilai->fullname }}
                                             </td>
                                             <td style="white-space: nowrap">
-                                                <a type="button" href="{{ route('kpi.edit.group-penilaian', $row->id) }}"
+                                                <a type="button" href="{{ route('kpi.edit.form-penilaian', $row->id) }}"
                                                     class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
                                                     title="Ubah">
                                                     <span class="fal fa-pencil ikon-edit"></span>
