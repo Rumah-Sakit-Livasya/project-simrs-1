@@ -253,7 +253,7 @@
                 </div>
             </div>
         </div>
-        @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr'))
+        @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
             @include('pages.monitoring.daftar-absensi.partials.edit')
         @endif
 
