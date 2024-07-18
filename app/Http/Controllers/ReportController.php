@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
+    public function __construct()
+    {
+        if (Auth::check() && !Auth::user()->hasRole('super admin')) {
+            return redirect()->route('attendances')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+        }
+    }
     protected function getNotify()
     {
         $day_off_notify = DayOffRequest::where('approved_line_child', auth()->user()->employee->id)->orWhere('approved_line_parent', auth()->user()->employee->id)->latest()->get();
@@ -581,7 +587,7 @@ class ReportController extends Controller
                 ->count();
             $total_hari = Attendance::where('employee_id', $employee_id)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
                 ->count();
-            $total_libur = Attendance::where('employee_id', $employee_id)->where('is_day_off',1)->where('day_off_request_id', null)->where('attendance_code_id', null)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+            $total_libur = Attendance::where('employee_id', $employee_id)->where('is_day_off', 1)->where('day_off_request_id', null)->where('attendance_code_id', null)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
                 ->count();
             $total_izin = 0;
             $total_absent = $employee->attendance->where('clock_in', null)->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])->count();
