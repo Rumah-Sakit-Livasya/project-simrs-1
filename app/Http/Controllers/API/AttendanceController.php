@@ -105,12 +105,12 @@ class AttendanceController extends Controller
                 if (!isset($attendance)) {
                     throw new \Exception("Pegawai Belum Memiliki Shift!");
                 }
-                if ($attendance_kemarin->shift->time_in >= '19.00' && $attendance_kemarin->shift->time_in <= '21.00' && $attendance_kemarin->is_day_off != 1 && $attendance_kemarin->clock_in == null) {
+                if ($attendance_kemarin->shift->time_in >= '19.00' && $attendance_kemarin->shift->time_in <= '21.00' && $attendance_kemarin->is_day_off != 1 && $attendance_kemarin->clock_in == null && $attendance->shift->time_in >= '05.00') {
                     $request['late_clock_in'] = 60;
                     $attendance_kemarin->update($request->all());
                 } else {
                     $waktu_absen = $attendance->shift->time_in;
-                    $perbedaanMenit = $request->clock_in->greaterThan($waktu_absen) ? $request->clock_in->diffInMinutes($waktu_absen) : null;
+                    $perbedaanMenit = $request->clock_in->greaterThan($waktu_absen) ? abs($request->clock_in->diffInMinutes($waktu_absen)) : null;
                     $perbedaanMenit = ($perbedaanMenit == 0) ? null : $perbedaanMenit;
                     $request['late_clock_in'] = $perbedaanMenit;
                     $attendance->update($request->all());
@@ -197,9 +197,9 @@ class AttendanceController extends Controller
                         $waktu_dikonversi = Carbon::createFromFormat('H:i', $attendance_kemarin->shift->time_out);
                         $tanggal_besok = Carbon::parse($attendance_kemarin->date)->addDay();
                         $tanggal_besok->setTime($waktu_dikonversi->hour, $waktu_dikonversi->minute);
-                        $perbedaanMenit = $tanggal_sekarang->diffInMinutes($tanggal_besok) + 1;
+                        $perbedaanMenit = abs($tanggal_sekarang->diffInMinutes($tanggal_besok)) + 1;
                     } else {
-                        $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? $tanggal_sekarang->diffInMinutes($waktu_absen_pulang) : null;
+                        $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? abs($tanggal_sekarang->diffInMinutes($waktu_absen_pulang)) : null;
                     }
                     $perbedaanMenit = ($perbedaanMenit == 0) ? null : $perbedaanMenit;
 
@@ -224,9 +224,9 @@ class AttendanceController extends Controller
                             $waktu_dikonversi = Carbon::createFromFormat('H:i', $attendance->shift->time_out);
                             $tanggal_besok = Carbon::parse($attendance->date)->addDay();
                             $tanggal_besok->setTime($waktu_dikonversi->hour, $waktu_dikonversi->minute);
-                            $perbedaanMenit = $tanggal_sekarang->diffInMinutes($tanggal_besok);
+                            $perbedaanMenit = abs($tanggal_sekarang->diffInMinutes($tanggal_besok));
                         } else {
-                            $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? $tanggal_sekarang->diffInMinutes($waktu_absen_pulang) + 1 : null;
+                            $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? abs($tanggal_sekarang->diffInMinutes($waktu_absen_pulang)) + 1 : null;
                         }
 
                         $attendance->update([
