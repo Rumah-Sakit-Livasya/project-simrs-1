@@ -7,6 +7,7 @@ use App\Imports\AttendanceImport;
 use App\Models\Attendance;
 use App\Models\AttendanceOutsource;
 use App\Models\Employee;
+use App\Models\Payroll;
 use App\Models\Shift;
 use Carbon\Carbon;
 use Exception;
@@ -452,8 +453,6 @@ class AttendanceController extends Controller
                 ]);
             } else {
                 if (isset($shift->time_in)) {
-
-
                     if ($shift->name == 'dayoff' || $shift->name == 'National Holiday') {
                         $clock_in = null;
                         $clock_out = null;
@@ -464,11 +463,11 @@ class AttendanceController extends Controller
                         $waktu_timein = $shift->time_in;
                         $waktu_timeout = $shift->time_out;
 
-                        if ($absensi->clock_in) {
-                            $perbedaanMenit_timein = Carbon::parse($clock_in)->greaterThan($waktu_timein) ? Carbon::parse($clock_in)->diffInMinutes($waktu_timein) : null;
+                        if (request()->clock_in) {
+                            $perbedaanMenit_timein = Carbon::parse($clock_in)->greaterThan($waktu_timein) ? abs(Carbon::parse($clock_in)->diffInMinutes($waktu_timein)) : null;
                         }
-                        if ($absensi->clock_out) {
-                            $perbedaanMenit_timeout = Carbon::parse($clock_out)->format('H:i') < $waktu_timeout ? Carbon::parse($clock_out)->diffInMinutes(Carbon::parse($waktu_timeout)) : null;
+                        if (request()->clock_out) {
+                            $perbedaanMenit_timeout = Carbon::parse($clock_out)->format('H:i') < $waktu_timeout ? abs(Carbon::parse($clock_out)->diffInMinutes(Carbon::parse($waktu_timeout))) : null;
                         }
                     }
                 }
@@ -526,10 +525,10 @@ class AttendanceController extends Controller
                         // Jika masuk
                     } else {
                         if ($absensi->clock_in) {
-                            $perbedaanMenit_timein = Carbon::parse($absensi->clock_in)->greaterThan($waktu_timein) ? Carbon::parse($absensi->clock_in)->diffInMinutes($waktu_timein) : null;
+                            $perbedaanMenit_timein = Carbon::parse($absensi->clock_in)->greaterThan($waktu_timein) ? abs(Carbon::parse($absensi->clock_in)->diffInMinutes($waktu_timein)) : null;
                         }
                         if ($absensi->clock_out) {
-                            $perbedaanMenit_timeout = Carbon::parse($absensi->clock_out)->format('H:i') < $waktu_timeout ? Carbon::parse($absensi->clock_out)->diffInMinutes(Carbon::parse($waktu_timeout)) + 1 : null;
+                            $perbedaanMenit_timeout = Carbon::parse($absensi->clock_out)->format('H:i') < $waktu_timeout ? abs(Carbon::parse($absensi->clock_out)->diffInMinutes(Carbon::parse($waktu_timeout))) + 1 : null;
                         }
                         $absensi->update([
                             'shift_id' => $attendance['shift_id'],
