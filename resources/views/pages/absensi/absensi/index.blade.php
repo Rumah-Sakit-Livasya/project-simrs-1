@@ -107,21 +107,47 @@
                                                 <div class="form-group mb-3">
                                                     <label for="bulan">Bulan</label>
                                                     <!-- Mengubah input menjadi select2 -->
-                                                    <select class="select2 form-control @error('bulan') is-invalid @enderror"
+                                                    <select
+                                                        class="select2 form-control @error('bulan') is-invalid @enderror"
                                                         name="bulan" id="bulan">
-                                                        <option value="1">Januari</option>
-                                                        <option value="2">Februari</option>
-                                                        <option value="3">Maret</option>
-                                                        <option value="4">April</option>
-                                                        <option value="5">Mei</option>
-                                                        <option value="6">Juni</option>
-                                                        <option value="7">Juli</option>
-                                                        <option value="8">Agustus</option>
-                                                        <option value="9">September</option>
-                                                        <option value="10">Oktober</option>
-                                                        <option value="11">November</option>
-                                                        <option value="12">Desember</option>
+                                                        <option value="1"
+                                                            {{ \Carbon\Carbon::now()->month == 1 ? 'selected' : '' }}>
+                                                            Januari</option>
+                                                        <option value="2"
+                                                            {{ \Carbon\Carbon::now()->month == 2 ? 'selected' : '' }}>
+                                                            Februari</option>
+                                                        <option value="3"
+                                                            {{ \Carbon\Carbon::now()->month == 3 ? 'selected' : '' }}>Maret
+                                                        </option>
+                                                        <option value="4"
+                                                            {{ \Carbon\Carbon::now()->month == 4 ? 'selected' : '' }}>April
+                                                        </option>
+                                                        <option value="5"
+                                                            {{ \Carbon\Carbon::now()->month == 5 ? 'selected' : '' }}>Mei
+                                                        </option>
+                                                        <option value="6"
+                                                            {{ \Carbon\Carbon::now()->month == 6 ? 'selected' : '' }}>Juni
+                                                        </option>
+                                                        <option value="7"
+                                                            {{ \Carbon\Carbon::now()->month == 7 ? 'selected' : '' }}>Juli
+                                                        </option>
+                                                        <option value="8"
+                                                            {{ \Carbon\Carbon::now()->month == 8 ? 'selected' : '' }}>
+                                                            Agustus</option>
+                                                        <option value="9"
+                                                            {{ \Carbon\Carbon::now()->month == 9 ? 'selected' : '' }}>
+                                                            September</option>
+                                                        <option value="10"
+                                                            {{ \Carbon\Carbon::now()->month == 10 ? 'selected' : '' }}>
+                                                            Oktober</option>
+                                                        <option value="11"
+                                                            {{ \Carbon\Carbon::now()->month == 11 ? 'selected' : '' }}>
+                                                            November</option>
+                                                        <option value="12"
+                                                            {{ \Carbon\Carbon::now()->month == 12 ? 'selected' : '' }}>
+                                                            Desember</option>
                                                     </select>
+
                                                     @error('bulan')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -131,15 +157,30 @@
                                                 <div class="form-group mb-3">
                                                     <label for="tahun">Tahun</label>
                                                     <!-- Mengubah input menjadi select2 -->
-                                                    <select class="select2 form-control @error('tahun') is-invalid @enderror"
+                                                    <select
+                                                        class="select2 form-control @error('tahun') is-invalid @enderror"
                                                         name="tahun" id="tahun">
-                                                        <option value="2024">2024</option>
-                                                        <option value="2025">2025</option>
-                                                        <option value="2026">2026</option>
-                                                        <option value="2027">2027</option>
-                                                        <option value="2028">2028</option>
-                                                        <option value="2029">2029</option>
-                                                        <option value="2030">2030</option>
+                                                        <option value="2024"
+                                                            {{ \Carbon\Carbon::now()->year == 2024 ? 'selected' : '' }}>
+                                                            2024</option>
+                                                        <option value="2025"
+                                                            {{ \Carbon\Carbon::now()->year == 2025 ? 'selected' : '' }}>
+                                                            2025</option>
+                                                        <option value="2026"
+                                                            {{ \Carbon\Carbon::now()->year == 2026 ? 'selected' : '' }}>
+                                                            2026</option>
+                                                        <option value="2027"
+                                                            {{ \Carbon\Carbon::now()->year == 2027 ? 'selected' : '' }}>
+                                                            2027</option>
+                                                        <option value="2028"
+                                                            {{ \Carbon\Carbon::now()->year == 2028 ? 'selected' : '' }}>
+                                                            2028</option>
+                                                        <option value="2029"
+                                                            {{ \Carbon\Carbon::now()->year == 2029 ? 'selected' : '' }}>
+                                                            2029</option>
+                                                        <option value="2030"
+                                                            {{ \Carbon\Carbon::now()->year == 2030 ? 'selected' : '' }}>
+                                                            2030</option>
                                                     </select>
                                                     @error('tahun')
                                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -170,7 +211,8 @@
                     <div class="col-md-3 pr-1" style="width: 25%; padding-left: 0px !important!">
                         <div class="card">
                             <div class="card-body p-2">
-                                <span class="badge badge-icon pos-top pos-right dashboard-report">{{ $jumlah_hadir }}</span>
+                                <span
+                                    class="badge badge-icon pos-top pos-right dashboard-report">{{ $jumlah_hadir }}</span>
                                 <div class="icon-dashboard-report text-primary">
                                     <i class="fal fa-user-alt hadir"></i>
                                 </div>
@@ -183,7 +225,8 @@
                     <div class="col-md-3 px-1" style="width: 25%">
                         <div class="card">
                             <div class="card-body p-2">
-                                <span class="badge badge-icon pos-top pos-right dashboard-report">{{ $jumlah_izin }}</span>
+                                <span
+                                    class="badge badge-icon pos-top pos-right dashboard-report">{{ $jumlah_izin }}</span>
                                 <div class="icon-dashboard-report text-success">
                                     <i class="fal fa-file-alt"></i>
                                 </div>
@@ -196,7 +239,8 @@
                     <div class="col-md-3 px-1" style="width: 25%">
                         <div class="card">
                             <div class="card-body p-2">
-                                <span class="badge badge-icon pos-top pos-right dashboard-report">{{ $jumlah_sakit }}</span>
+                                <span
+                                    class="badge badge-icon pos-top pos-right dashboard-report">{{ $jumlah_sakit }}</span>
                                 <div class="icon-dashboard-report text-danger">
                                     <i class="fal fa-first-aid"></i>
                                 </div>
@@ -209,7 +253,8 @@
                     <div class="col-md-3 pl-1" style="width: 25%; padding-right: 0px !important!">
                         <div class="card">
                             <div class="card-body p-2">
-                                <span class="badge badge-icon pos-top pos-right dashboard-report">{{ $jumlah_cuti }}</span>
+                                <span
+                                    class="badge badge-icon pos-top pos-right dashboard-report">{{ $jumlah_cuti }}</span>
                                 <div class="icon-dashboard-report text-warning">
                                     <i class="fal fa-clock"></i>
                                 </div>
