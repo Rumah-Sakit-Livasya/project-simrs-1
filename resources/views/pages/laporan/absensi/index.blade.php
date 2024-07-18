@@ -167,18 +167,42 @@
                                             <!-- Mengubah input menjadi select2 -->
                                             <select class="select2 form-control @error('bulan') is-invalid @enderror"
                                                 name="bulan" id="bulan">
-                                                <option value="1">Januari</option>
-                                                <option value="2">Februari</option>
-                                                <option value="3">Maret</option>
-                                                <option value="4">April</option>
-                                                <option value="5">Mei</option>
-                                                <option value="6">Juni</option>
-                                                <option value="7">Juli</option>
-                                                <option value="8">Agustus</option>
-                                                <option value="9">September</option>
-                                                <option value="10">Oktober</option>
-                                                <option value="11">November</option>
-                                                <option value="12">Desember</option>
+                                                <option value="1"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 1 ? 'selected' : '' }}>
+                                                    Januari</option>
+                                                <option value="2"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 2 ? 'selected' : '' }}>
+                                                    Februari</option>
+                                                <option value="3"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 3 ? 'selected' : '' }}>
+                                                    Maret</option>
+                                                <option value="4"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 4 ? 'selected' : '' }}>
+                                                    April</option>
+                                                <option value="5"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 5 ? 'selected' : '' }}>
+                                                    Mei</option>
+                                                <option value="6"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 6 ? 'selected' : '' }}>
+                                                    Juni</option>
+                                                <option value="7"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 7 ? 'selected' : '' }}>
+                                                    Juli</option>
+                                                <option value="8"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 8 ? 'selected' : '' }}>
+                                                    Agustus</option>
+                                                <option value="9"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 9 ? 'selected' : '' }}>
+                                                    September</option>
+                                                <option value="10"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 10 ? 'selected' : '' }}>
+                                                    Oktober</option>
+                                                <option value="11"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 11 ? 'selected' : '' }}>
+                                                    November</option>
+                                                <option value="12"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 12 ? 'selected' : '' }}>
+                                                    Desember</option>
                                             </select>
                                             @error('bulan')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -191,14 +215,30 @@
                                             <!-- Mengubah input menjadi select2 -->
                                             <select class="select2 form-control @error('tahun') is-invalid @enderror"
                                                 name="tahun" id="tahun">
-                                                <option value="2023">2023</option>
-                                                <option value="2024">2024</option>
-                                                <option value="2025">2025</option>
-                                                <option value="2026">2026</option>
-                                                <option value="2027">2027</option>
-                                                <option value="2028">2028</option>
-                                                <option value="2029">2029</option>
-                                                <option value="2030">2030</option>
+                                                <option value="2024"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2024</option>
+                                                <option value="2023"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2023</option>
+                                                <option value="2025"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2025</option>
+                                                <option value="2026"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2026</option>
+                                                <option value="2027"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2027</option>
+                                                <option value="2028"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2028</option>
+                                                <option value="2029"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2029</option>
+                                                <option value="2030"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2030</option>
                                             </select>
                                             @error('tahun')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -224,37 +264,6 @@
                 </div>
             </div>
         </div>
-        {{-- <div class="row">
-            <div class="col-xl-12">
-                <div id="panel-9" class="panel">
-                    <div class="panel-hdr">
-                        <h2>
-                            Pie <span class="fw-300"><i>Chart</i></span>
-                        </h2>
-                        <div class="panel-toolbar">
-                            <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip"
-                                data-offset="0,10" data-original-title="Collapse"></button>
-                            <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip"
-                                data-offset="0,10" data-original-title="Fullscreen"></button>
-                            <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip"
-                                data-offset="0,10" data-original-title="Close"></button>
-                        </div>
-                    </div>
-                    <div class="panel-container show">
-                        <div class="panel-content">
-                            <div class="panel-tag">
-                                Display as Pie Chart
-                            </div>
-                            <div id="pieChart" style="width:100%; height:300px;"></div>
-                            <div class="text-right">
-                                <button id="pieChartUnload" onclick="pieChartUnload();"
-                                    class="btn btn-sm btn-dark ml-auto">Unload Data</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> --}}
         <div class="row">
             <div class="col-xl-6">
                 <div id="panel-1" class="panel">
@@ -416,6 +425,184 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card pt-2">
+                    <div class="card-body row">
+                        <div class="col-xl-4 col-sm-4 mb-2">
+                            <h5 class="font-weight-bold text-primary">LAPORAN PER KATEGORI UNIT
+                            </h5>
+                            <span style="font-size: 1.1em">Pilih kategori dibawah ini untuk menampilkan laporannya!
+                            </span>
+                        </div>
+                        <div class="col-xl-2 col-sm-2 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Total Pegawai</span>
+                            <h1 style="font-size: 2em">0</h1>
+                        </div>
+                        <div class="col-xl-1 col-sm-1 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">On Time</span>
+                            <h1 style="font-size: 2em">
+                                0</h1>
+                        </div>
+                        <div class="col-xl-1 col-sm-1 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Late In</span>
+                            <h1 style="font-size: 2em">
+                                0</h1>
+                        </div>
+                        <div class="col-xl-2 col-sm-2 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">No Check In</span>
+                            <h1 style="font-size: 2em">
+                                0</h1>
+                        </div>
+                        <div class="col-xl-1 col-sm-1 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Absent</span>
+                            <h1 style="font-size: 2em">
+                                0</h1>
+                        </div>
+                        <div class="col-xl-1 col-sm-1 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Time Off</span>
+                            <h1 style="font-size: 2em">
+                                0</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-xl-12">
+                <div id="panel-1" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            Filter Laporan per Kategori
+                        </h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <form action="{{ route('attendances.reports.filter') }}" method="POST">
+                                @method('POST')
+                                @csrf
+                                <div class="row" id="step-1">
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="bulan">Bulan</label>
+                                            <!-- Mengubah input menjadi select2 -->
+                                            <select class="select2 form-control @error('bulan') is-invalid @enderror"
+                                                name="bulan" id="bulan_kategori">
+                                                <option value="1"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 1 ? 'selected' : '' }}>
+                                                    Januari</option>
+                                                <option value="2"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 2 ? 'selected' : '' }}>
+                                                    Februari</option>
+                                                <option value="3"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 3 ? 'selected' : '' }}>
+                                                    Maret</option>
+                                                <option value="4"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 4 ? 'selected' : '' }}>
+                                                    April</option>
+                                                <option value="5"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 5 ? 'selected' : '' }}>
+                                                    Mei</option>
+                                                <option value="6"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 6 ? 'selected' : '' }}>
+                                                    Juni</option>
+                                                <option value="7"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 7 ? 'selected' : '' }}>
+                                                    Juli</option>
+                                                <option value="8"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 8 ? 'selected' : '' }}>
+                                                    Agustus</option>
+                                                <option value="9"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 9 ? 'selected' : '' }}>
+                                                    September</option>
+                                                <option value="10"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 10 ? 'selected' : '' }}>
+                                                    Oktober</option>
+                                                <option value="11"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 11 ? 'selected' : '' }}>
+                                                    November</option>
+                                                <option value="12"
+                                                    {{ isset($selectedBulan) && $selectedBulan == 12 ? 'selected' : '' }}>
+                                                    Desember</option>
+                                            </select>
+                                            @error('bulan')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="tahun">Tahun</label>
+                                            <!-- Mengubah input menjadi select2 -->
+                                            <select class="select2 form-control @error('tahun') is-invalid @enderror"
+                                                name="tahun" id="tahun_kategori">
+                                                <option value="2024"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2024</option>
+                                                <option value="2023"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2023</option>
+                                                <option value="2025"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2025</option>
+                                                <option value="2026"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2026</option>
+                                                <option value="2027"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2027</option>
+                                                <option value="2028"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2028</option>
+                                                <option value="2029"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2029</option>
+                                                <option value="2030"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                    2030</option>
+                                            </select>
+                                            @error('tahun')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="kategori">Kategori</label>
+                                            <!-- Mengubah input menjadi select2 -->
+                                            <select class="select2 form-control @error('kategori') is-invalid @enderror"
+                                                name="kategori" id="kategori">
+                                                <option value="PELMED">Pelayanan Medis</option>
+                                                <option value="PENMED">Penunjang Medis</option>
+                                                <option value="KEU">Keuangan</option>
+                                                <option value="HRD">HRD & Legal</option>
+                                                <option value="UMUM">Umum</option>
+                                                <option value="MARKETING">Marketing</option>
+                                            </select>
+                                            @error('kategori')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 d-flex align-items-center">
+                                        <button type="submit" class="btn btn-primary btn-block w-100">
+                                            <div class="ikon-tambah">
+                                                <span class="fal fa-search mr-1"></span>Cari
+                                            </div>
+                                            <div class="span spinner-text d-none">
+                                                <span class="spinner-border spinner-border-sm" role="status"
+                                                    aria-hidden="true"></span>
+                                                Loading...
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         {{-- @include('pages.master-data.banks.partials.create-data')
         @include('pages.master-data.banks.partials.update-data') --}}
     </main>
@@ -431,6 +618,15 @@
     <script src="/js/statistics/c3/c3.js"></script>
     <script src="/js/statistics/demo-data/demo-c3.js"></script>
     <script>
+        function convertMonthNameToNumber(monthName) {
+            // Mendapatkan tahun saat ini
+            const currentYear = new Date().getFullYear();
+            // Membuat tanggal dengan nama bulan dan tanggal arbitrer menggunakan tahun saat ini
+            const date = new Date(`${monthName} 1, ${currentYear}`);
+            // Mengambil angka bulan dari tanggal tersebut (0-11, sehingga perlu +1)
+            return date.getMonth() + 1;
+        }
+
         var colors = [myapp_get_color.success_500, myapp_get_color.danger_500, myapp_get_color.info_500, myapp_get_color
             .primary_500, myapp_get_color.warning_500
         ];
@@ -441,9 +637,12 @@
             let total_latein = [];
             let total_timeoff = [];
             let total_absent = [];
+            let currentMonth = new Date().getMonth() + 1;
 
             for (let nama_bulan in attendancesAllMonths) {
-                if (attendancesAllMonths.hasOwnProperty(nama_bulan)) {
+                if (attendancesAllMonths.hasOwnProperty(nama_bulan) && convertMonthNameToNumber(nama_bulan) <=
+                    currentMonth) {
+
                     let total_all = 0;
                     total_all = total_all + attendancesAllMonths[nama_bulan]["total_ontime_all"] +
                         attendancesAllMonths[nama_bulan]["total_latein_all"] +
