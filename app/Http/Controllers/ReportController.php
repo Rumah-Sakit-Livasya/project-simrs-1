@@ -34,11 +34,6 @@ class ReportController extends Controller
 
     public function attendances()
     {
-        if (Auth::check() && !auth()::user()->hasRole('super admin')) {
-            dd(true);
-            return redirect()->route('attendances')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
-        }
-
         $total_employee = Employee::where('is_active', 1)->get()->count();
         $total_ontime = Attendance::where('clock_in', '!=', null)->whereHas('employees', function ($query) {
             $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
@@ -122,6 +117,10 @@ class ReportController extends Controller
 
     public function attendanceReports()
     {
+
+        if (Auth::check() && !auth()::user()->hasRole('super admin')) {
+            return redirect()->route('attendances')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+        }
 
         $total_absent_this_month = 0;
         $total_ontime_this_month = 0;
