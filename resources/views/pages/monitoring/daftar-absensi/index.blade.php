@@ -170,7 +170,7 @@
                                                 <td style="white-space: nowrap"
                                                     class="{{ $row->clock_out && $row->early_clock_out ? 'text-danger' : '' }}"
                                                     style="vertical-align: middle;">
-                                                    @isset($row->late_clock_in)
+                                                    @isset($row->early_clock_out)
                                                         {{ $row->early_clock_out }} Menit
                                                     @else
                                                         -
