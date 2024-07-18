@@ -118,7 +118,7 @@ class ReportController extends Controller
     public function attendanceReports()
     {
 
-        if (Auth::check() && !auth()::user()->hasRole('super admin')) {
+        if (Auth::check() && !Auth::user()->hasRole('super admin')) {
             return redirect()->route('attendances')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
 
