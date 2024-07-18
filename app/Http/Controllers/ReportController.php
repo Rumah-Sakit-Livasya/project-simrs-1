@@ -13,12 +13,6 @@ use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
-    public function __construct()
-    {
-        if (Auth::check() && !Auth::user()->hasRole('super admin')) {
-            return redirect()->route('attendances')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
-        }
-    }
     protected function getNotify()
     {
         $day_off_notify = DayOffRequest::where('approved_line_child', auth()->user()->employee->id)->orWhere('approved_line_parent', auth()->user()->employee->id)->latest()->get();
@@ -40,6 +34,10 @@ class ReportController extends Controller
 
     public function attendances()
     {
+        if (Auth::check() && !Auth::user()->hasRole('super admin')) {
+            return redirect()->route('attendances')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+        }
+
         $total_employee = Employee::where('is_active', 1)->get()->count();
         $total_ontime = Attendance::where('clock_in', '!=', null)->whereHas('employees', function ($query) {
             $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
