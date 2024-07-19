@@ -26,6 +26,7 @@ use App\Models\RekapPenilaianBulanan;
 use App\Models\PenilaianPegawai;
 use App\Models\Shift;
 use App\Models\Structure;
+use App\Models\Target;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -663,6 +664,19 @@ class DashboardController extends Controller
     {
         return view('pages.master-data.shift.index', [
             'shifts' => Shift::all(),
+            'getNotify' => $this->getNotify()
+        ]);
+    }
+
+    public function getDataTargets()
+    {
+        // Mendapatkan organization_id dari pengguna yang sedang login
+        $organizationId = auth()->user()->employee->organization_id;
+
+        // Mengambil data target sesuai dengan organization_id pengguna
+        $targets = Target::where('organization_id', $organizationId)->get();
+        return view('pages.target.index', [
+            'targets' => $targets,
             'getNotify' => $this->getNotify()
         ]);
     }

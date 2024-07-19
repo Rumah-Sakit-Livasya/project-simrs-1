@@ -76,4 +76,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Payroll::class);
     }
+
+    public function targets()
+    {
+        return $this->hasMany(Target::class);
+    }
 }

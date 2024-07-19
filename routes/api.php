@@ -22,6 +22,7 @@ use App\Http\Controllers\API\PayrollApiController;
 use App\Http\Controllers\API\PayrollComponentController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\SalaryController;
+use App\Http\Controllers\API\TargetController;
 use App\Http\Controllers\BotMessageController;
 use App\Http\Controllers\DeductionController;
 use App\Http\Controllers\ReportController;
@@ -191,6 +192,12 @@ Route::prefix('dashboard')->group(function () {
         Route::put('/update/{id}', [StructureController::class, 'update']);
         Route::get('/get/{id}', [StructureController::class, 'getStructure']);
         Route::get('/delete/{id}', [StructureController::class, 'destroy']);
+    });
+    Route::prefix('targets')->group(function () {
+        Route::post('/store', [TargetController::class, 'store']);
+        Route::put('/update/{id}', [TargetController::class, 'update']);
+        Route::get('/get/{id}', [TargetController::class, 'getTarget']);
+        Route::get('/delete/{id}', [TargetController::class, 'destroy']);
     });
     Route::prefix('payroll')->group(function () {
         Route::prefix('salary')->group(function () {

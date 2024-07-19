@@ -97,4 +97,8 @@ class Employee extends Model
     {
         return $this->hasMany(GroupPenilaian::class, 'pejabat_penilai');
     }
+    public function targets()
+    {
+        return $this->hasMany(Target::class);
+    }
 }

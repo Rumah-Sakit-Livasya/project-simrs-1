@@ -1,0 +1,134 @@
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Http\Controllers\Controller;
+use App\Models\Target;
+use Illuminate\Http\Request;
+
+class TargetController extends Controller
+{
+    public function getTarget($id)
+    {
+        try {
+            $target = Target::findOrFail($id);
+            return response()->json($target, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'No result'
+            ], 404);
+        }
+    }
+
+    public function store()
+    {
+        try {
+            $validator = request()->validate([
+                'organization_id' => 'required',
+                'user_id' => 'required',
+                'title' => 'required',
+                'actual' => 'required',
+                'target' => 'required',
+                'min_target' => 'required',
+            ]);
+
+            $target = $validator['target'];
+            $actual = $validator['actual'];
+            $minTarget = $validator['min_target'];
+            $maxTarget = $validator['target'];
+            $validator['max_target'] = $validator['target'];
+
+            // Menentukan status berdasarkan perbandingan antara actual dan target
+            if ($actual === 0) {
+                $validator['status'] = 'Belum dikerjakan sama sekali';
+            } elseif ($actual < $minTarget) {
+                $validator['status'] = 'Belum sesuai target';
+            } elseif ($actual >= $minTarget && $actual < $target) {
+                $validator['status'] = 'Hampir mendekati target';
+            } elseif ($actual >= $target && $actual <= $maxTarget) {
+                $validator['status'] = 'Sesuai target';
+            } else {
+                $validator['status'] = 'Di luar rentang target';
+            }
+
+            // Menentukan selisih antara target dan actual
+            $validator['difference'] = $target - $actual;
+
+            Target::create($validator);
+            //return response
+            return response()->json(['message' => 'Target Berhasil di Tambahkan!']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'No result',
+                'errorLaravel' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    public function update($id)
+    {
+        try {
+            // Validasi input request
+            $validator = request()->validate([
+                'organization_id' => 'required',
+                'user_id' => 'required',
+                'title' => 'required',
+                'actual' => 'required',
+                'target' => 'required',
+                'min_target' => 'required',
+                'max_target' => 'required',
+            ]);
+
+            $target = $validator['target'];
+            $actual = $validator['actual'];
+            $minTarget = $validator['min_target'];
+            $maxTarget = $validator['max_target'];
+
+            // Menentukan status berdasarkan perbandingan antara actual dan target
+            if ($actual === 0) {
+                $validator['status'] = 'Tidak dikerjakan sama sekali';
+            } elseif ($actual < $minTarget) {
+                $validator['status'] = 'Belum sesuai target';
+            } elseif ($actual >= $minTarget && $actual < $target) {
+                $validator['status'] = 'Hampir mendekati target';
+            } elseif ($actual >= $target && $actual <= $maxTarget) {
+                $validator['status'] = 'Sesuai target';
+            } else {
+                $validator['status'] = 'Di luar rentang target';
+            }
+
+            // Menentukan selisih antara target dan actual
+            $validator['difference'] = $target - $actual;
+
+            // Temukan Target yang akan diupdate
+            $targetItem = Target::findOrFail($id);
+
+            // Update data target
+            $targetItem->update($validator);
+
+            // Response sukses
+            return response()->json(['message' => 'Target Berhasil Diperbarui!']);
+        } catch (\Exception $e) {
+            // Response error
+            return response()->json([
+                'error' => 'Gagal memperbarui target',
+                'errorLaravel' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $target = Target::find($id);
+            $target->delete();
+            //return response
+            return response()->json(['message' => 'Target Berhasil di Hapus!']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'No result',
+                'errorLaravel' => $e->getMessage()
+            ], 404);
+        }
+    }
+}
