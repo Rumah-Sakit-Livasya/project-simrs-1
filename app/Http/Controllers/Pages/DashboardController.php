@@ -695,7 +695,6 @@ class DashboardController extends Controller
     }
     public function getManagementShift()
     {
-        dd(auth()->user()->hasRole('pj'));
         if (auth()->user()->hasRole('super admin')) {
             $employees = Employee::where('is_active', 1)->get();
             $organizations = Organization::all();
