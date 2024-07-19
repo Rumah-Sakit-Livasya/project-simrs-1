@@ -356,6 +356,8 @@ class ReportController extends Controller
 
         $grafik_laporan = [];
 
+        $endDateGrafikLaporan = Carbon::now();
+
         foreach ($groupReport as $groupName => $units) {
             // Query untuk mengambil attendances dengan tambahan filter tanggal
             $attendances = Attendance::whereHas('employees', function ($query) use ($units) {
@@ -363,7 +365,7 @@ class ReportController extends Controller
                     $query->whereIn('name', $units);
                 });
             })
-                ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+                ->whereBetween('date', [$startDateReport->toDateString(), $endDateGrafikLaporan->toDateString()])
                 ->get();
 
             // Query untuk menghitung jumlah izin
@@ -378,7 +380,7 @@ class ReportController extends Controller
                         $query->where('attendance_code_id', 1);
                     })->orWhere('attendance_code_id', 1);
                 })
-                ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+                ->whereBetween('date', [$startDateReport->toDateString(), $endDateGrafikLaporan->toDateString()])
                 ->count();
 
             // Query untuk menghitung jumlah sakit
@@ -393,7 +395,7 @@ class ReportController extends Controller
                         $query->where('attendance_code_id', 2);
                     })->orWhere('attendance_code_id', 2);
                 })
-                ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+                ->whereBetween('date', [$startDateReport->toDateString(), $endDateGrafikLaporan->toDateString()])
                 ->count();
 
             // Query untuk menghitung jumlah cuti
@@ -416,7 +418,7 @@ class ReportController extends Controller
                             ->where('attendance_code_id', '!=', 2);
                     });
                 })
-                ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+                ->whereBetween('date', [$startDateReport->toDateString(), $endDateGrafikLaporan->toDateString()])
                 ->count();
 
             // Query untuk menghitung jumlah terlambat masuk
@@ -427,7 +429,7 @@ class ReportController extends Controller
                         $query->whereIn('name', $units);
                     });
                 })
-                ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+                ->whereBetween('date', [$startDateReport->toDateString(), $endDateGrafikLaporan->toDateString()])
                 ->count();
 
             // Query untuk menghitung jumlah on time
@@ -439,7 +441,7 @@ class ReportController extends Controller
                         $query->whereIn('name', $units);
                     });
                 })
-                ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+                ->whereBetween('date', [$startDateReport->toDateString(), $endDateGrafikLaporan->toDateString()])
                 ->count();
 
             // Query untuk menghitung jumlah hadir
