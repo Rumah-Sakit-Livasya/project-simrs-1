@@ -30,6 +30,7 @@
                                         <th style="white-space: nowrap">Judul</th>
                                         <th style="white-space: nowrap">Status</th>
                                         <th style="white-space: nowrap">Actual</th>
+                                        <th style="white-space: nowrap">Target</th>
                                         <th style="white-space: nowrap">Difference</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
@@ -43,16 +44,17 @@
                                                 <td style="white-space: nowrap; background-color: #282828; color: #e6e6e6">
                                                     {{ $row->status }}</td>
                                             @elseif($row->status === 'Belum sesuai target')
-                                                <td style="white-space: nowrap; background-color: #f10000; color: #e6e6e6">
+                                                <td style="white-space: nowrap; background-color: #f10000; color: #ffffff">
                                                     {{ $row->status }}</td>
                                             @elseif($row->status === 'Hampir mendekati target')
                                                 <td style="white-space: nowrap; background-color: #eaff00; color: #0a0a0a">
                                                     {{ $row->status }}</td>
                                             @elseif($row->status === 'Sesuai target')
-                                                <td style="white-space: nowrap; background-color: #00ff0d; color: #e6e6e6">
+                                                <td style="white-space: nowrap; background-color: #00cd3a; color: #ffffff">
                                                     {{ $row->status }}</td>
                                             @endif
                                             <td style="white-space: nowrap">{{ $row->actual }}</td>
+                                            <td style="white-space: nowrap">{{ $row->target }}</td>
                                             <td style="white-space: nowrap">{{ $row->difference }}</td>
                                             <td style="white-space: nowrap">
                                                 <button type="button" data-backdrop="static" data-keyboard="false"
@@ -65,7 +67,7 @@
                                                         Loading...
                                                     </div>
                                                 </button>
-                                                <button type="button" data-backdrop="static" data-keyboard="false"
+                                                {{-- <button type="button" data-backdrop="static" data-keyboard="false"
                                                     class="badge mx-1 badge-success p-2 border-0 text-white btn-hapus"
                                                     data-id="{{ $row->id }}" title="Hapus">
                                                     <span class="fal fa-trash ikon-hapus"></span>
@@ -74,7 +76,7 @@
                                                             aria-hidden="true"></span>
                                                         Loading...
                                                     </div>
-                                                </button>
+                                                </button> --}}
                                             </td>
                                         </tr>
                                     @endforeach
@@ -85,6 +87,7 @@
                                         <th style="white-space: nowrap">Judul</th>
                                         <th style="white-space: nowrap">Status</th>
                                         <th style="white-space: nowrap">Actual</th>
+                                        <th style="white-space: nowrap">Target</th>
                                         <th style="white-space: nowrap">Difference</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
@@ -130,18 +133,12 @@
                         button.find('.ikon-edit').show();
                         button.find('.spinner-text').addClass('d-none');
                         $('#ubah-data').modal('show');
-                        $('#ubah-data #name').val(data.name)
-                        $('#ubah-data #time_in').val(data.time_in)
-                        $('#ubah-data #time_out').val(data.time_out)
-                        if (data.status == 'on') {
-                            $('#status').attr('checked', true);
-                            $('#status-text').text('Aktif')
-                            $('input[name=status]').val('on');
-                        } else {
-                            $('#status').attr('checked', false);
-                            $('input[name=status]').val('off');
-                            $('#status-text').text('Tidak Aktif')
-                        }
+                        $('#ubah-data #user_id').val(data.user_id);
+                        $('#ubah-data #organization_id').val(data.organization_id);
+                        $('#ubah-data #title').val(data.title);
+                        $('#ubah-data #actual').val(data.actual);
+                        $('#ubah-data #target').val(data.target);
+                        $('#ubah-data #min_target').val(data.min_target);
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);

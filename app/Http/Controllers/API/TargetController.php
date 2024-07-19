@@ -39,7 +39,7 @@ class TargetController extends Controller
             $validator['max_target'] = $validator['target'];
 
             // Menentukan status berdasarkan perbandingan antara actual dan target
-            if ($actual === 0) {
+            if ($actual == 0) {
                 $validator['status'] = 'Belum dikerjakan sama sekali';
             } elseif ($actual < $minTarget) {
                 $validator['status'] = 'Belum sesuai target';
@@ -52,7 +52,7 @@ class TargetController extends Controller
             }
 
             // Menentukan selisih antara target dan actual
-            $validator['difference'] = $target - $actual;
+            $validator['difference'] = $actual - $target;
 
             Target::create($validator);
             //return response
@@ -76,17 +76,17 @@ class TargetController extends Controller
                 'actual' => 'required',
                 'target' => 'required',
                 'min_target' => 'required',
-                'max_target' => 'required',
             ]);
 
             $target = $validator['target'];
             $actual = $validator['actual'];
             $minTarget = $validator['min_target'];
-            $maxTarget = $validator['max_target'];
+            $maxTarget = $validator['target'];
+            $validator['max_target'] = $validator['target'];
 
             // Menentukan status berdasarkan perbandingan antara actual dan target
-            if ($actual === 0) {
-                $validator['status'] = 'Tidak dikerjakan sama sekali';
+            if ($actual == 0) {
+                $validator['status'] = 'Belum dikerjakan sama sekali';
             } elseif ($actual < $minTarget) {
                 $validator['status'] = 'Belum sesuai target';
             } elseif ($actual >= $minTarget && $actual < $target) {
@@ -98,7 +98,7 @@ class TargetController extends Controller
             }
 
             // Menentukan selisih antara target dan actual
-            $validator['difference'] = $target - $actual;
+            $validator['difference'] = $actual - $target;
 
             // Temukan Target yang akan diupdate
             $targetItem = Target::findOrFail($id);

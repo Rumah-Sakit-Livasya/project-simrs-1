@@ -47,12 +47,6 @@
                             placeholder="Masukkan Min Target" required>
                         <div class="invalid-feedback">Min Target wajib diisi dengan angka atau desimal.</div>
                     </div>
-                    <div class="form-group">
-                        <label clas for="max_target">Max Target</label>
-                        <input type="number" step="any" class="form-control" id="max_target" name="max_target"
-                            placeholder="Masukkan Max Target" required>
-                        <div class="invalid-feedback">Max Target wajib diisi dengan angka atau desimal.</div>
-                    </div>
                 </div>
                 <div class="modal-footer mt-2">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
