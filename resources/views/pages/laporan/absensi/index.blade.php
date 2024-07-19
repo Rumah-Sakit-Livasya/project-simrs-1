@@ -478,7 +478,7 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form action="{{ route('attendances.reports.filter') }}" method="POST">
+                            <form action="{{ route('attendances.reports.filter.per-unit') }}" method="POST">
                                 @method('POST')
                                 @csrf
                                 <div class="row" id="step-1">

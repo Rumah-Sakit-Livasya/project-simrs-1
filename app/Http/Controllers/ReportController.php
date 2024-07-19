@@ -347,6 +347,7 @@ class ReportController extends Controller
 
     public function filterAttendanceReports()
     {
+
         $total_absent_this_month = 0;
         $total_ontime_this_month = 0;
         $total_latein_this_month = 0;
@@ -469,7 +470,7 @@ class ReportController extends Controller
         foreach ($employees as $employee) {
             $total_late_in = 0;
             $total_early_out = 0;
-            $total_hadir = $employee->attendance->where('clock_in', '!=', null)
+            $total_hadir = $employee->attendance->where('clock_in', '!=', null)->where('is_day_off', null)
                 ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport])
                 ->count();
             $total_izin = 0;
@@ -550,6 +551,87 @@ class ReportController extends Controller
             'total_timeoff_this_month' => $total_timeoff_this_month,
             'top_5_ontime_reports' => $top_5_ontime_reports,
         ]);
+    }
+
+    public function filterAttendanceReportPerUnit()
+    {
+        try {
+            $groupReport = [
+                'PELMED' => [
+                    'Unit Rawat Inap',
+                    'Unit Rawat Jalan',
+                    'Unit IGD',
+                    'Unit OK',
+                    'Unit Perinatologi'
+                ],
+                'PENMED' => [
+                    'Unit Farmasi',
+                    'Unit Radiologi'
+                ],
+                'KEU' => [
+                    'Unit Keuangan'
+                ],
+                'HRD' => [
+                    'Unit SDM'
+                ],
+                'UMUM' => [
+                    'Unit Umum Security',
+                    'Sanitasi'
+                ],
+                'MARKETING' => [
+                    'Unit Marketing'
+                ]
+            ];
+
+            $grafik_laporan = [];
+
+            $groupName = request()->kategori;
+            $startDateReport = Carbon::create(
+                request()->tahun,
+                request()->bulan,
+                26
+            )->subMonth();
+
+
+            $endDateReport = Carbon::create(
+                request()->tahun,
+                request()->bulan,
+                25
+            );
+
+            if (request()->bulan == Carbon::now()->month && request()->tahun == Carbon::now()->year) {
+                if (Carbon::now()->day != 26) {
+                    $endDateReport = Carbon::now();
+                }
+            }
+
+            if (array_key_exists($groupName, $groupReport)) {
+                $units = $groupReport[$groupName];
+
+                $attendances = Attendance::select('attendances.*')
+                    ->join('employees', 'attendances.employee_id', '=', 'employees.id')
+                    ->join('organizations', 'employees.organization_id', '=', 'organizations.id')
+                    ->whereIn('organizations.name', $units)
+                    ->whereBetween('attendances.date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+                    ->get();
+                $grafik_laporan["Hadir"] = $attendances->where('clock_in', '!=', null)->where('is_day_off', null)->count();
+                $grafik_laporan["Absent"] = $attendances->where('clock_in', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->count();
+                $grafik_laporan["DayOff"] = $attendances->where('clock_in', null)->where('attendance_code_id', '!=', null)->where('day_off_request_id', '!=', null)->count();
+                $grafik_laporan["Libur"] = $attendances->where('clock_in', null)->where('is_day_off', 1)->where('attendance_code_id',  null)->where('day_off_request_id',  null)->count();
+                dd($grafik_laporan);
+            } else {
+                // Handle jika nama grup tidak ada dalam groupReport
+                throw new \Exception('Group name tidak ditemukan!');
+            }
+            dd($attendances);
+        } catch (\Exception $e) {
+            // Tangkap error dan lakukan sesuatu, misalnya log atau kirim respons error
+            $errorMessage = $e->getMessage();
+            // Contoh penanganan error dengan log
+            \Log::error('Error fetching attendances: ' . $errorMessage);
+            // Contoh penanganan error dengan respons JSON
+            return response()->json(['error' => $errorMessage], 500);
+        }
     }
 
     public function getReportAttendancesEmployee($employee_id, $periode, $tahun)
