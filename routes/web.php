@@ -175,6 +175,7 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::get("/targets", [DashboardController::class, 'getDataTargets'])->name("targets");
+    Route::get("/targets/report", [DashboardController::class, 'getDataTargetReport'])->name("targets.report");
     /* END MASTER DATA --------------------------------------------------------*/
 
     /*

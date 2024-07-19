@@ -45,7 +45,7 @@ class TargetController extends Controller
                 $validator['status'] = 'Belum sesuai target';
             } elseif ($actual >= $minTarget && $actual < $target) {
                 $validator['status'] = 'Hampir mendekati target';
-            } elseif ($actual >= $target && $actual <= $maxTarget) {
+            } elseif ($actual >= $target) {
                 $validator['status'] = 'Sesuai target';
             } else {
                 $validator['status'] = 'Di luar rentang target';
@@ -91,7 +91,7 @@ class TargetController extends Controller
                 $validator['status'] = 'Belum sesuai target';
             } elseif ($actual >= $minTarget && $actual < $target) {
                 $validator['status'] = 'Hampir mendekati target';
-            } elseif ($actual >= $target && $actual <= $maxTarget) {
+            } elseif ($actual >= $target) {
                 $validator['status'] = 'Sesuai target';
             } else {
                 $validator['status'] = 'Di luar rentang target';

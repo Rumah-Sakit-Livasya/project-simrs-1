@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Target;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,8 +12,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(RolePermissionSeeder::class);
-        $this->call(MenusTableSeeder::class);
+        Target::factory()->count(500)->create();
+        // $this->call(RolePermissionSeeder::class);
+        // $this->call(MenusTableSeeder::class);
         // $this->call(BankSeeder::class);
         // $this->call(OrganizationSeeder::class);
         // $this->call(CompanySeeder::class);

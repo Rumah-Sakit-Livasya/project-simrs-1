@@ -40,7 +40,10 @@
                                         <tr>
                                             <td style="white-space: nowrap">{{ $loop->iteration }}</td>
                                             <td style="white-space: nowrap">{{ $row->title }}</td>
-                                            @if ($row->status === 'Belum dikerjakan sama sekali')
+                                            @if ($row->status === 'Di luar rentang target')
+                                                <td style="white-space: nowrap; background-color: #282828; color: #e6e6e6">
+                                                    {{ $row->status }}</td>
+                                            @elseif($row->status === 'Belum dikerjakan sama sekali')
                                                 <td style="white-space: nowrap; background-color: #282828; color: #e6e6e6">
                                                     {{ $row->status }}</td>
                                             @elseif($row->status === 'Belum sesuai target')

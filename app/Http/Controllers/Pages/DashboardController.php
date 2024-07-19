@@ -681,6 +681,37 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function getDataTargetReport(Request $request)
+    {
+        // Mendapatkan organization_id dari pengguna yang sedang login
+        $organizationId = auth()->user()->employee->organization_id;
+
+        // Mendapatkan input dari form
+        $bulan = $request->input('bulan');
+        $tahun = $request->input('tahun');
+        $organizationId = $request->input('organization_id');
+
+        // Mengambil data target sesuai dengan organization_id, bulan, dan tahun yang dipilih
+        $targets = Target::where('organization_id', $organizationId)
+            ->whereMonth('created_at', $bulan)
+            ->whereYear('created_at', $tahun)
+            ->get();
+
+        // Jika ingin mengirimkan semua organisasi ke view (sepertinya Anda ingin mengirim yang sedang dipilih saja?)
+        $organizations = Organization::all();
+
+        $selectedBulan = request()->bulan;
+        $selectedTahun = request()->tahun;
+
+        return view('pages.target.report', [
+            'targets' => $targets,
+            'organizations' => $organizations,
+            'selectedBulan' => $selectedBulan,
+            'selectedTahun' => $selectedTahun,
+            'getNotify' => $this->getNotify()
+        ]);
+    }
+
     public function getDataBanks()
     {
         return view('pages.master-data.banks.index', [
