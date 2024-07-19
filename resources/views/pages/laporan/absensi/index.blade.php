@@ -264,6 +264,24 @@
                 </div>
             </div>
         </div>
+        <div class="row mt-1">
+            <div class="col-xl-12">
+                <div id="panel-1" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            Grafik Absensi Per Kategori ({{ \Carbon\Carbon::now()->translatedFormat('F Y') }})
+                        </h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <div id="laporanPerKategori">
+                                <canvas style="width:100%; height: 600px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-xl-6">
                 <div id="panel-1" class="panel">
@@ -742,6 +760,102 @@
 
             new Chart($("#barStacked > canvas").get(0).getContext("2d"), config);
         }
+
+        var LaporanPerKategori = function() {
+            // Mendapatkan data JSON dari PHP (Laravel)
+            let laporan_per_kategori = {!! $grafik_report_per_unit !!};
+
+            // Menyiapkan data untuk grafik
+            var barStackedData = {
+                labels: Object.keys(laporan_per_kategori), // Menggunakan nama grup sebagai label
+                datasets: [{
+                        label: "Izin/Sakit/Cuti",
+                        backgroundColor: myapp_get_color.success_300,
+                        borderColor: myapp_get_color.success_500,
+                        borderWidth: 1,
+                        data: Object.values(laporan_per_kategori).map(data => data.Izin + data.Sakit + data
+                            .Cuti) // Menggabungkan Izin, Sakit, dan Cuti
+                    },
+                    {
+                        label: "Terlambat",
+                        backgroundColor: myapp_get_color.warning_300,
+                        borderColor: myapp_get_color.warning_500,
+                        borderWidth: 1,
+                        data: Object.values(laporan_per_kategori).map(data => data.LateIn) // Terlambat
+                    },
+                    {
+                        label: "Ontime",
+                        backgroundColor: myapp_get_color.primary_300,
+                        borderColor: myapp_get_color.primary_500,
+                        borderWidth: 1,
+                        data: Object.values(laporan_per_kategori).map(data => data.OnTime) // Ontime
+                    },
+                    {
+                        label: "Absent",
+                        backgroundColor: myapp_get_color.danger_300,
+                        borderColor: myapp_get_color.danger_500,
+                        borderWidth: 1,
+                        data: Object.values(laporan_per_kategori).map(data => data.Absent) // Absent
+                    }
+                ]
+            };
+
+            var config = {
+                type: 'bar',
+                data: barStackedData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        display: true, // Menampilkan legend
+                        position: 'top', // Posisi legend di atas grafik
+                    },
+                    scales: {
+                        yAxes: [{
+                            stacked: true,
+                            gridLines: {
+                                display: true,
+                                color: "#f2f2f2"
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                                fontSize: 14,
+                                callback: function(value) {
+                                    return value;
+                                }
+                            }
+                        }],
+                        xAxes: [{
+                            stacked: true,
+                            gridLines: {
+                                display: true,
+                                color: "#f2f2f2"
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                                fontSize: 14
+                            }
+                        }]
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                var dataset = data.datasets[tooltipItem.datasetIndex];
+                                var currentValue = dataset.data[tooltipItem.index];
+                                return dataset.label + ": " + currentValue;
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Menggambar grafik menggunakan Chart.js
+            new Chart($("#laporanPerKategori > canvas").get(0).getContext("2d"), config);
+        };
+
+        barStacked();
+        LaporanPerKategori();
+
         /* bar stacked -- end */
 
         var pieChart = c3.generate({
@@ -791,7 +905,6 @@
                     placeholder: 'Pilih Data Berikut',
                 });
             });
-            barStacked();
             $('.btn-edit').click(function(e) {
                 e.preventDefault();
                 let button = $(this);
