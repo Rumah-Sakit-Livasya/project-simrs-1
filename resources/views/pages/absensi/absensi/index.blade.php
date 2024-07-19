@@ -111,40 +111,40 @@
                                                         class="select2 form-control @error('bulan') is-invalid @enderror"
                                                         name="bulan" id="bulan">
                                                         <option value="1"
-                                                            {{ \Carbon\Carbon::now()->month == 1 ? 'selected' : '' }}>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 1 ? 'selected' : '' }}>
                                                             Januari</option>
                                                         <option value="2"
-                                                            {{ \Carbon\Carbon::now()->month == 2 ? 'selected' : '' }}>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 2 ? 'selected' : '' }}>
                                                             Februari</option>
                                                         <option value="3"
-                                                            {{ \Carbon\Carbon::now()->month == 3 ? 'selected' : '' }}>Maret
-                                                        </option>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 3 ? 'selected' : '' }}>
+                                                            Maret</option>
                                                         <option value="4"
-                                                            {{ \Carbon\Carbon::now()->month == 4 ? 'selected' : '' }}>April
-                                                        </option>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 4 ? 'selected' : '' }}>
+                                                            April</option>
                                                         <option value="5"
-                                                            {{ \Carbon\Carbon::now()->month == 5 ? 'selected' : '' }}>Mei
-                                                        </option>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 5 ? 'selected' : '' }}>
+                                                            Mei</option>
                                                         <option value="6"
-                                                            {{ \Carbon\Carbon::now()->month == 6 ? 'selected' : '' }}>Juni
-                                                        </option>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 6 ? 'selected' : '' }}>
+                                                            Juni</option>
                                                         <option value="7"
-                                                            {{ \Carbon\Carbon::now()->month == 7 ? 'selected' : '' }}>Juli
-                                                        </option>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 7 ? 'selected' : '' }}>
+                                                            Juli</option>
                                                         <option value="8"
-                                                            {{ \Carbon\Carbon::now()->month == 8 ? 'selected' : '' }}>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 8 ? 'selected' : '' }}>
                                                             Agustus</option>
                                                         <option value="9"
-                                                            {{ \Carbon\Carbon::now()->month == 9 ? 'selected' : '' }}>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 9 ? 'selected' : '' }}>
                                                             September</option>
                                                         <option value="10"
-                                                            {{ \Carbon\Carbon::now()->month == 10 ? 'selected' : '' }}>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 10 ? 'selected' : '' }}>
                                                             Oktober</option>
                                                         <option value="11"
-                                                            {{ \Carbon\Carbon::now()->month == 11 ? 'selected' : '' }}>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 11 ? 'selected' : '' }}>
                                                             November</option>
                                                         <option value="12"
-                                                            {{ \Carbon\Carbon::now()->month == 12 ? 'selected' : '' }}>
+                                                            {{ isset($selectedBulan) && $selectedBulan == 12 ? 'selected' : '' }}>
                                                             Desember</option>
                                                     </select>
 
@@ -160,26 +160,30 @@
                                                     <select
                                                         class="select2 form-control @error('tahun') is-invalid @enderror"
                                                         name="tahun" id="tahun">
+
                                                         <option value="2024"
-                                                            {{ \Carbon\Carbon::now()->year == 2024 ? 'selected' : '' }}>
+                                                            {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
                                                             2024</option>
+                                                        <option value="2023"
+                                                            {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
+                                                            2023</option>
                                                         <option value="2025"
-                                                            {{ \Carbon\Carbon::now()->year == 2025 ? 'selected' : '' }}>
+                                                            {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
                                                             2025</option>
                                                         <option value="2026"
-                                                            {{ \Carbon\Carbon::now()->year == 2026 ? 'selected' : '' }}>
+                                                            {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
                                                             2026</option>
                                                         <option value="2027"
-                                                            {{ \Carbon\Carbon::now()->year == 2027 ? 'selected' : '' }}>
+                                                            {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
                                                             2027</option>
                                                         <option value="2028"
-                                                            {{ \Carbon\Carbon::now()->year == 2028 ? 'selected' : '' }}>
+                                                            {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
                                                             2028</option>
                                                         <option value="2029"
-                                                            {{ \Carbon\Carbon::now()->year == 2029 ? 'selected' : '' }}>
+                                                            {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
                                                             2029</option>
                                                         <option value="2030"
-                                                            {{ \Carbon\Carbon::now()->year == 2030 ? 'selected' : '' }}>
+                                                            {{ isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '' }}>
                                                             2030</option>
                                                     </select>
                                                     @error('tahun')

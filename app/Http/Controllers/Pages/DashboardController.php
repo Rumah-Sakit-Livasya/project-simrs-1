@@ -955,7 +955,10 @@ class DashboardController extends Controller
             }
         }
 
-        return view('pages.absensi.absensi.index', compact('attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
+        $selectedBulan = Carbon::now()->month;
+        $selectedTahun = Carbon::now()->year;
+
+        return view('pages.absensi.absensi.index', compact('selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
     }
 
     public function getAttendancesFilter()
@@ -1002,7 +1005,11 @@ class DashboardController extends Controller
             }
         }
 
-        return view('pages.absensi.absensi.index', compact('attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
+
+        $selectedBulan = request()->bulan;
+        $selectedTahun = request()->tahun;
+
+        return view('pages.absensi.absensi.index', compact('selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
     }
 
     public function getAttendancesOutsourcing()
