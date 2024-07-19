@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
         Route::prefix('reports')->group(function () {
             Route::get('/', [ReportController::class, 'attendanceReports'])->name('attendances.reports');
             Route::post('/', [ReportController::class, 'filterAttendanceReports'])->name('attendances.reports.filter');
+            Route::post('/unit', [ReportController::class, 'filterAttendanceReportPerUnit'])->name('attendances.reports.filter.per-unit');
         });
     });
     /* END ABSENSI ----------------------------------------------------------------------------*/

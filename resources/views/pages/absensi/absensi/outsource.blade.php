@@ -323,7 +323,7 @@
             formData.append('longitude', longitude);
 
             try {
-                const response = await fetch('/outsource/attendances', {
+                const response = await fetch('/attendances/outsource', {
                     method: 'POST',
                     body: formData,
                     headers: {
