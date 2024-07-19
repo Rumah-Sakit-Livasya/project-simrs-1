@@ -26,6 +26,7 @@ use App\Http\Controllers\API\TargetController;
 use App\Http\Controllers\BotMessageController;
 use App\Http\Controllers\DeductionController;
 use App\Http\Controllers\ReportController;
+use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\PayrollComponent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -230,4 +231,4 @@ Route::prefix('dashboard')->group(function () {
         Route::delete('/delete/{id}', [MenuController::class, 'destroy'])->middleware('check.api.credentials')->name('master-data.menu.delete');
     });
 });
-// Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(\App\Http\Middleware\CheckAuthorizationBot::class)->name('bot.kirim-pesan');
+Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');

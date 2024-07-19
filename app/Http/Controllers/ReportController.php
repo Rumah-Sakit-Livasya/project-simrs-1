@@ -131,8 +131,6 @@ class ReportController extends Controller
         $year = Carbon::now()->year;
         $attendancesAllMonths = [];
 
-
-
         // Mulai dari Januari hingga Desember
         for ($month = 1; $month <= 12; $month++) {
             // Tanggal mulai: 26 bulan sebelumnya
@@ -331,6 +329,8 @@ class ReportController extends Controller
         return view('pages.laporan.absensi.index', [
             'attendancesAllMonths' => $attendancesAllMonths,
             'bulan' => $bulan,
+            'selectedBulan' => Carbon::now()->month,
+            'selectedTahun' => Carbon::now()->year,
             'attendances' => $attendances,
             'employees' => $employees,
             'startDateReport' => $startDateReport,
@@ -536,6 +536,8 @@ class ReportController extends Controller
         return view('pages.laporan.absensi.index', [
             'attendancesAllMonths' => $attendancesAllMonths,
             'bulan' => $bulan,
+            'selectedBulan' => request()->bulan,
+            'selectedTahun' => request()->tahun,
             'attendances' => $attendances,
             'employees' => $employees,
             'startDateReport' => $startDateReport,

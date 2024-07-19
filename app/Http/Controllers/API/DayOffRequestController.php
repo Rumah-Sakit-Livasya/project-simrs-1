@@ -269,7 +269,7 @@ class DayOffRequestController extends Controller
 
 
         // dd($day_off_request);
-        if (auth()->user()->hasRole('Admin')) {
+        if (auth()->user()->hasRole('super admin')) {
             $is_approved = "Disetujui";
         } else {
             if ($day_off_request->approved_line_child !== null && $day_off_request->approved_line_parent == null) {

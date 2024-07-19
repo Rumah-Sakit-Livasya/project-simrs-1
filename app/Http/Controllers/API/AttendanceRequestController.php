@@ -339,7 +339,7 @@ class AttendanceRequestController extends Controller
         $messages .= 'https://internal.livasya.com/attendances/attendance-requests/' . $attendance_request->id;
 
         // dd($attendance_request);
-        if (auth()->user()->hasRole('Admin')) {
+        if (auth()->user()->hasRole('super admin')) {
             $is_approved = "Disetujui";
         } else {
             if ($attendance_request->approved_line_child !== null && $attendance_request->approved_line_parent == null) {
