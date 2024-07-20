@@ -150,65 +150,59 @@
                     <div class="panel-container show">
                         <div class="panel-content">
                             <!-- datatable start -->
-                            <div class="table-responsive">
-                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                    <thead>
+                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100"
+                                style="font-size: 9pt !important">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Unit</th>
+                                        <th>Judul</th>
+                                        <th>Status</th>
+                                        <th>Actual</th>
+                                        <th>Target</th>
+                                        <th>Difference</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($targets as $row)
                                         <tr>
-                                            <th style="white-space: nowrap">No</th>
-                                            <th style="white-space: nowrap">Unit</th>
-                                            <th style="white-space: nowrap">Judul</th>
-                                            <th style="white-space: nowrap">Status</th>
-                                            <th style="white-space: nowrap">Actual</th>
-                                            <th style="white-space: nowrap">Target</th>
-                                            <th style="white-space: nowrap">Difference</th>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $row->organization->name }}</td>
+                                            <td>{{ $row->title }}</td>
+                                            @if ($row->status === 'Di luar rentang target')
+                                                <td background-color: #282828; color: #e6e6e6">
+                                                    {{ $row->status }}</td>
+                                            @elseif($row->status === 'Belum dikerjakan sama sekali')
+                                                <td background-color: #282828; color: #e6e6e6">
+                                                    {{ $row->status }}</td>
+                                            @elseif($row->status === 'Belum sesuai target')
+                                                <td background-color: #f10000; color: #ffffff">
+                                                    {{ $row->status }}</td>
+                                            @elseif($row->status === 'Hampir mendekati target')
+                                                <td background-color: #eaff00; color: #0a0a0a">
+                                                    {{ $row->status }}</td>
+                                            @elseif($row->status === 'Sesuai target')
+                                                <td background-color: #00cd3a; color: #ffffff">
+                                                    {{ $row->status }}</td>
+                                            @endif
+                                            <td>{{ $row->actual }}</td>
+                                            <td>{{ $row->target }}</td>
+                                            <td>{{ $row->difference }}</td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($targets as $row)
-                                            <tr>
-                                                <td style="white-space: nowrap">{{ $loop->iteration }}</td>
-                                                <td style="white-space: nowrap">{{ $row->organization->name }}</td>
-                                                <td style="white-space: nowrap">{{ $row->title }}</td>
-                                                @if ($row->status === 'Di luar rentang target')
-                                                    <td
-                                                        style="white-space: nowrap; background-color: #282828; color: #e6e6e6">
-                                                        {{ $row->status }}</td>
-                                                @elseif($row->status === 'Belum dikerjakan sama sekali')
-                                                    <td
-                                                        style="white-space: nowrap; background-color: #282828; color: #e6e6e6">
-                                                        {{ $row->status }}</td>
-                                                @elseif($row->status === 'Belum sesuai target')
-                                                    <td
-                                                        style="white-space: nowrap; background-color: #f10000; color: #ffffff">
-                                                        {{ $row->status }}</td>
-                                                @elseif($row->status === 'Hampir mendekati target')
-                                                    <td
-                                                        style="white-space: nowrap; background-color: #eaff00; color: #0a0a0a">
-                                                        {{ $row->status }}</td>
-                                                @elseif($row->status === 'Sesuai target')
-                                                    <td
-                                                        style="white-space: nowrap; background-color: #00cd3a; color: #ffffff">
-                                                        {{ $row->status }}</td>
-                                                @endif
-                                                <td style="white-space: nowrap">{{ $row->actual }}</td>
-                                                <td style="white-space: nowrap">{{ $row->target }}</td>
-                                                <td style="white-space: nowrap">{{ $row->difference }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th style="white-space: nowrap">No</th>
-                                            <th style="white-space: nowrap">Unit</th>
-                                            <th style="white-space: nowrap">Judul</th>
-                                            <th style="white-space: nowrap">Status</th>
-                                            <th style="white-space: nowrap">Actual</th>
-                                            <th style="white-space: nowrap">Target</th>
-                                            <th style="white-space: nowrap">Difference</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Unit</th>
+                                        <th>Judul</th>
+                                        <th>Status</th>
+                                        <th>Actual</th>
+                                        <th>Target</th>
+                                        <th>Difference</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
                             <!-- datatable end -->
                         </div>
                     </div>

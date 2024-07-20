@@ -249,3 +249,30 @@ function convertPeriodePayroll($period)
     // Gabungkan kembali periode dengan bulan dalam bahasa Indonesia
     return $startMonthIndonesian . ' - ' . $endMonthIndonesian;
 }
+
+// Check if function is already declared
+if (!function_exists('isActiveMenu')) {
+    function isActiveMenu($menu)
+    {
+        $urls = collect([$menu->url]);
+        if ($menu->children->isNotEmpty()) {
+            $urls = $urls->merge($menu->children->pluck('url'));
+            foreach ($menu->children as $child) {
+                $urls = $urls->merge(isActiveMenuUrls($child));
+            }
+        }
+        return set_active_mainmenu($urls->toArray());
+    }
+
+    function isActiveMenuUrls($menu)
+    {
+        $urls = collect([$menu->url]);
+        if ($menu->children->isNotEmpty()) {
+            $urls = $urls->merge($menu->children->pluck('url'));
+            foreach ($menu->children as $child) {
+                $urls = $urls->merge(isActiveMenuUrls($child));
+            }
+        }
+        return $urls;
+    }
+}
