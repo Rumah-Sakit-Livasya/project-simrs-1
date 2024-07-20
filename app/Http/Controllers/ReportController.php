@@ -360,7 +360,7 @@ class ReportController extends Controller
 
         foreach ($groupReport as $groupName => $units) {
             // Query untuk mengambil attendances dengan tambahan filter tanggal
-            $attendances = Attendance::whereHas('employees', function ($query) use ($units) {
+            $attendancesgr = Attendance::whereHas('employees', function ($query) use ($units) {
                 $query->whereHas('organization', function ($query) use ($units) {
                     $query->whereIn('name', $units);
                 });
@@ -445,25 +445,25 @@ class ReportController extends Controller
                 ->count();
 
             // Query untuk menghitung jumlah hadir
-            $hadirCount = $attendances->where('clock_in', '!=', null)
+            $hadirCount = $attendancesgr->where('clock_in', '!=', null)
                 ->where('is_day_off', null)
                 ->count();
 
             // Query untuk menghitung jumlah absen
-            $absenCount = $attendances->where('clock_in', null)
+            $absenCount = $attendancesgr->where('clock_in', null)
                 ->where('is_day_off', null)
                 ->where('attendance_code_id', null)
                 ->where('day_off_request_id', null)
                 ->count();
 
             // Query untuk menghitung jumlah day off
-            $dayOffCount = $attendances->where('clock_in', null)
+            $dayOffCount = $attendancesgr->where('clock_in', null)
                 ->where('attendance_code_id', '!=', null)
                 ->where('day_off_request_id', '!=', null)
                 ->count();
 
             // Query untuk menghitung jumlah libur
-            $liburCount = $attendances->where('clock_in', null)
+            $liburCount = $attendancesgr->where('clock_in', null)
                 ->where('is_day_off', 1)
                 ->where('attendance_code_id', null)
                 ->where('day_off_request_id', null)

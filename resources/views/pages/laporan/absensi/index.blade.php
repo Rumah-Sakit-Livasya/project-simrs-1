@@ -264,12 +264,60 @@
                 </div>
             </div>
         </div>
-        <div class="row mt-1">
+        <div class="row mb-4">
+            <div class="col-xl-12">
+                <div class="card pt-2">
+                    <div class="card-body row">
+                        <div class="col-xl-4 col-sm-4 mb-2">
+                            <h5 class="font-weight-bold text-primary">LAPORAN PER KATEGORI UNIT
+                            </h5>
+                            <span style="font-size: 1.1em">Pilih kategori dibawah ini untuk menampilkan laporannya!
+                            </span>
+                        </div>
+                        <div class="col-xl-2 col-sm-2 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Total Pegawai</span>
+                            <h1 style="font-size: 2em">0</h1>
+                        </div>
+                        <div class="col-xl-1 col-sm-1 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">On Time</span>
+                            <h1 style="font-size: 2em">
+                                0</h1>
+                        </div>
+                        <div class="col-xl-1 col-sm-1 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Late In</span>
+                            <h1 style="font-size: 2em">
+                                0</h1>
+                        </div>
+                        <div class="col-xl-2 col-sm-2 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">No Check In</span>
+                            <h1 style="font-size: 2em">
+                                0</h1>
+                        </div>
+                        <div class="col-xl-1 col-sm-1 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Absent</span>
+                            <h1 style="font-size: 2em">
+                                0</h1>
+                        </div>
+                        <div class="col-xl-1 col-sm-1 mb-2">
+                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Time Off</span>
+                            <h1 style="font-size: 2em">
+                                0</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Grafik Absensi Per Kategori ({{ \Carbon\Carbon::now()->translatedFormat('F Y') }})
+                            Grafik Absensi Per Kategori
+                            @if (\Carbon\Carbon::now()->day > 26)
+                                {{ \Carbon\Carbon::now()->addMonth()->translatedFormat('F Y') }}
+                            @else
+                                {{ \Carbon\Carbon::parse($endDateReport)->translatedFormat('F Y') }}
+                            @endif
                         </h2>
                     </div>
                     <div class="panel-container show">
@@ -438,49 +486,6 @@
                                 </table>
                                 <!-- datatable end -->
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xl-12">
-                <div class="card pt-2">
-                    <div class="card-body row">
-                        <div class="col-xl-4 col-sm-4 mb-2">
-                            <h5 class="font-weight-bold text-primary">LAPORAN PER KATEGORI UNIT
-                            </h5>
-                            <span style="font-size: 1.1em">Pilih kategori dibawah ini untuk menampilkan laporannya!
-                            </span>
-                        </div>
-                        <div class="col-xl-2 col-sm-2 mb-2">
-                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Total Pegawai</span>
-                            <h1 style="font-size: 2em">0</h1>
-                        </div>
-                        <div class="col-xl-1 col-sm-1 mb-2">
-                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">On Time</span>
-                            <h1 style="font-size: 2em">
-                                0</h1>
-                        </div>
-                        <div class="col-xl-1 col-sm-1 mb-2">
-                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Late In</span>
-                            <h1 style="font-size: 2em">
-                                0</h1>
-                        </div>
-                        <div class="col-xl-2 col-sm-2 mb-2">
-                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">No Check In</span>
-                            <h1 style="font-size: 2em">
-                                0</h1>
-                        </div>
-                        <div class="col-xl-1 col-sm-1 mb-2">
-                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Absent</span>
-                            <h1 style="font-size: 2em">
-                                0</h1>
-                        </div>
-                        <div class="col-xl-1 col-sm-1 mb-2">
-                            <span class="title-sm d-inline-block mb-2 font-weight-bold text-primary">Time Off</span>
-                            <h1 style="font-size: 2em">
-                                0</h1>
                         </div>
                     </div>
                 </div>
@@ -765,6 +770,32 @@
             // Mendapatkan data JSON dari PHP (Laravel)
             let laporan_per_kategori = {!! $grafik_report_per_unit !!};
 
+            // Menyiapkan array untuk menyimpan nilai persentase
+            let cutiValues = [];
+            let lateInValues = [];
+            let onTimeValues = [];
+            let absentValues = [];
+
+            // Iterasi melalui data untuk menghitung persentase
+            Object.values(laporan_per_kategori).forEach(data => {
+                let total = data.Izin + data.Sakit + data.Cuti + data.LateIn + data.OnTime + data.Absent;
+
+                // Menghitung persentase jika total tidak nol
+                if (total !== 0) {
+                    cutiValues.push((data.Izin + data.Sakit + data.Cuti) / total * 100);
+                    lateInValues.push((data.LateIn) / total * 100);
+                    onTimeValues.push((data.OnTime) / total * 100);
+                    absentValues.push((data.Absent) / total * 100);
+                } else {
+                    cutiValues.push(0);
+                    lateInValues.push(0);
+                    onTimeValues.push(0);
+                    absentValues.push(0);
+                }
+            });
+
+            console.log(cutiValues, onTimeValues, lateInValues, absentValues);
+
             // Menyiapkan data untuk grafik
             var barStackedData = {
                 labels: Object.keys(laporan_per_kategori), // Menggunakan nama grup sebagai label
@@ -773,29 +804,33 @@
                         backgroundColor: myapp_get_color.success_300,
                         borderColor: myapp_get_color.success_500,
                         borderWidth: 1,
-                        data: Object.values(laporan_per_kategori).map(data => data.Izin + data.Sakit + data
-                            .Cuti) // Menggabungkan Izin, Sakit, dan Cuti
+                        data: cutiValues,
+                        rawDataValues: Object.values(laporan_per_kategori).map(data => data.Izin + data.Sakit +
+                            data.Cuti)
                     },
                     {
                         label: "Terlambat",
                         backgroundColor: myapp_get_color.warning_300,
                         borderColor: myapp_get_color.warning_500,
                         borderWidth: 1,
-                        data: Object.values(laporan_per_kategori).map(data => data.LateIn) // Terlambat
+                        data: lateInValues, // Terlambat dalam persentase
+                        rawDataValues: Object.values(laporan_per_kategori).map(data => data.LateIn)
                     },
                     {
                         label: "Ontime",
                         backgroundColor: myapp_get_color.primary_300,
                         borderColor: myapp_get_color.primary_500,
                         borderWidth: 1,
-                        data: Object.values(laporan_per_kategori).map(data => data.OnTime) // Ontime
+                        data: onTimeValues, // Ontime dalam persentase
+                        rawDataValues: Object.values(laporan_per_kategori).map(data => data.OnTime)
                     },
                     {
                         label: "Absent",
                         backgroundColor: myapp_get_color.danger_300,
                         borderColor: myapp_get_color.danger_500,
                         borderWidth: 1,
-                        data: Object.values(laporan_per_kategori).map(data => data.Absent) // Absent
+                        data: absentValues, // Absent dalam persentase
+                        rawDataValues: Object.values(laporan_per_kategori).map(data => data.Absent)
                     }
                 ]
             };
@@ -821,7 +856,7 @@
                                 beginAtZero: true,
                                 fontSize: 14,
                                 callback: function(value) {
-                                    return value;
+                                    return value + '%'; // Menambahkan '%' di akhir nilai sumbu y
                                 }
                             }
                         }],
@@ -842,7 +877,13 @@
                             label: function(tooltipItem, data) {
                                 var dataset = data.datasets[tooltipItem.datasetIndex];
                                 var currentValue = dataset.data[tooltipItem.index];
-                                return dataset.label + ": " + currentValue;
+                                var dataValues = dataset.rawDataValues;
+
+                                return [
+                                    dataset.label + ": " + currentValue.toFixed(2) + '%',
+                                    "Jumlah: " + dataValues[tooltipItem
+                                        .index] // Menampilkan jumlah sebelum persentase
+                                ];
                             }
                         }
                     }
@@ -852,6 +893,8 @@
             // Menggambar grafik menggunakan Chart.js
             new Chart($("#laporanPerKategori > canvas").get(0).getContext("2d"), config);
         };
+
+
 
         barStacked();
         LaporanPerKategori();
