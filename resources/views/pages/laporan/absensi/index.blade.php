@@ -322,6 +322,32 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
+                            <div class="panel-tag">
+                                <div class="row d-flex justify-content-center align-items-center">
+                                    <div class="col-sm-3 col-md-3 my-1 d-flex align-items-center">
+                                        <span class="d-inline-block ml-2 bg-danger"
+                                            style="height: 15px; width: 25px"></span> <span
+                                            class="ml-2 d-inline-block">Absent</span>
+                                    </div>
+                                    <div class="col-sm-3 col-md-3 my-1 d-flex align-items-center">
+                                        <span class="d-inline-block ml-2 bg-info"
+                                            style="height: 15px; width: 25px"></span>
+                                        <span class="ml-2 d-inline-block"> On Time </span>
+                                    </div>
+                                    <div class="col-sm-3 col-md-3 my-1 d-flex align-items-center">
+                                        <span class="d-inline-block ml-2 bg-warning"
+                                            style="height: 15px; width: 25px"></span> <span class="ml-2 d-inline-block">
+                                            Telat
+                                        </span>
+                                    </div>
+                                    <div class="col-sm-3 col-md-3 my-1 d-flex align-items-center">
+                                        <span class="d-inline-block ml-2 bg-success"
+                                            style="height: 15px; width: 25px"></span> <span class="ml-2 d-inline-block">
+                                            Time Off
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                             <div id="laporanPerKategori">
                                 <canvas style="width:100%; height: 600px;"></canvas>
                             </div>
