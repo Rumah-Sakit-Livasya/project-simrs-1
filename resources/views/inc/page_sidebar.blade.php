@@ -5,7 +5,10 @@
             class="page-logo-link press-scale-down d-flex align-items-center justify-content-center position-relative"
             data-toggle="modal" data-target="#modal-shortcut">
             <img src="{{ asset('/img/logo.png') }}" alt="Laravel" aria-roledescription="logo" style="width: 45px">
-            <span class="page-logo-text font-weight-bold">SMART HR</span>
+            <div class="text-left ml-2">
+                <span class="page-logo-text text-left font-weight-bold">SMART HR</span>
+                <p class="mb-0 text-small text-white"> {{ auth()->user()->employee->company->name }}</p>
+            </div>
         </a>
     </div>
     <!-- BEGIN PRIMARY NAVIGATION -->
