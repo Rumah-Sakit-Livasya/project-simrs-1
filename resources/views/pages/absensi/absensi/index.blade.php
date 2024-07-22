@@ -3,6 +3,7 @@
 @section('extended-css')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
     <style>
         .icon-dashboard-report {
             font-size: 2em;
@@ -17,7 +18,7 @@
 
         .bg-opacity-50 {
             background-color: #fd3994a5 !important;
-            /* Merah dengan opacity 50% */
+            /* Red with 50% opacity */
         }
 
         .badge.pos-top.pos-right.dashboard-report {
@@ -33,7 +34,6 @@
         }
 
         @media screen and (max-width: 500px) {
-
             .badge.pos-top.pos-right.dashboard-report {
                 font-size: 0.9em;
                 height: 15px;
@@ -41,8 +41,56 @@
             }
         }
 
-        .badge.pos-top.pos-right.dashboard-report {}
+        /* Default styles */
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 400px;
+            /* Fixed width */
+            height: 100%;
+            /* Auto height */
+            z-index: 10;
+            /* Ensure it is above the map */
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 400px;
+            /* Fixed width */
+            height: 100%;
+            /* Auto height */
+            z-index: 11;
+            /* Ensure it is above the video */
+        }
+
+        #map {
+            width: 100%;
+            height: 255px;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+
+            #video,
+            #canvas {
+                width: 100%;
+                /* Full width on small screens */
+                height: 100%;
+                /* Auto height on small screens */
+            }
+
+            #map {
+                height: 200px;
+                /* Adjust height for small screens */
+                margin-top: 0;
+                /* Remove margin-top */
+            }
+        }
     </style>
+    <script defer src="/js/face-api/face-api.min.js"></script>
 @endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
@@ -50,20 +98,32 @@
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
-                        <h2>
-                            Live Attendance </h2>
+                        <h2>Live Attendance</h2>
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <div id="map" style="width:100%;height:255px !important;"></div>
+                            <!-- Container for video and canvas -->
+                            <div style="position: relative; width: 100%; height: 250px;">
+                                <video id="video" autoplay muted></video>
+                                <canvas id="canvas"></canvas>
+                            </div>
+
+                            <!-- Info section -->
+                            <div id="info" style="margin-top: 0px; text-align: center; font-size: 9pt"></div>
+
+                            <!-- Map container -->
+                            <div id="map"></div>
+
+                            <!-- Time attendance section -->
                             <div class="time-attendance row justify-content-center mb-2" style="color: #666666 !important;">
-                                <span class="mt-4 col-md-12 text-center"
-                                    style="font-size:1.2em">{{ \Carbon\Carbon::now()->translatedFormat('l, j F Y') }}</span>
+                                <span class="mt-4 col-md-12 text-center" style="font-size:1.2em">
+                                    {{ \Carbon\Carbon::now()->translatedFormat('l, j F Y') }}
+                                </span>
                                 <h2 class="col-md-12 mt-2 text-center" id="waktu-realtime">
-                                    {{ \Carbon\Carbon::now()->translatedFormat('H:i:s') }}</h2>
+                                    {{ \Carbon\Carbon::now()->translatedFormat('H:i:s') }}
+                                </h2>
                                 <div class="attendance-btn mt-2">
                                     @if (isset($last_attendance))
-                                        {{-- @dd($last_attendance) --}}
                                         <button
                                             class="btn btn-primary btn-sm btn-clock-in mr-1 {{ $last_attendance->clock_in ? 'd-none' : '' }}"
                                             id="clock_in">
@@ -367,51 +427,182 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
-        var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        $(document).ready(async function() {
+            const label = "{{ auth()->user()->employee->foto }}";
+            const name = "{{ auth()->user()->name }}";
+            const employeeImage = `/storage/employee/profile/${label}`;
 
-        // Check if Geolocation is available
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var lat = position.coords.latitude;
-                var lng = position.coords.longitude;
-                var accuracy = position.coords.accuracy;
+            function initializeMap() {
+                const map = L.map('map');
 
-                // Set the view to the current location with a closer zoom level
-                map.setView([lat, lng], 17); // Zoom level set to 15 for closer view
+                // Set default view
+                map.setView([51.505, -0.09], 13); // Ganti dengan koordinat default
 
-                // Add a marker at the current location
-                var marker = L.marker([lat, lng]).addTo(map)
-                    .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
-                    .openPopup();
-            }, function(error) {
-                console.error("Geolocation failed: " + error.message);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                // Geolocation
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const {
+                            latitude,
+                            longitude
+                        } = position.coords;
+
+                        // Update map view to user's location
+                        map.setView([latitude, longitude], 13);
+
+                        // Add a marker for the user's location
+                        L.marker([latitude, longitude]).addTo(map)
+                            .bindPopup('You are here!')
+                            .openPopup();
+                    }, () => {
+                        alert('Unable to retrieve your location');
+                    });
+                } else {
+                    alert('Geolocation is not supported by this browser.');
+                }
+            }
+
+            // Call the initializeMap function
+            initializeMap();
+
+            try {
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+                    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+                    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+                    faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+                ]);
+
+                console.log('Models loaded successfully');
+                startVideo();
+            } catch (error) {
+                console.error('Error loading models:', error);
+                alert('Error loading models. Check console for details.');
+            }
+
+            function startVideo() {
+                navigator.mediaDevices.getUserMedia({
+                        video: {}
+                    })
+                    .then(stream => {
+                        document.getElementById('video').srcObject = stream;
+                        adjustVideoCanvasSize();
+                    })
+                    .catch(err => {
+                        console.error("Error accessing webcam: ", err);
+                        alert('Error accessing webcam. Check console for details.');
+                    });
+            }
+
+            $('#video').on('play', async () => {
+                const canvas = document.getElementById('canvas');
+                const video = document.getElementById('video');
+                const displaySize = {
+                    width: video.width,
+                    height: video.height
+                };
+                faceapi.matchDimensions(canvas, displaySize);
+
+                try {
+                    const labeledFaceDescriptors = await loadLabeledImages();
+                    console.log('Labeled face descriptors loaded');
+                    const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
+
+                    setInterval(async () => {
+                        try {
+                            const detections = await faceapi.detectAllFaces(video,
+                                    new faceapi.TinyFaceDetectorOptions())
+                                .withFaceLandmarks().withFaceDescriptors();
+                            const resizedDetections = faceapi.resizeResults(detections,
+                                displaySize);
+                            const results = resizedDetections.map(d => faceMatcher
+                                .findBestMatch(d.descriptor));
+
+                            const ctx = canvas.getContext('2d');
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                            results.forEach((result, i) => {
+                                const box = resizedDetections[i].detection.box;
+                                const drawBox = new faceapi.draw.DrawBox(box, {
+                                    label: result.toString()
+                                });
+                                drawBox.draw(canvas);
+
+                                if (result.label !== 'unknown') {
+                                    const employeeName = name;
+                                    console.log('Face matched:', employeeName);
+                                    showAlert(employeeName);
+                                }
+                            });
+                        } catch (error) {
+                            console.error('Error detecting faces:', error);
+                            alert('Error detecting faces. Check console for details.');
+                        }
+                    }, 100);
+                } catch (error) {
+                    console.error('Error loading labeled images:', error);
+                    alert('Error loading labeled images. Check console for details.');
+                }
             });
-        } else {
-            console.error("Geolocation is not supported by this browser.");
-        }
-    </script>
-    <script>
-        /* demo scripts for change table color */
-        /* change background */
-        $(document).ready(function() {
-            $(function() {
-                $('.select2').select2();
+
+            async function loadLabeledImages() {
+                try {
+                    const descriptions = [];
+                    const img = await faceapi.fetchImage(employeeImage);
+                    const detections = await faceapi.detectSingleFace(img).withFaceLandmarks()
+                        .withFaceDescriptor();
+                    if (detections) {
+                        descriptions.push(detections.descriptor);
+                    } else {
+                        console.error('No face detected in the image.');
+                        alert('No face detected in the profile image.');
+                    }
+                    return [new faceapi.LabeledFaceDescriptors(name, descriptions)];
+                } catch (error) {
+                    console.error('Error loading labeled images:', error);
+                    alert('Error loading labeled images. Check console for details.');
+                }
+            }
+
+            function showAlert(employeeName) {
+                document.getElementById('info').innerText = `Pegawai Teridentifikasi: ${employeeName}`;
+            }
+
+            function adjustVideoCanvasSize() {
+                const video = document.getElementById('video');
+                const canvas = document.getElementById('canvas');
+                const container = video.parentElement;
+
+                // Set the size of video and canvas based on the container
+                video.width = canvas.width = container.offsetWidth;
+                video.height = canvas.height = container.offsetHeight;
+            }
+
+            $('#clock_in').click(function(e) {
+                e.preventDefault();
+                console.log("Clock In button clicked");
+                $('#clockin-modal').modal('show');
+                startVideo();
             });
+
+            $('.select2').select2();
+
             $('#datepicker-modal-2').daterangepicker({
                 opens: 'left'
             }, function(start, end, label) {
-                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end
-                    .format('YYYY-MM-DD'));
+                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' +
+                    end.format('YYYY-MM-DD'));
             });
 
             $('#store-form').on('submit', function(e) {
                 e.preventDefault();
                 let formData = new FormData(this);
                 formData.append("employee_id", "{{ auth()->user()->employee->id }}");
-                formData.append("approved_line_child", "{{ auth()->user()->employee->approval_line }}");
+                formData.append("approved_line_child",
+                    "{{ auth()->user()->employee->approval_line }}");
                 formData.append("approved_line_parent",
                     "{{ auth()->user()->employee->approval_line_parent }}");
 
@@ -429,7 +620,7 @@
                         $('#store-form').find('.ikon-edit').show();
                         $('#store-form').find('.spinner-text').addClass('d-none');
                         $('#tambah-data').modal('hide');
-                        showSuccessAlert(response.message)
+                        showSuccessAlert(response.message);
                         setTimeout(function() {
                             location.reload();
                         }, 500);
@@ -442,7 +633,7 @@
 
             $('.btn-accept').on('click', function(e) {
                 e.preventDefault();
-                console.log("click");
+                console.log("Click");
                 let formData = {
                     employee_id: "{{ auth()->user()->employee->id }}"
                 }
@@ -453,12 +644,10 @@
                     data: formData,
                     beforeSend: function() {
                         $('#approve-request').find('.ikon-edit').hide();
-                        $('#approve-request').find('.spinner-text')
-                            .removeClass(
-                                'd-none');
+                        $('#approve-request').find('.spinner-text').removeClass('d-none');
                     },
                     success: function(response) {
-                        showSuccessAlert(response.message)
+                        showSuccessAlert(response.message);
                         setTimeout(function() {
                             location.reload();
                         }, 1000);
@@ -467,7 +656,7 @@
                         console.log(xhr.responseText);
                     }
                 });
-            })
+            });
 
             $('.js-thead-colors a').on('click', function() {
                 var theadColor = $(this).attr("data-bg");
@@ -481,135 +670,35 @@
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
             });
 
-        });
-    </script>
-    <script>
-        if (navigator.geolocation) {
-            window.myMap = function() {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    let location = {
-                        lat: position.coords.latitude - 0.000001,
-                        lng: position.coords.longitude
-                    };
-
-                    let mapProp = {
-                        center: location,
-                        zoom: 17.1,
-                    };
-
-                    let map = new google.maps.Map(document.getElementById("map"), mapProp);
-
-                    let marker = new google.maps.Marker({
-                        position: location,
-                        map: map
-                    });
-                });
-            }
-        } else {
-            showErrorAlert("Browser ini tidak support geolokasi!");
-        }
-        $(document).ready(function() {
-            $('#clock_in').click(function() {
-
-                $('#clock_in').prop('disabled', true);
-                $('#clock_in').find('.spinner-text').removeClass('d-none');
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    let latitude = position.coords.latitude;
-                    let longitude = position.coords.longitude;
-                    let data_clock_in = {
-                        _token: "{{ csrf_token() }}",
-                        latitude: latitude,
-                        longitude: longitude,
-                        clock_in: null,
-                        clock_out: null,
-                        employee_id: "{{ Auth::user()->employee->id }}",
-                        time_in: null
-
-                    };
-                    $.ajax({
-                        type: "PUT",
-                        url: "/api/dashboard/clock-in",
-                        data: data_clock_in,
-                        async: true,
-                        success: function(response) {
-                            $('#clock_in').find('.spinner-text').addClass(
-                                'd-none');
-                            showSuccessAlert(response.message)
-                            setTimeout(function() {
-                                location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr) {
-                            if (xhr.status === 422) {
-                                var errors = xhr.responseJSON;
-                                // Lakukan sesuatu dengan pesan kesalahan yang diterima
-                                showErrorAlert(errors.error);
-                            } else {
-                                // Tangani kesalahan lainnya
-                                var errors = xhr.responseJSON;
-                                showErrorAlert(errors.error);
-                            }
-                        }
-                    });
-                });
-
-            })
             $('#clock_out').click(function() {
-
                 $('#clock_out').prop('disabled', true);
-                $('#clock_out').find('.spinner-text').removeClass('d-none');
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    let latitude = position.coords.latitude;
-                    let longitude = position.coords.longitude;
-                    let data_clock_out = {
-                        _token: "{{ csrf_token() }}",
-                        latitude: latitude,
-                        longitude: longitude,
-                        clock_out: null,
-                        employee_id: "{{ Auth::user()->employee->id }}",
-                        time_out: null
-                    };
-                    $.ajax({
-                        type: "PUT",
-                        url: "/api/dashboard/clock-out",
-                        data: data_clock_out,
-                        async: true,
-                        success: function(response) {
-                            $('#clock_out').find('.spinner-text').addClass(
-                                'd-none');
-                            showSuccessAlert(response.message)
-                            setTimeout(function() {
-                                location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr) {
-                            if (xhr.status === 422) {
-                                var errors = xhr.responseJSON;
-                                // Lakukan sesuatu dengan pesan kesalahan yang diterima
-                                showErrorAlert(errors.error);
-                            } else {
-                                // Tangani kesalahan lainnya
-                                var errors = xhr.responseJSON;
-                                showErrorAlert(errors.error);
-                            }
+                $('#clock_out').find('.spinner-border-sm').removeClass('d-none');
+                $('#clock_out').find('.clock-out-text').addClass('d-none');
+                $.ajax({
+                    url: "{{ route('employee.attendance.clock-out') }}",
+                    method: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            showSuccessAlert(response.message);
+                            $('#clock_out').prop('disabled', false);
+                            $('#clock_out').find('.spinner-border-sm').addClass('d-none');
+                            $('#clock_out').find('.clock-out-text').removeClass('d-none');
                         }
-                    });
+                    },
+                    error: function(xhr) {
+                        showErrorAlert('Terjadi kesalahan, harap coba lagi');
+                        $('#clock_out').prop('disabled', false);
+                        $('#clock_out').find('.spinner-border-sm').addClass('d-none');
+                        $('#clock_out').find('.clock-out-text').removeClass('d-none');
+                    }
                 });
-
-            })
-            setInterval(function() {
-                var currentTime = new Date();
-                var hours = currentTime.getHours();
-                var minutes = currentTime.getMinutes();
-                var seconds = currentTime.getSeconds();
-                hours = (hours < 10 ? "0" : "") + hours;
-                minutes = (minutes < 10 ? "0" : "") + minutes;
-                seconds = (seconds < 10 ? "0" : "") + seconds;
-                var timeString = hours + ':' + minutes + ':' + seconds;
-                $("#waktu-realtime").text(timeString);
-            }, 1000);
+            });
         });
     </script>
+
     {{-- <script
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHLSY8GcO1KmPQdavk8G1m4wUw0tXlifU&loading=async&callback=myMap&v=weekly"
         async defer></script> --}}
