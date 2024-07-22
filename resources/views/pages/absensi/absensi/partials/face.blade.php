@@ -14,10 +14,10 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="form-group">
-                                <div class="video-container">
+                                <div class="video-container position-relative">
                                     <video id="video" class="w-100" autoplay></video>
+                                    <canvas id="canvas" class="position-absolute top-0 start-0 w-100 h-100"></canvas>
                                 </div>
-                                <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
                                 <div id="info"></div>
                                 <div class="text-center mt-2 mb-4">
                                     <button type="button" class="btn btn-primary" id="upload">

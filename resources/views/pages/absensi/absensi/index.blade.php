@@ -5,6 +5,31 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
     <style>
+        #map {
+            height: 225px;
+            /* Ensure the map container has a height */
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            /* Aspect ratio of 4:3 */
+        }
+
+        #video,
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #canvas {
+            z-index: 1;
+        }
+
         .icon-dashboard-report {
             font-size: 2em;
             text-align: center;
@@ -40,55 +65,6 @@
                 width: 15px;
             }
         }
-
-        /* Default styles */
-        #video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 400px;
-            /* Fixed width */
-            height: 100%;
-            /* Auto height */
-            z-index: 10;
-            /* Ensure it is above the map */
-        }
-
-        #canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 400px;
-            /* Fixed width */
-            height: 100%;
-            /* Auto height */
-            z-index: 11;
-            /* Ensure it is above the video */
-        }
-
-        #map {
-            width: 100%;
-            height: 255px;
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-
-            #video,
-            #canvas {
-                width: 100%;
-                /* Full width on small screens */
-                height: 100%;
-                /* Auto height on small screens */
-            }
-
-            #map {
-                height: 200px;
-                /* Adjust height for small screens */
-                margin-top: 0;
-                /* Remove margin-top */
-            }
-        }
     </style>
     <script defer src="/js/face-api/face-api.min.js"></script>
 @endsection
@@ -102,15 +78,6 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <!-- Container for video and canvas -->
-                            <div style="position: relative; width: 100%; height: 250px;">
-                                <video id="video" autoplay muted></video>
-                                <canvas id="canvas"></canvas>
-                            </div>
-
-                            <!-- Info section -->
-                            <div id="info" style="margin-top: 0px; text-align: center; font-size: 9pt"></div>
-
                             <!-- Map container -->
                             <div id="map"></div>
 
@@ -418,6 +385,7 @@
             </div>
         </div>
     </main>
+    @include('pages.absensi.absensi.partials.face')
 @endsection
 @section('plugin')
     <script src="/js/dependency/moment/moment.js"></script>
@@ -427,84 +395,75 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
-        $(document).ready(async function() {
+        var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Check if Geolocation is available
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+                var accuracy = position.coords.accuracy;
+
+                // Set the view to the current location with a closer zoom level
+                map.setView([lat, lng], 17); // Zoom level set to 17 for closer view
+
+                // Add a marker at the current location
+                var marker = L.marker([lat, lng]).addTo(map)
+                    .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
+                    .openPopup();
+            }, function(error) {
+                console.error("Geolocation failed: " + error.message);
+            });
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+        }
+    </script>
+    <script>
+        $(document).ready(function() {
             const label = "{{ auth()->user()->employee->foto }}";
             const name = "{{ auth()->user()->name }}";
             const employeeImage = `/storage/employee/profile/${label}`;
+            const $video = $('#video');
+            const $canvas = $('#canvas');
+            const $info = $('#info');
 
-            function initializeMap() {
-                const map = L.map('map');
-
-                // Set default view
-                map.setView([51.505, -0.09], 13); // Ganti dengan koordinat default
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
-
-                // Geolocation
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        const {
-                            latitude,
-                            longitude
-                        } = position.coords;
-
-                        // Update map view to user's location
-                        map.setView([latitude, longitude], 13);
-
-                        // Add a marker for the user's location
-                        L.marker([latitude, longitude]).addTo(map)
-                            .bindPopup('You are here!')
-                            .openPopup();
-                    }, () => {
-                        alert('Unable to retrieve your location');
-                    });
-                } else {
-                    alert('Geolocation is not supported by this browser.');
+            async function initFaceRecognition() {
+                try {
+                    await Promise.all([
+                        faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+                        faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+                        faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+                        faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+                    ]);
+                    console.log('Models loaded successfully');
+                } catch (error) {
+                    console.error('Error loading models:', error);
+                    alert('Error loading models. Check console for details.');
                 }
             }
 
-            // Call the initializeMap function
-            initializeMap();
-
-            try {
-                await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-                    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-                    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-                    faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
-                ]);
-
-                console.log('Models loaded successfully');
-                startVideo();
-            } catch (error) {
-                console.error('Error loading models:', error);
-                alert('Error loading models. Check console for details.');
-            }
-
-            function startVideo() {
-                navigator.mediaDevices.getUserMedia({
-                        video: {}
-                    })
-                    .then(stream => {
-                        document.getElementById('video').srcObject = stream;
-                        adjustVideoCanvasSize();
-                    })
-                    .catch(err => {
-                        console.error("Error accessing webcam: ", err);
-                        alert('Error accessing webcam. Check console for details.');
+            async function startVideo() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: true
                     });
+                    $video[0].srcObject = stream;
+                    $video[0].play();
+                } catch (err) {
+                    console.error("Error accessing webcam: ", err);
+                    alert('Error accessing webcam. Check console for details.');
+                }
             }
 
-            $('#video').on('play', async () => {
-                const canvas = document.getElementById('canvas');
-                const video = document.getElementById('video');
+            $video.on('play', async () => {
                 const displaySize = {
-                    width: video.width,
-                    height: video.height
+                    width: $video.width(),
+                    height: $video.height()
                 };
-                faceapi.matchDimensions(canvas, displaySize);
+                faceapi.matchDimensions($canvas[0], displaySize);
 
                 try {
                     const labeledFaceDescriptors = await loadLabeledImages();
@@ -513,23 +472,24 @@
 
                     setInterval(async () => {
                         try {
-                            const detections = await faceapi.detectAllFaces(video,
+                            const detections = await faceapi.detectAllFaces($video[0],
                                     new faceapi.TinyFaceDetectorOptions())
-                                .withFaceLandmarks().withFaceDescriptors();
+                                .withFaceLandmarks()
+                                .withFaceDescriptors();
                             const resizedDetections = faceapi.resizeResults(detections,
                                 displaySize);
                             const results = resizedDetections.map(d => faceMatcher
                                 .findBestMatch(d.descriptor));
 
-                            const ctx = canvas.getContext('2d');
-                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            const ctx = $canvas[0].getContext('2d');
+                            ctx.clearRect(0, 0, $canvas.width(), $canvas.height());
 
                             results.forEach((result, i) => {
                                 const box = resizedDetections[i].detection.box;
                                 const drawBox = new faceapi.draw.DrawBox(box, {
                                     label: result.toString()
                                 });
-                                drawBox.draw(canvas);
+                                drawBox.draw($canvas[0]);
 
                                 if (result.label !== 'unknown') {
                                     const employeeName = name;
@@ -539,7 +499,6 @@
                             });
                         } catch (error) {
                             console.error('Error detecting faces:', error);
-                            alert('Error detecting faces. Check console for details.');
                         }
                     }, 100);
                 } catch (error) {
@@ -568,19 +527,13 @@
             }
 
             function showAlert(employeeName) {
-                document.getElementById('info').innerText = `Pegawai Teridentifikasi: ${employeeName}`;
+                $info.text(`Pegawai Teridentifikasi: ${employeeName}`);
             }
 
-            function adjustVideoCanvasSize() {
-                const video = document.getElementById('video');
-                const canvas = document.getElementById('canvas');
-                const container = video.parentElement;
+            // Initialize face-api.js models
+            initFaceRecognition();
 
-                // Set the size of video and canvas based on the container
-                video.width = canvas.width = container.offsetWidth;
-                video.height = canvas.height = container.offsetHeight;
-            }
-
+            // Event handler for the "Clock In" button
             $('#clock_in').click(function(e) {
                 e.preventDefault();
                 console.log("Clock In button clicked");
@@ -588,21 +541,22 @@
                 startVideo();
             });
 
-            $('.select2').select2();
+            $(function() {
+                $('.select2').select2();
+            });
 
             $('#datepicker-modal-2').daterangepicker({
                 opens: 'left'
             }, function(start, end, label) {
-                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' +
-                    end.format('YYYY-MM-DD'));
+                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end
+                    .format('YYYY-MM-DD'));
             });
 
             $('#store-form').on('submit', function(e) {
                 e.preventDefault();
                 let formData = new FormData(this);
                 formData.append("employee_id", "{{ auth()->user()->employee->id }}");
-                formData.append("approved_line_child",
-                    "{{ auth()->user()->employee->approval_line }}");
+                formData.append("approved_line_child", "{{ auth()->user()->employee->approval_line }}");
                 formData.append("approved_line_parent",
                     "{{ auth()->user()->employee->approval_line_parent }}");
 
@@ -670,6 +624,31 @@
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
             });
 
+            if (navigator.geolocation) {
+                window.myMap = function() {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        let location = {
+                            lat: position.coords.latitude - 0.000001,
+                            lng: position.coords.longitude
+                        };
+
+                        let mapProp = {
+                            center: location,
+                            zoom: 17.1,
+                        };
+
+                        let map = new google.maps.Map(document.getElementById("map"), mapProp);
+
+                        let marker = new google.maps.Marker({
+                            position: location,
+                            map: map
+                        });
+                    });
+                }
+            } else {
+                showErrorAlert("Browser ini tidak support geolokasi!");
+            }
+
             $('#clock_out').click(function() {
                 $('#clock_out').prop('disabled', true);
                 $('#clock_out').find('.spinner-border-sm').removeClass('d-none');
@@ -698,6 +677,7 @@
             });
         });
     </script>
+
 
     {{-- <script
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHLSY8GcO1KmPQdavk8G1m4wUw0tXlifU&loading=async&callback=myMap&v=weekly"
