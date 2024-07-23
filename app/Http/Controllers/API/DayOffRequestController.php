@@ -100,30 +100,33 @@ class DayOffRequestController extends Controller
 
     public function store()
     {
-
         try {
+            // Validator
             $validator = \Validator::make(request()->all(), [
                 'date' => 'required',
-                'photo' => 'nullable|file|mimes:jpg,png,jpeg|max:1024', // Maksimum 5MB (5120 KB)
+                'photo' => 'nullable|file|mimes:jpg,png,jpeg|max:1024',
                 'description' => 'required|string',
-                'employee_id' => 'required',
+                'employee_id' => 'required|exists:employees,id',
+                'attendance_code_id' => 'required|exists:attendance_codes,id',
             ], [
                 'date.required' => 'Kolom tanggal wajib diisi.',
                 'photo.file' => 'Kolom foto harus berupa file.',
                 'photo.mimes' => 'Format foto harus berupa JPG, PNG, atau JPEG.',
-                'photo.max' => 'Ukuran file gambar tidak boleh lebih dari 1MB.', // Pesan khusus untuk ukuran file gambar terlalu besar
-                'photo.uploaded' => 'Ukuran file gambar terlalu besar.', // Pesan khusus untuk ukuran file gambar terlalu besar
+                'photo.max' => 'Ukuran file gambar tidak boleh lebih dari 1MB.',
+                'photo.uploaded' => 'Ukuran file gambar terlalu besar.',
                 'description.required' => 'Kolom deskripsi wajib diisi.',
                 'description.string' => 'Kolom deskripsi harus berupa teks.',
                 'employee_id.required' => 'Kolom ID karyawan wajib diisi.',
+                'employee_id.exists' => 'Karyawan tidak ditemukan.',
+                'attendance_code_id.required' => 'Kolom kode kehadiran wajib diisi.',
+                'attendance_code_id.exists' => 'Kode kehadiran tidak ditemukan.',
             ]);
 
-
             if ($validator->fails()) {
-                $errors = $validator->errors();
-                if ($errors->has('photo')) {
-                    throw new \Exception($errors->first('photo'));
-                }
+                return response()->json([
+                    'status' => 'error',
+                    'errors' => $validator->errors()
+                ], 422);
             }
 
             // Header untuk cURL
@@ -245,6 +248,8 @@ class DayOffRequestController extends Controller
             ], 404);
         }
     }
+
+
 
     public function approve($id)
     {
