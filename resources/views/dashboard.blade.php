@@ -168,7 +168,7 @@
                         <div class="panel-content pt-0" style="overflow-x: auto; white-space: nowrap;">
                             @foreach ($employees as $item)
                                 <a type="button" href="#" data-backdrop="static" data-keyboard="false"
-                                    class="btn-show-day-off" data-id="{{ $item->id }}" title="">
+                                    class="btn-show-pegawai" data-id="{{ $item->id }}" title="">
                                     <div class="daftar-pegawai text-center d-inline-block ml-1 mr-1">
                                         @if ($item->foto != null && Storage::exists('public/employee/profile/' . $item->foto))
                                             <img src="{{ asset('storage/employee/profile/' . $item->foto) }}"
@@ -847,7 +847,6 @@
                         $('#show-day-off').modal('show');
                         $('#avatar').attr('src', '/storage/employee/profile/' + data.foto);
                         $('#nama-pegawai').text(data.fullname);
-                        $('#nama-pegawai').text(data.fullname);
                         $('#jabatan').text(data.jabatan);
                         $('#status-libur').text(data.status);
                         $('#start-date').text(data.start_date);
@@ -855,6 +854,32 @@
                         $('#email').text(data.email);
                         $('#phone').text(data.phone);
                         $('#organisasi').text(data.organisasi);
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
+            });
+
+            $('.btn-show-pegawai').click(function(event) {
+                event.preventDefault();
+                const id = $(this).attr('data-id');
+                $.ajax({
+                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
+                    url: `/api/dashboard/employee/get/${id}`, // Isi dengan url/path file php yang dituju
+                    dataType: "json",
+                    success: function(data) {
+                        $('#show-pegawai').modal('show');
+                        $('#show-pegawai #avatar').attr('src', '/storage/employee/profile/' +
+                            data.foto);
+                        $('#show-pegawai #nama-pegawai').text(data.fullname);
+                        $('#show-pegawai #jabatan').text(data.jabatan);
+                        $('#show-pegawai #status-libur').text(data.status);
+                        $('#show-pegawai #start-date').text(data.start_date);
+                        $('#show-pegawai #end-date').text(data.end_date);
+                        $('#show-pegawai #email').text(data.email);
+                        $('#show-pegawai #phone').text(data.phone);
+                        $('#show-pegawai #organisasi').text(data.organisasi);
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);
