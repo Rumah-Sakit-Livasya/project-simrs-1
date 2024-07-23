@@ -818,7 +818,7 @@
                     dataType: "json",
                     success: function(data) {
                         $('#show-day-off').modal('show');
-                        $('#avatar').attr('src', data.foto);
+                        $('#avatar').attr('src', '/storage/employee/profile/' + data.foto);
                         $('#nama-pegawai').text(data.fullname);
                         $('#nama-pegawai').text(data.fullname);
                         $('#jabatan').text(data.jabatan);
