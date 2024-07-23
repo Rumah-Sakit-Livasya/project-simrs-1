@@ -168,19 +168,18 @@
                         <div class="panel-content pt-0" style="overflow-x: auto; white-space: nowrap;">
                             @foreach ($employees as $item)
                                 <a type="button" href="#" data-backdrop="static" data-keyboard="false"
-                                    class="btn-show-day-off" data-id="{{ $item->id }}"
-                                    title="{{ $item->day_off->attendance_code->description ?? ($item->attendance_code->description ?? 'Libur') }}">
+                                    class="btn-show-day-off" data-id="{{ $item->id }}" title="">
                                     <div class="daftar-pegawai text-center d-inline-block ml-1 mr-1">
-                                        @if ($item->employees->foto != null && Storage::exists('public/employee/profile/' . $item->employees->foto))
-                                            <img src="{{ asset('storage/employee/profile/' . $item->employees->foto) }}"
+                                        @if ($item->foto != null && Storage::exists('public/employee/profile/' . $item->foto))
+                                            <img src="{{ asset('storage/employee/profile/' . $item->foto) }}"
                                                 class="rounded-circle mr-2" alt=""
                                                 style="width: 60px; height: 60px; object-fit: cover; z-index: 100;">
                                         @else
-                                            <img src="{{ $item->employees->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
+                                            <img src="{{ $item->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
                                                 class="rounded-circle mr-2" alt=""
                                                 style="width: 60px; z-index: 100;">
                                         @endif
-                                        <div class="name mt-2">{{ Str::limit($item->employees->fullname, 15) }}</div>
+                                        <div class="name mt-2">{{ Str::limit($item->fullname, 15) }}</div>
                                     </div>
                                 </a>
                             @endforeach
