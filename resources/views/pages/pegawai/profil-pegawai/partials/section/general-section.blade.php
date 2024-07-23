@@ -30,7 +30,7 @@
                                         <span class="font-weight-bold">No
                                             HP</span>
                                     </div>
-                                    <div class="col-sm-8">+{{ $employee->mobile_phone }}
+                                    <div class="col-sm-8">{{ $employee->mobile_phone }}
                                     </div>
                                 </div>
                             </li>
@@ -60,7 +60,7 @@
                                             Lahir</span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p class="d-flex">
+                                        <p class="d-flex mb-0">
                                             {{ tgl($employee->birthdate) }}
                                             <span
                                                 class="ml-2 py-0 align-self-center badge badge-secondary p-1">{{ hitungUmur($employee->birthdate) }}</span>
@@ -84,7 +84,7 @@
                                             Pernikahan</span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>{{ $employee->marital_status }}</p>
+                                        <p class="mb-0">{{ $employee->marital_status }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -95,7 +95,7 @@
                                             Darah</span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>{{ $employee->blood_type }}</p>
+                                        <p class="mb-0">{{ $employee->blood_type }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -105,7 +105,7 @@
                                         <span class="font-weight-bold">Agama</span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>{{ $employee->religion }}</p>
+                                        <p class="mb-0">{{ $employee->religion }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -141,7 +141,7 @@
                                             ID</span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>{{ $employee->identity_type }}</p>
+                                        <p class="mb-0">{{ $employee->identity_type }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -152,7 +152,7 @@
                                             ID</span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>{{ $employee->identity_number }}</p>
+                                        <p class="mb-0">{{ $employee->identity_number }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -163,7 +163,7 @@
                                             kedaluwarsa ID</span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>{{ $employee->identity_expire_date ?? 'Permanen' }}</p>
+                                        <p class="mb-0">{{ $employee->identity_expire_date ?? 'Permanen' }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -174,7 +174,7 @@
                                             Pos</span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>{{ $employee->postal_code }}</p>
+                                        <p class="mb-0">{{ $employee->postal_code }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -185,7 +185,7 @@
                                             KTP</span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>{{ $employee->citizen_id_address }}</p>
+                                        <p class="mb-0">{{ $employee->citizen_id_address }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -195,7 +195,7 @@
                                         <span class="font-weight-bold">Tempat Tinggal</span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>{{ $employee->residental_address }}</p>
+                                        <p class="mb-0">{{ $employee->residental_address }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -243,7 +243,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>
+                                        <p class="mb-0">
                                             {{ $employee->company->name }}
                                         </p>
                                     </div>
@@ -257,7 +257,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>{{ $employee->employee_code ?? '*belum disetting' }}</p>
+                                        <p class="mb-0">{{ $employee->employee_code ?? '*belum disetting' }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -269,7 +269,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>{{ $employee->barcode ?? '*belum disetting' }}</p>
+                                        <p class="mb-0">{{ $employee->barcode ?? '*belum disetting' }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -281,7 +281,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>
+                                        <p class="mb-0">
                                             {{ $employee->organization->name }}
                                         </p>
                                     </div>
@@ -295,7 +295,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>
+                                        <p class="mb-0">
                                             {{ $employee->jobPosition->name }}
                                         </p>
                                     </div>
@@ -309,7 +309,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>
+                                        <p class="mb-0">
                                             {{ $employee->jobLevel->name }}
                                         </p>
                                     </div>
@@ -323,7 +323,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>
+                                        <p class="mb-0">
                                             {{ $employee->employment_status }}
                                         </p>
                                     </div>
@@ -355,7 +355,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p class="d-flex">
+                                        <p class="d-flex mb-0">
                                             {{ tgl($employee->end_status_date) }}
                                         </p>
                                     </div>
@@ -369,7 +369,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>
+                                        <p class="mb-0">
                                             -
                                         </p>
                                     </div>
@@ -383,7 +383,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>
+                                        <p class="mb-0">
                                             -
                                         </p>
                                     </div>
@@ -397,7 +397,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>
+                                        <p class="mb-0">
                                             @if (isset($approvalLine))
                                                 {{ $approvalLine->employee_code }} - {{ $approvalLine->fullname }}
                                             @elseif(isset($approvalParent))
@@ -419,7 +419,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p>
+                                        <p class="mb-0">
                                             Tidak ada manajer
                                         </p>
                                     </div>
@@ -428,7 +428,16 @@
                         </ul>
                     </div>
                     <div class="col">
-                        <button type="button" class="d-inline-flex btn btn-basic btn-sm">Sunting</button>
+                        <button type="button" data-backdrop="static" data-keyboard="false"
+                            class="badge mx-1 badge-success p-2 border-0 text-white btn-ubah-pekerjaan"
+                            data-id="{{ $employee->id }}" title="Ubah">
+                            <i class="fal fa-pencil-alt mr-1 ikon-edit-pekerjaan"></i>
+                            <div class="span spinner-text d-none">
+                                <span class="spinner-border spinner-border-sm " role="status"
+                                    aria-hidden="true"></span>
+                                Loading...
+                            </div>
+                        </button>
                     </div>
                 </div>
             </div>

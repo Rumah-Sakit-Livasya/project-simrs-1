@@ -43,29 +43,31 @@ class AttendanceImport implements ToCollection
                         if (isset($employeeShift) || isset($cuti)) {
                             $check_attendance = Attendance::where('employee_id', $employeeId)->where('date', Carbon::parse($dates[$dateIndex])->format('Y-m-d'))->first();
                             if (isset($check_attendance)) {
-                                if ($cuti != null && $check_attendance->day_off_request_id == null) {
-                                    $day_off = DayOffRequest::where('employee_id', $employeeId)->where('start_date', \Carbon\Carbon::parse($dates[$dateIndex])->format('Y-m-d'))->first();
-                                    if (!$day_off) {
-                                        DayOffRequest::create([
-                                            'attendance_code_id' => 1,
+                                if ($check_attendance->day_off_request_id == null) {
+                                    if ($cuti != null && $check_attendance->day_off_request_id == null) {
+                                        $day_off = DayOffRequest::where('employee_id', $employeeId)->where('start_date', \Carbon\Carbon::parse($dates[$dateIndex])->format('Y-m-d'))->first();
+                                        if (!$day_off) {
+                                            DayOffRequest::create([
+                                                'attendance_code_id' => 1,
+                                                'employee_id' => $employeeId,
+                                                'start_date' => \Carbon\Carbon::parse($dates[$dateIndex])->format('Y-m-d'),
+                                                'end_date' => \Carbon\Carbon::parse($dates[$dateIndex])->format('Y-m-d'),
+                                                'description' => $cuti,
+                                                'is_approved' => 'Pending',
+                                                'approval_line_child' => $employeeApproval->approval_line,
+                                                'approval_line_parent' => $employeeApproval->approval_line_parent,
+                                            ]);
+                                        }
+                                    }
+                                    if ($cuti == null && $check_attendance->day_off_request_id == null) {
+                                        $check_attendance->update([
                                             'employee_id' => $employeeId,
-                                            'start_date' => \Carbon\Carbon::parse($dates[$dateIndex])->format('Y-m-d'),
-                                            'end_date' => \Carbon\Carbon::parse($dates[$dateIndex])->format('Y-m-d'),
-                                            'description' => $cuti,
-                                            'is_approved' => 'Pending',
-                                            'approval_line_child' => $employeeApproval->approval_line,
-                                            'approval_line_parent' => $employeeApproval->approval_line_parent,
+                                            'shift_id' => $employeeShift,
+                                            'is_day_off' => $is_day_off,
+                                            'attendance_code_id' => $cuti,
+                                            'date' => \Carbon\Carbon::parse($dates[$dateIndex])->format('Y-m-d'),
                                         ]);
                                     }
-                                }
-                                if ($cuti == null && $check_attendance->day_off_request_id == null) {
-                                    $check_attendance->update([
-                                        'employee_id' => $employeeId,
-                                        'shift_id' => $employeeShift,
-                                        'is_day_off' => $is_day_off,
-                                        'attendance_code_id' => $cuti,
-                                        'date' => \Carbon\Carbon::parse($dates[$dateIndex])->format('Y-m-d'),
-                                    ]);
                                 }
                             } else {
                                 Attendance::create([

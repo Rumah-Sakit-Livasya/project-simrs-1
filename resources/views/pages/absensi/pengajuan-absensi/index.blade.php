@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'User')
+@section('title', 'Pengajuan Absensi')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row mb-5">

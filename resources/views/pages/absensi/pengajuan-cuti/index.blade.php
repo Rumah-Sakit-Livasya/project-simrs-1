@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'User')
+@section('title', 'Pengajuan Cuti/Izin/Sakit')
 @section('extended-css')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -325,7 +325,6 @@
                     $('#tambah-data').modal('hide');
                     showErrorAlert('Jatah Cuti Melahirkan sudah habis!');
                 } else {
-                    e.preventDefault();
                     let formData = new FormData(this);
                     formData.append("employee_id", "{{ auth()->user()->employee->id }}");
                     formData.append("approved_line_child",
@@ -357,16 +356,23 @@
                             $('#store-form').find('.spinner-text').addClass('d-none');
                             $('#tambah-data').modal('hide');
                             let errorMessage =
-                                "Terjadi kesalahan saat menyimpan data."; // Pesan default
-                            if (xhr.responseJSON && xhr.responseJSON.error) {
+                                "Terjadi kesalahan saat menyimpan data."; // Default message
+                            if (xhr.status === 422) {
+                                // Validation error from the server
+                                let errors = xhr.responseJSON.errors;
+                                errorMessage = Object.values(errors).map(function(error) {
+                                    return error.join('<br>');
+                                }).join('<br>');
+                            } else if (xhr.responseJSON && xhr.responseJSON.error) {
+                                // General error from the server
                                 errorMessage = xhr.responseJSON.error;
                             }
                             showErrorAlert(errorMessage);
                         }
                     });
                 }
-
             });
+
 
             $('.btn-accept').on('click', function(e) {
                 e.preventDefault();
