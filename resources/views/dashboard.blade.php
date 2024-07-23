@@ -806,7 +806,6 @@
             });
         });
     </script>
-
     <script>
         $(document).ready(function() {
             $('.btn-show-day-off').click(function(event) {
