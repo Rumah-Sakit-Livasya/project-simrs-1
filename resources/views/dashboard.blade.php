@@ -166,7 +166,7 @@
                     <div class="panel-container show">
                         <h2 class="panel-heading">Daftar Pegawai</h2>
                         <div class="panel-content pt-0" style="overflow-x: auto; white-space: nowrap;">
-                            @foreach ($day_off as $item)
+                            @foreach ($employees as $item)
                                 <a type="button" href="#" data-backdrop="static" data-keyboard="false"
                                     class="btn-show-day-off" data-id="{{ $item->id }}"
                                     title="{{ $item->day_off->attendance_code->description ?? ($item->attendance_code->description ?? 'Libur') }}">
