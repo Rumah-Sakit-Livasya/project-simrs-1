@@ -268,6 +268,72 @@
                 });
             });
 
+            $('.btn-ubah-pekerjaan').click(function(e) {
+                e.preventDefault();
+                let button = $(this);
+                // console.log('clicked');
+                let id = button.attr('data-id');
+                button.find('.ikon-edit').hide();
+                button.find('.spinner-text').removeClass('d-none');
+
+                $.ajax({
+                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
+                    url: `/api/dashboard/employee/get/${id}`, // Isi dengan url/path file php yang dituju
+                    dataType: "json",
+                    success: function(data) {
+                        console.log(data);
+                        button.find('.ikon-edit').show();
+                        button.find('.spinner-text').addClass('d-none');
+                        $('#ubah-identitas').modal('show');
+                        $('#ubah-identitas #identity-type').val(data.identity_type);
+                        $('#ubah-identitas #identity-number').val(data.identity_number);
+                        var identityNumberExpired = data.identity_expire_date;
+                        if (!identityNumberExpired) {
+                            $('#ubah-identitas #identity-expire-date').prop('disabled', true);
+                        } else {
+                            // Jika ada data, maka atur nilai input
+                            $('#ubah-identitas #identity-expire-date').val(
+                                identityNumberExpired);
+                        }
+                        $('#ubah-identitas #postal-code').val(data.postal_code);
+                        $('#ubah-identitas #citizen-id-address').val(data.citizen_id_address);
+                        $('#ubah-identitas #residental-address').val(data.residental_address);
+                    },
+                    error: function(xhr) {
+
+                        $('#ubah-identitas').modal('hide');
+                        showErrorAlert(xhr.responseText);
+                    }
+                });
+
+                $('#update-identity-form').on('submit', function(e) {
+                    e.preventDefault();
+                    let formData = $(this).serialize();
+                    $.ajax({
+                        type: "POST",
+                        url: '/api/dashboard/employee/update-identitas/' + id,
+                        data: formData,
+                        beforeSend: function() {
+                            $('#update-identity-form').find('.ikon-edit').hide();
+                            $('#update-identity-form').find('.spinner-text')
+                                .removeClass(
+                                    'd-none');
+                        },
+                        success: function(response) {
+                            $('#ubah-identitas').modal('hide');
+                            showSuccessAlert(response.message)
+                            setTimeout(function() {
+                                location.reload();
+                            }, 500);
+                        },
+                        error: function(xhr) {
+                            $('#ubah-identitas').modal('hide');
+                            showErrorAlert(xhr.responseText);
+                        }
+                    });
+                });
+            });
+
             $('.btn-ajukan').click(function(e) {
                 // Mendapatkan tanggal hari ini
                 var today = new Date();

@@ -337,7 +337,7 @@
                                         </span>
                                     </div>
                                     <div class="col-sm-8">
-                                        <p class="d-flex">
+                                        <p class="d-flex mb-0">
                                             {{ tgl($employee->join_date) }}
                                             <span class="badge badge-secondary ml-2 py-0 align-self-center">
                                                 {{ hitungHari($employee->join_date) }}
