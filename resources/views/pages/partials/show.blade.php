@@ -94,7 +94,7 @@
                     </div>
                     <hr style="width: 100%; border-color: rgba(0, 0, 0, 0.387); margin-top: -3px">
                     <div class="col-md-12 d-flex justify-content-center text-center">
-                        <div class="status-libur">
+                        {{-- <div class="status-libur">
                             <div>
                                 <h3 class="mb-0 badge badge-danger" style="font-weight: 500; font-size: 15px"
                                     id="status-libur">
@@ -107,11 +107,10 @@
                                 </div>
                                 <div id="end-date" class="badge badge-primary badge-pill">Jum, 12 Apr 2024</div>
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                     <div class="p-3">
-                        <table width="100%" cellpadding="8" cellspacing="20" style="font-size: 14px;"
-                            class="mt-3">
+                        <table width="100%" cellpadding="8" cellspacing="20" style="font-size: 14px;" class="mt-3">
                             <tr>
                                 <td>Email</td>
                                 <td>:</td>
@@ -120,7 +119,8 @@
                             <tr>
                                 <td>Nomor Telepon</td>
                                 <td>:</td>
-                                <td><span id="phone">0895636659028</span></td>
+                                <td><span id="phone"><a href="https://wa.me/0895636659028"
+                                            target="_blank">0895636659028</a></span></td>
                             </tr>
                             <tr>
                                 <td>Organisasi</td>

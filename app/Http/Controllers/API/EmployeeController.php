@@ -40,6 +40,36 @@ class EmployeeController extends Controller
         }
     }
 
+    public function pegawai($id)
+    {
+        try {
+            $employee = Employee::findOrFail($id);
+            $fullname = $employee->fullname;
+            if ($employee->gender == "Laki-laki") {
+                $foto = $employee->foto ? '/' . $employee->foto : '/img/demo/avatars/avatar-c.png';
+            } else {
+                $foto = $employee->foto ? '/' . $employee->foto : '/img/demo/avatars/avatar-p.png';
+            }
+            $jabatan = $employee->job_position->name ?? 'Staff';
+            $organisasi = $employee->organization->name ?? '-';
+            $email = $employee->email ?? '-';
+            $phone = phone($employee->mobile_phone) ?? '-';
+            return response()->json([
+                'employee' => $employee,
+                'fullname' => $fullname,
+                'foto' => $foto,
+                'email' => $email,
+                'phone' => $phone,
+                'jabatan' => $jabatan,
+                'organisasi' => $organisasi,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 404);
+        }
+    }
+
     public function editLokasi($id)
     {
         try {

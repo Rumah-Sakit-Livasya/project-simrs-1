@@ -276,3 +276,12 @@ if (!function_exists('isActiveMenu')) {
         return $urls;
     }
 }
+
+function phone($phone)
+{
+    // Remove any leading zero
+    if (substr($phone, 0, 1) == '0') {
+        $phone = '62' . substr($phone, 1);
+    }
+    return $phone;
+}

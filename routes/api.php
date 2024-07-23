@@ -132,6 +132,7 @@ Route::prefix('dashboard')->group(function () {
         Route::get('/delete/{id}', [JobPositionController::class, 'destroy']);
     });
     Route::prefix('employee')->group(function () {
+        Route::get('/pegawai/{id}', [EmployeeController::class, 'pegawai']);
         Route::post('/store', [EmployeeController::class, 'store']);
         Route::post('/non-aktif/{id}', [EmployeeController::class, 'nonAktifPegawai']);
         Route::put('/update-personal/{id}', [EmployeeController::class, 'updatePersonal']);

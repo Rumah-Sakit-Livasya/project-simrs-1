@@ -835,6 +835,12 @@
     </script>
 
     <script>
+        function formatPhoneNumber(phone) {
+            if (phone.startsWith('0')) {
+                return '62' + phone.substring(1);
+            }
+            return phone;
+        }
         $(document).ready(function() {
             $('.btn-show-day-off').click(function(event) {
                 event.preventDefault();
@@ -866,7 +872,7 @@
                 const id = $(this).attr('data-id');
                 $.ajax({
                     type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                    url: `/api/dashboard/employee/get/${id}`, // Isi dengan url/path file php yang dituju
+                    url: `/api/dashboard/employee/pegawai/${id}`, // Isi dengan url/path file php yang dituju
                     dataType: "json",
                     success: function(data) {
                         $('#show-pegawai').modal('show');
@@ -874,12 +880,23 @@
                             data.foto);
                         $('#show-pegawai #nama-pegawai').text(data.fullname);
                         $('#show-pegawai #jabatan').text(data.jabatan);
-                        $('#show-pegawai #status-libur').text(data.status);
-                        $('#show-pegawai #start-date').text(data.start_date);
-                        $('#show-pegawai #end-date').text(data.end_date);
                         $('#show-pegawai #email').text(data.email);
                         $('#show-pegawai #phone').text(data.phone);
                         $('#show-pegawai #organisasi').text(data.organisasi);
+                        $('#show-pegawai #phone').each(function() {
+                            var phoneSpan = $(this);
+                            var rawPhone = phoneSpan
+                                .text(); // Get the raw phone number text
+                            var formattedPhone = formatPhoneNumber(
+                                rawPhone); // Format the phone number
+
+                            var whatsappLink = 'https://wa.me/' +
+                                formattedPhone; // Create the WhatsApp link
+
+                            phoneSpan.html('<a href="' + whatsappLink +
+                                '" target="_blank">' + rawPhone + '</a>'
+                            ); // Update the HTML
+                        });
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);
