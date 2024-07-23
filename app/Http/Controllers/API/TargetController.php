@@ -27,16 +27,16 @@ class TargetController extends Controller
                 'organization_id' => 'required',
                 'user_id' => 'required',
                 'title' => 'required',
-                'actual' => 'required',
-                'target' => 'required',
-                'min_target' => 'required',
+                'actual' => 'max:255',
+                'target' => 'max:255',
+                'min_target' => 'max:255',
             ]);
 
-            $target = $validator['target'];
-            $actual = $validator['actual'];
-            $minTarget = $validator['min_target'];
-            $maxTarget = $validator['target'];
-            $validator['max_target'] = $validator['target'];
+            $target = $validator['target'] ?? 0;
+            $actual = $validator['actual'] ?? 0;
+            $minTarget = $validator['min_target'] ?? 0;
+            $maxTarget = $validator['target'] ?? 0;
+            $validator['max_target'] = $validator['target'] ?? 0;
 
             // Menentukan status berdasarkan perbandingan antara actual dan target
             if ($actual == 0) {
@@ -73,16 +73,16 @@ class TargetController extends Controller
                 'organization_id' => 'required',
                 'user_id' => 'required',
                 'title' => 'required',
-                'actual' => 'required',
-                'target' => 'required',
-                'min_target' => 'required',
+                'actual' => 'max:255',
+                'target' => 'max:255',
+                'min_target' => 'max:255',
             ]);
 
-            $target = $validator['target'];
-            $actual = $validator['actual'];
-            $minTarget = $validator['min_target'];
-            $maxTarget = $validator['target'];
-            $validator['max_target'] = $validator['target'];
+            $target = $validator['target'] ?? 0;
+            $actual = $validator['actual'] ?? 0;
+            $minTarget = $validator['min_target'] ?? 0;
+            $maxTarget = $validator['target'] ?? 0;
+            $validator['max_target'] = $validator['target'] ?? 0;
 
             // Menentukan status berdasarkan perbandingan antara actual dan target
             if ($actual == 0) {

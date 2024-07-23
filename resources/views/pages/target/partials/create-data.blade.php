@@ -35,18 +35,20 @@
                             placeholder="Masukkan Actual" required>
                         <div class="invalid-feedback">Actual wajib diisi dengan angka atau desimal.</div>
                     </div>
-                    <div class="form-group">
-                        <label clas for="target">Target</label>
-                        <input type="number" step="any" class="form-control" id="target" name="target"
-                            placeholder="Masukkan Target" required>
-                        <div class="invalid-feedback">Target wajib diisi dengan angka atau desimal.</div>
-                    </div>
-                    <div class="form-group">
-                        <label clas for="min_target">Min Target</label>
-                        <input type="number" step="any" class="form-control" id="min_target" name="min_target"
-                            placeholder="Masukkan Min Target" required>
-                        <div class="invalid-feedback">Min Target wajib diisi dengan angka atau desimal.</div>
-                    </div>
+                    @can('create target okr')
+                        <div class="form-group">
+                            <label clas for="target">Target</label>
+                            <input type="number" step="any" class="form-control" id="target" name="target"
+                                placeholder="Masukkan Target" required>
+                            <div class="invalid-feedback">Target wajib diisi dengan angka atau desimal.</div>
+                        </div>
+                        <div class="form-group">
+                            <label clas for="min_target">Min Target</label>
+                            <input type="number" step="any" class="form-control" id="min_target" name="min_target"
+                                placeholder="Masukkan Min Target" required>
+                            <div class="invalid-feedback">Min Target wajib diisi dengan angka atau desimal.</div>
+                        </div>
+                    @endcan
                 </div>
                 <div class="modal-footer mt-2">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

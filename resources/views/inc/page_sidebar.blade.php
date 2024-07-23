@@ -49,11 +49,6 @@
         </div>
 
         <!-- Sidebar.blade.php -->
-        {{-- <ul id="js-nav-menu" class="nav-menu">
-            @foreach (App\Models\Menu::whereNull('parent_id')->with('children.children')->orderBy('sort_order')->get() as $menu)
-                @include('inc.partials.menu', ['menu' => $menu])
-            @endforeach
-        </ul> --}}
         <ul id="js-nav-menu" class="nav-menu">
             @if (auth()->user()->hasRole('super admin'))
                 @foreach (App\Models\Menu::whereNull('parent_id')->with('children.children')->orderBy('sort_order')->get() as $menu)

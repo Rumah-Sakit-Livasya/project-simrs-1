@@ -1,15 +1,17 @@
--@extends('inc.layout')
+@extends('inc.layout')
 @section('title', 'Targets')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row mb-5">
-            <div class="col-xl-12">
-                <button type="button" id="btn-tambah" class="btn btn-primary waves-effect waves-themed" data-backdrop="static"
-                    data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah Job Level">
-                    <span class="fal fa-plus-circle mr-1"></span>
-                    Tambah OKR
-                </button>
-            </div>
+            @can('create okr')
+                <div class="col-xl-12">
+                    <button type="button" id="btn-tambah" class="btn btn-primary waves-effect waves-themed" data-backdrop="static"
+                        data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah Job Level">
+                        <span class="fal fa-plus-circle mr-1"></span>
+                        Tambah OKR
+                    </button>
+                </div>
+            @endcan
         </div>
 
         <div class="row">

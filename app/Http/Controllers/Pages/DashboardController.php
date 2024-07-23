@@ -229,7 +229,7 @@ class DashboardController extends Controller
 
         $year = $request->tahun;
 
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         $totalEmployees = $employees->count();
         $lateCount = [];
 
@@ -265,6 +265,7 @@ class DashboardController extends Controller
             'masaJabatan' => $masaJabatan,
             'statusKepegawaian' => $statusKepegawaian,
             'day_off' => $day_off,
+            'employees' => $employees,
             'getNotify' => $this->getNotify(),
         ]);
     }
