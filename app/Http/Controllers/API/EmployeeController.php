@@ -95,9 +95,13 @@ class EmployeeController extends Controller
 
             // Cari employee berdasarkan ID
             $employee = Employee::findOrFail($id);
+            $user = User::where('employee_id', $employee->id);
 
             // Perbarui data employee dengan data yang divalidasi
             $employee->update($validator);
+            $user->update([
+                'name' => request()->fullname
+            ]);
 
             // Return response
             return response()->json(['message' => 'Pengguna berhasil diupdate']);
@@ -197,7 +201,7 @@ class EmployeeController extends Controller
                 'postal_code' => 'required|string|max:255',
                 'identity_number' => 'nullable|string|max:255',
                 'citizen_id_address' => 'required|string|max:255',
-                'identity_expire_date' => 'nullable|date|date_format:Y-m-d',
+                'identity_expire_date' => 'nullable',
                 'residental_address' => 'required|string|max:255',
             ]);
 

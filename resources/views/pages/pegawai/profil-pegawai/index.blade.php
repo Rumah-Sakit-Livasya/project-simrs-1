@@ -55,7 +55,7 @@
                     // Set attribut src pada elemen gambar berdasarkan data image dari respons
                     var previewImage = $('.img-preview');
                     if (previewImage.length) {
-                        previewImage.attr('src', '/storage/' + data.image);
+                        previewImage.attr('src', '/storage/employee/profile/' + data.foto);
                     }
 
                     // Show the modal
@@ -193,7 +193,7 @@
                             showSuccessAlert(response.message)
                             setTimeout(function() {
                                 location.reload();
-                            }, 500);
+                            }, 1000);
                         },
                         error: function(xhr) {
                             showErrorAlert(xhr.responseText);

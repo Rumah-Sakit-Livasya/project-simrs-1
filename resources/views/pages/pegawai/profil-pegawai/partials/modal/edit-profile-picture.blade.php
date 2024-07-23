@@ -17,6 +17,7 @@
                         <label class="form-label d-block">Foto</label>
                         <div class="img-preview-container">
                             <img class="img-preview img-fluid mb-3 col-sm-5 p-0" style="border-radius: 11px">
+
                         </div>
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="foto" name="foto"
