@@ -142,8 +142,12 @@
                                                 <select
                                                     class="select2 form-control mb-3 w-100  @error('periode') is-invalid @enderror"
                                                     id="rumus_penilaian" name="rumus_penilaian">
-                                                        <option value="rata-rata" {{ $group_penilaian->rumus_penilaian == 'rata-rata' ? 'selected' : '' }}>Rata-rata</option>
-                                                        <option value="kostum" {{ $group_penilaian->rumus_penilaian == 'kostum' ? 'selected' : '' }}>Kostum</option>
+                                                    <option value="rata-rata"
+                                                        {{ $group_penilaian->rumus_penilaian == 'rata-rata' ? 'selected' : '' }}>
+                                                        Rata-rata</option>
+                                                    <option value="kostum"
+                                                        {{ $group_penilaian->rumus_penilaian == 'kostum' ? 'selected' : '' }}>
+                                                        Kostum</option>
                                                 </select>
                                             </div>
                                             @error('rumus_penilaian')
@@ -275,7 +279,8 @@
                             'd-none');
                         showSuccessAlert(response.message)
                         setTimeout(function() {
-                            window.location.href = "{{ route('kpi.get.group-penilaian') }}";
+                            window.location.href =
+                                "{{ route('kpi.get.form-penilaian') }}";
                         }, 1000);
                     },
                     error: function(xhr) {
