@@ -17,20 +17,6 @@
                             </div>
                             <div id="info"></div>
                             <div class="text-center mt-2 mb-4">
-                                <button
-                                    class="btn btn-primary btn-sm btn-clock-in mr-1 {{ $last_attendance->clock_in ? 'd-none' : '' }}"
-                                    id="clock_in_modal">
-                                    <span class="spinner-border spinner-text spinner-border-sm d-none" role="status"
-                                        aria-hidden="true"></span>
-                                    Clock In
-                                </button>
-                                <button
-                                    class="btn btn-danger btn-sm btn-clock-in {{ $last_attendance->clock_out ? 'd-none' : '' }}"
-                                    id="clock_out_modal">
-                                    <span class="spinner-border spinner-text spinner-border-sm d-none" role="status"
-                                        aria-hidden="true"></span>
-                                    Clock Out
-                                </button>
                             </div>
                         </div>
                     </div>

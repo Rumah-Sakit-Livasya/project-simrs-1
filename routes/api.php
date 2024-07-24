@@ -48,8 +48,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::prefix('dashboard')->group(function () {
-    Route::put('/clock-in', [AttendanceController::class, 'clock_in']);
-    Route::put('/clock-out', [AttendanceController::class, 'clock_out'])->name('employee.attendance.clock-out');
+    Route::post('/clock-in', [AttendanceController::class, 'clock_in']);
+    Route::post('/clock-out', [AttendanceController::class, 'clock_out'])->name('employee.attendance.clock-out');
     Route::post('/management-shift/store', [AttendanceController::class, 'import']);
 
     Route::put('/management-shift/update', [AttendanceController::class, 'updateManagementShift']);

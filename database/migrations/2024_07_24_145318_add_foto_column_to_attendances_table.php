@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('attendances', function (Blueprint $table) {
-            $table->string('foto')->after('location')->nullable();
+            $table->string('foto_clock_in')->after('location')->nullable();
+            $table->string('foto_clock_out')->after('foto_clock_in')->nullable();
         });
     }
 

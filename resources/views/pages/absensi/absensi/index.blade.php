@@ -403,6 +403,7 @@
             const label = "{{ auth()->user()->employee->foto }}";
             const name = "{{ auth()->user()->name }}";
             const employeeImage = `/storage/employee/profile/${label}`;
+            const employeeId = "{{ auth()->user()->employee->id }}";
             const $video = $('#video');
             const $canvas = $('#canvas');
             const $info = $('#info');
@@ -411,18 +412,7 @@
             let photoData = null;
             let longitude = null;
             let latitude = null;
-
-            $('#clock_in_modal').on('click', function() {
-                if (detectionCount >= requiredDetections) {
-                    handleClockIn();
-                } else {
-                    $('#info').text('Face not detected enough times.');
-                }
-            });
-
-            $('#clock_out_modal').on('click', function() {
-                handleClockOut();
-            });
+            let clockType = null;
 
             async function initFaceRecognition() {
                 try {
@@ -499,7 +489,8 @@
                                     console.log('Face matched:', employeeName);
                                     showAlert(employeeName);
                                     detectionCount++;
-                                    if (detectionCount === 5) {
+                                    console.log(detectionCount);
+                                    if (detectionCount === 10) {
                                         capturePhoto();
                                     }
                                 } else {
@@ -569,31 +560,62 @@
 
             $('#clock_in').click(function(e) {
                 e.preventDefault();
-                console.log("Clock In button clicked");
+                clockType = 'clockin'; // Set the clockType to clockin
                 $('#clockin-modal').modal('show');
             });
 
             $('#clock_out').click(function(e) {
-                $('#clock_out').prop('disabled', true);
-                $('#clock_out').find('.spinner-border-sm').removeClass('d-none');
-                $('#clock_out').find('.clock-out-text').addClass('d-none');
-                // Implement clock out functionality here
                 e.preventDefault();
-                console.log("Clock In button clicked");
+                clockType = 'clockout'; // Set the clockType to clockout
                 $('#clockin-modal').modal('show');
             });
 
-            function handleClockIn() {
+            function base64ToBlob(base64, mime) {
+                const sliceSize = 512;
+                const byteCharacters = atob(base64);
+                const bytesLength = byteCharacters.length;
+                const slicesCount = Math.ceil(bytesLength / sliceSize);
+                const byteArrays = new Array(slicesCount);
+
+                for (let sliceIndex = 0; sliceIndex < slicesCount; sliceIndex++) {
+                    const begin = sliceIndex * sliceSize;
+                    const end = Math.min(begin + sliceSize, bytesLength);
+
+                    const bytes = new Array(end - begin);
+                    for (let offset = begin, i = 0; offset < end; offset++, i++) {
+                        bytes[i] = byteCharacters.charCodeAt(offset);
+                    }
+
+                    byteArrays[sliceIndex] = new Uint8Array(bytes);
+                }
+
+                return new Blob(byteArrays, {
+                    type: mime
+                });
+            }
+
+            function handleClockIn(photoData) {
+                if (!longitude || !latitude || !photoData) {
+                    $('#info').text('Missing required data for clocking in.');
+                    return;
+                }
+
                 const formData = new FormData();
-                formData.append('_token', '{{ csrf_token() }}'); // Include CSRF token if needed
+                formData.append('_token', '{{ csrf_token() }}'); // Include CSRF token
                 formData.append('longitude', longitude); // Longitude from geolocation
                 formData.append('latitude', latitude); // Latitude from geolocation
-                formData.append('photo', photoData); // Append photo data
-                formData.append('employee_id', '{{ auth()->user()->employee_id }}');
+
+                // Convert Base64 photoData to Blob
+                const mimeType = 'image/jpeg';
+                const base64Data = photoData.split(',')[1]; // Remove the data URL part
+                const photoBlob = base64ToBlob(base64Data, mimeType);
+
+                formData.append('photo', photoBlob, 'photo.jpg'); // Append photo data as a Blob
+                formData.append('employee_id', employeeId); // Employee ID
 
                 $.ajax({
                     url: '/api/dashboard/clock-in',
-                    method: 'PUT', // Change to PUT method
+                    method: 'POST', // Use PUT method
                     data: formData,
                     processData: false,
                     contentType: false,
@@ -606,30 +628,47 @@
                         $('#clock_in_modal').find('.spinner-border').addClass('d-none');
                         $('#clock_in_modal').addClass('d-none');
                         $('#clock_in_modal').removeClass('d-none');
-                        $('#info').text('Clock In successful!');
+                        $('#clockin-modal').hide();
+                        showSuccessAlert(response.message);
+                        setTimeout(function() {
+                            console.log('Reloading the page now.');
+                            window.location.reload();
+                        }, 1000);
                     },
                     error: function(xhr) {
                         $('#clock_in_modal').prop('disabled', false);
                         $('#clock_in_modal').find('.spinner-border').addClass('d-none');
-                        $('#info').text('Error occurred: ' + xhr.responseText);
+                        $('#clockin-modal').hide();
+                        showErrorAlert(xhr.responseJSON.message);
                     }
                 });
             }
 
-            function handleClockOut() {
+            function handleClockOut(photoData) {
+                if (!longitude || !latitude || !photoData) {
+                    $('#info').text('Missing required data for clocking out.');
+                    return;
+                }
+
                 const formData = new FormData();
-                formData.append('_token', '{{ csrf_token() }}'); // Include CSRF token if needed
+                formData.append('_token', '{{ csrf_token() }}'); // Include CSRF token
                 formData.append('longitude', longitude); // Longitude from geolocation
                 formData.append('latitude', latitude); // Latitude from geolocation
-                formData.append('photo', photoData); // Append photo data
-                formData.append('employee_id', '{{ auth()->user()->employee_id }}');
+
+                // Convert Base64 photoData to Blob
+                const mimeType = 'image/jpeg';
+                const base64Data = photoData.split(',')[1]; // Remove the data URL part
+                const photoBlob = base64ToBlob(base64Data, mimeType);
+
+                formData.append('photo', photoBlob, 'photo.jpg'); // Append photo data as a Blob
+                formData.append('employee_id', employeeId); // Employee ID
 
                 $.ajax({
                     url: '/api/dashboard/clock-out',
-                    method: 'PUT', // Change to PUT method
-                    data: {
-                        _token: '{{ csrf_token() }}' // Include CSRF token if needed
-                    },
+                    method: 'POST', // Use PUT method
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     beforeSend: function() {
                         $('#clock_out_modal').prop('disabled', true);
                         $('#clock_out_modal').find('.spinner-border').removeClass('d-none');
@@ -638,15 +677,22 @@
                         $('#clock_out_modal').prop('disabled', false);
                         $('#clock_out_modal').find('.spinner-border').addClass('d-none');
                         $('#clock_out_modal').addClass('d-none');
-                        $('#info').text('Clock Out successful!');
+                        $('#clockin-modal').hide();
+                        showSuccessAlert(response.message);
+                        setTimeout(function() {
+                            console.log('Reloading the page now.');
+                            window.location.reload();
+                        }, 1000);
                     },
                     error: function(xhr) {
                         $('#clock_out_modal').prop('disabled', false);
                         $('#clock_out_modal').find('.spinner-border').addClass('d-none');
-                        $('#info').text('Error occurred: ' + xhr.responseText);
+                        $('#clockin-modal').hide();
+                        showErrorAlert(xhr.responseJSON.message);
                     }
                 });
             }
+
 
             function capturePhoto() {
                 const canvas = document.createElement('canvas');
@@ -654,8 +700,16 @@
                 canvas.height = $('#video').height();
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage($('#video')[0], 0, 0, canvas.width, canvas.height);
-                photoData = canvas.toDataURL('image/jpeg'); // Base64-encoded image data
+                const photoData = canvas.toDataURL('image/jpeg'); // Base64-encoded image data
+
+                // Call the appropriate function based on clockType
+                if (clockType === 'clockin') {
+                    handleClockIn(photoData);
+                } else if (clockType === 'clockout') {
+                    handleClockOut(photoData);
+                }
             }
+
         });
     </script>
 @endsection
