@@ -22,7 +22,10 @@
                                 <div class="text-center mt-2 mb-4">
                                     <button type="button" class="btn btn-primary" id="upload">
                                         <span class="spinner-border mr-1 spinner-text spinner-border-sm d-none"
-                                            role="status" aria-hidden="true"></span>Absen Masuk</button>
+                                            role="status" aria-hidden="true"></span>Clock In</button>
+                                    <button type="button" class="btn btn-primary" id="upload">
+                                        <span class="spinner-border mr-1 spinner-text spinner-border-sm d-none"
+                                            role="status" aria-hidden="true"></span>Clock Out</button>
                                 </div>
                             </div>
                         </div>

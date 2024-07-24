@@ -26,6 +26,10 @@
             height: 100%;
         }
 
+        #video {
+            transform: scaleX(-1);
+        }
+
         #canvas {
             z-index: 1;
         }
@@ -415,10 +419,10 @@
                     .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
                     .openPopup();
             }, function(error) {
-                console.error("Geolocation failed: " + error.message);
+                showErrorAlert("Geolocation failed: " + error.message);
             });
         } else {
-            console.error("Geolocation is not supported by this browser.");
+            showErrorAlert("Geolocation is not supported by this browser.");
         }
     </script>
     <script>
@@ -454,7 +458,7 @@
                     $video[0].play();
                 } catch (err) {
                     console.error("Error accessing webcam: ", err);
-                    alert('Error accessing webcam. Check console for details.');
+                    showErrorAlert('Error accessing webcam. Check console for details.');
                 }
             }
 
@@ -495,6 +499,8 @@
                                     const employeeName = name;
                                     console.log('Face matched:', employeeName);
                                     showAlert(employeeName);
+                                } else {
+                                    $info.text(`Pegawai tidak teridentifikasi!`);
                                 }
                             });
                         } catch (error) {
