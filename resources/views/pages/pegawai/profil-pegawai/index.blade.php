@@ -271,7 +271,6 @@
             $('.btn-ubah-pekerjaan').click(function(e) {
                 e.preventDefault();
                 let button = $(this);
-                // console.log('clicked');
                 let id = button.attr('data-id');
                 button.find('.ikon-edit').hide();
                 button.find('.spinner-text').removeClass('d-none');

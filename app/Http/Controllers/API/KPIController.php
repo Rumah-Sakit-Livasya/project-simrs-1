@@ -100,7 +100,8 @@ class KPIController extends Controller
                 [
                     'nama_group' => request()->nama_group,
                     'penilai' => request()->penilai,
-                    'pejabat_penilai' => request()->pejabat_penilai
+                    'pejabat_penilai' => request()->pejabat_penilai,
+                    'rumus_penilaian' => request()->rumus_penilaian
                 ]
             );
             foreach ($group_penilaian->aspek_penilaians as $index => $aspek) {
