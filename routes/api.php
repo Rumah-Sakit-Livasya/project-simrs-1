@@ -111,6 +111,7 @@ Route::prefix('dashboard')->group(function () {
         Route::get('/delete/{id}', [RoleController::class, 'destroy']);
         Route::post('/assignPermissions/{roleName}', [RoleController::class, 'assignPermissions']);
     });
+
     Route::prefix('user')->group(function () {
         Route::post('/store', [UserController::class, 'store']);
         Route::put('/update/{id}', [UserController::class, 'update']);
@@ -119,18 +120,21 @@ Route::prefix('dashboard')->group(function () {
         Route::get('/delete/{id}', [UserController::class, 'destroy']);
         Route::post('/assign-permissions', [UserController::class, 'storePermissions']);
     });
+
     Route::prefix('job-level')->group(function () {
         Route::post('/store', [JobLevelController::class, 'store']);
         Route::put('/update/{id}', [JobLevelController::class, 'update']);
         Route::get('/get/{id}', [JobLevelController::class, 'getJobLevel']);
         Route::get('/delete/{id}', [JobLevelController::class, 'destroy']);
     });
+
     Route::prefix('job-position')->group(function () {
         Route::post('/store', [JobPositionController::class, 'store']);
         Route::put('/update/{id}', [JobPositionController::class, 'update']);
         Route::get('/get/{id}', [JobPositionController::class, 'getJobPosition']);
         Route::get('/delete/{id}', [JobPositionController::class, 'destroy']);
     });
+
     Route::prefix('employee')->group(function () {
         Route::get('/pegawai/{id}', [EmployeeController::class, 'pegawai']);
         Route::post('/store', [EmployeeController::class, 'store']);
@@ -170,6 +174,7 @@ Route::prefix('dashboard')->group(function () {
         Route::get('/get/{id}', [AttendanceCodeController::class, 'getAttendanceCode']);
         Route::get('/delete/{id}', [AttendanceCodeController::class, 'destroy']);
     });
+
     Route::prefix('shifts')->group(function () {
         Route::post('/store', [ShiftController::class, 'store']);
         Route::put('/update/{id}', [ShiftController::class, 'update']);
@@ -177,30 +182,35 @@ Route::prefix('dashboard')->group(function () {
         Route::get('/delete/{id}', [ShiftController::class, 'destroy']);
         Route::get('/export/{organization:id}', [ShiftController::class, 'export'])->name('shift.export');
     });
+
     Route::prefix('banks')->group(function () {
         Route::post('/store', [BankController::class, 'store']);
         Route::put('/update/{id}', [BankController::class, 'update']);
         Route::get('/get/{id}', [BankController::class, 'getBank']);
         Route::get('/delete/{id}', [BankController::class, 'destroy']);
     });
+
     Route::prefix('bank-employees')->group(function () {
         Route::post('/store', [BankEmployeeController::class, 'store']);
         Route::put('/update/{id}', [BankEmployeeController::class, 'update']);
         Route::get('/get/{id}', [BankEmployeeController::class, 'getBankEmployee']);
         Route::get('/delete/{id}', [BankEmployeeController::class, 'destroy']);
     });
+
     Route::prefix('structures')->group(function () {
         Route::post('/store', [StructureController::class, 'store']);
         Route::put('/update/{id}', [StructureController::class, 'update']);
         Route::get('/get/{id}', [StructureController::class, 'getStructure']);
         Route::get('/delete/{id}', [StructureController::class, 'destroy']);
     });
+
     Route::prefix('targets')->group(function () {
         Route::post('/store', [TargetController::class, 'store']);
         Route::put('/update/{id}', [TargetController::class, 'update']);
         Route::get('/get/{id}', [TargetController::class, 'getTarget']);
         Route::get('/delete/{id}', [TargetController::class, 'destroy']);
     });
+
     Route::prefix('payroll')->group(function () {
         Route::prefix('salary')->group(function () {
             Route::post('/store', [SalaryController::class, 'store']);
