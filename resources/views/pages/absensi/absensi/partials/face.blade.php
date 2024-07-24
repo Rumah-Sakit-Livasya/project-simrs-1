@@ -1,37 +1,41 @@
 <div class="modal fade font-weight-bold p-0" id="clockin-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
         <div class="modal-content">
-            <form autocomplete="off" novalidate method="post" id="store-form" enctype="multipart/form-data">
-                @method('post')
-                @csrf
-                <div class="modal-header">
-                    <h5 class="font-weight-bold">Swafoto untuk Absen</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
-                    </button>
-                </div>
-                <div class="modal-body py-0">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="form-group">
-                                <div class="video-container position-relative">
-                                    <video id="video" class="w-100" autoplay></video>
-                                    <canvas id="canvas" class="position-absolute top-0 start-0 w-100 h-100"></canvas>
-                                </div>
-                                <div id="info"></div>
-                                <div class="text-center mt-2 mb-4">
-                                    <button type="button" class="btn btn-primary" id="upload">
-                                        <span class="spinner-border mr-1 spinner-text spinner-border-sm d-none"
-                                            role="status" aria-hidden="true"></span>Clock In</button>
-                                    <button type="button" class="btn btn-primary" id="upload">
-                                        <span class="spinner-border mr-1 spinner-text spinner-border-sm d-none"
-                                            role="status" aria-hidden="true"></span>Clock Out</button>
-                                </div>
+            <div class="modal-header">
+                <h5 class="font-weight-bold">Swafoto untuk Absen</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body py-0">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <div class="video-container position-relative">
+                                <video id="video" class="w-100" autoplay></video>
+                                <canvas id="canvas" class="position-absolute top-0 start-0 w-100 h-100"></canvas>
+                            </div>
+                            <div id="info"></div>
+                            <div class="text-center mt-2 mb-4">
+                                <button
+                                    class="btn btn-primary btn-sm btn-clock-in mr-1 {{ $last_attendance->clock_in ? 'd-none' : '' }}"
+                                    id="clock_in_modal">
+                                    <span class="spinner-border spinner-text spinner-border-sm d-none" role="status"
+                                        aria-hidden="true"></span>
+                                    Clock In
+                                </button>
+                                <button
+                                    class="btn btn-danger btn-sm btn-clock-in {{ $last_attendance->clock_out ? 'd-none' : '' }}"
+                                    id="clock_out_modal">
+                                    <span class="spinner-border spinner-text spinner-border-sm d-none" role="status"
+                                        aria-hidden="true"></span>
+                                    Clock Out
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>

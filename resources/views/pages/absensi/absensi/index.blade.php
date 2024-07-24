@@ -399,33 +399,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
-        var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        // Check if Geolocation is available
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var lat = position.coords.latitude;
-                var lng = position.coords.longitude;
-                var accuracy = position.coords.accuracy;
-
-                // Set the view to the current location with a closer zoom level
-                map.setView([lat, lng], 17); // Zoom level set to 17 for closer view
-
-                // Add a marker at the current location
-                var marker = L.marker([lat, lng]).addTo(map)
-                    .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
-                    .openPopup();
-            }, function(error) {
-                showErrorAlert("Geolocation failed: " + error.message);
-            });
-        } else {
-            showErrorAlert("Geolocation is not supported by this browser.");
-        }
-    </script>
-    <script>
         $(document).ready(function() {
             const label = "{{ auth()->user()->employee->foto }}";
             const name = "{{ auth()->user()->name }}";
@@ -433,6 +406,23 @@
             const $video = $('#video');
             const $canvas = $('#canvas');
             const $info = $('#info');
+            let detectionCount = 0;
+            const requiredDetections = 5;
+            let photoData = null;
+            let longitude = null;
+            let latitude = null;
+
+            $('#clock_in_modal').on('click', function() {
+                if (detectionCount >= requiredDetections) {
+                    handleClockIn();
+                } else {
+                    $('#info').text('Face not detected enough times.');
+                }
+            });
+
+            $('#clock_out_modal').on('click', function() {
+                handleClockOut();
+            });
 
             async function initFaceRecognition() {
                 try {
@@ -462,12 +452,21 @@
                 }
             }
 
-            $video.on('play', async () => {
+            function updateDimensions() {
                 const displaySize = {
                     width: $video.width(),
                     height: $video.height()
                 };
                 faceapi.matchDimensions($canvas[0], displaySize);
+                return displaySize;
+            }
+
+            $('#clockin-modal').on('shown.bs.modal', async function() {
+                // Ensure video stream starts when modal is shown
+                startVideo();
+
+                // Set up dimensions for face-api.js
+                const displaySize = updateDimensions();
 
                 try {
                     const labeledFaceDescriptors = await loadLabeledImages();
@@ -499,6 +498,10 @@
                                     const employeeName = name;
                                     console.log('Face matched:', employeeName);
                                     showAlert(employeeName);
+                                    detectionCount++;
+                                    if (detectionCount === 5) {
+                                        capturePhoto();
+                                    }
                                 } else {
                                     $info.text(`Pegawai tidak teridentifikasi!`);
                                 }
@@ -536,156 +539,123 @@
                 $info.text(`Pegawai Teridentifikasi: ${employeeName}`);
             }
 
-            // Initialize face-api.js models
-            initFaceRecognition();
+            async function initMap() {
+                const map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
 
-            // Event handler for the "Clock In" button
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        latitude = position.coords.latitude;
+                        longitude = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
+
+                        map.setView([latitude, longitude], 17); // Zoom level set to 17 for closer view
+
+                        L.marker([latitude, longitude]).addTo(map)
+                            .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
+                            .openPopup();
+                    }, function(error) {
+                        showErrorAlert("Geolocation failed: " + error.message);
+                    });
+                } else {
+                    showErrorAlert("Geolocation is not supported by this browser.");
+                }
+            }
+
+            initFaceRecognition();
+            initMap();
+
             $('#clock_in').click(function(e) {
                 e.preventDefault();
                 console.log("Clock In button clicked");
                 $('#clockin-modal').modal('show');
-                startVideo();
             });
 
-            $(function() {
-                $('.select2').select2();
-            });
-
-            $('#datepicker-modal-2').daterangepicker({
-                opens: 'left'
-            }, function(start, end, label) {
-                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end
-                    .format('YYYY-MM-DD'));
-            });
-
-            $('#store-form').on('submit', function(e) {
+            $('#clock_out').click(function(e) {
+                $('#clock_out').prop('disabled', true);
+                $('#clock_out').find('.spinner-border-sm').removeClass('d-none');
+                $('#clock_out').find('.clock-out-text').addClass('d-none');
+                // Implement clock out functionality here
                 e.preventDefault();
-                let formData = new FormData(this);
-                formData.append("employee_id", "{{ auth()->user()->employee->id }}");
-                formData.append("approved_line_child", "{{ auth()->user()->employee->approval_line }}");
-                formData.append("approved_line_parent",
-                    "{{ auth()->user()->employee->approval_line_parent }}");
+                console.log("Clock In button clicked");
+                $('#clockin-modal').modal('show');
+            });
+
+            function handleClockIn() {
+                const formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}'); // Include CSRF token if needed
+                formData.append('longitude', longitude); // Longitude from geolocation
+                formData.append('latitude', latitude); // Latitude from geolocation
+                formData.append('photo', photoData); // Append photo data
+                formData.append('employee_id', '{{ auth()->user()->employee_id }}');
 
                 $.ajax({
-                    type: "POST",
-                    url: '/employee/request/day-off',
+                    url: '/api/dashboard/clock-in',
+                    method: 'PUT', // Change to PUT method
                     data: formData,
                     processData: false,
                     contentType: false,
                     beforeSend: function() {
-                        $('#store-form').find('.ikon-tambah').hide();
-                        $('#store-form').find('.spinner-text').removeClass('d-none');
+                        $('#clock_in_modal').prop('disabled', true);
+                        $('#clock_in_modal').find('.spinner-border').removeClass('d-none');
                     },
                     success: function(response) {
-                        $('#store-form').find('.ikon-edit').show();
-                        $('#store-form').find('.spinner-text').addClass('d-none');
-                        $('#tambah-data').modal('hide');
-                        showSuccessAlert(response.message);
-                        setTimeout(function() {
-                            location.reload();
-                        }, 500);
+                        $('#clock_in_modal').prop('disabled', false);
+                        $('#clock_in_modal').find('.spinner-border').addClass('d-none');
+                        $('#clock_in_modal').addClass('d-none');
+                        $('#clock_in_modal').removeClass('d-none');
+                        $('#info').text('Clock In successful!');
                     },
                     error: function(xhr) {
-                        showErrorAlert(xhr.responseText);
+                        $('#clock_in_modal').prop('disabled', false);
+                        $('#clock_in_modal').find('.spinner-border').addClass('d-none');
+                        $('#info').text('Error occurred: ' + xhr.responseText);
                     }
                 });
-            });
-
-            $('.btn-accept').on('click', function(e) {
-                e.preventDefault();
-                console.log("Click");
-                let formData = {
-                    employee_id: "{{ auth()->user()->employee->id }}"
-                }
-                let id = $(this).attr('data-id');
-                $.ajax({
-                    type: "PUT",
-                    url: '/employee/approve/day-off/' + id,
-                    data: formData,
-                    beforeSend: function() {
-                        $('#approve-request').find('.ikon-edit').hide();
-                        $('#approve-request').find('.spinner-text').removeClass('d-none');
-                    },
-                    success: function(response) {
-                        showSuccessAlert(response.message);
-                        setTimeout(function() {
-                            location.reload();
-                        }, 1000);
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
-                });
-            });
-
-            $('.js-thead-colors a').on('click', function() {
-                var theadColor = $(this).attr("data-bg");
-                console.log(theadColor);
-                $('#dt-basic-example thead').removeClassPrefix('bg-').addClass(theadColor);
-            });
-
-            $('.js-tbody-colors a').on('click', function() {
-                var theadColor = $(this).attr("data-bg");
-                console.log(theadColor);
-                $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
-            });
-
-            if (navigator.geolocation) {
-                window.myMap = function() {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        let location = {
-                            lat: position.coords.latitude - 0.000001,
-                            lng: position.coords.longitude
-                        };
-
-                        let mapProp = {
-                            center: location,
-                            zoom: 17.1,
-                        };
-
-                        let map = new google.maps.Map(document.getElementById("map"), mapProp);
-
-                        let marker = new google.maps.Marker({
-                            position: location,
-                            map: map
-                        });
-                    });
-                }
-            } else {
-                showErrorAlert("Browser ini tidak support geolokasi!");
             }
 
-            $('#clock_out').click(function() {
-                $('#clock_out').prop('disabled', true);
-                $('#clock_out').find('.spinner-border-sm').removeClass('d-none');
-                $('#clock_out').find('.clock-out-text').addClass('d-none');
+            function handleClockOut() {
+                const formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}'); // Include CSRF token if needed
+                formData.append('longitude', longitude); // Longitude from geolocation
+                formData.append('latitude', latitude); // Latitude from geolocation
+                formData.append('photo', photoData); // Append photo data
+                formData.append('employee_id', '{{ auth()->user()->employee_id }}');
+
                 $.ajax({
-                    url: "{{ route('employee.attendance.clock-out') }}",
-                    method: "POST",
+                    url: '/api/dashboard/clock-out',
+                    method: 'PUT', // Change to PUT method
                     data: {
-                        _token: "{{ csrf_token() }}"
+                        _token: '{{ csrf_token() }}' // Include CSRF token if needed
+                    },
+                    beforeSend: function() {
+                        $('#clock_out_modal').prop('disabled', true);
+                        $('#clock_out_modal').find('.spinner-border').removeClass('d-none');
                     },
                     success: function(response) {
-                        if (response.status === 'success') {
-                            showSuccessAlert(response.message);
-                            $('#clock_out').prop('disabled', false);
-                            $('#clock_out').find('.spinner-border-sm').addClass('d-none');
-                            $('#clock_out').find('.clock-out-text').removeClass('d-none');
-                        }
+                        $('#clock_out_modal').prop('disabled', false);
+                        $('#clock_out_modal').find('.spinner-border').addClass('d-none');
+                        $('#clock_out_modal').addClass('d-none');
+                        $('#info').text('Clock Out successful!');
                     },
                     error: function(xhr) {
-                        showErrorAlert('Terjadi kesalahan, harap coba lagi');
-                        $('#clock_out').prop('disabled', false);
-                        $('#clock_out').find('.spinner-border-sm').addClass('d-none');
-                        $('#clock_out').find('.clock-out-text').removeClass('d-none');
+                        $('#clock_out_modal').prop('disabled', false);
+                        $('#clock_out_modal').find('.spinner-border').addClass('d-none');
+                        $('#info').text('Error occurred: ' + xhr.responseText);
                     }
                 });
-            });
+            }
+
+            function capturePhoto() {
+                const canvas = document.createElement('canvas');
+                canvas.width = $('#video').width();
+                canvas.height = $('#video').height();
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage($('#video')[0], 0, 0, canvas.width, canvas.height);
+                photoData = canvas.toDataURL('image/jpeg'); // Base64-encoded image data
+            }
         });
     </script>
-
-
-    {{-- <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHLSY8GcO1KmPQdavk8G1m4wUw0tXlifU&loading=async&callback=myMap&v=weekly"
-        async defer></script> --}}
 @endsection
