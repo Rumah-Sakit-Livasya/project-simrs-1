@@ -1,5 +1,5 @@
 <div class="modal fade font-weight-bold p-0" id="clockin-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="font-weight-bold">Swafoto untuk Absen</h5>

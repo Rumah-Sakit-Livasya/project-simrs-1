@@ -490,7 +490,7 @@
                                     showAlert(employeeName);
                                     detectionCount++;
                                     console.log(detectionCount);
-                                    if (detectionCount === 10) {
+                                    if (detectionCount === 3) {
                                         capturePhoto();
                                     }
                                 } else {
