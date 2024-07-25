@@ -1,17 +1,18 @@
 <div class="tab-pane fade show active" id="v-pills-personal" role="tabpanel" aria-labelledby="v-pills-personal-tab">
     <div class="border px-3 pt-3 pb-0 rounded">
         <ul class="nav nav-pills" role="tablist">
-            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#personal">Info
+            <li class="nav-item" style="margin-left: -4px;"><a class="nav-link active" data-toggle="tab"
+                    href="#personal">Info
                     Personal</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#identitas">Identitas &amp;
                     Alamat</a></li>
         </ul>
         <div class="tab-content py-3">
             <div class="tab-pane fade show active" id="personal" role="tabpanel">
-                <h3>
+                <h3 class="mt-3">
                     Info Personal
                 </h3>
-                <hr>
+                <hr class="my-1">
                 <div class="row">
                     <div class="col-10">
                         <ul class="list-unstyled mb-0">
@@ -127,10 +128,10 @@
             </div>
 
             <div class="tab-pane fade" id="identitas" role="tabpanel">
-                <h3>
-                    Identitas &amp; Alamat
+                <h3 class="mt-3">
+                    Identitas & Alamat
                 </h3>
-                <hr>
+                <hr class="my-1">
                 <div class="row">
                     <div class="col-10">
                         <ul class="list-unstyled mb-0">
@@ -221,17 +222,18 @@
 <div class="tab-pane fade" id="v-pills-pekerjaan" role="tabpanel" aria-labelledby="v-pills-pekerjaan-tab">
     <div class="border px-3 pt-3 pb-0 rounded">
         <ul class="nav nav-pills" role="tablist">
-            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#pekerjaan">Info
+            <li class="nav-item" style="margin-left: -4px"><a class="nav-link active" data-toggle="tab"
+                    href="#pekerjaan">Info
                     Pekerjaan</a>
             </li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#subordinate">Subordinate</a></li>
         </ul>
         <div class="tab-content py-3">
             <div class="tab-pane fade show active" id="pekerjaan" role="tabpanel">
-                <h3>
+                <h3 class="mt-3">
                     Info Pekerjaan
                 </h3>
-                <hr>
+                <hr class="my-1">
                 <div class="row">
                     <div class="col-10">
                         <ul class="list-unstyled mb-0">
@@ -442,11 +444,6 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="subordinate" role="tabpanel">
-                <h3>
-                    Subordinate
-                </h3>
-                <hr>
-
                 <div class="row">
                     <div class="col-12">
                         <ul class="nav nav-pills justify-content-center" role="tablist">
@@ -600,3 +597,80 @@
         </div>
     </div>
 </div>
+<div class="tab-pane fade" id="v-pills-dokumen-kepegawaian" role="tabpanel"
+    aria-labelledby="v-pills-dokumen-kepegawaian-tab">
+    <div class="border px-3 pt-3 pb-0 rounded">
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="pekerjaan" role="tabpanel">
+                <h3 class="font-weight-bold text-primary">
+                    Dokumen Kepegawaian
+                </h3>
+                <hr class="mt-3" style="border-color:#fd3995">
+                <div class="row">
+                    <div class="col-xl-12 my-2">
+                        <a href="javascript:void(0);" id="tambah-dokumen" class="btn btn-primary btn-sm mb-4 ">Tambah
+                            Dokumen</a>
+                        <!-- datatable start -->
+                        <div class="table-responsive">
+                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                                <thead>
+                                    <tr>
+                                        <!-- <th style="white-space: nowrap">Foto</th> -->
+                                        <th style="white-space: nowrap">Nama</th>
+                                        <th style="white-space: nowrap">File</th>
+                                        <th style="white-space: nowrap">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($upload_files as $item)
+                                        <tr>
+                                            <td>{{ $item->nama }}</td>
+                                            <td>
+                                                <a href="javascript:void(0)" class="download"
+                                                    data-id="{{ $item->id }}">Lihat dokumen</a>
+                                            </td>
+                                            <td>
+                                                <a href="#" data-backdrop="static" data-keyboard="false"
+                                                    class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
+                                                    data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-success-500&quot;></div></div>"
+                                                    data-toggle="tooltip" data-id="{{ $item->id }}"
+                                                    title="Edit Shift">
+                                                    <span class="fal fa-pencil ikon-edit"></span>
+                                                    <div class="span spinner-text d-none">
+                                                        <span class="spinner-border spinner-border-sm" role="status"
+                                                            aria-hidden="true"></span>
+                                                        Loading...
+                                                    </div>
+                                                </a>
+                                                <a href="#" data-backdrop="static" data-keyboard="false"
+                                                    class="badge mx-1 badge-danger p-2 border-0 text-white btn-edit"
+                                                    data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-success-500&quot;></div></div>"
+                                                    data-toggle="tooltip" data-id="{{ $item->id }}"
+                                                    title="Edit Shift">
+                                                    <span class="fal fa-trash ikon-edit"></span>
+                                                    <div class="span spinner-text d-none">
+                                                        <span class="spinner-border spinner-border-sm" role="status"
+                                                            aria-hidden="true"></span>
+                                                        Loading...
+                                                    </div>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th style="white-space: nowrap">Nama</th>
+                                        <th style="white-space: nowrap">File</th>
+                                        <th style="white-space: nowrap">Aksi</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <!-- datatable end -->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

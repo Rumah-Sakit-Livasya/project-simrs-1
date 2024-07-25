@@ -78,11 +78,8 @@
                         {{ auth()->user()->name }}
                         <small class="text-muted mb-0">{{ $employee->organization->name }}</small>
                     </h5>
-                    <div class="mt-4 text-center demo">
-                    </div>
                 </div>
             </div>
-
             <div class="col-lg-12">
                 <div class="accordion accordion-hover" id="info-parent">
                     <div class="card">
@@ -98,7 +95,6 @@
                                     <span class="collapsed-hidden">
                                         <i class="fal fa-chevron-down fs-xl"></i>
                                     </span>
-                                </span>
                             </a>
                         </div>
                         <div id="general-info" class="collapse show" data-parent="#info-parent">

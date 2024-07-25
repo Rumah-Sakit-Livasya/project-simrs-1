@@ -8,7 +8,7 @@
             <div class="panel-content">
                 <div class="row">
                     @include('pages.pegawai.profil-pegawai.partials.left-content')
-                    <div class="col-lg-9 p-0">
+                    <div class="col-lg-9">
                         <div class="card mb-g">
                             <div class="row mt-4">
                                 <div class="col-12 px-5">
@@ -16,7 +16,6 @@
                                         <div class="col mb-4">
                                             <div class="tab-content" id="v-pills-tabContent">
                                                 @include('pages.pegawai.profil-pegawai.partials.section.general-section')
-                                                @include('pages.pegawai.profil-pegawai.partials.section.time-management-section')
                                             </div>
                                         </div>
                                     </div>
@@ -31,6 +30,7 @@
             @include('pages.pegawai.profil-pegawai.partials.modal.edit-identity')
             @include('pages.pegawai.profil-pegawai.partials.modal.edit-profile-picture')
             @include('pages.pegawai.profil-pegawai.partials.modal.create-attendance-request')
+            @include('pages.pegawai.profil-pegawai.partials.modal.create-dokumen')
 
     </main>
 @endsection
@@ -117,7 +117,7 @@
 
         $(document).ready(function() {
             $('#dt-basic-example').dataTable({
-                responsive: true
+                responsive: false
             });
 
             $('.js-thead-colors a').on('click', function() {
@@ -130,6 +130,71 @@
                 var theadColor = $(this).attr("data-bg");
                 console.log(theadColor);
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
+            });
+
+            $('#tambah-dokumen').click(function(e) {
+                $('#tambah-dokumen-modal').modal('show');
+            });
+
+            // Update Form
+            $('#tambah-dokumen-form').on('submit', function(e) {
+                e.preventDefault();
+
+                const employeeId = "{{ auth()->user()->employee->id }}";
+                var formData = new FormData(this);
+                formData.append('employee_id', employeeId);
+
+                $.ajax({
+                    type: 'post', // Sesuaikan dengan method form
+                    url: '/api/dashboard/files/store',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        // Handle success, e.g., close modal or update UI
+                        $('#tambah-dokumen-modal').modal('hide');
+                        showSuccessAlert(response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function(error) {
+                        $('#tambah-dokumen-modal').modal('hide');
+                        showErrorAlert(error.error);
+                    }
+                });
+            });
+
+            $('a.download').on('click', function(e) {
+                e.preventDefault();
+
+                // Ambil ID dokumen dari atribut data-id
+                var documentId = $(this).data('id');
+                var url = "/api/dashboard/files/download-document/" + documentId;
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    xhrFields: {
+                        responseType: 'blob' // Mengatur responseType ke blob
+                    },
+                    success: function(data, status, xhr) {
+                        // Ambil nama file dari header Content-Disposition
+                        var disposition = xhr.getResponseHeader('Content-Disposition');
+                        var filename = disposition ? disposition.split('filename=')[1] :
+                            'document.pdf';
+
+                        // Membuat link download
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(data);
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    },
+                    error: function(xhr) {
+                        showErrorAlert(xhr.responseJSON.error);
+                    }
+                });
             });
 
             $('.btn-ubah-personal').click(function(e) {

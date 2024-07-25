@@ -25,6 +25,7 @@ use App\Http\Controllers\API\SalaryController;
 use App\Http\Controllers\API\TargetController;
 use App\Http\Controllers\BotMessageController;
 use App\Http\Controllers\DeductionController;
+use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ReportController;
 use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\PayrollComponent;
@@ -48,8 +49,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::prefix('dashboard')->group(function () {
-    Route::put('/clock-in', [AttendanceController::class, 'clock_in']);
-    Route::put('/clock-out', [AttendanceController::class, 'clock_out']);
+    Route::post('/clock-in', [AttendanceController::class, 'clock_in']);
+    Route::post('/clock-out', [AttendanceController::class, 'clock_out'])->name('employee.attendance.clock-out');
     Route::post('/management-shift/store', [AttendanceController::class, 'import']);
 
     Route::put('/management-shift/update', [AttendanceController::class, 'updateManagementShift']);
@@ -73,6 +74,11 @@ Route::prefix('dashboard')->group(function () {
         Route::get('/attendance/{id}', [AttendanceRequestController::class, 'getAttendanceRequest']);
         Route::post('/attendance/update/{id}', [AttendanceRequestController::class, 'update']);
         Route::get('/attendance/delete/{id}', [AttendanceRequestController::class, 'destroy']);
+    });
+
+    Route::prefix('files')->group(function () {
+        Route::post('store', [FileUploadController::class, 'storeKepegawaian']);
+        Route::get('/download-document/{id}', [FileUploadController::class, 'downloadDocument'])->name('download.document');
     });
 
     //organization
