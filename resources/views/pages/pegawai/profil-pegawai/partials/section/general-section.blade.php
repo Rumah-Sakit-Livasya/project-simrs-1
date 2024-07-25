@@ -622,36 +622,41 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>Ijazah Terakhir</td>
-                                        <td>
-                                            <a href="#">Lihat dokumen</a>
-                                        </td>
-                                        <td>
-                                            <a href="#" data-backdrop="static" data-keyboard="false"
-                                                class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
-                                                data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-success-500&quot;></div></div>"
-                                                data-toggle="tooltip" title="Edit Shift">
-                                                <span class="fal fa-pencil ikon-edit"></span>
-                                                <div class="span spinner-text d-none">
-                                                    <span class="spinner-border spinner-border-sm" role="status"
-                                                        aria-hidden="true"></span>
-                                                    Loading...
-                                                </div>
-                                            </a>
-                                            <a href="#" data-backdrop="static" data-keyboard="false"
-                                                class="badge mx-1 badge-danger p-2 border-0 text-white btn-edit"
-                                                data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-success-500&quot;></div></div>"
-                                                data-toggle="tooltip" title="Edit Shift">
-                                                <span class="fal fa-trash ikon-edit"></span>
-                                                <div class="span spinner-text d-none">
-                                                    <span class="spinner-border spinner-border-sm" role="status"
-                                                        aria-hidden="true"></span>
-                                                    Loading...
-                                                </div>
-                                            </a>
-                                        </td>
-                                    </tr>
+                                    @foreach ($upload_files as $item)
+                                        <tr>
+                                            <td>{{ $item->nama }}</td>
+                                            <td>
+                                                <a href="javascript:void(0)" class="download"
+                                                    data-id="{{ $item->id }}">Lihat dokumen</a>
+                                            </td>
+                                            <td>
+                                                <a href="#" data-backdrop="static" data-keyboard="false"
+                                                    class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
+                                                    data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-success-500&quot;></div></div>"
+                                                    data-toggle="tooltip" data-id="{{ $item->id }}"
+                                                    title="Edit Shift">
+                                                    <span class="fal fa-pencil ikon-edit"></span>
+                                                    <div class="span spinner-text d-none">
+                                                        <span class="spinner-border spinner-border-sm" role="status"
+                                                            aria-hidden="true"></span>
+                                                        Loading...
+                                                    </div>
+                                                </a>
+                                                <a href="#" data-backdrop="static" data-keyboard="false"
+                                                    class="badge mx-1 badge-danger p-2 border-0 text-white btn-edit"
+                                                    data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-success-500&quot;></div></div>"
+                                                    data-toggle="tooltip" data-id="{{ $item->id }}"
+                                                    title="Edit Shift">
+                                                    <span class="fal fa-trash ikon-edit"></span>
+                                                    <div class="span spinner-text d-none">
+                                                        <span class="spinner-border spinner-border-sm" role="status"
+                                                            aria-hidden="true"></span>
+                                                        Loading...
+                                                    </div>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                                 <tfoot>
                                     <tr>

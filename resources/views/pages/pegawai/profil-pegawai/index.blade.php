@@ -165,6 +165,38 @@
                 });
             });
 
+            $('a.download').on('click', function(e) {
+                e.preventDefault();
+
+                // Ambil ID dokumen dari atribut data-id
+                var documentId = $(this).data('id');
+                var url = "/api/dashboard/files/download-document/" + documentId;
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    xhrFields: {
+                        responseType: 'blob' // Mengatur responseType ke blob
+                    },
+                    success: function(data, status, xhr) {
+                        // Ambil nama file dari header Content-Disposition
+                        var disposition = xhr.getResponseHeader('Content-Disposition');
+                        var filename = disposition ? disposition.split('filename=')[1] :
+                            'document.pdf';
+
+                        // Membuat link download
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(data);
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    },
+                    error: function(xhr) {
+                        showErrorAlert(xhr.responseJSON.error);
+                    }
+                });
+            });
+
             $('.btn-ubah-personal').click(function(e) {
                 e.preventDefault();
                 let button = $(this);

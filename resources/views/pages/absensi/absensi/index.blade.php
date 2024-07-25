@@ -503,7 +503,7 @@
                     }, 100);
                 } catch (error) {
                     console.error('Error loading labeled images:', error);
-                    alert('Error loading labeled images. Check console for details.');
+                    alert('Update Foto profile terlebih dahulu!');
                 }
             });
 
@@ -522,7 +522,7 @@
                     return [new faceapi.LabeledFaceDescriptors(name, descriptions)];
                 } catch (error) {
                     console.error('Error loading labeled images:', error);
-                    alert('Error loading labeled images. Check console for details.');
+                    alert('Update Foto profile terlebih dahulu!');
                 }
             }
 

@@ -78,6 +78,7 @@ Route::prefix('dashboard')->group(function () {
 
     Route::prefix('files')->group(function () {
         Route::post('store', [FileUploadController::class, 'storeKepegawaian']);
+        Route::get('/download-document/{id}', [FileUploadController::class, 'downloadDocument'])->name('download.document');
     });
 
     //organization

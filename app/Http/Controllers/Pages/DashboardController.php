@@ -27,6 +27,7 @@ use App\Models\PenilaianPegawai;
 use App\Models\Shift;
 use App\Models\Structure;
 use App\Models\Target;
+use App\Models\UploadFile;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -572,9 +573,10 @@ class DashboardController extends Controller
         $approvalLine = $getEmployee->where('id', $employee->approval_line)->first();
         $approvalParent = $getEmployee->where('id', $employee->approval_line_parent)->first();
         $employeeGroup = $getEmployee->where('organization_id', $employee->organization_id);
+        $upload_files = UploadFile::where('pic', auth()->user()->employee->id)->where('kategori', 'Kepegawaian')->where('tipe', 2)->get();
 
         $roles = Role::all();
-        return view('pages.pegawai.profil-pegawai.index', compact('user', 'roles', 'employee', 'getNotify', 'approvalLine', 'approvalParent', 'employeeGroup'));
+        return view('pages.pegawai.profil-pegawai.index', compact('user', 'roles', 'employee', 'getNotify', 'approvalLine', 'approvalParent', 'employeeGroup', 'upload_files'));
     }
 
     public function  getDataOrganizations()
