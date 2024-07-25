@@ -8,7 +8,7 @@
             <div class="panel-content">
                 <div class="row">
                     @include('pages.pegawai.profil-pegawai.partials.left-content')
-                    <div class="col-lg-9 p-0">
+                    <div class="col-lg-9">
                         <div class="card mb-g">
                             <div class="row mt-4">
                                 <div class="col-12 px-5">
@@ -16,7 +16,6 @@
                                         <div class="col mb-4">
                                             <div class="tab-content" id="v-pills-tabContent">
                                                 @include('pages.pegawai.profil-pegawai.partials.section.general-section')
-                                                @include('pages.pegawai.profil-pegawai.partials.section.time-management-section')
                                             </div>
                                         </div>
                                     </div>
@@ -117,7 +116,7 @@
 
         $(document).ready(function() {
             $('#dt-basic-example').dataTable({
-                responsive: true
+                responsive: false
             });
 
             $('.js-thead-colors a').on('click', function() {

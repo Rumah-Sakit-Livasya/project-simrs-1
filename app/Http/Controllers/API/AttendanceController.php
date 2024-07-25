@@ -24,68 +24,53 @@ class AttendanceController extends Controller
 
     public function clock_in(Request $request)
     {
-        $employee = Employee::where('id', $request->employee_id)->first();
-        $company = $employee->company;
         try {
-            $perusahaanLatitude = null;
-            $perusahaanLongitude = null;
-            $radiusPerusahaan = $company->radius;
-            $is_clock_in = false;
+            $validator = Validator::make($request->all(), [
+                'employee_id' => 'required|exists:employees,id',
+                'latitude' => 'required',
+                'longitude' => 'required',
+                'photo' => 'required|image',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 422);
+            }
+
+            $employee = Employee::findOrFail($request->employee_id);
+            $company = $employee->company;
+
             $penggunaLatitude = $request->latitude;
             $penggunaLongitude = $request->longitude;
+            $radiusPerusahaan = $company->radius;
+            $is_clock_in = false;
 
-            if ($employee->locations()->exists()) {
-                foreach ($employee->locations as $location) {
-                    $perusahaanLatitude = $location->latitude;
-                    $perusahaanLongitude = $location->longitude;
-                    $jarak = haversine($perusahaanLatitude, $perusahaanLongitude, $penggunaLatitude, $penggunaLongitude);
+            $locations = $employee->locations()->exists() ? $employee->locations : collect([['latitude' => $company->latitude, 'longitude' => $company->longitude]]);
 
-                    if ($jarak <= $radiusPerusahaan) {
-                        $is_clock_in = true;
-                    }
-                }
-            } else {
-                $perusahaanLatitude = $company->latitude;
-                $perusahaanLongitude = $company->longitude;
+            foreach ($locations as $location) {
+                $perusahaanLatitude = $location->latitude;
+                $perusahaanLongitude = $location->longitude;
                 $jarak = haversine($perusahaanLatitude, $perusahaanLongitude, $penggunaLatitude, $penggunaLongitude);
 
                 if ($jarak <= $radiusPerusahaan) {
                     $is_clock_in = true;
+                    break;
                 }
             }
 
             if ($is_clock_in) {
-                $validator = Validator::make($request->all(), [
-                    'latitude' => 'required',
-                    'longitude' => 'required',
-                    'photo' => 'required|image', // Validate the photo field
-                    'clock_in' => 'nullable',
-                    'clock_out' => 'nullable',
-                ]);
-
-                if ($validator->fails()) {
-                    return response()->json($validator->errors(), 422);
-                }
-
                 // Store the photo
-                $photoPath = null;
-                if ($request->hasFile('photo')) {
-                    $photo = $request->file('photo');
-                    $photoPath = $photo->store('absensi/clock-in', 'public'); // Save photo in storage/absensi
-                }
+                $photoPath = $request->file('photo')->store('absensi/clock-in', 'public');
 
-                $employee_id = $request->employee_id;
                 $tanggal_sekarang = now()->format('Y-m-d');
-                $request['location'] = $request->latitude . "," . $request->longitude;
-                $request['foto_clock_in'] = $photoPath; // Add photo path to the request data
+                $request['location'] = "{$request->latitude},{$request->longitude}";
+                $request['foto_clock_in'] = $photoPath;
+                $request['clock_in'] = now();
 
-                $tanggal_kemarin = Carbon::now()->subDay();
-                $attendance_kemarin = Attendance::where('employee_id', $employee_id)
-                    ->where('date', $tanggal_kemarin->format('Y-m-d'))
+                $attendance_kemarin = Attendance::where('employee_id', $request->employee_id)
+                    ->where('date', now()->subDay()->format('Y-m-d'))
                     ->first();
 
-                $request['clock_in'] = Carbon::now();
-                $attendance = Attendance::where('employee_id', $employee_id)
+                $attendance = Attendance::where('employee_id', $request->employee_id)
                     ->where('date', $tanggal_sekarang)
                     ->first();
 
@@ -94,20 +79,16 @@ class AttendanceController extends Controller
                 }
 
                 if (
-                    $attendance_kemarin->shift->time_in >= '19.00' &&
-                    $attendance_kemarin->shift->time_in <= '21.00' &&
-                    $attendance_kemarin->is_day_off != 1 &&
-                    $attendance_kemarin->clock_in == null &&
-                    $attendance->shift->time_in >= '05.00' &&
-                    $attendance->shift->time_out <= '21.00'
+                    $attendance_kemarin && $attendance_kemarin->shift->time_in >= '19.00' && $attendance_kemarin->shift->time_in <= '21.00' &&
+                    !$attendance_kemarin->is_day_off && !$attendance_kemarin->clock_in &&
+                    $attendance->shift->time_in >= '05.00' && $attendance->shift->time_out <= '21.00'
                 ) {
                     $request['late_clock_in'] = 60;
                     $attendance_kemarin->update($request->all());
                 } else {
                     $waktu_absen = $attendance->shift->time_in;
-                    $perbedaanMenit = $request->clock_in->greaterThan($waktu_absen) ? abs($request->clock_in->diffInMinutes($waktu_absen)) : null;
-                    $perbedaanMenit = ($perbedaanMenit == 0) ? null : $perbedaanMenit;
-                    $request['late_clock_in'] = $perbedaanMenit;
+                    $perbedaanMenit = $request->clock_in->greaterThan($waktu_absen) ? $request->clock_in->diffInMinutes($waktu_absen) : null;
+                    $request['late_clock_in'] = $perbedaanMenit ?? null;
                     $attendance->update($request->all());
                 }
 
@@ -116,11 +97,10 @@ class AttendanceController extends Controller
                 return response()->json(['error' => 'Lokasi tidak terdeteksi atau berada di luar jangkauan!'], 422);
             }
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 404);
+            return response()->json(['error' => $e->getMessage()], 404);
         }
     }
+
 
 
     public function clock_out(Request $request)

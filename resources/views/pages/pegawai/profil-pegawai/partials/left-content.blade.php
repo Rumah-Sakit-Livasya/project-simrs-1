@@ -78,8 +78,6 @@
                         {{ auth()->user()->name }}
                         <small class="text-muted mb-0">{{ $employee->organization->name }}</small>
                     </h5>
-                    <div class="mt-4 text-center demo">
-                    </div>
                 </div>
             </div>
             <div class="col-lg-12">
@@ -97,7 +95,6 @@
                                     <span class="collapsed-hidden">
                                         <i class="fal fa-chevron-down fs-xl"></i>
                                     </span>
-                                </span>
                             </a>
                         </div>
                         <div id="general-info" class="collapse show" data-parent="#info-parent">
@@ -111,6 +108,11 @@
                                     <a class="nav-link col-12 p-3" id="v-pills-pekerjaan-tab" data-toggle="pill"
                                         href="#v-pills-pekerjaan" role="tab" aria-controls="v-pills-pekerjaan">
                                         <span class="ml-1">Info Pekerjaan</span>
+                                    </a>
+                                    <a class="nav-link col-12 p-3" id="v-pills-dokumen-kepegawaian-tab"
+                                        data-toggle="pill" href="#v-pills-dokumen-kepegawaian" role="tab"
+                                        aria-controls="v-pills-dokumen-kepegawaian">
+                                        <span class="ml-1">Dokumen Kepegawaian</span>
                                     </a>
                                 </div>
                             </div>

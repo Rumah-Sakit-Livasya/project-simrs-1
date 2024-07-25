@@ -628,7 +628,7 @@
                         $('#clock_in_modal').find('.spinner-border').addClass('d-none');
                         $('#clock_in_modal').addClass('d-none');
                         $('#clock_in_modal').removeClass('d-none');
-                        $('#clockin-modal').hide();
+                        $('#clockin-modal').modal('hide');
                         showSuccessAlert(response.message);
                         setTimeout(function() {
                             console.log('Reloading the page now.');
@@ -638,8 +638,8 @@
                     error: function(xhr) {
                         $('#clock_in_modal').prop('disabled', false);
                         $('#clock_in_modal').find('.spinner-border').addClass('d-none');
-                        $('#clockin-modal').hide();
-                        showErrorAlert(xhr.responseJSON.message);
+                        $('#clockin-modal').modal('hide');
+                        showErrorAlert(xhr.responseJSON.error);
                     }
                 });
             }
@@ -677,7 +677,7 @@
                         $('#clock_out_modal').prop('disabled', false);
                         $('#clock_out_modal').find('.spinner-border').addClass('d-none');
                         $('#clock_out_modal').addClass('d-none');
-                        $('#clockin-modal').hide();
+                        $('#clockin-modal').modal('hide');
                         showSuccessAlert(response.message);
                         setTimeout(function() {
                             console.log('Reloading the page now.');
@@ -687,8 +687,8 @@
                     error: function(xhr) {
                         $('#clock_out_modal').prop('disabled', false);
                         $('#clock_out_modal').find('.spinner-border').addClass('d-none');
-                        $('#clockin-modal').hide();
-                        showErrorAlert(xhr.responseJSON.message);
+                        $('#clockin-modal').modal('hide');
+                        showErrorAlert(xhr.responseJSON.error);
                     }
                 });
             }
