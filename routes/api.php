@@ -25,6 +25,7 @@ use App\Http\Controllers\API\SalaryController;
 use App\Http\Controllers\API\TargetController;
 use App\Http\Controllers\BotMessageController;
 use App\Http\Controllers\DeductionController;
+use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ReportController;
 use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\PayrollComponent;
@@ -73,6 +74,10 @@ Route::prefix('dashboard')->group(function () {
         Route::get('/attendance/{id}', [AttendanceRequestController::class, 'getAttendanceRequest']);
         Route::post('/attendance/update/{id}', [AttendanceRequestController::class, 'update']);
         Route::get('/attendance/delete/{id}', [AttendanceRequestController::class, 'destroy']);
+    });
+
+    Route::prefix('files')->group(function () {
+        Route::post('store', [FileUploadController::class, 'storeKepegawaian']);
     });
 
     //organization

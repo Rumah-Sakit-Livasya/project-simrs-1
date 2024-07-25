@@ -608,7 +608,8 @@
                 <hr class="mt-3" style="border-color:#fd3995">
                 <div class="row">
                     <div class="col-xl-12 my-2">
-                        <a href="#" class="btn btn-primary btn-sm mb-4 ">Tambah Dokumen</a>
+                        <a href="javascript:void(0);" id="tambah-dokumen" class="btn btn-primary btn-sm mb-4 ">Tambah
+                            Dokumen</a>
                         <!-- datatable start -->
                         <div class="table-responsive">
                             <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">

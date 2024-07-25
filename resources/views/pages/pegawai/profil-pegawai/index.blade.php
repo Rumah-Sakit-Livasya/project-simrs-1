@@ -30,6 +30,7 @@
             @include('pages.pegawai.profil-pegawai.partials.modal.edit-identity')
             @include('pages.pegawai.profil-pegawai.partials.modal.edit-profile-picture')
             @include('pages.pegawai.profil-pegawai.partials.modal.create-attendance-request')
+            @include('pages.pegawai.profil-pegawai.partials.modal.create-dokumen')
 
     </main>
 @endsection
@@ -129,6 +130,39 @@
                 var theadColor = $(this).attr("data-bg");
                 console.log(theadColor);
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
+            });
+
+            $('#tambah-dokumen').click(function(e) {
+                $('#tambah-dokumen-modal').modal('show');
+            });
+
+            // Update Form
+            $('#tambah-dokumen-form').on('submit', function(e) {
+                e.preventDefault();
+
+                const employeeId = "{{ auth()->user()->employee->id }}";
+                var formData = new FormData(this);
+                formData.append('employee_id', employeeId);
+
+                $.ajax({
+                    type: 'post', // Sesuaikan dengan method form
+                    url: '/api/dashboard/files/store',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        // Handle success, e.g., close modal or update UI
+                        $('#tambah-dokumen-modal').modal('hide');
+                        showSuccessAlert(response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function(error) {
+                        $('#tambah-dokumen-modal').modal('hide');
+                        showErrorAlert(error.error);
+                    }
+                });
             });
 
             $('.btn-ubah-personal').click(function(e) {

@@ -23,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('attendances', function (Blueprint $table) {
-            //
+            $table->dropColumn('foto_clock_in');
+            $table->dropColumn('foto_clock_out');
         });
     }
 };

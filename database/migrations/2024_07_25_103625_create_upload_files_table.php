@@ -13,7 +13,25 @@ return new class extends Migration
     {
         Schema::create('upload_files', function (Blueprint $table) {
             $table->id();
+            $table->string('kategori', 100)->nullable();
+            $table->unsignedBigInteger('organization_id')->nullable();
+            $table->string('nama', 100)->nullable();
+            $table->integer('tipe');
+            $table->integer('hard_copy');
+            $table->string('keterangan', 100)->nullable();
+            $table->unsignedBigInteger('pic');
+            $table->string('file');
             $table->timestamps();
+
+            $table->foreign('organization_id')
+                ->references('id')
+                ->on('organizations')
+                ->onDelete('cascade');
+
+            $table->foreign('pic')
+                ->references('id')
+                ->on('employees')
+                ->onDelete('cascade');
         });
     }
 
