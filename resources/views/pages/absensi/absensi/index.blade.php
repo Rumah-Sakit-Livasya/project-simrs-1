@@ -542,6 +542,9 @@
                         longitude = position.coords.longitude;
                         const accuracy = position.coords.accuracy;
 
+                        console.log(
+                            `Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy}`);
+
                         map.setView([latitude, longitude], 17); // Zoom level set to 17 for closer view
 
                         L.marker([latitude, longitude]).addTo(map)
@@ -600,6 +603,8 @@
                     return;
                 }
 
+                console.log(`Clocking in with Longitude: ${longitude}, Latitude: ${latitude}`);
+
                 const formData = new FormData();
                 formData.append('_token', '{{ csrf_token() }}'); // Include CSRF token
                 formData.append('longitude', longitude); // Longitude from geolocation
@@ -650,6 +655,8 @@
                     return;
                 }
 
+                console.log(`Clocking out with Longitude: ${longitude}, Latitude: ${latitude}`);
+
                 const formData = new FormData();
                 formData.append('_token', '{{ csrf_token() }}'); // Include CSRF token
                 formData.append('longitude', longitude); // Longitude from geolocation
@@ -693,7 +700,6 @@
                 });
             }
 
-
             function capturePhoto() {
                 const canvas = document.createElement('canvas');
                 canvas.width = $('#video').width();
@@ -709,7 +715,6 @@
                     handleClockOut(photoData);
                 }
             }
-
         });
     </script>
 @endsection
