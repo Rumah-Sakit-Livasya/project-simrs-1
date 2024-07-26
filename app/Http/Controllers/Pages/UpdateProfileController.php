@@ -22,7 +22,7 @@ class UpdateProfileController extends Controller
     {
 
         $request->validate([
-            'foto' => 'nullable|image|mimes:jpg,png,jpeg|max:6144',
+            'foto' => 'nullable|image|mimes:jpg,png,jpeg|max:10240',
         ]);
 
         $employee = Employee::where('id', auth()->user()->employee->id)->first();
