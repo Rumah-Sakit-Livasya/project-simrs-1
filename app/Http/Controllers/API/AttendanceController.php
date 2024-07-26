@@ -44,16 +44,30 @@ class AttendanceController extends Controller
             $radiusPerusahaan = $company->radius;
             $is_clock_in = false;
 
-            $locations = $employee->locations()->exists() ? $employee->locations : collect([['latitude' => $company->latitude, 'longitude' => $company->longitude]]);
+            //Jika memiliki lokasi absen ditabel lokasi
+            if ($employee->locations()->exists()) {
 
-            foreach ($locations as $location) {
-                $perusahaanLatitude = $location->latitude;
-                $perusahaanLongitude = $location->longitude;
+                //jika memiliki lebih dari 1 lokasi
+                foreach ($employee->locations as $i => $location) {
+                    $perusahaanLatitude = $location->latitude;
+                    $perusahaanLongitude = $location->longitude;
+                    $jarak = haversine($perusahaanLatitude, $perusahaanLongitude, $penggunaLatitude, $penggunaLongitude);
+
+                    // jika jarak sudah masuk radius, maka izinkan absen
+                    if ($jarak <= $radiusPerusahaan) {
+                        $is_clock_in = true;
+                    }
+                }
+            } else {
+                // koordinat perusahaan
+                $perusahaanLatitude = $company->latitude;
+                $perusahaanLongitude = $company->longitude;
+
                 $jarak = haversine($perusahaanLatitude, $perusahaanLongitude, $penggunaLatitude, $penggunaLongitude);
 
+                // jika jarak sudah masuk radius, maka izinkan absen
                 if ($jarak <= $radiusPerusahaan) {
                     $is_clock_in = true;
-                    break;
                 }
             }
 
