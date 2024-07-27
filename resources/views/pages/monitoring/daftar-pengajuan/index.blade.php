@@ -117,8 +117,7 @@
                                         <th style="white-space: nowrap">Tanggal</th>
                                         <th style="white-space: nowrap">Keterangan</th>
                                         <th style="white-space: nowrap">Status</th>
-                                        @if (auth()->user()->hasRole('super admin') ||
-                                                auth()->user()->can(['monitoring edit pengajuan absensi', 'monitoring delete pengajuan absensi']))
+                                        @if (auth()->user()->hasRole('super admin'))
                                             <th style="white-space: nowrap">Action</th>
                                         @endif
                                     </tr>
@@ -147,8 +146,7 @@
                                                     -
                                                 @endisset
                                             </td>
-                                            @if (auth()->user()->hasRole('super admin') ||
-                                                    auth()->user()->can(['monitoring edit pengajuan absensi', 'monitoring delete pengajuan absensi']))
+                                            @if (auth()->user()->hasRole('super admin'))
                                                 <td>
                                                     <button data-backdrop="static" data-keyboard="false"
                                                         class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
@@ -184,8 +182,7 @@
                                         <th style="white-space: nowrap">Tanggal</th>
                                         <th style="white-space: nowrap">Keterangan</th>
                                         <th style="white-space: nowrap">Status</th>
-                                        @if (auth()->user()->hasRole('super admin') ||
-                                                auth()->user()->can(['monitoring edit pengajuan absensi', 'monitoring delete pengajuan absensi']))
+                                        @if (auth()->user()->hasRole('super admin'))
                                             <th style="white-space: nowrap">Action</th>
                                         @endif
                                     </tr>
