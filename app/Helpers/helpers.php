@@ -249,6 +249,7 @@ function convertPeriodePayroll($period)
     // Gabungkan kembali periode dengan bulan dalam bahasa Indonesia
     return $startMonthIndonesian . ' - ' . $endMonthIndonesian;
 }
+<<<<<<< HEAD
 
 // Check if function is already declared
 if (!function_exists('isActiveMenu')) {
@@ -285,3 +286,5 @@ function phone($phone)
     }
     return $phone;
 }
+=======
+>>>>>>> parent of 90f2e48 (fix bug menu)
