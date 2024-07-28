@@ -250,6 +250,7 @@ function convertPeriodePayroll($period)
     return $startMonthIndonesian . ' - ' . $endMonthIndonesian;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 // Check if function is already declared
 if (!function_exists('isActiveMenu')) {
@@ -286,5 +287,7 @@ function phone($phone)
     }
     return $phone;
 }
+=======
+>>>>>>> parent of 90f2e48 (fix bug menu)
 =======
 >>>>>>> parent of 90f2e48 (fix bug menu)
