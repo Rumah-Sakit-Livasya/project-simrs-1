@@ -490,7 +490,7 @@
                                     showAlert(employeeName);
                                     detectionCount++;
                                     console.log(detectionCount);
-                                    if (detectionCount === 1) {
+                                    if (detectionCount === 3) {
                                         capturePhoto();
                                     }
                                 } else {
@@ -500,7 +500,7 @@
                         } catch (error) {
                             console.error('Error detecting faces:', error);
                         }
-                    }, 500);
+                    }, 100);
                 } catch (error) {
                     console.error('Error loading labeled images:', error);
                     alert('Update Foto profile terlebih dahulu!');
