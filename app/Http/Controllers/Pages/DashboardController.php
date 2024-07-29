@@ -557,9 +557,10 @@ class DashboardController extends Controller
         $attendances = Attendance::where('employee_id', $id)
             ->whereBetween('date', [$startPeriod, $endPeriod])
             ->get();
-
+        $employees = Employee::where('id', $id)->get();
+        $attendance_codes = AttendanceCode::all();
         $shifts = Shift::all();
-        return view('pages.monitoring.daftar-absensi.payroll', compact('attendances', 'shifts'));
+        return view('pages.monitoring.daftar-absensi.payroll', compact('attendances', 'shifts', 'employees', 'attendance_codes'));
     }
 
 

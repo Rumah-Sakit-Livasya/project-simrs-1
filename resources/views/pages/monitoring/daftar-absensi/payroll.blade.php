@@ -126,152 +126,148 @@
                         </h2>
                     </div>
                     <div class="panel-container show">
-                        <div class="panel-content">
-
-                            {{-- Ontime --}}
-                            {{-- <button type="button" class="btn btn-primary my-3" data-toggle="modal"
-                                data-target="#filterModal" id="btnFilter">
-                                <span class="fal fa-clock ikon-ontime-all"></span>
-                                Ontime All
-                                <div class="span spinner-text d-none">
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                </div>
-                            </button> --}}
-
-                            <div class="table-responsive">
-                                <!-- datatable start -->
-                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                    <thead>
-                                        <tr>
-                                            <th style="white-space: nowrap">No</th>
-                                            <th style="white-space: nowrap">Tanggal</th>
-                                            <th style="white-space: nowrap">Shift</th>
-                                            <th style="white-space: nowrap">Time In</th>
-                                            <th style="white-space: nowrap">Time Out</th>
-                                            <th style="white-space: nowrap">Clock In</th>
-                                            <th style="white-space: nowrap">Clock Out</th>
-                                            <th style="white-space: nowrap">Late Clock In</th>
-                                            <th style="white-space: nowrap">Early Clock Out</th>
-                                            <th style="white-space: nowrap">Libur</th>
-                                            <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->hasRole('hr'))
-                                                <th style="white-space: nowrap">Action</th>
-                                            @endif
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($attendances as $row)
+                        <div class="row panel-content">
+                            <div class="col-xl-12 mb-3">
+                                <button id="tambah_pengajuan_cuti" class="btn btn-primary">Tambah Pengajuan Cuti/Izin
+                                    Sakit</button>
+                            </div>
+                            <div class="col-xl-12">
+                                <div class="table-responsive">
+                                    <!-- datatable start -->
+                                    <table id="dt-basic-example"
+                                        class="table table-bordered table-hover table-striped w-100">
+                                        <thead>
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td>
-                                                <td style="white-space: nowrap">
-                                                    {{ \Carbon\Carbon::parse($row->date)->translatedFormat('D, j M Y') }}
-                                                </td>
-                                                <td style="white-space: nowrap">
-                                                    <span
-                                                        class="badge {{ $row->shift->name == 'dayoff' || $row->shift->name == 'National Holiday' ? 'badge-danger' : 'badge-secondary' }} badge-pill">
-                                                        {{ $row->shift->name }}
-                                                    </span>
-                                                </td>
-                                                <td style="white-space: nowrap">
-                                                    {{ $row->shift->time_in }}
-                                                </td>
-                                                <td style="white-space: nowrap">
-                                                    {{ $row->shift->time_out }}
-                                                </td>
-                                                <td style="white-space: nowrap"
-                                                    class="{{ $row->clock_in && $row->late_clock_in ? 'text-danger' : '' }}"
-                                                    style="vertical-align: middle;">
-                                                    @isset($row->clock_in)
-                                                        {{ \Carbon\Carbon::parse($row->clock_in)->format('H:i') }}
-                                                    @else
-                                                        -
-                                                    @endisset
-                                                </td>
-                                                <td style="white-space: nowrap"
-                                                    class="{{ $row->clock_out && $row->early_clock_out ? 'text-danger' : '' }}"
-                                                    style="vertical-align: middle;">
-                                                    @isset($row->clock_out)
-                                                        {{ \Carbon\Carbon::parse($row->clock_out)->format('H:i') }}
-                                                    @else
-                                                        -
-                                                    @endisset
-                                                </td>
-                                                <td style="white-space: nowrap"
-                                                    class="{{ $row->clock_in && $row->late_clock_in ? 'text-danger' : '' }}"
-                                                    style="vertical-align: middle;">
-                                                    @isset($row->late_clock_in)
-                                                        {{ $row->late_clock_in }} Menit
-                                                    @else
-                                                        -
-                                                    @endisset
-                                                </td>
-                                                <td style="white-space: nowrap"
-                                                    class="{{ $row->clock_out && $row->early_clock_out ? 'text-danger' : '' }}"
-                                                    style="vertical-align: middle;">
-                                                    @isset($row->late_clock_in)
-                                                        {{ $row->early_clock_out }} Menit
-                                                    @else
-                                                        -
-                                                    @endisset
-                                                </td>
-                                                <td style="white-space: nowrap">
-                                                    {{ $row->is_day_off == 1 ? 'Ya' : '-' }}
-                                                </td>
-                                                <td style="white-space: nowrap">
-                                                    @isset($row->day_off)
-                                                        {{ $row->day_off->attendance_code->description }}
-                                                    @else
-                                                        -
-                                                    @endisset
-                                                </td>
+                                                <th style="white-space: nowrap">No</th>
+                                                <th style="white-space: nowrap">Tanggal</th>
+                                                <th style="white-space: nowrap">Shift</th>
+                                                <th style="white-space: nowrap">Time In</th>
+                                                <th style="white-space: nowrap">Time Out</th>
+                                                <th style="white-space: nowrap">Clock In</th>
+                                                <th style="white-space: nowrap">Clock Out</th>
+                                                <th style="white-space: nowrap">Late Clock In</th>
+                                                <th style="white-space: nowrap">Early Clock Out</th>
+                                                <th style="white-space: nowrap">Libur</th>
+                                                <th style="white-space: nowrap">Keterangan</th>
                                                 @if (auth()->user()->hasRole('super admin') || auth()->user()->hasRole('hr'))
-                                                    <td>
-                                                        <a href="#" data-backdrop="static" data-keyboard="false"
-                                                            class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
-                                                            data-id="{{ $row->id }}" title="Edit Absensi">
-                                                            <span class="fal fa-pencil ikon-edit"></span>
-                                                            <div class="span spinner-text d-none">
-                                                                <span class="spinner-border spinner-border-sm"
-                                                                    role="status" aria-hidden="true"></span>
-                                                                Loading...
-                                                            </div>
-                                                        </a>
-
-                                                        <a href="javascript:void(0)" data-backdrop="static"
-                                                            data-keyboard="false"
-                                                            class="badge mx-1 badge-success p-2 border-0 text-white btn-ontime"
-                                                            data-id="{{ $row->id }}" title="On time">
-                                                            <span class="fal fa-clock ikon-ontime"></span>
-                                                            <div class="span spinner-text d-none">
-                                                                <span class="spinner-border spinner-border-sm"
-                                                                    role="status" aria-hidden="true"></span>
-                                                            </div>
-                                                        </a>
-                                                    </td>
+                                                    <th style="white-space: nowrap">Action</th>
                                                 @endif
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th style="white-space: nowrap">No</th>
-                                            <th style="white-space: nowrap">Tanggal</th>
-                                            <th style="white-space: nowrap">Shift</th>
-                                            <th style="white-space: nowrap">Time In</th>
-                                            <th style="white-space: nowrap">Time Out</th>
-                                            <th style="white-space: nowrap">Clock In</th>
-                                            <th style="white-space: nowrap">Clock Out</th>
-                                            <th style="white-space: nowrap">Late Clock In</th>
-                                            <th style="white-space: nowrap">Early Clock Out</th>
-                                            <th style="white-space: nowrap">Libur</th>
-                                            <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->hasRole('hr'))
-                                                <th style="white-space: nowrap">Action</th>
-                                            @endif
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                                <!-- datatable end -->
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($attendances as $row)
+                                                <tr>
+                                                    <td>{{ $loop->iteration }}</td>
+                                                    <td style="white-space: nowrap">
+                                                        {{ \Carbon\Carbon::parse($row->date)->translatedFormat('D, j M Y') }}
+                                                    </td>
+                                                    <td style="white-space: nowrap">
+                                                        <span
+                                                            class="badge {{ $row->shift->name == 'dayoff' || $row->shift->name == 'National Holiday' ? 'badge-danger' : 'badge-secondary' }} badge-pill">
+                                                            {{ $row->shift->name }}
+                                                        </span>
+                                                    </td>
+                                                    <td style="white-space: nowrap">
+                                                        {{ $row->shift->time_in }}
+                                                    </td>
+                                                    <td style="white-space: nowrap">
+                                                        {{ $row->shift->time_out }}
+                                                    </td>
+                                                    <td style="white-space: nowrap"
+                                                        class="{{ $row->clock_in && $row->late_clock_in ? 'text-danger' : '' }}"
+                                                        style="vertical-align: middle;">
+                                                        @isset($row->clock_in)
+                                                            {{ \Carbon\Carbon::parse($row->clock_in)->format('H:i') }}
+                                                        @else
+                                                            -
+                                                        @endisset
+                                                    </td>
+                                                    <td style="white-space: nowrap"
+                                                        class="{{ $row->clock_out && $row->early_clock_out ? 'text-danger' : '' }}"
+                                                        style="vertical-align: middle;">
+                                                        @isset($row->clock_out)
+                                                            {{ \Carbon\Carbon::parse($row->clock_out)->format('H:i') }}
+                                                        @else
+                                                            -
+                                                        @endisset
+                                                    </td>
+                                                    <td style="white-space: nowrap"
+                                                        class="{{ $row->clock_in && $row->late_clock_in ? 'text-danger' : '' }}"
+                                                        style="vertical-align: middle;">
+                                                        @isset($row->late_clock_in)
+                                                            {{ $row->late_clock_in }} Menit
+                                                        @else
+                                                            -
+                                                        @endisset
+                                                    </td>
+                                                    <td style="white-space: nowrap"
+                                                        class="{{ $row->clock_out && $row->early_clock_out ? 'text-danger' : '' }}"
+                                                        style="vertical-align: middle;">
+                                                        @isset($row->late_clock_in)
+                                                            {{ $row->early_clock_out }} Menit
+                                                        @else
+                                                            -
+                                                        @endisset
+                                                    </td>
+                                                    <td style="white-space: nowrap">
+                                                        {{ $row->is_day_off == 1 ? 'Ya' : '-' }}
+                                                    </td>
+                                                    <td style="white-space: nowrap">
+                                                        @isset($row->day_off)
+                                                            {{ $row->day_off->attendance_code->description }}
+                                                        @else
+                                                            -
+                                                        @endisset
+                                                    </td>
+                                                    @if (auth()->user()->hasRole('super admin') || auth()->user()->hasRole('hr'))
+                                                        <td>
+                                                            <a href="#" data-backdrop="static" data-keyboard="false"
+                                                                class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
+                                                                data-id="{{ $row->id }}" title="Edit Absensi">
+                                                                <span class="fal fa-pencil ikon-edit"></span>
+                                                                <div class="span spinner-text d-none">
+                                                                    <span class="spinner-border spinner-border-sm"
+                                                                        role="status" aria-hidden="true"></span>
+                                                                    Loading...
+                                                                </div>
+                                                            </a>
+
+                                                            <a href="javascript:void(0)" data-backdrop="static"
+                                                                data-keyboard="false"
+                                                                class="badge mx-1 badge-success p-2 border-0 text-white btn-ontime"
+                                                                data-id="{{ $row->id }}" title="On time">
+                                                                <span class="fal fa-clock ikon-ontime"></span>
+                                                                <div class="span spinner-text d-none">
+                                                                    <span class="spinner-border spinner-border-sm"
+                                                                        role="status" aria-hidden="true"></span>
+                                                                </div>
+                                                            </a>
+                                                        </td>
+                                                    @endif
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th style="white-space: nowrap">No</th>
+                                                <th style="white-space: nowrap">Tanggal</th>
+                                                <th style="white-space: nowrap">Shift</th>
+                                                <th style="white-space: nowrap">Time In</th>
+                                                <th style="white-space: nowrap">Time Out</th>
+                                                <th style="white-space: nowrap">Clock In</th>
+                                                <th style="white-space: nowrap">Clock Out</th>
+                                                <th style="white-space: nowrap">Late Clock In</th>
+                                                <th style="white-space: nowrap">Early Clock Out</th>
+                                                <th style="white-space: nowrap">Libur</th>
+                                                <th style="white-space: nowrap">Keterangan</th>
+                                                @if (auth()->user()->hasRole('super admin') || auth()->user()->hasRole('hr'))
+                                                    <th style="white-space: nowrap">Action</th>
+                                                @endif
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                    <!-- datatable end -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -346,11 +342,15 @@
             </div>
         </div>
     </main>
+    @include('pages.monitoring.daftar-absensi.partials.tambah-day-off')
 @endsection
 @section('plugin')
+    <script src="/js/dependency/moment/moment.js"></script>
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/statistics/chartist/chartist.js"></script>
+    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script>
         document.getElementById('filterSubmit').addEventListener('click', function(event) {
             event.preventDefault(); // Menghentikan perilaku default pengiriman formulir
@@ -386,6 +386,103 @@
                     dropdownParent: $('#filterModal'),
                     placeholder: "Pilih Periode"
                 });
+            });
+
+            $('#tambah_pengajuan_cuti').click(function() {
+                const employee_id = "{{ $employees[0]->id }}";
+                $('#tambah-pengajuan-cuti-modal').modal('show');
+                $('#employee_id_tambah').val(employee_id).select2({
+                    dropdownParent: $('#tambah-pengajuan-cuti-modal')
+                });
+                $('#attendance_code_id_tambah').val(2).select2({
+                    dropdownParent: $('#tambah-pengajuan-cuti-modal')
+                });
+                $('#employee_id_tambah').select2({
+                    dropdownParent: $('#tambah-pengajuan-cuti-modal')
+                });
+                $('#is_approved_tambah').val('Disetujui').select2({
+                    dropdownParent: $('#tambah-pengajuan-cuti-modal')
+                });
+
+                $('#date_tambah').daterangepicker({
+                    opens: 'left',
+                }, function(start, end, label) {
+                    console.log("A new date selection was made: " + start.format('YYYY-MM-DD') +
+                        ' to ' + end
+                        .format('YYYY-MM-DD'));
+                });
+            });
+
+            $('#tambah-day-off-req-form').on('submit', function(e) {
+
+                e.preventDefault();
+                if ($('#attendance_code_id_tambah').val() == 3 && totalCT < 1) {
+                    $('#tambah-pengajuan-cuti-modal').modal('hide');
+                    showErrorAlert('Jatah Cuti Tahunan sudah habis!');
+                } else if ($('#attendance_code_id_tambah').val() == 7 && totalCM < 1) {
+                    $('#tambah-pengajuan-cuti-modal').modal('hide');
+                    showErrorAlert('Jatah Cuti Menikah sudah habis!');
+                } else if ($('#attendance_code_id_tambah').val() == 8 && totalCMA < 1) {
+                    $('#tambah-pengajuan-cuti-modal').modal('hide');
+                    showErrorAlert('Jatah Cuti Menikahkan Anak sudah habis!');
+                } else if ($('#attendance_code_id_tambah').val() == 9 && totalCKA < 1) {
+                    $('#tambah-pengajuan-cuti-modal').modal('hide');
+                    showErrorAlert('Jatah Cuti Khitanan Anak sudah habis!');
+                } else if ($('#attendance_code_id_tambah').val() == 10 && totalCIM < 1) {
+                    $('#tambah-pengajuan-cuti-modal').modal('hide');
+                    showErrorAlert('Jatah Cuti Izin Istri Melahirkan sudah habis!');
+                } else if ($('#attendance_code_id_tambah').val() == 12 && totalCK < 1) {
+                    $('#tambah-pengajuan-cuti-modal').modal('hide');
+                    showErrorAlert('Jatah Cuti Keguguran sudah habis!');
+                } else if ($('#attendance_code_id_tambah').val() == 13 && totalCKM < 1) {
+                    $('#tambah-pengajuan-cuti-modal').modal('hide');
+                    showErrorAlert('Jatah Cuti Keluarga Meninggal sudah habis!');
+                } else if ($('#attendance_code_id_tambah').val() == 14 && totalCRM < 1) {
+                    $('#tambah-pengajuan-cuti-modal').modal('hide');
+                    showErrorAlert('Jatah Cuti Keluarga Meninggal se-Rumah sudah habis!');
+                } else if ($('#attendance_code_id_tambah').val() == 15 && totalCRM < 1) {
+                    $('#tambah-pengajuan-cuti-modal').modal('hide');
+                    showErrorAlert('Jatah Cuti Melahirkan sudah habis!');
+                } else {
+                    e.preventDefault();
+                    let formData = new FormData(this);
+
+                    $.ajax({
+                        type: "POST",
+                        url: '/attendances/request/day-off',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function() {
+                            $('#tambah-day-off-req-form').find('.ikon-tambah').hide();
+                            $('#tambah-day-off-req-form').find('.spinner-text').removeClass(
+                                'd-none');
+                        },
+                        success: function(response) {
+                            $('#tambah-day-off-req-form').find('.ikon-tambah').show();
+                            $('#tambah-day-off-req-form').find('.spinner-text').addClass(
+                                'd-none');
+                            $('#tambah-pengajuan-cuti-modal').modal('hide');
+                            showSuccessAlert(response.message)
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1000);
+                        },
+                        error: function(xhr) {
+                            $('#tambah-day-off-req-form').find('.ikon-tambah').show();
+                            $('#tambah-day-off-req-form').find('.spinner-text').addClass(
+                                'd-none');
+                            $('#tambah-pengajuan-cuti-modal').modal('hide');
+                            let errorMessage =
+                                "Terjadi kesalahan saat menyimpan data."; // Pesan default
+                            if (xhr.responseJSON && xhr.responseJSON.error) {
+                                errorMessage = xhr.responseJSON.error;
+                            }
+                            showErrorAlert(errorMessage);
+                        }
+                    });
+                }
+
             });
 
             $('.btn-edit').click(function(e) {
