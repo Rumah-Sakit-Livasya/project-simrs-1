@@ -12,26 +12,57 @@
 
         .video-container {
             position: relative;
-            width: 100%;
-            padding-top: 75%;
-            /* Aspect ratio of 4:3 */
+            padding-top: 100%;
+            /* 16:9 Aspect Ratio */
         }
 
-        #video,
-        #canvas {
+        .video-container video {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-        }
-
-        #video {
+            object-fit: cover;
             transform: scaleX(-1);
+            /* Membalik video secara horizontal */
         }
 
-        #canvas {
-            z-index: 1;
+        @media (max-width: 576px) {
+            .modal-dialog {
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+                height: 100%;
+                max-height: 100%;
+            }
+
+            .modal-content {
+                height: 100%;
+                max-height: 100%;
+                border-radius: 0;
+            }
+
+            .modal-body {
+                overflow-y: auto;
+            }
+
+            .video-container {
+                position: relative;
+                width: 100%;
+                padding-top: 100%;
+                /* 16:9 Aspect Ratio */
+            }
+
+            .video-container video {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transform: scaleX(-1);
+                /* Membalik video secara horizontal */
+            }
         }
 
         .icon-dashboard-report {
@@ -848,5 +879,135 @@
             //     $("#waktu-realtime").text(timeString);
             // }, 1000);
         });
+    </script>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const snap = document.getElementById('snap');
+        const uploadButton = document.getElementById('upload');
+        const clock_out = document.getElementById('clock_out');
+
+        function toggleSpinner(buttonId, show) {
+            const button = document.getElementById(buttonId);
+            const spinner = button.querySelector('.spinner-border');
+            if (show) {
+                spinner.classList.remove('d-none');
+            } else {
+                spinner.classList.add('d-none');
+            }
+        }
+
+        async function startCamera() {
+            try {
+                const constraints = {
+                    video: {
+                        width: {
+                            ideal: 640
+                        },
+                        height: {
+                            ideal: 720
+                        }
+                    }
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+            } catch (error) {
+                console.error('Error accessing the camera:', error);
+            }
+        }
+
+        // snap.addEventListener('click', () => {
+
+        // });
+
+        uploadButton.addEventListener('click', async () => {
+            // Disable the button to prevent multiple submissions
+            uploadButton.disabled = true;
+
+            toggleSpinner('upload', true);
+            context.scale(-1, 1);
+            context.drawImage(video, -canvas.width, 0, 640, 480);
+            const dataURL = canvas.toDataURL('image/png');
+            const formData = new FormData();
+            const location = latitude + ", " + longitude;
+            formData.append('image', dataURL);
+            formData.append('location', location);
+            formData.append('latitude', latitude);
+            formData.append('longitude', longitude);
+
+            try {
+                const response = await fetch('/attendances/outsource', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    console.log('Success:', result);
+                    $('#clockin-modal').modal('hide');
+                    showSuccessAlert(response.message);
+                    setTimeout(function() {
+                        console.log('Reloading the page now.');
+                        window.location.reload();
+                    }, 1000);
+
+                } else {
+                    $('#clockin-modal').modal('hide');
+                    showErrorAlert(result.error);
+                }
+            } catch (error) {
+                showErrorAlert(error.error);
+            } finally {
+                // Re-enable the button after process completion
+                toggleSpinner('upload', false);
+                uploadButton.disabled = false;
+            }
+        });
+
+
+        clock_out.addEventListener('click', async () => {
+            toggleSpinner('clock_out', true);
+            const formData = new FormData();
+            const location = latitude + ", " + longitude;
+            formData.append('location', location);
+            formData.append('latitude', latitude);
+            formData.append('longitude', longitude);
+
+            $('#clock_in').prop('disabled', true);
+            $('#clock_in').find('.spinner-text').removeClass('d-none');
+            try {
+                const response = await fetch('/outsource/attendances/clock_out', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    toggleSpinner('clock_out', false);
+                    showSuccessAlert(response.message);
+                    setTimeout(function() {
+                        console.log('Reloading the page now.');
+                        window.location.reload();
+                    }, 1000);
+
+                } else {
+                    console.error('Error:', result);
+                    $('#clockin-modal').modal('hide');
+                    showErrorAlert(result.error);
+                }
+            } catch (error) {
+                showErrorAlert(error.error);
+            }
+        });
+
+        startCamera();
     </script>
 @endsection
