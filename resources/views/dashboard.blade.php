@@ -548,7 +548,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $employee->fullname }}</td>
-                                        <td>{{ $employee->organization->name }}</td>
+                                        <td>{{ $employee->organization->name ?? '-' }}</td>
                                         @foreach ($monthlyLateCount as $month => $lateMinutes)
                                             <td>{{ $lateMinutes }}</td>
                                         @endforeach
