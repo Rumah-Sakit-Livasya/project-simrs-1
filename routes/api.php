@@ -155,6 +155,8 @@ Route::prefix('dashboard')->group(function () {
         Route::get('/organization/{id}', [EmployeeController::class, 'editOrganisasi']);
         Route::put('/organization/{id}', [EmployeeController::class, 'updateOrganization']);
         Route::post('/salary/export', [EmployeeController::class, 'exportSalary'])->name('salary.export');
+        Route::post('/salary/export/deductions', [PayrollApiController::class, 'exportPayrollDeductions']);
+        Route::post('/salary/import/deductions', [PayrollApiController::class, 'importPayrollDeductions']);
         Route::post('/salary/import', [EmployeeController::class, 'importSalary'])->name('salary.import');
         Route::post('/deduction/export', [EmployeeController::class, 'exportDeduction'])->name('deduction.export');
         Route::post('/deduction/import', [EmployeeController::class, 'importDeduction'])->name('deduction.import');
