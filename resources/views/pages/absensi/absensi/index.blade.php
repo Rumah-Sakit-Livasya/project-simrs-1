@@ -5,15 +5,18 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
     <style>
-        #map {
-            height: 225px;
-            /* Ensure the map container has a height */
+        /* Mengatur container video agar memiliki aspek rasio yang benar */
+        #canvas {
+            transform: none;
+            /* Pastikan tidak ada transformasi CSS */
         }
 
         .video-container {
             position: relative;
-            padding-top: 100%;
-            /* 16:9 Aspect Ratio */
+            width: 100%;
+            padding-top: 120%;
+            /* 5:6 Aspect Ratio for a slightly taller view */
+            /* Gunakan padding-top yang sesuai untuk aspect ratio yang diinginkan */
         }
 
         .video-container video {
@@ -24,44 +27,22 @@
             height: 100%;
             object-fit: cover;
             transform: scaleX(-1);
-            /* Membalik video secara horizontal */
+            /* Mengatur video agar menutupi container dengan benar */
         }
 
-        @media (max-width: 576px) {
-            .modal-dialog {
-                margin: 0;
-                width: 100%;
-                max-width: 100%;
-                height: 100%;
-                max-height: 100%;
-            }
+        #map {
+            height: 300px;
+            /* Atur tinggi sesuai kebutuhan */
+            width: 100%;
+            /* Lebar peta sesuai dengan elemen kontainer */
+        }
 
-            .modal-content {
-                height: 100%;
-                max-height: 100%;
-                border-radius: 0;
-            }
-
-            .modal-body {
-                overflow-y: auto;
-            }
-
+        /* Responsif untuk ukuran layar lebih kecil */
+        @media (max-width: 768px) {
             .video-container {
-                position: relative;
-                width: 100%;
-                padding-top: 100%;
-                /* 16:9 Aspect Ratio */
-            }
-
-            .video-container video {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transform: scaleX(-1);
-                /* Membalik video secara horizontal */
+                padding-top: 140%;
+                /* Adjust the aspect ratio for smaller screens */
+                /* Adjust padding-top for a taller aspect ratio on mobile */
             }
         }
 
@@ -749,265 +730,225 @@
         // });
 
         $(document).ready(function() {
-            async function initMap() {
-                const map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            const uploadButton = document.getElementById('upload');
+            let latitude = null;
+            let longitude = null;
+            let actionType = null; // Will be either 'clock_in' or 'clock_out'
+
+            function toggleSpinner(buttonId, show) {
+                const button = document.getElementById(buttonId);
+                const spinner = button.querySelector('.spinner-border');
+                if (show) {
+                    spinner.style.display = 'inline-block';
+                } else {
+                    spinner.style.display = 'none';
+                }
+            }
+
+            async function startCamera() {
+                try {
+                    const constraints = {
+                        video: {
+                            facingMode: 'user', // Use 'environment' for rear camera
+                            width: {
+                                ideal: 640
+                            },
+                            height: {
+                                ideal: 720
+                            },
+                            playsinline: true // Ensure playsinline is true
+                        }
+                    };
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true); // Set playsinline attribute
+
+                    // Set canvas size when video metadata is loaded
+                    video.addEventListener('loadedmetadata', () => {
+                        adjustCanvasSize();
+                    });
+                } catch (error) {
+                    console.error('Error accessing the camera:', error);
+                    alert('Error accessing the camera: ' + error.message);
+                }
+            }
+
+            function adjustCanvasSize() {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
+
+            async function getLocation() {
+                return new Promise((resolve, reject) => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(position => {
+                            latitude = position.coords.latitude;
+                            longitude = position.coords.longitude;
+                            resolve(position);
+                        }, error => {
+                            console.error("Geolocation failed: " + error.message);
+                            reject(error);
+                        });
+                    } else {
+                        console.error("Geolocation is not supported by this browser.");
+                        reject(new Error("Geolocation not supported"));
+                    }
+                });
+            }
+
+            async function initializeMap() {
+                var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        latitude = position.coords.latitude;
-                        longitude = position.coords.longitude;
-                        const accuracy = position.coords.accuracy;
+                try {
+                    const position = await getLocation();
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
 
-                        console.log(
-                            `Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy}`);
+                    map.setView([lat, lng], 17); // Zoom level set to 17 for closer view
 
-                        map.setView([latitude, longitude], 17); // Zoom level set to 17 for closer view
-
-                        L.marker([latitude, longitude]).addTo(map)
-                            .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
-                            .openPopup();
-                    }, function(error) {
-                        showErrorAlert("Geolocation failed: " + error.message);
-                    });
-                } else {
-                    showErrorAlert("Geolocation is not supported by this browser.");
+                    L.marker([lat, lng]).addTo(map)
+                        .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
+                        .openPopup();
+                } catch (error) {
+                    console.error("Error initializing map: ", error);
                 }
             }
 
-            initMap();
+            $('#clock_in').on('click', function(e) {
+                e.preventDefault();
+                actionType = 'clock_in'; // Set flag for Clock In
+                $('#picture-modal').modal('show');
+            });
 
-            $('#clock_in').click(function() {
+            $('#clock_out').on('click', function(e) {
+                e.preventDefault();
+                actionType = 'clock_out'; // Set flag for Clock Out
+                $('#picture-modal').modal('show');
+            });
 
-                $('#clock_in').prop('disabled', true);
-                $('#clock_in').find('.spinner-text').removeClass('d-none');
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    let latitude = position.coords.latitude;
-                    let longitude = position.coords.longitude;
-                    let data_clock_in = {
-                        _token: "{{ csrf_token() }}",
-                        latitude: latitude,
-                        longitude: longitude,
-                        clock_in: null,
-                        clock_out: null,
-                        employee_id: "{{ Auth::user()->employee->id }}",
-                        time_in: null
-
-                    };
-                    $.ajax({
-                        type: "PUT",
-                        url: "/api/dashboard/clock-in",
-                        data: data_clock_in,
-                        async: true,
-                        success: function(response) {
-                            $('#clock_in').find('.spinner-text').addClass(
-                                'd-none');
-                            showSuccessAlert(response.message)
-                            setTimeout(function() {
-                                location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr) {
-                            if (xhr.status === 422) {
-                                var errors = xhr.responseJSON;
-                                // Lakukan sesuatu dengan pesan kesalahan yang diterima
-                                showErrorAlert(errors.error);
-                            } else {
-                                // Tangani kesalahan lainnya
-                                var errors = xhr.responseJSON;
-                                showErrorAlert(errors.error);
+            $('#dt-basic-example').dataTable({
+                responsive: false,
+                "pageLength": 5,
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [{
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        title: 'Rekap Absensi Bulan ' + new Date().toLocaleString('default', {
+                            month: 'long',
+                        }) + ' ' + new Date().getFullYear(),
+                        titleAttr: 'Export to Excel',
+                        className: 'btn-outline-default',
+                        exportOptions: {
+                            columns: ':visible',
+                            format: {
+                                body: function(data, row, column, node) {
+                                    // Menghapus tag HTML dari data sebelum mengekspor ke Excel
+                                    return $('<div/>').html(data).text();
+                                }
                             }
-                        }
-                    });
-                });
-
-            })
-            $('#clock_out').click(function() {
-
-                $('#clock_out').prop('disabled', true);
-                $('#clock_out').find('.spinner-text').removeClass('d-none');
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    let latitude = position.coords.latitude;
-                    let longitude = position.coords.longitude;
-                    let data_clock_out = {
-                        _token: "{{ csrf_token() }}",
-                        latitude: latitude,
-                        longitude: longitude,
-                        clock_out: null,
-                        employee_id: "{{ Auth::user()->employee->id }}",
-                        time_out: null
-                    };
-                    $.ajax({
-                        type: "PUT",
-                        url: "/api/dashboard/clock-out",
-                        data: data_clock_out,
-                        async: true,
-                        success: function(response) {
-                            $('#clock_out').find('.spinner-text').addClass(
-                                'd-none');
-                            showSuccessAlert(response.message)
-                            setTimeout(function() {
-                                location.reload();
-                            }, 1000);
                         },
-                        error: function(xhr) {
-                            if (xhr.status === 422) {
-                                var errors = xhr.responseJSON;
-                                // Lakukan sesuatu dengan pesan kesalahan yang diterima
-                                showErrorAlert(errors.error);
-                            } else {
-                                // Tangani kesalahan lainnya
-                                var errors = xhr.responseJSON;
-                                showErrorAlert(errors.error);
-                            }
+                        customize: function(xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            $('row:first c', sheet).attr('style',
+                                'text-align: center;'); // Mengatur gaya untuk heading
+                            $('row:nth-child(2) c', sheet).attr('s', '43');
+                            $('row:nth-child(2) c', sheet).attr('class', 'style43');
                         }
-                    });
-                });
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        titleAttr: 'Print Table',
+                        className: 'btn-outline-default'
+                    }
+                ]
+            });
 
-            })
-            // setInterval(function() {
-            //     var currentTime = new Date();
-            //     var hours = currentTime.getHours();
-            //     var minutes = currentTime.getMinutes();
-            //     var seconds = currentTime.getSeconds();
-            //     hours = (hours < 10 ? "0" : "") + hours;
-            //     minutes = (minutes < 10 ? "0" : "") + minutes;
-            //     seconds = (seconds < 10 ? "0" : "") + seconds;
-            //     var timeString = hours + ':' + minutes + ':' + seconds;
-            //     $("#waktu-realtime").text(timeString);
-            // }, 1000);
+            setInterval(function() {
+                var currentTime = new Date();
+                var hours = currentTime.getHours();
+                var minutes = currentTime.getMinutes();
+                var seconds = currentTime.getSeconds();
+                hours = (hours < 10 ? "0" : "") + hours;
+                minutes = (minutes < 10 ? "0" : "") + minutes;
+                seconds = (seconds < 10 ? "0" : "") + seconds;
+                var timeString = hours + ':' + minutes + ':' + seconds;
+                $("#waktu-realtime").text(timeString);
+            }, 1000);
+
+            startCamera();
+            initializeMap();
+
+            function dataURLToFile(dataURL, filename) {
+                const [header, data] = dataURL.split(',');
+                const mime = header.match(/:(.*?);/)[1];
+                const binary = atob(data);
+                const array = [];
+                for (let i = 0; i < binary.length; i++) {
+                    array.push(binary.charCodeAt(i));
+                }
+                return new File([new Uint8Array(array)], filename, {
+                    type: mime
+                });
+            }
+
+            uploadButton.addEventListener('click', async () => {
+                uploadButton.disabled = true;
+                toggleSpinner('upload', true);
+
+                // Reset transformasi canvas dan gambar tanpa efek mirror
+                context.resetTransform();
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const dataURL = canvas.toDataURL('image/png');
+                const file = dataURLToFile(dataURL, 'photo.png');
+                const formData = new FormData();
+                formData.append('employee_id', '{{ auth()->user()->employee->id }}');
+                formData.append('photo', file); // Use file object instead of dataURL
+                formData.append('location', `${latitude}, ${longitude}`);
+                formData.append('latitude', latitude);
+                formData.append('longitude', longitude);
+
+                const apiUrl = actionType === 'clock_in' ? '/api/dashboard/clock-in' :
+                    '/api/dashboard/clock-out';
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST', // Update method to PUT if required
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        console.log('Success:', result);
+                        $('#picture-modal').modal('hide');
+                        showSuccessAlert(result.message);
+                        setTimeout(() => {
+                            console.log('Reloading the page now.');
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        $('#picture-modal').modal('hide');
+                        showErrorAlert(result.error);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showErrorAlert(error.message);
+                } finally {
+                    toggleSpinner('upload', false);
+                    uploadButton.disabled = false;
+                }
+            });
+
         });
     </script>
-    {{-- <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const snap = document.getElementById('snap');
-        const uploadButton = document.getElementById('upload');
-        const clock_out = document.getElementById('clock_out');
-
-        function toggleSpinner(buttonId, show) {
-            const button = document.getElementById(buttonId);
-            const spinner = button.querySelector('.spinner-border');
-            if (show) {
-                spinner.classList.remove('d-none');
-            } else {
-                spinner.classList.add('d-none');
-            }
-        }
-
-        async function startCamera() {
-            try {
-                const constraints = {
-                    video: {
-                        width: {
-                            ideal: 640
-                        },
-                        height: {
-                            ideal: 720
-                        }
-                    }
-                };
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                const video = document.getElementById('video');
-                video.srcObject = stream;
-            } catch (error) {
-                console.error('Error accessing the camera:', error);
-            }
-        }
-
-        // snap.addEventListener('click', () => {
-
-        // });
-
-        uploadButton.addEventListener('click', async () => {
-            // Disable the button to prevent multiple submissions
-            uploadButton.disabled = true;
-
-            toggleSpinner('upload', true);
-            context.scale(-1, 1);
-            context.drawImage(video, -canvas.width, 0, 640, 480);
-            const dataURL = canvas.toDataURL('image/png');
-            const formData = new FormData();
-            const location = latitude + ", " + longitude;
-            formData.append('image', dataURL);
-            formData.append('location', location);
-            formData.append('latitude', latitude);
-            formData.append('longitude', longitude);
-
-            try {
-                const response = await fetch('/attendances/outsource', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    console.log('Success:', result);
-                    $('#clockin-modal').modal('hide');
-                    showSuccessAlert(response.message);
-                    setTimeout(function() {
-                        console.log('Reloading the page now.');
-                        window.location.reload();
-                    }, 1000);
-
-                } else {
-                    $('#clockin-modal').modal('hide');
-                    showErrorAlert(result.error);
-                }
-            } catch (error) {
-                showErrorAlert(error.error);
-            } finally {
-                // Re-enable the button after process completion
-                toggleSpinner('upload', false);
-                uploadButton.disabled = false;
-            }
-        });
-
-
-        clock_out.addEventListener('click', async () => {
-            toggleSpinner('clock_out', true);
-            const formData = new FormData();
-            const location = latitude + ", " + longitude;
-            formData.append('location', location);
-            formData.append('latitude', latitude);
-            formData.append('longitude', longitude);
-
-            $('#clock_in').prop('disabled', true);
-            $('#clock_in').find('.spinner-text').removeClass('d-none');
-            try {
-                const response = await fetch('/outsource/attendances/clock_out', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    toggleSpinner('clock_out', false);
-                    showSuccessAlert(response.message);
-                    setTimeout(function() {
-                        console.log('Reloading the page now.');
-                        window.location.reload();
-                    }, 1000);
-
-                } else {
-                    console.error('Error:', result);
-                    $('#clockin-modal').modal('hide');
-                    showErrorAlert(result.error);
-                }
-            } catch (error) {
-                showErrorAlert(error.error);
-            }
-        });
-
-        startCamera();
-    </script> --}}
 @endsection
