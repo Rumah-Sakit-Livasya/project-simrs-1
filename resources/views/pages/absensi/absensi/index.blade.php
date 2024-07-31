@@ -5,7 +5,47 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
     <style>
+        #gambar-detail-absensi {
+            display: flex;
+            /* Use flexbox to position images side by side */
+            justify-content: space-between;
+            /* Space images evenly */
+            width: 100%;
+            margin-bottom: 20px;
+            /* Ensure the container takes full width */
+        }
+
+        .img-clock {
+            width: 50%;
+            /* Each image takes 50% of the modal width */
+            height: auto;
+            /* Maintain aspect ratio */
+            object-fit: cover;
+            /* Cover the container */
+            object-position: center;
+            /* Center the image */
+        }
+
         /* Mengatur container video agar memiliki aspek rasio yang benar */
+        #map-wrapper {
+            position: relative;
+            height: 400px;
+            /* Adjust the height as needed */
+            width: 100%;
+            /* Make wrapper take full width of modal */
+            margin-bottom: 20px;
+            /* Add space below the map */
+        }
+
+        #map-detail-absensi {
+            height: 100%;
+            /* Make map fill the wrapper */
+            width: 100%;
+            /* Make map fill the wrapper */
+            border: 1px solid #ddd;
+            /* Optional: add a border around the map for better visibility */
+        }
+
         #canvas {
             transform: none;
             /* Pastikan tidak ada transformasi CSS */
@@ -379,8 +419,10 @@
                                                     @endisset
                                                 </td>
                                                 <td>
-                                                    <button class="btn btn-primary text-white py-1 px-2 detail-absensi">
-                                                        <i class="fas fa-eye mr-2"></i> Detail
+                                                    <button class="btn btn-primary text-white py-1 px-2 detail-absensi"
+                                                        data-employee-id="{{ $row->employee_id }}"
+                                                        data-tanggal="{{ $row->date }}">
+                                                        <i class="fas fa-eye"></i>
                                                     </button>
                                                 </td>
                                             </tr>
@@ -409,6 +451,7 @@
         </div>
     </main>
     @include('pages.absensi.absensi.partials.face')
+    @include('pages.absensi.absensi.partials.detail-absensi')
 @endsection
 @section('plugin')
     <script src="/js/dependency/moment/moment.js"></script>
@@ -842,7 +885,7 @@
 
             $('#dt-basic-example').dataTable({
                 responsive: false,
-                "pageLength": 5,
+                "pageLength": 31,
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'B>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
@@ -953,13 +996,137 @@
                     }
                 } catch (error) {
                     $('#picture-modal').modal('hide');
-                    showErrorAlert(error.message);
+                    showErrorAlert(error.error);
                 } finally {
                     toggleSpinner('upload', false);
                     uploadButton.disabled = false;
                 }
             });
 
+        });
+
+        async function fetchAttendanceDetails(employeeId, tanggal) {
+            const url = '/api/dashboard/attendances/detail';
+            const data = {
+                employee_id: employeeId,
+                tanggal: tanggal
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('Error fetching attendance details:', error);
+                showErrorAlert(error.message);
+                throw error;
+            }
+        }
+
+        $('.detail-absensi').click(async function(e) {
+            e.preventDefault();
+            const employeeId = $(this).attr('data-employee-id');
+            const tanggal = $(this).attr('data-tanggal');
+            const modal = $('#detail-absensi-modal');
+            const modalBody = modal.find('.modal-body');
+
+            try {
+                console.log('Fetching attendance details for:', employeeId, tanggal);
+                const result = await fetchAttendanceDetails(employeeId, tanggal);
+
+                if (result.success) {
+                    const attendance = result.data;
+
+                    $('#tanggal-detail-absensi').text(tanggal);
+
+                    // Render map after modal is shown
+                    modal.on('shown.bs.modal', function() {
+                        if (attendance.location) {
+                            const [latitude, longitude] = attendance.location.split(',');
+
+                            // Clear the modal body before appending new content
+                            modalBody.html('');
+
+                            // Create wrapper for the map
+                            const mapWrapper = document.createElement('div');
+                            mapWrapper.id = 'map-wrapper';
+                            mapWrapper.style.position = 'relative';
+                            mapWrapper.style.height = '300px';
+                            mapWrapper.style.marginBottom = '20px';
+                            mapWrapper.style.width = '100%';
+
+                            // Create map element and append it to the wrapper
+                            const mapElement = document.createElement('div');
+                            mapElement.id = 'map-detail-absensi';
+                            mapElement.style.height = '100%';
+                            mapElement.style.width = '100%';
+                            mapWrapper.append(mapElement);
+
+                            // Append map wrapper to modal body
+                            modalBody.append(mapWrapper);
+
+                            // Initialize map with placeholder coordinates
+                            const map = L.map(mapElement).setView([0, 0], 13);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            }).addTo(map);
+
+                            // Set view to actual coordinates after the map is added to the DOM
+                            map.setView([latitude, longitude], 17);
+                            L.marker([latitude, longitude]).addTo(map)
+                                .bindPopup('Lokasi Absen')
+                                .openPopup();
+                        }
+
+                        // Render images if available
+                        if (attendance.foto_clock_in || attendance.foto_clock_out) {
+                            const gambarDetail = document.createElement('div');
+                            gambarDetail.id = 'gambar-detail-absensi';
+                            gambarDetail.style.display = 'flex'; // Use flexbox to position images
+                            gambarDetail.style.justifyContent = 'space-between'; // Space images evenly
+                            gambarDetail.style.width = '100%'; // Ensure the container takes full width
+                            modalBody.append(gambarDetail);
+
+                            if (attendance.foto_clock_in) {
+                                const imgClockIn = document.createElement('img');
+                                imgClockIn.src = `/storage/${attendance.foto_clock_in}`;
+                                imgClockIn.alt = 'Foto Clock In';
+                                imgClockIn.className = 'img-clock'; // Use a common class for styling
+                                gambarDetail.append(imgClockIn);
+                            }
+
+                            if (attendance.foto_clock_out) {
+                                const imgClockOut = document.createElement('img');
+                                imgClockOut.src = `/storage/${attendance.foto_clock_out}`;
+                                imgClockOut.alt = 'Foto Clock Out';
+                                imgClockOut.className = 'img-clock'; // Use a common class for styling
+                                gambarDetail.append(imgClockOut);
+                            }
+                        }
+                    });
+
+                    // Show modal
+                    modal.modal('show');
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error handling detail-absensi click:', error.message);
+                alert('Terjadi kesalahan saat mengambil data absensi.');
+            }
         });
     </script>
 @endsection

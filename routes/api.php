@@ -165,6 +165,7 @@ Route::prefix('dashboard')->group(function () {
 
     Route::prefix('attendances')->group(function () {
         Route::get('/report/employee/{employee_id}/{periode}/{tahun}', [ReportController::class, 'getReportAttendancesEmployee']);
+        Route::post('/detail', [AttendanceController::class, 'getDetailAttendance']);
     });
 
     Route::prefix('day-off')->group(function () {

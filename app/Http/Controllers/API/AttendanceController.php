@@ -952,4 +952,17 @@ class AttendanceController extends Controller
             ], 404);
         }
     }
+
+    public function getDetailAttendance(Request $request)
+    {
+        $attendance = Attendance::where('date', $request->tanggal)
+            ->where('employee_id', $request->employee_id)
+            ->first();
+
+        if (!$attendance) {
+            return response()->json(['success' => false, 'message' => 'Data absensi tidak ditemukan'], 404);
+        }
+
+        return response()->json(['success' => true, 'data' => $attendance], 200);
+    }
 }
