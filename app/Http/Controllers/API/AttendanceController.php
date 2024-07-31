@@ -111,12 +111,11 @@ class AttendanceController extends Controller
 
     public function clock_out(Request $request)
     {
-
-        // Find the employee and company
-        $employee = Employee::where('id', $request->employee_id)->first();
-        $company = $employee->company;
-
         try {
+            // Find the employee and company
+            $employee = Employee::where('id', $request->employee_id)->first();
+            $company = $employee->company;
+
             $perusahaanLatitude = null;
             $perusahaanLongitude = null;
             $radiusPerusahaan = $company->radius; // Radius dalam kilometer
@@ -127,7 +126,7 @@ class AttendanceController extends Controller
             // Check if the employee has locations
             if ($employee->locations()->exists()) {
                 // If multiple locations exist
-                foreach ($employee->locations as $i => $location) {
+                foreach ($employee->locations as $location) {
                     $perusahaanLatitude = $location->latitude;
                     $perusahaanLongitude = $location->longitude;
                     $jarak = haversine($perusahaanLatitude, $perusahaanLongitude, $penggunaLatitude, $penggunaLongitude);
@@ -135,6 +134,7 @@ class AttendanceController extends Controller
                     // If within radius, allow clock out
                     if ($jarak <= $radiusPerusahaan) {
                         $is_clock_in = true;
+                        break; // Stop checking other locations if already within radius
                     }
                 }
             } else {
@@ -180,72 +180,40 @@ class AttendanceController extends Controller
                     ->where('date', $tanggal_sekarang->format('Y-m-d'))
                     ->first();
 
-                if ($attendance_kemarin && $attendance_kemarin->clock_out == null && $attendance_kemarin->shift->time_out > '06:00' && $attendance_kemarin->shift->time_out < '07:10') {
-                    if (!isset($attendance_kemarin)) {
-                        throw new \Exception("Pegawai Belum Memiliki Shift!");
+                if ($attendance_kemarin) {
+                    if ($attendance_kemarin->clock_out === null && $attendance_kemarin->shift->time_out > '06:00' && $attendance_kemarin->shift->time_out < '07:10') {
+                        if (!isset($attendance_kemarin)) {
+                            throw new \Exception("Pegawai Belum Memiliki Shift!");
+                        }
+                        $waktu_absen_pulang = $attendance_kemarin->shift->time_out;
+                        if ($tanggal_sekarang->format('Y-m-d') == $attendance_kemarin->date) {
+                            $waktu_dikonversi = Carbon::createFromFormat('H:i', $attendance_kemarin->shift->time_out);
+                            $tanggal_besok = Carbon::parse($attendance_kemarin->date)->addDay();
+                            $tanggal_besok->setTime($waktu_dikonversi->hour, $waktu_dikonversi->minute);
+                            $perbedaanMenit = abs($tanggal_sekarang->diffInMinutes($tanggal_besok)) + 1;
+                        } else {
+                            $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? abs($tanggal_sekarang->diffInMinutes($waktu_absen_pulang)) : null;
+                        }
+                        $perbedaanMenit = ($perbedaanMenit == 0) ? null : $perbedaanMenit;
+
+                        if ($attendance_kemarin->clock_in != null) {
+                            $attendance_kemarin->update([
+                                'clock_out' => $tanggal_sekarang,
+                                'early_clock_out' => $perbedaanMenit,
+                                'foto_clock_out' => $photoPath // Store the photo path
+                            ]);
+
+                            return response()->json(['message' => 'Berhasil Clock Out!']);
+                        } else {
+                            return response()->json(['error' => 'Anda belum clock in!'], 422);
+                        }
                     }
-                    $waktu_absen_pulang = $attendance_kemarin->shift->time_out;
-                    if ($tanggal_sekarang->format('Y-m-d') == $attendance_kemarin->date) {
-                        $waktu_dikonversi = Carbon::createFromFormat('H:i', $attendance_kemarin->shift->time_out);
-                        $tanggal_besok = Carbon::parse($attendance_kemarin->date)->addDay();
-                        $tanggal_besok->setTime($waktu_dikonversi->hour, $waktu_dikonversi->minute);
-                        $perbedaanMenit = abs($tanggal_sekarang->diffInMinutes($tanggal_besok)) + 1;
-                    } else {
-                        $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? abs($tanggal_sekarang->diffInMinutes($waktu_absen_pulang)) : null;
-                    }
-                    $perbedaanMenit = ($perbedaanMenit == 0) ? null : $perbedaanMenit;
+                }
 
-                    if ($attendance_kemarin->clock_in != null) {
-                        $attendance_kemarin->update([
-                            'clock_out' => $tanggal_sekarang,
-                            'early_clock_out' => $perbedaanMenit,
-                            'foto_clock_out' => $photoPath // Store the photo path
-                        ]);
-
-                        return response()->json(['message' => 'Berhasil Clock Out!']);
-                    } else {
-                        return response()->json(['error' => 'Anda belum clock in!'], 422);
-                    }// Kurangi satu hari dari waktu sekarang untuk check apakah kemarin shift malam atau tidak
-                $tanggal_kemarin = Carbon::now()->subDay();
-                //cek absen kemarin apakah shift malam
-                $attendance_kemarin = Attendance::where('employee_id', $request->employee_id)->where('date', $tanggal_kemarin->format('Y-m-d'))->first();
-
-                //get data untuk absensi hari ini jika tidak shift malam
-                $tanggal_sekarang = Carbon::now();
-                $attendance = Attendance::where('employee_id', $request->employee_id)->where('date', $tanggal_sekarang->format('Y-m-d'))->first();
-                if ($attendance_kemarin->clock_out == null && $attendance_kemarin->shift->time_out > '06:00' && $attendance_kemarin->shift->time_out < '07:10') {
-                    if (!isset($attendance_kemarin)) {
-                        throw new \Exception("Pegawai Belum Memiliki Shift!");
-                    }
-                    $waktu_absen_pulang = $attendance_kemarin->shift->time_out;
-                    if ($tanggal_sekarang->format('Y-m-d') == $attendance_kemarin->date) {
-                        $waktu_dikonversi = Carbon::createFromFormat('H:i', $attendance_kemarin->shift->time_out);
-                        $tanggal_besok = Carbon::parse($attendance_kemarin->date)->addDay();
-                        $tanggal_besok->setTime($waktu_dikonversi->hour, $waktu_dikonversi->minute);
-                        $perbedaanMenit = abs($tanggal_sekarang->diffInMinutes($tanggal_besok)) + 1;
-                    } else {
-                        $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? abs($tanggal_sekarang->diffInMinutes($waktu_absen_pulang)) : null;
-                    }
-                    $perbedaanMenit = ($perbedaanMenit == 0) ? null : $perbedaanMenit;
-
-                    if ($attendance_kemarin->clock_in != null) {
-                        $attendance_kemarin->update([
-                            'clock_out' => $tanggal_sekarang,
-                            'early_clock_out' => $perbedaanMenit,
-                            'foto_clock_out' => $photoPath,
-                        ]);
-
-                        return response()->json(['message' => 'Berhasil Clock Out!']);
-                    } else {
-                        return response()->json(['error' => 'Anda belum clock in!'], 422);
-                    }
-                } else {
-                    $waktu_absen_pulang = $attendance->shift->time_out;
-
+                if ($attendance) {
                     if ($attendance->clock_in !== null) {
                         $waktu_absen_pulang = $attendance->shift->time_out;
 
-                        //jika shift nya shift malam update ke tanggal sekarang dan tetapkan perbedaan menitnya dari jam hari ini sampai jam 07:00 besok
                         if ($attendance->shift->time_out > '06:00' && $attendance->shift->time_out < '07:10') {
                             $waktu_dikonversi = Carbon::createFromFormat('H:i', $attendance->shift->time_out);
                             $tanggal_besok = Carbon::parse($attendance->date)->addDay();
@@ -265,6 +233,8 @@ class AttendanceController extends Controller
                     } else {
                         return response()->json(['error' => 'Anda belum clock in!'], 422);
                     }
+                } else {
+                    return response()->json(['error' => 'Data absensi tidak ditemukan!'], 422);
                 }
             } else {
                 throw new \Exception("Lokasi diluar jangkauan!");
@@ -275,6 +245,7 @@ class AttendanceController extends Controller
             ], 404);
         }
     }
+
 
     // public function clock_in(Request $request)
     // {
@@ -379,129 +350,129 @@ class AttendanceController extends Controller
     //     }
     // }
 
-    public function clock_out(Request $request)
-    {
+    // public function clock_out(Request $request)
+    // {
 
-        $employee = Employee::where('id', request()->employee_id)->first();
-        $company = $employee->company;
-        try {
-            $perusahaanLatitude = null;
-            $perusahaanLongitude = null;
-            $radiusPerusahaan = $company->radius; // Radius dalam kilometer
-            $is_clock_in = false; //cek apakah sesuai radius lokasi
-            $penggunaLatitude = $request['latitude']; //lokasi absen pegawai
-            $penggunaLongitude = $request['longitude']; //lokasi absen pegawai
+    //     $employee = Employee::where('id', request()->employee_id)->first();
+    //     $company = $employee->company;
+    //     try {
+    //         $perusahaanLatitude = null;
+    //         $perusahaanLongitude = null;
+    //         $radiusPerusahaan = $company->radius; // Radius dalam kilometer
+    //         $is_clock_in = false; //cek apakah sesuai radius lokasi
+    //         $penggunaLatitude = $request['latitude']; //lokasi absen pegawai
+    //         $penggunaLongitude = $request['longitude']; //lokasi absen pegawai
 
 
-            //Jika memiliki lokasi absen ditabel lokasi
-            if ($employee->locations()->exists()) {
+    //         //Jika memiliki lokasi absen ditabel lokasi
+    //         if ($employee->locations()->exists()) {
 
-                //jika memiliki lebih dari 1 lokasi
-                foreach ($employee->locations as $i => $location) {
-                    $perusahaanLatitude = $location->latitude;
-                    $perusahaanLongitude = $location->longitude;
-                    $jarak = haversine($perusahaanLatitude, $perusahaanLongitude, $penggunaLatitude, $penggunaLongitude);
+    //             //jika memiliki lebih dari 1 lokasi
+    //             foreach ($employee->locations as $i => $location) {
+    //                 $perusahaanLatitude = $location->latitude;
+    //                 $perusahaanLongitude = $location->longitude;
+    //                 $jarak = haversine($perusahaanLatitude, $perusahaanLongitude, $penggunaLatitude, $penggunaLongitude);
 
-                    // jika jarak sudah masuk radius, maka izinkan absen
-                    if ($jarak <= $radiusPerusahaan) {
-                        $is_clock_in = true;
-                    }
-                }
-            } else {
-                // koordinat perusahaan
-                $perusahaanLatitude = $company->latitude;
-                $perusahaanLongitude = $company->longitude;
+    //                 // jika jarak sudah masuk radius, maka izinkan absen
+    //                 if ($jarak <= $radiusPerusahaan) {
+    //                     $is_clock_in = true;
+    //                 }
+    //             }
+    //         } else {
+    //             // koordinat perusahaan
+    //             $perusahaanLatitude = $company->latitude;
+    //             $perusahaanLongitude = $company->longitude;
 
-                $jarak = haversine($perusahaanLatitude, $perusahaanLongitude, $penggunaLatitude, $penggunaLongitude);
+    //             $jarak = haversine($perusahaanLatitude, $perusahaanLongitude, $penggunaLatitude, $penggunaLongitude);
 
-                // jika jarak sudah masuk radius, maka izinkan absen
-                if ($jarak <= $radiusPerusahaan) {
-                    $is_clock_in = true;
-                }
-            }
+    //             // jika jarak sudah masuk radius, maka izinkan absen
+    //             if ($jarak <= $radiusPerusahaan) {
+    //                 $is_clock_in = true;
+    //             }
+    //         }
 
-            // Validasi apakah pengguna berada dalam radius perusahaan
-            if ($is_clock_in) {
+    //         // Validasi apakah pengguna berada dalam radius perusahaan
+    //         if ($is_clock_in) {
 
-                $validator = Validator::make($request->all(), [
-                    'latitude' => 'required',
-                    'longitude' => 'required',
-                ]);
+    //             $validator = Validator::make($request->all(), [
+    //                 'latitude' => 'required',
+    //                 'longitude' => 'required',
+    //             ]);
 
-                if ($validator->fails()) {
-                    return response()->json($validator->errors(), 422);
-                }
+    //             if ($validator->fails()) {
+    //                 return response()->json($validator->errors(), 422);
+    //             }
 
-                // Kurangi satu hari dari waktu sekarang untuk check apakah kemarin shift malam atau tidak
-                $tanggal_kemarin = Carbon::now()->subDay();
-                //cek absen kemarin apakah shift malam
-                $attendance_kemarin = Attendance::where('employee_id', $request->employee_id)->where('date', $tanggal_kemarin->format('Y-m-d'))->first();
+    //             // Kurangi satu hari dari waktu sekarang untuk check apakah kemarin shift malam atau tidak
+    //             $tanggal_kemarin = Carbon::now()->subDay();
+    //             //cek absen kemarin apakah shift malam
+    //             $attendance_kemarin = Attendance::where('employee_id', $request->employee_id)->where('date', $tanggal_kemarin->format('Y-m-d'))->first();
 
-                //get data untuk absensi hari ini jika tidak shift malam
-                $tanggal_sekarang = Carbon::now();
-                $attendance = Attendance::where('employee_id', $request->employee_id)->where('date', $tanggal_sekarang->format('Y-m-d'))->first();
-                if ($attendance_kemarin->clock_out == null && $attendance_kemarin->shift->time_out > '06:00' && $attendance_kemarin->shift->time_out < '07:10') {
-                    if (!isset($attendance_kemarin)) {
-                        throw new \Exception("Pegawai Belum Memiliki Shift!");
-                    }
-                    $waktu_absen_pulang = $attendance_kemarin->shift->time_out;
-                    if ($tanggal_sekarang->format('Y-m-d') == $attendance_kemarin->date) {
-                        $waktu_dikonversi = Carbon::createFromFormat('H:i', $attendance_kemarin->shift->time_out);
-                        $tanggal_besok = Carbon::parse($attendance_kemarin->date)->addDay();
-                        $tanggal_besok->setTime($waktu_dikonversi->hour, $waktu_dikonversi->minute);
-                        $perbedaanMenit = abs($tanggal_sekarang->diffInMinutes($tanggal_besok)) + 1;
-                    } else {
-                        $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? abs($tanggal_sekarang->diffInMinutes($waktu_absen_pulang)) : null;
-                    }
-                    $perbedaanMenit = ($perbedaanMenit == 0) ? null : $perbedaanMenit;
+    //             //get data untuk absensi hari ini jika tidak shift malam
+    //             $tanggal_sekarang = Carbon::now();
+    //             $attendance = Attendance::where('employee_id', $request->employee_id)->where('date', $tanggal_sekarang->format('Y-m-d'))->first();
+    //             if ($attendance_kemarin->clock_out == null && $attendance_kemarin->shift->time_out > '06:00' && $attendance_kemarin->shift->time_out < '07:10') {
+    //                 if (!isset($attendance_kemarin)) {
+    //                     throw new \Exception("Pegawai Belum Memiliki Shift!");
+    //                 }
+    //                 $waktu_absen_pulang = $attendance_kemarin->shift->time_out;
+    //                 if ($tanggal_sekarang->format('Y-m-d') == $attendance_kemarin->date) {
+    //                     $waktu_dikonversi = Carbon::createFromFormat('H:i', $attendance_kemarin->shift->time_out);
+    //                     $tanggal_besok = Carbon::parse($attendance_kemarin->date)->addDay();
+    //                     $tanggal_besok->setTime($waktu_dikonversi->hour, $waktu_dikonversi->minute);
+    //                     $perbedaanMenit = abs($tanggal_sekarang->diffInMinutes($tanggal_besok)) + 1;
+    //                 } else {
+    //                     $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? abs($tanggal_sekarang->diffInMinutes($waktu_absen_pulang)) : null;
+    //                 }
+    //                 $perbedaanMenit = ($perbedaanMenit == 0) ? null : $perbedaanMenit;
 
-                    if ($attendance_kemarin->clock_in != null) {
-                        $attendance_kemarin->update([
-                            'clock_out' => $tanggal_sekarang,
-                            'early_clock_out' => $perbedaanMenit,
-                        ]);
+    //                 if ($attendance_kemarin->clock_in != null) {
+    //                     $attendance_kemarin->update([
+    //                         'clock_out' => $tanggal_sekarang,
+    //                         'early_clock_out' => $perbedaanMenit,
+    //                     ]);
 
-                        return response()->json(['message' => 'Berhasil Clock Out!']);
-                    } else {
-                        return response()->json(['error' => 'Anda belum clock in!'], 422);
-                    }
-                } else {
-                    $waktu_absen_pulang = $attendance->shift->time_out;
+    //                     return response()->json(['message' => 'Berhasil Clock Out!']);
+    //                 } else {
+    //                     return response()->json(['error' => 'Anda belum clock in!'], 422);
+    //                 }
+    //             } else {
+    //                 $waktu_absen_pulang = $attendance->shift->time_out;
 
-                    if ($attendance->clock_in !== null) {
-                        $waktu_absen_pulang = $attendance->shift->time_out;
+    //                 if ($attendance->clock_in !== null) {
+    //                     $waktu_absen_pulang = $attendance->shift->time_out;
 
-                        //jika shift nya shift malam update ke tanggal sekarang dan tetapkan perbedaan menitnya dari jam hari ini sampai jam 07:00 besok
-                        if ($attendance->shift->time_out > '06:00' && $attendance->shift->time_out < '07:10') {
-                            $waktu_dikonversi = Carbon::createFromFormat('H:i', $attendance->shift->time_out);
-                            $tanggal_besok = Carbon::parse($attendance->date)->addDay();
-                            $tanggal_besok->setTime($waktu_dikonversi->hour, $waktu_dikonversi->minute);
-                            $perbedaanMenit = abs($tanggal_sekarang->diffInMinutes($tanggal_besok));
-                        } else {
-                            $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? abs($tanggal_sekarang->diffInMinutes($waktu_absen_pulang)) + 1 : null;
-                        }
+    //                     //jika shift nya shift malam update ke tanggal sekarang dan tetapkan perbedaan menitnya dari jam hari ini sampai jam 07:00 besok
+    //                     if ($attendance->shift->time_out > '06:00' && $attendance->shift->time_out < '07:10') {
+    //                         $waktu_dikonversi = Carbon::createFromFormat('H:i', $attendance->shift->time_out);
+    //                         $tanggal_besok = Carbon::parse($attendance->date)->addDay();
+    //                         $tanggal_besok->setTime($waktu_dikonversi->hour, $waktu_dikonversi->minute);
+    //                         $perbedaanMenit = abs($tanggal_sekarang->diffInMinutes($tanggal_besok));
+    //                     } else {
+    //                         $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? abs($tanggal_sekarang->diffInMinutes($waktu_absen_pulang)) + 1 : null;
+    //                     }
 
-                        $attendance->update([
-                            'clock_out' => $tanggal_sekarang,
-                            'early_clock_out' => $perbedaanMenit,
-                        ]);
+    //                     $attendance->update([
+    //                         'clock_out' => $tanggal_sekarang,
+    //                         'early_clock_out' => $perbedaanMenit,
+    //                     ]);
 
-                        return response()->json(['message' => 'Berhasil Clock Out!']);
-                    } else {
-                        return response()->json(['error' => 'Anda belum clock in!'], 422);
-                    }
-                }
-            } else {
-                throw new \Exception("Lokasi diluar jangkauan!");
-            }
+    //                     return response()->json(['message' => 'Berhasil Clock Out!']);
+    //                 } else {
+    //                     return response()->json(['error' => 'Anda belum clock in!'], 422);
+    //                 }
+    //             }
+    //         } else {
+    //             throw new \Exception("Lokasi diluar jangkauan!");
+    //         }
 
-            //return response
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 404);
-        }
-    }
+    //         //return response
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'error' => $e->getMessage()
+    //         ], 404);
+    //     }
+    // }
 
     public function clock_in_outsource(Request $request)
     {
