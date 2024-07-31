@@ -170,38 +170,86 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
-        var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const uploadButton = document.getElementById('upload');
+        const clockOutButton = document.getElementById('clock_out');
         let latitude = null;
         let longitude = null;
 
-        // Check if Geolocation is available
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var lat = position.coords.latitude;
-                var lng = position.coords.longitude;
-                latitude = lat;
-                longitude = lng;
-                var accuracy = position.coords.accuracy;
+        function toggleSpinner(buttonId, show) {
+            const button = document.getElementById(buttonId);
+            const spinner = button.querySelector('.spinner-border');
+            if (show) {
+                spinner.style.display = 'inline-block';
+            } else {
+                spinner.style.display = 'none';
+            }
+        }
 
-                // Set the view to the current location with a closer zoom level
-                map.setView([lat, lng], 17); // Zoom level set to 15 for closer view
+        async function startCamera() {
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: 'user', // Use 'environment' for rear camera
+                        width: {
+                            ideal: 640
+                        },
+                        height: {
+                            ideal: 720
+                        }
+                    }
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+            } catch (error) {
+                console.error('Error accessing the camera:', error);
+                alert('Error accessing the camera: ' + error.message);
+            }
+        }
 
-                // Add a marker at the current location
-                var marker = L.marker([lat, lng]).addTo(map)
+        async function getLocation() {
+            return new Promise((resolve, reject) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        latitude = position.coords.latitude;
+                        longitude = position.coords.longitude;
+                        resolve(position);
+                    }, error => {
+                        console.error("Geolocation failed: " + error.message);
+                        reject(error);
+                    });
+                } else {
+                    console.error("Geolocation is not supported by this browser.");
+                    reject(new Error("Geolocation not supported"));
+                }
+            });
+        }
+
+        async function initializeMap() {
+            var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            try {
+                const position = await getLocation();
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+
+                map.setView([lat, lng], 17); // Zoom level set to 17 for closer view
+
+                L.marker([lat, lng]).addTo(map)
                     .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
                     .openPopup();
-            }, function(error) {
-                console.error("Geolocation failed: " + error.message);
-            });
-        } else {
-            console.error("Geolocation is not supported by this browser.");
+            } catch (error) {
+                console.error("Error initializing map: ", error);
+            }
         }
-        $(document).ready(function() {
 
+        $(document).ready(function() {
             $('#clock_in').on('click', function(e) {
                 e.preventDefault();
                 console.log("click");
@@ -239,7 +287,6 @@
                             // $('row c', sheet).attr('s', '25'); // Memberikan border pada sel
                             $('row:nth-child(2) c', sheet).attr('s', '43');
                             $('row:nth-child(2) c', sheet).attr('class', 'style43');
-
                         }
                     },
                     {
@@ -262,56 +309,15 @@
                 var timeString = hours + ':' + minutes + ':' + seconds;
                 $("#waktu-realtime").text(timeString);
             }, 1000);
+
+            startCamera();
+            initializeMap();
         });
-    </script>
-
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const snap = document.getElementById('snap');
-        const uploadButton = document.getElementById('upload');
-        const clock_out = document.getElementById('clock_out');
-
-        function toggleSpinner(buttonId, show) {
-            const button = document.getElementById(buttonId);
-            const spinner = button.querySelector('.spinner-border');
-            if (show) {
-                spinner.classList.remove('d-none');
-            } else {
-                spinner.classList.add('d-none');
-            }
-        }
-
-        async function startCamera() {
-            try {
-                const constraints = {
-                    video: {
-                        width: {
-                            ideal: 640
-                        },
-                        height: {
-                            ideal: 720
-                        }
-                    }
-                };
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                const video = document.getElementById('video');
-                video.srcObject = stream;
-            } catch (error) {
-                console.error('Error accessing the camera:', error);
-            }
-        }
-
-        // snap.addEventListener('click', () => {
-
-        // });
 
         uploadButton.addEventListener('click', async () => {
-            // Disable the button to prevent multiple submissions
             uploadButton.disabled = true;
-
             toggleSpinner('upload', true);
+
             context.scale(-1, 1);
             context.drawImage(video, -canvas.width, 0, 640, 480);
             const dataURL = canvas.toDataURL('image/png');
@@ -340,7 +346,6 @@
                         console.log('Reloading the page now.');
                         window.location.reload();
                     }, 1000);
-
                 } else {
                     $('#clockin-modal').modal('hide');
                     showErrorAlert(result.error);
@@ -348,14 +353,12 @@
             } catch (error) {
                 showErrorAlert(error.error);
             } finally {
-                // Re-enable the button after process completion
                 toggleSpinner('upload', false);
                 uploadButton.disabled = false;
             }
         });
 
-
-        clock_out.addEventListener('click', async () => {
+        clockOutButton.addEventListener('click', async () => {
             toggleSpinner('clock_out', true);
             const formData = new FormData();
             const location = latitude + ", " + longitude;
@@ -382,7 +385,6 @@
                         console.log('Reloading the page now.');
                         window.location.reload();
                     }, 1000);
-
                 } else {
                     console.error('Error:', result);
                     $('#clockin-modal').modal('hide');
@@ -392,7 +394,5 @@
                 showErrorAlert(error.error);
             }
         });
-
-        startCamera();
     </script>
 @endsection

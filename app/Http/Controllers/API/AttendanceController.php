@@ -479,14 +479,16 @@ class AttendanceController extends Controller
 
     public function clock_in_outsource(Request $request)
     {
+
         try {
-            $perusahaanLatitude = -6.764976435287691;
-            $perusahaanLongitude = 108.17786913965288;
-            $radiusPerusahaan = 1; // Radius dalam kilometer
+            $perusahaanLatitude = -6.764068373562436;
+            $perusahaanLongitude = 108.17782772851972;
+            $radiusPerusahaan = 0.09; // Radius dalam kilometer
             $is_clock_in = false; //cek apakah sesuai radius lokasi
             $penggunaLatitude = $request->latitude; //lokasi absen pegawai
             $penggunaLongitude = $request->longitude; //lokasi absen pegawai
 
+            // Panggil fungsi haversine untuk menghitung jarak
             $jarak = haversine($perusahaanLatitude, $perusahaanLongitude, $penggunaLatitude, $penggunaLongitude);
 
             // jika jarak sudah masuk radius, maka izinkan absen
@@ -570,7 +572,7 @@ class AttendanceController extends Controller
         try {
             $perusahaanLatitude = -6.764976435287691;
             $perusahaanLongitude = 108.17786913965288;
-            $radiusPerusahaan = 1; // Radius dalam kilometer
+            $radiusPerusahaan = 0.09; // Radius dalam kilometer
             $is_clock_out = false; //cek apakah sesuai radius lokasi
             $penggunaLatitude = $request->latitude; //lokasi absen pegawai
             $penggunaLongitude = $request->longitude; //lokasi absen pegawai

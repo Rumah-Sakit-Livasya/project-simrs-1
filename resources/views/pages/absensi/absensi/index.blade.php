@@ -880,7 +880,7 @@
             // }, 1000);
         });
     </script>
-    <script>
+    {{-- <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
@@ -1009,5 +1009,5 @@
         });
 
         startCamera();
-    </script>
+    </script> --}}
 @endsection
