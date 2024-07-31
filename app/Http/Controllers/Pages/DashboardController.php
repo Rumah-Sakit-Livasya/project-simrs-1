@@ -961,7 +961,7 @@ class DashboardController extends Controller
     {
         // dd(auth()->user()->getRoleNames());
         if (auth()->user()->employee->employment_status == 'Outsource') {
-            return redirect()->route('attendances.outsource');
+            return redirect()->route('monitoring.attendances.outsource');
         }
         $getNotify = $this->getNotify();
 

@@ -334,6 +334,7 @@
                                             <th style="white-space: nowrap">Early Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
+                                            <th style="white-space: nowrap">Detail</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -377,6 +378,11 @@
                                                         -
                                                     @endisset
                                                 </td>
+                                                <td>
+                                                    <button class="btn btn-primary text-white py-1 px-2 detail-absensi">
+                                                        <i class="fas fa-eye mr-2"></i> Detail
+                                                    </button>
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -390,6 +396,7 @@
                                             <th style="white-space: nowrap">Early Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
+                                            <th style="white-space: nowrap">Detail</th>
                                         </tr>
                                     </tfoot>
                                 </table>
