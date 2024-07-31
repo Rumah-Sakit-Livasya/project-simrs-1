@@ -169,6 +169,7 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
@@ -198,11 +199,13 @@
                         },
                         height: {
                             ideal: 720
-                        }
+                        },
+                        playsinline: true // Ensure playsinline is true
                     }
                 };
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = stream;
+                video.setAttribute('playsinline', true); // Set playsinline attribute
             } catch (error) {
                 console.error('Error accessing the camera:', error);
                 alert('Error accessing the camera: ' + error.message);
@@ -395,4 +398,5 @@
             }
         });
     </script>
+
 @endsection
