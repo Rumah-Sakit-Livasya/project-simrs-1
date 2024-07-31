@@ -907,7 +907,11 @@
 
                 // Reset transformasi canvas dan gambar tanpa efek mirror
                 context.resetTransform();
+                context.save(); // Simpan state saat ini
+                context.translate(canvas.width, 0); // Pindahkan origin ke kanan
+                context.scale(-1, 1); // Terapkan skala horizontal terbalik
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                context.restore(); // Kembalikan state sebelumnya
 
                 const dataURL = canvas.toDataURL('image/png');
                 const file = dataURLToFile(dataURL, 'photo.png');
@@ -941,7 +945,7 @@
                         showErrorAlert(result.error);
                     }
                 } catch (error) {
-                    console.error('Error:', error);
+                    $('#picture-modal').modal('hide');
                     showErrorAlert(error.message);
                 } finally {
                     toggleSpinner('upload', false);
