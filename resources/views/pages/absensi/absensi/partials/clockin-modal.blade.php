@@ -15,7 +15,7 @@
                         <div class="col-12">
                             <div class="form-group">
                                 <div class="video-container">
-                                    <video id="video" class="w-100" autoplay></video>
+                                    <video id="video" class="w-100" autoplay playsinline></video>
                                 </div>
                                 <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
                                 <div class="text-center mt-2 mb-4">

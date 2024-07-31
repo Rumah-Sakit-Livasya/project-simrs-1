@@ -4,10 +4,18 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
+        /* Mengatur container video agar memiliki aspek rasio yang benar */
+        #canvas {
+            transform: none;
+            /* Pastikan tidak ada transformasi CSS */
+        }
+
         .video-container {
             position: relative;
-            padding-top: 100%;
-            /* 16:9 Aspect Ratio */
+            width: 100%;
+            padding-top: 120%;
+            /* 5:6 Aspect Ratio for a slightly taller view */
+            /* Gunakan padding-top yang sesuai untuk aspect ratio yang diinginkan */
         }
 
         .video-container video {
@@ -18,8 +26,18 @@
             height: 100%;
             object-fit: cover;
             transform: scaleX(-1);
-            /* Membalik video secara horizontal */
+            /* Mengatur video agar menutupi container dengan benar */
         }
+
+        /* Responsif untuk ukuran layar lebih kecil */
+        @media (max-width: 768px) {
+            .video-container {
+                padding-top: 140%;
+                /* Adjust the aspect ratio for smaller screens */
+                /* Adjust padding-top for a taller aspect ratio on mobile */
+            }
+        }
+
 
         @media (max-width: 576px) {
             .modal-dialog {
@@ -38,24 +56,6 @@
 
             .modal-body {
                 overflow-y: auto;
-            }
-
-            .video-container {
-                position: relative;
-                width: 100%;
-                padding-top: 100%;
-                /* 16:9 Aspect Ratio */
-            }
-
-            .video-container video {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transform: scaleX(-1);
-                /* Membalik video secara horizontal */
             }
         }
     </style>
@@ -206,10 +206,20 @@
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = stream;
                 video.setAttribute('playsinline', true); // Set playsinline attribute
+
+                // Set canvas size when video metadata is loaded
+                video.addEventListener('loadedmetadata', () => {
+                    adjustCanvasSize();
+                });
             } catch (error) {
                 console.error('Error accessing the camera:', error);
                 alert('Error accessing the camera: ' + error.message);
             }
+        }
+
+        function adjustCanvasSize() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
         }
 
         async function getLocation() {
@@ -321,8 +331,14 @@
             uploadButton.disabled = true;
             toggleSpinner('upload', true);
 
-            context.scale(-1, 1);
-            context.drawImage(video, -canvas.width, 0, 640, 480);
+            // Reset transformasi canvas dan gambar tanpa efek mirror
+            context.resetTransform();
+            context.save(); // Simpan state saat ini
+            context.translate(canvas.width, 0); // Pindahkan origin ke kanan
+            context.scale(-1, 1); // Terapkan skala horizontal terbalik
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            context.restore(); // Kembalikan state sebelumnya
+
             const dataURL = canvas.toDataURL('image/png');
             const formData = new FormData();
             const location = latitude + ", " + longitude;
@@ -361,6 +377,8 @@
             }
         });
 
+
+
         clockOutButton.addEventListener('click', async () => {
             toggleSpinner('clock_out', true);
             const formData = new FormData();
@@ -372,7 +390,7 @@
             $('#clock_in').prop('disabled', true);
             $('#clock_in').find('.spinner-text').removeClass('d-none');
             try {
-                const response = await fetch('/outsource/attendances/clock_out', {
+                const response = await fetch('/attendances/outsource/clock_out', {
                     method: 'POST',
                     body: formData,
                     headers: {
