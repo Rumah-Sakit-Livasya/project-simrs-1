@@ -415,11 +415,14 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}' // Add CSRF token for security
                     },
                     success: function(response) {
-                        console.log('Success:', response);
+                        $('#tambah-potongan-modal').modal('hide');
                         showSuccessAlert('File uploaded successfully!');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
                     },
                     error: function(xhr, status, error) {
-                        console.error('Error:', error);
+                        $('#tambah-potongan-modal').modal('hide');
                         showErrorAlert('File upload failed. Please try again.');
                     }
                 });
