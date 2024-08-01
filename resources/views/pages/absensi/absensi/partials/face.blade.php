@@ -1,5 +1,5 @@
 <div class="modal fade font-weight-bold p-0" id="picture-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <form autocomplete="off" novalidate method="post" id="store-form" enctype="multipart/form-data">
                 @method('post')
