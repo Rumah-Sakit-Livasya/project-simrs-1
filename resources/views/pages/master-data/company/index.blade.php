@@ -232,7 +232,7 @@
 
             $.ajax({
                 type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                url: '/dashboard/company/get/' + id, // Isi dengan url/path file php yang dituju
+                url: '/master-data/companies/get/' + id, // Isi dengan url/path file php yang dituju
                 dataType: "json",
                 success: function(data) {
                     ikonEdit.classList.remove('d-none');
@@ -271,7 +271,7 @@
 
             $.ajax({
                 type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                url: '/dashboard/company/get/' + id, // Isi dengan url/path file php yang dituju
+                url: '/master-data/companies/get/' + id, // Isi dengan url/path file php yang dituju
                 dataType: "json",
                 success: function(data) {
                     ikonEdit.classList.remove('d-none');
@@ -294,7 +294,7 @@
                 const fd = new FormData(this);
                 $.ajax({
                     type: 'POST',
-                    url: '/dashboard/company/update-location/' + id,
+                    url: '/master-data/companies/update-location/' + id,
                     processData: false,
                     contentType: false,
                     data: fd,
@@ -325,7 +325,7 @@
                 // console.log(fd);
                 $.ajax({
                     type: 'POST',
-                    url: '/dashboard/company/update/' + dataId,
+                    url: '/master-data/companies/update/' + dataId,
                     processData: false,
                     contentType: false,
                     data: fd,
@@ -354,7 +354,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: '/dashboard/company/store',
+                    url: '/master-data/companies/store',
                     data: formData,
                     processData: false,
                     contentType: false,

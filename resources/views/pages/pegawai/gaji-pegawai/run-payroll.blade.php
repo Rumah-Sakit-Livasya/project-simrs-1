@@ -55,6 +55,16 @@
                                                 </select>
                                             </div>
                                             <div class="btn-next mt-3 text-right">
+                                                <button type="button" class="btn-export btn btn-success btn-sm ml-2">
+                                                    <div class="ikon-export">
+                                                        <i class='fas fa-file-excel mr-2'></i> Template Potongan Pegawai
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="btn-import btn btn-info btn-sm ml-2">
+                                                    <div class="ikon-import">
+                                                        <i class='fas fa-file-excel mr-2'></i> Import Potongan Pegawai
+                                                    </div>
+                                                </button>
                                                 <button type="submit" class="btn-next-step btn btn-primary btn-sm ml-2">
                                                     <div class="ikon-tambah">
                                                         <i class='bx bxs-checkbox-minus'></i> Tambah atau Ubah
@@ -117,7 +127,7 @@
                                                                     </a>
                                                                 </strong>
                                                                 <br>
-                                                                {{ $payroll->employee->organization->name }}
+                                                                {{ $payroll->employee->organization->name ?? '-' }}
                                                             </div>
                                                         </div>
                                                     </td>
@@ -150,7 +160,8 @@
                                                                     role="status" aria-hidden="true"></span>
                                                             </div>
                                                         </button>
-                                                        <button type="button" data-backdrop="static" data-keyboard="false"
+                                                        <button type="button" data-backdrop="static"
+                                                            data-keyboard="false"
                                                             class="badge mx-1 badge-danger p-2 border-0 text-white btn-edit"
                                                             data-id="{{ $payroll->id }}" title="Hapus Data"
                                                             onclick="btnDelete(event)">
@@ -181,6 +192,7 @@
     </main>
 
     @include('pages.pegawai.gaji-pegawai.partials.update-payroll')
+    @include('pages.pegawai.gaji-pegawai.partials.tambah-potongan')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -336,6 +348,86 @@
         }
 
         $(document).ready(function() {
+            $('.btn-export').click(function() {
+                // Get the selected value from the select element with id "periode"
+                const periode = $('#periode').val();
+
+                // Create the data object to be sent with the request
+                const data = {
+                    periode: periode
+                };
+
+                // Make the AJAX POST request to the specified API URL
+                $.ajax({
+                    url: '/api/dashboard/employee/salary/export/deductions',
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}' // Add CSRF token for security
+                    },
+                    xhrFields: {
+                        responseType: 'blob' // Set the response type to blob
+                    },
+                    success: function(response) {
+                        // Create a link element
+                        const link = document.createElement('a');
+                        const url = window.URL.createObjectURL(response);
+                        link.href = url;
+                        link.download = 'payroll_deductions_' + periode + '.xlsx';
+                        document.body.appendChild(link);
+                        link.click();
+                        window.URL.revokeObjectURL(url); // Clean up the URL object
+                        document.body.removeChild(link);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        // Handle the error response here
+                        showErrorAlert('Export failed. Please try again.');
+                    }
+                });
+            });
+
+            $('.btn-import').click(function() {
+                $('#tambah-potongan-modal').modal('show');
+            });
+
+            $('#potongan').on('change', function() {
+                // Get the selected file name
+                var fileName = $(this).val().split('\\').pop();
+
+                // Update the label text with the file name
+                $(this).next('.custom-file-label').html(fileName);
+            });
+
+            $('#update-potongan-tombol').on('click', function() {
+                // Create a FormData object
+                var formData = new FormData($('#form-update-potongan-payroll')[0]);
+
+                // Make the AJAX request
+                $.ajax({
+                    url: '/api/dashboard/employee/salary/import/deductions',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}' // Add CSRF token for security
+                    },
+                    success: function(response) {
+                        $('#tambah-potongan-modal').modal('hide');
+                        showSuccessAlert('File uploaded successfully!');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function(xhr, status, error) {
+                        $('#tambah-potongan-modal').modal('hide');
+                        showErrorAlert('File upload failed. Please try again.');
+                    }
+                });
+            });
+
             $(".js-sweetalert-deduction").on("click", function() {
                 var deductionId = $(this).data("payroll-id");
 

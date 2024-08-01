@@ -49,10 +49,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::prefix('dashboard')->group(function () {
-    // Route::post('/clock-in', [AttendanceController::class, 'clock_in']);
-    // Route::post('/clock-out', [AttendanceController::class, 'clock_out'])->name('employee.attendance.clock-out');
-    Route::put('/clock-in', [AttendanceController::class, 'clock_in']);
-    Route::put('/clock-out', [AttendanceController::class, 'clock_out']);
+    Route::post('/clock-in', [AttendanceController::class, 'clock_in']);
+    Route::post('/clock-out', [AttendanceController::class, 'clock_out'])->name('employee.attendance.clock-out');
+    // Route::put('/clock-in', [AttendanceController::class, 'clock_in']);
+    // Route::put('/clock-out', [AttendanceController::class, 'clock_out']);
     Route::post('/management-shift/store', [AttendanceController::class, 'import']);
 
     Route::put('/management-shift/update', [AttendanceController::class, 'updateManagementShift']);
@@ -61,6 +61,7 @@ Route::prefix('dashboard')->group(function () {
     Route::get('/attendances/{id}', [AttendanceController::class, 'getAttendance']);
     Route::put('/attendances/update/{id}', [AttendanceController::class, 'updateAttendance'])->name('update-absensi');
     Route::post('/attendances/update/{id}/ontime', [AttendanceRequestController::class, 'ontime'])->name('ontime');
+    Route::post('/attendances/update/{id}/alfa', [AttendanceRequestController::class, 'alfa'])->name('alfa');
     Route::post('/attendances/update/ontimeAll', [AttendanceRequestController::class, 'ontimeAll'])->name('attendance.ontimeAll');
 
     Route::get('location/get/{id}', [LocationController::class, 'getLocation']);
@@ -155,6 +156,8 @@ Route::prefix('dashboard')->group(function () {
         Route::get('/organization/{id}', [EmployeeController::class, 'editOrganisasi']);
         Route::put('/organization/{id}', [EmployeeController::class, 'updateOrganization']);
         Route::post('/salary/export', [EmployeeController::class, 'exportSalary'])->name('salary.export');
+        Route::post('/salary/export/deductions', [PayrollApiController::class, 'exportPayrollDeductions']);
+        Route::post('/salary/import/deductions', [PayrollApiController::class, 'importPayrollDeductions']);
         Route::post('/salary/import', [EmployeeController::class, 'importSalary'])->name('salary.import');
         Route::post('/deduction/export', [EmployeeController::class, 'exportDeduction'])->name('deduction.export');
         Route::post('/deduction/import', [EmployeeController::class, 'importDeduction'])->name('deduction.import');
@@ -163,6 +166,7 @@ Route::prefix('dashboard')->group(function () {
 
     Route::prefix('attendances')->group(function () {
         Route::get('/report/employee/{employee_id}/{periode}/{tahun}', [ReportController::class, 'getReportAttendancesEmployee']);
+        Route::post('/detail', [AttendanceController::class, 'getDetailAttendance']);
     });
 
     Route::prefix('day-off')->group(function () {
@@ -240,4 +244,4 @@ Route::prefix('dashboard')->group(function () {
         Route::delete('/delete/{id}', [MenuController::class, 'destroy'])->middleware('check.api.credentials')->name('master-data.menu.delete');
     });
 });
-// Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');
+Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');

@@ -56,6 +56,37 @@ class AttendanceRequestController extends Controller
         }
     }
 
+    public function alfa($id)
+    {
+        try {
+            // Temukan pegawai berdasarkan id
+            $attendance = Attendance::find($id);
+
+            if ($attendance) {
+                // Logika untuk memperbarui clockin dan clockout
+                $attendance->shift_id = $attendance->shift_id == 1 ? 2 : $attendance->shift_id;
+                $attendance->clock_in = null;
+                $attendance->clock_out = null;
+                $attendance->is_day_off = null;
+                $attendance->attendance_code_id = null;
+                $attendance->day_off_request_id = null;
+                $attendance->save();
+
+                return response()->json([
+                    'message' => 'Clockin and Clockout times updated successfully.'
+                ]);
+            } else {
+                return response()->json([
+                    'error' => 'Attendances not found.'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function ontimeAll(Request $request)
     {
         // try {

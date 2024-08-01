@@ -5,33 +5,85 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
     <style>
-        #map {
-            height: 225px;
-            /* Ensure the map container has a height */
+        #gambar-detail-absensi {
+            display: flex;
+            /* Use flexbox to position images side by side */
+            justify-content: space-between;
+            /* Space images evenly */
+            width: 100%;
+            margin-bottom: 20px;
+            /* Ensure the container takes full width */
+        }
+
+        .img-clock {
+            width: 50%;
+            /* Each image takes 50% of the modal width */
+            height: auto;
+            /* Maintain aspect ratio */
+            object-fit: cover;
+            /* Cover the container */
+            object-position: center;
+            /* Center the image */
+        }
+
+        /* Mengatur container video agar memiliki aspek rasio yang benar */
+        #map-wrapper {
+            position: relative;
+            height: 400px;
+            /* Adjust the height as needed */
+            width: 100%;
+            /* Make wrapper take full width of modal */
+            margin-bottom: 20px;
+            /* Add space below the map */
+        }
+
+        #map-detail-absensi {
+            height: 100%;
+            /* Make map fill the wrapper */
+            width: 100%;
+            /* Make map fill the wrapper */
+            border: 1px solid #ddd;
+            /* Optional: add a border around the map for better visibility */
+        }
+
+        #canvas {
+            transform: none;
+            /* Pastikan tidak ada transformasi CSS */
         }
 
         .video-container {
             position: relative;
             width: 100%;
-            padding-top: 75%;
-            /* Aspect ratio of 4:3 */
+            padding-top: 120%;
+            /* 5:6 Aspect Ratio for a slightly taller view */
+            /* Gunakan padding-top yang sesuai untuk aspect ratio yang diinginkan */
         }
 
-        #video,
-        #canvas {
+        .video-container video {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-        }
-
-        #video {
+            object-fit: cover;
             transform: scaleX(-1);
+            /* Mengatur video agar menutupi container dengan benar */
         }
 
-        #canvas {
-            z-index: 1;
+        #map {
+            height: 300px;
+            /* Atur tinggi sesuai kebutuhan */
+            width: 100%;
+            /* Lebar peta sesuai dengan elemen kontainer */
+        }
+
+        /* Responsif untuk ukuran layar lebih kecil */
+        @media (max-width: 768px) {
+            .video-container {
+                padding-top: 140%;
+                /* Adjust the aspect ratio for smaller screens */
+                /* Adjust padding-top for a taller aspect ratio on mobile */
+            }
         }
 
         .icon-dashboard-report {
@@ -322,6 +374,7 @@
                                             <th style="white-space: nowrap">Early Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
+                                            <th style="white-space: nowrap">Detail</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -365,6 +418,13 @@
                                                         -
                                                     @endisset
                                                 </td>
+                                                <td>
+                                                    <button class="btn btn-primary text-white py-1 px-2 detail-absensi"
+                                                        data-employee-id="{{ $row->employee_id }}"
+                                                        data-tanggal="{{ $row->date }}">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -378,6 +438,7 @@
                                             <th style="white-space: nowrap">Early Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
+                                            <th style="white-space: nowrap">Detail</th>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -390,6 +451,7 @@
         </div>
     </main>
     @include('pages.absensi.absensi.partials.face')
+    @include('pages.absensi.absensi.partials.detail-absensi')
 @endsection
 @section('plugin')
     <script src="/js/dependency/moment/moment.js"></script>
@@ -718,136 +780,353 @@
         // });
 
         $(document).ready(function() {
-            async function initMap() {
-                const map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            const uploadButton = document.getElementById('upload');
+            let latitude = null;
+            let longitude = null;
+            let actionType = null; // Will be either 'clock_in' or 'clock_out'
+
+            function toggleSpinner(buttonId, show) {
+                const button = document.getElementById(buttonId);
+                const spinner = button.querySelector('.spinner-border');
+                if (show) {
+                    spinner.style.display = 'inline-block';
+                } else {
+                    spinner.style.display = 'none';
+                }
+            }
+
+            async function startCamera() {
+                try {
+                    const constraints = {
+                        video: {
+                            facingMode: 'user', // Use 'environment' for rear camera
+                            width: {
+                                ideal: 640
+                            },
+                            height: {
+                                ideal: 720
+                            },
+                            playsinline: true // Ensure playsinline is true
+                        }
+                    };
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true); // Set playsinline attribute
+
+                    // Set canvas size when video metadata is loaded
+                    video.addEventListener('loadedmetadata', () => {
+                        adjustCanvasSize();
+                    });
+                } catch (error) {
+                    console.error('Error accessing the camera:', error);
+                    alert('Error accessing the camera: ' + error.message);
+                }
+            }
+
+            function adjustCanvasSize() {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
+
+            async function getLocation() {
+                return new Promise((resolve, reject) => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(position => {
+                            latitude = position.coords.latitude;
+                            longitude = position.coords.longitude;
+                            resolve(position);
+                        }, error => {
+                            console.error("Geolocation failed: " + error.message);
+                            reject(error);
+                        });
+                    } else {
+                        console.error("Geolocation is not supported by this browser.");
+                        reject(new Error("Geolocation not supported"));
+                    }
+                });
+            }
+
+            async function initializeMap() {
+                var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        latitude = position.coords.latitude;
-                        longitude = position.coords.longitude;
-                        const accuracy = position.coords.accuracy;
+                try {
+                    const position = await getLocation();
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
 
-                        console.log(
-                            `Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy}`);
+                    map.setView([lat, lng], 17); // Zoom level set to 17 for closer view
 
-                        map.setView([latitude, longitude], 17); // Zoom level set to 17 for closer view
-
-                        L.marker([latitude, longitude]).addTo(map)
-                            .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
-                            .openPopup();
-                    }, function(error) {
-                        showErrorAlert("Geolocation failed: " + error.message);
-                    });
-                } else {
-                    showErrorAlert("Geolocation is not supported by this browser.");
+                    L.marker([lat, lng]).addTo(map)
+                        .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
+                        .openPopup();
+                } catch (error) {
+                    console.error("Error initializing map: ", error);
                 }
             }
 
-            initMap();
+            $('#clock_in').on('click', function(e) {
+                e.preventDefault();
+                actionType = 'clock_in'; // Set flag for Clock In
+                $('#picture-modal').modal('show');
+            });
 
-            $('#clock_in').click(function() {
+            $('#clock_out').on('click', function(e) {
+                e.preventDefault();
+                actionType = 'clock_out'; // Set flag for Clock Out
+                $('#picture-modal').modal('show');
+            });
 
-                $('#clock_in').prop('disabled', true);
-                $('#clock_in').find('.spinner-text').removeClass('d-none');
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    let latitude = position.coords.latitude;
-                    let longitude = position.coords.longitude;
-                    let data_clock_in = {
-                        _token: "{{ csrf_token() }}",
-                        latitude: latitude,
-                        longitude: longitude,
-                        clock_in: null,
-                        clock_out: null,
-                        employee_id: "{{ Auth::user()->employee->id }}",
-                        time_in: null
-
-                    };
-                    $.ajax({
-                        type: "PUT",
-                        url: "/api/dashboard/clock-in",
-                        data: data_clock_in,
-                        async: true,
-                        success: function(response) {
-                            $('#clock_in').find('.spinner-text').addClass(
-                                'd-none');
-                            showSuccessAlert(response.message)
-                            setTimeout(function() {
-                                location.reload();
-                            }, 1000);
+            $('#dt-basic-example').dataTable({
+                responsive: false,
+                "pageLength": 31,
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [{
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        title: 'Rekap Absensi Bulan ' + new Date().toLocaleString('default', {
+                            month: 'long',
+                        }) + ' ' + new Date().getFullYear(),
+                        titleAttr: 'Export to Excel',
+                        className: 'btn-outline-default',
+                        exportOptions: {
+                            columns: ':visible',
+                            format: {
+                                body: function(data, row, column, node) {
+                                    // Menghapus tag HTML dari data sebelum mengekspor ke Excel
+                                    return $('<div/>').html(data).text();
+                                }
+                            }
                         },
-                        error: function(xhr) {
-                            if (xhr.status === 422) {
-                                var errors = xhr.responseJSON;
-                                // Lakukan sesuatu dengan pesan kesalahan yang diterima
-                                showErrorAlert(errors.error);
-                            } else {
-                                // Tangani kesalahan lainnya
-                                var errors = xhr.responseJSON;
-                                showErrorAlert(errors.error);
+                        customize: function(xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            $('row:first c', sheet).attr('style',
+                                'text-align: center;'); // Mengatur gaya untuk heading
+                            $('row:nth-child(2) c', sheet).attr('s', '43');
+                            $('row:nth-child(2) c', sheet).attr('class', 'style43');
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        titleAttr: 'Print Table',
+                        className: 'btn-outline-default'
+                    }
+                ]
+            });
+
+            setInterval(function() {
+                var currentTime = new Date();
+                var hours = currentTime.getHours();
+                var minutes = currentTime.getMinutes();
+                var seconds = currentTime.getSeconds();
+                hours = (hours < 10 ? "0" : "") + hours;
+                minutes = (minutes < 10 ? "0" : "") + minutes;
+                seconds = (seconds < 10 ? "0" : "") + seconds;
+                var timeString = hours + ':' + minutes + ':' + seconds;
+                $("#waktu-realtime").text(timeString);
+            }, 1000);
+
+            startCamera();
+            initializeMap();
+
+            function dataURLToFile(dataURL, filename) {
+                const [header, data] = dataURL.split(',');
+                const mime = header.match(/:(.*?);/)[1];
+                const binary = atob(data);
+                const array = [];
+                for (let i = 0; i < binary.length; i++) {
+                    array.push(binary.charCodeAt(i));
+                }
+                return new File([new Uint8Array(array)], filename, {
+                    type: mime
+                });
+            }
+
+            uploadButton.addEventListener('click', async () => {
+                uploadButton.disabled = true;
+                toggleSpinner('upload', true);
+
+                // Reset transformasi canvas dan gambar tanpa efek mirror
+                context.resetTransform();
+                context.save(); // Simpan state saat ini
+                context.translate(canvas.width, 0); // Pindahkan origin ke kanan
+                context.scale(-1, 1); // Terapkan skala horizontal terbalik
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                context.restore(); // Kembalikan state sebelumnya
+
+                const dataURL = canvas.toDataURL('image/png');
+                const file = dataURLToFile(dataURL, 'photo.png');
+                const formData = new FormData();
+                formData.append('employee_id', '{{ auth()->user()->employee->id }}');
+                formData.append('photo', file); // Use file object instead of dataURL
+                formData.append('location', `${latitude}, ${longitude}`);
+                formData.append('latitude', latitude);
+                formData.append('longitude', longitude);
+
+                const apiUrl = actionType === 'clock_in' ? '/api/dashboard/clock-in' :
+                    '/api/dashboard/clock-out';
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST', // Update method to PUT if required
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        console.log('Success:', result);
+                        $('#picture-modal').modal('hide');
+                        showSuccessAlert(result.message);
+                        setTimeout(() => {
+                            console.log('Reloading the page now.');
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        $('#picture-modal').modal('hide');
+                        showErrorAlert(result.error);
+                    }
+                } catch (error) {
+                    $('#picture-modal').modal('hide');
+                    showErrorAlert(error.error);
+                } finally {
+                    toggleSpinner('upload', false);
+                    uploadButton.disabled = false;
+                }
+            });
+
+        });
+
+        async function fetchAttendanceDetails(employeeId, tanggal) {
+            const url = '/api/dashboard/attendances/detail';
+            const data = {
+                employee_id: employeeId,
+                tanggal: tanggal
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('Error fetching attendance details:', error);
+                showErrorAlert(error.message);
+                throw error;
+            }
+        }
+
+        $('.detail-absensi').click(async function(e) {
+            e.preventDefault();
+            const employeeId = $(this).attr('data-employee-id');
+            const tanggal = $(this).attr('data-tanggal');
+            const modal = $('#detail-absensi-modal');
+            const modalBody = modal.find('.modal-body');
+
+            try {
+                console.log('Fetching attendance details for:', employeeId, tanggal);
+                const result = await fetchAttendanceDetails(employeeId, tanggal);
+
+                if (result.success) {
+                    const attendance = result.data;
+
+                    $('#tanggal-detail-absensi').text(tanggal);
+
+                    // Render map after modal is shown
+                    modal.on('shown.bs.modal', function() {
+                        if (attendance.location) {
+                            const [latitude, longitude] = attendance.location.split(',');
+
+                            // Clear the modal body before appending new content
+                            modalBody.html('');
+
+                            // Create wrapper for the map
+                            const mapWrapper = document.createElement('div');
+                            mapWrapper.id = 'map-wrapper';
+                            mapWrapper.style.position = 'relative';
+                            mapWrapper.style.height = '300px';
+                            mapWrapper.style.marginBottom = '20px';
+                            mapWrapper.style.width = '100%';
+
+                            // Create map element and append it to the wrapper
+                            const mapElement = document.createElement('div');
+                            mapElement.id = 'map-detail-absensi';
+                            mapElement.style.height = '100%';
+                            mapElement.style.width = '100%';
+                            mapWrapper.append(mapElement);
+
+                            // Append map wrapper to modal body
+                            modalBody.append(mapWrapper);
+
+                            // Initialize map with placeholder coordinates
+                            const map = L.map(mapElement).setView([0, 0], 13);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            }).addTo(map);
+
+                            // Set view to actual coordinates after the map is added to the DOM
+                            map.setView([latitude, longitude], 17);
+                            L.marker([latitude, longitude]).addTo(map)
+                                .bindPopup('Lokasi Absen')
+                                .openPopup();
+                        }
+
+                        // Render images if available
+                        if (attendance.foto_clock_in || attendance.foto_clock_out) {
+                            const gambarDetail = document.createElement('div');
+                            gambarDetail.id = 'gambar-detail-absensi';
+                            gambarDetail.style.display = 'flex'; // Use flexbox to position images
+                            gambarDetail.style.justifyContent = 'space-between'; // Space images evenly
+                            gambarDetail.style.width = '100%'; // Ensure the container takes full width
+                            modalBody.append(gambarDetail);
+
+                            if (attendance.foto_clock_in) {
+                                const imgClockIn = document.createElement('img');
+                                imgClockIn.src = `/storage/${attendance.foto_clock_in}`;
+                                imgClockIn.alt = 'Foto Clock In';
+                                imgClockIn.className = 'img-clock'; // Use a common class for styling
+                                gambarDetail.append(imgClockIn);
+                            }
+
+                            if (attendance.foto_clock_out) {
+                                const imgClockOut = document.createElement('img');
+                                imgClockOut.src = `/storage/${attendance.foto_clock_out}`;
+                                imgClockOut.alt = 'Foto Clock Out';
+                                imgClockOut.className = 'img-clock'; // Use a common class for styling
+                                gambarDetail.append(imgClockOut);
                             }
                         }
                     });
-                });
 
-            })
-
-            $('#clock_out').click(function() {
-
-                $('#clock_out').prop('disabled', true);
-                $('#clock_out').find('.spinner-text').removeClass('d-none');
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    let latitude = position.coords.latitude;
-                    let longitude = position.coords.longitude;
-                    let data_clock_out = {
-                        _token: "{{ csrf_token() }}",
-                        latitude: latitude,
-                        longitude: longitude,
-                        clock_out: null,
-                        employee_id: "{{ Auth::user()->employee->id }}",
-                        time_out: null
-                    };
-                    $.ajax({
-                        type: "PUT",
-                        url: "/api/dashboard/clock-out",
-                        data: data_clock_out,
-                        async: true,
-                        success: function(response) {
-                            $('#clock_out').find('.spinner-text').addClass(
-                                'd-none');
-                            showSuccessAlert(response.message)
-                            setTimeout(function() {
-                                location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr) {
-                            if (xhr.status === 422) {
-                                var errors = xhr.responseJSON;
-                                // Lakukan sesuatu dengan pesan kesalahan yang diterima
-                                showErrorAlert(errors.error);
-                            } else {
-                                // Tangani kesalahan lainnya
-                                var errors = xhr.responseJSON;
-                                showErrorAlert(errors.error);
-                            }
-                        }
-                    });
-                });
-
-            })
-            // setInterval(function() {
-            //     var currentTime = new Date();
-            //     var hours = currentTime.getHours();
-            //     var minutes = currentTime.getMinutes();
-            //     var seconds = currentTime.getSeconds();
-            //     hours = (hours < 10 ? "0" : "") + hours;
-            //     minutes = (minutes < 10 ? "0" : "") + minutes;
-            //     seconds = (seconds < 10 ? "0" : "") + seconds;
-            //     var timeString = hours + ':' + minutes + ':' + seconds;
-            //     $("#waktu-realtime").text(timeString);
-            // }, 1000);
+                    // Show modal
+                    modal.modal('show');
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error handling detail-absensi click:', error.message);
+                alert('Terjadi kesalahan saat mengambil data absensi.');
+            }
         });
     </script>
 @endsection

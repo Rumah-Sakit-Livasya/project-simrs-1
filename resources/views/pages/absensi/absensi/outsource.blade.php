@@ -4,10 +4,18 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
+        /* Mengatur container video agar memiliki aspek rasio yang benar */
+        #canvas {
+            transform: none;
+            /* Pastikan tidak ada transformasi CSS */
+        }
+
         .video-container {
             position: relative;
-            padding-top: 100%;
-            /* 16:9 Aspect Ratio */
+            width: 100%;
+            padding-top: 120%;
+            /* 5:6 Aspect Ratio for a slightly taller view */
+            /* Gunakan padding-top yang sesuai untuk aspect ratio yang diinginkan */
         }
 
         .video-container video {
@@ -18,8 +26,18 @@
             height: 100%;
             object-fit: cover;
             transform: scaleX(-1);
-            /* Membalik video secara horizontal */
+            /* Mengatur video agar menutupi container dengan benar */
         }
+
+        /* Responsif untuk ukuran layar lebih kecil */
+        @media (max-width: 768px) {
+            .video-container {
+                padding-top: 140%;
+                /* Adjust the aspect ratio for smaller screens */
+                /* Adjust padding-top for a taller aspect ratio on mobile */
+            }
+        }
+
 
         @media (max-width: 576px) {
             .modal-dialog {
@@ -38,24 +56,6 @@
 
             .modal-body {
                 overflow-y: auto;
-            }
-
-            .video-container {
-                position: relative;
-                width: 100%;
-                padding-top: 100%;
-                /* 16:9 Aspect Ratio */
-            }
-
-            .video-container video {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transform: scaleX(-1);
-                /* Membalik video secara horizontal */
             }
         }
     </style>
@@ -169,39 +169,100 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script>
-        var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
 
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const uploadButton = document.getElementById('upload');
+        const clockOutButton = document.getElementById('clock_out');
         let latitude = null;
         let longitude = null;
 
-        // Check if Geolocation is available
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var lat = position.coords.latitude;
-                var lng = position.coords.longitude;
-                latitude = lat;
-                longitude = lng;
-                var accuracy = position.coords.accuracy;
+        function toggleSpinner(buttonId, show) {
+            const button = document.getElementById(buttonId);
+            const spinner = button.querySelector('.spinner-border');
+            if (show) {
+                spinner.style.display = 'inline-block';
+            } else {
+                spinner.style.display = 'none';
+            }
+        }
 
-                // Set the view to the current location with a closer zoom level
-                map.setView([lat, lng], 17); // Zoom level set to 15 for closer view
+        async function startCamera() {
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: 'user', // Use 'environment' for rear camera
+                        width: {
+                            ideal: 640
+                        },
+                        height: {
+                            ideal: 720
+                        },
+                        playsinline: true // Ensure playsinline is true
+                    }
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true); // Set playsinline attribute
 
-                // Add a marker at the current location
-                var marker = L.marker([lat, lng]).addTo(map)
+                // Set canvas size when video metadata is loaded
+                video.addEventListener('loadedmetadata', () => {
+                    adjustCanvasSize();
+                });
+            } catch (error) {
+                console.error('Error accessing the camera:', error);
+                alert('Error accessing the camera: ' + error.message);
+            }
+        }
+
+        function adjustCanvasSize() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+        }
+
+        async function getLocation() {
+            return new Promise((resolve, reject) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        latitude = position.coords.latitude;
+                        longitude = position.coords.longitude;
+                        resolve(position);
+                    }, error => {
+                        console.error("Geolocation failed: " + error.message);
+                        reject(error);
+                    });
+                } else {
+                    console.error("Geolocation is not supported by this browser.");
+                    reject(new Error("Geolocation not supported"));
+                }
+            });
+        }
+
+        async function initializeMap() {
+            var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            try {
+                const position = await getLocation();
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+
+                map.setView([lat, lng], 17); // Zoom level set to 17 for closer view
+
+                L.marker([lat, lng]).addTo(map)
                     .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
                     .openPopup();
-            }, function(error) {
-                console.error("Geolocation failed: " + error.message);
-            });
-        } else {
-            console.error("Geolocation is not supported by this browser.");
+            } catch (error) {
+                console.error("Error initializing map: ", error);
+            }
         }
-        $(document).ready(function() {
 
+        $(document).ready(function() {
             $('#clock_in').on('click', function(e) {
                 e.preventDefault();
                 console.log("click");
@@ -239,7 +300,6 @@
                             // $('row c', sheet).attr('s', '25'); // Memberikan border pada sel
                             $('row:nth-child(2) c', sheet).attr('s', '43');
                             $('row:nth-child(2) c', sheet).attr('class', 'style43');
-
                         }
                     },
                     {
@@ -262,58 +322,23 @@
                 var timeString = hours + ':' + minutes + ':' + seconds;
                 $("#waktu-realtime").text(timeString);
             }, 1000);
+
+            startCamera();
+            initializeMap();
         });
-    </script>
-
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const snap = document.getElementById('snap');
-        const uploadButton = document.getElementById('upload');
-        const clock_out = document.getElementById('clock_out');
-
-        function toggleSpinner(buttonId, show) {
-            const button = document.getElementById(buttonId);
-            const spinner = button.querySelector('.spinner-border');
-            if (show) {
-                spinner.classList.remove('d-none');
-            } else {
-                spinner.classList.add('d-none');
-            }
-        }
-
-        async function startCamera() {
-            try {
-                const constraints = {
-                    video: {
-                        width: {
-                            ideal: 640
-                        },
-                        height: {
-                            ideal: 720
-                        }
-                    }
-                };
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                const video = document.getElementById('video');
-                video.srcObject = stream;
-            } catch (error) {
-                console.error('Error accessing the camera:', error);
-            }
-        }
-
-        // snap.addEventListener('click', () => {
-
-        // });
 
         uploadButton.addEventListener('click', async () => {
-            // Disable the button to prevent multiple submissions
             uploadButton.disabled = true;
-
             toggleSpinner('upload', true);
-            context.scale(-1, 1);
-            context.drawImage(video, -canvas.width, 0, 640, 480);
+
+            // Reset transformasi canvas dan gambar tanpa efek mirror
+            context.resetTransform();
+            context.save(); // Simpan state saat ini
+            context.translate(canvas.width, 0); // Pindahkan origin ke kanan
+            context.scale(-1, 1); // Terapkan skala horizontal terbalik
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            context.restore(); // Kembalikan state sebelumnya
+
             const dataURL = canvas.toDataURL('image/png');
             const formData = new FormData();
             const location = latitude + ", " + longitude;
@@ -340,7 +365,6 @@
                         console.log('Reloading the page now.');
                         window.location.reload();
                     }, 1000);
-
                 } else {
                     $('#clockin-modal').modal('hide');
                     showErrorAlert(result.error);
@@ -348,14 +372,14 @@
             } catch (error) {
                 showErrorAlert(error.error);
             } finally {
-                // Re-enable the button after process completion
                 toggleSpinner('upload', false);
                 uploadButton.disabled = false;
             }
         });
 
 
-        clock_out.addEventListener('click', async () => {
+
+        clockOutButton.addEventListener('click', async () => {
             toggleSpinner('clock_out', true);
             const formData = new FormData();
             const location = latitude + ", " + longitude;
@@ -366,7 +390,7 @@
             $('#clock_in').prop('disabled', true);
             $('#clock_in').find('.spinner-text').removeClass('d-none');
             try {
-                const response = await fetch('/outsource/attendances/clock_out', {
+                const response = await fetch('/attendances/outsource/clock_out', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -382,7 +406,6 @@
                         console.log('Reloading the page now.');
                         window.location.reload();
                     }, 1000);
-
                 } else {
                     console.error('Error:', result);
                     $('#clockin-modal').modal('hide');
@@ -392,7 +415,6 @@
                 showErrorAlert(error.error);
             }
         });
-
-        startCamera();
     </script>
+
 @endsection

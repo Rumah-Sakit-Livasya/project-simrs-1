@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exports\PayrollDeductionsExport;
 use App\Http\Controllers\Controller;
+use App\Imports\PayrollDeductionsImport;
 use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\Payroll;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PayrollApiController extends Controller
 {
@@ -356,6 +359,29 @@ class PayrollApiController extends Controller
         } catch (\Exception $e) {
             // Menangani kesalahan jika terjadi
             return response()->json(['error' => 'Failed to mark payroll as reviewed', 'details' => $e->getMessage()], 500);
+        }
+    }
+
+    public function exportPayrollDeductions(Request $request)
+    {
+        // Nama file Excel
+        $periode = $request->periode;
+        $filename = 'payroll_deductions_' . $periode . '.xlsx';
+
+        // Export data karyawan dan data nama shift ke dalam file Excel
+        return Excel::download(new PayrollDeductionsExport($periode), $filename);
+    }
+
+    public function importPayrollDeductions(Request $request)
+    {
+        try {
+            $file = $request->file('potongan');
+            // Lakukan impor menggunakan SalaryImport
+            \Maatwebsite\Excel\Facades\Excel::import(new PayrollDeductionsImport, $file);
+
+            return response()->json(['message' => 'Data Gaji berhasil diimpor!']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }

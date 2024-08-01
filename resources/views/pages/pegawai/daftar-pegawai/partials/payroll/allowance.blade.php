@@ -24,7 +24,7 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $employee->fullname }}</td>
                     <td>{{ $employee->jobPosition->name }}</td>
-                    <td>{{ $employee->organization->name }}</td>
+                    <td>{{ $employee->organization->name ?? '-' }}</td>
                     <td>{{ isset($employee->salary->basic_salary) ? rp($employee->salary->basic_salary) : 'Rp 0' }}</td>
                     <td>{{ isset($employee->salary->tunjangan_jabatan) ? rp($employee->salary->tunjangan_jabatan) : 'Rp 0' }}
                     </td>
