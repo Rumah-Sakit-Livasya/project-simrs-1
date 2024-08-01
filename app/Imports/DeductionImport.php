@@ -17,7 +17,6 @@ class DeductionImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
 
-        dd($row);
         // Cari karyawan berdasarkan nama lengkap
         $employee = Employee::where('email', $row['fullname'])->first();
 
