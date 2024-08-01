@@ -793,6 +793,7 @@
                 });
 
             })
+
             $('#clock_out').click(function() {
 
                 $('#clock_out').prop('disabled', true);
