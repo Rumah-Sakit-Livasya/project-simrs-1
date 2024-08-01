@@ -35,7 +35,6 @@ class PayrollDeductionsImport implements ToModel, WithHeadingRow
         $payroll = Payroll::where('employee_id', $employee->id)->where('periode', $periode)->first();
 
         $payroll->update([
-            'potongan_keterlambatan' => $row['potongan_keterlambatan'] ?? 0,
             'potongan_izin' => $row['potongan_izin'] ?? 0,
             'potongan_sakit' => $row['potongan_sakit'] ?? 0,
             'simpanan_pokok' => $row['simpanan_pokok'] ?? 0,

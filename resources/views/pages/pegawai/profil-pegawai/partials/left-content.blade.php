@@ -109,6 +109,11 @@
                                         href="#v-pills-pekerjaan" role="tab" aria-controls="v-pills-pekerjaan">
                                         <span class="ml-1">Info Pekerjaan</span>
                                     </a>
+                                    <a class="nav-link col-12 p-3" id="v-pills-dokumen-kepegawaian-tab"
+                                        data-toggle="pill" href="#v-pills-dokumen-kepegawaian" role="tab"
+                                        aria-controls="v-pills-dokumen-kepegawaian">
+                                        <span class="ml-1">Dokumen</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>

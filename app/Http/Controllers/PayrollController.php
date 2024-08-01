@@ -71,8 +71,9 @@ class PayrollController extends Controller
         $jobPosition = JobPosition::all();
         $bank = JobPosition::all();
         $locations = Bank::all();
-        $payrolls = Payroll::where('is_review', 0)->get();
+        $payrolls = Payroll::where('is_review', 0)->where('periode', 'Juli 2024 - Agustus 2024')->get();
         $getNotify = $this->getNotify();
+        // dd($payrolls[0]);
 
         return view('pages.pegawai.gaji-pegawai.run-payroll', compact('employees', 'bank', 'jobLevel', 'organizations', 'jobPosition', 'locations', 'payrolls', 'getNotify'));
     }

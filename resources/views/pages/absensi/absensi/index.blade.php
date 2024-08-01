@@ -787,6 +787,10 @@
             let latitude = null;
             let longitude = null;
             let actionType = null; // Will be either 'clock_in' or 'clock_out'
+            let employeeId = null;
+            let tanggal = null;
+            let modal = null;
+            let modalBody = null;
 
             function toggleSpinner(buttonId, show) {
                 const button = document.getElementById(buttonId);
@@ -1038,24 +1042,26 @@
 
         $('.detail-absensi').click(async function(e) {
             e.preventDefault();
-            const employeeId = $(this).attr('data-employee-id');
-            const tanggal = $(this).attr('data-tanggal');
-            const modal = $('#detail-absensi-modal');
-            const modalBody = modal.find('.modal-body');
+            employeeId = $(this).attr('data-employee-id');
+            tanggal = $(this).attr('data-tanggal');
+            modal = $('#detail-absensi-modal');
+            modalBody = modal.find('.modal-body');
 
             try {
-                console.log('Fetching attendance details for:', employeeId, tanggal);
                 const result = await fetchAttendanceDetails(employeeId, tanggal);
 
                 if (result.success) {
                     const attendance = result.data;
-
                     $('#tanggal-detail-absensi').text(tanggal);
+                    // Show modal
+                    modal.modal('show');
 
                     // Render map after modal is shown
                     modal.on('shown.bs.modal', function() {
                         if (attendance.location) {
-                            const [latitude, longitude] = attendance.location.split(',');
+                            const [lat, long] = attendance.location.split(',');
+                            latitude = lat;
+                            longitude = long;
 
                             // Clear the modal body before appending new content
                             modalBody.html('');
@@ -1118,8 +1124,6 @@
                         }
                     });
 
-                    // Show modal
-                    modal.modal('show');
                 } else {
                     alert(result.message);
                 }

@@ -186,18 +186,30 @@
                                                         -
                                                     @endisset
                                                 </td>
-                                                @if (auth()->user()->hasRole('super admin'))
+                                                @if (auth()->user()->hasRole('super admin') ||
+                                                        auth()->user()->can('') ||
+                                                        auth()->user()->can('monitoring detail absensi'))
                                                     <td style="vertical-align: middle;">
-                                                        <a href="#" data-backdrop="static" data-keyboard="false"
-                                                            class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
-                                                            data-id="{{ $row->id }}" title="Edit Absensi">
-                                                            <span class="fal fa-pencil ikon-edit"></span>
-                                                            <div class="span spinner-text d-none">
-                                                                <span class="spinner-border spinner-border-sm"
-                                                                    role="status" aria-hidden="true"></span>
-                                                                Loading...
-                                                            </div>
-                                                        </a>
+                                                        @can('monitoring edit absensi')
+                                                            <a href="#" data-backdrop="static" data-keyboard="false"
+                                                                class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
+                                                                data-id="{{ $row->id }}" title="Edit Absensi">
+                                                                <span class="fal fa-pencil ikon-edit"></span>
+                                                                <div class="span spinner-text d-none">
+                                                                    <span class="spinner-border spinner-border-sm"
+                                                                        role="status" aria-hidden="true"></span>
+                                                                    Loading...
+                                                                </div>
+                                                            </a>
+                                                        @endcan
+                                                        @can('monitoring detail absensi')
+                                                            <button
+                                                                class="badge mx-1 badge-primary p-2 border-0 text-white detail-absensi"
+                                                                data-employee-id="{{ $row->employee_id }}"
+                                                                data-tanggal="{{ $row->date }}">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        @endcan
                                                     </td>
                                                 @endif
                                             </tr>
@@ -561,6 +573,7 @@
             //         }
             //     });
             // });
+
 
             $('#update-form').on('submit', function(e) {
                 e.preventDefault();
