@@ -61,6 +61,7 @@ Route::prefix('dashboard')->group(function () {
     Route::get('/attendances/{id}', [AttendanceController::class, 'getAttendance']);
     Route::put('/attendances/update/{id}', [AttendanceController::class, 'updateAttendance'])->name('update-absensi');
     Route::post('/attendances/update/{id}/ontime', [AttendanceRequestController::class, 'ontime'])->name('ontime');
+    Route::post('/attendances/update/{id}/alfa', [AttendanceRequestController::class, 'alfa'])->name('alfa');
     Route::post('/attendances/update/ontimeAll', [AttendanceRequestController::class, 'ontimeAll'])->name('attendance.ontimeAll');
 
     Route::get('location/get/{id}', [LocationController::class, 'getLocation']);
