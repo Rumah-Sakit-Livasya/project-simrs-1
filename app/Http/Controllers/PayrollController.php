@@ -71,7 +71,7 @@ class PayrollController extends Controller
         $jobPosition = JobPosition::all();
         $bank = JobPosition::all();
         $locations = Bank::all();
-        $payrolls = Payroll::where('is_review', 0)->where('periode', 'Juli 2024 - Agustus 2024')->get();
+        $payrolls = Payroll::where('is_review', 0)->get();
         $getNotify = $this->getNotify();
         // dd($payrolls[0]);
 
