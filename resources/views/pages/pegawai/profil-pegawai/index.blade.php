@@ -116,6 +116,8 @@
         }
 
         $(document).ready(function() {
+            let dokumenId = null;
+
             $('#dt-basic-example').dataTable({
                 responsive: false
             });
@@ -195,6 +197,10 @@
                         showErrorAlert(xhr.responseJSON.error);
                     }
                 });
+            });
+
+            $('.btn-delete-dokumen').click(function(e) {
+                dokumenId = $(this).attr('data-id');
             });
 
             $('.btn-ubah-personal').click(function(e) {
@@ -452,6 +458,7 @@
                     placeholder: 'Pilih Data Berikut'
                 });
             });
+
             $('#sama-alamat').change(function() {
                 if ($(this).is(':checked')) {
                     $('#residental_address').val($('#citizen_id_address').val());
@@ -461,6 +468,7 @@
                     // Lakukan sesuatu jika checkbox tidak tercentang di sini
                 }
             });
+
             $('.btn-next .btn-prev').click(function(e) {
                 e.preventDefault();
                 let parent = $(this).parent().parent();
@@ -505,6 +513,7 @@
                     });
                 }
             });
+
             $('.btn-next .btn-next-step').click(function(e) {
                 e.preventDefault();
                 let parent = $(this).parent().parent();
@@ -546,16 +555,19 @@
                 });
 
             });
+
             $('#datepicker-3').datepicker({
                 todayBtn: "linked",
                 clearBtn: true,
                 todayHighlight: true,
             });
+
             $('#identity_expire_date').datepicker({
                 todayBtn: "linked",
                 clearBtn: true,
                 todayHighlight: true,
             });
+
             $('#join_date').datepicker({
                 todayBtn: "linked",
                 clearBtn: true,

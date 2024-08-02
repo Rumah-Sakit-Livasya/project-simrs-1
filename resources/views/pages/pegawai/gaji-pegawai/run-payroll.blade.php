@@ -135,7 +135,7 @@
                                                     <td> <a href="javascript:void(0);"
                                                             data-payroll-id="{{ $payroll->id }}"
                                                             class="js-sweetalert-allowance cursor-pointer">
-                                                            {{ dd($payroll) }}
+                                                            {{ rp($payroll->total_allowance) }}
                                                         </a>
                                                     </td>
                                                     <td>

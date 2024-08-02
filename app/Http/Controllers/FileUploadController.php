@@ -93,4 +93,9 @@ class FileUploadController extends Controller
             return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
+
+    public function delete($id)
+    {
+        dd(true);
+    }
 }
