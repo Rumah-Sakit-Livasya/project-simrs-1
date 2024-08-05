@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Target::factory()->count(500)->create();
+        // Target::factory()->count(500)->create();
         // $this->call(RolePermissionSeeder::class);
         // $this->call(MenusTableSeeder::class);
         // $this->call(BankSeeder::class);
@@ -24,5 +24,8 @@ class DatabaseSeeder extends Seeder
         // $this->call(UserSeeder::class);
         // $this->call(AttendanceCodeSeeder::class);
         // $this->call(ShiftSeeder::class);
+        $this->call(DepartementSeeder::class);
+        $this->call(EthnicSeeder::class);
+        $this->call(PenjaminSeeder::class);
     }
 }

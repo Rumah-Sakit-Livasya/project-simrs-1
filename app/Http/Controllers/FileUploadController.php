@@ -23,7 +23,7 @@ class FileUploadController extends Controller
             $validator = Validator::make($request->all(), [
                 'nama' => 'required',
                 'employee_id' => 'required',
-                'file' => 'required|file',
+                'file' => 'required|file', // buat lebih spesifik, office, pdf, dan txt
             ], $messages);
 
             if ($validator->fails()) {

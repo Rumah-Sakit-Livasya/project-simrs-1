@@ -1,0 +1,99 @@
+<?php
+
+namespace App\Http\Controllers\SIMRS;
+
+use App\Http\Controllers\Controller;
+use App\Models\SIMRS\Departement;
+use Illuminate\Http\Request;
+
+class DepartementController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $departements = Departement::orderBy('name', 'asc')->get();
+        return view('web.pages.master-data.departement.index', compact('departements'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('web.pages.master-data.departement.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|max:255',
+            'kode' => 'required',
+            'keterangan' => 'required|max:255',
+            'quota' => 'required|max:255',
+            'kode_poli' => 'nullable|max:255',
+            'publish_online' => 'required',
+            'revenue_and_cost_center' => 'nullable',
+            'master_layanan_rl' => 'nullable',
+        ]);
+
+        $store = Departement::create($validatedData);
+        return redirect('/departement')->with('success', 'Departemen berhasil ditambahkan!');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Departement  $departement
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Departement $departement)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Models\Departement  $departement
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Departement $departement)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Departement  $departement
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Departement $departement)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Departement  $departement
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Departement $departement)
+    {
+        //
+    }
+}

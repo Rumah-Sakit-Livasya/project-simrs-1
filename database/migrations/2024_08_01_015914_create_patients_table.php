@@ -1,0 +1,64 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreatePatientsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('patients', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('family_id')->nullable();
+            $table->foreignId('penjamin_id')->nullable();
+            $table->string('name');
+            $table->string('place');
+            $table->string('date_of_birth');
+            $table->string('nickname')->nullable();
+            $table->string('title');
+            $table->string('gender');
+            $table->string('religion');
+            $table->string('blood_group')->nullable();
+            $table->string('allergy')->nullable();
+            $table->string('married_status')->nullable();
+            $table->string('language');
+            $table->string('citizenship')->nullable();
+            $table->string('id_card')->nullable();
+            $table->string('address');
+            $table->string('ward');
+            $table->string('subdistrict');
+            $table->string('regency');
+            $table->string('province')->nullable();
+            $table->string('mobile_phone_number');
+            $table->string('email')->nullable();
+            $table->string('last_education');
+            $table->string('ethnic');
+            $table->string('job');
+            $table->string('nama_penjamin')->nullable();
+            $table->string('nomor_penjamin')->nullable();
+            $table->string('nama_pegawai')->nullable();
+            $table->string('nama_perusahaan_pegawai')->nullable();
+            $table->string('hubungan_pegawai')->nullable();
+            $table->string('nomor_kepegawaian')->nullable();
+            $table->string('bagian_pegawai')->nullable();
+            $table->string('grup_perusahaan')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('patients');
+    }
+}
