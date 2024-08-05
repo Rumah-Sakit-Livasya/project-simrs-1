@@ -2,7 +2,8 @@
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="font-weight-bold">Detail Absensi <span id="tanggal-detail-absensi"></span></h5>
+                <h5 class="font-weight-bold">Detail Absensi <span id="employee_name"></span> (<span
+                        id="tanggal-detail-absensi"></span>)</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true"><i class="fal fa-times"></i></span>
                 </button>

@@ -958,10 +958,12 @@ class AttendanceController extends Controller
             ->where('employee_id', $request->employee_id)
             ->first();
 
+        $employeeName = $attendance->employees->fullname;
+
         if (!$attendance) {
             return response()->json(['success' => false, 'message' => 'Data absensi tidak ditemukan'], 404);
         }
 
-        return response()->json(['success' => true, 'data' => $attendance], 200);
+        return response()->json(['success' => true, 'data' => $attendance, 'nama' => $employeeName], 200);
     }
 }
