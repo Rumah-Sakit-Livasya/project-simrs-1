@@ -4,6 +4,47 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
+        #gambar-detail-absensi {
+            display: flex;
+            /* Use flexbox to position images side by side */
+            justify-content: space-between;
+            /* Space images evenly */
+            width: 100%;
+            margin-bottom: 20px;
+            /* Ensure the container takes full width */
+        }
+
+        .img-clock {
+            width: 50%;
+            /* Each image takes 50% of the modal width */
+            height: auto;
+            /* Maintain aspect ratio */
+            object-fit: cover;
+            /* Cover the container */
+            object-position: center;
+            /* Center the image */
+        }
+
+        /* Mengatur container video agar memiliki aspek rasio yang benar */
+        #map-wrapper {
+            position: relative;
+            height: 400px;
+            /* Adjust the height as needed */
+            width: 100%;
+            /* Make wrapper take full width of modal */
+            margin-bottom: 20px;
+            /* Add space below the map */
+        }
+
+        #map-detail-absensi {
+            height: 100%;
+            /* Make map fill the wrapper */
+            width: 100%;
+            /* Make map fill the wrapper */
+            border: 1px solid #ddd;
+            /* Optional: add a border around the map for better visibility */
+        }
+
         @media screen and (min-width: 680px) {
 
             #absensi #dt-basic-example tbody td:first-child,
