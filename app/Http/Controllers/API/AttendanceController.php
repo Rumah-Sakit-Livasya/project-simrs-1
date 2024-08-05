@@ -95,8 +95,7 @@ class AttendanceController extends Controller
                 } else {
                     $waktu_absen = $attendance->shift->time_in;
                     $perbedaanMenit = $request->clock_in->greaterThan($waktu_absen) ? abs($request->clock_in->diffInMinutes($waktu_absen)) : null;
-                    $perbedaanMenit = ($perbedaanMenit == 0) ? null : $perbedaanMenit;
-                    $request['late_clock_in'] = $perbedaanMenit;
+                    $request['late_clock_in'] = ($perbedaanMenit == 0) ? null : $perbedaanMenit;
                     $attendance->update($request->all());
                 }
 
