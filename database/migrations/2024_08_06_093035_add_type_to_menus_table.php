@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('menus', function (Blueprint $table) {
-            $table->string('type', 20)->default('hr');
+            $table->string('type', 20)->default('hr')->after('permission');
         });
     }
 
