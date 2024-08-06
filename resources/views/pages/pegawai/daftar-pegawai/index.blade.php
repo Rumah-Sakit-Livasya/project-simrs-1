@@ -299,6 +299,16 @@
                 placeholder: 'Pilih Data berikut',
             });
 
+            $('#ubah-organisasi #is_doctor').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#ubah-organisasi #departement_id').prop('disabled', false);
+                    $('#ubah-organisasi #kode_dpjp').prop('disabled', false);
+                } else {
+                    $('#ubah-organisasi #departement_id').prop('disabled', true);
+                    $('#ubah-organisasi #kode_dpjp').prop('disabled', true);
+                }
+            });
+
             $('#organization-option').select2({
                 dropdownParent: $('#downloadTemplateModal'),
                 placeholder: "kosongkan jika semua",
@@ -411,6 +421,10 @@
                         dropdownParent: $('#ubah-organisasi')
                     });
                     $('#ubah-organisasi #company_id').val(data.company_id).select2({
+                        dropdownParent: $('#ubah-organisasi')
+                    });
+                    $('#ubah-organisasi #departement_id').val(data.doctor).select2({
+                        placeholder: 'Pilih Department',
                         dropdownParent: $('#ubah-organisasi')
                     });
                     $('#ubah-organisasi #job_position_id').val(data.job_position_id).select2({

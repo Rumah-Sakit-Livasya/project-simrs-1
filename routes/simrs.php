@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
 use Illuminate\Support\Facades\Route;
@@ -58,9 +59,9 @@ Route::group(['middleware' => ['web']], function () {
     // Route::put('/role/edit/{role:id}', [RoleController::class, 'update'])->name('master.data.user.akses.role.update');
     // Route::get('/role/delete/{role:id}', [RoleController::class, 'destroy'])->name('master.data.user.akses.role.destroy');
 
-    // Route::get('/departement', [DepartementController::class, 'index'])->name('master.data.setup.departement.index');
-    // Route::get('/tambah-departement', [DepartementController::class, 'create'])->name('master.data.setup.tambah.departement');
-    // Route::post('/tambah-departement', [DepartementController::class, 'store'])->name('master.data.setup.simpan.tambah.departement');
+    Route::get('/departements', [DepartementController::class, 'index'])->name('master.data.setup.departement.index');
+    Route::get('/tambah-departement', [DepartementController::class, 'create'])->name('master.data.setup.tambah.departement');
+    Route::post('/tambah-departement', [DepartementController::class, 'store'])->name('master.data.setup.simpan.tambah.departement');
 
     // // Revenue & Cost Center 
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');

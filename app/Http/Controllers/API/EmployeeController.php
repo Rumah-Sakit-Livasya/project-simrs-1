@@ -19,6 +19,7 @@ use App\Models\JobPosition;
 use App\Models\Location;
 use App\Models\Organization;
 use App\Models\Salary;
+use App\Models\SIMRS\Doctor;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -175,6 +176,26 @@ class EmployeeController extends Controller
                 'name' => request()->fullname,
                 'email' => request()->email
             ]);
+
+            $dokter = request()->is_doctor;
+            if ($dokter == "on") {
+                $employee->is_doctor = true;
+                $employee->save();
+
+                Doctor::updateOrCreate(
+                    ['employee_id' => $employee->id],
+                    [
+                        'departement_id' => request()->departement_id,
+                        'kode_dpjp' => request()->kode_dpjp,
+                    ]
+                );
+            } else {
+                $employee->is_doctor = false;
+                $employee->save();
+
+                Doctor::where('employee_id', $employee->id)->delete();
+            }
+
 
             // Return response
             return response()->json(['message' => 'Organisasi berhasil diupdate']);

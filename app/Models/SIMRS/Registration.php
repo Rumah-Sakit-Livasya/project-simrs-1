@@ -4,6 +4,7 @@ namespace App\Models\SIMRS;
 
 use App\Models\Employee;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,28 +33,30 @@ class Registration extends Model
     {
         return $this->belongsTo(Employee::class);
     }
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
+    }
 
     protected static function boot()
     {
         parent::boot();
 
-        static::creating(function ($model) {
-            $model->registrasi = $model->generateNomorRegistrasi();
-        });
+        // static::creating(function ($model) {
+        //     $model->registrasi = $model->generateNomorRegistrasi();
+        // });
     }
 
-    public function generateNomorRegistrasi()
-    {
-        $tanggal = now()->format('ymd');
+    // public function generateNomorRegistrasi()
+    // {
+    //     $date = Carbon::now();
+    //     $year = $date->format('y');
+    //     $month = $date->format('m');
+    //     $day = $date->format('d');
 
-        $latestRegistrasi = static::where('registrasi', 'like', $tanggal . '%')->latest('registrasi')->first();
+    //     $count = Registration::whereDate('created_at', $date->toDateString())->count() + 1;
+    //     $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
-        if ($latestRegistrasi) {
-            $lastNumber = intval(substr($latestRegistrasi->registrasi, 6));
-            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-            return $tanggal . $newNumber;
-        }
-
-        return $tanggal . '0001';
-    }
+    //     return $year . $month . $day . $count;
+    // }
 }

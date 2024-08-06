@@ -16,7 +16,7 @@ class DepartementController extends Controller
     public function index()
     {
         $departements = Departement::orderBy('name', 'asc')->get();
-        return view('web.pages.master-data.departement.index', compact('departements'));
+        return view('pages.simrs.departement.index', compact('departements'));
     }
 
     /**
@@ -26,7 +26,7 @@ class DepartementController extends Controller
      */
     public function create()
     {
-        return view('web.pages.master-data.departement.create');
+        return view('pages.simrs.departement.create');
     }
 
     /**

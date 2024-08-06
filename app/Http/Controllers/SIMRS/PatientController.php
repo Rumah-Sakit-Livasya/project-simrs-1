@@ -124,7 +124,7 @@ class PatientController extends Controller
             'family_address' => 'required|max:255',
         ]);
 
-        if ($request['penjamin_id'] !== 3) {
+        if ($request['penjamin_id'] !== 1) {
             $validatedData['nomor_penjamin'] = $request->nomor_penjamin;
             $validatedData['nama_pegawai'] = $request->nama_pegawai;
             $validatedData['nama_perusahaan_pegawai'] = $request->nama_perusahaan_pegawai;
@@ -133,6 +133,7 @@ class PatientController extends Controller
             $validatedData['bagian_pegawai'] = $request->bagian_pegawai;
             $validatedData['grup_perusahaan'] = $request->grup_perusahaan;
         }
+
         $validatedData['medical_record_number'] = MedicalRecordHelper::generateMedicalRecordNumber();
         $family = Family::create($validatedData);
         $validatedData['family_id'] = $family->id;
@@ -199,7 +200,7 @@ class PatientController extends Controller
     public function detail_registrasi_pasien(Patient $patient)
     {
 
-        // return $patient;
+        return dd($patient);
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [

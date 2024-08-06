@@ -259,24 +259,31 @@
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
                                             <td><a
-                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->medical_record_number }}</a>
+                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->registration_date }}</a>
                                             </td>
                                             <td><a
-                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->name }}</a>
+                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->registration_number }}</a>
                                             </td>
                                             <td><a
-                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->address }}</a>
-                                            </td>
-                                            <td><a href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->place }},
-                                                    {{ $registration->date_of_birth }}</a></td>
-                                            <td><a
-                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->mobile_phone_number }}</a>
+                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->patient->medical_record_number }}</a>
                                             </td>
                                             <td><a
-                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->family->name }}</a>
+                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->patient->name }}</a>
+                                            </td>
+                                            <td><a
+                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->patient->address }}</a>
+                                            </td>
+                                            <td><a
+                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->poliklinik }}</a>
+                                            </td>
+                                            <td><a
+                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->doctor->employee->fullname }}</a>
                                             </td>
                                             <td><a
                                                     href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->penjamin->name }}</a>
+                                            </td>
+                                            <td><a
+                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->employee->fullname }}</a>
                                             </td>
                                         </tr>
                                     @endforeach

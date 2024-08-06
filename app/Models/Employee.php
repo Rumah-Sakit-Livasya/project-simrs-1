@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\SIMRS\Doctor;
+use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -100,5 +102,15 @@ class Employee extends Model
     public function targets()
     {
         return $this->hasMany(Target::class);
+    }
+
+    public function doctor()
+    {
+        return $this->hasOne(Doctor::class);
+    }
+
+    public function registration()
+    {
+        return $this->hasMany(Registration::class);
     }
 }

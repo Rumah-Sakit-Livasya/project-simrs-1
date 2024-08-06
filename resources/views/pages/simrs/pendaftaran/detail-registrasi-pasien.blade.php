@@ -1,229 +1,453 @@
 @extends('inc.layout')
+@section('extended-css')
+    <link rel="stylesheet" href="/css/framework_custom.min.css">
+@endsection
 @section('content')
-<style>
-    .biodata-pasien {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
+    <style>
 
-    .btn-biodata {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        grid-gap: 5px;
-        margin: 10px;
-    }
-
-    .btn-flatcx {
-        width: 30px;
-        height: 30px;
-        line-height: 30px;
-        border: 1px solid #ccc;
-        color: var(--primary-color);
-        font-size: 1.5em;
-        border-radius: 50%;
-        text-align: center;
-        vertical-align: middle;
-    }
-
-    .form-control[disabled],
-    .form-control[readonly],
-    fieldset[disabled] .form-control {
-        background-color: transparent;
-        border-bottom-color: rgba(12, 12, 12, 0.2);
-        border-bottom-style: dashed;
-        outline: none;
-        border-top: none;
-        border-right: none;
-        border-left: none;
-    }
-
-
-    li.blue-box {
-        background: #eef5fd;
-        color: #3F51B5;
-    }
-
-    li.red-box {
-        background: #fff4f7;
-        color: #F44336;
-    }
-
-    li.green-box {
-        background: #f1fdda;
-        color: #8BC34A;
-    }
-
-    li.cyan-box {
-        background: #edfbfd;
-        color: #00BCD4;
-    }
-
-    li.orange-box {
-        background: #fff1dc;
-        color: #FF9800;
-    }
-
-    li.purple-box {
-        background: #f5e8f7;
-        color: #9C27B0;
-    }
-
-    li.brown-box {
-        background: #efdad2;
-        color: #ab6e58;
-    }
-
-    .box-menu li {
-        padding: 20px 30px;
-        margin: 20px;
-        width: 200px;
-        background: #f2f0f5;
-        text-align: center;
-        cursor: pointer;
-        border: 1px solid #e5e5e5;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
-    }
-
-    .box-menu .circle-menu {
-        height: 50px;
-        width: 50px;
-        line-height: 50px;
-        font-size: 2.5em;
-        transition: all .15s linear;
-    }
-</style>
-<main id="js-page-content" role="main" class="page-content">
-    <div class="row">
-        <div class="col-xl-3">
-            <div id="panel-1" class="panel">
-                <div class="panel-container show">
-                    <div class="panel-content">
-                        <div class="row">
-                            <div class="col biodata-pasien">
-                                <img src="http://192.168.1.253/real/include/avatar/woman-icon.png"
-                                    style="width: 120px; height: 120px;">
-                                <h3 class="text-center mt-3 text-black">
-                                    {{ strtoupper($patient->name) }}
-                                    <small class="text-danger text-accent-2 mt-1">
-                                        No RM : {{ $patient->medical_record_number }}
-                                    </small>
-                                </h3>
-                            </div>
-
-                            <div class="col-md-10 col-bg-10">
-
-                                <ul class="nav nav-tabs nav-tabs-clean" role="tablist">
-                                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#biodata"
-                                            role="tab">Biodata</a></li>
-                                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#kunjungan"
-                                            role="tab">Kunjungan</a></li>
-                                </ul>
-                                <div class="tab-content p-3">
-                                    <div class="tab-pane fade show active" id="biodata" role="tabpanel"
-                                        aria-labelledby="biodata">
-                                        <div class="mt-3 row align-items-center">
-                                            <div class="col-xl-2">
-                                                <i class="fas fa-calendar text-warning mr-2"
-                                                    style="transform: scale(1.4)"></i>
-                                            </div>
-                                            <div class="col">
-                                                <span class="d-block">{{ $patient->place }}, {{ $patient->date_of_birth
-                                                    }}</span>
-                                                <span class="text-primary">Tempat, Tanggal Lahir</span>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3 row align-items-center">
-                                            <div class="col-xl-2">
-                                                <i class="fas fa-calendar-alt text-warning mr-2"
-                                                    style="transform: scale(1.4)"></i>
-                                            </div>
-                                            <div class="col">
-                                                <span class="d-block">{{ $age }}</span>
-                                                <span class="text-primary">Umur</span>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3 row align-items-center">
-                                            <div class="col-xl-2">
-                                                <i class="fas fa-venus-mars text-warning mr-2"
-                                                    style="transform: scale(1.4)"></i>
-                                            </div>
-                                            <div class="col">
-                                                <span class="d-block">{{ $patient->gender }}</span>
-                                                <span class="text-primary">Jenis Kelamin</span>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3 row align-items-center">
-                                            <div class="col-xl-2">
-                                                <i class="fas fa-map-marker-alt text-warning mr-2"
-                                                    style="transform: scale(1.4)"></i>
-                                            </div>
-                                            <div class="col">
-                                                <span class="d-block">{{ $patient->address }}</span>
-                                                <span class="text-primary">Alamat</span>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3 row align-items-center">
-                                            <div class="col-xl-2">
-                                                <i class="fas fa-mobile-android-alt text-warning mr-2"
-                                                    style="transform: scale(1.4)"></i>
-                                            </div>
-                                            <div class="col">
-                                                <span class="d-block">{{ $patient->mobile_phone_number }}</span>
-                                                <span class="text-primary">Telp/HP</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tab-pane fade" id="kunjungan" role="tabpanel"
-                                        aria-labelledby="kunjungan">
-                                        Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin
-                                        coffee squid.
-                                        Exercitation +1 labore velit, blog sartorial PBR leggings next level wes
-                                        anderson
-                                        artisan four loko farm-to-table craft beer twee. Qui photo booth letterpress,
-                                        commodo
-                                        enim craft beer mlkshk aliquip jean shorts ullamco ad vinyl cillum PBR. Homo
-                                        nostrud
-                                        organic.
-                                    </div>
+    </style>
+    <main id="js-page-content" role="main" class="page-content">
+        <div class="row">
+            <div class="col-xl-3">
+                <div id="panel-1" class="panel h-100">
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <div class="row">
+                                <div class="col biodata-pasien">
+                                    <img src="http://192.168.1.253/real/include/avatar/woman-icon.png"
+                                        style="width: 120px; height: 120px;">
+                                    <h3 class="text-center mt-3 text-black">
+                                        {{ strtoupper($patient->name) }}
+                                        <small class="text-danger text-accent-2 mt-1">
+                                            No RM : {{ $patient->medical_record_number }}
+                                        </small>
+                                    </h3>
                                 </div>
 
+                                <div class="col-md-10 col-bg-10">
+
+                                    <ul class="nav nav-tabs nav-tabs-clean" role="tablist">
+                                        <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#biodata"
+                                                role="tab">Biodata</a></li>
+                                        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#kunjungan"
+                                                role="tab">Kunjungan</a></li>
+                                    </ul>
+                                    <div class="tab-content p-3">
+                                        <div class="tab-pane fade show active" id="biodata" role="tabpanel"
+                                            aria-labelledby="biodata">
+                                            <div class="mt-3 row align-items-center">
+                                                <div class="col-xl-2">
+                                                    <i class="fas fa-calendar text-warning mr-2"
+                                                        style="transform: scale(1.4)"></i>
+                                                </div>
+                                                <div class="col">
+                                                    <span class="d-block">{{ $patient->place }},
+                                                        {{ $patient->date_of_birth }}</span>
+                                                    <span class="text-primary">Tempat, Tanggal Lahir</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3 row align-items-center">
+                                                <div class="col-xl-2">
+                                                    <i class="fas fa-calendar-alt text-warning mr-2"
+                                                        style="transform: scale(1.4)"></i>
+                                                </div>
+                                                <div class="col">
+                                                    <span class="d-block">{{ $age }}</span>
+                                                    <span class="text-primary">Umur</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3 row align-items-center">
+                                                <div class="col-xl-2">
+                                                    <i class="fas fa-venus-mars text-warning mr-2"
+                                                        style="transform: scale(1.4)"></i>
+                                                </div>
+                                                <div class="col">
+                                                    <span class="d-block">{{ $patient->gender }}</span>
+                                                    <span class="text-primary">Jenis Kelamin</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3 row align-items-center">
+                                                <div class="col-xl-2">
+                                                    <i class="fas fa-map-marker-alt text-warning mr-2"
+                                                        style="transform: scale(1.4)"></i>
+                                                </div>
+                                                <div class="col">
+                                                    <span class="d-block">{{ $patient->address }}</span>
+                                                    <span class="text-primary">Alamat</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3 row align-items-center">
+                                                <div class="col-xl-2">
+                                                    <i class="fas fa-mobile-android-alt text-warning mr-2"
+                                                        style="transform: scale(1.4)"></i>
+                                                </div>
+                                                <div class="col">
+                                                    <span class="d-block">{{ $patient->mobile_phone_number }}</span>
+                                                    <span class="text-primary">Telp/HP</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="kunjungan" role="tabpanel"
+                                            aria-labelledby="kunjungan">
+                                            Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin
+                                            coffee squid.
+                                            Exercitation +1 labore velit, blog sartorial PBR leggings next level wes
+                                            anderson
+                                            artisan four loko farm-to-table craft beer twee. Qui photo booth letterpress,
+                                            commodo
+                                            enim craft beer mlkshk aliquip jean shorts ullamco ad vinyl cillum PBR. Homo
+                                            nostrud
+                                            organic.
+                                        </div>
+                                    </div>
+
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-xl-9">
-            <div id="panel-1" class="panel">
-                <div class="panel-hdr">
-                    <h2 class="text-light">
-                        <i class="fas fa-address-card mr-3 ml-2 text-primary" style="transform: scale(2.1)"></i>
-                        <span class="text-primary">Data Registrasi</span>
-                    </h2>
-                </div>
-                <div class="panel-container show">
-                    <div class="panel-content">
-                        <ul class="box-menu">
-                            <div class="row justify-content-center">
-                                <div class="col-md-6">
-                                    <div class="row justify-content-center">
+            <div class="col-xl-9">
+                <div id="panel-1" class="panel h-100">
+                    <div class="panel-hdr">
+                        <h2 class="text-light">
+                            <i class="fas fa-address-card mr-3 ml-2 text-primary" style="transform: scale(2.1)"></i>
+                            <span class="text-primary">Data Registrasi</span>
+                        </h2>
+                        <a href="#" class="btn btn-icon-toggle toolbar-menu-pasien waves-effect text-primary"
+                            data-toggle="dropdown" aria-expanded="true"><i class="mdi mdi-menu mdi-24px"></i></a>
 
+                        <ul id="menu_layanan_pasien" class="dropdown-menu pull-right menu-card-styling w-25" role="menu"
+                            style="text-align: left;">
+                            <li class="p-2">
+                                <a href="javascript:void(0);" data-style="style-default" class="nextRegis">
+                                    <i class="fa fa-circle-o fa-fw pink-text text-accent-2"></i>
+                                    Rujuk Rawat Inap / Poli Lain
+                                </a>
+                            </li>
+                            <li class="p-2">
+                                <a href="javascript:void(0);" onclick="return tutup_kunjungan();"
+                                    data-style="style-default">
+                                    <i class="fa fa-circle-o fa-fw pink-text text-accent-2"></i>
+                                    Tutup Kunjungan
+                                </a>
+                            </li>
+                            <li class="p-2">
+                                <a href="javascript:void(0);" onclick="return batal_registrasi();"
+                                    data-style="style-default">
+                                    <i class="fa fa-circle-o fa-fw pink-text text-accent-2"></i>
+                                    Batal Registrasi
+                                </a>
+                            </li>
+                            <li style="display:none;">
+                                <a href="javascript:void(0);" onclick="return batal_keluar();"
+                                    data-style="style-default">
+                                    <i class="fa fa-circle-o fa-fw pink-text text-accent-2"></i>
+                                    Batal Keluar
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+
+                            <div class="card-body style-default-bright">
+                                <!-- Info registrasi -->
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="s_tgl_1" class="col-md-4 control-label">Tanggal
+                                                Registrasi</label>
+                                            <div class="col-md-8">
+                                                <input class="form-control" type="text"
+                                                    value="{{ $registration->registration_date }}" readonly="readonly">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="s_tgl_1" class="col-md-4 control-label btnEditDokter pointer"><u>
+                                                    Dokter (DPJP)</u></label>
+                                            <div class="col-md-8">
+                                                <input class="form-control" type="text"
+                                                    value="{{ $registration->doctor->employee->fullname }}"
+                                                    readonly="readonly">
+                                                <!--					<span class="mdi mdi-account-edit mdi-24px red-text form-control-feedback pointer btnEditDokter" title="Edit Dokter"></span> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="s_tgl_1" class="col-md-4 control-label">No Registrasi</label>
+                                            <div class="col-md-8">
+                                                <input class="form-control" type="text"
+                                                    value="{{ $registration->registration_number }}" readonly="readonly">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="s_tgl_1" class="col-md-4 control-label">Unit Layanan</label>
+                                            <div class="col-md-8">
+                                                <input class="form-control" type="text"
+                                                    value="{{ $registration->poliklinik }}" readonly="readonly">
+                                                <div class="mt-2">
+                                                    <span style="font-size: 1.4em;color:red">No.Urut :
+                                                        {{ $registration->no_urut }}</span>
+                                                    <br>
+                                                    <button class="btn btn-warning waves-effect mr-3" style="display: "
+                                                        onclick="popupFull('http://192.168.1.253/real/antrol_bpjs/regenerate_antrol/180789','p_card', 900,600,'no'); return false;">
+                                                        <i class="mdi mdi-update"></i> Re Generate BPJS
+                                                    </button>
+                                                    <button class="btn btn-success waves-effect mt-2" style="display: ;"
+                                                        onclick="popupFull('http://192.168.1.253/real/antrol_bpjs/get_task_antrian_vclaim/2408046471','p_card', 900,600,'no'); return false;">
+                                                        <i class="mdi mdi-update"></i> Status TASK ID
+                                                    </button>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="s_tgl_1" class="col-md-4 control-label">Kelas Rawat</label>
+                                            <div class="col-md-8">
+                                                <input class="form-control" type="text" value="{{ $kelasRawat }} "
+                                                    readonly="readonly">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="s_tgl_1"
+                                                class="col-md-4 control-label editPenjamin pointer"><u>Penjamin</u></label>
+                                            <div class="col-md-8">
+                                                <input class="form-control" type="text" value="{{ $penjamin }}"
+                                                    readonly="readonly">
+
+                                                <div style="display:none">
+                                                    <a id="sepada" class="blinkme red-text"
+                                                        style="clear:both:margin-top:1em; "
+                                                        onclick="popupwindow('http://192.168.1.253/real/vclaim/inject_noka_sep/180789','p_insurance','800','500','yes');return false;"
+                                                        href="">
+                                                        Pasien ini Belum Memiliki SEP,Klik disini Untuk Inject SEP
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="s_tgl_1" class="col-md-4 control-label">Ruangan - Bed</label>
+                                            <div class="col-md-8">
+                                                <input class="form-control" type="text" value=" - "
+                                                    readonly="readonly">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="s_tgl_1" class="col-md-4 control-label">Keterangan</label>
+                                            <div class="col-md-8">
+                                                <input class="form-control" type="text" value="-"
+                                                    readonly="readonly">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="s_tgl_1"
+                                                class="col-md-4 control-label diagAwal pointer"><u>Diagnosa
+                                                    Awal</u></label>
+                                            <div class="col-md-8">
+                                                <input class="form-control" type="text"
+                                                    value="{{ $registration->diagnosa_awal }}" readonly="readonly">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- end info registrasi -->
+                                </div><!--end .card-body -->
+                                <div class="row mt-3">
+                                    <div class="col-md-12" style="display: none">
+                                        <div class="form-group">
+                                            <label for="s_tgl_1" class="col-md-4 control-label pointer"><u>Informasi
+                                                    Billing</u></label>
+                                            <div class="col-md-12">
+                                                <input class="form-control {infocolor} blinkme" style="font-weight: bold;"
+                                                    type="text" value="0 - 0 -  - " readonly="readonly">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-actionbar">
+                                    <div class="card-actionbar-row " id="group-print-pasien">
+                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupwindow('http://192.168.1.253/real/regprint/print_kartu_pdf/53432/180789','p_card', 400,400,'no'); return false"><i
+                                                class="mdi mdi-printer"></i> Kartu pasien</button>
+                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupwindow('http://192.168.1.253/real/regprint/print_identitas/53432/180789','p_card', 400,400,'yes'); return false"><i
+                                                class="mdi mdi-printer"></i> Identitas Pasien</button>
+                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupwindow('http://192.168.1.253/real/regprint/label_rm_pdf/53432/180789','p_card', 400,400,'no'); return false;"><i
+                                                class="mdi mdi-printer"></i> Label RM (PDF)</button>
+                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupwindow('http://192.168.1.253/real/regprint/label_rm_new/53432/180789','p_card', 400,400,'no'); return false;"><i
+                                                class="mdi mdi-printer"></i> Label RM</button>
+                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupwindow('http://192.168.1.253/real/regprint/label_gelang_anak_pdf/53432/180789','p_card', 400,400,'no'); return false;"><i
+                                                class="mdi mdi-printer"></i> Label Gelang Anak</button>
+                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupwindow('http://192.168.1.253/real/regprint/label_gelang_dewasa_pdf/53432/180789','p_card', 400,400,'no'); return false;"><i
+                                                class="mdi mdi-printer"></i> Label Gelang Dewasa</button>
+                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupwindow('http://192.168.1.253/real/regprint/tracer_new/53432/180789','p_tracer_new', 800,500,'no'); return false;"><i
+                                                class="mdi mdi-printer"></i> Tracer</button>
+                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupwindow('http://192.168.1.253/real/regprint/slip_dokter/53432/180789','p_card', 400,400,'no'); return false;"><i
+                                                class="mdi mdi-printer"></i> Charges Slip</button>
+                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupwindow('http://192.168.1.253/real/persalinan/skl/180789/modul_pasien','p_card', 400,400,'no'); return false;"><i
+                                                class="mdi mdi-printer"></i> Surat Keterangan Lahir</button>
+                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
+                                            style="display: none"
+                                            onclick="popupwindow('http://192.168.1.253/real/regprint/print_surat_ket_mati/53432/180789','p_card', 2000,2000,'no'); return false;"><i
+                                                class="mdi mdi-printer"></i> Surat Keterangan Kematian</button>
+                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupwindow('http://192.168.1.253/real/pengkajian/general_consent?pregid=180789','p_card', 1000,900,'yes'); return false;"><i
+                                                class="mdi mdi-printer"></i> General Consent</button>
+                                        <div class="col-sm-12"></div>
+                                        <button class="btn btn-danger pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupFull('http://192.168.1.253/real/vclaim/print_sep_pdf/180789'); return false;"><i
+                                                class="mdi mdi-printer"></i> Print SEP</button>
+                                        <button class="btn btn-danger pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupFull('http://192.168.1.253/real/vclaim/sep_internal/180789'); return false;"><i
+                                                class="mdi mdi-printer"></i> Cek SEP Internal</button>
+                                        <button class="btn btn-danger pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupFull('http://192.168.1.253/real/vclaim/form_rencana_kontrol/2/180789'); return false;"><i
+                                                class="mdi mdi-printer"></i> Rencana Kontrol</button>
+                                        <button class="btn btn-danger pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupFull('http://192.168.1.253/real/vclaim/form_rencana_kontrol/1/180789'); return false;"><i
+                                                class="mdi mdi-printer"></i> Surat SPRI</button>
+                                        <button class="btn btn-danger pull-left waves-effect" style="margin: 2px"
+                                            onclick="popupFull('http://192.168.1.253/real/vclaim/rujukan/180789'); return false;"><i
+                                                class="mdi mdi-printer"></i> Rujukan BPJS</button>
+                                        <button class="btn btn-danger pull-left waves-effect"
+                                            onclick="popupwindow('http://192.168.1.253/real/vclaim/pengajuan_add/180789','p_card', 900,600,'no'); return false;"><i
+                                                class="mdi mdi-printer" style="margin: 2px"></i> Pengajuan</button>
+                                        <button style="display: ;" class="btn btn-success pull-left waves-effect"
+                                            onclick="popupwindow('http://192.168.1.253/real/satu_sehat/get_encounter/180789','p_card', 900,600,'no'); return false;"><i
+                                                class="mdi mdi-history" style="margin: 2px"></i> Status Kunjungan
+                                            (SatuSehat)</button>
                                     </div>
                                 </div>
                             </div>
-                        </ul>
+                        </div>
+                    </div>
+                    <div class="panel-hdr border-top">
+                        <h2 class="text-light">
+                            <i class="fas fa-address-card mr-3 ml-2 text-primary" style="transform: scale(2.1)"></i>
+                            <span class="text-primary">Daftar Layanan</span>
+                        </h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="card">
+                            <div class="card-body style-default-bright">
+                                <div class="row">
+                                    <ul id="patient-menu-icon">
+                                        <li>
+                                            <div class="circle-menu waves-effect pink accent-2 menu-layanan"
+                                                data-layanan="pengkajian/menu_rajal/180663">
+                                                <i class="mdi mdi-clipboard-pulse"></i>
+                                            </div>
+                                            <span>Catatan Medis</span>
+                                        </li>
+                                        <li>
+                                            <div class="circle-menu waves-effect light-green accent-3 menu-layanan"
+                                                data-layanan="tindakan_medis/list_tindakan_medis">
+                                                <i class="mdi mdi-needle"></i>
+                                            </div>
+                                            <span>Tindakan Medis</span>
+                                        </li>
+                                        <li>
+                                            <div class="circle-menu waves-effect amber lighten-1 menu-layanan"
+                                                data-layanan="obatalkes_ruangan/list_obat_alkes">
+                                                <i class="mdi mdi-pill"></i>
+                                            </div>
+                                            <span>Obat/Alkes</span>
+                                        </li>
+                                        <li>
+                                            <div class="circle-menu waves-effect purple menu-layanan"
+                                                data-layanan="order_lab/list_order/1">
+                                                <i class="mdi mdi-flask-outline"></i>
+                                            </div>
+                                            <span>Laboratorium</span>
+                                        </li>
+                                        <li>
+                                            <div class="circle-menu waves-effect red menu-layanan"
+                                                data-layanan="order_rad/list_order">
+                                                <i class="mdi mdi-radioactive"></i>
+                                            </div>
+                                            <span>Radiologi</span>
+                                        </li>
+                                        <li>
+                                            <div class="circle-menu waves-effect blue menu-layanan"
+                                                data-layanan="pemakaian_alat/list_pemakaian_alat">
+                                                <i class="mdi mdi-source-merge"></i>
+                                            </div>
+                                            <span>Pemakaian Alat</span>
+                                        </li>
+                                        <li>
+                                            <div class="circle-menu waves-effect blue darken-3 menu-layanan"
+                                                data-layanan="visite/visite_list">
+                                                <i class="mdi mdi-stethoscope"></i>
+                                            </div>
+                                            <span>Visite</span>
+                                        </li>
+                                        <li>
+                                            <div class="circle-menu waves-effect pink accent-2 menu-layanan"
+                                                data-layanan="bhp_ruangan/list_bhp">
+                                                <i class="mdi mdi-pill"></i>
+                                            </div>
+                                            <span>BMHP</span>
+                                        </li>
+                                        <li>
+                                            <div class="circle-menu waves-effect light-green accent-3 menu-layanan"
+                                                data-layanan="operasi/data_treatment">
+                                                <i class="mdi mdi-heart-pulse"></i>
+                                            </div>
+                                            <span>Operasi (OK)</span>
+                                        </li>
+                                        <li>
+                                            <div class="circle-menu waves-effect teal menu-layanan"
+                                                data-layanan="persalinan/index">
+                                                <i class="mdi mdi-seat-flat-angled"></i>
+                                            </div>
+                                            <span>Persalinan (VK)</span>
+                                        </li>
+                                        <li>
+                                            <div class="circle-menu waves-effect red menu-layanan"
+                                                data-layanan="gizi/list_order_gizi">
+                                                <i class="mdi mdi-bowl"></i>
+                                            </div>
+                                            <span>Gizi</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div><!--end .card-body -->
+
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-</main>
+    </main>
 @endsection

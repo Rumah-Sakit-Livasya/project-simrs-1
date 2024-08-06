@@ -2,7 +2,6 @@
 
 namespace App\Models\SIMRS;
 
-use App\Models\Employee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,8 +11,13 @@ class Departement extends Model
 
     protected $guarded = ['id'];
 
-    public function employee()
+    public function doctors()
     {
-        return $this->hasMany(Employee::class);
+        return $this->hasMany(Doctor::class);
+    }
+
+    public function time_tables()
+    {
+        return $this->hasMany(TimeTable::class);
     }
 }

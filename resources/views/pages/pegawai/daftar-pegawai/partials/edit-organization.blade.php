@@ -11,7 +11,7 @@
                     </button>
                 </div>
                 <div class="modal-body py-0">
-                    <div class="row">
+                    <div class="row justify-content-center align-items-center">
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="fullname">Nama</label>
@@ -88,6 +88,47 @@
                                     @endforeach
                                 </select>
                                 @error('company_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-5 mt-3">
+                            <div class="form-group">
+                                <label for="departement_id">Departement</label>
+                                <select
+                                    class="select2 form-control w-100  @error('organization_id') is-invalid @enderror"
+                                    id="departement_id" name="departement_id" disabled>
+                                    <option value=""></option>
+                                    @foreach ($departements as $departement)
+                                        <option value="{{ $departement->id }}">{{ $departement->id }} -
+                                            {{ $departement->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('departement_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <div class="form-group">
+                                <label for="kode_dpjp">Kode DPJP</label>
+                                <input type="text" id="kode_dpjp" name="kode_dpjp" class="form-control"
+                                    placeholder="Masukan Kode DPJP" disabled>
+                                @error('kode_dpjp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-3 mt-5">
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox"
+                                        class="custom-control-input @error('is_doctor') is-invalid @enderror"
+                                        id="is_doctor" value="on" name="is_doctor">
+                                    <label class="custom-control-label" for="is_doctor">Dokter?</label>
+                                </div>
+                                @error('is_doctor')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>

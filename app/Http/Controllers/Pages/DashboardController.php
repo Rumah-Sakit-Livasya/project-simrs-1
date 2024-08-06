@@ -25,6 +25,7 @@ use App\Models\PayrollComponent;
 use App\Models\RekapPenilaianBulanan;
 use App\Models\PenilaianPegawai;
 use App\Models\Shift;
+use App\Models\SIMRS\Departement;
 use App\Models\Structure;
 use App\Models\Target;
 use App\Models\UploadFile;
@@ -607,13 +608,14 @@ class DashboardController extends Controller
         $employees = Employee::where('is_active', 1)->get();
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
+        $departements = Departement::all();
         $jobPosition = JobPosition::all();
         $locations = Location::all();
         $bank = Bank::all();
         $company = Company::all();
         $getNotify = $this->getNotify();
 
-        return view('pages.pegawai.daftar-pegawai.index', compact('employees', 'jobLevel', 'organizations', 'jobPosition', 'locations', 'bank', 'company', 'getNotify'));
+        return view('pages.pegawai.daftar-pegawai.index', compact('employees', 'jobLevel', 'organizations', 'departements', 'jobPosition', 'locations', 'bank', 'company', 'getNotify'));
     }
 
     public function pegawaiNonAktifList(Request $request)

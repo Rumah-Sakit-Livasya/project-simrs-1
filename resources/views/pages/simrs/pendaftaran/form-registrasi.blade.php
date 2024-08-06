@@ -264,8 +264,12 @@
                                 @switch($case)
                                     @case('rawat-jalan')
                                         <form action="{{ route('simpan.registrasi.rajal') }}" method="post">
+                                            @csrf
+                                            <input type="hidden" name="patient_id" value="{{ $patient->id }}">
+                                            <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+                                            <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
+                                            <input type="hidden" name="registration_type" value="rawat-jalan">
                                             <div class="row">
-                                                @csrf
                                                 <div class="col-xl-6">
                                                     <div class="form-group">
                                                         <div class="row align-items-center">
@@ -288,26 +292,33 @@
                                                     <div class="form-group">
                                                         <div class="row align-items-center">
                                                             <div class="col-xl-4 text-right">
-                                                                <label class="form-label" for="employee_id">
-                                                                    Dokter
-                                                                </label>
+                                                                <label class="form-label" for="doctor_id">Dokter</label>
                                                             </div>
                                                             <div class="col-xl-8">
                                                                 <div class="form-group">
-                                                                    <select class="form-control w-100" id="dokter"
+                                                                    <select class="select2 form-control w-100" id="doctor_id"
                                                                         name="doctor_id">
-                                                                        <option selected></option>
+                                                                        <option value=""></option>
+                                                                        @foreach ($groupedDoctors as $department => $doctors)
+                                                                            <optgroup label="{{ $department }}">
+                                                                                @foreach ($doctors as $doctor)
+                                                                                    <option value="{{ $doctor->id }}"
+                                                                                        data-departement="{{ $department }}">
+                                                                                        {{ $doctor->employee->fullname }}
+                                                                                    </option>
+                                                                                @endforeach
+                                                                            </optgroup>
+                                                                        @endforeach
                                                                     </select>
                                                                 </div>
+
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
                                                         <div class="row align-items-center">
                                                             <div class="col-xl-4 text-right">
-                                                                <label class="form-label" for="poliklinik">
-                                                                    Poliklinik
-                                                                </label>
+                                                                <label class="form-label" for="poliklinik">Poliklinik</label>
                                                             </div>
                                                             <div class="col-xl-8">
                                                                 <input type="text"
@@ -398,7 +409,7 @@
                                                     <div class="form-group">
                                                         <div class="row align-items-center">
                                                             <div class="col-xl-4 text-right">
-                                                                <label class="form-label" for="registration_date">
+                                                                <label class="form-label" for="">
                                                                     Rujukan
                                                                 </label>
                                                             </div>
@@ -408,34 +419,142 @@
                                                                         <div
                                                                             class="custom-control custom-radio custom-control-inline p-0">
                                                                             <input type="radio" class="custom-control-input"
-                                                                                id="inisiatif_pribadi" name="rujukan">
+                                                                                id="inisiatif_pribadi" name="rujukan"
+                                                                                value="inisiatif pribadi">
                                                                             <label class="custom-control-label"
                                                                                 for="inisiatif_pribadi">Inisiatif Pribadi</label>
                                                                         </div>
                                                                         <div
                                                                             class="custom-control custom-radio custom-control-inline">
                                                                             <input type="radio" class="custom-control-input"
-                                                                                id="dalam_rs" name="rujukan">
+                                                                                id="dalam_rs" name="rujukan" value="dalam rs">
                                                                             <label class="custom-control-label"
-                                                                                for="dalam_rs">Dalam
-                                                                                RS</label>
+                                                                                for="dalam_rs">Dalam RS</label>
                                                                         </div>
                                                                         <div
                                                                             class="custom-control custom-radio custom-control-inline">
                                                                             <input type="radio" class="custom-control-input"
-                                                                                id="luar_rs" name="rujukan">
+                                                                                id="luar_rs" name="rujukan" value="luar rs">
                                                                             <label class="custom-control-label"
-                                                                                for="luar_rs">Luar
-                                                                                RS</label>
+                                                                                for="luar_rs">Luar RS</label>
                                                                         </div>
                                                                         <div
                                                                             class="custom-control custom-radio custom-control-inline">
                                                                             <input type="radio" class="custom-control-input"
-                                                                                id="rujukan_bpjs" name="rujukan">
+                                                                                id="rujukan_bpjs" name="rujukan"
+                                                                                value="rujukan bpjs">
                                                                             <label class="custom-control-label"
-                                                                                for="rujukan_bpjs">Rujukan
-                                                                                BPJS</label>
+                                                                                for="rujukan_bpjs">Rujukan BPJS</label>
                                                                         </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group mt-3 d-none" id="dokter_perujuk_container">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-xl-4 text-right">
+                                                                <label class="form-label" for="dokter_perujuk">Dokter
+                                                                    Perujuk</label>
+                                                            </div>
+                                                            <div class="col-xl-8">
+                                                                <div class="form-group">
+                                                                    <select class="select2 form-control w-100" id="dokter_perujuk"
+                                                                        name="dokter_perujuk">
+                                                                        <option value=""></option>
+                                                                        @foreach ($groupedDoctors as $department => $doctors)
+                                                                            <optgroup label="{{ $department }}">
+                                                                                @foreach ($doctors as $doctor)
+                                                                                    <option value="{{ $doctor->id }}"
+                                                                                        data-departement="{{ $department }}">
+                                                                                        {{ $doctor->employee->fullname }}
+                                                                                    </option>
+                                                                                @endforeach
+                                                                            </optgroup>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row d-none" id="luar_dan_rujuk_bpjs_container">
+                                                        <div class="col-12">
+                                                            <div class="form-group mt-3">
+                                                                <div class="row align-items-center">
+                                                                    <div class="col-xl-4 text-right">
+                                                                        <label class="form-label" for="tipe_rujukan">Tipe
+                                                                            Rujuk</label>
+                                                                    </div>
+                                                                    <div class="col-xl-8">
+                                                                        <div class="form-group">
+                                                                            <select class="select2 form-control w-100"
+                                                                                id="tipe_rujukan" name="tipe_rujukan">
+                                                                                <option value="rsu/rsk/rb">RSU/RSK/RB</option>
+                                                                                <option value="puskesmas">PUSKESMAS</option>
+                                                                                <option value="bidan/perawat">BIDAN/PERAWAT
+                                                                                </option>
+                                                                                <option value="dokter">DOKTER</option>
+                                                                                <option value="dukun terlatih">DUKUN TERLATIH
+                                                                                </option>
+                                                                                <option value="kasus polisi">KASUS POLISI</option>
+                                                                                <option value="klinik">KLINIK</option>
+                                                                                <option value="lain-lain">LAIN-LAIN</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12">
+                                                            <div class="form-group mt-3">
+                                                                <div class="row align-items-center">
+                                                                    <div class="col-xl-4 text-right">
+                                                                        <label class="form-label" for="nama perujuk">Nama
+                                                                            Perujuk</label>
+                                                                    </div>
+                                                                    <div class="col-xl-8">
+                                                                        <input type="text" class="form-control"
+                                                                            id="nama_perujuk" name="nama_perujuk">
+                                                                        @error('nama_perujuk')
+                                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                                        @enderror
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="form-group mt-3">
+                                                                <div class="row align-items-center">
+                                                                    <div class="col-xl-4 text-right">
+                                                                        <label class="form-label" for="telp_perujuk">Telp/HP
+                                                                            Perujuk</label>
+                                                                    </div>
+                                                                    <div class="col-xl-8">
+                                                                        <input type="text" class="form-control"
+                                                                            id="telp_perujuk" name="telp_perujuk">
+                                                                        @error('telp_perujuk')
+                                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                                        @enderror
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="form-group mt-3">
+                                                                <div class="row align-items-center">
+                                                                    <div class="col-xl-4 text-right">
+                                                                        <label class="form-label"
+                                                                            for="alamat_perujuk">Alamat</label>
+                                                                    </div>
+                                                                    <div class="col-xl-8">
+                                                                        <input type="text" class="form-control"
+                                                                            id="alamat_perujuk" name="alamat_perujuk">
+                                                                        @error('alamat_perujuk')
+                                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                                        @enderror
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -451,8 +570,8 @@
                                                                 </label>
                                                             </div>
                                                             <div class="col-xl-10">
-                                                                <textarea class="form-control" id="diagnosa-awal" name="diagnosa-awal" rows="5"></textarea>
-                                                                @error('diagnosa-awal')
+                                                                <textarea class="form-control" id="diagnosa-awal" name="diagnosa_awal" rows="5"></textarea>
+                                                                @error('diagnosa_awal')
                                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                                 @enderror
                                                             </div>
@@ -604,25 +723,28 @@
                                                                     <div
                                                                         class="custom-control custom-radio custom-control-inline p-0">
                                                                         <input type="radio" class="custom-control-input"
-                                                                            id="inisiatif_pribadi" name="rujukan">
+                                                                            id="inisiatif_pribadi" name="rujukan"
+                                                                            value="inisiatif pribadi">
                                                                         <label class="custom-control-label"
-                                                                            for="inisiatif_pribadi">Inisiatif Pribadi</label>
+                                                                            for="inisiatif_pribadi">Inisiatif
+                                                                            Pribadi</label>
                                                                     </div>
                                                                     <div class="custom-control custom-radio custom-control-inline">
                                                                         <input type="radio" class="custom-control-input"
-                                                                            id="dalam_rs" name="rujukan">
+                                                                            id="dalam_rs" name="rujukan" value="dalam rs">
                                                                         <label class="custom-control-label" for="dalam_rs">Dalam
                                                                             RS</label>
                                                                     </div>
                                                                     <div class="custom-control custom-radio custom-control-inline">
                                                                         <input type="radio" class="custom-control-input"
-                                                                            id="luar_rs" name="rujukan">
+                                                                            id="luar_rs" name="rujukan" value="luar rs">
                                                                         <label class="custom-control-label" for="luar_rs">Luar
                                                                             RS</label>
                                                                     </div>
                                                                     <div class="custom-control custom-radio custom-control-inline">
                                                                         <input type="radio" class="custom-control-input"
-                                                                            id="rujukan_bpjs" name="rujukan">
+                                                                            id="rujukan_bpjs" name="rujukan"
+                                                                            value="rujukan bpjs">
                                                                         <label class="custom-control-label"
                                                                             for="rujukan_bpjs">Rujukan
                                                                             BPJS</label>
@@ -659,13 +781,13 @@
                                                 <div class="form-group">
                                                     <div class="row align-items-center">
                                                         <div class="col-xl-4 text-right">
-                                                            <label class="form-label" for="diagnosa-awal">
+                                                            <label class="form-label" for="diagnosa_awal">
                                                                 Diagnosa Awal
                                                             </label>
                                                         </div>
                                                         <div class="col-xl-8">
-                                                            <textarea class="form-control" id="diagnosa-awal" name="diagnosa-awal" rows="5"></textarea>
-                                                            @error('diagnosa-awal')
+                                                            <textarea class="form-control" id="diagnosa_awal" name="diagnosa_awal" rows="5"></textarea>
+                                                            @error('diagnosa_awal')
                                                                 <div class="invalid-feedback">{{ $message }}</div>
                                                             @enderror
                                                         </div>
@@ -810,7 +932,8 @@
                                                                         <input type="radio" class="custom-control-input"
                                                                             id="inisiatif_pribadi" name="rujukan">
                                                                         <label class="custom-control-label"
-                                                                            for="inisiatif_pribadi">Inisiatif Pribadi</label>
+                                                                            for="inisiatif_pribadi">Inisiatif
+                                                                            Pribadi</label>
                                                                     </div>
                                                                     <div class="custom-control custom-radio custom-control-inline">
                                                                         <input type="radio" class="custom-control-input"
@@ -1093,7 +1216,8 @@
                                                                         <input type="radio" class="custom-control-input"
                                                                             id="inisiatif_pribadi" name="rujukan">
                                                                         <label class="custom-control-label"
-                                                                            for="inisiatif_pribadi">Inisiatif Pribadi</label>
+                                                                            for="inisiatif_pribadi">Inisiatif
+                                                                            Pribadi</label>
                                                                     </div>
                                                                     <div class="custom-control custom-radio custom-control-inline">
                                                                         <input type="radio" class="custom-control-input"
@@ -1283,7 +1407,8 @@
                                                                         <input type="radio" class="custom-control-input"
                                                                             id="inisiatif_pribadi" name="rujukan">
                                                                         <label class="custom-control-label"
-                                                                            for="inisiatif_pribadi">Inisiatif Pribadi</label>
+                                                                            for="inisiatif_pribadi">Inisiatif
+                                                                            Pribadi</label>
                                                                     </div>
                                                                     <div class="custom-control custom-radio custom-control-inline">
                                                                         <input type="radio" class="custom-control-input"
@@ -1431,6 +1556,31 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            // poliklinik sesuai dokter yang dipilih
+            $('#doctor_id').change(function() {
+                var selectedDoctor = $(this).find('option:selected');
+                var departement = selectedDoctor.data('departement') || '';
+                $('#poliklinik').val(departement);
+            });
+
+            $('input[name="rujukan"]').change(function() {
+                var value = $(this).val();
+
+                // Tampilkan atau sembunyikan Dokter Perujuk
+                if (value === 'dalam rs') {
+                    $('#dokter_perujuk_container').removeClass('d-none');
+                } else {
+                    $('#dokter_perujuk_container').addClass('d-none');
+                }
+
+                // Tampilkan atau sembunyikan Luar dan Rujukan BPJS
+                if (value === 'luar rs' || value === 'rujukan bpjs') {
+                    $('#luar_dan_rujuk_bpjs_container').removeClass('d-none');
+                } else {
+                    $('#luar_dan_rujuk_bpjs_container').addClass('d-none');
+                }
+            });
+
             $(function() {
                 $('.select2').select2();
                 $('#dokter').select2();
