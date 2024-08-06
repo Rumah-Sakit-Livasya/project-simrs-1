@@ -54,11 +54,21 @@
                                     placeholder="1">
                             </div>
                         </div>
-                        <div class="col-lg-12 mb-2">
+                        <div class="col-lg-6 mb-2">
                             <div class="form-group">
                                 <label for="title">Permission</label>
                                 <input type="text" class="form-control" id="permission" name="permission"
                                     placeholder="view absensi">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-2">
+                            <div class="form-group">
+                                <label for="title">Type Web</label>
+                                <select class="select2 form-control w-100  @error('parent_id') is-invalid @enderror"
+                                    id="type" name="type">
+                                    <option value="simrs">SIMRS</option>
+                                    <option value="hr">SMART HR</option>
+                                </select>
                             </div>
                         </div>
                     </div>

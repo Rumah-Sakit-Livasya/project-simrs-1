@@ -50,12 +50,15 @@
 
         <!-- Sidebar.blade.php -->
         <ul id="js-nav-menu" class="nav-menu">
+            @php
+                $appType = session('app_type', 'hr'); // Default ke 'hr' jika tidak ada session
+            @endphp
             @if (auth()->user()->hasRole('super admin'))
-                @foreach (App\Models\Menu::whereNull('parent_id')->with('children.children')->orderBy('sort_order')->get() as $menu)
+                @foreach (App\Models\Menu::where('type', $appType)->whereNull('parent_id')->with('children.children')->orderBy('sort_order')->get() as $menu)
                     @include('inc.partials.menu', ['menu' => $menu])
                 @endforeach
             @else
-                @foreach (App\Models\Menu::whereNull('parent_id')->with('children.children')->orderBy('sort_order')->get() as $menu)
+                @foreach (App\Models\Menu::where('type', $appType)->whereNull('parent_id')->with('children.children')->orderBy('sort_order')->get() as $menu)
                     @can($menu->permission)
                         @include('inc.partials.menu', ['menu' => $menu])
                     @endcan

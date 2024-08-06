@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Pages\CompanyController;
 use App\Http\Controllers\API\CompanyController as ApiCompanyController;
 use App\Http\Controllers\API\EmployeeController;
+use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\BotMessageController;
 use App\Http\Controllers\FaceRecognitionController;
 use App\Http\Controllers\MonitoringController;
@@ -25,14 +26,22 @@ use PHPUnit\Event\Code\Test;
 Route::get('/', [AuthenticatedSessionController::class, 'create'])
     ->middleware('guest')
     ->name('user.login');
-// Route::post('/', [AuthenticatedSessionController::class, 'store']);
 Route::post('/', [AuthenticatedSessionController::class, 'store']);
 
 Route::middleware('auth')->group(function () {
+
+    Route::get('/home', [ApplicationController::class, 'chooseApp'])->name('home');
+    Route::post('/set-app', [ApplicationController::class, 'setApp'])->name('set-app');
+
+    Route::prefix('simrs')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('simrs.dashboard');
+        })->name('dashboard.simrs');
+    });
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
 
     Route::prefix('dashboard')->group(function () {
         Route::get("/", [DashboardController::class, 'index'])->name("dashboard");
@@ -266,6 +275,7 @@ Route::middleware('auth')->group(function () {
         Artisan::call('optimize');
         return 'optimize complete';
     });
+
     Route::get('/testing/absen', function () {
         return view('test-absen');
     });
