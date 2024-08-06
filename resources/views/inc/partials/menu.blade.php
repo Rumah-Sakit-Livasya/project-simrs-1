@@ -1,13 +1,20 @@
 @php
-    // Kumpulkan URL children menu
-    $childrenUrls = $menu->children->pluck('url')->toArray();
+    // Kumpulkan URL children dan sub-children menu
+    $childrenUrls = $menu->children
+        ->flatMap(function ($child) {
+            return $child->children->pluck('url')->merge([$child->url]);
+        })
+        ->toArray();
+
     // Tambahkan juga URL parent menu
     $urls = array_merge([$menu->url], $childrenUrls);
-    // Set class active main menu berdasarkan array URL children
-    $isActive = $menu->children->count() > 0 ? set_active_mainmenu($urls) : set_active($menu->url);
+
+    // Set class active main menu berdasarkan array URL children dan sub-children
+    $isActiveMainMenu = set_active_mainmenu($urls);
+    $isActiveSubMenu = set_active($menu->url);
 @endphp
 
-<li class="{{ $isActive }}">
+<li class="{{ $menu->children->count() > 0 ? $isActiveMainMenu : $isActiveSubMenu }}">
     <a href="{{ $menu->url ?: '#' }}" title="{{ $menu->title }}" data-filter-tags="{{ $menu->title }}">
         @if ($menu->icon)
             <i class="{{ $menu->icon }}"></i>
@@ -16,7 +23,6 @@
     </a>
     @if ($menu->children->count() > 0)
         <ul>
-            {{-- @dd($urls) Uncomment to debug --}}
             @foreach ($menu->children as $i => $child)
                 @can($child->permission)
                     @include('inc.partials.menu', ['menu' => $child])

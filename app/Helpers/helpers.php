@@ -115,14 +115,24 @@ if (!function_exists('set_active_mainmenu')) {
     function set_active_mainmenu($paths, $class = 'active open')
     {
         foreach ((array) $paths as $path) {
-            // Periksa jika URL parent cocok dengan salah satu URL children atau path children
-            if (Request::is(trim($path, '/')) || in_array(request()->path(), $paths)) {
-                return $class;
+            $trimmedPath = trim($path, '/');
+            // Cek apakah path termasuk karakter *
+            if (strpos($trimmedPath, '*') !== false) {
+                $pattern = str_replace('*', '.*', $trimmedPath);
+                if (preg_match("#^{$pattern}$#", request()->path())) {
+                    return $class;
+                }
+            } else {
+                if (Request::is($trimmedPath)) {
+                    return $class;
+                }
             }
         }
         return '';
     }
 }
+
+
 
 if (!function_exists('tgl')) {
     function tgl($tanggal)

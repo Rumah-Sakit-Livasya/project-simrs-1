@@ -53,6 +53,10 @@
 <script src="/js/sweetalert2.min.js"></script>
 
 <style>
+    .header-function-fixed:not(.nav-function-top):not(.nav-function-fixed) .page-sidebar .primary-nav {
+        margin-top: 3.125rem;
+    }
+
     .bx {
         transform: scale(1.5);
         margin-right: 1rem;
