@@ -75,7 +75,7 @@
     }
 
     .page-header {
-        z-index: 2000 !important;
+        z-index: 1800 !important;
     }
 
     span.garis {
