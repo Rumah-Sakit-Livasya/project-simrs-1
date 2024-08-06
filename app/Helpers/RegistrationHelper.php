@@ -10,8 +10,7 @@ if (!function_exists('generate_registration_number')) {
         $date = Carbon::now();
         $year = $date->format('y');
         $month = $date->format('m');
-        $day = $date->for
-        mat('d');
+        $day = $date->format('d');
 
         $count = Registration::whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
