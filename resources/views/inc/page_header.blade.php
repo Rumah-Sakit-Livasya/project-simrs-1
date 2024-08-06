@@ -1,3 +1,7 @@
+@php
+    $appType = session('app_type', 'hr'); // Default ke 'hr' jika tidak ada session
+@endphp
+
 <!-- BEGIN Page Header -->
 <header class="page-header" role="banner">
     <!-- we need this logo when user switches to nav-function-top -->
@@ -38,6 +42,26 @@
         </a>
     </div>
     <div class="ml-auto d-flex">
+        <div class="d-flex align-items-center mr-4">
+            @if ($appType == 'simrs')
+                <form action="{{ route('set-app') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="app_type" value="hr">
+                    <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
+                        <i class="fas fa-users mr-2"></i> SMART HR
+                    </button>
+                </form>
+            @else
+                <form action="{{ route('set-app') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="app_type" value="simrs">
+                    <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
+                        <i class="fas fa-notes-medical mr-2"></i> SIMRS
+                    </button>
+                </form>
+            @endif
+        </div>
+
 
         <!-- app settings -->
         @if ($settings_app == 'Y')
@@ -222,10 +246,10 @@
         @else
         @endif
 
-        <a href="#" class="header-icon" data-toggle="modal" data-target=".js-modal-messenger">
+        {{-- <a href="#" class="header-icon" data-toggle="modal" data-target=".js-modal-messenger">
             <i class='bx bx-chat'></i>
             <span class="badge badge-icon">!</span>
-        </a>
+        </a> --}}
 
         {{-- <!-- app message -->
         @if ($message_app == 'Y')

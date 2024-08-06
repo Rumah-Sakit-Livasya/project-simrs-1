@@ -262,7 +262,7 @@
                     <div class="card" onclick="this.closest('form').submit()">
                         <div class="card-header d-flex align-items-center">
                             <i class="fas fa-users fa-2x mr-2"></i>
-                            <h3 class="mb-0">HR Management</h3>
+                            <h3 class="mb-0">SMART HR</h3>
                         </div>
                         <div class="card-body">
                             <p>Manage your company's HR-related activities.</p>
@@ -295,7 +295,7 @@
                     <input type="hidden" name="app_type" value="hr">
                     <div class="mobile-card" onclick="this.closest('form').submit()">
                         <i class="fas fa-users"></i>
-                        <h3 class="mb-0">Presensi</h3>
+                        <h3 class="mb-0">SMART HR</h3>
                     </div>
                 </form>
             </div>

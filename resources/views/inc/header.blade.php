@@ -53,6 +53,14 @@
 <script src="/js/sweetalert2.min.js"></script>
 
 <style>
+    .header-btn[data-class='mobile-nav-on'] {
+        border-color: #4679cc;
+        background-color: #4679cc;
+        background-image: -webkit-gradient(linear, left bottom, left top, from(#4679cc), to(#409eff));
+        background-image: linear-gradient(to top, #4679cc, #409eff);
+        color: #fff;
+    }
+
     .header-function-fixed:not(.nav-function-top):not(.nav-function-fixed) .page-sidebar .primary-nav {
         margin-top: 3.125rem;
     }

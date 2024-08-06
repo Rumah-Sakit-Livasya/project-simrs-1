@@ -34,6 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/set-app', [ApplicationController::class, 'setApp'])->name('set-app');
 
     Route::prefix('simrs')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('simrs.dashboard');
+        })->name('dashboard.simrs');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

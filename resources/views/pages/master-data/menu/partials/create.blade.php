@@ -23,13 +23,9 @@
                             <div class="form-group">
                                 <label for="title">Parent Menu</label>
                                 <select class="select2 form-control w-100  @error('parent_id') is-invalid @enderror"
-                                    id="parent_id1" name="parent_id">
-                                    <option value=""></option>
-                                    @foreach ($menus as $item)
-                                        <option value="{{ $item->id }}">{{ $item->id }} -
-                                            {{ $item->title }}
-                                        </option>
-                                    @endforeach
+                                    id="type1" name="type">
+                                    <option value="simrs">SIMRS</option>
+                                    <option value="hr">SMART HR</option>
                                 </select>
                             </div>
                         </div>
@@ -54,11 +50,25 @@
                                     placeholder="1">
                             </div>
                         </div>
-                        <div class="col-lg-12 mb-2">
+                        <div class="col-lg-6 mb-2">
                             <div class="form-group">
                                 <label for="title">Permission</label>
                                 <input type="text" class="form-control" id="permission" name="permission"
                                     placeholder="view absensi">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-2">
+                            <div class="form-group">
+                                <label for="title">Tipe Web</label>
+                                <select class="select2 form-control w-100  @error('parent_id') is-invalid @enderror"
+                                    id="parent_id1" name="parent_id">
+                                    <option value=""></option>
+                                    @foreach ($menus as $item)
+                                        <option value="{{ $item->id }}">{{ $item->id }} -
+                                            {{ $item->title }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>

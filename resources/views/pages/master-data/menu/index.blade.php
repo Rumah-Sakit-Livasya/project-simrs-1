@@ -139,6 +139,9 @@
                 $('#ubah-data #parent_id').val(data.menu.parent_id).select2({
                     dropdownParent: $('#ubah-data')
                 });
+                $('#ubah-data #type').val(data.menu.type).select2({
+                    dropdownParent: $('#ubah-data')
+                });
                 $('#ubah-data #sort_order').val(data.menu.sort_order);
                 $('#ubah-data #permission').val(data.menu.permission);
             } catch (error) {
