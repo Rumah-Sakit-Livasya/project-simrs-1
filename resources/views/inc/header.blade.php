@@ -74,6 +74,10 @@
         flex: .5 0 auto !important;
     }
 
+    .page-header {
+        z-index: 2000 !important;
+    }
+
     span.garis {
         display: inline-block;
         width: 30px;
