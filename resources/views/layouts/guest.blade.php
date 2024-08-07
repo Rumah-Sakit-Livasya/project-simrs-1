@@ -29,40 +29,28 @@
             background-size: cover;
         }
 
-        /* For light mode */
-        body {
-            color: #333;
-            /* Dark text color for light mode */
+        /* Ensure labels and text inputs are white */
+        .text-white {
+            color: #ffffff;
         }
 
-        /* For dark mode */
-        .dark body {
-            color: #e0e0e0 !important;
-            /* Light text color for dark mode */
+        /* Ensure the background and text contrast properly */
+        .form-container {
+            background-color: rgba(43, 43, 43, 0.66);
+            /* Dark background with opacity */
+            color: #ffffff;
+            /* Ensure text is white */
         }
 
-        /* Ensure the input fields and labels have good contrast */
-        .dark input,
-        .dark label {
-            color: #e0e0e0 !important;
-            /* Light text color for dark mode */
-        }
-
-        input,
-        label {
-            color: #333 !important;
-            /* Dark text color for light mode */
-        }
-
-        /* Ensure the input fields have a visible border */
         .input-label {
-            border-color: #ffffff !important;
-            /* Light border color for light mode */
+            color: #ffffff;
+            /* White text for labels */
         }
 
-        .dark input {
-            border-color: #555 !important;
-            /* Darker border color for dark mode */
+        .dark .input-label,
+        .dark .text-white {
+            color: #e0e0e0;
+            /* Light text color for dark mode */
         }
 
         .overlay {
