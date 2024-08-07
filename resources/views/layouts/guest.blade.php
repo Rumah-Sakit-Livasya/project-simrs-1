@@ -55,8 +55,8 @@
         }
 
         /* Ensure the input fields have a visible border */
-        input {
-            border-color: #ccc !important;
+        .input-label {
+            border-color: #ffffff !important;
             /* Light border color for light mode */
         }
 
