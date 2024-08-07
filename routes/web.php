@@ -275,14 +275,6 @@ Route::middleware('auth')->group(function () {
         Artisan::call('optimize');
         return 'optimize complete';
     });
-
-    Route::get('/testing/absen', function () {
-        return view('test-absen');
-    });
-
-    Route::get('test/employees/create', [FaceRecognitionController::class, 'create']);
-    Route::post('test/employees', [FaceRecognitionController::class, 'store'])->name('test.update.profile');
-    Route::get('test/attendance', [FaceRecognitionController::class, 'index']);
 });
 
 
