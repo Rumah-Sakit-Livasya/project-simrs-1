@@ -89,14 +89,14 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         if (auth()->user()->hasRole('super admin') || auth()->user()->hasRole('manager')) {
-            $day_off = Attendance::where('is_day_off', 1)->where('date', now()->format('Y-m-d'))->orderBy('day_off_request_id')->get();
+            $day_off = Attendance::where('is_day_off', 1)->where('date', now()->format('Y-m-d'))->orderBy('day_off_request_id', 'desc')->get();
         } else {
             $day_off = Attendance::join('employees', 'attendances.employee_id', '=', 'employees.id')
                 ->where('attendances.is_day_off', 1)
                 ->where('employees.company_id', auth()->user()->employee->company_id)
                 ->whereDate('attendances.date', now()->format('Y-m-d'))
                 ->select('attendances.*', 'employees.company_id')
-                ->orderBy('attendances.day_off_request_id')
+                ->orderBy('attendances.day_off_request_id', 'desc')
                 ->get();
         }
 
