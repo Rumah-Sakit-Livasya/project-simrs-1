@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(['middleware' => ['web']], function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/daftar-rekam-medis', [PatientController::class, 'daftar_rm'])->name('pendaftaran.pasien.daftar_rm');
     Route::get('/pendaftaran-pasien-baru', [PatientController::class, 'pendaftaran_pasien_baru'])->name('pendaftaran.pasien.pendaftaran_pasien_baru');
     Route::post('/pendaftaran-pasien-baru', [PatientController::class, 'simpan_pendaftaran_pasien'])->name('simpan.pendaftaran.pasien');
@@ -63,7 +63,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/tambah-departement', [DepartementController::class, 'create'])->name('master.data.setup.tambah.departement');
     Route::post('/tambah-departement', [DepartementController::class, 'store'])->name('master.data.setup.simpan.tambah.departement');
 
-    // // Revenue & Cost Center 
+    // // Revenue & Cost Center
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');
     // Route::post('/rnc', [RevenueAndCostCenterController::class, 'store'])->name('master.data.setup.rnc.store');
     // Route::put('/rnc', [RevenueAndCostCenterController::class, 'update'])->name('master.data.setup.rnc.update');
