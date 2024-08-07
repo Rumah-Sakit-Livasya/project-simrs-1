@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/logo.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/logo.png') }}">
 
-    <title>{{ config('app.name', 'Smart HR') }}</title>
+    <title>SMART HR - GUEST LOGIN/REGISTER</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
