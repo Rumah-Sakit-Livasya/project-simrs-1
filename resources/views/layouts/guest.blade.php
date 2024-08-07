@@ -29,6 +29,42 @@
             background-size: cover;
         }
 
+        /* For light mode */
+        body {
+            color: #333;
+            /* Dark text color for light mode */
+        }
+
+        /* For dark mode */
+        .dark body {
+            color: #e0e0e0;
+            /* Light text color for dark mode */
+        }
+
+        /* Ensure the input fields and labels have good contrast */
+        .dark input,
+        .dark label {
+            color: #e0e0e0;
+            /* Light text color for dark mode */
+        }
+
+        input,
+        label {
+            color: #333;
+            /* Dark text color for light mode */
+        }
+
+        /* Ensure the input fields have a visible border */
+        input {
+            border-color: #ccc;
+            /* Light border color for light mode */
+        }
+
+        .dark input {
+            border-color: #555;
+            /* Darker border color for dark mode */
+        }
+
         .overlay {
             position: absolute;
             top: 0;
