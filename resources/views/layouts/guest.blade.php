@@ -1,30 +1,119 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/logo.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/logo.png') }}">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <title>{{ config('app.name', 'Smart HR') }}</title>
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
-            </div>
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: url('{{ asset('img/rs.jpg') }}') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.8), rgb(255 121 0 / 80%));
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 93%;
+            max-width: 420px;
+            height: 93%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border-radius: 10px;
+            border: 3px solid #ffffff;
+            box-shadow: transparent;
+        }
+
+        .logo {
+            text-align: center;
+        }
+
+        .logo img {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .logo p {
+            margin: 0;
+            font-size: 2rem;
+            /* Default font size */
+            line-height: 2.5rem;
+            /* Default line height */
+            color: white;
+        }
+
+        /* Responsive font size */
+        @media (min-width: 640px) {
+            .logo p {
+                font-size: 2rem;
+                line-height: 3rem;
+                margin-bottom: 0px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .logo p {
+                font-size: 2.8rem;
+                line-height: 3rem;
+                margin-bottom: 0px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .logo p {
+                font-size: 2.8rem;
+                line-height: 3rem;
+                margin-bottom: 0px;
+            }
+        }
+    </style>
+</head>
+
+<body class="font-sans text-gray-900 antialiased">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="logo">
+            <img src="{{ asset('img/logo.png') }}" alt="Logo RS" width="100" height="100" class="mb-2">
+            <p>RUMAH SAKIT<br>LIVASYA</p>
         </div>
-    </body>
+
+        <div class="w-full sm:max-w-md mt-6 px-6 py-4 shadow-md overflow-hidden sm:rounded-lg"
+            style="background-color: rgb(43 43 43 / 76%); border-radius: 10px;">
+            {{ $slot }}
+        </div>
+    </div>
+</body>
+
 </html>
