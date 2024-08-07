@@ -53,6 +53,30 @@
             /* Light text color for dark mode */
         }
 
+        input,
+        textarea {
+            color: #333;
+            /* Dark text color for light mode */
+        }
+
+        /* Ensure dark mode text color for input fields */
+        .dark input,
+        .dark textarea {
+            color: #e0e0e0;
+            /* Light text color for dark mode */
+        }
+
+        /* Adjust placeholder text color if needed */
+        input::placeholder {
+            color: #999;
+            /* Lighter color for placeholder text in light mode */
+        }
+
+        .dark input::placeholder {
+            color: #666;
+            /* Lighter color for placeholder text in dark mode */
+        }
+
         .overlay {
             position: absolute;
             top: 0;
