@@ -42,9 +42,8 @@
         .container {
             position: relative;
             z-index: 2;
-            width: 93%;
+            width: 95%;
             max-width: 420px;
-            height: 93%;
             padding: 20px;
             display: flex;
             flex-direction: column;
@@ -58,6 +57,7 @@
 
         .logo {
             text-align: center;
+            margin-bottom: 20px;
         }
 
         .logo img {
@@ -68,18 +68,14 @@
         .logo p {
             margin: 0;
             font-size: 2rem;
-            /* Default font size */
             line-height: 2.5rem;
-            /* Default line height */
             color: white;
         }
 
-        /* Responsive font size */
         @media (min-width: 640px) {
             .logo p {
                 font-size: 2rem;
                 line-height: 3rem;
-                margin-bottom: 0px;
             }
         }
 
@@ -87,7 +83,6 @@
             .logo p {
                 font-size: 2.8rem;
                 line-height: 3rem;
-                margin-bottom: 0px;
             }
         }
 
@@ -95,8 +90,15 @@
             .logo p {
                 font-size: 2.8rem;
                 line-height: 3rem;
-                margin-bottom: 0px;
             }
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 100%;
+            background-color: rgb(43 43 43 / 66%);
+            border-radius: 10px;
+            padding: 20px;
         }
     </style>
 </head>
@@ -109,8 +111,7 @@
             <p>RUMAH SAKIT<br>LIVASYA</p>
         </div>
 
-        <div class="w-full sm:max-w-md mt-6 px-6 py-4 shadow-md overflow-hidden sm:rounded-lg"
-            style="background-color: rgb(43 43 43 / 76%); border-radius: 10px;">
+        <div class="form-container">
             {{ $slot }}
         </div>
     </div>
