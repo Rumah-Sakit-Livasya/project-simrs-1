@@ -37,31 +37,31 @@
 
         /* For dark mode */
         .dark body {
-            color: #e0e0e0;
+            color: #e0e0e0 !important;
             /* Light text color for dark mode */
         }
 
         /* Ensure the input fields and labels have good contrast */
         .dark input,
         .dark label {
-            color: #e0e0e0;
+            color: #e0e0e0 !important;
             /* Light text color for dark mode */
         }
 
         input,
         label {
-            color: #333;
+            color: #333 !important;
             /* Dark text color for light mode */
         }
 
         /* Ensure the input fields have a visible border */
         input {
-            border-color: #ccc;
+            border-color: #ccc !important;
             /* Light border color for light mode */
         }
 
         .dark input {
-            border-color: #555;
+            border-color: #555 !important;
             /* Darker border color for dark mode */
         }
 
