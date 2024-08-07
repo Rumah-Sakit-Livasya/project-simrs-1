@@ -32,8 +32,8 @@
                                         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#kunjungan"
                                                 role="tab">Kunjungan</a></li>
                                     </ul>
-                                    <div class="tab-content p-3">
-                                        <div class="tab-pane fade show active" id="biodata" role="tabpanel"
+                                    <div class="tab-content">
+                                        <div class="tab-pane fade show active ml-5" id="biodata" role="tabpanel"
                                             aria-labelledby="biodata">
                                             <div class="mt-3 row align-items-center">
                                                 <div class="col-xl-2">
@@ -87,20 +87,38 @@
                                                 </div>
                                             </div>
                                         </div>
+
                                         <div class="tab-pane fade" id="kunjungan" role="tabpanel"
                                             aria-labelledby="kunjungan">
-                                            Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin
-                                            coffee squid.
-                                            Exercitation +1 labore velit, blog sartorial PBR leggings next level wes
-                                            anderson
-                                            artisan four loko farm-to-table craft beer twee. Qui photo booth letterpress,
-                                            commodo
-                                            enim craft beer mlkshk aliquip jean shorts ullamco ad vinyl cillum PBR. Homo
-                                            nostrud
-                                            organic.
+                                            <div class="card-body tab-content">
+                                                <div class="tab-pane active" id="second4" style="width: 125%;">
+                                                    <div class="row">
+                                                        <div class="col-md">
+                                                            <div class="d-flex">
+                                                                <span
+                                                                    class="d-block text-white display-4 mr-3 flex-shrink-0">
+                                                                    <i class="mdi mdi-stethoscope mdi-18px bg-primary p-3 white-text"
+                                                                        style="border-radius: 11px"></i>
+                                                                </span>
+                                                                <div class="d-inline-flex flex-column">
+                                                                    <a href="javascript:void(0)"
+                                                                        class="fs-lg fw-500 d-block">
+                                                                        KLINIK SPESIALIS ANAK
+                                                                    </a>
+                                                                    <div class="d-block text-muted fs-md mt-1">
+                                                                        dr. H. Iing Syapei Sudjono, Sp. OG
+                                                                    </div>
+                                                                    <p class="text-muted mt-1" style="font-size: 9pt">
+                                                                        23 Jun 2021 09:27 - 23 Jun
+                                                                        2021 09:57</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -117,24 +135,23 @@
                         <a href="#" class="btn btn-icon-toggle toolbar-menu-pasien waves-effect text-primary"
                             data-toggle="dropdown" aria-expanded="true"><i class="mdi mdi-menu mdi-24px"></i></a>
 
-                        <ul id="menu_layanan_pasien" class="dropdown-menu pull-right menu-card-styling w-25" role="menu"
-                            style="text-align: left;">
+                        <ul id="menu_layanan_pasien" class="dropdown-menu pull-right menu-card-styling w-25"
+                            role="menu" style="text-align: left;">
                             <li class="p-2">
-                                <a href="javascript:void(0);" data-style="style-default" class="nextRegis">
+                                <a href="javascript:void(0);" data-toggle="modal" data-target="#rujuk-ranap-poli"
+                                    class="nextRegis">
                                     <i class="fa fa-circle-o fa-fw pink-text text-accent-2"></i>
                                     Rujuk Rawat Inap / Poli Lain
                                 </a>
                             </li>
                             <li class="p-2">
-                                <a href="javascript:void(0);" onclick="return tutup_kunjungan();"
-                                    data-style="style-default">
+                                <a href="javascript:void(0);" data-toggle="modal" data-target="#tutup-kunjungan">
                                     <i class="fa fa-circle-o fa-fw pink-text text-accent-2"></i>
                                     Tutup Kunjungan
                                 </a>
                             </li>
                             <li class="p-2">
-                                <a href="javascript:void(0);" onclick="return batal_registrasi();"
-                                    data-style="style-default">
+                                <a href="javascript:void(0);" data-toggle="modal" data-target="#batal-registrasi">
                                     <i class="fa fa-circle-o fa-fw pink-text text-accent-2"></i>
                                     Batal Registrasi
                                 </a>
@@ -156,23 +173,29 @@
                                 <div class="row mt-3">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="s_tgl_1" class="col-md-4 control-label">Tanggal
-                                                Registrasi</label>
-                                            <div class="col-md-8">
-                                                <input class="form-control" type="text"
-                                                    value="{{ $registration->registration_date }}" readonly="readonly">
+                                            <div class="row">
+                                                <label for="s_tgl_1" class="col-md-4 control-label">Tanggal
+                                                    Registrasi</label>
+                                                <div class="col-md-8">
+                                                    <input class="form-control" type="text"
+                                                        value="{{ $registration->registration_date }}"
+                                                        readonly="readonly">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="s_tgl_1" class="col-md-4 control-label btnEditDokter pointer"><u>
-                                                    Dokter (DPJP)</u></label>
-                                            <div class="col-md-8">
-                                                <input class="form-control" type="text"
-                                                    value="{{ $registration->doctor->employee->fullname }}"
-                                                    readonly="readonly">
-                                                <!--					<span class="mdi mdi-account-edit mdi-24px red-text form-control-feedback pointer btnEditDokter" title="Edit Dokter"></span> -->
+                                            <div class="row">
+                                                <label for="s_tgl_1"
+                                                    class="col-md-4 control-label btnEditDokter pointer"><u>
+                                                        Dokter (DPJP)</u></label>
+                                                <div class="col-md-8">
+                                                    <input class="form-control" type="text"
+                                                        value="{{ $registration->doctor->employee->fullname }}"
+                                                        readonly="readonly">
+                                                    <!--					<span class="mdi mdi-account-edit mdi-24px red-text form-control-feedback pointer btnEditDokter" title="Edit Dokter"></span> -->
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -180,24 +203,30 @@
                                 <div class="row mt-3">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="s_tgl_1" class="col-md-4 control-label">No Registrasi</label>
-                                            <div class="col-md-8">
-                                                <input class="form-control" type="text"
-                                                    value="{{ $registration->registration_number }}" readonly="readonly">
+                                            <div class="row">
+                                                <label for="s_tgl_1" class="col-md-4 control-label">No Registrasi</label>
+                                                <div class="col-md-8">
+                                                    <input class="form-control" type="text"
+                                                        value="{{ $registration->registration_number }}"
+                                                        readonly="readonly">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="s_tgl_1" class="col-md-4 control-label">Unit Layanan</label>
-                                            <div class="col-md-8">
-                                                <input class="form-control" type="text"
-                                                    value="{{ $registration->poliklinik }}" readonly="readonly">
-                                                <div class="mt-2">
+                                            <div class="row">
+                                                <label for="s_tgl_1" class="col-md-4 control-label">Unit Layanan</label>
+                                                <div class="col-md-8">
+                                                    <input class="form-control" type="text"
+                                                        value="{{ $registration->poliklinik }}" readonly="readonly">
+                                                </div>
+                                                <div class="ml-5 mt-2">
                                                     <span style="font-size: 1.4em;color:red">No.Urut :
                                                         {{ $registration->no_urut }}</span>
                                                     <br>
-                                                    <button class="btn btn-warning waves-effect mr-3" style="display: "
+                                                    <button class="btn btn-warning waves-effect mr-3 mt-2"
+                                                        style="display: "
                                                         onclick="popupFull('http://192.168.1.253/real/antrol_bpjs/regenerate_antrol/180789','p_card', 900,600,'no'); return false;">
                                                         <i class="mdi mdi-update"></i> Re Generate BPJS
                                                     </button>
@@ -206,7 +235,6 @@
                                                         <i class="mdi mdi-update"></i> Status TASK ID
                                                     </button>
                                                 </div>
-
                                             </div>
                                         </div>
                                     </div>
@@ -214,20 +242,24 @@
                                 <div class="row mt-3">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="s_tgl_1" class="col-md-4 control-label">Kelas Rawat</label>
-                                            <div class="col-md-8">
-                                                <input class="form-control" type="text" value="{{ $kelasRawat }} "
-                                                    readonly="readonly">
+                                            <div class="row">
+                                                <label for="s_tgl_1" class="col-md-4 control-label">Kelas Rawat</label>
+                                                <div class="col-md-8">
+                                                    <input class="form-control" type="text"
+                                                        value="{{ $kelasRawat }} " readonly="readonly">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="s_tgl_1"
-                                                class="col-md-4 control-label editPenjamin pointer"><u>Penjamin</u></label>
-                                            <div class="col-md-8">
-                                                <input class="form-control" type="text" value="{{ $penjamin }}"
-                                                    readonly="readonly">
+                                            <div class="row">
+                                                <label for="s_tgl_1"
+                                                    class="col-md-4 control-label editPenjamin pointer"><u>Penjamin</u></label>
+                                                <div class="col-md-8">
+                                                    <input class="form-control" type="text"
+                                                        value="{{ $penjamin }}" readonly="readonly">
+                                                </div>
 
                                                 <div style="display:none">
                                                     <a id="sepada" class="blinkme red-text"
@@ -244,19 +276,23 @@
                                 <div class="row mt-3">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="s_tgl_1" class="col-md-4 control-label">Ruangan - Bed</label>
-                                            <div class="col-md-8">
-                                                <input class="form-control" type="text" value=" - "
-                                                    readonly="readonly">
+                                            <div class="row">
+                                                <label for="s_tgl_1" class="col-md-4 control-label">Ruangan - Bed</label>
+                                                <div class="col-md-8">
+                                                    <input class="form-control" type="text" value=" - "
+                                                        readonly="readonly">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="s_tgl_1" class="col-md-4 control-label">Keterangan</label>
-                                            <div class="col-md-8">
-                                                <input class="form-control" type="text" value="-"
-                                                    readonly="readonly">
+                                            <div class="row">
+                                                <label for="s_tgl_1" class="col-md-4 control-label">Keterangan</label>
+                                                <div class="col-md-8">
+                                                    <input class="form-control" type="text" value="-"
+                                                        readonly="readonly">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -264,12 +300,14 @@
                                 <div class="row mt-3">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="s_tgl_1"
-                                                class="col-md-4 control-label diagAwal pointer"><u>Diagnosa
-                                                    Awal</u></label>
-                                            <div class="col-md-8">
-                                                <input class="form-control" type="text"
-                                                    value="{{ $registration->diagnosa_awal }}" readonly="readonly">
+                                            <div class="row">
+                                                <label for="s_tgl_1"
+                                                    class="col-md-4 control-label diagAwal pointer"><u>Diagnosa
+                                                        Awal</u></label>
+                                                <div class="col-md-8">
+                                                    <input class="form-control" type="text"
+                                                        value="{{ $registration->diagnosa_awal }}" readonly="readonly">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -279,11 +317,14 @@
                                 <div class="row mt-3">
                                     <div class="col-md-12" style="display: none">
                                         <div class="form-group">
-                                            <label for="s_tgl_1" class="col-md-4 control-label pointer"><u>Informasi
-                                                    Billing</u></label>
-                                            <div class="col-md-12">
-                                                <input class="form-control {infocolor} blinkme" style="font-weight: bold;"
-                                                    type="text" value="0 - 0 -  - " readonly="readonly">
+                                            <div class="row">
+                                                <label for="s_tgl_1" class="col-md-4 control-label pointer"><u>Informasi
+                                                        Billing</u></label>
+                                                <div class="col-md-12">
+                                                    <input class="form-control {infocolor} blinkme"
+                                                        style="font-weight: bold;" type="text" value="0 - 0 -  - "
+                                                        readonly="readonly">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -450,4 +491,229 @@
             </div>
         </div>
     </main>
+
+    <div class="modal fade" id="batal-registrasi" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">Batal Registrasi Pasien</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
+                </div>
+                <form autocomplete="off" novalidate="">
+                    <div class="modal-body">
+                        <div class="alert alert-warning alert-dismissible fade show">
+                            <div class="d-flex align-items-center">
+                                <div class="alert-icon width-6">
+                                    <div class='icon-stack icon-stack-lg'>
+                                        <i class="base base-7 icon-stack-3x opacity-100 color-warning-500 "></i> <i
+                                            class="base base-14 icon-stack-2x opacity-50 color-warning-300 "></i> <i
+                                            class="fal fa-info icon-stack-1x opacity-100 color-white "></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 text-center">
+                                    <span class="h3">PERHATIAN</span>
+                                    <br>
+                                    FORM INI AKAN MENGHAPUS DATA REGISTRASI PASIEN BERSANGKUTAN!
+                                    <br>
+                                    (TERMASUK DATA REKAM MEDIS, CATATAN DOKTER, DLL.)
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-xl-3 text-right">
+                                    <label for="tgl_batal">Tanggal Batal</label>
+                                </div>
+                                <div class="col-xl">
+                                    <input type="text" class="form-control" readonly id="tgl_batal"
+                                        value="{{ \Carbon\Carbon::now() }}" name="tgl_batal">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-xl-3 text-right">
+                                    <label class="form-label font-weight-normal" for="alasan">Alasan</label>
+                                </div>
+                                <div class="col-xl text-right">
+                                    <textarea class="form-control" id="alasan" rows="5" name="alasan"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-xl-3 text-right">
+                                    <label for="email">User Cancel</label>
+                                </div>
+                                <div class="col-xl text-right">
+                                    <input type="text" class="form-control" id="email" name="email"
+                                        value="{{ auth()->user()->email }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mt-3">
+                            <div class="row">
+                                <div class="col-xl-3 text-right">
+                                    <label for="password">Password</label>
+                                </div>
+                                <div class="col-xl text-right">
+                                    <input type="password" class="form-control" name="password" id="password"
+                                        placeholder="Password" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+            </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="tutup-kunjungan" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">Batal Registrasi Pasien</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
+                </div>
+                <form autocomplete="off" novalidate="">
+                    <div class="modal-body">
+                        <div class="alert alert-warning alert-dismissible fade show">
+                            <div class="d-flex align-items-center">
+                                <div class="alert-icon width-6">
+                                    <div class='icon-stack icon-stack-lg'>
+                                        <i class="base base-7 icon-stack-3x opacity-100 color-warning-500 "></i> <i
+                                            class="base base-14 icon-stack-2x opacity-50 color-warning-300 "></i> <i
+                                            class="fal fa-info icon-stack-1x opacity-100 color-white "></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 text-center">
+                                    <span class="h3">PERHATIAN</span>
+                                    <br>
+                                    FORM INI AKAN MENGHAPUS DATA REGISTRASI PASIEN BERSANGKUTAN!
+                                    <br>
+                                    (TERMASUK DATA REKAM MEDIS, CATATAN DOKTER, DLL.)
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-xl-3" style="text-align: right">
+                                    <label for="alasan_keluar">Alasan Keluar</label>
+                                </div>
+                                <div class="col-xl">
+                                    <select class="form-control w-100 select2" id="alasan_keluar"
+                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
+                                        name="alasan_keluar">
+                                        <option value=""></option>
+                                        <option value="Permintaan Pasien">Permintaan Pasien</option>
+                                        <option value="Perintah Dokter">Perintah Dokter</option>
+                                        <option value="Meninggal">Meninggal</option>
+                                    </select>
+                                    @error('alasan_keluar')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <div class="row">
+                                <div class="col-xl-3 text-right">
+                                    <label for="lp_manual">No. LP Manual</label>
+                                </div>
+                                <div class="col-xl text-right">
+                                    <input type="lp_manual" class="form-control" name="lp_manual" id="lp_manual"
+                                        placeholder="Di isi jika SEP KLL" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-xl-3" style="text-align: right">
+                                    <label for="proses_keluar">Proses Keluar</label>
+                                </div>
+                                <div class="col-xl">
+                                    <select class="form-control w-100 select2" id="proses_keluar"
+                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
+                                        name="proses_keluar">
+                                        <option value=""></option>
+                                        <option value="Sembuh">Sembuh</option>
+                                        <option value="Dirujuk">Dirujuk</option>
+                                        <option value="Meninggal">Meninggal</option>
+                                        <option value="Pulang Paksa">Pulang Paksa</option>
+                                        <option value="Tidak Tahu">Tidak Tahu</option>
+                                        <option value="ODC">ODC</option>
+                                        <option value="Masuk Rawat Inap">Masuk Rawat Inap</option>
+                                    </select>
+                                    @error('proses_keluar')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-xl-3 text-right">
+                                    <label for="email">User Cancel</label>
+                                </div>
+                                <div class="col-xl text-right">
+                                    <input type="text" class="form-control" id="email" name="email"
+                                        value="{{ auth()->user()->email }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mt-3">
+                            <div class="row">
+                                <div class="col-xl-3 text-right">
+                                    <label for="password">Password</label>
+                                </div>
+                                <div class="col-xl text-right">
+                                    <input type="password" class="form-control" name="password" id="password"
+                                        placeholder="Password" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+            </div>
+            </form>
+        </div>
+    </div>
+@endsection
+@section('plugin')
+    {{-- Select 2 --}}
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script>
+        $(document).ready(function() {
+
+            // Select 2
+            $(function() {
+                $('#alasan_keluar').select2({
+                    dropdownCssClass: "move-up",
+                    dropdownParent: $('#tutup-kunjungan'),
+                    placeholder: "Pilih Alasan Keluar"
+                });
+                $('#proses_keluar').select2({
+                    dropdownCssClass: "move-up",
+                    dropdownParent: $('#tutup-kunjungan'),
+                    placeholder: "Pilih Proses Keluar"
+                });
+            });
+        });
+    </script>
 @endsection

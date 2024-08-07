@@ -27,10 +27,10 @@ if (!function_exists('generateDoctorSequenceNumber')) {
 
         // Hitung jumlah registrasi pada hari tersebut untuk dokter yang diberikan
         $count = Registration::where('doctor_id', $doctorId)
-            ->where('registration_date', $date)
+            ->whereDate('registration_date', $date)
             ->count();
 
-        return dd($date);
+        // return dd($date);
 
         // Tambahkan 1 untuk nomor urut baru
         $sequenceNumber = $count + 1;

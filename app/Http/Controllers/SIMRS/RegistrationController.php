@@ -141,13 +141,6 @@ class RegistrationController extends Controller
      */
     public function store(Request $request)
     {
-        // Generate the registration number
-        // return dd($request);
-        $registrationNumber = generate_registration_number();
-
-        // Generate the sequence number for the doctor
-        $doctorSequenceNumber = generateDoctorSequenceNumber($request->doctor_id, $request->registration_date);
-
         // Validate the incoming request data
         $validatedData = $request->validate([
             'patient_id' => 'required',
@@ -168,9 +161,19 @@ class RegistrationController extends Controller
             'diagnosa_awal' => 'required|string',
         ]);
 
+        $validatedData['registration_date'] = Carbon::now();
+        $validatedData['status'] = 'online';
+
+        // Generate No Registration
+        $registrationNumber = generate_registration_number();
+
+        // Generate the sequence number for the doctor
+        $doctorSequenceNumber = generateDoctorSequenceNumber($request->doctor_id, $request->registration_date);
+
         $validatedData['registration_number'] = $registrationNumber;
         $validatedData['no_urut'] = $doctorSequenceNumber;
 
+        // return dd($validatedData);
         $store = Registration::create($validatedData);
         return redirect('/daftar-registrasi-pasien')->with('success', 'Registrasi berhasil ditambahkan!');
     }
