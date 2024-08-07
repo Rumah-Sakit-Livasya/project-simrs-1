@@ -161,7 +161,7 @@
         </div>
 
         <div class="row day-off">
-            <div class="col-lg-12">
+            {{-- <div class="col-lg-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-container show">
                         <h2 class="panel-heading">Daftar Pegawai</h2>
@@ -186,7 +186,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             <div class="col-lg-12">
                 <div id="panel-1" class="panel">
@@ -453,7 +453,7 @@
             </div>
         </div>
 
-        <div id="panel-10" class="panel">
+        {{-- <div id="panel-10" class="panel">
             <div class="panel-hdr">
                 <h2>
                     Combination <span class="fw-300"><i>Chart (Bar & Line)</i></span>
@@ -509,9 +509,9 @@
                 <canvas id="barlineCombine" style="width:100%; height:300px;"></canvas>
                 <p class="text-center h4 mt-3 text-bold">Tahun 2024</p>
             </div>
-        </div>
+        </div> --}}
 
-        <div id="panel-11" class="panel">
+        {{-- <div id="panel-11" class="panel">
             <div class="panel-hdr">
                 <h2>
                     Daftar Pegawai <span class="fw-300"><i>yang sering telat</i></span>
@@ -578,7 +578,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </main>
     @include('pages.partials.show')
 @endsection
