@@ -42,6 +42,20 @@
         </a>
     </div>
     <div class="ml-auto d-flex">
+        <div class="form-group mt-4 mr-3">
+            <div class="input-group global-search">
+                <div class="input-group-prepend mt-2" style="width: 2rem">
+                    <label for="global_search" class="waves-effect waves-themed" style="width: 2rem; z-index: 100;">
+                        <i class="fal fa-search font-weight-bold ml-1" style="font-size: 12pt; width: 2rem;"></i>
+                    </label>
+                </div>
+                <input id="global_search" name="global_search" type="text" class="form-control input-global"
+                    placeholder="Search anything...">
+            </div>
+            <div id="search-results" class="mt-2"
+                style="position: absolute; z-index: 1000; background: white; width: 100%; max-height: 200px; overflow-y: auto;">
+            </div>
+        </div>
         <div class="d-flex align-items-center mr-4">
             @if ($appType == 'simrs')
                 <form action="{{ route('set-app') }}" method="POST">

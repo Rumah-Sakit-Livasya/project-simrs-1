@@ -18,7 +18,6 @@ use function displayAge;
 
 class PatientController extends Controller
 {
-
     public function daftar_rm(Request $request)
     {
         $query = Patient::query();
@@ -285,7 +284,16 @@ class PatientController extends Controller
         }
     }
 
-    public function store_registrasi()
+    public function search(Request $request)
     {
+        $query = $request->get('query');
+        $patients = Patient::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('medical_record_number', 'LIKE', "%{$query}%")
+            ->with(['registration' => function ($query) {
+                $query->orderBy('created_at', 'desc')->first();
+            }])
+            ->get();
+
+        return response()->json($patients);
     }
 }

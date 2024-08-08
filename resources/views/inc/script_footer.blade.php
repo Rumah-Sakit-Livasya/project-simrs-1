@@ -68,6 +68,65 @@ DOC: if you remove pace.js from core please note on Internet Explorer some CSS a
                 location.reload();
             };
         });
+
+        $('#global_search').on('keyup', function() {
+            var query = $(this).val();
+
+            if (query.length > 0) {
+                $.ajax({
+                    url: '{{ route('patients.search') }}',
+                    type: 'GET',
+                    data: {
+                        query: query
+                    },
+                    success: function(data) {
+                        var results = $('#search-results');
+                        results.empty();
+
+                        if (data.length > 0) {
+                            $.each(data, function(index, patient) {
+                                var latestRegistration = patient.registration
+                                    .length > 0 ? patient.registration[0] : null;
+                                var link = '';
+
+                                if (latestRegistration && latestRegistration
+                                    .status === 'online') {
+                                    link =
+                                        `<a href="/daftar-registrasi-pasien/${latestRegistration.id}/">`;
+                                } else {
+                                    link =
+                                        `<a href="/patients/${patient.id}/">`;
+                                }
+
+                                results.append(
+                                    `<div class="search-item" style="padding: 10px; border-bottom: 1px solid #ccc;">` +
+                                    link +
+                                    `<strong>` + patient.name +
+                                    `</strong><br>` +
+                                    `No RM: ` + patient.medical_record_number +
+                                    `<br>` +
+                                    `Tgl Lahir: ` + patient.date_of_birth +
+                                    `</a>` +
+                                    `</div>`
+                                );
+                            });
+                        } else {
+                            results.append(
+                                '<div class="search-item" style="padding: 10px;">No results found</div>'
+                            );
+                        }
+                    }
+                });
+            } else {
+                $('#search-results').empty();
+            }
+        });
+    });
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#global_search').length) {
+            $('#search-results').empty();
+        }
     });
 </script>
 

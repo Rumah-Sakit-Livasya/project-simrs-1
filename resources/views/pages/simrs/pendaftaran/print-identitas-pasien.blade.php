@@ -1,5 +1,5 @@
 @php
-use \App\Helpers\DateHelper;
+    use App\Helpers\DateHelper;
 @endphp
 
 <!DOCTYPE html>
@@ -40,13 +40,10 @@ use \App\Helpers\DateHelper;
     </style>
     <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/js/bootstrap.min.js"></script>
 
-    <script type="text/javascript" src="http://192.168.1.253/real/include/js/jqgrid5/js/i18n/grid.locale-id.js">
-    </script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/js/jqgrid5/js/i18n/grid.locale-id.js"></script>
     <script src="http://192.168.1.253/real/include/js/jqgrid5/js/jquery.jqGrid.min.js?v2"></script>
-    <script type="text/javascript" src="http://192.168.1.253/real/include/js/jqwidgets3.6/jqwidgets/jqxcore.js">
-    </script>
-    <script type="text/javascript" src="http://192.168.1.253/real/include/js/jqwidgets3.6/jqwidgets/jqx-all.js">
-    </script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/js/jqwidgets3.6/jqwidgets/jqxcore.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/js/jqwidgets3.6/jqwidgets/jqx-all.js"></script>
     <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/node-waves/waves.min.js">
     </script>
     <script type="text/javascript"
@@ -56,18 +53,19 @@ use \App\Helpers\DateHelper;
     <script type="text/javascript"
         src="http://192.168.1.253/real/include/styles/ma/plugins/bootstrap-datepicker/bootstrap-datetimepicker.min.js">
     </script>
-    <script type="text/javascript"
-        src="http://192.168.1.253/real/include/styles/ma/plugins/select2/select2.full.min.js"></script>
-    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/spin.js/spin.min.js">
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/select2/select2.full.min.js">
     </script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/spin.js/spin.min.js"></script>
     <style type="text/css"></style>
     <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/bootbox.min.js"></script>
-    <script type="text/javascript"
-        src="http://192.168.1.253/real/include/styles/ma/plugins/jquery.inputmask.bundle.min.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/jquery.inputmask.bundle.min.js">
+    </script>
     <script type="text/javascript" src="http://192.168.1.253/real/include/js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="http://192.168.1.253/real/include/js/standard_lib.js"></script>
     <script type="text/javascript">
-        function base_url(){return 'http://192.168.1.253/real/';}
+        function base_url() {
+            return 'http://192.168.1.253/real/';
+        }
     </script>
 </head>
 
@@ -127,11 +125,11 @@ use \App\Helpers\DateHelper;
         </style>
 
         <script type="text/javascript">
-            function printit(){
-    $("#printdiv").hide();
-    window.print();
-    $("#printdiv").show();
-  }  
+            function printit() {
+                $("#printdiv").hide();
+                window.print();
+                $("#printdiv").show();
+            }
         </script>
 
         <div class="card" id="printdiv">
@@ -169,8 +167,7 @@ use \App\Helpers\DateHelper;
                                 <div class="head"><u>Tempat / Tgl Lahir</u></div>
                                 <div class="child"><em>Place &amp; Date Birth</em></div>
                             </td>
-                            <td>: {{ $patient->place }} , {{
-                                \App\Helpers\DateHelper::getIndonesianDateFormat($patient->date_of_birth) }}</td>
+                            <td>: {{ $patient->place }}, {{ getIndonesianDateFormat($patient->date_of_birth) }}</td>
                             <td>
                                 <div class="head"><u>Umur</u></div>
                                 <div class="child"><em>Age</em></div>
@@ -329,7 +326,7 @@ use \App\Helpers\DateHelper;
           <td></td>
         </tr>
       </table>
-	-->
+ -->
             </div>
         </div>
 

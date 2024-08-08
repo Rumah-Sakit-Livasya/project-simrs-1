@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
 use App\Models\User;
 use Carbon\Carbon;
@@ -36,6 +37,21 @@ class Registration extends Model
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);
+    }
+
+    public function batal_registration()
+    {
+        return $this->hasOne(BatalRegister::class);
+    }
+
+    public function tutup_kunjungan()
+    {
+        return $this->hasOne(TutupKunjungan::class);
+    }
+
+    public function ganti_dokter()
+    {
+        return $this->hasOne(GantiDokter::class);
     }
 
     protected static function boot()

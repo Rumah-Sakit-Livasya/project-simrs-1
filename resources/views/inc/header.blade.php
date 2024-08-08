@@ -153,6 +153,16 @@
             opacity: 0;
         }
     }
+
+    .global-search input {
+        transition: 5s ease-in-out;
+        border: none;
+    }
+
+    .global-search:hover,
+    .input-global:focus .global-search {
+        border-bottom: 1px solid #3c6eb4;
+    }
 </style>
 @yield('extended-css')
 
