@@ -59,6 +59,7 @@ class MenuController extends Controller
                 'icon' => request()->icon,
                 'sort_order' => request()->sort_order,
                 'permission' => request()->permission,
+                'type' => request()->type
             ]);
 
             // Create permission if it doesn't exist
@@ -112,6 +113,7 @@ class MenuController extends Controller
                 'icon' => request()->icon,
                 'sort_order' => request()->sort_order,
                 'permission' => $permissionName,
+                'type' => request()->type,
             ]);
 
             // Update permission name if it has changed

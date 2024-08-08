@@ -12,11 +12,9 @@ use Illuminate\Support\Facades\Route;
 |
 | Here is where you can register web routes for your application. These
 | routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
+| contains the "web" middleware group. Now create something
 */
-
-Route::group(['middleware' => ['web']], function () {
+Route::group(['middleware' => ['auth']], function () {
     Route::get('/search-patients', [PatientController::class, 'search'])->name('patients.search');
 
     Route::get('/daftar-rekam-medis', [PatientController::class, 'daftar_rm'])->name('pendaftaran.pasien.daftar_rm');
@@ -68,6 +66,27 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/departements', [DepartementController::class, 'index'])->name('master.data.setup.departement.index');
     Route::get('/tambah-departement', [DepartementController::class, 'create'])->name('master.data.setup.tambah.departement');
     Route::post('/tambah-departement', [DepartementController::class, 'store'])->name('master.data.setup.simpan.tambah.departement');
+
+    // // Revenue & Cost Center 
+ah.departement');
+
+    // // Revenue & Cost Center 
+bah.departement');
+
+    // // Revenue & Cost Center 
+bah.departement');
+
+    // // Revenue & Cost Center 
+bah.departement');
+
+    // // Revenue & Cost Center 
+bah.departement');
+
+    // // Revenue & Cost Center 
+ah.departement');
+
+    // // Revenue & Cost Center 
+ambah.departement');
 
     // // Revenue & Cost Center 
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');
