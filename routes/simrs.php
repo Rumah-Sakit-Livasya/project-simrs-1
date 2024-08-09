@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\SIMRS\DepartementController;
+use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
@@ -77,6 +78,15 @@ Route::middleware(['auth'])->group(function () {
             Route::prefix('layanan-medis')->group(function () {
                 Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');
                 Route::get('/grup-tindakan-medis', [GrupTindakanMedisController::class, 'index'])->name('master-data.layanan-medis.grup-tindakan-medis');
+            });
+            Route::prefix('penunjang-medis')->group(function () {
+                Route::prefix('radiologi')->group(function () {
+                    Route::get('/grup-parameter', [GrupParameterRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.grup-parameter');
+                    // Route::get('/parameter', [])
+                });
+                Route::prefix('laboratorium')->group(function () {
+                    // Route::get('')
+                });
             });
         });
     });
