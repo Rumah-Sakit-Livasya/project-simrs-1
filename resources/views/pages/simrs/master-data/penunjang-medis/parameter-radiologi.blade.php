@@ -102,7 +102,7 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Grup Tindakan Rawat Jalan
+                            Parameter Radiologi
                         </h2>
                     </div>
                     <div class="panel-container show">
@@ -113,22 +113,16 @@
                                     <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
                                     <thead class="bg-primary-600">
                                         <tr>
-                                            <th>Departement ID</th>
-                                            <th>Nama Grup</th>
-                                            <th>Status</th>
-                                            <th>COA Pendapatan</th>
-                                            <th>COA Biaya</th>
+                                            <th>Kode</th>
+                                            <th>Parameter</th>
                                             <th>Fungsi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($grup_tindakan_medis as $row)
+                                        @foreach ($parameter_radiologi as $row)
                                             <tr>
-                                                <td>{{ $row->departement_id }}</td>
-                                                <td>{{ $row->nama_grup }}</td>
-                                                <td>{{ $row->status }}</td>
-                                                <td>{{ $row->coa_pendapatan }}</td>
-                                                <td>{{ $row->coa_biaya }}</td>
+                                                <td>{{ $row->kode }}</td>
+                                                <td>{{ $row->parameter }}</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
                                                         data-id="{{ $row->id }}">
@@ -144,12 +138,12 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <th colspan="6" class="text-center">
+                                            <th colspan="3" class="text-center">
                                                 <button type="button" class="btn-outline-primary waves-effect waves-themed"
                                                     id="btn-tambah-grup-tindakan" data-toggle="modal"
                                                     data-target="#modal-tambah-grup-tindakan" data-action="tambah">
                                                     <span class="fal fa-plus-circle"></span>
-                                                    Tambah Grup Tindakan
+                                                    Tambah Parameter
                                                 </button>
                                             </th>
                                         </tr>
@@ -164,8 +158,8 @@
         </div>
     </main>
 
-    @include('pages.simrs.master-data.layanan-medis.partials.tambah-grup-tindakan')
-    @include('pages.simrs.master-data.layanan-medis.partials.edit-grup-tindakan')
+    {{-- @include('pages.simrs.master-data.layanan-medis.partials.tambah-grup-tindakan')
+    @include('pages.simrs.master-data.layanan-medis.partials.edit-grup-tindakan') --}}
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
