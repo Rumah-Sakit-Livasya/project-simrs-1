@@ -3,6 +3,7 @@
 use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
+use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
@@ -82,7 +83,7 @@ Route::middleware(['auth'])->group(function () {
             Route::prefix('penunjang-medis')->group(function () {
                 Route::prefix('radiologi')->group(function () {
                     Route::get('/grup-parameter', [GrupParameterRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.grup-parameter');
-                    // Route::get('/parameter', [])
+                    Route::get('/kategori', [KategoriRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.kategori');
                 });
                 Route::prefix('laboratorium')->group(function () {
                     // Route::get('')

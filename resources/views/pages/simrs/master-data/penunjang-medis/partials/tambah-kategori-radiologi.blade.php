@@ -1,11 +1,11 @@
-<div class="modal fade" id="modal-tambah-grup-parameter-radiologi" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document"> <!-- Menggunakan kelas modal-xl untuk ukuran ekstra besar -->
+<div class="modal fade" id="modal-tambah-kategori-radiologi" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document"> <!-- Menggunakan kelas modal-xl untuk ukuran ekstra besar -->
         <div class="modal-content">
             <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="store-form">
                 @method('post')
                 @csrf
                 <div class="modal-header pb-1 mb-0">
-                    <h5 class="modal-title font-weight-bold">Tambah Grup Tindakan Medis</h5>
+                    <h5 class="modal-title font-weight-bold">Tambah Kategori Radiologi</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true"><i class="fal fa-times"></i></span>
                     </button>
@@ -16,18 +16,27 @@
                     </div>
                     <div class="col-md-12 mb-3">
                         <div class="row">
-                            <div class="col-md-6 mt-3">
+                            <div class="col-md-12 mt-3">
                                 <div class="form-group">
-                                    <label for="no_urut">No Urut <span class="text-danger fw-bold">*</span></label>
-                                    <input type="number" value="{{ old('no_urut') }}" class="form-control"
-                                        name="no_urut" placeholder="Masukan nama grup...">
+                                    <label for="nama_kategori">Nama Kategori <span
+                                            class="text-danger fw-bold">*</span></label>
+                                    <input type="text" value="{{ old('nama_kategori') }}" class="form-control"
+                                        name="nama_kategori" placeholder="Masukan nama grup...">
                                 </div>
                             </div>
-                            <div class="col-md-6 mt-3">
+                            <div class="col-md-12 mt-3">
                                 <div class="form-group">
-                                    <label for="nama_grup">Nama Grup <span class="text-danger fw-bold">*</span></label>
-                                    <input type="text" value="{{ old('nama_grup') }}" class="form-control"
-                                        name="nama_grup" placeholder="Masukan nama grup...">
+                                    <label class="d-block">Status</label>
+                                    <div class="custom-control d-inline-block custom-radio mt-2 mr-2">
+                                        <input type="radio" checked="" class="custom-control-input"
+                                            id="status_aktif_tambah" name="status" value="1">
+                                        <label class="custom-control-label" for="status_aktif_tambah">Aktif</label>
+                                    </div>
+                                    <div class="custom-control d-inline-block custom-radio mt-2">
+                                        <input type="radio" class="custom-control-input" id="status_tidak_tambah"
+                                            name="status" value="0">
+                                        <label class="custom-control-label" for="status_tidak_tambah">Tidak</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
