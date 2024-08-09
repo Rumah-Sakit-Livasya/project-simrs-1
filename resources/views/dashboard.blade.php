@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Marketing Dashboard')
+@section('title', 'Dashboard')
 @section('extended-css')
     <style>
         /* Gaya scrollbar saat hover untuk browser WebKit (misalnya Chrome, Safari) */

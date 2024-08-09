@@ -36,7 +36,7 @@
         <div class="row" style="height: 90%">
             <div class="col-lg-12 d-flex align-items-center justify-content-center">
                 <div class="logo-dashboard-simrs text-center">
-                    <h3 class="text-center spaced-text gradient-text">@SIMRS</h3>
+                    <h3 class="text-center spaced-text gradient-text">COMING SOON</h3>
                     <img src="{{ asset('img/logo.png') }}" width="130" height="130" alt="Logo RS">
                     <h3 class="text-center spaced-text mt-3">RUMAH SAKIT LIVASYA</h3>
                     <p style="letter-spacing: 0.2em">Jl. Raya Timur III Dawuan No. 875 Kab. Majalengka Telp 081211151300</p>

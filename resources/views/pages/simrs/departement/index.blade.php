@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Daftar Rekam Medis')
+@section('title', 'Departement')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row">

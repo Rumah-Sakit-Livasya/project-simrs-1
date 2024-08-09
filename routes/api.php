@@ -19,7 +19,6 @@ use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\LocationController;
 use App\Http\Controllers\API\MenuController;
 use App\Http\Controllers\API\PayrollApiController;
-use App\Http\Controllers\API\PayrollComponentController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\SalaryController;
 use App\Http\Controllers\API\TargetController;
@@ -27,12 +26,11 @@ use App\Http\Controllers\BotMessageController;
 use App\Http\Controllers\DeductionController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
+use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Http\Middleware\CheckAuthorizationBot;
-use App\Models\PayrollComponent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Maatwebsite\Excel\Row;
-use Spatie\Permission\Models\Permission;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +46,27 @@ use Spatie\Permission\Models\Permission;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::prefix('simrs')->group(function () {
+    Route::prefix('master-data')->group(function () {
+        Route::prefix('layanan-medis')->group(function () {
+            Route::get('/tindakan-medis/{id}', [TindakanMedisController::class, 'getTindakan'])->name('master-data.layanan-medis.tindakan-medis.get');
+            Route::post('/tindakan-medis', [TindakanMedisController::class, 'store'])->name('master-data.layanan-medis.tindakan-medis.store');
+            Route::patch('/tindakan-medis/{id}/update', [TindakanMedisController::class, 'update'])->name('master-data.layanan-medis.tindakan-medis.update');
+            Route::delete('/tindakan-medis/{id}/delete', [TindakanMedisController::class, 'delete'])->name('master-data.layanan-medis.tindakan-medis.delete');
+
+            Route::post('/grup-tindakan-medis', [GrupTindakanMedisController::class, 'store'])->name('master-data.grup-tindakan-medis.store');
+            Route::get('/grup-tindakan-medis/{id}', [GrupTindakanMedisController::class, 'getGrupTindakan'])->name('master-data.layanan-medis.grup-tindakan-medis.get');
+            Route::patch('/grup-tindakan-medis/{id}/update', [GrupTindakanMedisController::class, 'update'])->name('master-data.layanan-medis.grup-tindakan-medis.update');
+            Route::delete('/grup-tindakan-medis/{id}/delete', [GrupTindakanMedisController::class, 'delete'])->name('master-data.layanan-medis.grup-tindakan-medis.delete');
+
+            Route::post('/grup-rehab-medik', [GrupTindakanMedisController::class, 'store'])->name('master-data.grup-rehab-medik.store');
+            Route::patch('/grup-rehab-medik/{id}/update', [GrupTindakanMedisController::class, 'update'])->name('master-data.layanan-medis.grup-rehab-medik.update');
+            Route::delete('/grup-rehab-medik/{id}/delete', [GrupTindakanMedisController::class, 'delete'])->name('master-data.layanan-medis.grup-rehab-medik.delete');
+        });
+    });
+});
+
 Route::prefix('dashboard')->group(function () {
     Route::post('/clock-in', [AttendanceController::class, 'clock_in']);
     Route::post('/clock-out', [AttendanceController::class, 'clock_out'])->name('employee.attendance.clock-out');
@@ -245,4 +264,5 @@ Route::prefix('dashboard')->group(function () {
         Route::delete('/delete/{id}', [MenuController::class, 'destroy'])->middleware('check.api.credentials')->name('master-data.menu.delete');
     });
 });
+
 Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');

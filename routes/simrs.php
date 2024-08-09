@@ -1,8 +1,12 @@
 <?php
 
 use App\Http\Controllers\SIMRS\DepartementController;
+use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
+use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Models\SIMRS\GrupTindakanMedis;
+use App\Models\SIMRS\TindakanMedis;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -63,6 +67,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tambah-departement', [DepartementController::class, 'create'])->name('master.data.setup.tambah.departement');
     Route::post('/tambah-departement', [DepartementController::class, 'store'])->name('master.data.setup.simpan.tambah.departement');
 
+
+    Route::prefix('simrs')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('simrs.dashboard');
+        })->name('dashboard.simrs');
+
+        Route::prefix('/master-data')->group(function () {
+            Route::prefix('layanan-medis')->group(function () {
+                Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');
+                Route::get('/grup-tindakan-medis', [GrupTindakanMedisController::class, 'index'])->name('master-data.layanan-medis.grup-tindakan-medis');
+            });
+        });
+    });
     // // Revenue & Cost Center
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');
     // Route::post('/rnc', [RevenueAndCostCenterController::class, 'store'])->name('master.data.setup.rnc.store');
