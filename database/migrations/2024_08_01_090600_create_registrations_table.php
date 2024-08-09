@@ -20,11 +20,14 @@ class CreateRegistrationsTable extends Migration
             $table->foreignId('employee_id');
             $table->foreignId('penjamin_id');
             $table->foreignId('doctor_id');
+            $table->foreignId('departement_id');
             $table->string('registration_type');
             $table->string('registration_date');
+            $table->string('registration_close_date')->nullable();
             $table->string('poliklinik')->nullable();
             $table->string('registration_number');
             $table->string('diagnosa_awal');
+            $table->string('diagnosa_akhir')->nullable();
             $table->boolean('kartu_pasien')->default(0);
             $table->string('rujukan');
             $table->string('no_urut')->nullable();
@@ -42,6 +45,7 @@ class CreateRegistrationsTable extends Migration
             $table->string('paket')->nullable();
             $table->string('tipe_jadwal')->nullable();
             $table->string('igd_type')->nullable();
+            $table->string('odc_type')->nullable();
             $table->string('pelayanan')->nullable();
             $table->string('kamar_tujuan')->nullable();
             $table->string('prosedur_masuk')->nullable();

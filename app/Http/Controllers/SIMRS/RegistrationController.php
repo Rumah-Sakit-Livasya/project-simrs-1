@@ -51,18 +51,22 @@ class RegistrationController extends Controller
         $patient = Patient::where('id', $id)->first();
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
+        $doctors = Doctor::with('employee', 'departement')->get();
 
+        // Group doctors by department
+        $groupedDoctors = [];
+        foreach ($doctors as $doctor) {
+            $groupedDoctors[$doctor->departement->name][] = $doctor;
+        }
+
+        $doctorsIGD = Doctor::with('employee', 'departement')
+            ->whereHas('departement', function ($query) {
+                $query->where('name', 'POLIKLINIK UMUM');
+            })
+            ->get();
 
         switch ($registrasi) {
             case 'rawat-jalan':
-                $doctors = Doctor::with('employee', 'departement')->get();
-
-                // Group doctors by department
-                $groupedDoctors = [];
-                foreach ($doctors as $doctor) {
-                    $groupedDoctors[$doctor->departement->name][] = $doctor;
-                }
-
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Rawat Jalan",
                     'groupedDoctors' => $groupedDoctors,
@@ -76,7 +80,7 @@ class RegistrationController extends Controller
             case 'igd':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "IGD",
-                    'doctors' => Doctor::all(),
+                    'doctors' => $doctorsIGD,
                     'penjamins' => Penjamin::all(),
                     'case' => 'igd',
                     'patient' => $patient,
@@ -85,9 +89,17 @@ class RegistrationController extends Controller
                 break;
 
             case 'odc':
+                $doctors = Doctor::with('employee', 'departement')->get();
+
+                // Group doctors by department
+                $groupedDoctors = [];
+                foreach ($doctors as $doctor) {
+                    $groupedDoctors[$doctor->departement->name][] = $doctor;
+                }
+
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "ODC",
-                    'doctors' => Doctor::all(),
+                    'groupedDoctors' => $groupedDoctors,
                     'penjamins' => Penjamin::all(),
                     'case' => 'odc',
                     'patient' => $patient,
@@ -98,7 +110,7 @@ class RegistrationController extends Controller
             case 'rawat-inap':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Rawat Inap",
-                    'doctors' => Doctor::all(),
+                    'groupedDoctors' => $groupedDoctors,
                     'penjamins' => Penjamin::all(),
                     'case' => 'rawat-inap',
                     'patient' => $patient,
@@ -146,36 +158,40 @@ class RegistrationController extends Controller
     }
 
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
+        // dd($request);
         // Validate the incoming request data
         $validatedData = $request->validate([
-            'patient_id' => 'required',
-            'user_id' => 'required',
-            'employee_id' => 'required',
-            'doctor_id' => 'required',
-            'registration_type' => 'required',
-            'registration_date' => 'required',
-            'doctor_id' => 'required',
-            'poliklinik' => 'required|string',
-            'penjamin_id' => 'required',
+            'patient_id' => 'nullable',
+            'user_id' => 'nullable',
+            'employee_id' => 'nullable',
+            'doctor_id' => 'nullable',
+            'registration_type' => 'nullable',
+            'registration_date' => 'nullable',
+            'doctor_id' => 'nullable',
+            'poliklinik' => 'nullable|string',
+            'penjamin_id' => 'nullable',
             'rujukan' => 'required|string',
             'dokter_perujuk' => 'nullable|integer',
             'tipe_rujukan' => 'nullable|string',
+            'igd_type' => 'nullable|string',
+            'odc_type' => 'nullable|string',
             'nama_perujuk' => 'nullable|string',
             'telp_perujuk' => 'nullable|string',
             'alamat_perujuk' => 'nullable|string',
-            'diagnosa_awal' => 'required|string',
+            'diagnosa_awal' => 'nullable|string',
         ]);
 
         $validatedData['registration_date'] = Carbon::now();
         $validatedData['status'] = 'online';
+
+        if ($validatedData['registration_type'] == 'rawat-jalan' || $validatedData['registration_type'] == 'igd') {
+            $validatedData['departement_id'] = Doctor::where('id', $validatedData['doctor_id'])->first()->departement->id;
+        } else if ($validatedData['registration_type'] == 'odc') {
+            $departement_id = Departement::where('kode', 'ODC')->first('id')->id;
+            $validatedData['departement_id'] = $departement_id;
+        }
 
         // Generate No Registration
         $registrationNumber = generate_registration_number();
@@ -212,7 +228,7 @@ class RegistrationController extends Controller
         }
 
         $tipeRegis = $registration->registration_type;
-        if ($tipeRegis === 'rawat-jalan') {
+        if ($tipeRegis === 'rawat-jalan' || $tipeRegis === 'igd' || $tipeRegis === 'odc') {
             $kelasRawat = 'Rawat Jalan';
         }
 
@@ -224,14 +240,16 @@ class RegistrationController extends Controller
             $groupedDoctors[$doctor->departement->name][] = $doctor;
         }
 
-        $patient = $registration->patient;
+        // $patient = $registration->patient;
+        $patient = Patient::with(['registration' => function ($query) {
+            $query->orderBy('id', 'desc');
+        }])->find($registration->patient->id);
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
             'kelasRawat' => $kelasRawat,
             'penjamin' => $penjamin,
             'groupedDoctors' => $groupedDoctors,
-            'jam' => Carbon::parse($registration->registration_date)->format('H:i'),
             'registration' => $registration,
             'patient' => $patient,
             'age' => $age
@@ -304,7 +322,51 @@ class RegistrationController extends Controller
             // $registration->delete();
 
             // Update the status of the registration
-            $registration->update(['status' => 'batal']);
+            $registration->update([
+                'status' => 'batal',
+                'registration_close_date' => Carbon::now()
+            ]);
+
+            return redirect()->route('detail.pendaftaran.pasien', $registration->patient->id)->with('success', 'Registration has been cancelled successfully.');
+        } else {
+            return back()->with('error', 'Email atau Password salah!');
+        }
+    }
+
+    public function batal_keluar(Request $request, $id)
+    {
+        $request->validate([
+            'email' => 'required',
+            'password' => 'required',
+            'alasan' => 'required|string',
+        ]);
+
+        $credentials = $request->only('email', 'password');
+        // Attempt Zimbra login if local authentication fails
+        if ($this->zimbraLogin($credentials['email'], $credentials['password'])) {
+            // Zimbra authentication successful
+            $user = User::where('email', $credentials['email'])->where('is_active', 1)->first();
+
+            if ($user == null) {
+                return back()->with('error', 'User tidak ditemukan!');
+            }
+            // Find the registration record
+            $registration = Registration::findOrFail($id);
+
+            // Create a new BatalRegister entry
+            BatalRegister::create([
+                'registration_id' => $registration->id,
+                'user_id' => $request->user_id,
+                'tgl_batal' => $request->tgl_batal,
+                'alasan' => $request->alasan,
+            ]);
+
+
+            // Update the status of the registration
+            $registration->update([
+                'status' => 'online',
+                'registration_close_date' => null
+            ]);
 
             return redirect()->route('detail.registrasi.pasien', $registration->id)->with('success', 'Registration has been cancelled successfully.');
         } else {
@@ -344,9 +406,12 @@ class RegistrationController extends Controller
             ]);
 
             // Update the status of the registration
-            $registration->update(['status' => 'tutup_kunjungan']);
+            $registration->update([
+                'status' => 'tutup_kunjungan',
+                'registration_close_date' => Carbon::now()
+            ]);
 
-            return redirect()->route('detail.registrasi.pasien', $registration->id)->with('success', 'Registration has been closed successfully.');
+            return redirect()->route('detail.pendaftaran.pasien', $registration->patient->id)->with('success', 'Registration has been closed successfully.');
         } else {
             return back()->with('error', 'Email atau Password salah!');
         }

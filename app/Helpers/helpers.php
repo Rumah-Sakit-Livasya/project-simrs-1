@@ -132,8 +132,6 @@ if (!function_exists('set_active_mainmenu')) {
     }
 }
 
-
-
 if (!function_exists('tgl')) {
     function tgl($tanggal)
     {
@@ -163,6 +161,39 @@ if (!function_exists('tgl')) {
     }
 }
 
+if (!function_exists('tgl_waktu')) {
+    function tgl_waktu($tanggal)
+    {
+        // List of months in Indonesian
+        $months = [
+            '01' => 'Jan',
+            '02' => 'Feb',
+            '03' => 'Mar',
+            '04' => 'Apr',
+            '05' => 'Mei',
+            '06' => 'Jun',
+            '07' => 'Jul',
+            '08' => 'Agu',
+            '09' => 'Sep',
+            '10' => 'Okt',
+            '11' => 'Nov',
+            '12' => 'Des',
+        ];
+
+        // Convert the datetime string to a timestamp
+        $timestamp = strtotime($tanggal);
+
+        // Extract the day, month, year, and time
+        $day = date('d', $timestamp);
+        $month = date('m', $timestamp);
+        $year = date('Y', $timestamp);
+        $time = date('H:i:s', $timestamp);
+
+        // Return the formatted date string
+        return $day . ' ' . $months[$month] . ' ' . $year . ' ' . $time;
+    }
+}
+
 function greetings()
 {
     date_default_timezone_set('Asia/Jakarta'); // Sesuaikan dengan zona waktu Anda
@@ -187,11 +218,28 @@ function konversiTanggal($tanggal)
 {
     // Array nama hari dalam Bahasa Indonesia
     $namaHari = array(
-        'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'
+        'Minggu',
+        'Senin',
+        'Selasa',
+        'Rabu',
+        'Kamis',
+        'Jumat',
+        'Sabtu'
     );
     // Array nama bulan dalam Bahasa Indonesia
     $namaBulan = array(
-        1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        1 => 'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember'
     );
 
     // Mendapatkan nama hari berdasarkan nilai tanggal

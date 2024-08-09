@@ -20,6 +20,11 @@ class Registration extends Model
         return $this->belongsTo(Patient::class);
     }
 
+    public function departement()
+    {
+        return $this->belongsTo(Departement::class);
+    }
+
     public function penjamin()
     {
         return $this->belongsTo(Penjamin::class);
@@ -47,6 +52,11 @@ class Registration extends Model
     public function tutup_kunjungan()
     {
         return $this->hasOne(TutupKunjungan::class);
+    }
+
+    public function batal_keluar()
+    {
+        return $this->hasOne(BatalKeluar::class);
     }
 
     public function ganti_dokter()

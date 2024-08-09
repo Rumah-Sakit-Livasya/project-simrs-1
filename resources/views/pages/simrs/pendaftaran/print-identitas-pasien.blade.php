@@ -304,29 +304,6 @@
                         </tr>
                     </tbody>
                 </table>
-                <!--
-      <table class="table table-bordered">
-        <tr>
-            <th>Tgl</th>
-            <th>Jam</th>
-            <th>Profesi</th>
-            <th>
-              <b>HASIL ANALISIS PEMERIKSAAN RENCANA PENATALAKSANAAN</b>
-                (DITULIS DENGAN FORMAT SOAP HARAP MENULISKAN NAMA DAN PARAF PADA SETIAP AKHIR CATATAN)
-            </th>
-            <th>INSTRUKSI TENAGA KESEHATAN</th>
-            <th>VERIFIKASI DPJP</th>
-        </tr>
-        <tr>
-          <td height="400px"></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
-      </table>
- -->
             </div>
         </div>
 

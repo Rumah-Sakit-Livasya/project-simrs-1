@@ -516,11 +516,11 @@
         </div>
     </main>
 
-    @include('pages.simrs.pendaftaran.form.batal-register-form')
-    @include('pages.simrs.pendaftaran.form.batal-keluar-form')
-    @include('pages.simrs.pendaftaran.form.tutup-kunjungan-form')
-    @include('pages.simrs.pendaftaran.form.ganti-dpjp-form')
-    @include('pages.simrs.pendaftaran.form.ganti-diagnosa-form')
+    @include('pages.simrs.pendaftaran.batal-register-form')
+    @include('pages.simrs.pendaftaran.batal-keluar-form')
+    @include('pages.simrs.pendaftaran.tutup-kunjungan-form')
+    @include('pages.simrs.pendaftaran.ganti-dpjp-form')
+    @include('pages.simrs.pendaftaran.ganti-diagnosa-form')
 @endsection
 @section('plugin')
     {{-- Select 2 --}}

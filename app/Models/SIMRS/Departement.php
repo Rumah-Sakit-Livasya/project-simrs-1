@@ -16,6 +16,11 @@ class Departement extends Model
         return $this->hasMany(Doctor::class);
     }
 
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class);
+    }
+
     public function time_tables()
     {
         return $this->hasMany(TimeTable::class);

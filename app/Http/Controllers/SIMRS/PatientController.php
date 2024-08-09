@@ -157,17 +157,28 @@ class PatientController extends Controller
     {
         return $patient;
         $validatedData = $request->validate([
-            'name' => 'required|max:255', 'nickname' => 'max:255',
-            'title' => 'required|max:255', 'gender' => 'required|max:255',
-            'place' => 'required|max:255', 'date_of_birth' => 'required|max:255',
-            'religion' => 'required|max:255', 'blood_group' => 'max:255',
-            'allergy' => 'max:255', 'married_status' => 'max:255',
-            'language' => 'required|max:255', 'citizenship' => 'max:255',
-            'id_card' => 'max:255', 'address' => 'required|max:255',
-            'province' => 'max:255', 'regency' => 'required|max:255',
-            'subdistrict' => 'required|max:255', 'ward' => 'required|max:255',
-            'mobile_phone_number' => 'max:255', 'email' => 'max:255',
-            'last_education' => 'required|max:255', 'ethnic' => 'required|max:255',
+            'name' => 'required|max:255',
+            'nickname' => 'max:255',
+            'title' => 'required|max:255',
+            'gender' => 'required|max:255',
+            'place' => 'required|max:255',
+            'date_of_birth' => 'required|max:255',
+            'religion' => 'required|max:255',
+            'blood_group' => 'max:255',
+            'allergy' => 'max:255',
+            'married_status' => 'max:255',
+            'language' => 'required|max:255',
+            'citizenship' => 'max:255',
+            'id_card' => 'max:255',
+            'address' => 'required|max:255',
+            'province' => 'max:255',
+            'regency' => 'required|max:255',
+            'subdistrict' => 'required|max:255',
+            'ward' => 'required|max:255',
+            'mobile_phone_number' => 'max:255',
+            'email' => 'max:255',
+            'last_education' => 'required|max:255',
+            'ethnic' => 'required|max:255',
             'job' => 'required|max:255',
         ]);
 
@@ -292,6 +303,7 @@ class PatientController extends Controller
             ->with(['registration' => function ($query) {
                 $query->orderBy('created_at', 'desc')->first();
             }])
+            ->limit(5)
             ->get();
 
         return response()->json($patients);
