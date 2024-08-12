@@ -15,7 +15,7 @@ class CreateKelasRawatsTable extends Migration
     {
         Schema::create('kelas_rawat', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('group_penjamin_id')->constrained('group_penjamins')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('group_penjamin_id')->constrained('group_penjamin')->onUpdate('cascade')->onDelete('cascade');
             $table->string('kelas');
             $table->string('urutan');
             $table->string('keterangan');
