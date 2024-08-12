@@ -41,8 +41,8 @@
             <i class="ni ni-menu"></i>
         </a>
     </div>
-    <div class="ml-auto d-flex" id="header-search-bar">
-        <div class="form-group mt-4 mr-3">
+    <div class="ml-auto d-flex">
+        <div class="form-group mt-4 mr-3" id="header-search-bar">
             <div class="input-group global-search">
                 <div class="input-group-prepend mt-2" style="width: 2rem">
                     <label for="global_search" class="waves-effect waves-themed" style="width: 2rem; z-index: 100;">
