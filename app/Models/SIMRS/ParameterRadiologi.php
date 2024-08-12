@@ -11,5 +11,5 @@ class ParameterRadiologi extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'parameter_radiologi';
-    protected $fillable = ['grup_parameter_radiologi_id', 'kategori_radiologi_id', 'status', 'parameter'];
+    protected $fillable = ['grup_parameter_radiologi_id', 'kategori_radiologi_id', 'is_reverse', 'is_kontras', 'kode', 'parameter'];
 }

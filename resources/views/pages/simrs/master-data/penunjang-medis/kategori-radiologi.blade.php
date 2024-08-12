@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Grup Parameter Radiologi')
+@section('title', 'Kategori Radiologi')
 @section('extended-css')
     <style>
         hr {
@@ -133,7 +133,7 @@
                                                 <button type="button" class="btn-outline-primary waves-effect waves-themed"
                                                     id="btn-tambah-kategori-radiologi">
                                                     <span class="fal fa-plus-circle"></span>
-                                                    Tambah Grup Parameter Radiologi
+                                                    Tambah Kategori Radiologi
                                                 </button>
                                             </th>
                                         </tr>

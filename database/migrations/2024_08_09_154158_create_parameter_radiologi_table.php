@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('parameter_radiologi', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('group_parameter_radiologi_id')->references('id')->on('grup_parameter_radiologi')->cascadeOnDelete();
+            $table->foreignId('grup_parameter_radiologi_id')->references('id')->on('grup_parameter_radiologi')->cascadeOnDelete();
             $table->foreignId('kategori_radiologi_id')->references('id')->on('kategori_radiologi')->cascadeOnDelete();
             $table->string('parameter');
             $table->string('status', 50)->nullable();

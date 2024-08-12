@@ -1,11 +1,11 @@
-<div class="modal fade" id="modal-tambah-parameter-radiologi" tabindex="-1" role="dialog">
+<div class="modal fade" id="modal-edit-parameter-radiologi" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" role="document"> <!-- Menggunakan kelas modal-xl untuk ukuran ekstra besar -->
         <div class="modal-content">
-            <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="store-form">
-                @method('post')
+            <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="update-form">
+                @method('PATCH')
                 @csrf
                 <div class="modal-header pb-1 mb-0">
-                    <h5 class="modal-title font-weight-bold">Tambah Prameter Radiologi</h5>
+                    <h5 class="modal-title font-weight-bold">Edit Prameter Radiologi</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true"><i class="fal fa-times"></i></span>
                     </button>
@@ -18,7 +18,7 @@
                         <div class="row">
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
-                                    <label for="departement_id">Grup Parameter <span
+                                    <label for="grup_parameter_radiologi_id">Grup Parameter <span
                                             class="help-block text-danger">*</span></label>
                                     <select class="select2 form-control w-100" id="grup_parameter_radiologi_id"
                                         name="grup_parameter_radiologi_id">
@@ -64,13 +64,13 @@
                                     <label class="d-block">Status</label>
                                     <div class="custom-control custom-checkbox custom-control-inline">
                                         <input type="checkbox" name="is_kontras" class="custom-control-input"
-                                            id="is_kontras">
-                                        <label class="custom-control-label" for="is_kontras">Kontras</label>
+                                            id="is_kontras_edit">
+                                        <label class="custom-control-label" for="is_kontras_edit">Kontras</label>
                                     </div>
                                     <div class="custom-control custom-checkbox custom-control-inline">
                                         <input type="checkbox" class="custom-control-input" name="is_reverse"
-                                            id="is_reverse" checked="">
-                                        <label class="custom-control-label" for="is_reverse">Reverse</label>
+                                            id="is_reverse_edit">
+                                        <label class="custom-control-label" for="is_reverse_edit">Reverse</label>
                                     </div>
                                 </div>
                             </div>
@@ -82,7 +82,7 @@
                     <button type="submit" data-backdrop="static" data-keyboard="false" id="btn-tambah"
                         class="btn mx-1 btn-tambah btn-primary text-white" title="Hapus">
                         <div class="ikon-tambah">
-                            <span class="fal fa-plus-circle mr-1"></span>Tambah
+                            <span class="fal fa-plus-circle mr-1"></span>Update
                         </div>
                         <div class="span spinner-text d-none">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

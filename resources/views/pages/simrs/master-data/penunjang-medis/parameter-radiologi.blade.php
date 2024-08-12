@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Tindakan Medis')
+@section('title', 'Parameter Radiologi')
 @section('extended-css')
     <style>
         hr {
@@ -68,16 +68,9 @@
                             <form action="/daftar-rekam-medis" method="get">
                                 @csrf
                                 <div class="row">
-                                    <div class="col-md-6 mb-2">
+                                    <div class="col-md-12 mb-3">
                                         <div class="form-group d-flex align-items-center">
-                                            <label for="departement" class="form-label">Departement</label>
-                                            <input type="text" name="departement_id" id="departement"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-2">
-                                        <div class="form-group d-flex align-items-center">
-                                            <label for="nama_tindakan_1" class="form-label">Nama Grup</label>
+                                            <label for="nama_tindakan_1" class="form-label">Nama</label>
                                             <input type="text" name="nama_tindakan" id="nama_tindakan_1"
                                                 class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
                                         </div>
@@ -89,8 +82,6 @@
                                     </div>
                                 </div>
                             </form>
-
-
                         </div>
                     </div>
                 </div>
@@ -102,7 +93,7 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Parameter Radiologi
+                            Kategori Radiologi
                         </h2>
                     </div>
                     <div class="panel-container show">
@@ -140,10 +131,9 @@
                                         <tr>
                                             <th colspan="3" class="text-center">
                                                 <button type="button" class="btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-grup-tindakan" data-toggle="modal"
-                                                    data-target="#modal-tambah-grup-tindakan" data-action="tambah">
+                                                    id="btn-tambah-parameter-radiologi">
                                                     <span class="fal fa-plus-circle"></span>
-                                                    Tambah Parameter
+                                                    Tambah Parameter Radiologi
                                                 </button>
                                             </th>
                                         </tr>
@@ -157,25 +147,195 @@
             </div>
         </div>
     </main>
-
-    {{-- @include('pages.simrs.master-data.layanan-medis.partials.tambah-grup-tindakan')
-    @include('pages.simrs.master-data.layanan-medis.partials.edit-grup-tindakan') --}}
+    @include('pages.simrs.master-data.penunjang-medis.partials.tambah-parameter-radiologi')
+    @include('pages.simrs.master-data.penunjang-medis.partials.edit-parameter-radiologi')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
-
     <script>
         $(document).ready(function() {
-            let grupId = null;
-            let action = null;
-            $('#departement_id').select2({
-                placeholder: 'Pilih data berikut',
-                dropdownParent: $('#modal-tambah-grup-tindakan')
+            let parameterId = null;
+            $('#loading-spinner').show();
+
+            $('#btn-tambah-parameter-radiologi').click(function() {
+                $('#modal-tambah-parameter-radiologi').modal('show');
             });
 
-            $('#loading-spinner').show();
+            $('#modal-tambah-parameter-radiologi .select2').select2({
+                dropdownParent: $('#modal-tambah-parameter-radiologi')
+            });
+
+            $('.btn-edit').click(function() {
+                $('#modal-edit-parameter-radiologi').modal('show');
+                parameterId = $(this).attr('data-id');
+                $.ajax({
+                    url: '/api/simrs/master-data/penunjang-medis/radiologi/parameter/' +
+                        parameterId,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#modal-edit-parameter-radiologi input[name="parameter"]').val(
+                            response
+                            .parameter);
+                        $('#modal-edit-parameter-radiologi input[name="kode"]').val(
+                            response
+                            .kode);
+                        $('#modal-edit-parameter-radiologi #grup_parameter_radiologi_id').val(
+                            response.grup_parameter_radiologi_id).select2({
+                            dropdownParent: $('#modal-edit-parameter-radiologi')
+                        });
+                        $('#modal-edit-parameter-radiologi #kategori_radiologi_id').val(
+                            response.kategori_radiologi_id).select2({
+                            dropdownParent: $('#modal-edit-parameter-radiologi')
+                        });
+
+                        if (response.is_reverse == 1 || response.is_reverse === true) {
+                            $('#modal-edit-parameter-radiologi input[name="is_reverse"]').prop(
+                                'checked', true);
+                        } else {
+                            $('#modal-edit-parameter-radiologi input[name="is_reverse"]').prop(
+                                'checked', false);
+                        }
+
+                        // Atur checkbox is_kontras
+                        if (response.is_kontras == 1 || response.is_kontras === true) {
+                            $('#modal-edit-parameter-radiologi input[name="is_kontras"]').prop(
+                                'checked', true);
+                        } else {
+                            $('#modal-edit-parameter-radiologi input[name="is_kontras"]').prop(
+                                'checked', false);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#modal-edit-parameter-radiologi').modal('hide');
+                        showErrorAlert('Terjadi kesalahan: ' + error);
+                    }
+                });
+
+            });
+
+            $('.btn-delete').click(function() {
+                var parameterId = $(this).attr('data-id');
+
+                // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
+                var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
+
+                if (userConfirmed) {
+                    // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
+                    $.ajax({
+                        url: '/api/simrs/master-data/penunjang-medis/radiologi/parameter/' +
+                            parameterId +
+                            '/delete',
+                        type: 'DELETE',
+                        success: function(response) {
+                            showSuccessAlert(response.message);
+
+                            setTimeout(() => {
+                                console.log('Reloading the page now.');
+                                window.location.reload();
+                            }, 1000);
+                        },
+                        error: function(xhr, status, error) {
+                            showErrorAlert('Terjadi kesalahan: ' + error);
+                        }
+                    });
+                } else {
+                    console.log('Penghapusan dibatalkan oleh pengguna.');
+                }
+            });
+
+            $('#update-form').on('submit', function(e) {
+                e.preventDefault(); // Mencegah form submit secara default
+
+                var formData = $(this).serialize(); // Mengambil semua data dari form
+
+                $.ajax({
+                    url: '/api/simrs/master-data/penunjang-medis/radiologi/parameter/' +
+                        parameterId +
+                        '/update',
+                    type: 'PATCH',
+                    data: formData,
+                    beforeSend: function() {
+                        $('#update-form').find('.ikon-edit').hide();
+                        $('#update-form').find('.spinner-text').removeClass(
+                            'd-none');
+                    },
+                    success: function(response) {
+                        $('#modal-edit-parameter-radiologi').modal('hide');
+                        showSuccessAlert(response.message);
+
+                        setTimeout(() => {
+                            console.log('Reloading the page now.');
+                            window.location.reload();
+                        }, 1000);
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status === 422) {
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessages = '';
+
+                            $.each(errors, function(key, value) {
+                                errorMessages += value +
+                                    '\n';
+                            });
+
+                            $('#modal-edit-parameter-radiologi').modal('hide');
+                            showErrorAlert('Terjadi kesalahan:\n' +
+                                errorMessages);
+                        } else {
+                            $('#modal-edit-parameter-radiologi').modal('hide');
+                            showErrorAlert('Terjadi kesalahan: ' + error);
+                            console.log(error);
+                        }
+                    }
+                });
+            });
+
+            $('#store-form').on('submit', function(e) {
+                e.preventDefault(); // Mencegah form submit secara default
+
+                var formData = $(this).serialize(); // Mengambil semua data dari form
+
+                $.ajax({
+                    url: '/api/simrs/master-data/penunjang-medis/radiologi/parameter',
+                    type: 'POST',
+                    data: formData,
+                    beforeSend: function() {
+                        $('#store-form').find('.ikon-tambah').hide();
+                        $('#store-form').find('.spinner-text').removeClass(
+                            'd-none');
+                    },
+                    success: function(response) {
+                        $('#modal-tambah-parameter-radiologi').modal('hide');
+                        showSuccessAlert(response.message);
+
+                        setTimeout(() => {
+                            console.log('Reloading the page now.');
+                            window.location.reload();
+                        }, 1000);
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status === 422) {
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessages = '';
+
+                            $.each(errors, function(key, value) {
+                                errorMessages += value +
+                                    '\n';
+                            });
+
+                            $('#modal-tambah-parameter-radiologi').modal('hide');
+                            showErrorAlert('Terjadi kesalahan:\n' +
+                                errorMessages);
+                        } else {
+                            $('#modal-tambah-parameter-radiologi').modal('hide');
+                            showErrorAlert('Terjadi kesalahan: ' + error);
+                            console.log(error);
+                        }
+                    }
+                });
+            });
 
             // initialize datatable
             $('#dt-basic-example').DataTable({
@@ -222,155 +382,6 @@
                 ]
             });
 
-            $('#btn-tambah-grup-tindakan').click(function() {
-                $('#modal-tambah-grup-tindakan').modal('show');
-            });
-
-            $('.btn-edit').click(function() {
-                $('#modal-edit-grup-tindakan').modal('show');
-                grupId = $(this).attr('data-id');
-                $.ajax({
-                    url: '/api/simrs/master-data/layanan-medis/grup-tindakan-medis/' + grupId,
-                    type: 'GET',
-                    success: function(response) {
-                        // Isi form dengan data yang diterima
-                        $('#departement_id1').val(response.departement_id).select2({
-                            dropdownParent: $('#modal-edit-grup-tindakan')
-                        });
-                        $('input[name="nama_grup"]').val(response.nama_grup);
-                        $('input[name="coa_pendapatan"]').val(response.coa_pendapatan);
-                        $('input[name="coa_prasarana"]').val(response.coa_prasarana);
-                        $('input[name="coa_bhp"]').val(response.coa_bhp);
-                        $('input[name="coa_biaya"]').val(response.coa_biaya);
-                        $('input[name="status"][value="' + response.status + '"]').prop(
-                            'checked', true);
-                    },
-                    error: function(xhr, status, error) {
-                        showErrorAlert('Terjadi kesalahan: ' + error);
-                    }
-                });
-
-            });
-
-            $('.btn-delete').click(function() {
-                var grupId = $(this).attr('data-id');
-
-                // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
-                var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
-
-                if (userConfirmed) {
-                    // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
-                    $.ajax({
-                        url: '/api/simrs/master-data/layanan-medis/grup-tindakan-medis/' + grupId +
-                            '/delete',
-                        type: 'DELETE',
-                        success: function(response) {
-                            showSuccessAlert(response.message);
-
-                            setTimeout(() => {
-                                console.log('Reloading the page now.');
-                                window.location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr, status, error) {
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                        }
-                    });
-                } else {
-                    console.log('Penghapusan dibatalkan oleh pengguna.');
-                }
-            });
-
-            $('#update-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
-
-                var formData = $(this).serialize(); // Mengambil semua data dari form
-
-                $.ajax({
-                    url: '/api/simrs/master-data/layanan-medis/grup-tindakan-medis/' + grupId +
-                        '/update',
-                    type: 'PATCH',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#update-form').find('.ikon-edit').hide();
-                        $('#update-form').find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        $('#modal-edit-grup-tindakan').modal('hide');
-                        showSuccessAlert(response.message);
-
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
-                    },
-                    error: function(xhr, status, error) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
-                            });
-
-                            $('#modal-edit-grup-tindakan').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
-                        } else {
-                            $('#modal-edit-grup-tindakan').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
-                        }
-                    }
-                });
-            });
-
-            $('#store-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
-
-                var formData = $(this).serialize(); // Mengambil semua data dari form
-
-                $.ajax({
-                    url: '/api/simrs/master-data/layanan-medis/grup-tindakan-medis',
-                    type: 'POST',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#store-form').find('.ikon-tambah').hide();
-                        $('#store-form').find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        $('#modal-tambah-grup-tindakan').modal('hide');
-                        showSuccessAlert(response.message);
-
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
-                    },
-                    error: function(xhr, status, error) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
-                            });
-
-                            $('#modal-tambah-grup-tindakan').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
-                        } else {
-                            $('#modal-tambah-grup-tindakan').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
-                        }
-                    }
-                });
-            });
         });
     </script>
 @endsection
