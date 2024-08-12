@@ -56,14 +56,14 @@
                                 <div class="form-group">
                                     <label class="d-block">Apakah Konsul ?</label>
                                     <div class="custom-control d-inline-block custom-radio mt-2 mr-2">
-                                        <input type="radio" class="custom-control-input" id="is_konsul_aktif_tambah"
+                                        <input type="radio" class="custom-control-input" id="is_konsul_aktif"
                                             name="is_konsul" value="1">
-                                        <label class="custom-control-label" for="is_konsul_aktif_tambah">Ya</label>
+                                        <label class="custom-control-label" for="is_konsul_aktif">Ya</label>
                                     </div>
                                     <div class="custom-control d-inline-block custom-radio mt-2">
-                                        <input type="radio" class="custom-control-input" id="is_konsul_tidak_tambah"
+                                        <input type="radio" class="custom-control-input" id="is_konsul_tidak"
                                             name="is_konsul" checked="" value="0">
-                                        <label class="custom-control-label" for="is_konsul_tidak_tambah">Tidak</label>
+                                        <label class="custom-control-label" for="is_konsul_tidak">Tidak</label>
                                     </div>
                                 </div>
                             </div>
@@ -71,14 +71,14 @@
                                 <div class="form-group">
                                     <label class="d-block">Auto Charge</label>
                                     <div class="custom-control d-inline-block custom-radio mt-2 mr-2">
-                                        <input type="radio" class="custom-control-input" id="auto_charge_aktif_tambah"
+                                        <input type="radio" class="custom-control-input" id="auto_charge_aktif"
                                             name="auto_charge" value="1">
-                                        <label class="custom-control-label" for="auto_charge_aktif_tambah">Ya</label>
+                                        <label class="custom-control-label" for="auto_charge_aktif">Ya</label>
                                     </div>
                                     <div class="custom-control d-inline-block custom-radio mt-2">
-                                        <input type="radio" class="custom-control-input" id="auto_charge_tidak_tambah"
+                                        <input type="radio" class="custom-control-input" id="auto_charge_tidak"
                                             name="auto_charge" checked="" value="0">
-                                        <label class="custom-control-label" for="auto_charge_tidak_tambah">Tidak</label>
+                                        <label class="custom-control-label" for="auto_charge_tidak">Tidak</label>
                                     </div>
                                 </div>
                             </div>
@@ -86,15 +86,14 @@
                                 <div class="form-group">
                                     <label class="d-block">Apakah Vaksin ?</label>
                                     <div class="custom-control d-inline-block custom-radio mt-2 mr-2">
-                                        <input type="radio" class="custom-control-input"
-                                            id="is_vaksin_aktif_tambah" name="is_vaksin" value="1">
-                                        <label class="custom-control-label" for="is_vaksin_aktif_tambah">Ya</label>
+                                        <input type="radio" class="custom-control-input" id="is_vaksin_aktif"
+                                            name="is_vaksin" value="1">
+                                        <label class="custom-control-label" for="is_vaksin_aktif">Ya</label>
                                     </div>
                                     <div class="custom-control d-inline-block custom-radio mt-2">
-                                        <input type="radio" class="custom-control-input"
-                                            id="is_vaksin_tidak_tambah" name="is_vaksin" checked=""
-                                            value="0">
-                                        <label class="custom-control-label" for="is_vaksin_tidak_tambah">Tidak</label>
+                                        <input type="radio" class="custom-control-input" id="is_vaksin_tidak"
+                                            name="is_vaksin" checked="" value="0">
+                                        <label class="custom-control-label" for="is_vaksin_tidak">Tidak</label>
                                     </div>
                                 </div>
                             </div>

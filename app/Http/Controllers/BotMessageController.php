@@ -314,4 +314,93 @@ class BotMessageController extends Controller
 
         return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
     }
+
+    public function notifyExpiryContract(Request $request)
+    {
+        // Cek apakah metode POST
+        if ($request->getMethod() !== 'POST') {
+            return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
+        }
+
+        // Ambil data dari header dan JSON
+        $headers = $request->headers->all();
+        $content = $request->json()->all();
+
+        // Validasi header
+        $key = $headers['key'][0] ?? '';
+        $user = $headers['nama'][0] ?? '';
+        $sandi = $headers['sandi'][0] ?? '';
+
+        $error = true;
+        if ($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!') {
+            $error = false;
+        }
+
+        if ($error) {
+            return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
+        }
+
+        $response = '';
+        $responseHRD = '';
+        $employees = Employee::where('is_active', 1)->whereMonth('end_status_date', Carbon::now()->month)->whereYear('end_status_date', Carbon::now()->year)->orderBy('end_status_date', 'asc')->get();
+        $headers = [
+            'Key:KeyAbcKey',
+            'Nama:arul',
+            'Sandi:123###!!',
+        ];
+
+        // Data untuk request HTTP
+
+        foreach ($employees as $employee) {
+            $response .= "*INFO KONTRAK AKAN BERAKHIR* \n\n";
+            $response .= "Halo kak, *" . $employee->fullname . "*, kontrakmu akan berakhir pada tanggal " . tgl(Carbon::parse($employee->end_status_date)) . ". Harap konfirmasi kebagian HRD untuk kontrak selanjutnya ya! 😇.\n\n";
+            $response .= "_Reported automatic by: Smart HR_";
+
+            $httpData = [
+                'number' => $employee->mobile_phone,
+                'message' => $response,
+            ];
+
+            // Mengirim request HTTP menggunakan cURL
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+            $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($curl);
+            curl_close($curl);
+
+            $responseHRD .= "*DAFTAR PEGAWAI YANG AKAN HABIS KONTRAK* \n\n";
+            $responseHRD .= "🔸 " . $employee->fullname . " (" . tgl(Carbon::parse($employee->end_status_date)) . ") \n";
+            $responseHRD .= "\n _Reported automatic by: Smart HR_";
+        }
+
+        $hrd = Employee::where('organization_id', 31)->get();
+        foreach ($hrd as $h) {
+
+            $httpDataHRD = [
+                'number' => $h->mobile_phone,
+                'message' => $responseHRD,
+            ];
+
+            // Mengirim request HTTP menggunakan cURL
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+            $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($curl);
+            curl_close($curl);
+        }
+    }
 }
