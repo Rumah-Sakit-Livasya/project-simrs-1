@@ -1109,7 +1109,8 @@ class DashboardController extends Controller
             $currentMonthEndDate = Carbon::now()->startOfMonth()->addDays(24);
         }
 
-        $attendances = AttendanceOutsource::whereBetween('date', [$previousMonthStartDate, $currentMonthEndDate])->get();
+        $attendances = AttendanceOutsource::orderBy('date')->get();
+        // $attendances = AttendanceOutsource::whereBetween('date', [$previousMonthStartDate, $currentMonthEndDate])->get();
         $employees = Employee::where('employment_status', 'Outsource')->get();
         return view('pages.absensi.absensi.list-outsource', compact('attendances', 'employees'));
     }
