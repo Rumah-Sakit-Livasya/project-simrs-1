@@ -23,6 +23,7 @@ class CreateFamiliesTable extends Migration
             $table->string('family_job')->nullable();
             $table->string('family_relation')->nullable();
             $table->string('family_address')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

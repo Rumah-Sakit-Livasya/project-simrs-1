@@ -23,6 +23,7 @@ class CreateDepartementsTable extends Migration
             $table->string('publish_online')->nullable();
             $table->string('revenue_and_cost_center')->nullable();
             $table->string('master_layanan_rl')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -8,12 +8,13 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Registration extends Model
 {
-    protected $guarded = ['id'];
+    use HasFactory, SoftDeletes;
 
-    use HasFactory;
+    protected $guarded = ['id'];
 
     public function patient()
     {

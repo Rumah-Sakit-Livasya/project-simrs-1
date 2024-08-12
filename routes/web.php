@@ -33,12 +33,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/home', [ApplicationController::class, 'chooseApp'])->name('home');
     Route::post('/set-app', [ApplicationController::class, 'setApp'])->name('set-app');
 
-    Route::prefix('simrs')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('simrs.dashboard');
-        })->name('dashboard.simrs');
-    });
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

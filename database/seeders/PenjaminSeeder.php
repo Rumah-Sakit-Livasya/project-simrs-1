@@ -16,13 +16,40 @@ class PenjaminSeeder extends Seeder
     {
         $penjamin = [
             [
-                'name' => 'Umum',
+                'group_penjamin_id' => 1,
+                'mulai_kerjasama' => '2023-01-01',
+                'akhir_kerjasama' => '2024-01-01',
+                'tipe_perusahaan' => 'Asuransi Penjamin',
+                'nama_perusahaan' => 'Umum',
+                'kode_perusahaan' => 'Umum',
+                'nama_kontak' => 'Mas',
+                'jenis_kerjasama' => 'RWI, RWJ',
+                'jenis_kontrak' => 'Kontrak',
+                'keterangan' => '-',
             ],
             [
-                'name' => 'BPJS',
+                'group_penjamin_id' => 2,
+                'mulai_kerjasama' => '2023-01-01',
+                'akhir_kerjasama' => '2024-01-01',
+                'tipe_perusahaan' => 'Asuransi Penjamin',
+                'nama_perusahaan' => 'BPJS Kesehatan',
+                'kode_perusahaan' => 'BPJS',
+                'nama_kontak' => 'Mas',
+                'jenis_kerjasama' => 'RWI, RWJ',
+                'jenis_kontrak' => 'Kontrak',
+                'keterangan' => '-',
             ],
             [
-                'name' => 'Asuransi',
+                'group_penjamin_id' => 3,
+                'mulai_kerjasama' => '2023-01-01',
+                'akhir_kerjasama' => '2024-01-01',
+                'tipe_perusahaan' => 'Asuransi Penjamin',
+                'nama_perusahaan' => 'Asuransi',
+                'kode_perusahaan' => 'Asuransi',
+                'nama_kontak' => 'Mas',
+                'jenis_kerjasama' => 'RWI, RWJ',
+                'jenis_kontrak' => 'Kontrak',
+                'keterangan' => '-',
             ],
         ];
 

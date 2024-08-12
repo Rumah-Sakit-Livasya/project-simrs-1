@@ -13,12 +13,14 @@ class CreateKelasRawatsTable extends Migration
      */
     public function up()
     {
-        Schema::create('kelas_rawats', function (Blueprint $table) {
+        Schema::create('kelas_rawat', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('group_penjamin_id')->constrained('group_penjamins')->onUpdate('cascade')->onDelete('cascade');
             $table->string('kelas');
             $table->string('urutan');
             $table->string('keterangan');
             $table->boolean('isICU')->default(0);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

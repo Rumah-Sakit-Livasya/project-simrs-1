@@ -1,0 +1,28 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('grup_tindakan_medis', function (Blueprint $table) {
+            $table->renameColumn('deparmenet_id', 'departement_id');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('grup_tindakan_medis', function (Blueprint $table) {
+            $table->renameColumn('departement_id', 'deparmenet_id');
+        });
+    }
+};

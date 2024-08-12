@@ -353,7 +353,7 @@
             </div>
         </div>
     </main>
-    @include('pages.simrs.pendaftaran.riwayat-kunjungan-form')
+    @include('pages.simrs.pendaftaran.form.riwayat-kunjungan-form')
 @endsection
 @section('plugin')
     <!-- JavaScript untuk menampilkan pop-up Edit -->

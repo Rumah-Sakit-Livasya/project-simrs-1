@@ -52,6 +52,7 @@ class CreateRegistrationsTable extends Migration
             $table->string('titip_kelas_rawat')->nullable();
             $table->string('tipe_perawatan')->nullable();
             $table->string('tindakan')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -4,12 +4,14 @@ namespace App\Models\SIMRS;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Penjamin extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
+    protected $table = 'penjamin';
 
     public function patient()
     {
@@ -19,5 +21,10 @@ class Penjamin extends Model
     public function registration()
     {
         return $this->hasMany(Registration::class);
+    }
+
+    public function group_penjamin()
+    {
+        return $this->belongsTo(GroupPenjamin::class);
     }
 }

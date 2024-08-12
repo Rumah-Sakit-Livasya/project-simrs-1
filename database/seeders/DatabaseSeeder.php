@@ -24,8 +24,9 @@ class DatabaseSeeder extends Seeder
         // $this->call(UserSeeder::class);
         // $this->call(AttendanceCodeSeeder::class);
         // $this->call(ShiftSeeder::class);
-        $this->call(DepartementSeeder::class);
-        $this->call(EthnicSeeder::class);
+        // $this->call(DepartementSeeder::class);
+        // $this->call(EthnicSeeder::class);
         $this->call(PenjaminSeeder::class);
+        // $this->call(GroupPenjaminSeeder::class);
     }
 }

@@ -17,6 +17,7 @@ class CreateKecamatansTable extends Migration
             $table->id();
             $table->foreignId('kabupaten_id');
             $table->string('name');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

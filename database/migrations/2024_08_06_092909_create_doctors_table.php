@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained('employees')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('departement_id')->constrained('departements')->onUpdate('cascade')->onDelete('cascade');
             $table->string('kode_dpjp');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

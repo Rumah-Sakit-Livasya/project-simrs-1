@@ -80,7 +80,7 @@
                                 @foreach ($penjamins as $penjamin)
                                     <option value="{{ $penjamin->id }}"
                                         {{ $penjamin->id === old('penjamin') ? 'selected' : '' }}>
-                                        {{ $penjamin->name }}</option>
+                                        {{ $penjamin->nama_perusahaan }}</option>
                                 @endforeach
                             </select>
                         </div>

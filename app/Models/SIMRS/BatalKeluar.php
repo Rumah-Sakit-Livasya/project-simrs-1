@@ -11,6 +11,7 @@ class BatalKeluar extends Model
     use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
+    protected $table = 'batal_keluar';
 
     public function registration()
     {

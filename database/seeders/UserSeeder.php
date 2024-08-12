@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
             'email' => 'fizar@livasya.com',
         ]);
 
-        $fizar->assignRole('admin');
+        $fizar->assignRole('super admin');
 
         $dimas = User::create([
             'employee_id' => 1,
@@ -27,6 +27,6 @@ class UserSeeder extends Seeder
             'email' => 'dimas@livasya.com',
         ]);
 
-        $dimas->assignRole('admin');
+        $dimas->assignRole('super admin');
     }
 }

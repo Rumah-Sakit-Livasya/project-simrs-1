@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('mulai_antrian_bpjs');
             $table->string('kuota_regis_online');
             $table->boolean('jadwal_unlimited')->default(0);
+            $table->boolean('status')->default(1);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

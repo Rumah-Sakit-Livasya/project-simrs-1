@@ -16,6 +16,7 @@ class CreateEthnicsTable extends Migration
         Schema::create('ethnics', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

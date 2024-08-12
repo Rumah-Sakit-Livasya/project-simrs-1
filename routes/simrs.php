@@ -1,8 +1,15 @@
 <?php
 
 use App\Http\Controllers\SIMRS\DepartementController;
+use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
+use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
+use App\Http\Controllers\SIMRS\KategoriRadiologiController;
+use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
+use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Models\SIMRS\GrupTindakanMedis;
+use App\Models\SIMRS\TindakanMedis;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -69,8 +76,28 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/tambah-departement', [DepartementController::class, 'create'])->name('master.data.setup.tambah.departement');
     Route::post('/tambah-departement', [DepartementController::class, 'store'])->name('master.data.setup.simpan.tambah.departement');
 
+    Route::prefix('simrs')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('simrs.dashboard');
+        })->name('dashboard.simrs');
 
-    // // Revenue & Cost Center 
+        Route::prefix('/master-data')->group(function () {
+            Route::prefix('layanan-medis')->group(function () {
+                Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');
+                Route::get('/grup-tindakan-medis', [GrupTindakanMedisController::class, 'index'])->name('master-data.layanan-medis.grup-tindakan-medis');
+            });
+            Route::prefix('penunjang-medis')->group(function () {
+                Route::prefix('radiologi')->group(function () {
+                    Route::get('/grup-parameter', [GrupParameterRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.grup-parameter');
+                    Route::get('/kategori', [KategoriRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.kategori');
+                    Route::get('/parameter', [ParameterRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.parameter');
+                });
+                Route::prefix('laboratorium')->group(function () {
+                    // Route::get('')
+                });
+            });
+        });
+    });
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');
     // Route::post('/rnc', [RevenueAndCostCenterController::class, 'store'])->name('master.data.setup.rnc.store');
     // Route::put('/rnc', [RevenueAndCostCenterController::class, 'update'])->name('master.data.setup.rnc.update');

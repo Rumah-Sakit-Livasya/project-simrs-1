@@ -508,7 +508,6 @@
                                     </ul>
                                 </div>
                             </div><!--end .card-body -->
-
                         </div>
                     </div>
                 </div>

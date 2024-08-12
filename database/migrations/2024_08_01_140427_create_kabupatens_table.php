@@ -17,6 +17,7 @@ class CreateKabupatensTable extends Migration
             $table->id();
             $table->foreignId('provinsi_id');
             $table->string('name');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

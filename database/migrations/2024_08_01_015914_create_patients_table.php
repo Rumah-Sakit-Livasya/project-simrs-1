@@ -48,6 +48,7 @@ class CreatePatientsTable extends Migration
             $table->string('nomor_kepegawaian')->nullable();
             $table->string('bagian_pegawai')->nullable();
             $table->string('grup_perusahaan')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
