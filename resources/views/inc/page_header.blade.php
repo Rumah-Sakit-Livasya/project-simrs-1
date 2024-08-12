@@ -41,7 +41,7 @@
             <i class="ni ni-menu"></i>
         </a>
     </div>
-    <div class="ml-auto d-flex">
+    <div class="ml-auto d-flex" id="header-search-bar">
         <div class="form-group mt-4 mr-3">
             <div class="input-group global-search">
                 <div class="input-group-prepend mt-2" style="width: 2rem">
