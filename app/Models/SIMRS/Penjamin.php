@@ -11,7 +11,7 @@ class Penjamin extends Model
     use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
-    protected $table = 'penjamin';
+    // protected $table = 'penjamin';
 
     public function patient()
     {

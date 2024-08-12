@@ -13,8 +13,8 @@ class GroupPenjamin extends Model
     protected $guarded = ['id'];
     protected $table = 'group_penjamin';
 
-    // public function penjamin()
-    // {
-    //     return $this->hasMany(Penjamin::class, 'group_penjamin_id', 'id');
-    // }
+    public function penjamin()
+    {
+        return $this->hasMany(Penjamin::class, 'group_penjamin_id', 'id');
+    }
 }

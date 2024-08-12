@@ -13,9 +13,9 @@ class CreatePenjaminsTable extends Migration
      */
     public function up()
     {
-        Schema::create('penjamin', function (Blueprint $table) {
+        Schema::create('penjamins', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('group_penjamin_id')->constrained('group_penjamins')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('group_penjamin_id')->constrained('group_penjamin')->onUpdate('cascade')->onDelete('cascade');
             $table->string("mulai_kerjasama");
             $table->string("akhir_kerjasama")->nullable();
             $table->string("tipe_perusahaan");
