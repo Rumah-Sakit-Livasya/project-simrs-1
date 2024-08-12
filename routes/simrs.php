@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
-use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
