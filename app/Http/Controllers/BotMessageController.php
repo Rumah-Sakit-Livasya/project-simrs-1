@@ -350,16 +350,43 @@ class BotMessageController extends Controller
         ];
 
         // Data untuk request HTTP
+        if ($employees->count() > 0) {
+            foreach ($employees as $employee) {
+                $response .= "*INFO KONTRAK AKAN BERAKHIR* \n\n";
+                $response .= "Halo kak, *" . $employee->fullname . "*, kontrakmu akan berakhir pada tanggal " . tgl(Carbon::parse($employee->end_status_date)) . ". Harap konfirmasi kebagian HRD untuk kontrak selanjutnya ya! 😇.\n\n";
+                $response .= "_Reported automatic by: Smart HR_";
 
-        foreach ($employees as $employee) {
-            $response .= "*INFO KONTRAK AKAN BERAKHIR* \n\n";
-            $response .= "Halo kak, *" . $employee->fullname . "*, kontrakmu akan berakhir pada tanggal " . tgl(Carbon::parse($employee->end_status_date)) . ". Harap konfirmasi kebagian HRD untuk kontrak selanjutnya ya! 😇.\n\n";
-            $response .= "_Reported automatic by: Smart HR_";
+                if ($employee->mobile_phone) {
+                    $httpData = [
+                        'number' => $employee->mobile_phone,
+                        'message' => $response,
+                    ];
 
-            if ($employee->mobile_phone) {
-                $httpData = [
-                    'number' => $employee->mobile_phone,
-                    'message' => $response,
+                    // Mengirim request HTTP menggunakan cURL
+                    $curl = curl_init();
+                    curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+                    curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+                    curl_setopt($curl, CURLOPT_POST, 1);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+                    curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
+                    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+                    $response = curl_exec($curl);
+                    $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                    $curlError = curl_error($curl);
+                    curl_close($curl);
+                }
+
+                $responseHRD .= "*DAFTAR PEGAWAI YANG AKAN HABIS KONTRAK* \n\n";
+                $responseHRD .= "🔸 " . $employee->fullname . " (" . tgl(Carbon::parse($employee->end_status_date)) . ") \n";
+                $responseHRD .= "\n _Reported automatic by: Smart HR_";
+            }
+
+            $hrd = Employee::where('organization_id', 31)->get();
+            foreach ($hrd as $h) {
+                $httpDataHRD = [
+                    'number' => $h->mobile_phone,
+                    'message' => $responseHRD,
                 ];
 
                 // Mengirim request HTTP menggunakan cURL
@@ -368,42 +395,16 @@ class BotMessageController extends Controller
                 curl_setopt($curl, CURLOPT_TIMEOUT, 30);
                 curl_setopt($curl, CURLOPT_POST, 1);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
                 curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
                 $response = curl_exec($curl);
                 $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
                 $curlError = curl_error($curl);
                 curl_close($curl);
+
+                return response()->json(['error' => ($curlError ? "1" : "0"), 'data' => $response]);
             }
-
-            $responseHRD .= "*DAFTAR PEGAWAI YANG AKAN HABIS KONTRAK* \n\n";
-            $responseHRD .= "🔸 " . $employee->fullname . " (" . tgl(Carbon::parse($employee->end_status_date)) . ") \n";
-            $responseHRD .= "\n _Reported automatic by: Smart HR_";
-        }
-
-        $hrd = Employee::where('organization_id', 31)->get();
-        foreach ($hrd as $h) {
-            $httpDataHRD = [
-                'number' => $h->mobile_phone,
-                'message' => $responseHRD,
-            ];
-
-            // Mengirim request HTTP menggunakan cURL
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
-            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-            curl_setopt($curl, CURLOPT_POST, 1);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-            $response = curl_exec($curl);
-            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            $curlError = curl_error($curl);
-            curl_close($curl);
-
-            return response()->json(['error' => ($curlError ? "1" : "0"), 'data' => $response]);
         }
     }
 }
