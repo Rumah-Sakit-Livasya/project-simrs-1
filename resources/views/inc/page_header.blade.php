@@ -43,7 +43,7 @@
     </div>
     <div class="ml-auto d-flex">
         <div class="form-group mt-4 mr-3" id="header-search-bar">
-            <div class="input-group global-search">
+            <div class="input-group global-search d-flex align-items-center">
                 <div class="input-group-prepend mt-2" style="width: 2rem">
                     <label for="global_search" class="waves-effect waves-themed" style="width: 2rem; z-index: 100;">
                         <i class="fal fa-search font-weight-bold ml-1" style="font-size: 12pt; width: 2rem;"></i>
@@ -521,7 +521,7 @@
             @endif
         @endisset
         <!-- app user menu -->
-        <div>
+        <div class="d-flex align-items-center">
             <a href="javascript:void(0)" data-toggle="dropdown" title="{{ auth()->user()->email }}"
                 class="header-icon d-flex align-items-center justify-content-center ml-2">
                 @if (auth()->user()->employee->foto && Storage::exists('public/employee/profile/' . auth()->user()->employee->foto))
