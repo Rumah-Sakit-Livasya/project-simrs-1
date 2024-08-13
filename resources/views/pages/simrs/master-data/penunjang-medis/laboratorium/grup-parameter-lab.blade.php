@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Parameter Radiologi')
+@section('title', 'Grup Parameter Laboratorium')
 @section('extended-css')
     <style>
         hr {
@@ -116,6 +116,8 @@
                                             <tr>
                                                 <td>{{ $row->no_urut }}</td>
                                                 <td>{{ $row->nama_grup }}</td>
+                                                <td>{{ $row->kode_order }}</td>
+                                                <td>{{ $row->kode_mapping ?? '-' }}</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
                                                         data-id="{{ $row->id }}">
@@ -131,9 +133,9 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <th colspan="3" class="text-center">
+                                            <th colspan="5" class="text-center">
                                                 <button type="button" class="btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-parameter-radiologi">
+                                                    id="btn-tambah-grup-parameter-laboratorium">
                                                     <span class="fal fa-plus-circle"></span>
                                                     Tambah Grup Laboratorium
                                                 </button>
@@ -149,8 +151,8 @@
             </div>
         </div>
     </main>
-    {{-- @include('pages.simrs.master-data.penunjang-medis.radiologi.partials.tambah-parameter-radiologi')
-    @include('pages.simrs.master-data.penunjang-medis.radiologi.partials.edit-grup-parameter-radiologi') --}}
+    @include('pages.simrs.master-data.penunjang-medis.laboratorium.partials.tambah-grup-prameter-lab')
+    @include('pages.simrs.master-data.penunjang-medis.laboratorium.partials.edit-grup-parameter-lab')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -158,59 +160,42 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            let parameterId = null;
+            let grupId = null;
             $('#loading-spinner').show();
 
-            $('#btn-tambah-parameter-radiologi').click(function() {
-                $('#modal-tambah-parameter-radiologi').modal('show');
+            $('#btn-tambah-grup-parameter-laboratorium').click(function() {
+                $('#modal-tambah-grup-parameter-laboratorium').modal('show');
             });
 
-            $('#modal-tambah-parameter-radiologi .select2').select2({
-                dropdownParent: $('#modal-tambah-parameter-radiologi')
+            $('#modal-tambah-grup-parameter-laboratorium .select2').select2({
+                dropdownParent: $('#modal-tambah-grup-parameter-laboratorium')
             });
 
             $('.btn-edit').click(function() {
-                $('#modal-edit-parameter-radiologi').modal('show');
-                parameterId = $(this).attr('data-id');
+                console.log('clicked');
+                $('#modal-edit-grup-parameter-laboratorium').modal('show');
+                grupId = $(this).attr('data-id');
+                $('#modal-edit-grup-parameter-laboratorium form').attr('data-id', grupId);
+
                 $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/radiologi/parameter/' +
-                        parameterId,
+                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/grup-parameter/' +
+                        grupId,
                     type: 'GET',
                     success: function(response) {
-                        $('#modal-edit-parameter-radiologi input[name="parameter"]').val(
+                        $('#modal-edit-grup-parameter-laboratorium input[name="nama_grup"]')
+                            .val(
+                                response
+                                .nama_grup);
+                        $('#modal-edit-grup-parameter-laboratorium input[name="kode_order"]')
+                            .val(
+                                response
+                                .kode_order);
+                        $('#modal-edit-grup-parameter-laboratorium input[name="no_urut"]').val(
                             response
-                            .parameter);
-                        $('#modal-edit-parameter-radiologi input[name="kode"]').val(
-                            response
-                            .kode);
-                        $('#modal-edit-parameter-radiologi #grup_parameter_radiologi_id').val(
-                            response.grup_parameter_radiologi_id).select2({
-                            dropdownParent: $('#modal-edit-parameter-radiologi')
-                        });
-                        $('#modal-edit-parameter-radiologi #kategori_radiologi_id').val(
-                            response.kategori_radiologi_id).select2({
-                            dropdownParent: $('#modal-edit-parameter-radiologi')
-                        });
-
-                        if (response.is_reverse == 1 || response.is_reverse === true) {
-                            $('#modal-edit-parameter-radiologi input[name="is_reverse"]').prop(
-                                'checked', true);
-                        } else {
-                            $('#modal-edit-parameter-radiologi input[name="is_reverse"]').prop(
-                                'checked', false);
-                        }
-
-                        // Atur checkbox is_kontras
-                        if (response.is_kontras == 1 || response.is_kontras === true) {
-                            $('#modal-edit-parameter-radiologi input[name="is_kontras"]').prop(
-                                'checked', true);
-                        } else {
-                            $('#modal-edit-parameter-radiologi input[name="is_kontras"]').prop(
-                                'checked', false);
-                        }
+                            .no_urut);
                     },
                     error: function(xhr, status, error) {
-                        $('#modal-edit-parameter-radiologi').modal('hide');
+                        $('#modal-edit-grup-parameter-laboratorium').modal('hide');
                         showErrorAlert('Terjadi kesalahan: ' + error);
                     }
                 });
@@ -218,7 +203,7 @@
             });
 
             $('.btn-delete').click(function() {
-                var parameterId = $(this).attr('data-id');
+                var grupId = $(this).attr('data-id');
 
                 // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
                 var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
@@ -226,8 +211,8 @@
                 if (userConfirmed) {
                     // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
                     $.ajax({
-                        url: '/api/simrs/master-data/penunjang-medis/radiologi/parameter/' +
-                            parameterId +
+                        url: '/api/simrs/master-data/penunjang-medis/laboratorium/grup-parameter/' +
+                            grupId +
                             '/delete',
                         type: 'DELETE',
                         success: function(response) {
@@ -250,11 +235,11 @@
             $('#update-form').on('submit', function(e) {
                 e.preventDefault(); // Mencegah form submit secara default
 
-                var formData = $(this).serialize(); // Mengambil semua data dari form
-
+                var formData = $(this).serialize();
+                grupId = $(this).attr('data-id');
                 $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/radiologi/parameter/' +
-                        parameterId +
+                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/grup-parameter/' +
+                        grupId +
                         '/update',
                     type: 'PATCH',
                     data: formData,
@@ -264,7 +249,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-edit-parameter-radiologi').modal('hide');
+                        $('#modal-edit-grup-parameter-laboratorium').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -282,11 +267,11 @@
                                     '\n';
                             });
 
-                            $('#modal-edit-parameter-radiologi').modal('hide');
+                            $('#modal-edit-grup-parameter-laboratorium').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-edit-parameter-radiologi').modal('hide');
+                            $('#modal-edit-grup-parameter-laboratorium').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
@@ -300,7 +285,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/radiologi/parameter',
+                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/grup-parameter',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {
@@ -309,7 +294,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-tambah-parameter-radiologi').modal('hide');
+                        $('#modal-tambah-grup-parameter-laboratorium').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -327,11 +312,11 @@
                                     '\n';
                             });
 
-                            $('#modal-tambah-parameter-radiologi').modal('hide');
+                            $('#modal-tambah-grup-parameter-laboratorium').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-tambah-parameter-radiologi').modal('hide');
+                            $('#modal-tambah-grup-parameter-laboratorium').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
