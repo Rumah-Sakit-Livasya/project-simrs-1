@@ -15,7 +15,8 @@ class KelasRawatController extends Controller
      */
     public function index()
     {
-        //
+        $kelas_rawat = KelasRawat::all();
+        return view('pages.simrs.master-data.setup.kelas-rawat', compact('kelas_rawat'));
     }
 
     /**

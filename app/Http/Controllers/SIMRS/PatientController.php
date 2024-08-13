@@ -90,7 +90,7 @@ class PatientController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|max:255',
             'nickname' => 'max:255',
-            'penjamin_id' => 'required',
+            'penjamin_id' => 'nullable',
             'title' => 'required|max:255',
             'gender' => 'required|max:255',
             'place' => 'required|max:255',
@@ -123,21 +123,23 @@ class PatientController extends Controller
             'family_address' => 'required|max:255',
         ]);
 
-        if ($request['penjamin_id'] !== 1) {
-            $validatedData['nomor_penjamin'] = $request->nomor_penjamin;
-            $validatedData['nama_pegawai'] = $request->nama_pegawai;
-            $validatedData['nama_perusahaan_pegawai'] = $request->nama_perusahaan_pegawai;
-            $validatedData['hubungan_pegawai'] = $request->hubungan_pegawai;
-            $validatedData['nomor_kepegawaian'] = $request->nomor_kepegawaian;
-            $validatedData['bagian_pegawai'] = $request->bagian_pegawai;
-            $validatedData['grup_perusahaan'] = $request->grup_perusahaan;
+        if ($request['penjamin_id']) {
+            if ($request['penjamin_id'] !== 1) {
+                $validatedData['nomor_penjamin'] = $request->nomor_penjamin;
+                $validatedData['nama_pegawai'] = $request->nama_pegawai;
+                $validatedData['nama_perusahaan_pegawai'] = $request->nama_perusahaan_pegawai;
+                $validatedData['hubungan_pegawai'] = $request->hubungan_pegawai;
+                $validatedData['nomor_kepegawaian'] = $request->nomor_kepegawaian;
+                $validatedData['bagian_pegawai'] = $request->bagian_pegawai;
+                $validatedData['grup_perusahaan'] = $request->grup_perusahaan;
+            }
         }
 
         $validatedData['medical_record_number'] = MedicalRecordHelper::generateMedicalRecordNumber();
         $family = Family::create($validatedData);
         $validatedData['family_id'] = $family->id;
-        Patient::create($validatedData);
-        return redirect('/daftar-rekam-medis')->with('success', 'Pasien berhasil ditambahkan!');
+        $patient = Patient::create($validatedData);
+        return redirect("/patients/$patient->id")->with('success', 'Pasien berhasil ditambahkan!');
     }
 
     public function edit_pendaftaran_pasien(Patient $patient)

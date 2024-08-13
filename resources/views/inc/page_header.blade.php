@@ -42,20 +42,22 @@
         </a>
     </div>
     <div class="ml-auto d-flex">
-        <div class="form-group mt-4 mr-3" id="header-search-bar">
-            <div class="input-group global-search d-flex align-items-center">
-                <div class="input-group-prepend mt-2" style="width: 2rem">
-                    <label for="global_search" class="waves-effect waves-themed" style="width: 2rem; z-index: 100;">
-                        <i class="fal fa-search font-weight-bold ml-1" style="font-size: 12pt; width: 2rem;"></i>
-                    </label>
+        @if ($appType == 'simrs')
+            <div class="form-group mt-4 mr-3" id="header-search-bar">
+                <div class="input-group global-search d-flex align-items-center">
+                    <div class="input-group-prepend mt-2" style="width: 2rem">
+                        <label for="global_search" class="waves-effect waves-themed" style="width: 2rem; z-index: 100;">
+                            <i class="fal fa-search font-weight-bold ml-1" style="font-size: 12pt; width: 2rem;"></i>
+                        </label>
+                    </div>
+                    <input id="global_search" name="global_search" type="text" class="form-control input-global"
+                        placeholder="Search anything...">
                 </div>
-                <input id="global_search" name="global_search" type="text" class="form-control input-global"
-                    placeholder="Search anything...">
+                <div id="search-results" class="mt-2"
+                    style="position: absolute; z-index: 1000; background: white; width: 100%; max-height: 200px; overflow-y: auto;">
+                </div>
             </div>
-            <div id="search-results" class="mt-2"
-                style="position: absolute; z-index: 1000; background: white; width: 100%; max-height: 200px; overflow-y: auto;">
-            </div>
-        </div>
+        @endif
         <div class="d-flex align-items-center mr-4">
             @if ($appType == 'simrs')
                 <form action="{{ route('set-app') }}" method="POST">

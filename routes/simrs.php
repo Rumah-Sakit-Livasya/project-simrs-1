@@ -5,6 +5,7 @@ use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
+use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
@@ -82,6 +83,9 @@ Route::group(['middleware' => ['auth']], function () {
         })->name('dashboard.simrs');
 
         Route::prefix('/master-data')->group(function () {
+            Route::prefix('setup')->group(function () {
+                Route::get('/kelas-rawat', [KelasRawatController::class, 'index'])->name('master-data.setup.kelas-rawat');
+            });
             Route::prefix('layanan-medis')->group(function () {
                 Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');
                 Route::get('/grup-tindakan-medis', [GrupTindakanMedisController::class, 'index'])->name('master-data.layanan-medis.grup-tindakan-medis');

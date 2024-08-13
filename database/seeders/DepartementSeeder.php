@@ -315,6 +315,16 @@ class DepartementSeeder extends Seeder
                 'revenue_and_cost_center' => 'SUPERIOR',
                 'master_layanan_rl' => '',
             ],
+            [
+                'name' => 'One Day Care',
+                'kode' => 'ODC',
+                'keterangan' => '',
+                'quota' => '',
+                'kode_poli' => '',
+                'publish_online' => '',
+                'revenue_and_cost_center' => 'SUPERIOR',
+                'master_layanan_rl' => '',
+            ],
             // Tambahkan etnis lainnya di sini
         ];
 
