@@ -683,6 +683,7 @@ class ReportController extends Controller
             // Push data ke dalam array attendances
             $attendances[] = [
                 'employee_name' => $employee->fullname,
+                'organization_name' => $employee->organization->name,
                 'avatar' => $employee->foto,
                 'gender' => $employee->gender,
                 'total_hadir' => $total_hadir,
