@@ -147,8 +147,8 @@
             </div>
         </div>
     </main>
-    @include('pages.simrs.master-data.penunjang-medis.partials.tambah-kategori-radiologi')
-    @include('pages.simrs.master-data.penunjang-medis.partials.edit-kategori-radiologi')
+    @include('pages.simrs.master-data.penunjang-medis.radiologi.partials.tambah-kategori-radiologi')
+    @include('pages.simrs.master-data.penunjang-medis.radiologi.partials.edit-kategori-radiologi')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>

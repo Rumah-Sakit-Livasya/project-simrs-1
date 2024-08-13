@@ -17,7 +17,7 @@ class ParameterRadiologiController extends Controller
         $grup_parameter_radiologi = GrupParameterRadiologi::all();
         $kategori_radiologi = KategoriRadiologi::all();
         $parameter_radiologi = ParameterRadiologi::all();
-        return view('pages.simrs.master-data.penunjang-medis.parameter-radiologi', compact('grup_parameter_radiologi', 'kategori_radiologi', 'parameter_radiologi'));
+        return view('pages.simrs.master-data.penunjang-medis.radiologi.parameter-radiologi', compact('grup_parameter_radiologi', 'kategori_radiologi', 'parameter_radiologi'));
     }
 
     public function getParameter($id)

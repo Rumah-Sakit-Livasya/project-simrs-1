@@ -11,7 +11,7 @@ class KategoriRadiologiController extends Controller
     public function index()
     {
         $kategori_radiologi = KategoriRadiologi::all();
-        return view('pages.simrs.master-data.penunjang-medis.kategori-radiologi', compact('kategori_radiologi'));
+        return view('pages.simrs.master-data.penunjang-medis.radiologi.kategori-radiologi', compact('kategori_radiologi'));
     }
 
     public function getGrupParameter($id)

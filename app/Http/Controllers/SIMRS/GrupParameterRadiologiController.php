@@ -11,7 +11,7 @@ class GrupParameterRadiologiController extends Controller
     public function index()
     {
         $grup_parameter_radiologi = GrupParameterRadiologi::all();
-        return view('pages.simrs.master-data.penunjang-medis.grup-parameter-radiologi', compact('grup_parameter_radiologi'));
+        return view('pages.simrs.master-data.penunjang-medis.radiologi.grup-parameter-radiologi', compact('grup_parameter_radiologi'));
     }
 
     public function getGrupParameter($id)
