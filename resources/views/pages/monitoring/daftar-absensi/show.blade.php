@@ -272,6 +272,8 @@
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/statistics/chartist/chartist.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
         /* demo scripts for change table color */
@@ -374,8 +376,6 @@
                 tanggal = $(this).attr('data-tanggal');
                 modal = $('#detail-absensi-modal');
                 modalBody = modal.find('.modal-body');
-
-                console.log(employeeId);
 
 
                 try {
