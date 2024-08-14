@@ -6,21 +6,15 @@ use App\Http\Controllers\API\DayOffRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Pages\CompanyController;
 use App\Http\Controllers\API\CompanyController as ApiCompanyController;
-use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\ApplicationController;
-use App\Http\Controllers\BotMessageController;
-use App\Http\Controllers\FaceRecognitionController;
-use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\Pages\DashboardController;
 use App\Http\Controllers\Pages\UpdateProfileController;
-use App\Http\Controllers\Pages\UserController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WhatsappController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
-use PHPUnit\Event\Code\Test;
 
 
 Route::get('/', [AuthenticatedSessionController::class, 'create'])

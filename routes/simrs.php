@@ -8,6 +8,8 @@ use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
+use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
+use App\Http\Controllers\SIMRS\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
@@ -101,7 +103,8 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::prefix('laboratorium')->group(function () {
                     Route::get('/grup-parameter', [GrupParameterLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.grup-parameter');
                     Route::get('/kategori', [KategoriLaboratorumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.kategori');
-                    Route::get('/parameter', [ParameterRadiologiController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.parameter');
+                    Route::get('/parameter', [ParameterLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.parameter');
+                    Route::get('/tipe', [TipeLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.tipe');
                 });
             });
         });
