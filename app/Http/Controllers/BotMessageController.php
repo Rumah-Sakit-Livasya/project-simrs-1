@@ -326,7 +326,6 @@ class BotMessageController extends Controller
 
         // Ambil data dari header dan JSON
         $headers = $request->headers->all();
-        $content = $request->json()->all();
 
         // Validasi header
         $key = $headers['key'][0] ?? '';
@@ -404,7 +403,7 @@ class BotMessageController extends Controller
             $curlError = curl_error($curl);
             curl_close($curl);
 
-            return response()->json(['error' => ($curlError ? "1" : "0"), 'data' => $response]);
+            // return response()->json(['error' => ($curlError ? "1" : "0"), 'data' => $response]);
         }
     }
 }
