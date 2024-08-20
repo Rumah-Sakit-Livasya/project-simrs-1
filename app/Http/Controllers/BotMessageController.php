@@ -317,6 +317,8 @@ class BotMessageController extends Controller
 
     public function notifyExpiryContract(Request $request)
     {
+        return 'Berhasil';
+
         // Cek apakah metode POST
         if ($request->getMethod() !== 'POST') {
             return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
