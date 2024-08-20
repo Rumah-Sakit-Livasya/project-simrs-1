@@ -361,7 +361,7 @@ class BotMessageController extends Controller
 
                 if ($employee->mobile_phone) {
                     $httpData = [
-                        'number' => $employee->mobile_phone,
+                        'number' => formatNomorIndo($employee->mobile_phone),
                         'message' => $response,
                     ];
 
@@ -384,29 +384,27 @@ class BotMessageController extends Controller
 
             $responseHRD .= "\n _Reported automatic by: Smart HR_";
 
-            $hrd = Employee::where('organization_id', 31)->get();
-            foreach ($hrd as $h) {
-                $httpDataHRD = [
-                    'number' => $h->mobile_phone,
-                    'message' => $responseHRD,
-                ];
+            $hrd = Employee::where('organization_id', 31)->latest()->first();
+            $httpDataHRD = [
+                'number' => formatNomorIndo($hrd->mobile_phone),
+                'message' => $responseHRD,
+            ];
 
-                // Mengirim request HTTP menggunakan cURL
-                $curl = curl_init();
-                curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
-                curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-                curl_setopt($curl, CURLOPT_POST, 1);
-                curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
-                curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+            // Mengirim request HTTP menggunakan cURL
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
-                $response = curl_exec($curl);
-                $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-                $curlError = curl_error($curl);
-                curl_close($curl);
+            $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($curl);
+            curl_close($curl);
 
-                return response()->json(['error' => ($curlError ? "1" : "0"), 'data' => $response]);
-            }
+            return response()->json(['error' => ($curlError ? "1" : "0"), 'data' => $response]);
         }
     }
 }
