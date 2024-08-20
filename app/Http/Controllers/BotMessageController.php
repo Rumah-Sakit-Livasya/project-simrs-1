@@ -352,6 +352,7 @@ class BotMessageController extends Controller
         ];
 
         // Data untuk request HTTP
+        $responseHRD .= "*DAFTAR PEGAWAI YANG AKAN HABIS KONTRAK* \n\n";
         if ($employees->count() > 0) {
             foreach ($employees as $employee) {
                 $response .= "*INFO KONTRAK AKAN BERAKHIR* \n\n";
@@ -378,11 +379,10 @@ class BotMessageController extends Controller
                     $curlError = curl_error($curl);
                     curl_close($curl);
                 }
-
-                $responseHRD .= "*DAFTAR PEGAWAI YANG AKAN HABIS KONTRAK* \n\n";
                 $responseHRD .= "🔸 " . $employee->fullname . " (" . tgl(Carbon::parse($employee->end_status_date)->format('Y-m-d')) . ") \n";
-                $responseHRD .= "\n _Reported automatic by: Smart HR_";
             }
+
+            $responseHRD .= "\n _Reported automatic by: Smart HR_";
 
             $hrd = Employee::where('organization_id', 31)->get();
             foreach ($hrd as $h) {
