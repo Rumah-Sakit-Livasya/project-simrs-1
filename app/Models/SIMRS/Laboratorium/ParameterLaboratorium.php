@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\SIMRS;
+namespace App\Models\SIMRS\Laboratorium;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
