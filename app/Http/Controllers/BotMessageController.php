@@ -341,7 +341,7 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $response = '';
+        $responsePegawai = '';
         $responseHRD = '';
         $employees = Employee::where('is_active', 1)->whereMonth('end_status_date', Carbon::now()->month)->whereYear('end_status_date', Carbon::now()->year)->orderBy('end_status_date', 'asc')->get();
         $headers = [
@@ -354,14 +354,14 @@ class BotMessageController extends Controller
         $responseHRD .= "*DAFTAR PEGAWAI YANG AKAN HABIS KONTRAK* \n\n";
         if ($employees->count() > 0) {
             foreach ($employees as $employee) {
-                $response .= "*INFO KONTRAK AKAN BERAKHIR* \n\n";
-                $response .= "Halo kak, *" . $employee->fullname . "*, kontrakmu akan berakhir pada tanggal " . tgl(Carbon::parse($employee->end_status_date)->format('Y-m-d')) . ". Harap konfirmasi kebagian HRD untuk kontrak selanjutnya ya! 😇.\n\n";
-                $response .= "_Reported automatic by: Smart HR_";
+                $responsePegawai .= "*INFO KONTRAK AKAN BERAKHIR* \n\n";
+                $responsePegawai .= "Halo kak, *" . $employee->fullname . "*, kontrakmu akan berakhir pada tanggal " . tgl(Carbon::parse($employee->end_status_date)->format('Y-m-d')) . ". Harap konfirmasi kebagian HRD untuk kontrak selanjutnya ya! 😇.\n\n";
+                $responsePegawai .= "_Reported automatic by: Smart HR_";
 
                 if ($employee->mobile_phone) {
                     $httpData = [
                         'number' => formatNomorIndo($employee->mobile_phone),
-                        'message' => $response,
+                        'message' => $responsePegawai,
                     ];
 
                     // Mengirim request HTTP menggunakan cURL
