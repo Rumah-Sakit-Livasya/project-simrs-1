@@ -683,6 +683,7 @@ class ReportController extends Controller
             // Push data ke dalam array attendances
             $attendances[] = [
                 'employee_name' => $employee->fullname,
+                'organization_name' => $employee->organization->name,
                 'avatar' => $employee->foto,
                 'gender' => $employee->gender,
                 'total_hadir' => $total_hadir,
@@ -693,6 +694,7 @@ class ReportController extends Controller
                 'total_absent' => $total_absent,
                 'total_cuti' => $total_cuti,
             ];
+
 
             //ambil jumlah ontime
             $grafik_jumlah_ontime = $employee->attendance->where('clock_in', '!=', null)->where('late_clock_in', null)->where('is_day_off', null)->count();
@@ -745,7 +747,7 @@ class ReportController extends Controller
 
         foreach ($groupReport as $groupName => $units) {
             // Query untuk mengambil attendances dengan tambahan filter tanggal
-            $attendances = Attendance::whereHas('employees', function ($query) use ($units) {
+            $attendances_grafik_filter = Attendance::whereHas('employees', function ($query) use ($units) {
                 $query->whereHas('organization', function ($query) use ($units) {
                     $query->whereIn('name', $units);
                 });
@@ -830,25 +832,25 @@ class ReportController extends Controller
                 ->count();
 
             // Query untuk menghitung jumlah hadir
-            $hadirCount = $attendances->where('clock_in', '!=', null)
+            $hadirCount = $attendances_grafik_filter->where('clock_in', '!=', null)
                 ->where('is_day_off', null)
                 ->count();
 
             // Query untuk menghitung jumlah absen
-            $absenCount = $attendances->where('clock_in', null)
+            $absenCount = $attendances_grafik_filter->where('clock_in', null)
                 ->where('is_day_off', null)
                 ->where('attendance_code_id', null)
                 ->where('day_off_request_id', null)
                 ->count();
 
             // Query untuk menghitung jumlah day off
-            $dayOffCount = $attendances->where('clock_in', null)
+            $dayOffCount = $attendances_grafik_filter->where('clock_in', null)
                 ->where('attendance_code_id', '!=', null)
                 ->where('day_off_request_id', '!=', null)
                 ->count();
 
             // Query untuk menghitung jumlah libur
-            $liburCount = $attendances->where('clock_in', null)
+            $liburCount = $attendances_grafik_filter->where('clock_in', null)
                 ->where('is_day_off', 1)
                 ->where('attendance_code_id', null)
                 ->where('day_off_request_id', null)
@@ -868,6 +870,7 @@ class ReportController extends Controller
             ];
         }
 
+        // dd($attendances[0]);
         return view('pages.laporan.absensi.index', [
             'attendancesAllMonths' => $attendancesAllMonths,
             'bulan' => $bulan,

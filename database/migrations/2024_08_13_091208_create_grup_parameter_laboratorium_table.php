@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('batal_register', function (Blueprint $table) {
+        Schema::create('grup_parameter_laboratorium', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('registration_id')->constrained('registrations')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
-            $table->string('tgl_batal');
-            $table->text('alasan');
+            $table->integer('no_urut');
+            $table->string('nama_grup', 100);
+            $table->string('kode_order', 50);
+            $table->string('kode_mapping', 50)->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('batal_register');
+        Schema::dropIfExists('grup_parameter_laboratorium');
     }
 };

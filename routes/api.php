@@ -30,6 +30,10 @@ use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
+use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
+use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
+use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
+use App\Http\Controllers\SIMRS\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RoomController;
@@ -113,6 +117,28 @@ Route::prefix('simrs')->group(function () {
             Route::post('/radiologi/parameter', [ParameterRadiologiController::class, 'store'])->name('master-data.penunjang-medis.radiologi.parameter.store');
             Route::patch('/radiologi/parameter/{id}/update', [ParameterRadiologiController::class, 'update'])->name('master-data.penunjang-medis.radiologi.parameter.update');
             Route::delete('/radiologi/parameter/{id}/delete', [ParameterRadiologiController::class, 'delete'])->name('master-data.penunjang-medis.radiologi.parameter.delete');
+
+            Route::prefix('laboratorium')->group(function () {
+                Route::get('/grup-parameter/{id}', [GrupParameterLaboratoriumController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.get');
+                Route::post('/grup-parameter', [GrupParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.store');
+                Route::patch('/grup-parameter/{id}/update', [GrupParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.update');
+                Route::delete('/grup-parameter/{id}/delete', [GrupParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.delete');
+
+                Route::get('/parameter/{id}', [ParameterLaboratoriumController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.get');
+                Route::post('/parameter', [ParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.parameter.store');
+                Route::patch('/parameter/{id}/update', [ParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.parameter.update');
+                Route::delete('/parameter/{id}/delete', [ParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.parameter.delete');
+
+                Route::get('/kategori/{id}', [KategoriLaboratorumController::class, 'getKategori'])->name('master-data.penunjang-medis.laboratorium.kategori.get');
+                Route::post('/kategori', [KategoriLaboratorumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.kategori.store');
+                Route::patch('/kategori/{id}/update', [KategoriLaboratorumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.kategori.update');
+                Route::delete('/kategori/{id}/delete', [KategoriLaboratorumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.kategori.delete');
+
+                Route::get('/tipe/{id}', [TipeLaboratoriumController::class, 'getTipe'])->name('master-data.penunjang-medis.laboratorium.tipe.get');
+                Route::post('/tipe', [TipeLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.tipe.store');
+                Route::patch('/tipe/{id}/update', [TipeLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.tipe.update');
+                Route::delete('/tipe/{id}/delete', [TipeLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.tipe.delete');
+            });
         });
     });
 });
