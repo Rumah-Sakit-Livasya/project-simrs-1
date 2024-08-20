@@ -403,7 +403,7 @@ class BotMessageController extends Controller
             $curlError = curl_error($curl);
             curl_close($curl);
 
-            // return response()->json(['error' => ($curlError ? "1" : "0"), 'data' => $response]);
+            return response()->json(['error' => ($curlError ? "1" : "0"), 'data' => $response]);
         }
     }
 }
