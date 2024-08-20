@@ -565,7 +565,6 @@ class DashboardController extends Controller
         return view('pages.monitoring.daftar-absensi.payroll', compact('attendances', 'shifts', 'employees', 'attendance_codes'));
     }
 
-
     public function getDataUser()
     {
         $userId = auth()->user()->id;

@@ -62,7 +62,7 @@
                             <div class="input-group-append">
                                 <span class="input-group-text bg-transparent border-left-0">
                                     <i class="fal fa-search" style="cursor: pointer" data-toggle="modal"
-                                        data-target=".example-modal-default-transparent"></i>
+                                        data-target="#kelas-rawat-form"></i>
                                 </span>
                             </div>
                         </div>
@@ -259,3 +259,44 @@
         </div>
     </div>
 </form>
+
+<div class="modal fade" id="kelas-rawat-form" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" style="max-width: 80vw" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white"><strong>Kelas Rawat</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row justify-content-center">
+                    <div class="col-lg-6">
+                        <div class="card m-auto border">
+                            <div class="card-header py-2 bg-primary">
+                                <div class="card-title text-white">
+                                    Form Pencarian
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form id="form-cari-kelas">
+                                    <div class="form-group">
+                                        <label class="form-label" for="kelas_rawat_id">Kelas Rawat</label>
+                                        <select class="form-control w-100" id="kelas_rawat_id" name="kelas_rawat_id">
+                                            <option value=""></option>
+                                            @foreach ($kelas_rawats as $kelas_rawat)
+                                                <option value="{{ $kelas_rawat->id }}">
+                                                    {{ $kelas_rawat->kelas }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

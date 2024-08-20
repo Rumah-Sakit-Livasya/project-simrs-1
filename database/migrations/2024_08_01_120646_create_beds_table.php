@@ -18,7 +18,7 @@ class CreateBedsTable extends Migration
             $table->foreignId('room_id');
             $table->string('nama_tt');
             $table->string('no_tt');
-            $table->boolean('isTambahan')->default(0);
+            $table->boolean('is_tambahan')->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\SIMRS\RoomController;
+use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
@@ -85,6 +87,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::prefix('/master-data')->group(function () {
             Route::prefix('setup')->group(function () {
                 Route::get('/kelas-rawat', [KelasRawatController::class, 'index'])->name('master-data.setup.kelas-rawat');
+                Route::get('/rooms/{kelas:id}', [RoomController::class, 'index'])->name('master-data.setup.rooms');
+                Route::get('/beds/{room:id}', [BedController::class, 'index'])->name('master-data.setup.beds');
             });
             Route::prefix('layanan-medis')->group(function () {
                 Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');

@@ -17,4 +17,9 @@ class GroupPenjamin extends Model
     {
         return $this->hasMany(Penjamin::class, 'group_penjamin_id', 'id');
     }
+
+    public function tarif_kelas_rawat()
+    {
+        return $this->belongsToMany(TarifKelasRawat::class, 'tarif_kelas_rawat');
+    }
 }

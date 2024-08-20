@@ -3,85 +3,102 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Room;
+use App\Models\SIMRS\TarifKelasRawat;
 use Illuminate\Http\Request;
 
 class KelasRawatController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $kelas_rawat = KelasRawat::all();
-        return view('pages.simrs.master-data.setup.kelas-rawat', compact('kelas_rawat'));
+        return view('pages.simrs.master-data.setup.kelas-rawat.index', compact('kelas_rawat'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'kelas' => 'required',
+            'urutan' => 'required',
+            'keterangan' => 'required',
+            'isICU' => 'nullable',
+        ]);
+
+        try {
+            // Store the new KelasRawat
+            $kelasRawat = KelasRawat::create($validatedData);
+
+            // Retrieve all GroupPenjamin records
+            $groupPenjamins = GroupPenjamin::all();
+
+            // Loop through each GroupPenjamin and create a TarifKelasRawat record
+            foreach ($groupPenjamins as $groupPenjamin) {
+                TarifKelasRawat::create([
+                    'kelas_rawat_id' => $kelasRawat->id,
+                    'group_penjamin_id' => $groupPenjamin->id,
+                    'tarif' => 0,
+                    // Add any other fields required for TarifKelasRawat
+                ]);
+            }
+
+            return response()->json(['message' => 'Kelas Rawat berhasil ditambahkan!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\KelasRawat  $kelasRawat
-     * @return \Illuminate\Http\Response
-     */
-    public function show(KelasRawat $kelasRawat)
+
+    public function getKelas($id)
     {
-        //
+        try {
+            $kelas_rawat = KelasRawat::findOrFail($id);
+
+            return response()->json([
+                'kelas' => $kelas_rawat->kelas,
+                'urutan' => $kelas_rawat->urutan,
+                'keterangan' => $kelas_rawat->keterangan,
+                'isICU' => $kelas_rawat->isICU,
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Data tidak ditemukan',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\KelasRawat  $kelasRawat
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(KelasRawat $kelasRawat)
+    public function update(Request $request, $id)
     {
-        //
+        $validatedData = $request->validate([
+            'kelas' => 'required',
+            'urutan' => 'required',
+            'keterangan' => 'required',
+            'isICU' => 'nullable',
+        ]);
+
+        try {
+            $kelas_rawat = KelasRawat::findOrFail($id);
+            $kelas_rawat->update($validatedData);
+            return response()->json(['message' => ' berhasil diupdate!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\KelasRawat  $kelasRawat
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, KelasRawat $kelasRawat)
+    public function delete($id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\KelasRawat  $kelasRawat
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(KelasRawat $kelasRawat)
-    {
-        //
+        try {
+            $kelas_rawat = KelasRawat::find($id);
+            $kelas_rawat->delete();
+            return response()->json(['message' => ' berhasil dihapus'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

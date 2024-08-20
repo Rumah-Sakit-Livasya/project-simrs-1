@@ -8,6 +8,7 @@ use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GantiDiagnosa;
 use App\Models\SIMRS\GantiDokter;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
@@ -49,6 +50,7 @@ class RegistrationController extends Controller
     public function create($id, $registrasi)
     {
         $patient = Patient::where('id', $id)->first();
+        $kelas_rawats = KelasRawat::all();
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
         $doctors = Doctor::with('employee', 'departement')->get();
@@ -111,6 +113,7 @@ class RegistrationController extends Controller
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Rawat Inap",
                     'groupedDoctors' => $groupedDoctors,
+                    'kelas_rawats' => $kelas_rawats,
                     'penjamins' => Penjamin::all(),
                     'case' => 'rawat-inap',
                     'patient' => $patient,

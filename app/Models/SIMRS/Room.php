@@ -18,6 +18,18 @@ class Room extends Model
         return $this->hasMany(Bed::class, 'room_id', 'id');
     }
 
+    public function bedTambahan()
+    {
+        return $this->hasMany(Bed::class, 'room_id', 'id')
+            ->where('beds.is_tambahan', 1);
+    }
+
+    public function bedBor()
+    {
+        return $this->hasMany(Bed::class, 'room_id', 'id')
+            ->where('beds.is_tambahan', 0);
+    }
+
     public function kelas_rawat()
     {
         return $this->belongsTo(KelasRawat::class, 'kelas_rawat_id', 'id');

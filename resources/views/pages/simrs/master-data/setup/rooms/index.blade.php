@@ -54,67 +54,12 @@
 @endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        <div class="row justify-content-center">
-            <div class="col-xl-10">
-                <div id="panel-1" class="panel">
-                    <div class="panel-hdr">
-                        <h2>
-                            <span>Form Pencarian</span>
-                        </h2>
-                    </div>
-                    <div class="panel-container show">
-                        <div class="panel-content" id="filter-wrapper">
-
-                            <form action="/daftar-rekam-medis" method="get">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group d-flex align-items-center">
-                                            <label for="departement" class="form-label">Departement</label>
-                                            <input type="text" name="departement_id" id="departement"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group d-flex align-items-center">
-                                            <label for="nama_tindakan_1" class="form-label">Nama</label>
-                                            <input type="text" name="nama_tindakan" id="nama_tindakan_1"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group d-flex align-items-center">
-                                            <label for="nama_tindakan_2" class="form-label">RL (1.3 dan 3.1)</label>
-                                            <input type="text" name="nama_tindakan" id="nama_tindakan_2"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group d-flex align-items-center">
-                                            <label for="nama_tindakan_3" class="form-label">RL (3.4)</label>
-                                            <input type="text" name="nama_tindakan" id="nama_tindakan_3"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <button type="submit" class="btn btn-sm float-right mt-2 btn-primary">
-                                            <i class="fas fa-search mr-1"></i> Cari
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="row">
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Tindakan Medis Rawat Jalan
+                            RUANGAN {{ $kelas_rawat->kelas }}
                         </h2>
                     </div>
                     <div class="panel-container show">
@@ -125,26 +70,29 @@
                                     <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
                                     <thead class="bg-primary-600">
                                         <tr>
-                                            <th>Group Tindakan Medis</th>
-                                            <th>Kode</th>
-                                            <th>Nama Tindakan</th>
-                                            <th>Nama Billing</th>
-                                            <th>Konsul</th>
-                                            <th>RL (1.3, 3.1)</th>
-                                            <th>RL (3.4)</th>
+                                            <th>No</th>
+                                            <th>Ruangan</th>
+                                            <th>No Ruang</th>
+                                            <th>Jumlah T. Tidur</th>
+                                            <th>Bed Tambahan</th>
+                                            <th>Jml Bed (BOR)</th>
+                                            <th>Keterangan</th>
                                             <th>Fungsi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($tindakan_medis as $row)
+                                        @foreach ($rooms as $row)
                                             <tr>
-                                                <td>{{ $row->grup_tindakan_medis_id }}</td>
-                                                <td>{{ $row->kode }}</td>
-                                                <td>{{ $row->nama_tindakan }}</td>
-                                                <td>{{ $row->nama_billing }}</td>
-                                                <td>{{ $row->is_konsul }}</td>
-                                                <td>{{ $row->mapping_rl_13 }}</td>
-                                                <td>{{ $row->mapping_rl_34 }}</td>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>
+                                                    <a
+                                                        href="{{ route('master-data.setup.beds', $row->id) }}">{{ $row->ruangan }}</a>
+                                                </td>
+                                                <td>{{ $row->no_ruang }}</td>
+                                                <td>{{ $row->beds->count() }}</td>
+                                                <td>{{ $row->bedTambahan->count() }}</td>
+                                                <td>{{ $row->bedBor->count() }}</td>
+                                                <td>{{ $row->keterangan }}</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
                                                         data-id="{{ $row->id }}">
@@ -161,26 +109,28 @@
                                     <tfoot>
                                         <tr>
                                             <th colspan="8" class="text-center">
-                                                <button type="button" class="btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-tindakan" data-toggle="modal"
-                                                    data-target="#modal-tambah-tindakan" data-action="tambah">
+                                                <button type="button"
+                                                    class="btn btn-outline-primary waves-effect waves-themed"
+                                                    id="btn-tambah-room" data-toggle="modal"
+                                                    data-target="#modal-tambah-room" data-action="tambah">
                                                     <span class="fal fa-plus-circle"></span>
-                                                    Tambah Tindakan
+                                                    Tambah Ruangan
                                                 </button>
                                             </th>
                                         </tr>
                                     </tfoot>
                                 </table>
                             </div>
-                            <!-- datatable end -->
                         </div>
+                        <!-- datatable end -->
                     </div>
                 </div>
             </div>
         </div>
+        </div>
     </main>
-    @include('pages.simrs.master-data.setup.partials.edit-kelas')
-    @include('pages.simrs.master-data.setup.partials.tambah-kelas')
+    @include('pages.simrs.master-data.setup.rooms.partials.edit-room')
+    @include('pages.simrs.master-data.setup.rooms.partials.tambah-room')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -188,55 +138,27 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            let tindakanId = null;
+            let roomId = null;
             $('#loading-spinner').show();
 
-            $('#btn-tambah-tindakan').click(function() {
-                $('#modal-tambah-tindakan').modal('show');
-                console.log('clicked');
+            $('#btn-tambah-room').click(function() {
+                $('#modal-tambah-room').modal('show');
             });
 
-            $('#modal-tambah-tindakan .select2').select2({
-                dropdownParent: $('#modal-tambah-tindakan')
+            $('#modal-tambah-room .select2').select2({
+                dropdownParent: $('#modal-tambah-room')
             });
 
             $('.btn-edit').click(function() {
-                $('#modal-edit-tindakan').modal('show');
-                tindakanId = $(this).attr('data-id');
+                $('#modal-edit-room').modal('show');
+                roomId = $(this).attr('data-id');
                 $.ajax({
-                    url: '/api/simrs/master-data/layanan-medis/tindakan-medis/' + tindakanId,
+                    url: '/api/simrs/master-data/setup/room/' + roomId,
                     type: 'GET',
                     success: function(response) {
-                        // Isi form dengan data yang diterima
-                        $('#modal-edit-tindakan #grup_tindakan_medis_id').val(response
-                                .grup_tindakan_medis_id)
-                            .select2({
-                                dropdownParent: $('#modal-edit-tindakan')
-                            });
-                        $('#modal-edit-tindakan input[name="kode"]').val(response
-                            .kode);
-                        $('#modal-edit-tindakan input[name="nama_tindakan"]').val(response
-                            .nama_tindakan);
-                        $('#modal-edit-tindakan input[name="nama_billing"]').val(response
-                            .nama_billing);
-                        $('#modal-edit-tindakan input[name="is_konsul"][value="' + response
-                            .is_konsul + '"]').prop(
-                            'checked', true);
-                        $('#modal-edit-tindakan input[name="auto_charge"][value="' + response
-                                .auto_charge + '"]')
-                            .prop(
-                                'checked', true);
-                        $('#modal-edit-tindakan input[name="is_vaksin"][value="' + response
-                            .is_vaksin + '"]').prop(
-                            'checked', true);
-                        $('#modal-edit-tindakan #mapping_rl_13').val(response.mapping_rl_13)
-                            .select2({
-                                dropdownParent: $('#modal-edit-tindakan')
-                            });
-                        $('#modal-edit-tindakan #mapping_rl_34').val(response.mapping_rl_34)
-                            .select2({
-                                dropdownParent: $('#modal-edit-tindakan')
-                            });
+                        $('#modal-edit-room #ruangan').val(response.ruangan);
+                        $('#modal-edit-room #no_ruang').val(response.no_ruang);
+                        $('#modal-edit-room #keterangan').val(response.keterangan);
                     },
                     error: function(xhr, status, error) {
                         showErrorAlert('Terjadi kesalahan: ' + error);
@@ -246,7 +168,7 @@
             });
 
             $('.btn-delete').click(function() {
-                var tindakanId = $(this).attr('data-id');
+                var roomId = $(this).attr('data-id');
 
                 // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
                 var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
@@ -254,14 +176,12 @@
                 if (userConfirmed) {
                     // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
                     $.ajax({
-                        url: '/api/simrs/master-data/layanan-medis/tindakan-medis/' + tindakanId +
-                            '/delete',
+                        url: '/api/simrs/master-data/setup/room/' + roomId + '/delete',
                         type: 'DELETE',
                         success: function(response) {
                             showSuccessAlert(response.message);
 
                             setTimeout(() => {
-                                console.log('Reloading the page now.');
                                 window.location.reload();
                             }, 1000);
                         },
@@ -280,8 +200,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/simrs/master-data/layanan-medis/tindakan-medis/' + tindakanId +
-                        '/update',
+                    url: '/api/simrs/master-data/setup/room/' + roomId + '/update',
                     type: 'PATCH',
                     data: formData,
                     beforeSend: function() {
@@ -290,7 +209,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-edit-tindakan').modal('hide');
+                        $('#modal-edit-room').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -308,11 +227,11 @@
                                     '\n';
                             });
 
-                            $('#modal-edit-tindakan').modal('hide');
+                            $('#modal-edit-room').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-edit-tindakan').modal('hide');
+                            $('#modal-edit-room').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
@@ -326,7 +245,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/simrs/master-data/layanan-medis/tindakan-medis',
+                    url: '/api/simrs/master-data/setup/room',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {
@@ -335,7 +254,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-tambah-tindakan').modal('hide');
+                        $('#modal-tambah-room').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -353,11 +272,11 @@
                                     '\n';
                             });
 
-                            $('#modal-tambah-tindakan').modal('hide');
+                            $('#modal-tambah-room').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-tambah-tindakan').modal('hide');
+                            $('#modal-tambah-room').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }

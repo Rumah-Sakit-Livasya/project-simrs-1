@@ -26,12 +26,19 @@ use App\Http\Controllers\BotMessageController;
 use App\Http\Controllers\DeductionController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
+use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
+use App\Http\Controllers\SIMRS\RoomController;
+use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Http\Middleware\CheckAuthorizationBot;
+use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Room;
+use App\Models\SIMRS\TarifKelasRawat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -66,6 +73,28 @@ Route::prefix('simrs')->group(function () {
             Route::post('/grup-rehab-medik', [GrupTindakanMedisController::class, 'store'])->name('master-data.grup-rehab-medik.store');
             Route::patch('/grup-rehab-medik/{id}/update', [GrupTindakanMedisController::class, 'update'])->name('master-data.layanan-medis.grup-rehab-medik.update');
             Route::delete('/grup-rehab-medik/{id}/delete', [GrupTindakanMedisController::class, 'delete'])->name('master-data.layanan-medis.grup-rehab-medik.delete');
+        });
+
+        Route::prefix('setup')->group(function () {
+            Route::get('/kelas-rawat/{id}', [KelasRawatController::class, 'getKelas'])->name('master-data.setup.kelas-rawat.get');
+            Route::post('/kelas-rawat', [KelasRawatController::class, 'store'])->name('master-data.setup.kelas-rawat.store');
+            Route::patch('/kelas-rawat/{id}/update', [KelasRawatController::class, 'update'])->name('master-data.setup.kelas-rawat.update');
+            Route::delete('/kelas-rawat/{id}/delete', [KelasRawatController::class, 'delete'])->name('master-data.setup.kelas-rawat.delete');
+
+            Route::get('/tarif/{id}', [TarifKelasRawatController::class, 'getTarif'])->name('master-data.setup.tarif.get');
+            // Route::post('/tarif', [TarifKelasRawatController::class, 'store'])->name('master-data.setup.tarif.store');
+            Route::patch('/tarif', [TarifKelasRawatController::class, 'update'])->name('master-data.setup.tarif.update');
+            // Route::delete('/tarif/{id}/delete', [TarifKelasRawatController::class, 'delete'])->name('master-data.setup.tarif.delete');
+
+            Route::get('/room/{id}', [RoomController::class, 'getRoom'])->name('master-data.setup.room.get');
+            Route::post('/room', [RoomController::class, 'store'])->name('master-data.setup.room.store');
+            Route::patch('/room/{id}/update', [RoomController::class, 'update'])->name('master-data.setup.room.update');
+            Route::delete('/room/{id}/delete', [RoomController::class, 'delete'])->name('master-data.setup.room.delete');
+
+            Route::get('/bed/{id}', [BedController::class, 'getBed'])->name('master-data.setup.bed.get');
+            Route::post('/bed', [BedController::class, 'store'])->name('master-data.setup.bed.store');
+            Route::patch('/bed/{id}/update', [BedController::class, 'update'])->name('master-data.setup.bed.update');
+            Route::delete('/bed/{id}/delete', [BedController::class, 'delete'])->name('master-data.setup.bed.delete');
         });
 
         Route::prefix('penunjang-medis')->group(function () {

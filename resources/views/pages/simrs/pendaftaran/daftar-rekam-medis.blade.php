@@ -300,11 +300,11 @@
                                                     @if ($patient->registration()->orderBy('created_at', 'desc')->first()->status === 'online')
                                                         <a
                                                             href="{{ route('detail.registrasi.pasien', $patient->registration()->orderBy('created_at', 'desc')->first()->id) }}">
-                                                            {{ $patient->penjamin->name }}
+                                                            {{ $patient->penjamin->name ?? '-' }}
                                                         </a>
                                                     @else
                                                         <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                            {{ $patient->penjamin->name }}
+                                                            {{ $patient->penjamin->name ?? '-' }}
                                                         </a>
                                                     @endif
                                                 @else

@@ -17,6 +17,7 @@ class CreateRoomsTable extends Migration
             $table->id();
             $table->foreignId('kelas_rawat_id');
             $table->string('ruangan');
+            $table->string('no_ruang');
             $table->string('keterangan');
             $table->softDeletes();
             $table->timestamps();

@@ -1,85 +1,85 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\SIMRS;
 
-use App\Models\Room;
+use App\Http\Controllers\Controller;
+use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Room;
 use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index($id)
     {
-        //
+        $kelas_rawat = KelasRawat::findOrFail($id);
+        $rooms = $kelas_rawat->rooms;
+        return view('pages.simrs.master-data.setup.rooms.index', compact('kelas_rawat', 'rooms'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'kelas_rawat_id' => 'required',
+            'ruangan' => 'required',
+            'no_ruang' => 'required',
+            'keterangan' => 'required',
+        ]);
+
+        try {
+            $store = Room::create($validatedData);
+            return response()->json(['message' => ' Berhasil ditambahkan!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Room  $room
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Room $room)
+    public function getRoom($id)
     {
-        //
+        try {
+            $room = Room::findOrFail($id);
+
+            return response()->json([
+                'ruangan' => $room->ruangan,
+                'no_ruang' => $room->no_ruang,
+                'keterangan' => $room->keterangan,
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Data tidak ditemukan',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Room  $room
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Room $room)
+    public function update(Request $request, $id)
     {
-        //
+        $validatedData = $request->validate([
+            'ruangan' => 'required',
+            'no_ruang' => 'required',
+            'keterangan' => 'required',
+        ]);
+
+        try {
+            $room = Room::findOrFail($id);
+            $room->update($validatedData);
+            return response()->json(['message' => ' Berhasil diupdate!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Room  $room
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Room $room)
+    public function delete($id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Room  $room
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Room $room)
-    {
-        //
+        try {
+            $room = Room::find($id);
+            $room->delete();
+            return response()->json(['message' => ' Berhasil dihapus'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

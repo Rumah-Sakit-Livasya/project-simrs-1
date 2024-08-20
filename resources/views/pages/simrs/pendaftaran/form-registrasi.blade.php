@@ -80,21 +80,21 @@
             color: #ab6e58;
         }
 
-        .box-menu li {
-            padding: 20px 30px;
-            margin: 20px;
-            width: 200px;
-            background: #f2f0f5;
-            text-align: center;
-            cursor: pointer;
-            border: 1px solid #e5e5e5;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
-        }
+        /* .box-menu li {
+                    padding: 20px 30px;
+                    margin: 20px;
+                    width: 200px;
+                    background: #f2f0f5;
+                    text-align: center;
+                    cursor: pointer;
+                    border: 1px solid #e5e5e5;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-direction: column;
+                    box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
+                } */
 
         .box-menu .circle-menu {
             height: 50px;
@@ -519,31 +519,6 @@
             </div>
         </div>
 
-        <div class="modal fade example-modal-default-transparent" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-transparent" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title text-white">
-                            Basic Modals
-                            <small class="m-0 text-white opacity-70">
-                                Below is a static modal example
-                            </small>
-                        </h4>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true"><i class="fal fa-times"></i></span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        ...
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </main>
 @endsection
 @section('plugin')
@@ -585,6 +560,9 @@
                 $('#pelayanan').select2();
                 $('#type').select2();
                 $('#tindakan').select2();
+                $('#kelas_rawat_id').select2({
+                    dropdownParent: $('#kelas-rawat-form')
+                });
             });
         });
 

@@ -11,10 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tarif_kelas_rawats', function (Blueprint $table) {
+        Schema::create('tarif_kelas_rawat', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('group_penjamin_id')->constrained('group_penjamin');
+            $table->foreignId('kelas_rawat_id')->constrained('kelas_rawat');
+            $table->string('tarif');
             $table->softDeletes();
             $table->timestamps();
+
+            // $table->primary(['kelas_rawat_id']);
         });
     }
 
