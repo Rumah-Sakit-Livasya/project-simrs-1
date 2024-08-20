@@ -320,7 +320,7 @@ class BotMessageController extends Controller
         // return 'Berhasil';
 
         // Cek apakah metode POST
-        if ($request->getMethod() !== 'GET') {
+        if ($request->getMethod() !== 'POST') {
             return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
         }
 
