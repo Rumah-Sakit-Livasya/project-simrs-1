@@ -11,7 +11,7 @@ use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
-use App\Http\Controllers\SIMRS\ParameterLaboratoriumController;
+use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;

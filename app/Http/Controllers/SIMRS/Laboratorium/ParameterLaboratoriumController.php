@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\SIMRS;
+namespace App\Http\Controllers\SIMRS\Laboratorium;
 
 use App\Http\Controllers\Controller;
 use App\Models\SIMRS\Laboratorium\GrupParameterLaboratorium;
 use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
 use App\Models\SIMRS\Laboratorium\TipeLaboratorium;
-use App\Models\SIMRS\ParameterLaboratorium;
+use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use Illuminate\Http\Request;
 
 class ParameterLaboratoriumController extends Controller

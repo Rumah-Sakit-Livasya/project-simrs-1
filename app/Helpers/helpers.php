@@ -132,6 +132,19 @@ if (!function_exists('set_active_mainmenu')) {
     }
 }
 
+if (!function_exists('formatNomorIndo')) {
+    function formatNomorIndo($nomor)
+    {
+        // Cek apakah nomor diawali dengan '62'
+        if (substr($nomor, 0, 2) === '62') {
+            // Ganti '62' dengan '0'
+            $nomor = '0' . substr($nomor, 2);
+        }
+
+        return $nomor;
+    }
+}
+
 if (!function_exists('tgl')) {
     function tgl($tanggal)
     {
