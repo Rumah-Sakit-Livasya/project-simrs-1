@@ -7,7 +7,7 @@
             <img src="{{ asset('/img/logo.png') }}" alt="Laravel" aria-roledescription="logo" style="width: 45px">
             <div class="text-left ml-2">
                 <span
-                    class="page-logo-text text-left font-weight-bold ml-0">{{ session('app_type', 'hr') == 'hr' ? 'SMART HR' : 'S I M R S' }}</span>
+                    class="page-logo-text text-left font-weight-bold ml-0">{{ session('app_type', 'hr') == 'hr' ? 'SMART HR' : 'S  I  M  R  S' }}</span>
                 <p class="mb-0 text-small text-white"> {{ auth()->user()->employee->company->name }}</p>
             </div>
         </a>
