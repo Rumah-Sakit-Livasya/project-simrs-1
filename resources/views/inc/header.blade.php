@@ -62,6 +62,16 @@
         color: #fff;
     }
 
+    .nav-menu li a>[class*='fa-'],
+    .nav-menu li a>.ni:hover {
+        color: #ffffff !important;
+    }
+
+    .nav-menu li a>[class*='fa-'],
+    .nav-menu li a>.ni {
+        color: #97b1dc !important;
+    }
+
     .header-function-fixed:not(.nav-function-top):not(.nav-function-fixed) .page-sidebar .primary-nav {
         margin-top: 3.125rem;
     }
