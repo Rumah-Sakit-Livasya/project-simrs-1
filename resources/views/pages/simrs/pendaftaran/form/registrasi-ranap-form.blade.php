@@ -1,9 +1,10 @@
 <form action="{{ route('simpan.registrasi') }}" method="post">
+    @method('post')
     @csrf
     <input type="hidden" name="patient_id" value="{{ $patient->id }}">
     <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
     <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
-    <input type="hidden" name="registration_type" value="rawat-jalan">
+    <input type="hidden" name="registration_type" value="rawat-inap">
     <div class="row">
         <div class="col-xl-6">
             <div class="form-group">
@@ -57,8 +58,10 @@
                     </div>
                     <div class="col-xl-8">
                         <div class="input-group bg-white shadow-inset-2">
-                            <input type="text" class="form-control border-right-0 bg-transparent pr-0"
-                                placeholder="">
+                            <input id="kelas_rawat_input" name="kamar_tujuan" type="text"
+                                class="form-control border-right-0 bg-transparent pr-0" placeholder="">
+                            <input type="hidden" id="bed_id" name="bed_id">
+                            <input type="hidden" id="kelas_rawat_id_input" name="kelas_rawat_id">
                             <div class="input-group-append">
                                 <span class="input-group-text bg-transparent border-left-0">
                                     <i class="fal fa-search" style="cursor: pointer" data-toggle="modal"
@@ -75,7 +78,7 @@
             <div class="form-group">
                 <div class="row align-items-center">
                     <div class="col-xl-4 text-right">
-                        <label class="form-label" for="registration_date">
+                        <label class="form-label" for="kartu_pasien">
                             Kartu Pasien
                         </label>
                     </div>
@@ -90,7 +93,7 @@
             <div class="form-group">
                 <div class="row align-items-center">
                     <div class="col-xl-4 text-right">
-                        <label class="form-label" for="registration_date">
+                        <label class="form-label" for="prosedur_masuk">
                             Prosedur Masuk
                         </label>
                     </div>
@@ -172,51 +175,52 @@
                     </div>
                     <div class="col-xl-8">
                         <div class="form-group">
-                            <select class="form-control w-100" id="type">
+                            <select class="form-control w-100" id="type" name="titip_kelas_rawat">
                                 <option></option>
-                                <option value="WA">On Call</option>
+                                @foreach ($kelasTitipan as $item)
+                                    <option value="{{ $item->id }}">{{ $item->kelas }}</option>
+                                @endforeach
                             </select>
                             <i class="text-danger" style="font-size: 8pt;">
                                 Secara tarif kamar tetap mengikuti tarif kelas yang diinginkan
-                                pasien -> yaitu: Kelas Titipan dari
+                                pasien 11yaitu: Kelas Titipan dari
                             </i>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="registration_date">
-                            Rujukan
-                        </label>
-                    </div>
-                    <div class="col-xl-8">
-                        <div class="custom-control custom-checkbox">
-                            <div class="frame-wrap">
-                                <div class="custom-control custom-radio custom-control-inline p-0">
-                                    <input type="radio" class="custom-control-input" id="inisiatif_pribadi"
-                                        name="rujukan">
-                                    <label class="custom-control-label" for="inisiatif_pribadi">Inisiatif
-                                        Pribadi</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" id="dalam_rs"
-                                        name="rujukan">
-                                    <label class="custom-control-label" for="dalam_rs">Dalam
-                                        RS</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" id="luar_rs"
-                                        name="rujukan">
-                                    <label class="custom-control-label" for="luar_rs">Luar
-                                        RS</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" id="rujukan_bpjs"
-                                        name="rujukan">
-                                    <label class="custom-control-label" for="rujukan_bpjs">Rujukan
-                                        BPJS</label>
+                <div class="form-group">
+                    <div class="row align-items-center">
+                        <div class="col-xl-4 text-right">
+                            <label class="form-label" for="">
+                                Rujukan
+                            </label>
+                        </div>
+                        <div class="col-xl-8">
+                            <div class="custom-control custom-checkbox">
+                                <div class="frame-wrap">
+                                    <div class="custom-control custom-radio custom-control-inline p-0">
+                                        <input type="radio" class="custom-control-input" id="inisiatif_pribadi"
+                                            name="rujukan" value="inisiatif pribadi">
+                                        <label class="custom-control-label" for="inisiatif_pribadi">Inisiatif
+                                            Pribadi</label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" id="dalam_rs"
+                                            name="rujukan" value="dalam rs">
+                                        <label class="custom-control-label" for="dalam_rs">Dalam RS</label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" id="luar_rs"
+                                            name="rujukan" value="luar rs">
+                                        <label class="custom-control-label" for="luar_rs">Luar RS</label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" id="rujukan_bpjs"
+                                            name="rujukan" value="rujukan bpjs">
+                                        <label class="custom-control-label" for="rujukan_bpjs">Rujukan BPJS</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -233,7 +237,7 @@
                         </label>
                     </div>
                     <div class="col-xl-10">
-                        <textarea class="form-control" id="diagnosa-awal" name="diagnosa-awal" rows="5"></textarea>
+                        <textarea class="form-control" id="diagnosa-awal" name="diagnosa_awal" rows="5"></textarea>
                         @error('diagnosa-awal')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -294,6 +298,23 @@
                                 </form>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <table id="bed-table" style="width: 100%;" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ruangan</th>
+                                    <th>T. Tidur</th>
+                                    <th>Pasien</th>
+                                    <th>Fungsi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

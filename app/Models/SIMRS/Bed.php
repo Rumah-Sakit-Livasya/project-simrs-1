@@ -17,4 +17,9 @@ class Bed extends Model
     {
         return $this->belongsTo(Room::class, 'room_id', 'id');
     }
+
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
 }

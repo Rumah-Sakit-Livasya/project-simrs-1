@@ -81,20 +81,20 @@
         }
 
         /* .box-menu li {
-                    padding: 20px 30px;
-                    margin: 20px;
-                    width: 200px;
-                    background: #f2f0f5;
-                    text-align: center;
-                    cursor: pointer;
-                    border: 1px solid #e5e5e5;
-                    border-radius: 8px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
-                } */
+                                                                                                                                        padding: 20px 30px;
+                                                                                                                                        margin: 20px;
+                                                                                                                                        width: 200px;
+                                                                                                                                        background: #f2f0f5;
+                                                                                                                                        text-align: center;
+                                                                                                                                        cursor: pointer;
+                                                                                                                                        border: 1px solid #e5e5e5;
+                                                                                                                                        border-radius: 8px;
+                                                                                                                                        display: flex;
+                                                                                                                                        align-items: center;
+                                                                                                                                        justify-content: center;
+                                                                                                                                        flex-direction: column;
+                                                                                                                                        box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
+                                                                                                                                    } */
 
         .box-menu .circle-menu {
             height: 50px;
@@ -524,8 +524,63 @@
 @section('plugin')
     <!-- JavaScript untuk menampilkan pop-up Edit -->
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            var bedTable = $('#bed-table').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: '{{ route('beds.getData') }}',
+                    data: function(d) {
+                        d.kelas_rawat_id = $('#kelas_rawat_id').val();
+                    }
+                },
+                columns: [{
+                        data: 'ruangan',
+                        name: 'ruangan'
+                    },
+                    {
+                        data: 'nama_tt',
+                        name: 'beds.nama_tt'
+                    },
+                    {
+                        data: 'pasien',
+                        name: 'pasien',
+                        orderable: false
+                    },
+                    {
+                        data: 'fungsi',
+                        name: 'fungsi',
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
+                deferLoading: 0 // Prevent initial automatic data loading
+            });
+
+            // Optional: Reload table data when `kelas_rawat_id` is changed
+            $('#kelas_rawat_id').on('change', function() {
+                bedTable.ajax.reload();
+            });
+
+            // Optional: Reload table data when a search button is clicked
+            $('#search-button').on('click', function() {
+                bedTable.ajax.reload();
+            });
+
+            $('#bed-table').on('click', '.pilih-bed', function() {
+                var kelasId = $(this).data('kelas-id');
+                var bedId = $(this).data('bed-id');
+                var roomInfo = $(this).data('room-info');
+
+                $('#kelas_rawat_id_input').val(kelasId);
+                $('#bed_id').val(bedId);
+                $('#kelas_rawat_input').val(roomInfo);
+
+                $('#kelas-rawat-form').modal('hide');
+            });
+
             // poliklinik sesuai dokter yang dipilih
             $('#doctor_id').change(function() {
                 var selectedDoctor = $(this).find('option:selected');

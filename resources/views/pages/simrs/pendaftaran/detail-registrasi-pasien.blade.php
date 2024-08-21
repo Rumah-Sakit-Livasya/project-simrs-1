@@ -11,7 +11,9 @@
         } elseif ($registration->registration_type == 'igd') {
             $unitLayanan = 'UGD';
         } elseif ($registration->registration_type == 'odc') {
-            $unitLayanan = 'One Day Care';
+            $unitLayanan = 'ONE DAY CARE';
+        } elseif ($registration->registration_type == 'rawat-inap') {
+            $unitLayanan = 'RAWAT INAP';
         }
     @endphp
     <main id="js-page-content" role="main" class="page-content">
@@ -239,7 +241,7 @@
                                                 <label for="s_tgl_1" class="col-md-4 control-label">Unit Layanan</label>
                                                 <div class="col-md-8">
                                                     <input class="form-control" type="text"
-                                                        value="{{ $registration->departement->name }}"
+                                                        value="{{ $registration->registration_type === 'rawat-inap' ? 'RAWAT INAP' : $registration->departement->name }}"
                                                         readonly="readonly">
                                                 </div>
                                                 <div class="ml-5 mt-2">
@@ -300,7 +302,7 @@
                                             <div class="row">
                                                 <label for="s_tgl_1" class="col-md-4 control-label">Ruangan - Bed</label>
                                                 <div class="col-md-8">
-                                                    <input class="form-control" type="text" value=" - "
+                                                    <input class="form-control" type="text" value="  - "
                                                         readonly="readonly">
                                                 </div>
                                             </div>

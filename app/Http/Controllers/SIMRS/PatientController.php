@@ -75,6 +75,10 @@ class PatientController extends Controller
 
     public function detail_patient(Patient $patient)
     {
+        $lastRegis = $patient->registration->last();
+        if ($lastRegis->status === 'online') {
+            return redirect("/daftar-registrasi-pasien/" . $lastRegis->id);
+        }
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
         return view('pages.simrs.pendaftaran.detail-pasien', [
@@ -85,8 +89,6 @@ class PatientController extends Controller
 
     public function simpan_pendaftaran_pasien(Request $request)
     {
-        // return $request;
-        // return $request['penjamin_id'] !== '3';
         $validatedData = $request->validate([
             'name' => 'required|max:255',
             'nickname' => 'max:255',

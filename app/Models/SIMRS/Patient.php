@@ -26,4 +26,9 @@ class Patient extends Model
     {
         return $this->hasMany(Registration::class);
     }
+
+    public function bed()
+    {
+        return $this->hasOne(Bed::class);
+    }
 }

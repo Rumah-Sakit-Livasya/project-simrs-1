@@ -18,7 +18,7 @@
                     <div class="panel-container show">
                         <div class="panel-content">
 
-                            <form action="/daftar-rekam-medis" method="get">
+                            <form action="/daftar-registrasi-pasien" method="get">
                                 @csrf
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
@@ -32,7 +32,8 @@
                                                         <div class="col-xl ">
                                                             <input type="text" class="form-control" id="datepicker-1"
                                                                 style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                                placeholder="Select date" value="01/01/2018 - 01/15/2018">
+                                                                placeholder="Select date" name="registration_date"
+                                                                value="01/01/2018 - 01/15/2018">
                                                         </div>
                                                     </div>
                                                     @error('registration_date')
@@ -71,11 +72,10 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ request('registration_name') }}"
+                                                    <input type="text" value="{{ request('name') }}"
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="registration_name"
-                                                        name="registration_name">
-                                                    @error('registration_name')
+                                                        class="form-control" id="name" name="name">
+                                                    @error('name')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
@@ -95,8 +95,8 @@
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
                                                         name="registration_type">
                                                         <option value=""></option>
-                                                        <option value="Rawat Inap">Rawat Inap</option>
-                                                        <option value="Rawat Jalan">Rawat Jalan</option>
+                                                        <option value="rawat-inap">Rawat Inap</option>
+                                                        <option value="rawat-jalan">Rawat Jalan</option>
                                                     </select>
                                                     @error('registration_type')
                                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -128,7 +128,7 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="address">
+                                                    <label class="form-label text-end" for="family_name">
                                                         Nama Keluarga
                                                     </label>
                                                 </div>
@@ -171,19 +171,19 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="family_name">
+                                                    <label class="form-label text-end" for="departement_id">
                                                         Poly/Unit
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select class="select2 form-control w-100" id="poly"
+                                                    <select class="select2 form-control w-100" id="departement_id"
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        name="poly">
+                                                        name="departement_id">
                                                         <option value=""></option>
                                                         <option value="Rawat Inap">Rawat Inap</option>
                                                         <option value="Rawat Jalan">Rawat Jalan</option>
                                                     </select>
-                                                    @error('poly')
+                                                    @error('departement_id')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
@@ -274,7 +274,7 @@
                                                     href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->patient->address }}</a>
                                             </td>
                                             <td><a
-                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->poliklinik }}</a>
+                                                    href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration['registration_type'] == 'rawat-inap' ? 'RAWAT INAP' : $registration->poliklinik }}</a>
                                             </td>
                                             <td><a
                                                     href="{{ route('detail.registrasi.pasien', $registration->id) }}">{{ $registration->doctor->employee->fullname }}</a>
@@ -359,20 +359,33 @@
                 });
             });
 
-            // Get the current date
+            /// Get the current date and time
             var today = new Date();
-            // Format it as MM/DD/YYYY
-            var formattedToday = ('0' + (today.getMonth() + 1)).slice(-2) + '/' + ('0' + today.getDate()).slice(-
-                2) + '/' + today.getFullYear();
+
+            // Format it as "YYYY-MM-DD"
+            var formattedToday = today.getFullYear() + '-' +
+                ('0' + (today.getMonth() + 1)).slice(-2) + '-' +
+                ('0' + today.getDate()).slice(-2) + ' ' +
+                ('0' + today.getHours()).slice(-2) + ':' +
+                ('0' + today.getMinutes()).slice(-2) + ':' +
+                ('0' + today.getSeconds()).slice(-2);
+
             // Set the default date for the datepicker
             $('#datepicker-1').daterangepicker({
                 opens: 'left',
-                startDate: formattedToday,
-                endDate: formattedToday
+                startDate: moment(today).format('YYYY-MM-DD'),
+                endDate: moment(today).format('YYYY-MM-DD'),
+                // timePicker: true, // Enable time selection
+                // timePicker24Hour: true, // 24-hour format
+                // timePickerSeconds: true, // Include seconds in time selection
+                locale: {
+                    format: 'YYYY-MM-DD' // Display format for the picker
+                }
             }, function(start, end, label) {
-                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end
-                    .format('YYYY-MM-DD'));
+                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') +
+                    ' to ' + end.format('YYYY-MM-DD'));
             });
+
 
             $('#loading-spinner').show();
             // initialize datatable

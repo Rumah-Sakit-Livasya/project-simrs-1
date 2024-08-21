@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
 use App\Models\SIMRS\BatalRegister;
+use App\Models\SIMRS\Bed;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GantiDiagnosa;
@@ -20,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Yajra\DataTables\Facades\DataTables;
 
 class RegistrationController extends Controller
 {
@@ -28,12 +30,74 @@ class RegistrationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        // $patients = Patient::take(100)->orderBy('created_at', 'desc')->get();
-        $registrations = Registration::where('status', '=', 'online')
-            ->orderBy('created_at')
-            ->get();
+        $query = Registration::query()->with('patient');
+
+        // Apply filters based on form inputs
+        $regFilters = ['medical_record_number', 'status', 'departement_id', 'registration_type'];
+        $patFilters = ['name', 'address', 'date_of_birth'];
+        $filterApplied = false;
+
+        // Filter by date range
+        if ($request->filled('registration_date')) {
+            $dateRange = explode(' - ', $request->registration_date);
+            if (count($dateRange) === 2) {
+                $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
+                $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
+                $query->whereBetween('registration_date', [$startDate, $endDate]);
+                $filterApplied = true;
+            }
+        }
+
+        foreach ($regFilters as $filter) {
+            if ($request->filled($filter)) {
+                $query->where($filter, 'like', '%' . $request->$filter . '%');
+                $filterApplied = true;
+            }
+        }
+
+        $registrations = $query->orderBy('registration_date', 'asc')->get();
+        // return dd($request);
+        // return dd($registrations);
+
+        // Filter by patient's name
+        if ($request->filled('name')) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%');
+            });
+            $filterApplied = true;
+        }
+
+        // Filter by patient's address
+        if ($request->filled('address')) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('address', 'like', '%' . $request->address . '%');
+            });
+            $filterApplied = true;
+        }
+
+        // Filter by patient's date_of_birth
+        if ($request->filled('date_of_birth')) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('date_of_birth', 'like', '%' . $request->date_of_birth . '%');
+            });
+            $filterApplied = true;
+        }
+
+        // Get the filtered results if any filter is applied
+        if ($filterApplied) {
+            $registrations = $query->orderBy('registration_date', 'asc')->get();
+        } else {
+            // Return an empty collection if no filters are applied
+            $registrations = collect();
+        }
+
+
+        // // $patients = Patient::take(100)->orderBy('created_at', 'desc')->get();
+        // $registrations = Registration::where('status', '=', 'online')
+        //     ->orderBy('created_at')
+        //     ->get();
 
         return view('pages.simrs.pendaftaran.daftar-registrasi-pasien', [
             'registrations' => $registrations,
@@ -114,6 +178,7 @@ class RegistrationController extends Controller
                     'title' => "Rawat Inap",
                     'groupedDoctors' => $groupedDoctors,
                     'kelas_rawats' => $kelas_rawats,
+                    'kelasTitipan' => $kelas_rawats,
                     'penjamins' => Penjamin::all(),
                     'case' => 'rawat-inap',
                     'patient' => $patient,
@@ -194,6 +259,15 @@ class RegistrationController extends Controller
         } else if ($validatedData['registration_type'] == 'odc') {
             $departement_id = Departement::where('kode', 'ODC')->first('id')->id;
             $validatedData['departement_id'] = $departement_id;
+        } else if ($validatedData['registration_type'] == 'rawat-inap') {
+            $departement_id = Departement::where('kode', 'RAWAT INAP')->first('id')->id;
+            $validatedData['departement_id'] = $departement_id;
+        }
+
+        if ($validatedData['registration_type'] == 'rawat-inap') {
+            $bed = Bed::findOrFail($request->bed_id);
+            $bed->patient_id = $request->patient_id;
+            $bed->update();
         }
 
         // Generate No Registration
@@ -210,12 +284,6 @@ class RegistrationController extends Controller
         return redirect("/daftar-registrasi-pasien/$store->id")->with('success', 'Registrasi berhasil ditambahkan!');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Registration  $registration
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $registration = Registration::findOrFail($id);
@@ -232,7 +300,9 @@ class RegistrationController extends Controller
 
         $tipeRegis = $registration->registration_type;
         if ($tipeRegis === 'rawat-jalan' || $tipeRegis === 'igd' || $tipeRegis === 'odc') {
-            $kelasRawat = 'Rawat Jalan';
+            $kelasRawat = 'RAWAT JALAN';
+        } else {
+            $kelasRawat = 'RAWAT INAP';
         }
 
         $doctors = Doctor::with('employee', 'departement')->get();
@@ -259,12 +329,47 @@ class RegistrationController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Registration  $registration
-     * @return \Illuminate\Http\Response
-     */
+    public function getDataBed(Request $request)
+    {
+        // Check if the request contains any search parameters
+        if (!$request->kelas_rawat_id && !$request->has('search.value')) {
+            // Return an empty response if no search parameter is provided
+            return DataTables::of(collect([]))->make(true);
+        }
+
+        $query = Bed::with(['room', 'patient'])
+            ->when($request->kelas_rawat_id, function ($q) use ($request) {
+                return $q->whereHas('room', function ($q) use ($request) {
+                    $q->where('kelas_rawat_id', $request->kelas_rawat_id);
+                });
+            });
+
+        return DataTables::of($query)
+            ->addColumn('ruangan', function ($bed) {
+                return $bed->room ? $bed->room->ruangan . ' - ' . $bed->room->no_ruang : '-';
+            })
+            ->addColumn('pasien', function ($bed) {
+                return $bed->patient ? $bed->patient->name : 'Kosong';
+            })
+            ->addColumn('fungsi', function ($bed) {
+                return $bed->patient ? '<span class="text-danger">(Terisi)</span>' : '<button type="button" class="btn btn-sm btn-info pilih-bed" data-kelas-id="' . $bed->room->kelas_rawat->id . '" data-bed-id="' . $bed->id . '" data-room-info="' . $bed->room->ruangan . ' - ' . $bed->room->no_ruang . ' (' . $bed->nama_tt . ')">Pilih</button>';
+            })
+            ->rawColumns(['fungsi'])
+            ->orderColumn('ruangan', function ($query, $order) {
+                $query->join('rooms', 'beds.room_id', '=', 'rooms.id')
+                    ->orderBy('rooms.ruangan', $order);
+            })
+            ->filterColumn('ruangan', function ($query, $keyword) {
+                $query->whereHas('room', function ($q) use ($keyword) {
+                    $q->where('ruangan', 'like', "%$keyword%")
+                        ->orWhere('no_ruang', 'like', "%$keyword%");
+                });
+            })
+            ->make(true);
+    }
+
+
+
     public function edit(Registration $registration)
     {
         //
@@ -312,6 +417,15 @@ class RegistrationController extends Controller
             }
             // Find the registration record
             $registration = Registration::findOrFail($id);
+            $bed = Bed::findOrFail($registration->patient->bed->id);
+
+            // Kosongkan Bed
+            if ($registration['registration_type'] == 'rawat-inap') {
+                $bed->patient_id = null;
+                $bed->save();
+            }
+
+
 
             // Create a new BatalRegister entry
             BatalRegister::create([
@@ -398,6 +512,13 @@ class RegistrationController extends Controller
             }
             // Find the registration record
             $registration = Registration::findOrFail($id);
+            $bed = Bed::findOrFail($registration->patient->bed->id);
+
+            // Kosongkan Bed
+            if ($registration['registration_type'] == 'rawat-inap') {
+                $bed->patient_id = null;
+                $bed->save();
+            }
 
             // Create a new BatalRegister entry
             TutupKunjungan::create([
