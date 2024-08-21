@@ -62,8 +62,8 @@
         color: #fff;
     }
 
-    .nav-menu li a>[class*='fa-'],
-    .nav-menu li a>.ni:hover {
+    .nav-menu li a:hover>[class*='fa-'],
+    .nav-menu li a:hover>.ni {
         color: #ffffff !important;
     }
 
