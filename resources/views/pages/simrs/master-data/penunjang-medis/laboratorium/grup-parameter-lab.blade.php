@@ -134,7 +134,8 @@
                                     <tfoot>
                                         <tr>
                                             <th colspan="5" class="text-center">
-                                                <button type="button" class="btn-outline-primary waves-effect waves-themed"
+                                                <button type="button"
+                                                    class="btn btn-outline-primary waves-effect waves-themed"
                                                     id="btn-tambah-grup-parameter-laboratorium">
                                                     <span class="fal fa-plus-circle"></span>
                                                     Tambah Grup Laboratorium

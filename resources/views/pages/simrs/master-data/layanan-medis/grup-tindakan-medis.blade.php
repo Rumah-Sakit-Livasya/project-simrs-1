@@ -145,7 +145,8 @@
                                     <tfoot>
                                         <tr>
                                             <th colspan="6" class="text-center">
-                                                <button type="button" class="btn-outline-primary waves-effect waves-themed"
+                                                <button type="button"
+                                                    class="btn btn-outline-primary waves-effect waves-themed"
                                                     id="btn-tambah-grup-tindakan" data-toggle="modal"
                                                     data-target="#modal-tambah-grup-tindakan" data-action="tambah">
                                                     <span class="fal fa-plus-circle"></span>

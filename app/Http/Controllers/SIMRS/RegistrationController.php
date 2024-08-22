@@ -25,18 +25,12 @@ use Yajra\DataTables\Facades\DataTables;
 
 class RegistrationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
         $query = Registration::query()->with('patient');
 
         // Apply filters based on form inputs
         $regFilters = ['medical_record_number', 'status', 'departement_id', 'registration_type'];
-        $patFilters = ['name', 'address', 'date_of_birth'];
         $filterApplied = false;
 
         // Filter by date range
@@ -58,8 +52,6 @@ class RegistrationController extends Controller
         }
 
         $registrations = $query->orderBy('registration_date', 'asc')->get();
-        // return dd($request);
-        // return dd($registrations);
 
         // Filter by patient's name
         if ($request->filled('name')) {
@@ -93,24 +85,12 @@ class RegistrationController extends Controller
             $registrations = collect();
         }
 
-
-        // // $patients = Patient::take(100)->orderBy('created_at', 'desc')->get();
-        // $registrations = Registration::where('status', '=', 'online')
-        //     ->orderBy('created_at')
-        //     ->get();
-
         return view('pages.simrs.pendaftaran.daftar-registrasi-pasien', [
             'registrations' => $registrations,
-            // 'patients' => $patients,
             'departements' => Departement::orderBy('name')->get(),
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create($id, $registrasi)
     {
         $patient = Patient::where('id', $id)->first();
@@ -128,6 +108,12 @@ class RegistrationController extends Controller
         $doctorsIGD = Doctor::with('employee', 'departement')
             ->whereHas('departement', function ($query) {
                 $query->where('name', 'POLIKLINIK UMUM');
+            })
+            ->get();
+
+        $doctorsLAB = Doctor::with('employee', 'departement')
+            ->whereHas('departement', function ($query) {
+                $query->where('name', 'like', '%Laboratorium%');
             })
             ->get();
 
@@ -189,7 +175,7 @@ class RegistrationController extends Controller
             case 'laboratorium':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Laboratorium",
-                    'doctors' => Doctor::all(),
+                    'doctors' => $doctorsLAB,
                     'penjamins' => Penjamin::all(),
                     'case' => 'laboratorium',
                     'patient' => $patient,
