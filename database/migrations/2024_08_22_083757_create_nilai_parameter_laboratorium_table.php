@@ -22,11 +22,10 @@ return new class extends Migration
             $table->float('min', 8, 2);
             $table->float('max', 8, 2);
             $table->string('nilai_normal')->nullable();
-            $table->boolean('is_reaktif')->nullable();
             $table->text('keterangan')->nullable();
             $table->text('hasil')->nullable();
-            $table->float('is_kritis_kurang_dari')->nullable();
-            $table->float('is_kritis_lebih_dari')->nullable();
+            $table->float('min_kritis')->nullable();
+            $table->float('max_kritis')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
