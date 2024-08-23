@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -39,5 +40,10 @@ class KelasRawat extends Model
     public function tarif_kelas_rawat()
     {
         return $this->belongsToMany(TarifKelasRawat::class, 'tarif_kelas_rawat');
+    }
+
+    public function tarif_parameter_radiologi()
+    {
+        return $this->hasMany(TarifParameterRadiologi::class, 'kelas_rawat_id');
     }
 }

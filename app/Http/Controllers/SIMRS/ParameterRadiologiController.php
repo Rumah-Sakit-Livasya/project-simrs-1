@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\GrupParameterRadiologi;
 use App\Models\SIMRS\KategoriRadiologi;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\ParameterRadiologi;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Contracts\Support\ValidatedData;
@@ -24,7 +26,7 @@ class ParameterRadiologiController extends Controller
     {
         try {
             $parameter_radiologi = ParameterRadiologi::findOrFail($id);
-
+            $grup_penjamin = GroupPenjamin::all();
             return response()->json([
                 'grup_parameter_radiologi_id' => $parameter_radiologi->grup_parameter_radiologi_id,
                 'kategori_radiologi_id' => $parameter_radiologi->kategori_radiologi_id,
@@ -32,6 +34,7 @@ class ParameterRadiologiController extends Controller
                 'kode' => $parameter_radiologi->kode,
                 'is_reverse' => $parameter_radiologi->is_reverse,
                 'is_kontras' => $parameter_radiologi->is_kontras,
+                'grup_penjamin' => $grup_penjamin
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
@@ -43,6 +46,15 @@ class ParameterRadiologiController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function tarifParameter($id)
+    {
+        $parameter_radiologi = ParameterRadiologi::findOrFail($id);
+        $grup_penjamin = GroupPenjamin::all();
+        $kelas_rawat = KelasRawat::select('id', 'kelas')->get();
+
+        return view('pages.simrs.master-data.penunjang-medis.radiologi.tarif-parameter-radiologi', compact('parameter_radiologi', 'grup_penjamin', 'kelas_rawat'));
     }
 
     public function store(Request $request)

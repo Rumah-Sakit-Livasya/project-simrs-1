@@ -105,6 +105,7 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('/grup-parameter', [GrupParameterRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.grup-parameter');
                     Route::get('/kategori', [KategoriRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.kategori');
                     Route::get('/parameter', [ParameterRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.parameter');
+                    Route::get('/parameter/{id}/tarif', [ParameterRadiologiController::class, 'tarifParameter'])->name('master-data.penunjang-medis.radiologi.parameter.tarif');
                 });
                 Route::prefix('laboratorium')->group(function () {
                     Route::get('/grup-parameter', [GrupParameterLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.grup-parameter');
