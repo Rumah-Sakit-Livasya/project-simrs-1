@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\SIMRS\Laboratorium;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\GroupPenjamin;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Laboratorium\GrupParameterLaboratorium;
 use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
 use App\Models\SIMRS\Laboratorium\TipeLaboratorium;
@@ -43,6 +45,16 @@ class ParameterLaboratoriumController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function tarifParameter($id)
+    {
+        dd($id);
+        $parameter_laboratorium = ParameterLaboratorium::findOrFail($id);
+        $grup_penjamin = GroupPenjamin::all();
+        $kelas_rawat = KelasRawat::select('id', 'kelas')->get();
+
+        return view('pages.simrs.master-data.penunjang-medis.radiologi.tarif-parameter-lab', compact('parameter_laboratorium', 'grup_penjamin', 'kelas_rawat'));
     }
 
     public function store(Request $request)

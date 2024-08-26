@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Grup Parameter Laboratorium')
+@section('title', 'Tipe Laboratorium')
 @section('extended-css')
     <style>
         hr {
@@ -93,7 +93,7 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Kategori Laboratorium
+                            Tipe Laboratorium
                         </h2>
                     </div>
                     <div class="panel-container show">
@@ -157,7 +157,7 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            let kategoriId = null;
+            let tipeId = null;
             $('#loading-spinner').show();
 
             $('#btn-tambah-tipe-laboratorium').click(function() {
@@ -171,12 +171,12 @@
             $('.btn-edit').click(function() {
                 console.log('clicked');
                 $('#modal-edit-tipe-laboratorium').modal('show');
-                kategoriId = $(this).attr('data-id');
-                $('#modal-edit-tipe-laboratorium form').attr('data-id', kategoriId);
+                tipeId = $(this).attr('data-id');
+                $('#modal-edit-tipe-laboratorium form').attr('data-id', tipeId);
 
                 $.ajax({
                     url: '/api/simrs/master-data/penunjang-medis/laboratorium/tipe/' +
-                        kategoriId,
+                        tipeId,
                     type: 'GET',
                     success: function(response) {
                         $('#modal-edit-tipe-laboratorium input[name="nama_tipe"]')
@@ -198,7 +198,7 @@
             });
 
             $('.btn-delete').click(function() {
-                var kategoriId = $(this).attr('data-id');
+                var tipeId = $(this).attr('data-id');
 
                 // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
                 var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
@@ -207,7 +207,7 @@
                     // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
                     $.ajax({
                         url: '/api/simrs/master-data/penunjang-medis/laboratorium/tipe/' +
-                            kategoriId +
+                            tipeId +
                             '/delete',
                         type: 'DELETE',
                         success: function(response) {
@@ -231,10 +231,10 @@
                 e.preventDefault(); // Mencegah form submit secara default
 
                 var formData = $(this).serialize();
-                kategoriId = $(this).attr('data-id');
+                tipeId = $(this).attr('data-id');
                 $.ajax({
                     url: '/api/simrs/master-data/penunjang-medis/laboratorium/tipe/' +
-                        kategoriId +
+                        tipeId +
                         '/update',
                     type: 'PATCH',
                     data: formData,

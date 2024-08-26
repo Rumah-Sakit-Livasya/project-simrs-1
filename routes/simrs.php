@@ -111,6 +111,7 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('/grup-parameter', [GrupParameterLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.grup-parameter');
                     Route::get('/kategori', [KategoriLaboratorumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.kategori');
                     Route::get('/parameter', [ParameterLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.parameter');
+                    Route::get('/parameter/{id}/tarif', [ParameterLaboratoriumController::class, 'tarifParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.tarif');
                     Route::get('/nilai-parameter', [NilaiParameterLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.nilai-parameter');
                     Route::get('/tipe', [TipeLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.tipe');
                 });
