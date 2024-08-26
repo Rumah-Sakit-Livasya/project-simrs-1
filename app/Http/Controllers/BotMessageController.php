@@ -378,6 +378,7 @@ class BotMessageController extends Controller
                     $curlError = curl_error($curl);
                     curl_close($curl);
                 }
+                $responsePegawai = '';
                 $responseHRD .= "🔸 " . $employee->fullname . " (" . tgl(Carbon::parse($employee->end_status_date)->format('Y-m-d')) . ") \n";
             }
 
