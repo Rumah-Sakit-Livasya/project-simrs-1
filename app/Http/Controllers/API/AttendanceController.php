@@ -479,7 +479,7 @@ class AttendanceController extends Controller
         try {
             $perusahaanLatitude = -6.764068373562436;
             $perusahaanLongitude = 108.17782772851972;
-            $radiusPerusahaan = 0.09; // Radius dalam kilometer
+            $radiusPerusahaan = 1; // Radius dalam kilometer
             $is_clock_in = false; //cek apakah sesuai radius lokasi
             $penggunaLatitude = $request->latitude; //lokasi absen pegawai
             $penggunaLongitude = $request->longitude; //lokasi absen pegawai
