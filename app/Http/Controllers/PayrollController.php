@@ -21,7 +21,7 @@ class PayrollController extends Controller
     {
         $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
-            $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
+            $employees = Employee::where('is_active', 1)->where('company_id', auth()->user()->employee->company_id)->get();
         }
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
@@ -36,7 +36,7 @@ class PayrollController extends Controller
     {
         $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
-            $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
+            $employees = Employee::where('is_active', 1)->where('company_id', auth()->user()->employee->company_id)->get();
         }
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
@@ -51,7 +51,7 @@ class PayrollController extends Controller
     {
         $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
-            $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
+            $employees = Employee::where('is_active', 1)->where('company_id', auth()->user()->employee->company_id)->get();
         }
         $getNotify = $this->getNotify();
 
@@ -83,7 +83,7 @@ class PayrollController extends Controller
         $organizations = Organization::all();
         $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
-            $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
+            $employees = Employee::where('is_active', 1)->where('company_id', auth()->user()->employee->company_id)->get();
         }
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
@@ -111,7 +111,7 @@ class PayrollController extends Controller
         $organizations = Organization::all();
         $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
-            $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
+            $employees = Employee::where('is_active', 1)->where('company_id', auth()->user()->employee->company_id)->get();
         }
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
