@@ -89,12 +89,9 @@ class AttendanceController extends Controller
                 if (!isset($attendance)) {
                     throw new \Exception("Pegawai Belum Memiliki Shift!");
                 }
-                if (isset($attendance_kemarin)) {
-
-                    if ($attendance_kemarin->is_day_off != 1 && $attendance_kemarin->shift->time_in >= '19.00' && $attendance_kemarin->shift->time_in <= '21.00' && $attendance_kemarin->clock_in == null) {
-                        $request['late_clock_in'] = 60;
-                        $attendance_kemarin->update($request->all());
-                    }
+                if ($attendance_kemarin->is_day_off != 1 && $attendance_kemarin->shift->time_in >= '19.00' && $attendance_kemarin->shift->time_in <= '21.00' && $attendance_kemarin->clock_in == null) {
+                    $request['late_clock_in'] = 60;
+                    $attendance_kemarin->update($request->all());
                 } else {
                     $waktu_absen = $attendance->shift->time_in;
                     $perbedaanMenit = $request->clock_in->greaterThan($waktu_absen) ? Carbon::parse($waktu_absen)->seconds(0)->diffInMinutes(Carbon::parse($request->clock_in)->seconds(0)) : null;
