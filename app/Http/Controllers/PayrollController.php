@@ -19,7 +19,7 @@ class PayrollController extends Controller
 {
     public function allowancePayroll()
     {
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
             $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
         }
@@ -34,7 +34,7 @@ class PayrollController extends Controller
 
     public function deductionPayroll()
     {
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
             $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
         }
@@ -49,7 +49,7 @@ class PayrollController extends Controller
 
     public function printPayroll()
     {
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
             $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
         }
@@ -81,7 +81,7 @@ class PayrollController extends Controller
     public function payrollHistory(Request $request)
     {
         $organizations = Organization::all();
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
             $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
         }
@@ -109,7 +109,7 @@ class PayrollController extends Controller
     public function payrollCetak(Request $request)
     {
         $organizations = Organization::all();
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
             $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
         }
