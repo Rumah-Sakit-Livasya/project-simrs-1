@@ -41,7 +41,8 @@ class BotMessageController extends Controller
         $response = '';
 
         if ($msg == '/rekapabsen') {
-            $total_pegawai = Employee::where('is_active', 1)->count();
+            $total_pegawai_rs = Employee::where('is_active', 1)->where('company_id', 1)->count();
+            $total_pegawai_pt = Employee::where('is_active', 1)->where('company_id', 2)->count();
             $total_clockin = Attendance::whereNotNull('clock_in')
                 ->whereDate('date', Carbon::now()->format('Y-m-d'))
                 ->whereHas('employees', function ($query) {
@@ -89,7 +90,8 @@ class BotMessageController extends Controller
             }
 
             $response = "\n\n⬛️ <b>REKAP ABSEN HARI INI:</b>\n\n";
-            $response .= "🔹 <code>Total Pegawai: $total_pegawai </code>\n";
+            $response .= "🔹 <code>Total Pegawai RS: $total_pegawai_rs </code>\n";
+            $response .= "🔹 <code>Total Pegawai PT: $total_pegawai_pt </code>\n";
             $response .= "🔹 <code>Sudah clockin: $total_clockin </code>\n";
             $response .= "🔹 <code>Belum clockin: $total_no_clockin </code>\n";
             $response .= "🔹 <code>Pegawai libur: $total_libur </code>\n";
