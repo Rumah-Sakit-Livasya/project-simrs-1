@@ -107,7 +107,7 @@
 
                 // Route Laravel dengan menggunakan nama route
                 let url =
-                    "{{ route('master-data.penunjang-medis.radiologi.parameter.tarif.store', ['parameterId' => ':parameterId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
+                    "{{ route('master-data.penunjang-medis.laboratorium.parameter.tarif.store', ['parameterId' => ':parameterId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
                     .replace(':parameterId', parameterId)
                     .replace(':grupPenjaminId', grupPenjaminId);
 
@@ -136,7 +136,7 @@
                 let parameterId = @json($parameter_radiologi->id);
 
                 let url =
-                    "{{ route('master-data.penunjang-medis.radiologi.parameter.tarif.get', ['parameterId' => ':parameterId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
+                    "{{ route('master-data.penunjang-medis.laboratorium.parameter.tarif.get', ['parameterId' => ':parameterId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
                     .replace(':parameterId', parameterId)
                     .replace(':grupPenjaminId', grupPenjaminId);
 

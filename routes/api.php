@@ -150,6 +150,8 @@ Route::prefix('simrs')->group(function () {
                 Route::post('/parameter', [ParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.parameter.store');
                 Route::patch('/parameter/{id}/update', [ParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.parameter.update');
                 Route::delete('/parameter/{id}/delete', [ParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.parameter.delete');
+                Route::get('/parameter/{parameterId}/tarif/{grupPenjaminId}', [ParameterLaboratoriumController::class, 'getTarifParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.tarif.get');
+                Route::post('/parameter/{parameterId}/tarif/{grupPenjaminId}', [ParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.parameter.tarif.store');
 
                 Route::get('/kategori/{id}', [KategoriLaboratorumController::class, 'getKategori'])->name('master-data.penunjang-medis.laboratorium.kategori.get');
                 Route::post('/kategori', [KategoriLaboratorumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.kategori.store');
