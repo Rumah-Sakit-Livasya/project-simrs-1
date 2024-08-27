@@ -183,7 +183,7 @@
 
             $('.btn-tarif').click(function() {
                 const id_param = $(this).attr('data-id');
-                const url = `{{ route('master-data.penunjang-medis.laboratorium.tarif', ':id') }}`
+                const url = `{{ route('master-data.penunjang-medis.laboratorium.parameter.tarif', ':id') }}`
                     .replace(':id', id_param);
                 const popupWidth = 900;
                 const popupHeight = 600;
