@@ -779,6 +779,7 @@
         //     }
         // });
 
+
         $(document).ready(function() {
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
@@ -897,7 +898,7 @@
                         extend: 'excelHtml5',
                         text: 'Excel',
                         title: 'Rekap Absensi Bulan ' + new Date().toLocaleString('default', {
-                            month: 'long',
+                            month: 'long'
                         }) + ' ' + new Date().getFullYear(),
                         titleAttr: 'Export to Excel',
                         className: 'btn-outline-default',
@@ -905,7 +906,7 @@
                             columns: ':visible',
                             format: {
                                 body: function(data, row, column, node) {
-                                    // Menghapus tag HTML dari data sebelum mengekspor ke Excel
+                                    // Remove HTML tags from data before exporting to Excel
                                     return $('<div/>').html(data).text();
                                 }
                             }
@@ -913,7 +914,7 @@
                         customize: function(xlsx) {
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
                             $('row:first c', sheet).attr('style',
-                                'text-align: center;'); // Mengatur gaya untuk heading
+                                'text-align: center;'); // Set style for heading
                             $('row:nth-child(2) c', sheet).attr('s', '43');
                             $('row:nth-child(2) c', sheet).attr('class', 'style43');
                         }
@@ -939,9 +940,6 @@
                 $("#waktu-realtime").text(timeString);
             }, 1000);
 
-            startCamera();
-            initializeMap();
-
             function dataURLToFile(dataURL, filename) {
                 const [header, data] = dataURL.split(',');
                 const mime = header.match(/:(.*?);/)[1];
@@ -959,18 +957,18 @@
                 uploadButton.disabled = true;
                 toggleSpinner('upload', true);
 
-                // Reset transformasi canvas dan gambar tanpa efek mirror
+                // Reset canvas transform and mirror image
                 context.resetTransform();
-                context.save(); // Simpan state saat ini
-                context.translate(canvas.width, 0); // Pindahkan origin ke kanan
-                context.scale(-1, 1); // Terapkan skala horizontal terbalik
+                context.save(); // Save current state
+                context.translate(canvas.width, 0); // Move origin to the right
+                context.scale(-1, 1); // Apply horizontal flip
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                context.restore(); // Kembalikan state sebelumnya
+                context.restore(); // Restore previous state
 
                 const dataURL = canvas.toDataURL('image/png');
                 const file = dataURLToFile(dataURL, 'photo.png');
                 const formData = new FormData();
-                formData.append('employee_id', '{{ auth()->user()->employee->id }}');
+                formData.append('employee_id', '2');
                 formData.append('photo', file); // Use file object instead of dataURL
                 formData.append('location', `${latitude}, ${longitude}`);
                 formData.append('latitude', latitude);
@@ -981,7 +979,7 @@
 
                 try {
                     const response = await fetch(apiUrl, {
-                        method: 'POST', // Update method to PUT if required
+                        method: 'POST',
                         body: formData
                     });
 
@@ -1000,137 +998,130 @@
                     }
                 } catch (error) {
                     $('#picture-modal').modal('hide');
-                    showErrorAlert(error.error);
+                    showErrorAlert(error.message);
                 } finally {
                     toggleSpinner('upload', false);
                     uploadButton.disabled = false;
                 }
             });
 
-        });
+            async function fetchAttendanceDetails(employeeId, tanggal) {
+                const url = '/api/dashboard/attendances/detail';
+                const data = {
+                    employee_id: employeeId,
+                    tanggal: tanggal
+                };
 
-        async function fetchAttendanceDetails(employeeId, tanggal) {
-            const url = '/api/dashboard/attendances/detail';
-            const data = {
-                employee_id: employeeId,
-                tanggal: tanggal
-            };
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content')
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                return result;
-            } catch (error) {
-                console.error('Error fetching attendance details:', error);
-                showErrorAlert(error.message);
-                throw error;
-            }
-        }
-
-        $('.detail-absensi').click(async function(e) {
-            e.preventDefault();
-            employeeId = $(this).attr('data-employee-id');
-            tanggal = $(this).attr('data-tanggal');
-            modal = $('#detail-absensi-modal');
-            modalBody = modal.find('.modal-body');
-
-            try {
-                const result = await fetchAttendanceDetails(employeeId, tanggal);
-
-                if (result.success) {
-                    const attendance = result.data;
-                    $('#tanggal-detail-absensi').text(tanggal);
-                    // Show modal
-                    modal.modal('show');
-
-                    // Render map after modal is shown
-                    modal.on('shown.bs.modal', function() {
-                        if (attendance.location) {
-                            const [lat, long] = attendance.location.split(',');
-                            latitude = lat;
-                            longitude = long;
-
-                            // Clear the modal body before appending new content
-                            modalBody.html('');
-
-                            // Create wrapper for the map
-                            const mapWrapper = document.createElement('div');
-                            mapWrapper.id = 'map-wrapper';
-                            mapWrapper.style.position = 'relative';
-                            mapWrapper.style.height = '300px';
-                            mapWrapper.style.marginBottom = '20px';
-                            mapWrapper.style.width = '100%';
-
-                            // Create map element and append it to the wrapper
-                            const mapElement = document.createElement('div');
-                            mapElement.id = 'map-detail-absensi';
-                            mapElement.style.height = '100%';
-                            mapElement.style.width = '100%';
-                            mapWrapper.append(mapElement);
-
-                            // Append map wrapper to modal body
-                            modalBody.append(mapWrapper);
-
-                            // Initialize map with placeholder coordinates
-                            const map = L.map(mapElement).setView([0, 0], 13);
-                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            }).addTo(map);
-
-                            // Set view to actual coordinates after the map is added to the DOM
-                            map.setView([latitude, longitude], 17);
-                            L.marker([latitude, longitude]).addTo(map)
-                                .bindPopup('Lokasi Absen')
-                                .openPopup();
-                        }
-
-                        // Render images if available
-                        if (attendance.foto_clock_in || attendance.foto_clock_out) {
-                            const gambarDetail = document.createElement('div');
-                            gambarDetail.id = 'gambar-detail-absensi';
-                            gambarDetail.style.display = 'flex'; // Use flexbox to position images
-                            gambarDetail.style.justifyContent = 'space-between'; // Space images evenly
-                            gambarDetail.style.width = '100%'; // Ensure the container takes full width
-                            modalBody.append(gambarDetail);
-
-                            if (attendance.foto_clock_in) {
-                                const imgClockIn = document.createElement('img');
-                                imgClockIn.src = `/storage/${attendance.foto_clock_in}`;
-                                imgClockIn.alt = 'Foto Clock In';
-                                imgClockIn.className = 'img-clock'; // Use a common class for styling
-                                gambarDetail.append(imgClockIn);
-                            }
-
-                            if (attendance.foto_clock_out) {
-                                const imgClockOut = document.createElement('img');
-                                imgClockOut.src = `/storage/${attendance.foto_clock_out}`;
-                                imgClockOut.alt = 'Foto Clock Out';
-                                imgClockOut.className = 'img-clock'; // Use a common class for styling
-                                gambarDetail.append(imgClockOut);
-                            }
-                        }
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content')
+                        },
+                        body: JSON.stringify(data)
                     });
 
-                } else {
-                    alert(result.message);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    return result;
+                } catch (error) {
+                    console.error('Error fetching attendance details:', error);
+                    showErrorAlert(error.message);
+                    throw error;
                 }
-            } catch (error) {
-                console.error('Error handling detail-absensi click:', error.message);
-                alert('Terjadi kesalahan saat mengambil data absensi.');
             }
+
+            $('.detail-absensi').click(async function(e) {
+                e.preventDefault();
+                employeeId = $(this).attr('data-employee-id');
+                tanggal = $(this).attr('data-tanggal');
+                modal = $('#detail-absensi-modal');
+                modalBody = modal.find('.modal-body');
+
+                try {
+                    const result = await fetchAttendanceDetails(employeeId, tanggal);
+
+                    if (result.success) {
+                        const attendance = result.data;
+                        $('#tanggal-detail-absensi').text(tanggal);
+                        modal.modal('show');
+
+                        modal.on('shown.bs.modal', function() {
+                            if (attendance.location) {
+                                const [lat, long] = attendance.location.split(',');
+                                latitude = lat;
+                                longitude = long;
+
+                                modalBody.html('');
+
+                                const mapWrapper = document.createElement('div');
+                                mapWrapper.id = 'map-wrapper';
+                                mapWrapper.style.position = 'relative';
+                                mapWrapper.style.height = '300px';
+                                mapWrapper.style.marginBottom = '20px';
+                                mapWrapper.style.width = '100%';
+
+                                const mapElement = document.createElement('div');
+                                mapElement.id = 'map-detail-absensi';
+                                mapElement.style.height = '100%';
+                                mapElement.style.width = '100%';
+                                mapWrapper.append(mapElement);
+
+                                modalBody.append(mapWrapper);
+
+                                const map = L.map(mapElement).setView([0, 0], 13);
+                                L.tileLayer(
+                                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                    }).addTo(map);
+
+                                map.setView([latitude, longitude], 17);
+                                L.marker([latitude, longitude]).addTo(map)
+                                    .bindPopup('Lokasi Absen')
+                                    .openPopup();
+                            }
+
+                            if (attendance.foto_clock_in || attendance.foto_clock_out) {
+                                const gambarDetail = document.createElement('div');
+                                gambarDetail.id = 'gambar-detail-absensi';
+                                gambarDetail.style.display = 'flex';
+                                gambarDetail.style.justifyContent = 'space-between';
+                                gambarDetail.style.width = '100%';
+                                modalBody.append(gambarDetail);
+
+                                if (attendance.foto_clock_in) {
+                                    const imgClockIn = document.createElement('img');
+                                    imgClockIn.src = `/storage/${attendance.foto_clock_in}`;
+                                    imgClockIn.alt = 'Foto Clock In';
+                                    imgClockIn.className = 'img-clock';
+                                    gambarDetail.append(imgClockIn);
+                                }
+
+                                if (attendance.foto_clock_out) {
+                                    const imgClockOut = document.createElement('img');
+                                    imgClockOut.src = `/storage/${attendance.foto_clock_out}`;
+                                    imgClockOut.alt = 'Foto Clock Out';
+                                    imgClockOut.className = 'img-clock';
+                                    gambarDetail.append(imgClockOut);
+                                }
+                            }
+                        });
+
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (error) {
+                    console.error('Error handling detail-absensi click:', error.message);
+                    alert('Terjadi kesalahan saat mengambil data absensi.');
+                }
+            });
+            startCamera();
+            initializeMap();
         });
     </script>
 @endsection
