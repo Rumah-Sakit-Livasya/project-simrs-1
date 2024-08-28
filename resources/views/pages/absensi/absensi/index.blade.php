@@ -970,7 +970,7 @@
                 const dataURL = canvas.toDataURL('image/png');
                 const file = dataURLToFile(dataURL, 'photo.png');
                 const formData = new FormData();
-                formData.append('employee_id', '2');
+                formData.append('employee_id', {{ 'auth()->user()->employee_id' }});
                 formData.append('photo', file); // Use file object instead of dataURL
                 formData.append('location', `${latitude}, ${longitude}`);
                 formData.append('latitude', latitude);
