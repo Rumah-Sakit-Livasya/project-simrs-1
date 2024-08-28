@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\SIMRS\Peralatan;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\GroupPenjamin;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Peralatan\Peralatan;
+use App\Models\SIMRS\Peralatan\TarifPeralatan;
 use Illuminate\Http\Request;
 
 class PeralatanController extends Controller
@@ -83,5 +86,54 @@ class PeralatanController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function storeTarif(Request $request, $peralatanId, $grupPenjaminId)
+    {
+        // Ambil semua input share_dr, share_rs, dan total dari request
+        $shareDrs = $request->input('share_dr');
+        $shareRss = $request->input('share_rs');
+        $totals = $request->input('total');
+
+        // Validasi input (jika diperlukan)
+        $request->validate([
+            'share_dr.*' => 'numeric',
+            'share_rs.*' => 'numeric',
+            'total.*' => 'numeric',
+        ]);
+
+        // Loop melalui setiap item di share_dr untuk memperbarui atau menyimpan data
+        foreach ($shareDrs as $id => $shareDr) {
+            // Temukan atau buat record baru
+            TarifPeralatan::updateOrCreate(
+                [
+                    'kelas_rawat_id' => $id,
+                    'group_penjamin_id' => $grupPenjaminId,
+                    'peralatan_id' => $peralatanId,
+                ],
+                [
+                    'share_dr' => $shareDr,
+                    'share_rs' => $shareRss[$id] ?? 0,
+                    'total' => $totals[$id] ?? 0,
+                ]
+            );
+        }
+
+        return response()->json(['message' => 'Data berhasil diperbarui!']);
+    }
+
+    public function getTarifPeralatan(Request $request, $peralatanId, $grupPenjaminId)
+    {
+        $tarif_parameter = TarifPeralatan::where('peralatan_id', $peralatanId)->where('group_penjamin_id', $grupPenjaminId)->get();
+        return response()->json(['data' => $tarif_parameter]);
+    }
+
+    public function tarifPeralatan($id)
+    {
+        $peralatan = Peralatan::findOrFail($id);
+        $grup_penjamin = GroupPenjamin::all();
+        $kelas_rawat = KelasRawat::select('id', 'kelas')->get();
+
+        return view('pages.simrs.master-data.peralatan.tarif-peralatan', compact('peralatan', 'grup_penjamin', 'kelas_rawat'));
     }
 }

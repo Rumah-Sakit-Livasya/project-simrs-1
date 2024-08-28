@@ -173,6 +173,9 @@ Route::prefix('simrs')->group(function () {
             Route::get('/{id}', [PeralatanController::class, 'getPeralatan'])->name('master-data.peralatan.get');
             Route::patch('/{id}/update', [PeralatanController::class, 'update'])->name('master-data.peralatan.update');
             Route::delete('/{id}/delete', [PeralatanController::class, 'delete'])->name('master-data.peralatan.delete');
+
+            Route::get('/{peralatanId}/tarif/{grupPenjaminId}', [PeralatanController::class, 'getTarifPeralatan'])->name('master-data.peralatan.tarif.get');
+            Route::post('/{peralatanId}/tarif/{grupPenjaminId}', [PeralatanController::class, 'storeTarif'])->name('master-data.peralatan.tarif.store');
         });
     });
 });

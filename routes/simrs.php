@@ -120,7 +120,10 @@ Route::group(['middleware' => ['auth']], function () {
                 });
             });
 
-            Route::get('/peralatan', [PeralatanController::class, 'index'])->name('master-data.peralatan');
+            Route::prefix('peralatan')->group(function () {
+                Route::get('/', [PeralatanController::class, 'index'])->name('master-data.peralatan');
+                Route::get('{id}/tarif', [PeralatanController::class, 'tarifPeralatan'])->name('master-data.peralatan.tarif');
+            });
         });
     });
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');

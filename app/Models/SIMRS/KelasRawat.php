@@ -3,6 +3,7 @@
 namespace App\Models\SIMRS;
 
 use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
+use App\Models\SIMRS\Peralatan\TarifPeralatan;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -51,5 +52,10 @@ class KelasRawat extends Model
     public function tarif_parameter_laboratorium()
     {
         return $this->hasMany(TarifParameterLaboratorium::class, 'kelas_rawat_id');
+    }
+
+    public function tarif_peralatan()
+    {
+        return $this->hasMany(TarifPeralatan::class, 'kelas_rawat_id');
     }
 }
