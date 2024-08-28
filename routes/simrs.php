@@ -10,11 +10,13 @@ use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
+use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\NilaiParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
+use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Models\SIMRS\GrupTindakanMedis;
 use App\Models\SIMRS\TindakanMedis;
@@ -100,6 +102,7 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');
                 Route::get('/grup-tindakan-medis', [GrupTindakanMedisController::class, 'index'])->name('master-data.layanan-medis.grup-tindakan-medis');
             });
+
             Route::prefix('penunjang-medis')->group(function () {
                 Route::prefix('radiologi')->group(function () {
                     Route::get('/grup-parameter', [GrupParameterRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.grup-parameter');
@@ -112,10 +115,12 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('/kategori', [KategoriLaboratorumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.kategori');
                     Route::get('/parameter', [ParameterLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.parameter');
                     Route::get('/parameter/{id}/tarif', [ParameterLaboratoriumController::class, 'tarifParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.tarif');
-                    Route::get('/nilai-parameter', [NilaiParameterLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.nilai-parameter');
+                    Route::get('/nilai-normal', [NilaiNormalLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.nilai-parameter');
                     Route::get('/tipe', [TipeLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.tipe');
                 });
             });
+
+            Route::get('/peralatan', [PeralatanController::class, 'index'])->name('master-data.peralatan');
         });
     });
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');

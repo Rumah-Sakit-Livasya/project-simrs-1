@@ -35,8 +35,11 @@ use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
+use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
+use App\Http\Controllers\SIMRS\Laboratorium\NilaiParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TarifParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
+use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
@@ -160,7 +163,16 @@ Route::prefix('simrs')->group(function () {
                 Route::post('/tipe', [TipeLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.tipe.store');
                 Route::patch('/tipe/{id}/update', [TipeLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.tipe.update');
                 Route::delete('/tipe/{id}/delete', [TipeLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.tipe.delete');
+
+                Route::get('/nilai-normal/{parameterId}/get', [NilaiNormalLaboratoriumController::class, 'getNilaiParameter'])->name('master-data.penunjang-medis.laboratorium.nilai-normal');
             });
+        });
+
+        Route::prefix('peralatan')->group(function () {
+            Route::post('/', [PeralatanController::class, 'store'])->name('master-data.peralatan.store');
+            Route::get('/{id}', [PeralatanController::class, 'getPeralatan'])->name('master-data.peralatan.get');
+            Route::patch('/{id}/update', [PeralatanController::class, 'update'])->name('master-data.peralatan.update');
+            Route::delete('/{id}/delete', [PeralatanController::class, 'delete'])->name('master-data.peralatan.delete');
         });
     });
 });
