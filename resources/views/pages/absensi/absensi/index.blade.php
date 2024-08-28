@@ -778,109 +778,112 @@
         //         }
         //     }
         // });
+
         $(document).ready(function() {
-            const video = $('#video')[0];
-            const canvas = $('#canvas')[0];
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
             const context = canvas.getContext('2d');
-            const uploadButton = $('#upload');
+            const uploadButton = document.getElementById('upload');
             let latitude = null;
             let longitude = null;
-            let actionType = null; // Akan menjadi 'clock_in' atau 'clock_out'
+            let actionType = null; // Will be either 'clock_in' or 'clock_out'
             let employeeId = null;
             let tanggal = null;
             let modal = null;
             let modalBody = null;
 
-            startCamera();
-            initializeMap();
-
             function toggleSpinner(buttonId, show) {
-                const button = $('#' + buttonId);
-                const spinner = button.find('.spinner-border');
+                const button = document.getElementById(buttonId);
+                const spinner = button.querySelector('.spinner-border');
                 if (show) {
-                    spinner.show();
+                    spinner.style.display = 'inline-block';
                 } else {
-                    spinner.hide();
+                    spinner.style.display = 'none';
                 }
             }
 
-            function startCamera() {
-                const constraints = {
-                    video: {
-                        facingMode: 'user', // Gunakan 'environment' untuk kamera belakang
-                        width: {
-                            ideal: 640
-                        },
-                        height: {
-                            ideal: 720
-                        },
-                        playsinline: true // Pastikan playsinline true
-                    }
-                };
+            // async function startCamera() {
+            //     try {
+            //         const constraints = {
+            //             video: {
+            //                 facingMode: 'user', // Use 'environment' for rear camera
+            //                 width: {
+            //                     ideal: 640
+            //                 },
+            //                 height: {
+            //                     ideal: 720
+            //                 },
+            //                 playsinline: true // Ensure playsinline is true
+            //             }
+            //         };
+            //         const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            //         video.srcObject = stream;
+            //         video.setAttribute('playsinline', true); // Set playsinline attribute
 
-                navigator.mediaDevices.getUserMedia(constraints)
-                    .then(function(stream) {
-                        video.srcObject = stream;
-                        video.setAttribute('playsinline', true);
-
-                        video.addEventListener('loadedmetadata', function() {
-                            adjustCanvasSize();
-                        });
-                    })
-                    .catch(function(error) {
-                        console.error('Error accessing the camera:', error);
-                        alert('Error accessing the camera: ' + error.message);
-                    });
-            }
+            //         // Set canvas size when video metadata is loaded
+            //         video.addEventListener('loadedmetadata', () => {
+            //             adjustCanvasSize();
+            //         });
+            //     } catch (error) {
+            //         console.error('Error accessing the camera:', error);
+            //         alert('Error accessing the camera: ' + error.message);
+            //     }
+            // }
 
             function adjustCanvasSize() {
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
             }
 
-            function getLocation() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        latitude = position.coords.latitude;
-                        longitude = position.coords.longitude;
-                        setMapPosition(latitude, longitude, position.coords.accuracy);
-                    }, function(error) {
-                        console.error("Geolocation failed: " + error.message);
-                    });
-                } else {
-                    console.error("Geolocation is not supported by this browser.");
+            async function getLocation() {
+                return new Promise((resolve, reject) => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(position => {
+                            latitude = position.coords.latitude;
+                            longitude = position.coords.longitude;
+                            resolve(position);
+                        }, error => {
+                            console.error("Geolocation failed: " + error.message);
+                            reject(error);
+                        });
+                    } else {
+                        console.error("Geolocation is not supported by this browser.");
+                        reject(new Error("Geolocation not supported"));
+                    }
+                });
+            }
+
+            async function initializeMap() {
+                var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                try {
+                    const position = await getLocation();
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    map.setView([lat, lng], 17); // Zoom level set to 17 for closer view
+
+                    L.marker([lat, lng]).addTo(map)
+                        .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
+                        .openPopup();
+                } catch (error) {
+                    console.error("Error initializing map: ", error);
                 }
-            }
-
-            function initializeMap() {
-                var map = L.map('map').setView([0, 0], 13); // Koordinat placeholder awal
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
-
-                getLocation();
-            }
-
-            function setMapPosition(lat, lng, accuracy) {
-                var map = L.map('map').setView([lat, lng], 17);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
-
-                L.marker([lat, lng]).addTo(map)
-                    .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
-                    .openPopup();
             }
 
             $('#clock_in').on('click', function(e) {
                 e.preventDefault();
-                actionType = 'clock_in';
+                actionType = 'clock_in'; // Set flag for Clock In
                 $('#picture-modal').modal('show');
             });
 
             $('#clock_out').on('click', function(e) {
                 e.preventDefault();
-                actionType = 'clock_out';
+                actionType = 'clock_out'; // Set flag for Clock Out
                 $('#picture-modal').modal('show');
             });
 
@@ -902,14 +905,17 @@
                             columns: ':visible',
                             format: {
                                 body: function(data, row, column, node) {
+                                    // Remove HTML tags from data before exporting to Excel
                                     return $('<div/>').html(data).text();
                                 }
                             }
                         },
                         customize: function(xlsx) {
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                            $('row:first c', sheet).attr('style', 'text-align: center;');
+                            $('row:first c', sheet).attr('style',
+                                'text-align: center;'); // Set style for heading
                             $('row:nth-child(2) c', sheet).attr('s', '43');
+                            $('row:nth-child(2) c', sheet).attr('class', 'style43');
                         }
                     },
                     {
@@ -933,6 +939,9 @@
                 $("#waktu-realtime").text(timeString);
             }, 1000);
 
+            // startCamera();
+            initializeMap();
+
             function dataURLToFile(dataURL, filename) {
                 const [header, data] = dataURL.split(',');
                 const mime = header.match(/:(.*?);/)[1];
@@ -946,22 +955,23 @@
                 });
             }
 
-            uploadButton.on('click', function() {
-                uploadButton.prop('disabled', true);
+            uploadButton.addEventListener('click', async () => {
+                uploadButton.disabled = true;
                 toggleSpinner('upload', true);
 
+                // Reset canvas transform and mirror image
                 context.resetTransform();
-                context.save();
-                context.translate(canvas.width, 0);
-                context.scale(-1, 1);
+                context.save(); // Save current state
+                context.translate(canvas.width, 0); // Move origin to the right
+                context.scale(-1, 1); // Apply horizontal flip
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                context.restore();
+                context.restore(); // Restore previous state
 
                 const dataURL = canvas.toDataURL('image/png');
                 const file = dataURLToFile(dataURL, 'photo.png');
                 const formData = new FormData();
                 formData.append('employee_id', '2');
-                formData.append('photo', file);
+                formData.append('photo', file); // Use file object instead of dataURL
                 formData.append('location', `${latitude}, ${longitude}`);
                 formData.append('latitude', latitude);
                 formData.append('longitude', longitude);
@@ -969,129 +979,149 @@
                 const apiUrl = actionType === 'clock_in' ? '/api/dashboard/clock-in' :
                     '/api/dashboard/clock-out';
 
-                $.ajax({
-                    url: apiUrl,
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function(result) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        console.log('Success:', result);
                         $('#picture-modal').modal('hide');
                         showSuccessAlert(result.message);
-                        setTimeout(function() {
+                        setTimeout(() => {
+                            console.log('Reloading the page now.');
                             window.location.reload();
                         }, 1000);
-                    },
-                    error: function(xhr) {
+                    } else {
                         $('#picture-modal').modal('hide');
-                        const response = JSON.parse(xhr.responseText);
-                        showErrorAlert(response.error || 'Terjadi kesalahan.');
-                    },
-                    complete: function() {
-                        toggleSpinner('upload', false);
-                        uploadButton.prop('disabled', false);
+                        showErrorAlert(result.error);
                     }
-                });
+                } catch (error) {
+                    $('#picture-modal').modal('hide');
+                    showErrorAlert(error.message);
+                } finally {
+                    toggleSpinner('upload', false);
+                    uploadButton.disabled = false;
+                }
             });
 
-            $('.detail-absensi').click(function(e) {
-                e.preventDefault();
-                employeeId = $(this).data('employee-id');
-                tanggal = $(this).data('tanggal');
-                modal = $('#detail-absensi-modal');
-                modalBody = modal.find('.modal-body');
-
-                fetchAttendanceDetails(employeeId, tanggal);
-            });
-
-            function fetchAttendanceDetails(employeeId, tanggal) {
+            async function fetchAttendanceDetails(employeeId, tanggal) {
                 const url = '/api/dashboard/attendances/detail';
                 const data = {
                     employee_id: employeeId,
                     tanggal: tanggal
                 };
 
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    contentType: 'application/json',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    data: JSON.stringify(data),
-                    success: function(result) {
-                        if (result.success) {
-                            const attendance = result.data;
-                            $('#tanggal-detail-absensi').text(tanggal);
-                            modal.modal('show');
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content')
+                        },
+                        body: JSON.stringify(data)
+                    });
 
-                            modal.on('shown.bs.modal', function() {
-                                renderAttendanceDetails(attendance);
-                            });
-                        } else {
-                            alert(result.message);
-                        }
-                    },
-                    error: function(xhr) {
-                        alert('Terjadi kesalahan saat mengambil data absensi.');
-                        console.error(xhr.responseText);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                });
-            }
 
-            function renderAttendanceDetails(attendance) {
-                if (attendance.location) {
-                    const [lat, long] = attendance.location.split(',');
-                    latitude = lat;
-                    longitude = long;
-
-                    modalBody.html('');
-
-                    const mapWrapper = $('<div>', {
-                            id: 'map-wrapper'
-                        })
-                        .css({
-                            position: 'relative',
-                            height: '300px',
-                            marginBottom: '20px',
-                            width: '100%'
-                        });
-
-                    const mapElement = $('<div>', {
-                            id: 'map-detail-absensi'
-                        })
-                        .css({
-                            height: '100%',
-                            width: '100%'
-                        });
-
-                    mapWrapper.append(mapElement);
-                    modalBody.append(mapWrapper);
-
-                    const map = L.map(mapElement[0]).setView([latitude, longitude], 17);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(map);
-                    L.marker([latitude, longitude]).addTo(map);
-
-                    const imgClockIn = $('<img>', {
-                        src: attendance.img_clock_in,
-                        class: 'img-fluid img-clock-in'
-                    });
-                    const imgClockOut = $('<img>', {
-                        src: attendance.img_clock_out,
-                        class: 'img-fluid img-clock-out'
-                    });
-
-                    const imgContainer = $('<div>', {
-                        class: 'd-flex justify-content-between'
-                    });
-                    imgContainer.append(imgClockIn, imgClockOut);
-                    modalBody.append(imgContainer);
-                } else {
-                    modalBody.html('<p>Lokasi tidak ada saat clock in</p>');
+                    const result = await response.json();
+                    return result;
+                } catch (error) {
+                    console.error('Error fetching attendance details:', error);
+                    showErrorAlert(error.message);
+                    throw error;
                 }
             }
+
+            $('.detail-absensi').click(async function(e) {
+                e.preventDefault();
+                employeeId = $(this).attr('data-employee-id');
+                tanggal = $(this).attr('data-tanggal');
+                modal = $('#detail-absensi-modal');
+                modalBody = modal.find('.modal-body');
+
+                try {
+                    const result = await fetchAttendanceDetails(employeeId, tanggal);
+
+                    if (result.success) {
+                        const attendance = result.data;
+                        $('#tanggal-detail-absensi').text(tanggal);
+                        modal.modal('show');
+
+                        modal.on('shown.bs.modal', function() {
+                            if (attendance.location) {
+                                const [lat, long] = attendance.location.split(',');
+                                latitude = lat;
+                                longitude = long;
+
+                                modalBody.html('');
+
+                                const mapWrapper = document.createElement('div');
+                                mapWrapper.id = 'map-wrapper';
+                                mapWrapper.style.position = 'relative';
+                                mapWrapper.style.height = '300px';
+                                mapWrapper.style.marginBottom = '20px';
+                                mapWrapper.style.width = '100%';
+
+                                const mapElement = document.createElement('div');
+                                mapElement.id = 'map-detail-absensi';
+                                mapElement.style.height = '100%';
+                                mapElement.style.width = '100%';
+                                mapWrapper.append(mapElement);
+
+                                modalBody.append(mapWrapper);
+
+                                const map = L.map(mapElement).setView([0, 0], 13);
+                                L.tileLayer(
+                                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                    }).addTo(map);
+
+                                map.setView([latitude, longitude], 17);
+                                L.marker([latitude, longitude]).addTo(map)
+                                    .bindPopup('Lokasi Absen')
+                                    .openPopup();
+                            }
+
+                            if (attendance.foto_clock_in || attendance.foto_clock_out) {
+                                const gambarDetail = document.createElement('div');
+                                gambarDetail.id = 'gambar-detail-absensi';
+                                gambarDetail.style.display = 'flex';
+                                gambarDetail.style.justifyContent = 'space-between';
+                                gambarDetail.style.width = '100%';
+                                modalBody.append(gambarDetail);
+
+                                if (attendance.foto_clock_in) {
+                                    const imgClockIn = document.createElement('img');
+                                    imgClockIn.src = `/storage/${attendance.foto_clock_in}`;
+                                    imgClockIn.alt = 'Foto Clock In';
+                                    imgClockIn.className = 'img-clock';
+                                    gambarDetail.append(imgClockIn);
+                                }
+
+                                if (attendance.foto_clock_out) {
+                                    const imgClockOut = document.createElement('img');
+                                    imgClockOut.src = `/storage/${attendance.foto_clock_out}`;
+                                    imgClockOut.alt = 'Foto Clock Out';
+                                    imgClockOut.className = 'img-clock';
+                                    gambarDetail.append(imgClockOut);
+                                }
+                            }
+                        });
+
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (error) {
+                    console.error('Error handling detail-absensi click:', error.message);
+                    alert('Terjadi kesalahan saat mengambil data absensi.');
+                }
+            });
         });
     </script>
 @endsection
