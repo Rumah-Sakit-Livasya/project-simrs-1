@@ -793,6 +793,10 @@
             let modal = null;
             let modalBody = null;
 
+
+            startCamera();
+            initializeMap();
+
             function toggleSpinner(buttonId, show) {
                 const button = document.getElementById(buttonId);
                 const spinner = button.querySelector('.spinner-border');
@@ -803,38 +807,38 @@
                 }
             }
 
-            // async function startCamera() {
-            //     try {
-            //         const constraints = {
-            //             video: {
-            //                 facingMode: 'user', // Use 'environment' for rear camera
-            //                 width: {
-            //                     ideal: 640
-            //                 },
-            //                 height: {
-            //                     ideal: 720
-            //                 },
-            //                 playsinline: true // Ensure playsinline is true
-            //             }
-            //         };
-            //         const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            //         video.srcObject = stream;
-            //         video.setAttribute('playsinline', true); // Set playsinline attribute
+            async function startCamera() {
+                try {
+                    const constraints = {
+                        video: {
+                            facingMode: 'user', // Use 'environment' for rear camera
+                            width: {
+                                ideal: 640
+                            },
+                            height: {
+                                ideal: 720
+                            },
+                            playsinline: true // Ensure playsinline is true
+                        }
+                    };
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true); // Set playsinline attribute
 
-            //         // Set canvas size when video metadata is loaded
-            //         video.addEventListener('loadedmetadata', () => {
-            //             adjustCanvasSize();
-            //         });
-            //     } catch (error) {
-            //         console.error('Error accessing the camera:', error);
-            //         alert('Error accessing the camera: ' + error.message);
-            //     }
-            // }
+                    // Set canvas size when video metadata is loaded
+                    video.addEventListener('loadedmetadata', () => {
+                        adjustCanvasSize();
+                    });
+                } catch (error) {
+                    console.error('Error accessing the camera:', error);
+                    alert('Error accessing the camera: ' + error.message);
+                }
+            }
 
-            // function adjustCanvasSize() {
-            //     canvas.width = video.videoWidth;
-            //     canvas.height = video.videoHeight;
-            // }
+            function adjustCanvasSize() {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
 
             async function getLocation() {
                 return new Promise((resolve, reject) => {
@@ -1120,8 +1124,6 @@
                     alert('Terjadi kesalahan saat mengambil data absensi.');
                 }
             });
-            // startCamera();
-            initializeMap();
         });
     </script>
 @endsection
