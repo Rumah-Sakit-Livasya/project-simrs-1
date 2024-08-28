@@ -459,7 +459,7 @@
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="></script>
     <script>
         // $(document).ready(function() {
         //     const label = "{{ auth()->user()->employee->foto }}";
@@ -779,6 +779,39 @@
         //     }
         // });
 
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'user', // Ubah ke 'environment' untuk kamera belakang
+                    width: {
+                        ideal: 640
+                    },
+                    height: {
+                        ideal: 720
+                    }
+                }
+            }).then(function(stream) {
+                var video = document.getElementById('video');
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true); // Menambahkan playsinline agar video ditampilkan inline
+                video.play();
+
+                video.onloadedmetadata = function() {
+                    adjustCanvasSize();
+                };
+            }).catch(function(error) {
+                console.log("Error accessing the camera: ", error);
+                alert("Could not access the camera. Error: " + error.message);
+            });
+        }
+
+        function adjustCanvasSize() {
+            var video = document.getElementById('video');
+            var canvas = document.getElementById('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+        }
+
         $(document).ready(function() {
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
@@ -800,39 +833,6 @@
                 } else {
                     spinner.style.display = 'none';
                 }
-            }
-
-            async function startCamera() {
-                try {
-                    const constraints = {
-                        video: {
-                            facingMode: 'user', // Use 'environment' for rear camera
-                            width: {
-                                ideal: 640
-                            },
-                            height: {
-                                ideal: 720
-                            },
-                            playsinline: true // Ensure playsinline is true
-                        }
-                    };
-                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                    video.srcObject = stream;
-                    video.setAttribute('playsinline', true); // Set playsinline attribute
-
-                    // Set canvas size when video metadata is loaded
-                    video.addEventListener('loadedmetadata', () => {
-                        adjustCanvasSize();
-                    });
-                } catch (error) {
-                    console.error('Error accessing the camera:', error);
-                    alert('Error accessing the camera: ' + error.message);
-                }
-            }
-
-            function adjustCanvasSize() {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
             }
 
             async function getLocation() {
