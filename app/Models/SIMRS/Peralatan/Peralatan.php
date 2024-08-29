@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Models\SIMRS\Laboratorium;
+namespace App\Models\SIMRS\Peralatan;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class NilaiParameterLaboratorium extends Model
+class Peralatan extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'nilai_parameter_laboratorium';
+    protected $table = 'peralatan';
+    protected $fillable = ['kode', 'nama', 'satuan_pakai', 'is_req_dokter'];
 }

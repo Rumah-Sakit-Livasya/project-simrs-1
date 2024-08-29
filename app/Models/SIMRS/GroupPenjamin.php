@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\SIMRS\Peralatan\TarifPeralatan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,5 +22,10 @@ class GroupPenjamin extends Model
     public function tarif_kelas_rawat()
     {
         return $this->belongsToMany(TarifKelasRawat::class, 'tarif_kelas_rawat');
+    }
+
+    public function tarif_peralatan()
+    {
+        return $this->belongsToMany(TarifPeralatan::class, 'tarif_peralatan');
     }
 }

@@ -55,7 +55,7 @@
                                                 </select>
                                             </div>
                                             <div class="btn-next mt-3 text-right">
-                                                <button type="button" class="btn-export btn btn-success btn-sm ml-2">
+                                                {{-- <button type="button" class="btn-export btn btn-success btn-sm ml-2">
                                                     <div class="ikon-export">
                                                         <i class='fas fa-file-excel mr-2'></i> Template Potongan Pegawai
                                                     </div>
@@ -64,7 +64,7 @@
                                                     <div class="ikon-import">
                                                         <i class='fas fa-file-excel mr-2'></i> Import Potongan Pegawai
                                                     </div>
-                                                </button>
+                                                </button> --}}
                                                 <button type="submit" class="btn-next-step btn btn-primary btn-sm ml-2">
                                                     <div class="ikon-tambah">
                                                         <i class='bx bxs-checkbox-minus'></i> Tambah atau Ubah
@@ -160,8 +160,7 @@
                                                                     role="status" aria-hidden="true"></span>
                                                             </div>
                                                         </button>
-                                                        <button type="button" data-backdrop="static"
-                                                            data-keyboard="false"
+                                                        <button type="button" data-backdrop="static" data-keyboard="false"
                                                             class="badge mx-1 badge-danger p-2 border-0 text-white btn-edit"
                                                             data-id="{{ $payroll->id }}" title="Hapus Data"
                                                             onclick="btnDelete(event)">
@@ -191,8 +190,8 @@
         </div>
     </main>
 
-    @include('pages.pegawai.gaji-pegawai.partials.update-payroll')
-    @include('pages.pegawai.gaji-pegawai.partials.tambah-potongan')
+    {{-- @include('pages.pegawai.gaji-pegawai.partials.update-payroll')
+    @include('pages.pegawai.gaji-pegawai.partials.tambah-potongan') --}}
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>

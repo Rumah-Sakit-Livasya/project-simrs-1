@@ -116,7 +116,7 @@
                                 <div class="" id="total_pegawai">
                                     <h3 class="mb-0 ml-2 font-weight-bold float-right text-primary mr-2"
                                         style="font-size: 28pt">
-                                        {{ $employees->count() }}
+                                        {{ $employees->count() + $employees_non_aktif }}
                                     </h3>
                                 </div>
                             </div>
@@ -134,7 +134,7 @@
                                 <div class="" id="total_nonaktif">
                                     <h3 class="mb-0 ml-2 font-weight-bold float-right text-danger mr-2"
                                         style="font-size: 28pt">
-                                        {{ $employees->where('is_active', 0)->count() }}
+                                        {{ $employees_non_aktif }}
                                     </h3>
                                 </div>
                             </div>
@@ -151,7 +151,43 @@
                                 <div class="" id="total_aktif">
                                     <h3 class="mb-0 ml-2 font-weight-bold float-right text-success mr-2"
                                         style="font-size: 28pt">
-                                        {{ $employees->where('is_active', 1)->count() }}
+                                        {{ $employees->count() }}
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-building text-info" style="font-size: 36pt"></i>
+                                    <h3 class="mb-0 ml-2 font-weight-bold text-info" style="bottom: 10px;">Pegawai Aktif
+                                        RS
+                                    </h3>
+                                </div>
+                                <div class="" id="total_aktif">
+                                    <h3 class="mb-0 ml-2 font-weight-bold float-right text-info mr-2"
+                                        style="font-size: 28pt">
+                                        {{ $employees->where('company_id', 1)->count() }}
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-building text-info" style="font-size: 36pt"></i>
+                                    <h3 class="mb-0 ml-2 font-weight-bold text-info" style="bottom: 10px;">Pegawai Aktif
+                                        PT
+                                    </h3>
+                                </div>
+                                <div class="" id="total_aktif">
+                                    <h3 class="mb-0 ml-2 font-weight-bold float-right text-info mr-2"
+                                        style="font-size: 28pt">
+                                        {{ $employees->where('company_id', 2)->count() }}
                                     </h3>
                                 </div>
                             </div>

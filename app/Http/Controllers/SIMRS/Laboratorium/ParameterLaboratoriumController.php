@@ -49,12 +49,11 @@ class ParameterLaboratoriumController extends Controller
 
     public function tarifParameter($id)
     {
-        dd($id);
         $parameter_laboratorium = ParameterLaboratorium::findOrFail($id);
         $grup_penjamin = GroupPenjamin::all();
         $kelas_rawat = KelasRawat::select('id', 'kelas')->get();
 
-        return view('pages.simrs.master-data.penunjang-medis.radiologi.tarif-parameter-lab', compact('parameter_laboratorium', 'grup_penjamin', 'kelas_rawat'));
+        return view('pages.simrs.master-data.penunjang-medis.laboratorium.tarif-parameter-lab', compact('parameter_laboratorium', 'grup_penjamin', 'kelas_rawat'));
     }
 
     public function store(Request $request)

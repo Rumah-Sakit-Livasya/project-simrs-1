@@ -3,23 +3,23 @@
 namespace App\Http\Controllers\SIMRS\Laboratorium;
 
 use App\Http\Controllers\Controller;
-use App\Models\SIMRS\Laboratorium\NilaiParameterLaboratorium;
+use App\Models\SIMRS\Laboratorium\NilaiNormalLaboratorium;
 use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use GuzzleHttp\Psr7\Request;
 
-class NilaiParameterLaboratoriumController extends Controller
+class NilaiNormalLaboratoriumController extends Controller
 {
     public function index()
     {
         $parameter = ParameterLaboratorium::all();
-        $nilai_parameter = NilaiParameterLaboratorium::all();
+        $nilai_parameter = NilaiNormalLaboratorium::all();
         return view('pages.simrs.master-data.penunjang-medis.laboratorium.nilai-parameter', compact('parameter', 'nilai_parameter'));
     }
 
     public function getParameter($id)
     {
         try {
-            $nilai_parameter_laboratorium = NilaiParameterLaboratorium::findOrFail($id);
+            $nilai_parameter_laboratorium = NilaiNormalLaboratorium::findOrFail($id);
 
             return response()->json([
                 'parameter_laboratorium_id' => $nilai_parameter_laboratorium->parameter_laboratorium_id,
@@ -58,7 +58,7 @@ class NilaiParameterLaboratoriumController extends Controller
         $validatedData['kode'] = $lastKode ? $lastKode + 1 : 1;
 
         try {
-            $store = NilaiParameterLaboratorium::create($validatedData);
+            $store = NilaiNormalLaboratorium::create($validatedData);
             return response()->json(['message' => ' berhasil ditambahkan!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -88,7 +88,7 @@ class NilaiParameterLaboratoriumController extends Controller
         }
 
         try {
-            $nilai_parameter_laboratorium = NilaiParameterLaboratorium::find($id);
+            $nilai_parameter_laboratorium = NilaiNormalLaboratorium::find($id);
             $nilai_parameter_laboratorium->update($validatedData);
             return response()->json(['message' => ' berhasil diupdate!'], 200);
         } catch (\Exception $e) {
@@ -99,7 +99,7 @@ class NilaiParameterLaboratoriumController extends Controller
     public function delete($id)
     {
         try {
-            $nilai_parameter_laboratorium = NilaiParameterLaboratorium::find($id);
+            $nilai_parameter_laboratorium = NilaiNormalLaboratorium::find($id);
             $nilai_parameter_laboratorium->delete();
             return response()->json(['message' => ' berhasil dihapus'], 200);
         } catch (\Exception $e) {

@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Parameter Radiologi')
+@section('title', 'Tarif Peralatan')
 @section('extended-css')
     <style>
         div.table-responsive>div.dataTables_wrapper>div.row>div[class^="col-"]:last-child {
@@ -19,7 +19,7 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Tarif Parameter {{ $parameter_laboratorium->parameter }}
+                            Tarif Peralatan {{ $peralatan->nama }}
                         </h2>
                     </div>
                     <div class="panel-container show">
@@ -43,20 +43,15 @@
                                                 <th>Nama Kelas</th>
                                                 <th>Share Dr</th>
                                                 <th>Share Dr</th>
-                                                <th>Prasarana</th>
-                                                <th>BHP</th>
                                                 <th>Total</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($kelas_rawat as $row)
                                                 @php
-                                                    $tarif = $row->tarif_parameter_laboratorium
+                                                    $tarif = $row->tarif_peralatan
                                                         ->where('group_penjamin_id', 1)
-                                                        ->where(
-                                                            'parameter_laboratorium_id',
-                                                            $parameter_laboratorium->id,
-                                                        )
+                                                        ->where('peralatan_id', $peralatan->id)
                                                         ->first();
                                                 @endphp
                                                 <tr>
@@ -69,16 +64,6 @@
                                                     <td>
                                                         <input type="text" name="share_rs[{{ $row->id }}]"
                                                             value="{{ $tarif->share_rs ?? 0 }}"
-                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" name="bhp[{{ $row->id }}]"
-                                                            value="{{ $tarif->bhp ?? 0 }}"
-                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" name="prasarana[{{ $row->id }}]"
-                                                            value="{{ $tarif->prasarana ?? 0 }}"
                                                             class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
                                                     </td>
                                                     <td>
@@ -118,12 +103,12 @@
                 e.preventDefault(); // Mencegah form dari pengiriman default
 
                 let grupPenjaminId = $('#grup-penjamin-id').val(); // Ambil grup_penjamin_id
-                let parameterId = @json($parameter_laboratorium->id);
+                let peralatanId = @json($peralatan->id);
 
                 // Route Laravel dengan menggunakan nama route
                 let url =
-                    "{{ route('master-data.penunjang-medis.laboratorium.parameter.tarif.store', ['parameterId' => ':parameterId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
-                    .replace(':parameterId', parameterId)
+                    "{{ route('master-data.peralatan.tarif.store', ['peralatanId' => ':peralatanId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
+                    .replace(':peralatanId', peralatanId)
                     .replace(':grupPenjaminId', grupPenjaminId);
 
                 $.ajax({
@@ -148,11 +133,11 @@
             $('#grup-penjamin-id').on('change', function() {
 
                 let grupPenjaminId = $(this).val(); // Ambil grup_penjamin_id
-                let parameterId = @json($parameter_laboratorium->id);
+                let peralatanId = @json($peralatan->id);
 
                 let url =
-                    "{{ route('master-data.penunjang-medis.laboratorium.parameter.tarif.get', ['parameterId' => ':parameterId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
-                    .replace(':parameterId', parameterId)
+                    "{{ route('master-data.peralatan.tarif.get', ['peralatanId' => ':peralatanId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
+                    .replace(':peralatanId', peralatanId)
                     .replace(':grupPenjaminId', grupPenjaminId);
 
                 $.ajax({
@@ -167,11 +152,6 @@
                                     .val(item.share_dr);
                                 $('input[name="share_rs[' + item.kelas_rawat_id + ']"]')
                                     .val(item.share_rs);
-                                $('input[name="prasarana[' + item.kelas_rawat_id +
-                                        ']"]')
-                                    .val(item.prasarana);
-                                $('input[name="bhp[' + item.kelas_rawat_id + ']"]')
-                                    .val(item.bhp);
                                 $('input[name="total[' + item.kelas_rawat_id + ']"]')
                                     .val(item.total);
                             });

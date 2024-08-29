@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Parameter Laboratorium')
+@section('title', 'Grup Parameter Radiologi')
 @section('extended-css')
     <style>
         hr {
@@ -93,7 +93,7 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Parameter Laboratorium
+                            Peralatan
                         </h2>
                     </div>
                     <div class="panel-container show">
@@ -104,26 +104,20 @@
                                     <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
                                     <thead class="bg-primary-600">
                                         <tr>
-                                            <th>Tipe</th>
-                                            <th>Grup</th>
-                                            <th>No. Urut</th>
                                             <th>Kode</th>
-                                            <th>Parameter</th>
-                                            <th>Kode Parameter</th>
-                                            <th>Kode Spesimen</th>
+                                            <th>Nama Alat</th>
+                                            <th>Satuan</th>
+                                            <th>Membutuhkan Dokter</th>
                                             <th>Fungsi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($parameter as $row)
+                                        @foreach ($peralatan as $row)
                                             <tr>
-                                                <td>{{ $row->tipe_laboratorium_id }}</td>
-                                                <td>{{ $row->grup_parameter_laboratorium_id }}</td>
-                                                <td>{{ $row->no_urut }}</td>
                                                 <td>{{ $row->kode }}</td>
-                                                <td>{{ $row->parameter }}</td>
-                                                <td></td>
-                                                <td></td>
+                                                <td>{{ $row->nama }}</td>
+                                                <td>{{ $row->satuan_pakai }}</td>
+                                                <td>{{ $row->is_req_dokter }}</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-primary px-2 py-1 btn-tarif"
                                                         data-id="{{ $row->id }}"> <i class="fas fa-credit-card"></i>
@@ -142,12 +136,12 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <th colspan="8" class="text-center">
+                                            <th colspan="5" class="text-center">
                                                 <button type="button"
                                                     class="btn btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-parameter-laboratorium">
+                                                    id="btn-tambah-peralatan">
                                                     <span class="fal fa-plus-circle"></span>
-                                                    Tambah Parameter Laboratorium
+                                                    Tambah Peralatan
                                                 </button>
                                             </th>
                                         </tr>
@@ -161,8 +155,8 @@
             </div>
         </div>
     </main>
-    @include('pages.simrs.master-data.penunjang-medis.laboratorium.partials.tambah-parameter-lab')
-    @include('pages.simrs.master-data.penunjang-medis.laboratorium.partials.edit-parameter-lab')
+    @include('pages.simrs.master-data.peralatan.partials.create')
+    @include('pages.simrs.master-data.peralatan.partials.edit')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -170,20 +164,21 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            let kategoriId = null;
+            let peralatanId = null;
             $('#loading-spinner').show();
 
-            $('#btn-tambah-parameter-laboratorium').click(function() {
-                $('#modal-tambah-parameter-laboratorium').modal('show');
+            $('#btn-tambah-peralatan').click(function() {
+                $('#modal-tambah-peralatan').modal('show');
+                console.log('clicked');
             });
 
-            $('#modal-tambah-parameter-laboratorium .select2').select2({
-                dropdownParent: $('#modal-tambah-parameter-laboratorium')
+            $('#modal-tambah-peralatan .select2').select2({
+                dropdownParent: $('#modal-tambah-peralatan')
             });
 
             $('.btn-tarif').click(function() {
                 const id_param = $(this).attr('data-id');
-                const url = `{{ route('master-data.penunjang-medis.laboratorium.parameter.tarif', ':id') }}`
+                const url = `{{ route('master-data.peralatan.tarif', ':id') }}`
                     .replace(':id', id_param);
                 const popupWidth = 900;
                 const popupHeight = 600;
@@ -199,28 +194,40 @@
             });
 
             $('.btn-edit').click(function() {
-                console.log('clicked');
-                $('#modal-edit-parameter-laboratorium').modal('show');
-                kategoriId = $(this).attr('data-id');
-                $('#modal-edit-parameter-laboratorium form').attr('data-id', kategoriId);
+                $('#modal-edit-peralatan').modal('show');
+                peralatanId = $(this).attr('data-id');
 
+                $('#modal-edit-peralatan form').attr('data-id', peralatanId);
                 $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/parameter/' +
-                        kategoriId,
+                    url: '/api/simrs/master-data/peralatan/' +
+                        peralatanId,
                     type: 'GET',
                     success: function(response) {
-                        $('#modal-edit-parameter-laboratorium input[name="nama_tipe"]')
-                            .val(
-                                response
-                                .nama_tipe);
-                        $('#modal-edit-parameter-laboratorium input[name="status"][value="' +
-                                response
-                                .status + '"]')
-                            .prop(
-                                'checked', true);
+                        $('#modal-edit-peralatan input[name="kode"]').val(
+                            response
+                            .kode);
+                        $('#modal-edit-peralatan input[name="nama"]').val(
+                            response
+                            .nama);
+                        $('#modal-edit-peralatan input[name="satuan_pakai"]').val(
+                            response
+                            .satuan_pakai);
+
+                        let is_req_dokter = response.is_req_dokter;
+
+                        // Mengatur radio button berdasarkan nilai
+                        if (is_req_dokter == 1) {
+                            $('#is_req_dokter_ya').prop('checked', true);
+                        } else {
+                            $('#is_req_dokter_tidak').prop('checked', true);
+                        }
+
+
+                        peralatanId = peralatanId;
+
                     },
                     error: function(xhr, status, error) {
-                        $('#modal-edit-parameter-laboratorium').modal('hide');
+                        $('#modal-edit-peralatan').modal('hide');
                         showErrorAlert('Terjadi kesalahan: ' + error);
                     }
                 });
@@ -228,7 +235,7 @@
             });
 
             $('.btn-delete').click(function() {
-                var kategoriId = $(this).attr('data-id');
+                var peralatanId = $(this).attr('data-id');
 
                 // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
                 var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
@@ -236,8 +243,8 @@
                 if (userConfirmed) {
                     // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
                     $.ajax({
-                        url: '/api/simrs/master-data/penunjang-medis/laboratorium/parameter/' +
-                            kategoriId +
+                        url: '/api/simrs/master-data/peralatan/' +
+                            peralatanId +
                             '/delete',
                         type: 'DELETE',
                         success: function(response) {
@@ -258,14 +265,12 @@
             });
 
             $('#update-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
+                e.preventDefault();
+                const id = $('#modal-edit-peralatan form').attr('data-id');
+                var formData = $(this).serialize(); // Mengambil semua data dari form
 
-                var formData = $(this).serialize();
-                kategoriId = $(this).attr('data-id');
                 $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/parameter/' +
-                        kategoriId +
-                        '/update',
+                    url: '/api/simrs/master-data/peralatan/' + id + '/update',
                     type: 'PATCH',
                     data: formData,
                     beforeSend: function() {
@@ -274,7 +279,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-edit-parameter-laboratorium').modal('hide');
+                        $('#modal-edit-peralatan').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -292,13 +297,12 @@
                                     '\n';
                             });
 
-                            $('#modal-edit-parameter-laboratorium').modal('hide');
+                            $('#modal-edit-peralatan').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-edit-parameter-laboratorium').modal('hide');
+                            $('#modal-edit-peralatan').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
                         }
                     }
                 });
@@ -307,10 +311,10 @@
             $('#store-form').on('submit', function(e) {
                 e.preventDefault(); // Mencegah form submit secara default
 
-                var formData = $(this).serialize();
+                var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/parameter',
+                    url: '/api/simrs/master-data/peralatan',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {
@@ -319,7 +323,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-tambah-parameter-laboratorium').modal('hide');
+                        $('#modal-tambah-peralatan').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -337,11 +341,11 @@
                                     '\n';
                             });
 
-                            $('#modal-tambah-parameter-laboratorium').modal('hide');
+                            $('#modal-tambah-peralatan').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-tambah-parameter-laboratorium').modal('hide');
+                            $('#modal-tambah-peralatan').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }

@@ -19,9 +19,9 @@ class PayrollController extends Controller
 {
     public function allowancePayroll()
     {
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
-            $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
+            $employees = Employee::where('is_active', 1)->where('company_id', auth()->user()->employee->company_id)->get();
         }
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
@@ -34,9 +34,9 @@ class PayrollController extends Controller
 
     public function deductionPayroll()
     {
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
-            $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
+            $employees = Employee::where('is_active', 1)->where('company_id', auth()->user()->employee->company_id)->get();
         }
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
@@ -49,9 +49,9 @@ class PayrollController extends Controller
 
     public function printPayroll()
     {
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
-            $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
+            $employees = Employee::where('is_active', 1)->where('company_id', auth()->user()->employee->company_id)->get();
         }
         $getNotify = $this->getNotify();
 
@@ -71,7 +71,9 @@ class PayrollController extends Controller
         $jobPosition = JobPosition::all();
         $bank = JobPosition::all();
         $locations = Bank::all();
-        $payrolls = Payroll::where('is_review', 0)->get();
+        $payrolls = Payroll::where('is_review', 0)->whereHas('employee', function ($query) {
+            $query->where('is_active', 1);
+        })->get();
         $getNotify = $this->getNotify();
         // dd($payrolls[0]);
 
@@ -81,9 +83,9 @@ class PayrollController extends Controller
     public function payrollHistory(Request $request)
     {
         $organizations = Organization::all();
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
-            $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
+            $employees = Employee::where('is_active', 1)->where('company_id', auth()->user()->employee->company_id)->get();
         }
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
@@ -97,7 +99,9 @@ class PayrollController extends Controller
             // Jika filter periode sudah diaplikasikan, ambil data payroll sesuai periode
             $periode = $request->input('periode');
             $payrolls = Payroll::where('is_review', 1)
-                ->where('periode', $periode)
+                ->where('periode', $periode)->whereHas('employee', function ($query) {
+                    $query->where('is_active', 1);
+                })
                 ->get();
         }
 
@@ -109,9 +113,9 @@ class PayrollController extends Controller
     public function payrollCetak(Request $request)
     {
         $organizations = Organization::all();
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         if (auth()->user()->hasRole('hr')) {
-            $employees = Employee::where('company_id', auth()->user()->employee->company_id)->get();
+            $employees = Employee::where('is_active', 1)->where('company_id', auth()->user()->employee->company_id)->get();
         }
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
@@ -125,7 +129,9 @@ class PayrollController extends Controller
             // Jika filter periode sudah diaplikasikan, ambil data payroll sesuai periode
             $periode = $request->input('periode');
             $payrolls = Payroll::where('is_review', 1)
-                ->where('periode', $periode)
+                ->where('periode', $periode)->whereHas('employee', function ($query) {
+                    $query->where('is_active', 1);
+                })
                 ->get();
         }
 
@@ -149,13 +155,17 @@ class PayrollController extends Controller
             // Jika employee_id tidak kosong, ambil data payroll sesuai dengan employee_id yang diberikan
             if (!empty($employeeIds)) {
                 $payrolls = Payroll::where('is_review', 1)
-                    ->where('periode', $periode)
+                    ->where('periode', $periode)->whereHas('employee', function ($query) {
+                        $query->where('is_active', 1);
+                    })
                     ->whereIn('employee_id', $employeeIds)
                     ->get();
             } else {
                 // Jika employee_id kosong, ambil semua data payroll untuk periode yang diberikan
                 $payrolls = Payroll::where('is_review', 1)
-                    ->where('periode', $periode)
+                    ->where('periode', $periode)->whereHas('employee', function ($query) {
+                        $query->where('is_active', 1);
+                    })
                     ->get();
             }
         }
@@ -181,7 +191,9 @@ class PayrollController extends Controller
             // Jika employee_id tidak kosong, ambil data payroll sesuai dengan employee_id yang diberikan
             $payroll = Payroll::where('is_review', 1)
                 ->where('periode', $periode)
-                ->where('employee_id', $employeeId)
+                ->where('employee_id', $employeeId)->whereHas('employee', function ($query) {
+                    $query->where('is_active', 1);
+                })
                 ->get();
 
             if (!$payroll) {
@@ -208,7 +220,9 @@ class PayrollController extends Controller
             // Jika employee_id tidak kosong, ambil data payroll sesuai dengan employee_id yang diberikan
             $payrolls = Payroll::where('is_review', 1)
                 ->where('periode', $periode)
-                ->where('employee_id', auth()->user()->employee->id)
+                ->where('employee_id', auth()->user()->employee->id)->whereHas('employee', function ($query) {
+                    $query->where('is_active', 1);
+                })
                 ->get();
             // dd($payrolls);
 

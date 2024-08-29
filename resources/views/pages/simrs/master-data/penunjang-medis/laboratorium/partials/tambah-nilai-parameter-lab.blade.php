@@ -58,7 +58,13 @@
                                     <div class="custom-control d-inline-block custom-radio mt-2">
                                         <input type="radio" class="custom-control-input" id="perempuan_tambah"
                                             name="jenis_kelamin" value="Perempuan">
-                                        <label class="custom-control-label" for="perempuan_tambah">Perempuan</label>
+                                        <label class="custom-control-label mr-1"
+                                            for="perempuan_tambah">Perempuan</label>
+                                    </div>
+                                    <div class="custom-control d-inline-block custom-radio mt-2">
+                                        <input type="radio" class="custom-control-input" id="semuanya_tambah"
+                                            name="jenis_kelamin" value="Semuanya">
+                                        <label class="custom-control-label" for="semuanya_tambah">Semuanya</label>
                                     </div>
                                 </div>
                             </div>
@@ -114,25 +120,25 @@
                                         <div class="form-group">
                                             <label for="nilai_normal" class="d-block">Nilai Normal</label>
                                             <div class="custom-control d-inline-block custom-radio mt-2 mr-2">
-                                                <input type="radio" checked="" class="custom-control-input"
+                                                <input type="radio" class="custom-control-input"
                                                     id="negatif_tambah" name="nilai_normal" value="Negatif">
                                                 <label class="custom-control-label"
                                                     for="negatif_tambah">Negatif</label>
                                             </div>
                                             <div class="custom-control d-inline-block custom-radio mt-2 mr-2">
-                                                <input type="radio" checked="" class="custom-control-input"
+                                                <input type="radio" class="custom-control-input"
                                                     id="positif_tambah" name="nilai_normal" value="Positif">
                                                 <label class="custom-control-label"
                                                     for="positif_tambah">Positif</label>
                                             </div>
                                             <div class="custom-control d-inline-block custom-radio mt-2 mr-2">
-                                                <input type="radio" checked="" class="custom-control-input"
+                                                <input type="radio" class="custom-control-input"
                                                     id="reaktif_tambah" name="nilai_normal" value="Reaktif">
                                                 <label class="custom-control-label"
                                                     for="reaktif_tambah">Reaktif</label>
                                             </div>
                                             <div class="custom-control d-inline-block custom-radio mt-2 mr-2">
-                                                <input type="radio" checked="" class="custom-control-input"
+                                                <input type="radio" class="custom-control-input"
                                                     id="non_reaktif_tambah" name="nilai_normal" value="Non Reaktif">
                                                 <label class="custom-control-label" for="non_reaktif_tambah">Non
                                                     Reaktif</label>

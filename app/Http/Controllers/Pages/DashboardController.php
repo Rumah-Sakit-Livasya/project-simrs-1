@@ -606,6 +606,7 @@ class DashboardController extends Controller
     public function getDataEmployees()
     {
         $employees = Employee::where('is_active', 1)->get();
+        $employees_non_aktif = Employee::where('is_active', null)->orWhere('is_active', 0)->count();
         $jobLevel = JobLevel::all();
         $organizations = Organization::all();
         $departements = Departement::all();
@@ -615,15 +616,16 @@ class DashboardController extends Controller
         $company = Company::all();
         $getNotify = $this->getNotify();
 
-        return view('pages.pegawai.daftar-pegawai.index', compact('employees', 'jobLevel', 'organizations', 'departements', 'jobPosition', 'locations', 'bank', 'company', 'getNotify'));
+        return view('pages.pegawai.daftar-pegawai.index', compact('employees', 'employees_non_aktif', 'jobLevel', 'organizations', 'departements', 'jobPosition', 'locations', 'bank', 'company', 'getNotify'));
     }
 
     public function pegawaiNonAktifList(Request $request)
     {
         try {
             // dd($request->status, $request->organization_id);
-            $employees = Employee::all();
+            $employees = Employee::where('is_active', 1)->get();
             $employees_nonaktif = null;
+            $departements = Departement::all();
             $status = isset($request->status) ? ($request->status == 0 ? false : true) : true;
             if (isset($request->status) && isset($request->organization_id)) {
                 $employees_nonaktif = Employee::where('is_active', $status)->where('organization_id', $request->organization_id)->get();
@@ -638,13 +640,14 @@ class DashboardController extends Controller
 
             $jobLevel = JobLevel::all();
             $organizations = Organization::all();
+            $employees_non_aktif = Employee::where('is_active', null)->orWhere('is_active', 0)->count();
             $jobPosition = JobPosition::all();
             $locations = Location::all();
             $bank = Bank::all();
             $company = Company::all();
             $getNotify = $this->getNotify();
 
-            return view('pages.pegawai.daftar-pegawai.index', compact('employees', 'jobLevel', 'organizations', 'jobPosition', 'locations', 'bank', 'company', 'getNotify', 'employees_nonaktif'));
+            return view('pages.pegawai.daftar-pegawai.index', compact('employees', 'employees_non_aktif', 'jobLevel', 'organizations', 'jobPosition', 'locations', 'bank', 'company', 'getNotify', 'employees_nonaktif', 'departements'));
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

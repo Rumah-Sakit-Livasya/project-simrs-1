@@ -40,18 +40,16 @@ use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
+use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
+use App\Http\Controllers\SIMRS\Laboratorium\NilaiParameterLaboratoriumController;
+use App\Http\Controllers\SIMRS\Laboratorium\TarifParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
+use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Http\Middleware\CheckAuthorizationBot;
-use App\Models\Inventaris\MaintenanceBarang;
-use App\Models\Inventaris\TemplateBarang;
-use App\Models\RoomMaintenance;
-use App\Models\SIMRS\KelasRawat;
-use App\Models\SIMRS\Room;
-use App\Models\SIMRS\TarifKelasRawat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -195,6 +193,8 @@ Route::prefix('simrs')->group(function () {
                 Route::post('/parameter', [ParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.parameter.store');
                 Route::patch('/parameter/{id}/update', [ParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.parameter.update');
                 Route::delete('/parameter/{id}/delete', [ParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.parameter.delete');
+                Route::get('/parameter/{parameterId}/tarif/{grupPenjaminId}', [TarifParameterLaboratoriumController::class, 'getTarifParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.tarif.get');
+                Route::post('/parameter/{parameterId}/tarif/{grupPenjaminId}', [TarifParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.parameter.tarif.store');
 
                 Route::get('/kategori/{id}', [KategoriLaboratorumController::class, 'getKategori'])->name('master-data.penunjang-medis.laboratorium.kategori.get');
                 Route::post('/kategori', [KategoriLaboratorumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.kategori.store');
@@ -205,7 +205,19 @@ Route::prefix('simrs')->group(function () {
                 Route::post('/tipe', [TipeLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.tipe.store');
                 Route::patch('/tipe/{id}/update', [TipeLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.tipe.update');
                 Route::delete('/tipe/{id}/delete', [TipeLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.tipe.delete');
+
+                Route::get('/nilai-normal/{parameterId}/get', [NilaiNormalLaboratoriumController::class, 'getNilaiParameter'])->name('master-data.penunjang-medis.laboratorium.nilai-normal');
             });
+        });
+
+        Route::prefix('peralatan')->group(function () {
+            Route::post('/', [PeralatanController::class, 'store'])->name('master-data.peralatan.store');
+            Route::get('/{id}', [PeralatanController::class, 'getPeralatan'])->name('master-data.peralatan.get');
+            Route::patch('/{id}/update', [PeralatanController::class, 'update'])->name('master-data.peralatan.update');
+            Route::delete('/{id}/delete', [PeralatanController::class, 'delete'])->name('master-data.peralatan.delete');
+
+            Route::get('/{peralatanId}/tarif/{grupPenjaminId}', [PeralatanController::class, 'getTarifPeralatan'])->name('master-data.peralatan.tarif.get');
+            Route::post('/{peralatanId}/tarif/{grupPenjaminId}', [PeralatanController::class, 'storeTarif'])->name('master-data.peralatan.tarif.store');
         });
     });
 });
