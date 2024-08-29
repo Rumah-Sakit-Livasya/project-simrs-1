@@ -88,7 +88,7 @@
                                             </td>
                                             <td style="white-space: nowrap">{{ $row->category_code }}</td>
                                             <td style="white-space: nowrap">
-                                                {{ count(Barang::where('barang_category_id', $row->id)->get()) }}
+                                                {{ count(Barang::where('category_barang_id', $row->id)->get()) }}
                                             </td>
                                             <td style="white-space: nowrap">
                                                 <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
