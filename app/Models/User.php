@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Inventaris\MaintenanceBarang;
+use App\Models\Inventaris\ReportBarang;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -80,5 +82,15 @@ class User extends Authenticatable
     public function targets()
     {
         return $this->hasMany(Target::class);
+    }
+
+    public function reportBarang()
+    {
+        return $this->hasMany(ReportBarang::class);
+    }
+
+    public function maintenance()
+    {
+        return $this->hasMany(MaintenanceBarang::class);
     }
 }

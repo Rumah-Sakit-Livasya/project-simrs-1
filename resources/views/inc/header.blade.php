@@ -54,6 +54,8 @@
 <script src="/js/sweetalert2.min.js"></script>
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
     .header-btn[data-class='mobile-nav-on'] {
         border-color: #4679cc;
         background-color: #4679cc;
@@ -179,6 +181,26 @@
     .global-search:hover,
     .input-global:focus .global-search {
         border-bottom: 1px solid #3c6eb4;
+    }
+
+    *,
+    select optgroup option,
+    select option,
+    select option {
+        font-family: "Poppins", "sans-serif";
+    }
+
+    .icon {
+        transform: scale(1.8);
+        margin-right: 1.1rem;
+        opacity: .3;
+        margin-left: .1rem;
+    }
+
+    .form-container {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease-in-out;
     }
 </style>
 @yield('extended-css')

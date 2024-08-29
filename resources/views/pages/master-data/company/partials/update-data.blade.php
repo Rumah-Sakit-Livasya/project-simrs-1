@@ -108,15 +108,30 @@
 
                         </div>
                     </div>
-                    <div class="form-group mt-3">
-                        <label for="operating_permit_number">izin Operasional</label>
-                        <input type="text" value="{{ old('operating_permit_number') }}"
-                            class="form-control @error('operating_permit_number') is-invalid @enderror"
-                            id="operating_permit_number" name="operating_permit_number"
-                            placeholder="Masukan izin Operasional">
-                        @error('operating_permit_number')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group mt-3">
+                                <label for="operating_permit_number">izin Operasional</label>
+                                <input type="text" value="{{ old('operating_permit_number') }}"
+                                    class="form-control @error('operating_permit_number') is-invalid @enderror"
+                                    id="operating_permit_number" name="operating_permit_number"
+                                    placeholder="Masukan izin Operasional">
+                                @error('operating_permit_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mt-3">
+                                <label for="code">Kode Perusahaan</label>
+                                <input type="text" value="{{ old('code') }}"
+                                    class="form-control @error('code') is-invalid @enderror" id="code"
+                                    name="code" placeholder="Masukan Kode Perusahaan">
+                                @error('code')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -25,6 +25,11 @@ use App\Http\Controllers\API\TargetController;
 use App\Http\Controllers\BotMessageController;
 use App\Http\Controllers\DeductionController;
 use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\Inventaris\BarangController;
+use App\Http\Controllers\Inventaris\CategoryBarangController;
+use App\Http\Controllers\Inventaris\MaintenanceBarangController;
+use App\Http\Controllers\Inventaris\RoomMaintenanceController;
+use App\Http\Controllers\Inventaris\TemplateBarangController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
@@ -41,6 +46,9 @@ use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Http\Middleware\CheckAuthorizationBot;
+use App\Models\Inventaris\MaintenanceBarang;
+use App\Models\Inventaris\TemplateBarang;
+use App\Models\RoomMaintenance;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Room;
 use App\Models\SIMRS\TarifKelasRawat;
@@ -60,6 +68,43 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::prefix('inventaris')->group(function () {
+    Route::prefix('room-maintenance')->group(function () {
+        Route::get('/{id}', [RoomMaintenanceController::class, 'getRoom'])->name('inventaris.room.get');
+        Route::post('/', [RoomMaintenanceController::class, 'store'])->name('inventaris.room.store');
+        Route::patch('/{id}/update', [RoomMaintenanceController::class, 'update'])->name('inventaris.room.update');
+        Route::delete('/{id}/delete', [RoomMaintenanceController::class, 'delete'])->name('inventaris.room.delete');
+    });
+    Route::prefix('category-barang')->group(function () {
+        Route::get('/{id}', [CategoryBarangController::class, 'getCategory'])->name('inventaris.category.get');
+        Route::post('/', [CategoryBarangController::class, 'store'])->name('inventaris.category.store');
+        Route::patch('/{id}/update', [CategoryBarangController::class, 'update'])->name('inventaris.category.update');
+        Route::delete('/{id}/delete', [CategoryBarangController::class, 'delete'])->name('inventaris.category.delete');
+    });
+    Route::prefix('template-barang')->group(function () {
+        Route::get('/{id}', [TemplateBarangController::class, 'getTemplate'])->name('inventaris.template.get');
+        Route::post('/', [TemplateBarangController::class, 'store'])->name('inventaris.template.store');
+        Route::patch('/{id}/update', [TemplateBarangController::class, 'update'])->name('inventaris.template.update');
+        Route::delete('/{id}/delete', [TemplateBarangController::class, 'delete'])->name('inventaris.template.delete');
+    });
+    Route::prefix('barang')->group(function () {
+        Route::get('/{id}', [BarangController::class, 'getBarang'])->name('inventaris.barang.get');
+        Route::post('/', [BarangController::class, 'store'])->name('inventaris.barang.store');
+        Route::patch('/move', [BarangController::class, 'move'])->name('inventaris.barang.move');
+        Route::patch('/pinjam', [BarangController::class, 'pinjam'])->name('inventaris.barang.pinjam');
+        Route::patch('/back', [BarangController::class, 'back'])->name('inventaris.barang.back');
+        Route::patch('/{id}/update', [BarangController::class, 'update'])->name('inventaris.barang.update');
+        Route::delete('/{id}/delete', [BarangController::class, 'delete'])->name('inventaris.barang.delete');
+    });
+    Route::prefix('maintenance')->group(function () {
+        Route::get('/{id}', [MaintenanceBarangController::class, 'getMaintenance'])->name('inventaris.maintenance.get');
+        Route::get('/{id}/dokumentasi', [MaintenanceBarangController::class, 'getFoto'])->name('inventaris.maintenance.view');
+        Route::post('/', [MaintenanceBarangController::class, 'store'])->name('inventaris.maintenance.store');
+        Route::patch('/{id}/update', [MaintenanceBarangController::class, 'update'])->name('inventaris.maintenance.update');
+        Route::delete('/{id}/delete', [MaintenanceBarangController::class, 'delete'])->name('inventaris.maintenance.delete');
+    });
 });
 
 Route::prefix('simrs')->group(function () {

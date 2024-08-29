@@ -10,21 +10,7 @@ class Company extends Model
     use HasFactory;
 
     protected $table = 'companies';
-    protected $fillable = [
-        'name',
-        'phone_number',
-        'email',
-        'address',
-        'province',
-        'city',
-        'logo',
-        'category',
-        'class',
-        'operating_permit_number',
-        'latitude',
-        'longitude',
-        'radius',
-    ];
+    protected $guarded = ['id'];
 
     public function employees()
     {

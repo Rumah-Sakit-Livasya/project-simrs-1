@@ -251,6 +251,7 @@
                     $('#ubah-data #category').val(data.category)
                     $('#ubah-data #class').val(data.class)
                     $('#ubah-data #operating_permit_number').val(data.operating_permit_number)
+                    $('#ubah-data #code').val(data.code)
                 },
                 error: function(xhr) {
                     console.log(xhr.responseText);

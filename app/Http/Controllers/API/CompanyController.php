@@ -37,6 +37,7 @@ class CompanyController extends Controller
                 'category' => 'nullable',
                 'class' => 'nullable',
                 'operating_permit_number' => 'nullable',
+                'code' => 'required',
             ], [
                 'email.required' => 'Email wajib diisi.',
                 'email.email' => 'Format email tidak valid.',
@@ -49,6 +50,7 @@ class CompanyController extends Controller
                 'address.required' => 'Alamat wajib diisi.',
                 'province.required' => 'Provinsi wajib diisi.',
                 'city.required' => 'Kota wajib diisi.',
+                'code.required' => 'Kode Perusahaan wajib diisi.',
             ]);
 
             if ($validator->fails()) {
@@ -73,6 +75,7 @@ class CompanyController extends Controller
                     'class' => request()->class,
                     'operating_permit_number' => request()->operating_permit_number,
                     'logo' => $imageName,
+                    'code' => request()->code,
                 ]);
             } else {
                 Company::create([
@@ -85,6 +88,7 @@ class CompanyController extends Controller
                     'category' => request()->category,
                     'class' => request()->class,
                     'operating_permit_number' => request()->operating_permit_number,
+                    'code' => request()->code,
                 ]);
             }
 
@@ -112,6 +116,7 @@ class CompanyController extends Controller
             'category' => 'nullable',
             'class' => 'nullable',
             'operating_permit_number' => 'nullable',
+            'code' => 'required',
         ], [
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
@@ -120,6 +125,7 @@ class CompanyController extends Controller
             'address.required' => 'Alamat wajib diisi.',
             'province.required' => 'Provinsi wajib diisi.',
             'city.required' => 'Kota wajib diisi.',
+            'code.required' => 'Kode Perusahaan wajib diisi.',
         ]);
 
         // Check if validation fails
@@ -169,6 +175,7 @@ class CompanyController extends Controller
                 'category' => $request->category,
                 'class' => $request->class,
                 'operating_permit_number' => $request->operating_permit_number,
+                'code' => $request->code,
             ]);
         }
 

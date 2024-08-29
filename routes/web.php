@@ -268,4 +268,5 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/simrs.php';
+require __DIR__ . '/inventaris.php';
 require __DIR__ . '/default-menu.php';
