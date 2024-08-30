@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Inventaris\Barang;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,5 +16,10 @@ class Company extends Model
     public function employees()
     {
         return $this->hasMany(Employee::class);
+    }
+
+    public function Barang()
+    {
+        return $this->hasMany(Barang::class);
     }
 }

@@ -45,18 +45,11 @@ class BarangController extends Controller
 
             // Ambil hasil pencarian
             $barang = $query->orderBy('custom_name', 'asc')->get();
+        } else {
+            $barang = Barang::orderBy('id', 'desc')
+                ->limit(100)
+                ->get();
         }
-        $barang = Barang::orderBy('id', 'desc')
-            // ->orWhere('room_id', 128)
-            // ->orWhere('room_id', 129)
-            // ->orWhere('room_id', 130)
-            // ->orWhere('room_id', 132)
-            // ->orWhere('room_id', 134)
-            // ->orWhere('room_id', 135)
-            // ->orWhere('room_id', 136)
-            // ->skip(100)
-            ->limit(100)
-            ->get();
 
         return view('pages.inventaris.barang.index', [
             'barang' => $barang,
@@ -147,24 +140,49 @@ class BarangController extends Controller
 
     public function move(Request $request)
     {
-        $itemCode = $request->item_code;
-        $newRoomCode = RoomMaintenance::where('id', $request->room_id)->first()->room_code;
+        $barang = Barang::where('id', $request->barang_id)->first();
+        $company = Company::where('id', $barang->company->id)->first();
+        if ($barang->item_code == 0) {
+            $room_code = RoomMaintenance::where('id', $request->room_id)->first()->room_code;
 
-        $itemCodeParts = explode('/', $itemCode);
-        if (isset($itemCodeParts[2])) {
-            $itemCodeParts[2] = strtoupper($newRoomCode);
+            $template_barang_id = $barang->template_barang_id;
+            $template = TemplateBarang::where('id', $template_barang_id)->first();
+
+            $lastUrutanBarang = Barang::where('template_barang_id', $template->id)
+                ->where('urutan_barang', '<>', '0')
+                ->orderByDesc('urutan_barang')
+                ->first();
+
+            if ($lastUrutanBarang) {
+                $urutanBarang = intval($lastUrutanBarang->urutan_barang) + 1;
+            } else {
+                $urutanBarang = 1;
+            }
+
+            $barang->urutan_barang = str_pad($urutanBarang, 3, '0', STR_PAD_LEFT);
+            $user = User::findOrFail($request->user_id);
+
+            $item_code = $company->code . "/" . $template->category->category_code . "/" . $room_code . "/" . $template->barang_code . "." . $template->name . " " . $barang->urutan_barang . "/" . $barang->bidding_year;
+            $barang->item_code = $item_code;
+        } else {
+            $itemCode = $request->item_code;
+            $newRoomCode = RoomMaintenance::where('id', $request->room_id)->first()->room_code;
+
+            $itemCodeParts = explode('/', $itemCode);
+            if (isset($itemCodeParts[2])) {
+                $itemCodeParts[2] = strtoupper($newRoomCode);
+            }
+
+            // Reassemble the item code
+            $updatedItemCode = implode('/', $itemCodeParts);
+
+            // Update the Barang record
+            $user = User::findOrFail($request->user_id);
+            $barang->item_code = $updatedItemCode;
         }
 
-        // Reassemble the item code
-        $updatedItemCode = implode('/', $itemCodeParts);
-
-        // Update the Barang record
-        $barang = Barang::where('id', $request->barang_id)->first();
-        $user = User::findOrFail($request->user_id);
-
+        // Assign the Room_id
         $barang->room_id = $request->room_id;
-        $barang->item_code = $updatedItemCode;
-
 
         // Create a new ReportBarang record
         $reportBarang = new ReportBarang();

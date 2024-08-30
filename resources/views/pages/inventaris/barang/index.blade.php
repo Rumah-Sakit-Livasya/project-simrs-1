@@ -12,7 +12,7 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form action="/barang" method="get">
+                            <form action="{{ route('inventaris.barang.search') }}" method="get">
                                 @csrf
                                 <div class="row justify-content-center mt-5">
                                     <div class="col-lg-4">
@@ -325,30 +325,5 @@
     </main>
 @endsection
 @section('plugin')
-
-    <script>
-        function toggleForm() {
-            var formContainer = document.getElementById('form-container');
-            var toggleButton = document.getElementById('toggle-form-btn');
-            var closeButton = document.getElementById('close-form-btn');
-
-            if (formContainer.style.display === 'none' || formContainer.style.display === '') {
-                formContainer.style.display = 'block';
-                formContainer.style.maxHeight = formContainer.scrollHeight + 'px';
-                toggleButton.innerText = 'Tutup';
-            } else if (formContainer.style.display === 'block') {
-                formContainer.style.maxHeight = '0';
-                setTimeout(function() {
-                    formContainer.style.display = 'none';
-                }, 500); // Sesuaikan dengan durasi transisi (0.5 detik)
-                toggleButton.innerText = 'Tambah Barang';
-            } else {
-                formContainer.style.maxHeight = '0';
-                setTimeout(function() {
-                    formContainer.style.display = 'none';
-                }, 500); // Sesuaikan dengan durasi transisi (0.5 detik)
-                toggleButton.innerText = 'Tambah Barang';
-            }
-        }
-    </script>
+    <script></script>
 @endsection
