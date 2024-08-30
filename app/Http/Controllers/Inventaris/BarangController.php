@@ -19,7 +19,7 @@ class BarangController extends Controller
     {
         $customName = $request->input('custom_name');
         $templateBarang = $request->input('template_barang_id');
-        $kategoriBarang = $request->input('barang_category_id');
+        $kategoriBarang = $request->input('category_barang_id');
         $identitasBarang = $request->input('identitas_barang');
         $barang = [];
 
@@ -40,7 +40,7 @@ class BarangController extends Controller
                 $query->where('template_barang_id', $templateBarang);
             }
             if ($kategoriBarang) {
-                $query->where('barang_category_id', $kategoriBarang);
+                $query->where('category_barang_id', $kategoriBarang);
             }
 
             // Ambil hasil pencarian
@@ -75,7 +75,7 @@ class BarangController extends Controller
 
         $template = $validatedData['template_barang_id'];
         $category = TemplateBarang::where('id', $template)->get('category_id')->first()->category_id;
-        $validatedData['barang_category_id'] = $category;
+        $validatedData['category_barang_id'] = $category;
 
         $barang_code = RoomMaintenance::where('id', $request['room_id'])->first()->room_code;
 
