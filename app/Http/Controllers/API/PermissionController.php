@@ -32,8 +32,12 @@ class PermissionController extends Controller
         try {
             $permission = Permission::findById($id);
 
+            // $validator = Validator::make($request->all(), [
+            //     'name' => 'required|string|max:255|unique:permissions,name',
+            // ]);
+
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255|unique:permissions,name',
+                'name' => 'required|string|max:255|unique:permissions,name,' . $permission->id,
             ]);
 
             if ($validator->fails()) {
