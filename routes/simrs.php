@@ -17,8 +17,11 @@ use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
+use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
+use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Models\SIMRS\GrupTindakanMedis;
+use App\Models\SIMRS\Persalinan\KategoriPersalinan;
 use App\Models\SIMRS\TindakanMedis;
 use Illuminate\Support\Facades\Route;
 
@@ -123,6 +126,11 @@ Route::group(['middleware' => ['auth']], function () {
             Route::prefix('peralatan')->group(function () {
                 Route::get('/', [PeralatanController::class, 'index'])->name('master-data.peralatan');
                 Route::get('{id}/tarif', [PeralatanController::class, 'tarifPeralatan'])->name('master-data.peralatan.tarif');
+            });
+
+            Route::prefix('persalinan')->group(function () {
+                Route::get('kategori', [KategoriPersalinanController::class, 'index'])->name('master-data.persalinan.kategori.index');
+                Route::get('tipe', [TipePersalinanController::class, 'index'])->name('master-data.persalinan.tipe');
             });
         });
     });

@@ -45,11 +45,13 @@ use App\Http\Controllers\SIMRS\Laboratorium\NilaiParameterLaboratoriumController
 use App\Http\Controllers\SIMRS\Laboratorium\TarifParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
+use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Http\Middleware\CheckAuthorizationBot;
+use App\Models\SIMRS\Persalinan\KategoriPersalinan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -218,6 +220,15 @@ Route::prefix('simrs')->group(function () {
 
             Route::get('/{peralatanId}/tarif/{grupPenjaminId}', [PeralatanController::class, 'getTarifPeralatan'])->name('master-data.peralatan.tarif.get');
             Route::post('/{peralatanId}/tarif/{grupPenjaminId}', [PeralatanController::class, 'storeTarif'])->name('master-data.peralatan.tarif.store');
+        });
+
+        Route::prefix('persalinan')->group(function () {
+            Route::prefix('kategori')->group(function () {
+                Route::post('/', [KategoriPersalinanController::class, 'store'])->name('master-data.persalinan.kategori.store');
+                Route::get('/{id}', [KategoriPersalinanController::class, 'getKategori'])->name('master-data.persalinan.kategori.get');
+                Route::patch('/{id}/update', [KategoriPersalinanController::class, 'update'])->name('master-data.persalinan.kategori.update');
+                Route::delete('/{id}/delete', [KategoriPersalinanController::class, 'delete'])->name('master-data.persalinan.kategori.delete');
+            });
         });
     });
 });
