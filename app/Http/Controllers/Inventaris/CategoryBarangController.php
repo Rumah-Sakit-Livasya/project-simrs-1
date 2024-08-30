@@ -83,12 +83,16 @@ class CategoryBarangController extends Controller
     {
         $category = CategoryBarang::find($id);
         $TBarang = TemplateBarang::where('category_id', $category->id)->get();
+        $templateBarang = TemplateBarang::orderBy('created_at', 'desc')->get();
+        $categoryBarang = CategoryBarang::orderBy('created_at', 'desc')->get();
 
         return view('pages.inventaris.category-barang.show', [
             'categories' => CategoryBarang::all(),
             'category' => $category,
             'items' => $TBarang,
-            'jumlah' => count(Barang::where('barang_category_id', $category->id)->get())
+            'jumlah' => count(Barang::where('category_barang_id', $category->id)->get()),
+            'templateBarang' => $templateBarang,
+            'categoryBarang' => $categoryBarang,
         ]);
     }
 }

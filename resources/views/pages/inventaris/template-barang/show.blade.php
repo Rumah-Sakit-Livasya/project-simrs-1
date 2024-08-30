@@ -121,8 +121,6 @@
         /* demo scripts for change table color */
         /* change background */
         $(document).ready(function() {
-
-
             $('#dt-basic-example').dataTable({
                 responsive: true,
                 dom: 'Bfrtip',
