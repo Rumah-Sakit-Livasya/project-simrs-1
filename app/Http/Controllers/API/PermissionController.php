@@ -38,7 +38,7 @@ class PermissionController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255|unique:permissions,name,' . $permission->id,
-                'name' => 'required|string|max:255',
+                'group' => 'required|string|max:255',
             ]);
 
             if ($validator->fails()) {
