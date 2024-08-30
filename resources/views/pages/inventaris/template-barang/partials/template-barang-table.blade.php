@@ -81,29 +81,49 @@
             $('.btn-delete').click(function() {
                 var templateId = $(this).attr('data-id');
 
-                // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
-                var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
+                // Using SweetAlert2 for confirmation
+                Swal.fire({
+                    title: 'Anda Yakin ingin menghapus ini?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // If the user confirms deletion, proceed with the AJAX request
+                        $.ajax({
+                            url: '/api/inventaris/template-barang/' + templateId +
+                                '/delete',
+                            type: 'DELETE',
+                            success: function(response) {
+                                Swal.fire({
+                                    title: 'Dihapus!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
 
-                if (userConfirmed) {
-                    // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
-                    $.ajax({
-                        url: '/api/inventaris/template-barang/' + templateId + '/delete',
-                        type: 'DELETE',
-                        success: function(response) {
-                            showSuccessAlert(response.message);
-
-                            setTimeout(() => {
-                                console.log('Reloading the page now.');
-                                window.location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr, status, error) {
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                        }
-                    });
-                } else {
-                    console.log('Penghapusan dibatalkan oleh pengguna.');
-                }
+                                setTimeout(() => {
+                                    console.log('Reloading the page now.');
+                                    window.location.reload();
+                                }, 800);
+                            },
+                            error: function(xhr, status, error) {
+                                Swal.fire(
+                                    'Error!',
+                                    'Terjadi kesalahan: ' + error,
+                                    'error'
+                                );
+                            }
+                        });
+                    } else {
+                        console.log('Penghapusan dibatalkan oleh pengguna.');
+                    }
+                });
             });
 
             $('#update-form').on('submit', function(e) {

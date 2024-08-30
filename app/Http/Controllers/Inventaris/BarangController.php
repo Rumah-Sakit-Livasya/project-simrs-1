@@ -331,10 +331,33 @@ class BarangController extends Controller
     {
         try {
             $barang = Barang::find($id);
+            $urutanDihapus = $barang->urutan_barang;
             $barang->delete();
-            return response()->json(['message' => "$barang->name Berhasil dihapus"], 200);
+
+            // Cari item dengan urutan_barang tertinggi
+            $barangTerbaru = Barang::where('template_barang_id', $barang->template_barang_id)->orderBy('urutan_barang', 'desc')->first();
+
+            if ($barangTerbaru && intval($barangTerbaru->urutan_barang) > intval($urutanDihapus)) {
+                // Perbarui item terbaru untuk mengisi celah
+                $barangTerbaru->urutan_barang = $urutanDihapus;
+
+                // Perbarui kode item untuk mencerminkan urutan_barang yang baru
+                $itemCodeParts = explode('/', $barangTerbaru->item_code);
+                if (isset($itemCodeParts[3])) { // Asumsikan urutan_barang adalah bagian ke-5 (index 3)
+                    $itemCodeParts[3] = str_pad($urutanDihapus, 3, '0', STR_PAD_LEFT);
+                }
+
+                // Gabungkan kembali kode item
+                $kodeItemTerbaru = implode('/', $itemCodeParts);
+                $barangTerbaru->item_code = $kodeItemTerbaru;
+
+                // Simpan perubahan pada barangTerbaru
+                $barangTerbaru->save();
+            }
+
+            return response()->json(['message' => "$barang->name berhasil dihapus"], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
 }

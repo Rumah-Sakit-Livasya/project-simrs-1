@@ -90,7 +90,7 @@ class TemplateBarangController extends Controller
     public function show($id)
     {
         $templateBarang = TemplateBarang::findOrFail($id);
-        $barang = Barang::where("template_barang_id", $templateBarang->id)->get();
+        $barang = Barang::where("template_barang_id", $templateBarang->id)->orderBy('urutan_barang')->get();
 
         return view('pages.inventaris.template-barang.show', [
             'barang' => $barang,

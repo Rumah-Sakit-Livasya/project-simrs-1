@@ -48,8 +48,9 @@
                             {{ RoomMaintenance::where('id', $row->ruang_pinjam)->first()->name }}
                         </td>
                     @else
-                        <td style="white-space: normal"><a href="{{ route('inventaris.rooms.show', $row->room->id) }}"
-                                class="">{{ strtoupper($row->room->name) }}</a>
+                        <td style="white-space: normal"><a
+                                href="{{ $row->room ? route('inventaris.rooms.show', $row->room->id) : 'javascript:void(0)' }}"
+                                class="">{{ $row->room ? strtoupper($row->room->name) : '*Ruangan tidak ada atau sudah dihapus' }}</a>
                         </td>
                     @endif
                 @endif
@@ -78,6 +79,11 @@
                             <i class="fal fa-arrow-circle-left"></i>
                         </button>
                     @endif
+
+                    <button class="badge mx-1 badge-danger p-2 border-0 text-white btn-delete"
+                        data-id="{{ $row->id }}">
+                        <i class="fal fa-trash"></i>
+                    </button>
                 </td>
             </tr>
 
@@ -453,6 +459,53 @@
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
+                    }
+                });
+            });
+
+            $('.btn-delete').click(function() {
+                var barangId = $(this).attr('data-id');
+
+                // Using SweetAlert2 for confirmation
+                Swal.fire({
+                    title: 'Anda Yakin ingin menghapus ini?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // If the user confirms deletion, proceed with the AJAX request
+                        $.ajax({
+                            url: '/api/inventaris/barang/' + barangId + '/delete',
+                            type: 'DELETE',
+                            success: function(response) {
+                                Swal.fire({
+                                    title: 'Dihapus!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+
+                                setTimeout(() => {
+                                    console.log('Reloading the page now.');
+                                    window.location.reload();
+                                }, 800);
+                            },
+                            error: function(xhr, status, error) {
+                                Swal.fire(
+                                    'Error!',
+                                    'Terjadi kesalahan: ' + error,
+                                    'error'
+                                );
+                            }
+                        });
+                    } else {
+                        console.log('Penghapusan dibatalkan oleh pengguna.');
                     }
                 });
             });
