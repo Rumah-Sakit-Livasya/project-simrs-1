@@ -8,6 +8,117 @@
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row">
+            <div class="col-xl-3">
+                <div class="card mb-2">
+                    <div class="card-body p-1 d-flex align-content-center" style="height: 5rem;">
+                        <a href="{{ route('inventaris.rooms.index') }}" class="w-100">
+                            <div class="row justify-content-center align-items-center w-100">
+                                <div class="ml-3 mt-2 col-2">
+                                    <div class="icon-stack display-3 flex-shrink-0">
+                                        <i class="fal fa-circle icon-stack-3x opacity-100 color-primary-400"></i>
+                                        <i class="fas fa-home icon-stack-1x opacity-100 color-primary-500"></i>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="ml-3 mt-2">
+                                        <strong style="font-size: 1.5em">
+                                            Ruangan
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="col-3" style="text-align: right;">
+                                    <span
+                                        style="font-size: 2rem; font-weight: bold; color: rgba(0,0,0,0.2)">{{ count($rooms) }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="card mb-2">
+                    <div class="card-body p-1 d-flex align-content-center" style="height: 5rem;">
+                        <a href="{{ route('inventaris.category.index') }}" class="w-100">
+                            <div class="row justify-content-center align-items-center w-100">
+                                <div class="ml-3 mt-2 col-2">
+                                    <div class="icon-stack display-3 flex-shrink-0">
+                                        <i class="fal fa-circle icon-stack-3x opacity-100 color-primary-400"></i>
+                                        <i class="fas fa-list-alt icon-stack-1x opacity-100 color-primary-500"></i>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="ml-3 mt-2">
+                                        <strong style="font-size: 1.5em">
+                                            Kategori Barang
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="col-3" style="text-align: right;">
+                                    <span
+                                        style="font-size: 2rem; font-weight: bold; color: rgba(0,0,0,0.2)">{{ count($category) }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="card mb-2">
+                    <div class="card-body p-1 d-flex align-content-center" style="height: 5rem;">
+                        <a href="{{ route('inventaris.template.index') }}" class="w-100">
+                            <div class="row justify-content-center align-items-center w-100">
+                                <div class="ml-3 mt-2 col-2">
+                                    <div class="icon-stack display-3 flex-shrink-0">
+                                        <i class="fal fa-circle icon-stack-3x opacity-100 color-primary-400"></i>
+                                        <i class="fas fa-clipboard icon-stack-1x opacity-100 color-primary-500"></i>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="ml-3 mt-2">
+                                        <strong style="font-size: 1.5em">
+                                            Template Barang
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="col-3" style="text-align: right;">
+                                    <span
+                                        style="font-size: 2rem; font-weight: bold; color: rgba(0,0,0,0.2)">{{ count($template) }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="card mb-2">
+                    <div class="card-body p-1 d-flex align-content-center" style="height: 5rem;">
+                        <a href="{{ route('inventaris.barang.index') }}" class="w-100">
+                            <div class="row justify-content-center align-items-center w-100">
+                                <div class="ml-3 mt-2 col-2">
+                                    <div class="icon-stack display-3 flex-shrink-0">
+                                        <i class="fal fa-circle icon-stack-3x opacity-100 color-primary-400"></i>
+                                        <i class="fas fa-cube icon-stack-1x opacity-100 color-primary-500"></i>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="ml-3 mt-2">
+                                        <strong style="font-size: 1.5em">
+                                            Barang
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="col-3" style="text-align: right;">
+                                    <span
+                                        style="font-size: 2rem; font-weight: bold; color: rgba(0,0,0,0.2)">{{ count($barang) }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">

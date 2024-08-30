@@ -28,6 +28,6 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/template-barang/{id}', [TemplateBarangController::class, 'show'])->name('inventaris.template.show');
         Route::get('/barang', [BarangController::class, 'index'])->name('inventaris.barang.index');
         Route::get('/maintenances/{barang:id}', [MaintenanceBarangController::class, 'index'])->name("inventaris.maintenance.index");
-        Route::get('/report-barang', [ReportBarangController::class, 'index'])->name('inventaris.template.index');
+        Route::get('/report-barang', [ReportBarangController::class, 'index'])->name('inventaris.report.index');
     });
 });
