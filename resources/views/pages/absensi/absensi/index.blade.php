@@ -802,7 +802,7 @@
                 }
             }
 
-            function startCamera() {
+            async function startCamera() {
                 try {
                     const constraints = {
                         video: {
@@ -816,17 +816,13 @@
                             playsinline: true // Ensure playsinline is true
                         }
                     };
-                    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-                        video.srcObject = stream;
-                        video.setAttribute('playsinline', true); // Set playsinline attribute
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true); // Set playsinline attribute
 
-                        // Set canvas size when video metadata is loaded
-                        video.addEventListener('loadedmetadata', () => {
-                            adjustCanvasSize();
-                        });
-                    }).catch(error => {
-                        console.error('Error accessing the camera:', error);
-                        alert('Error accessing the camera: ' + error.message);
+                    // Set canvas size when video metadata is loaded
+                    video.addEventListener('loadedmetadata', () => {
+                        adjustCanvasSize();
                     });
                 } catch (error) {
                     console.error('Error accessing the camera:', error);
@@ -839,35 +835,32 @@
                 canvas.height = video.videoHeight;
             }
 
-            function getLocation(callback) {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        latitude = position.coords.latitude;
-                        longitude = position.coords.longitude;
-                        callback(null, position);
-                    }, error => {
-                        console.error("Geolocation failed: " + error.message);
-                        callback(error);
-                    });
-                } else {
-                    const error = new Error("Geolocation not supported");
-                    console.error(error.message);
-                    callback(error);
-                }
+            async function getLocation() {
+                return new Promise((resolve, reject) => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(position => {
+                            latitude = position.coords.latitude;
+                            longitude = position.coords.longitude;
+                            resolve(position);
+                        }, error => {
+                            console.error("Geolocation failed: " + error.message);
+                            reject(error);
+                        });
+                    } else {
+                        console.error("Geolocation is not supported by this browser.");
+                        reject(new Error("Geolocation not supported"));
+                    }
+                });
             }
 
-            function initializeMap() {
+            async function initializeMap() {
                 var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
-                getLocation((error, position) => {
-                    if (error) {
-                        console.error("Error initializing map: ", error);
-                        return;
-                    }
-
+                try {
+                    const position = await getLocation();
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     const accuracy = position.coords.accuracy;
@@ -877,7 +870,9 @@
                     L.marker([lat, lng]).addTo(map)
                         .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
                         .openPopup();
-                });
+                } catch (error) {
+                    console.error("Error initializing map: ", error);
+                }
             }
 
             $('#clock_in').on('click', function(e) {
@@ -960,7 +955,7 @@
                 });
             }
 
-            uploadButton.addEventListener('click', () => {
+            uploadButton.addEventListener('click', async () => {
                 uploadButton.disabled = true;
                 toggleSpinner('upload', true);
 
@@ -984,40 +979,45 @@
                 const apiUrl = actionType === 'clock_in' ? '/api/dashboard/clock-in' :
                     '/api/dashboard/clock-out';
 
-                fetch(apiUrl, {
+                try {
+                    const response = await fetch(apiUrl, {
                         method: 'POST', // Update method to PUT if required
                         body: formData
-                    }).then(response => response.json())
-                    .then(result => {
-                        if (result.success) {
-                            console.log('Success:', result);
-                            $('#picture-modal').modal('hide');
-                            showSuccessAlert(result.message);
-                            setTimeout(() => {
-                                console.log('Reloading the page now.');
-                                window.location.reload();
-                            }, 1000);
-                        } else {
-                            $('#picture-modal').modal('hide');
-                            showErrorAlert(result.error);
-                        }
-                    }).catch(error => {
-                        $('#picture-modal').modal('hide');
-                        showErrorAlert(error.message);
-                    }).finally(() => {
-                        toggleSpinner('upload', false);
-                        uploadButton.disabled = false;
                     });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        console.log('Success:', result);
+                        $('#picture-modal').modal('hide');
+                        showSuccessAlert(result.message);
+                        setTimeout(() => {
+                            console.log('Reloading the page now.');
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        $('#picture-modal').modal('hide');
+                        showErrorAlert(result.error);
+                    }
+                } catch (error) {
+                    $('#picture-modal').modal('hide');
+                    showErrorAlert(error.error);
+                } finally {
+                    toggleSpinner('upload', false);
+                    uploadButton.disabled = false;
+                }
             });
 
-            function fetchAttendanceDetails(employeeId, tanggal, callback) {
-                const url = '/api/dashboard/attendances/detail';
-                const data = {
-                    employee_id: employeeId,
-                    tanggal: tanggal
-                };
+        });
 
-                fetch(url, {
+        async function fetchAttendanceDetails(employeeId, tanggal) {
+            const url = '/api/dashboard/attendances/detail';
+            const data = {
+                employee_id: employeeId,
+                tanggal: tanggal
+            };
+
+            try {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1025,120 +1025,112 @@
                             'content')
                     },
                     body: JSON.stringify(data)
-                }).then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                }).then(result => {
-                    callback(null, result);
-                }).catch(error => {
-                    console.error('Error fetching attendance details:', error);
-                    showErrorAlert(error.message);
-                    callback(error);
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('Error fetching attendance details:', error);
+                showErrorAlert(error.message);
+                throw error;
             }
+        }
 
-            $('.detail-absensi').click(function(e) {
-                e.preventDefault();
-                employeeId = $(this).attr('data-employee-id');
-                tanggal = $(this).attr('data-tanggal');
-                modal = $('#detail-absensi-modal');
-                modalBody = modal.find('.modal-body');
+        $('.detail-absensi').click(async function(e) {
+            e.preventDefault();
+            employeeId = $(this).attr('data-employee-id');
+            tanggal = $(this).attr('data-tanggal');
+            modal = $('#detail-absensi-modal');
+            modalBody = modal.find('.modal-body');
 
-                fetchAttendanceDetails(employeeId, tanggal, (error, result) => {
-                    if (error) {
-                        console.error('Error handling detail-absensi click:', error.message);
-                        alert('Terjadi kesalahan saat mengambil data absensi.');
-                        return;
-                    }
+            try {
+                const result = await fetchAttendanceDetails(employeeId, tanggal);
 
-                    if (result.success) {
-                        const attendance = result.data;
-                        $('#tanggal-detail-absensi').text(tanggal);
-                        // Show modal
-                        modal.modal('show');
+                if (result.success) {
+                    const attendance = result.data;
+                    $('#tanggal-detail-absensi').text(tanggal);
+                    // Show modal
+                    modal.modal('show');
 
-                        // Render map after modal is shown
-                        modal.on('shown.bs.modal', function() {
-                            if (attendance.location) {
-                                const [lat, long] = attendance.location.split(',');
-                                latitude = lat;
-                                longitude = long;
+                    // Render map after modal is shown
+                    modal.on('shown.bs.modal', function() {
+                        if (attendance.location) {
+                            const [lat, long] = attendance.location.split(',');
+                            latitude = lat;
+                            longitude = long;
 
-                                // Clear the modal body before appending new content
-                                modalBody.html('');
+                            // Clear the modal body before appending new content
+                            modalBody.html('');
 
-                                // Create wrapper for the map
-                                const mapWrapper = document.createElement('div');
-                                mapWrapper.id = 'map-wrapper';
-                                mapWrapper.style.position = 'relative';
-                                mapWrapper.style.height = '300px';
-                                mapWrapper.style.marginBottom = '20px';
-                                mapWrapper.style.width = '100%';
+                            // Create wrapper for the map
+                            const mapWrapper = document.createElement('div');
+                            mapWrapper.id = 'map-wrapper';
+                            mapWrapper.style.position = 'relative';
+                            mapWrapper.style.height = '300px';
+                            mapWrapper.style.marginBottom = '20px';
+                            mapWrapper.style.width = '100%';
 
-                                // Create map element and append it to the wrapper
-                                const mapElement = document.createElement('div');
-                                mapElement.id = 'map-detail-absensi';
-                                mapElement.style.height = '100%';
-                                mapElement.style.width = '100%';
-                                mapWrapper.append(mapElement);
+                            // Create map element and append it to the wrapper
+                            const mapElement = document.createElement('div');
+                            mapElement.id = 'map-detail-absensi';
+                            mapElement.style.height = '100%';
+                            mapElement.style.width = '100%';
+                            mapWrapper.append(mapElement);
 
-                                // Append map wrapper to modal body
-                                modalBody.append(mapWrapper);
+                            // Append map wrapper to modal body
+                            modalBody.append(mapWrapper);
 
-                                // Initialize map with placeholder coordinates
-                                const map = L.map(mapElement).setView([0, 0], 13);
-                                L.tileLayer(
-                                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                    }).addTo(map);
+                            // Initialize map with placeholder coordinates
+                            const map = L.map(mapElement).setView([0, 0], 13);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            }).addTo(map);
 
-                                // Set view to actual coordinates after the map is added to the DOM
-                                map.setView([latitude, longitude], 17);
-                                L.marker([latitude, longitude]).addTo(map)
-                                    .bindPopup('Lokasi Absen')
-                                    .openPopup();
+                            // Set view to actual coordinates after the map is added to the DOM
+                            map.setView([latitude, longitude], 17);
+                            L.marker([latitude, longitude]).addTo(map)
+                                .bindPopup('Lokasi Absen')
+                                .openPopup();
+                        }
+
+                        // Render images if available
+                        if (attendance.foto_clock_in || attendance.foto_clock_out) {
+                            const gambarDetail = document.createElement('div');
+                            gambarDetail.id = 'gambar-detail-absensi';
+                            gambarDetail.style.display = 'flex'; // Use flexbox to position images
+                            gambarDetail.style.justifyContent = 'space-between'; // Space images evenly
+                            gambarDetail.style.width = '100%'; // Ensure the container takes full width
+                            modalBody.append(gambarDetail);
+
+                            if (attendance.foto_clock_in) {
+                                const imgClockIn = document.createElement('img');
+                                imgClockIn.src = `/storage/${attendance.foto_clock_in}`;
+                                imgClockIn.alt = 'Foto Clock In';
+                                imgClockIn.className = 'img-clock'; // Use a common class for styling
+                                gambarDetail.append(imgClockIn);
                             }
 
-                            // Render images if available
-                            if (attendance.foto_clock_in || attendance.foto_clock_out) {
-                                const gambarDetail = document.createElement('div');
-                                gambarDetail.id = 'gambar-detail-absensi';
-                                gambarDetail.style.display =
-                                    'flex'; // Use flexbox to position images
-                                gambarDetail.style.justifyContent =
-                                    'space-between'; // Space images evenly
-                                gambarDetail.style.width =
-                                    '100%'; // Ensure the container takes full width
-                                modalBody.append(gambarDetail);
-
-                                if (attendance.foto_clock_in) {
-                                    const imgClockIn = document.createElement('img');
-                                    imgClockIn.src = `/storage/${attendance.foto_clock_in}`;
-                                    imgClockIn.alt = 'Foto Clock In';
-                                    imgClockIn.className =
-                                        'img-clock'; // Use a common class for styling
-                                    gambarDetail.append(imgClockIn);
-                                }
-
-                                if (attendance.foto_clock_out) {
-                                    const imgClockOut = document.createElement('img');
-                                    imgClockOut.src =
-                                        `/storage/${attendance.foto_clock_out}`;
-                                    imgClockOut.alt = 'Foto Clock Out';
-                                    imgClockOut.className =
-                                        'img-clock'; // Use a common class for styling
-                                    gambarDetail.append(imgClockOut);
-                                }
+                            if (attendance.foto_clock_out) {
+                                const imgClockOut = document.createElement('img');
+                                imgClockOut.src = `/storage/${attendance.foto_clock_out}`;
+                                imgClockOut.alt = 'Foto Clock Out';
+                                imgClockOut.className = 'img-clock'; // Use a common class for styling
+                                gambarDetail.append(imgClockOut);
                             }
-                        });
+                        }
+                    });
 
-                    } else {
-                        alert(result.message);
-                    }
-                });
-            });
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error handling detail-absensi click:', error.message);
+                alert('Terjadi kesalahan saat mengambil data absensi.');
+            }
         });
     </script>
 @endsection
