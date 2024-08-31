@@ -333,7 +333,7 @@
                                                     <a href="{{ route('day-off-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -363,7 +363,7 @@
                                                     <a href="{{ route('day-off-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -390,7 +390,7 @@
                                                     <a href="{{ route('day-off-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -428,7 +428,7 @@
                                                     <a href="{{ route('attendance-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -459,7 +459,7 @@
                                                     <a href="{{ route('attendance-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -487,7 +487,7 @@
                                                     <a href="{{ route('attendance-requests.get', $row->id) }}"
                                                         class="d-flex align-items-center">
                                                         <span class="status mr-2">
-                                                            @if ($row->employee->foto != null && Storage::exists('public/employee/profile/' . $row->employee->foto))
+                                                            @if ($row->employee->foto != null && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
                                                                 <span class="profile-image rounded-circle d-block"
                                                                     style="background-image:url('{{ asset('storage/employee/profile/' . $row->employee->foto) }}'); background-size: cover; margin-top: -6px"></span>
                                                             @else
@@ -526,7 +526,7 @@
         <div class="d-flex align-items-center">
             <a href="javascript:void(0)" data-toggle="dropdown" title="{{ auth()->user()->email }}"
                 class="header-icon d-flex align-items-center justify-content-center ml-2">
-                @if (auth()->user()->employee->foto && Storage::exists('public/employee/profile/' . auth()->user()->employee->foto))
+                @if (auth()->user()->employee->foto && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
                     <img src="{{ asset('storage/employee/profile/' . auth()->user()->employee->foto) }}"
                         class="rounded-circle" alt=""
                         style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;">
