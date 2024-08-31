@@ -64,7 +64,7 @@
                             <i class="fas fa-pencil-alt edit-icon"></i>
                         </div>
                         <!-- Gambar profil -->
-                        @if (Storage::exists('public/employee/profile/' . auth()->user()->employee->foto))
+                        @if (Storage::exists('employee/profile/' . auth()->user()->employee->foto))
                             <img src="{{ asset('storage/employee/profile/' . auth()->user()->employee->foto) }}"
                                 class="rounded-circle shadow-2 img-thumbnail" alt=""
                                 style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;">
