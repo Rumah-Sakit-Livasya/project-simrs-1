@@ -46,6 +46,7 @@ use App\Http\Controllers\SIMRS\Laboratorium\TarifParameterLaboratoriumController
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
+use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
@@ -228,6 +229,11 @@ Route::prefix('simrs')->group(function () {
                 Route::get('/{id}', [KategoriPersalinanController::class, 'getKategori'])->name('master-data.persalinan.kategori.get');
                 Route::patch('/{id}/update', [KategoriPersalinanController::class, 'update'])->name('master-data.persalinan.kategori.update');
                 Route::delete('/{id}/delete', [KategoriPersalinanController::class, 'delete'])->name('master-data.persalinan.kategori.delete');
+            });
+
+            Route::prefix('tipe')->group(function () {
+                Route::post('/', [TipePersalinanController::class, 'store'])->name('master-data.persalinan.tipe.store');
+                Route::patch('/{id}/update', [TipePersalinanController::class, 'update'])->name('master-data.persalinan.tipe.update');
             });
         });
     });

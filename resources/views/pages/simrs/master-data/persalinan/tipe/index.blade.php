@@ -49,39 +49,33 @@
                                             <tr>
                                                 <td>{{ $row->tipe }}</td>
                                                 <td><input type="number" name="persentase[{{ $row->id }}]"
-                                                        value="{{ $row->persentase }}">
+                                                        data-id="{{ $row->id }}" value="{{ $row->persentase }}">
                                                 </td>
                                                 <td>
                                                     <input type="checkbox" name="operator[{{ $row->id }}]"
+                                                        data-id="{{ $row->id }}"
                                                         {{ $row->operator == 1 ? 'checked' : '' }}>
                                                 </td>
                                                 <td>
                                                     <input type="checkbox" name="anestesi[{{ $row->id }}]"
+                                                        data-id="{{ $row->id }}"
                                                         {{ $row->anestesi == 1 ? 'checked' : '' }}>
                                                 </td>
                                                 <td>
                                                     <input type="checkbox" name="prediatric[{{ $row->id }}]"
+                                                        data-id="{{ $row->id }}"
                                                         {{ $row->prediatric == 1 ? 'checked' : '' }}>
                                                 </td>
                                                 <td>
                                                     <input type="checkbox" name="room[{{ $row->id }}]"
+                                                        data-id="{{ $row->id }}"
                                                         {{ $row->room == 1 ? 'checked' : '' }}>
                                                 </td>
                                                 <td>
                                                     <input type="checkbox" name="observasi[{{ $row->id }}]"
+                                                        data-id="{{ $row->id }}"
                                                         {{ $row->observasi == 1 ? 'checked' : '' }}>
                                                 </td>
-
-                                                {{-- <td>
-                                                    <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
-                                                        data-id="{{ $row->id }}">
-                                                        <i class="fas fa-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-danger px-2 py-1 btn-delete"
-                                                        data-id="{{ $row->id }}">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </td> --}}
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -90,9 +84,9 @@
                                             <th colspan="3" class="text-center">
                                                 <button type="button"
                                                     class="btn btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-kategori">
+                                                    id="btn-tambah-tipe">
                                                     <span class="fal fa-plus-circle"></span>
-                                                    Tambah Kategori Persalinan
+                                                    Tambah Tipe Persalinan
                                                 </button>
                                             </th>
                                         </tr>
@@ -106,7 +100,7 @@
             </div>
         </div>
     </main>
-    @include('pages.simrs.master-data.persalinan.kategori.partials.tambah')
+    @include('pages.simrs.master-data.persalinan.tipe.partials.tambah')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -117,119 +111,45 @@
             let kategoriId = null;
             $('#loading-spinner').show();
 
-            $('#btn-tambah-kategori').click(function() {
-                $('#modal-tambah-kategori').modal('show');
+            $('#btn-tambah-tipe').click(function() {
+                $('#modal-tambah-tipe').modal('show');
             });
 
-            $('.btn-edit').click(function() {
-                console.log('clicked');
-                $('#modal-edit-kategori').modal('show');
-                kategoriId = $(this).attr('data-id');
-                $('#modal-edit-kategori form').attr('data-id', kategoriId);
+            // Event listener untuk checkbox
+            $('input[type="checkbox"]').change(function() {
+                let checkbox = $(this);
+                let fieldName = checkbox.attr('name');
+                let isChecked = checkbox.is(':checked');
+                let tipeId = checkbox.attr('data-id'); // Mengambil id dari atribut data-id
+
+                // Membuat URL dengan id yang dinamis
+                let url = '{{ route('master-data.persalinan.tipe.update', ':tipeId') }}';
+                url = url.replace(':tipeId',
+                    tipeId); // Mengganti placeholder :id dengan nilai sebenarnya dari id
 
                 $.ajax({
-                    url: '/api/simrs/master-data/persalinan/kategori/' +
-                        kategoriId,
-                    type: 'GET',
-                    success: function(response) {
-                        $('#modal-edit-kategori input[name="nama"]')
-                            .val(
-                                response
-                                .nama);
-
-                        let is_aktif = response.is_aktif;
-
-                        // Mengatur radio button berdasarkan nilai
-                        if (is_aktif == 1) {
-                            $('#is_aktif_ya').prop('checked', true);
-                        } else {
-                            $('#is_aktif_tidak').prop('checked', true);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        $('#modal-edit-kategori').modal('hide');
-                        showErrorAlert('Terjadi kesalahan: ' + error);
-                    }
-                });
-
-            });
-
-            $('.btn-delete').click(function() {
-                var kategoriId = $(this).attr('data-id');
-
-                // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
-                var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
-
-                if (userConfirmed) {
-                    // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
-                    $.ajax({
-                        url: '/api/simrs/master-data/persalinan/kategori/' +
-                            kategoriId +
-                            '/delete',
-                        type: 'DELETE',
-                        success: function(response) {
-                            showSuccessAlert(response.message);
-
-                            setTimeout(() => {
-                                console.log('Reloading the page now.');
-                                window.location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr, status, error) {
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                        }
-                    });
-                } else {
-                    console.log('Penghapusan dibatalkan oleh pengguna.');
-                }
-            });
-
-            $('#update-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
-
-                var formData = $(this).serialize();
-                kategoriId = $(this).attr('data-id');
-                $.ajax({
-                    url: '/api/simrs/master-data/persalinan/kategori/' +
-                        kategoriId +
-                        '/update',
+                    url: url, // Menggunakan URL yang sudah diganti
                     type: 'PATCH',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#update-form').find('.ikon-edit').hide();
-                        $('#update-form').find('.spinner-text').removeClass(
-                            'd-none');
+                    data: {
+                        _token: '{{ csrf_token() }}', // CSRF token
+                        id: tipeId,
+                        field: fieldName, // Nama field (misalnya 'operator[1]')
+                        value: isChecked ? 1 : 0 // Status checkbox (checked atau tidak)
                     },
                     success: function(response) {
-                        $('#modal-edit-kategori').modal('hide');
+                        // Berhasil update
+                        console.log(response.message);
                         showSuccessAlert(response.message);
-
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
                     },
                     error: function(xhr, status, error) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
-                            });
-
-                            $('#modal-edit-kategori').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
-                        } else {
-                            $('#modal-edit-kategori').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
-                        }
+                        // Jika terjadi error
+                        console.error(xhr.responseText);
+                        showErrorAlert('Terjadi kesalahan. Mohon coba lagi.');
                     }
                 });
             });
+
+
 
             $('#store-form').on('submit', function(e) {
                 e.preventDefault(); // Mencegah form submit secara default
@@ -237,7 +157,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/simrs/master-data/persalinan/kategori',
+                    url: '{{ route('master-data.persalinan.tipe.store') }}',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {
@@ -246,7 +166,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-tambah-kategori').modal('hide');
+                        $('#modal-tambah-tipe').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -264,11 +184,11 @@
                                     '\n';
                             });
 
-                            $('#modal-tambah-kategori').modal('hide');
+                            $('#modal-tambah-tipe').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-tambah-kategori').modal('hide');
+                            $('#modal-tambah-tipe').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }

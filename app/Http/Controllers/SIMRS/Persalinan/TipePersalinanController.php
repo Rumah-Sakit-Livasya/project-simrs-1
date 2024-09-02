@@ -44,7 +44,7 @@ class TipePersalinanController extends Controller
     {
         $validatedData = $request->validate([
             'tipe' => 'required',
-            'persentase' => 'required',
+            'persentase' => 'required|numeric',
             'operator' => 'required',
             'anestesi' => 'required',
             'prediatric' => 'required',
@@ -62,19 +62,15 @@ class TipePersalinanController extends Controller
 
     public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'tipe' => 'required',
-            'persentase' => 'required',
-            'operator' => 'required',
-            'anestesi' => 'required',
-            'prediatric' => 'required',
-            'room' => 'required',
-            'observasi' => 'required',
-        ]);
+        $field = $request->input('field');
+        $fieldName = explode('[', $field)[0]; // Mengambil 'room' saja
 
         try {
-            $grup_tipe_persalinan = TipePersalinan::find($id);
-            $grup_tipe_persalinan->update($validatedData);
+            $tipe_persalinan = TipePersalinan::find($id);
+            $tipe_persalinan->update([
+                $fieldName => $request->value,
+            ]);
+            // $grup_tipe_persalinan->update($validatedData);
             return response()->json(['message' => ' berhasil diupdate!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

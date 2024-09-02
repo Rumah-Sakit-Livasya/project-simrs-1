@@ -113,7 +113,11 @@
 
                 $('#store-form').on('submit', function(e) {
                     e.preventDefault();
+                    let clockin = $('#clockin').val();
+                    let clockout = $('#clockout').val();
                     let formData = new FormData(this);
+                    formData.append("clockin", clockin);
+                    formData.append("clockout", clockout);
                     formData.append("employee_id", "{{ auth()->user()->employee->id }}");
                     formData.append("approved_line_child",
                         "{{ auth()->user()->employee->approval_line }}");

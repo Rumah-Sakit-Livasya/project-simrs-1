@@ -201,9 +201,12 @@ class AttendanceRequestController extends Controller
 
     public function store()
     {
-        // return dd(request()->all());
 
         try {
+            if (request()->clockin == null && request()->clockout == null) {
+                throw new \Exception('Clockin atau Clockout harap diisi!');
+            }
+
             $validator = Validator::make(request()->all(), [
                 'employee_id' => 'required',
                 'date' => 'required|date',
@@ -212,10 +215,6 @@ class AttendanceRequestController extends Controller
                 'file' => 'nullable|file|mimes:jpg,png,jpeg',
                 'description' => 'nullable|string',
             ]);
-
-            if (!request()->has('clockin') && !request()->has('clockout')) {
-                return redirect()->back()->with('error', 'Clockin atau Clockout harap diisi!');
-            }
 
             $employee = Employee::where('id', request()->employee_id)->first(['approval_line', 'approval_line_parent', 'fullname']);
             $is_approved = 'Pending';
