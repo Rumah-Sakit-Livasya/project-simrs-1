@@ -45,6 +45,7 @@ use App\Http\Controllers\SIMRS\Laboratorium\NilaiParameterLaboratoriumController
 use App\Http\Controllers\SIMRS\Laboratorium\TarifParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
+use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
@@ -234,6 +235,13 @@ Route::prefix('simrs')->group(function () {
             Route::prefix('tipe')->group(function () {
                 Route::post('/', [TipePersalinanController::class, 'store'])->name('master-data.persalinan.tipe.store');
                 Route::patch('/{id}/update', [TipePersalinanController::class, 'update'])->name('master-data.persalinan.tipe.update');
+            });
+
+            Route::prefix('daftar-persalinan')->group(function () {
+                Route::post('/', [DaftarPersalinanController::class, 'store'])->name('master-data.persalinan.daftar-persalinan.store');
+                Route::get('/{id}', [DaftarPersalinanController::class, 'getPersalinan'])->name('master-data.persalinan.daftar-persalinan.get');
+                Route::patch('/{id}/update', [DaftarPersalinanController::class, 'update'])->name('master-data.persalinan.daftar-persalinan.update');
+                Route::delete('/{id}/delete', [DaftarPersalinanController::class, 'delete'])->name('master-data.persalinan.daftar-persalinan.delete');
             });
         });
     });
