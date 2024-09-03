@@ -14,6 +14,10 @@ use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\NilaiParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
+use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
+use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
+use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
+use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
@@ -134,6 +138,13 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/kategori', [KategoriPersalinanController::class, 'index'])->name('master-data.persalinan.kategori.index');
                 Route::get('/tipe', [TipePersalinanController::class, 'index'])->name('master-data.persalinan.tipe');
                 Route::get('/daftar-persalinan', [DaftarPersalinanController::class, 'index'])->name('master-data.persalinan.daftar');
+            });
+
+            Route::prefix('operasi')->group(function () {
+                Route::get('/kategori', [KategoriOperasiController::class, 'index'])->name('master-data.operasi.kategori.index');
+                Route::get('/tipe', [TipeOperasiController::class, 'index'])->name('master-data.operasi.tipe');
+                Route::get('/jenis', [JenisOperasiController::class, 'index'])->name('master-data.operasi.jenis');
+                Route::get('/tindakan', [TindakanOperasiController::class, 'index'])->name('master-data.operasi.tindakan');
             });
         });
     });

@@ -1,0 +1,202 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\SIMRS\BedController;
+use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
+use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
+use App\Http\Controllers\SIMRS\KategoriRadiologiController;
+use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
+use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
+use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
+use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
+use App\Http\Controllers\SIMRS\KelasRawatController;
+use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
+use App\Http\Controllers\SIMRS\Laboratorium\TarifParameterLaboratoriumController;
+use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
+use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
+use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
+use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
+use App\Http\Controllers\SIMRS\ParameterRadiologiController;
+use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
+use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
+use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
+use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
+use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
+use App\Http\Controllers\SIMRS\RoomController;
+use App\Http\Controllers\SIMRS\TarifKelasRawatController;
+use App\Http\Controllers\SIMRS\TindakanMedisController;
+
+Route::prefix('simrs')->group(function () {
+    Route::prefix('master-data')->group(function () {
+        Route::prefix('layanan-medis')->group(function () {
+            Route::get('/tindakan-medis/{id}', [TindakanMedisController::class, 'getTindakan'])->name('master-data.layanan-medis.tindakan-medis.get');
+            Route::post('/tindakan-medis', [TindakanMedisController::class, 'store'])->name('master-data.layanan-medis.tindakan-medis.store');
+            Route::patch('/tindakan-medis/{id}/update', [TindakanMedisController::class, 'update'])->name('master-data.layanan-medis.tindakan-medis.update');
+            Route::delete('/tindakan-medis/{id}/delete', [TindakanMedisController::class, 'delete'])->name('master-data.layanan-medis.tindakan-medis.delete');
+
+            Route::post('/grup-tindakan-medis', [GrupTindakanMedisController::class, 'store'])->name('master-data.grup-tindakan-medis.store');
+            Route::get('/grup-tindakan-medis/{id}', [GrupTindakanMedisController::class, 'getGrupTindakan'])->name('master-data.layanan-medis.grup-tindakan-medis.get');
+            Route::patch('/grup-tindakan-medis/{id}/update', [GrupTindakanMedisController::class, 'update'])->name('master-data.layanan-medis.grup-tindakan-medis.update');
+            Route::delete('/grup-tindakan-medis/{id}/delete', [GrupTindakanMedisController::class, 'delete'])->name('master-data.layanan-medis.grup-tindakan-medis.delete');
+
+            Route::post('/grup-rehab-medik', [GrupTindakanMedisController::class, 'store'])->name('master-data.grup-rehab-medik.store');
+            Route::patch('/grup-rehab-medik/{id}/update', [GrupTindakanMedisController::class, 'update'])->name('master-data.layanan-medis.grup-rehab-medik.update');
+            Route::delete('/grup-rehab-medik/{id}/delete', [GrupTindakanMedisController::class, 'delete'])->name('master-data.layanan-medis.grup-rehab-medik.delete');
+        });
+
+        Route::prefix('setup')->group(function () {
+            Route::get('/kelas-rawat/{id}', [KelasRawatController::class, 'getKelas'])->name('master-data.setup.kelas-rawat.get');
+            Route::post('/kelas-rawat', [KelasRawatController::class, 'store'])->name('master-data.setup.kelas-rawat.store');
+            Route::patch('/kelas-rawat/{id}/update', [KelasRawatController::class, 'update'])->name('master-data.setup.kelas-rawat.update');
+            Route::delete('/kelas-rawat/{id}/delete', [KelasRawatController::class, 'delete'])->name('master-data.setup.kelas-rawat.delete');
+
+            Route::get('/tarif/{id}', [TarifKelasRawatController::class, 'getTarif'])->name('master-data.setup.tarif.get');
+            // Route::post('/tarif', [TarifKelasRawatController::class, 'store'])->name('master-data.setup.tarif.store');
+            Route::patch('/tarif', [TarifKelasRawatController::class, 'update'])->name('master-data.setup.tarif.update');
+            // Route::delete('/tarif/{id}/delete', [TarifKelasRawatController::class, 'delete'])->name('master-data.setup.tarif.delete');
+
+            Route::get('/room/{id}', [RoomController::class, 'getRoom'])->name('master-data.setup.room.get');
+            Route::post('/room', [RoomController::class, 'store'])->name('master-data.setup.room.store');
+            Route::patch('/room/{id}/update', [RoomController::class, 'update'])->name('master-data.setup.room.update');
+            Route::delete('/room/{id}/delete', [RoomController::class, 'delete'])->name('master-data.setup.room.delete');
+
+            Route::get('/bed/{id}', [BedController::class, 'getBed'])->name('master-data.setup.bed.get');
+            Route::post('/bed', [BedController::class, 'store'])->name('master-data.setup.bed.store');
+            Route::patch('/bed/{id}/update', [BedController::class, 'update'])->name('master-data.setup.bed.update');
+            Route::delete('/bed/{id}/delete', [BedController::class, 'delete'])->name('master-data.setup.bed.delete');
+        });
+
+        Route::prefix('penunjang-medis')->group(function () {
+            Route::get('/radiologi/grup-parameter-radiologi/{id}', [GrupParameterRadiologiController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.radiologi.grup-parameter.get');
+            Route::post('/radiologi/grup-parameter-radiologi', [GrupParameterRadiologiController::class, 'store'])->name('master-data.penunjang-medis.radiologi.grup-parameter.store');
+            Route::patch('/radiologi/grup-parameter-radiologi/{id}/update', [GrupParameterRadiologiController::class, 'update'])->name('master-data.penunjang-medis.radiologi.grup-parameter.update');
+            Route::delete('/radiologi/grup-parameter-radiologi/{id}/delete', [GrupParameterRadiologiController::class, 'delete'])->name('master-data.penunjang-medis.radiologi.grup-parameter.delete');
+
+            Route::get('/radiologi/kategori/{id}', [KategoriRadiologiController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.radiologi.kategori.get');
+            Route::post('/radiologi/kategori', [KategoriRadiologiController::class, 'store'])->name('master-data.penunjang-medis.radiologi.kategori.store');
+            Route::patch('/radiologi/kategori/{id}/update', [KategoriRadiologiController::class, 'update'])->name('master-data.penunjang-medis.radiologi.kategori.update');
+            Route::delete('/radiologi/kategori/{id}/delete', [KategoriRadiologiController::class, 'delete'])->name('master-data.penunjang-medis.radiologi.kategori.delete');
+
+
+            Route::get('/radiologi/parameter/{id}', [ParameterRadiologiController::class, 'getParameter'])->name('master-data.penunjang-medis.radiologi.parameter.get');
+            Route::post('/radiologi/parameter', [ParameterRadiologiController::class, 'store'])->name('master-data.penunjang-medis.radiologi.parameter.store');
+            Route::patch('/radiologi/parameter/{id}/update', [ParameterRadiologiController::class, 'update'])->name('master-data.penunjang-medis.radiologi.parameter.update');
+            Route::delete('/radiologi/parameter/{id}/delete', [ParameterRadiologiController::class, 'delete'])->name('master-data.penunjang-medis.radiologi.parameter.delete');
+
+            Route::prefix('radiologi')->group(function () {
+                Route::get('/grup-parameter-radiologi/{id}', [GrupParameterRadiologiController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.radiologi.grup-parameter.get');
+                Route::post('/grup-parameter-radiologi', [GrupParameterRadiologiController::class, 'store'])->name('master-data.penunjang-medis.radiologi.grup-parameter.store');
+                Route::patch('/grup-parameter-radiologi/{id}/update', [GrupParameterRadiologiController::class, 'update'])->name('master-data.penunjang-medis.radiologi.grup-parameter.update');
+                Route::delete('/grup-parameter-radiologi/{id}/delete', [GrupParameterRadiologiController::class, 'delete'])->name('master-data.penunjang-medis.radiologi.grup-parameter.delete');
+
+                Route::get('/kategori/{id}', [KategoriRadiologiController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.radiologi.kategori.get');
+                Route::post('/kategori', [KategoriRadiologiController::class, 'store'])->name('master-data.penunjang-medis.radiologi.kategori.store');
+                Route::patch('/kategori/{id}/update', [KategoriRadiologiController::class, 'update'])->name('master-data.penunjang-medis.radiologi.kategori.update');
+                Route::delete('/kategori/{id}/delete', [KategoriRadiologiController::class, 'delete'])->name('master-data.penunjang-medis.radiologi.kategori.delete');
+
+
+                Route::get('/parameter/{id}', [ParameterRadiologiController::class, 'getParameter'])->name('master-data.penunjang-medis.radiologi.parameter.get');
+                Route::post('/parameter', [ParameterRadiologiController::class, 'store'])->name('master-data.penunjang-medis.radiologi.parameter.store');
+                Route::patch('/parameter/{id}/update', [ParameterRadiologiController::class, 'update'])->name('master-data.penunjang-medis.radiologi.parameter.update');
+                Route::delete('/parameter/{id}/delete', [ParameterRadiologiController::class, 'delete'])->name('master-data.penunjang-medis.radiologi.parameter.delete');
+
+                Route::get('/parameter/{parameterId}/tarif/{grupPenjaminId}', [TarifParameterRadiologiController::class, 'getTarifParameter'])->name('master-data.penunjang-medis.radiologi.parameter.tarif.get');
+                Route::post('/parameter/{parameterId}/tarif/{grupPenjaminId}', [TarifParameterRadiologiController::class, 'store'])->name('master-data.penunjang-medis.radiologi.parameter.tarif.store');
+            });
+
+            Route::prefix('laboratorium')->group(function () {
+                Route::get('/grup-parameter/{id}', [GrupParameterLaboratoriumController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.get');
+                Route::post('/grup-parameter', [GrupParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.store');
+                Route::patch('/grup-parameter/{id}/update', [GrupParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.update');
+                Route::delete('/grup-parameter/{id}/delete', [GrupParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.delete');
+
+                Route::get('/parameter/{id}', [ParameterLaboratoriumController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.get');
+                Route::post('/parameter', [ParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.parameter.store');
+                Route::patch('/parameter/{id}/update', [ParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.parameter.update');
+                Route::delete('/parameter/{id}/delete', [ParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.parameter.delete');
+                Route::get('/parameter/{parameterId}/tarif/{grupPenjaminId}', [TarifParameterLaboratoriumController::class, 'getTarifParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.tarif.get');
+                Route::post('/parameter/{parameterId}/tarif/{grupPenjaminId}', [TarifParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.parameter.tarif.store');
+
+                Route::get('/kategori/{id}', [KategoriLaboratorumController::class, 'getKategori'])->name('master-data.penunjang-medis.laboratorium.kategori.get');
+                Route::post('/kategori', [KategoriLaboratorumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.kategori.store');
+                Route::patch('/kategori/{id}/update', [KategoriLaboratorumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.kategori.update');
+                Route::delete('/kategori/{id}/delete', [KategoriLaboratorumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.kategori.delete');
+
+                Route::get('/tipe/{id}', [TipeLaboratoriumController::class, 'getTipe'])->name('master-data.penunjang-medis.laboratorium.tipe.get');
+                Route::post('/tipe', [TipeLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.tipe.store');
+                Route::patch('/tipe/{id}/update', [TipeLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.tipe.update');
+                Route::delete('/tipe/{id}/delete', [TipeLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.tipe.delete');
+
+                Route::get('/nilai-normal/{parameterId}/get', [NilaiNormalLaboratoriumController::class, 'getNilaiParameter'])->name('master-data.penunjang-medis.laboratorium.nilai-normal');
+            });
+        });
+
+        Route::prefix('peralatan')->group(function () {
+            Route::post('/', [PeralatanController::class, 'store'])->name('master-data.peralatan.store');
+            Route::get('/{id}', [PeralatanController::class, 'getPeralatan'])->name('master-data.peralatan.get');
+            Route::patch('/{id}/update', [PeralatanController::class, 'update'])->name('master-data.peralatan.update');
+            Route::delete('/{id}/delete', [PeralatanController::class, 'delete'])->name('master-data.peralatan.delete');
+
+            Route::get('/{peralatanId}/tarif/{grupPenjaminId}', [PeralatanController::class, 'getTarifPeralatan'])->name('master-data.peralatan.tarif.get');
+            Route::post('/{peralatanId}/tarif/{grupPenjaminId}', [PeralatanController::class, 'storeTarif'])->name('master-data.peralatan.tarif.store');
+        });
+
+        Route::prefix('persalinan')->group(function () {
+            Route::prefix('kategori')->group(function () {
+                Route::post('/', [KategoriPersalinanController::class, 'store'])->name('master-data.persalinan.kategori.store');
+                Route::get('/{id}', [KategoriPersalinanController::class, 'getKategori'])->name('master-data.persalinan.kategori.get');
+                Route::patch('/{id}/update', [KategoriPersalinanController::class, 'update'])->name('master-data.persalinan.kategori.update');
+                Route::delete('/{id}/delete', [KategoriPersalinanController::class, 'delete'])->name('master-data.persalinan.kategori.delete');
+            });
+
+            Route::prefix('tipe')->group(function () {
+                Route::post('/', [TipePersalinanController::class, 'store'])->name('master-data.persalinan.tipe.store');
+                Route::patch('/{id}/update', [TipePersalinanController::class, 'update'])->name('master-data.persalinan.tipe.update');
+            });
+
+            Route::prefix('daftar-persalinan')->group(function () {
+                Route::post('/', [DaftarPersalinanController::class, 'store'])->name('master-data.persalinan.daftar-persalinan.store');
+                Route::get('/{id}', [DaftarPersalinanController::class, 'getPersalinan'])->name('master-data.persalinan.daftar-persalinan.get');
+                Route::patch('/{id}/update', [DaftarPersalinanController::class, 'update'])->name('master-data.persalinan.daftar-persalinan.update');
+                Route::delete('/{id}/delete', [DaftarPersalinanController::class, 'delete'])->name('master-data.persalinan.daftar-persalinan.delete');
+            });
+        });
+
+        Route::prefix('operasi')->group(function () {
+            Route::prefix('kategori')->group(function () {
+                Route::post('/', [KategoriOperasiController::class, 'store'])->name('master-data.operasi.kategori.store');
+                Route::get('/{id}', [KategoriOperasiController::class, 'getKategori'])->name('master-data.operasi.kategori.get');
+                Route::patch('/{id}/update', [KategoriOperasiController::class, 'update'])->name('master-data.operasi.kategori.update');
+                Route::delete('/{id}/delete', [KategoriOperasiController::class, 'delete'])->name('master-data.operasi.kategori.delete');
+            });
+
+            Route::prefix('tipe')->group(function () {
+                Route::post('/', [TipeOperasiController::class, 'store'])->name('master-data.operasi.tipe.store');
+                Route::get('/{id}', [TipeOperasiController::class, 'getTipe'])->name('master-data.operasi.tipe.get');
+                Route::patch('/{id}/update', [TipeOperasiController::class, 'update'])->name('master-data.operasi.tipe.update');
+                Route::delete('/{id}/delete', [TipeOperasiController::class, 'delete'])->name('master-data.operasi.tipe.delete');
+                Route::post('/{tipeId}/update-per-column', [TipeOperasiController::class, 'updatePerColumn'])->name('master-data.operasi.tipe.update.column');
+            });
+
+            Route::prefix('jenis')->group(function () {
+                Route::post('/', [JenisOperasiController::class, 'store'])->name('master-data.operasi.jenis.store');
+                Route::get('/{id}', [JenisOperasiController::class, 'getJenis'])->name('master-data.operasi.jenis.get');
+                Route::patch('/{id}/update', [JenisOperasiController::class, 'update'])->name('master-data.operasi.jenis.update');
+                Route::delete('/{id}/delete', [JenisOperasiController::class, 'delete'])->name('master-data.operasi.jenis.delete');
+            });
+
+            Route::prefix('tindakan')->group(function () {
+                Route::post('/', [TindakanOperasiController::class, 'store'])->name('master-data.operasi.tindakan.store');
+                Route::get('/{id}', [TindakanOperasiController::class, 'getTindakan'])->name('master-data.operasi.tindakan.get');
+                Route::patch('/{id}/update', [TindakanOperasiController::class, 'update'])->name('master-data.operasi.tindakan.update');
+                Route::delete('/{id}/delete', [TindakanOperasiController::class, 'delete'])->name('master-data.operasi.tindakan.delete');
+            });
+
+            // Route::prefix('tipe')->group(function () {
+            //     Route::post('/', [TipePersalinanController::class, 'store'])->name('master-data.persalinan.tipe.store');
+            //     Route::patch('/{id}/update', [TipePersalinanController::class, 'update'])->name('master-data.persalinan.tipe.update');
+            // });
+        });
+    });
+});
