@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
 use App\Models\SIMRS\Departement;
+use App\Models\SIMRS\Doctor;
 use Illuminate\Http\Request;
 
 class DepartementController extends Controller
@@ -16,7 +17,7 @@ class DepartementController extends Controller
     public function index()
     {
         $departements = Departement::orderBy('name', 'asc')->get();
-        return view('pages.simrs.departement.index', compact('departements'));
+        return view('pages.simrs.master-data.setup.departement.index', compact('departements'));
     }
 
     /**
@@ -24,9 +25,10 @@ class DepartementController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function tambah()
     {
-        return view('pages.simrs.departement.create');
+        $doctors = Doctor::all();
+        return view('pages.simrs.master-data.setup.departement.create', compact('doctors'));
     }
 
     /**
@@ -37,19 +39,21 @@ class DepartementController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request);
         $validatedData = $request->validate([
             'name' => 'required|max:255',
             'kode' => 'required',
             'keterangan' => 'required|max:255',
             'quota' => 'required|max:255',
             'kode_poli' => 'nullable|max:255',
+            'default_dokter' => 'nullable|max:255',
             'publish_online' => 'required',
             'revenue_and_cost_center' => 'nullable',
             'master_layanan_rl' => 'nullable',
         ]);
 
         $store = Departement::create($validatedData);
-        return redirect('/departement')->with('success', 'Departemen berhasil ditambahkan!');
+        return redirect()->route('master-data.setup.departemen.index')->with('success', 'Departemen berhasil ditambahkan!');
     }
 
     /**

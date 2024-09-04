@@ -12,9 +12,9 @@ class Departement extends Model
 
     protected $guarded = ['id'];
 
-    public function doctors()
+    public function doctor()
     {
-        return $this->hasMany(Doctor::class);
+        return $this->belongsTo(Doctor::class, 'default_dokter');
     }
 
     public function registrations()

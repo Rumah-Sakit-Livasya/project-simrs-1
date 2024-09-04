@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\SIMRS\BedController;
+use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
+use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
@@ -26,6 +28,7 @@ use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Models\SIMRS\Departement;
 
 Route::prefix('simrs')->group(function () {
     Route::prefix('master-data')->group(function () {
@@ -65,6 +68,11 @@ Route::prefix('simrs')->group(function () {
             Route::post('/bed', [BedController::class, 'store'])->name('master-data.setup.bed.store');
             Route::patch('/bed/{id}/update', [BedController::class, 'update'])->name('master-data.setup.bed.update');
             Route::delete('/bed/{id}/delete', [BedController::class, 'delete'])->name('master-data.setup.bed.delete');
+
+            Route::prefix('departemen')->group(function () {
+                Route::post('/', [DepartementController::class, 'store'])->name('master-data.setup.departemen.store');
+                Route::patch('/{id}/update', [DepartementController::class, 'update'])->name('master-data.setup.departemen.update');
+            });
         });
 
         Route::prefix('penunjang-medis')->group(function () {
@@ -192,11 +200,13 @@ Route::prefix('simrs')->group(function () {
                 Route::patch('/{id}/update', [TindakanOperasiController::class, 'update'])->name('master-data.operasi.tindakan.update');
                 Route::delete('/{id}/delete', [TindakanOperasiController::class, 'delete'])->name('master-data.operasi.tindakan.delete');
             });
+        });
 
-            // Route::prefix('tipe')->group(function () {
-            //     Route::post('/', [TipePersalinanController::class, 'store'])->name('master-data.persalinan.tipe.store');
-            //     Route::patch('/{id}/update', [TipePersalinanController::class, 'update'])->name('master-data.persalinan.tipe.update');
-            // });
+        Route::prefix('grup-suplier')->group(function () {
+            Route::post('/', [GrupSuplierController::class, 'store'])->name('master-data.grup-suplier.store');
+            Route::get('/{id}', [GrupSuplierController::class, 'getGrup'])->name('master-data.grup-suplier.get');
+            Route::patch('/{id}/update', [GrupSuplierController::class, 'update'])->name('master-data.grup-suplier.update');
+            Route::delete('/{id}/delete', [GrupSuplierController::class, 'delete'])->name('master-data.grup-suplier.delete');
         });
     });
 });

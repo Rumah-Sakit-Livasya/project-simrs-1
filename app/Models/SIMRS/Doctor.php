@@ -13,9 +13,9 @@ class Doctor extends Model
 
     protected $guarded = ['id'];
 
-    public function departement()
+    public function departements()
     {
-        return $this->belongsTo(Departement::class);
+        return $this->hasMany(Departement::class, 'default_dokter');
     }
 
     public function employee()

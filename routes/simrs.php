@@ -4,6 +4,7 @@ use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
+use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Models\SIMRS\GrupSuplier\GrupSuplier;
 use App\Models\SIMRS\GrupTindakanMedis;
 use App\Models\SIMRS\Persalinan\DaftarPersalinan;
 use App\Models\SIMRS\Persalinan\KategoriPersalinan;
@@ -92,9 +94,9 @@ Route::group(['middleware' => ['auth']], function () {
     // Route::put('/role/edit/{role:id}', [RoleController::class, 'update'])->name('master.data.user.akses.role.update');
     // Route::get('/role/delete/{role:id}', [RoleController::class, 'destroy'])->name('master.data.user.akses.role.destroy');
 
-    Route::get('/departements', [DepartementController::class, 'index'])->name('master.data.setup.departement.index');
-    Route::get('/tambah-departement', [DepartementController::class, 'create'])->name('master.data.setup.tambah.departement');
-    Route::post('/tambah-departement', [DepartementController::class, 'store'])->name('master.data.setup.simpan.tambah.departement');
+    // Route::get('/departements', [DepartementController::class, 'index'])->name('master.data.setup.departement.index');
+    // Route::get('/tambah-departement', [DepartementController::class, 'create'])->name('master.data.setup.tambah.departement');
+    // Route::post('/tambah-departement', [DepartementController::class, 'store'])->name('master.data.setup.simpan.tambah.departement');
 
     Route::prefix('simrs')->group(function () {
         Route::get('/dashboard', function () {
@@ -106,6 +108,9 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/kelas-rawat', [KelasRawatController::class, 'index'])->name('master-data.setup.kelas-rawat');
                 Route::get('/rooms/{kelas:id}', [RoomController::class, 'index'])->name('master-data.setup.rooms');
                 Route::get('/beds/{room:id}', [BedController::class, 'index'])->name('master-data.setup.beds');
+
+                Route::get('departemen', [DepartementController::class, 'index'])->name('master-data.setup.departemen.index');
+                Route::get('departemen/tambah', [DepartementController::class, 'tambah'])->name('master-data.setup.departemen.tambah');
             });
             Route::prefix('layanan-medis')->group(function () {
                 Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');
@@ -145,6 +150,10 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/tipe', [TipeOperasiController::class, 'index'])->name('master-data.operasi.tipe');
                 Route::get('/jenis', [JenisOperasiController::class, 'index'])->name('master-data.operasi.jenis');
                 Route::get('/tindakan', [TindakanOperasiController::class, 'index'])->name('master-data.operasi.tindakan');
+            });
+
+            Route::prefix('grup-suplier')->group(function () {
+                Route::get('/', [GrupSuplierController::class, 'index'])->name('master-data.grup-suplier.index');
             });
         });
     });
