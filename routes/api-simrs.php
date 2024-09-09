@@ -26,6 +26,7 @@ use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RoomController;
+use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Models\SIMRS\Departement;
@@ -72,6 +73,13 @@ Route::prefix('simrs')->group(function () {
             Route::prefix('departemen')->group(function () {
                 Route::post('/', [DepartementController::class, 'store'])->name('master-data.setup.departemen.store');
                 Route::patch('/{id}/update', [DepartementController::class, 'update'])->name('master-data.setup.departemen.update');
+            });
+
+            Route::prefix('tarif-registrasi-layanan')->group(function () {
+                Route::get('/{id}', [TarifRegistrasiController::class, 'getTarif'])->name('master-data.setup.tarif-registrasi.get');
+                Route::post('/', [TarifRegistrasiController::class, 'store'])->name('master-data.setup.tarif-registrasi.store');
+                Route::patch('/{id}/update', [TarifRegistrasiController::class, 'update'])->name('master-data.setup.tarif-registrasi.update');
+                Route::delete('/{id}/delete', [TarifRegistrasiController::class, 'delete'])->name('master-data.setup.tarif-registrasi.delete');
             });
         });
 

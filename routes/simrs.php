@@ -25,6 +25,7 @@ use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
+use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Models\SIMRS\GrupSuplier\GrupSuplier;
 use App\Models\SIMRS\GrupTindakanMedis;
@@ -111,6 +112,9 @@ Route::group(['middleware' => ['auth']], function () {
 
                 Route::get('departemen', [DepartementController::class, 'index'])->name('master-data.setup.departemen.index');
                 Route::get('departemen/tambah', [DepartementController::class, 'tambah'])->name('master-data.setup.departemen.tambah');
+
+                Route::get('/tarif-registrasi-layanan', [TarifRegistrasiController::class, 'index'])->name('master-data.setup.tarif-registrasi.index');
+                Route::get('/tarif-registrasi-layanan/{id}/set-tarif', [TarifRegistrasiController::class, 'setTarif'])->name('master-data.setup.tarif-registrasi.set-tarif');
             });
             Route::prefix('layanan-medis')->group(function () {
                 Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');
