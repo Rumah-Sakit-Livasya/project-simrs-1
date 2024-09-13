@@ -142,6 +142,7 @@
     <script src="/js/dependency/moment/moment.js"></script>
     <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -212,13 +213,13 @@
                 buttons: [{
                         extend: 'excelHtml5',
                         text: 'Excel',
-                        title: 'Rekap Absensi Bulan ' + new Date().toLocaleString('default', {
+                        title: 'Daftar Pengajuan ' + new Date().toLocaleString('default', {
                             month: 'long',
                         }) + ' ' + new Date().getFullYear(),
                         titleAttr: 'Export to Excel',
                         className: 'btn-outline-default',
                         exportOptions: {
-                            columns: ':visible',
+                            columns: ':visible:not(:last-child):not(:nth-last-child(2))', // Mengabaikan kolom "Action" dan "Status"
                             format: {
                                 body: function(data, row, column, node) {
                                     // Menghapus tag HTML dari data sebelum mengekspor ke Excel
@@ -229,12 +230,9 @@
                         customize: function(xlsx) {
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
                             $('row:first c', sheet).attr('style',
-                                'text-align: center;'
-                            ); // Mengatur gaya untuk heading
-                            // $('row c', sheet).attr('s', '25'); // Memberikan border pada sel
+                                'text-align: center;'); // Mengatur gaya untuk heading
                             $('row:nth-child(2) c', sheet).attr('s', '43');
                             $('row:nth-child(2) c', sheet).attr('class', 'style43');
-
                         }
                     },
                     {
