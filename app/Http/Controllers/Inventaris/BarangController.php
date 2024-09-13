@@ -63,60 +63,74 @@ class BarangController extends Controller
 
     public function store(Request $request)
     {
-        $user = User::findOrFail($request->user_id);
-        $validatedData = $request->validate([
-            'custom_name' => "max:255",
-            'template_barang_id' => "required|max:255",
-            'condition' => "required|max:5120",
-            'bidding_year' => "required|max:255",
-            'merk' => "max:5120",
-            'room_id' => "max:255",
-        ]);
+        try {
+            $user = User::findOrFail($request->user_id);
+            $validatedData = $request->validate([
+                'custom_name' => "max:255",
+                'template_barang_id' => "required|max:255",
+                'condition' => "required|max:5120",
+                'bidding_year' => "required|max:255",
+                'merk' => "max:5120",
+                'room_id' => "max:255",
+            ]);
+            $template = $validatedData['template_barang_id'];
+            $category = TemplateBarang::where('id', $template)->get('category_id')->first()->category_id;
+            $validatedData['category_barang_id'] = $category;
 
-        $template = $validatedData['template_barang_id'];
-        $category = TemplateBarang::where('id', $template)->get('category_id')->first()->category_id;
-        $validatedData['category_barang_id'] = $category;
+            $barang_code = RoomMaintenance::where('id', $request['room_id'])->first()->room_code;
 
-        $barang_code = RoomMaintenance::where('id', $request['room_id'])->first()->room_code;
+            $barang_id = $request->template_barang_id;
+            $template = TemplateBarang::where('id', $barang_id)->first();
 
-        $barang_id = $request->template_barang_id;
-        $template = TemplateBarang::where('id', $barang_id)->first();
+            // Report Hasil
+            $templateBarang = TemplateBarang::where('id', $request->template_barang_id)->first();
 
-        // Report Hasil
-        $templateBarang = TemplateBarang::where('id', $request->template_barang_id)->first();
+            if ($request->custom_name === null) {
+                $nameBarang = $templateBarang->name;
+            } else {
+                $nameBarang = $request->custom_name;
+            }
 
-        if ($request->custom_name === null) {
-            $nameBarang = $templateBarang->name;
-        } else {
-            $nameBarang = $request->custom_name;
-        }
+            if ($request->room_id === null) {
+                $room = RoomMaintenance::findOrFail($request->room_id);
+                $namaRuang = $room->name;
+            } else {
+                $namaRuang = "Sistem";
+            }
 
-        if ($request->room_id === null) {
-            $room = RoomMaintenance::findOrFail($request->room_id);
-            $namaRuang = $room->name;
-        } else {
-            $namaRuang = "Sistem";
-        }
+            $reportData = [
+                'barang_id' => $request->barang_id,
+                'room_id' => $request->room_id
+            ];
+            $reportData['user_id'] = $user->id;
+            $reportData['keterangan'] = strtoupper("$nameBarang telah ditambahkan ke $namaRuang oleh $user->name");
 
-        $reportData = [
-            'barang_id' => $request->barang_id,
-            'room_id' => $request->room_id
-        ];
-        $reportData['user_id'] = $user->id;
-        $reportData['keterangan'] = strtoupper("$nameBarang telah ditambahkan ke $namaRuang oleh $user->name");
+            $lastUrutanBarang = Barang::where('template_barang_id', $template->id)
+                ->where('urutan_barang', '<>', '0')
+                ->orderByDesc('urutan_barang')
+                ->first();
+            // Start from 0 if $lastUrutanBarang is null, otherwise from the last number
+            $startUrutan = $lastUrutanBarang ? intval($lastUrutanBarang->urutan_barang) : 0;
 
-        $lastUrutanBarang = Barang::where('template_barang_id', $template->id)
-            ->where('urutan_barang', '<>', '0')
-            ->orderByDesc('urutan_barang')
-            ->first();
-        // Start from 0 if $lastUrutanBarang is null, otherwise from the last number
-        $startUrutan = $lastUrutanBarang ? intval($lastUrutanBarang->urutan_barang) : 0;
+            $validatedData['company_id'] = $request->company_id;
+            $companyCode = Company::findOrFail($request->company_id)->code;
+            if ($request->jumlah) {
+                for ($i = 1; $i <= $request->jumlah; $i++) {
+                    $urutanBarang = $startUrutan + $i;
 
-        $companyCode = Company::findOrFail($request->company_id)->code;
-        if ($request->jumlah) {
+                    // Format the urutan_barang to have leading zeros
+                    $validatedData['urutan_barang'] = str_pad($urutanBarang, 3, '0', STR_PAD_LEFT);
 
-            for ($i = 1; $i <= $request->jumlah; $i++) {
-                $urutanBarang = $startUrutan + $i;
+                    // Generate the item code
+                    $item_code = $companyCode . "/" . $template->category->category_code . "/" . $barang_code . "/" . $template->barang_code . "." . $template->name . " " . $validatedData['urutan_barang'] . "/" . $request->bidding_year;
+                    $validatedData['item_code'] = $item_code;
+
+                    // Create the Barang and ReportBarang records
+                    Barang::create($validatedData);
+                    ReportBarang::create($reportData);
+                }
+            } else {
+                $urutanBarang = $startUrutan + 1;
 
                 // Format the urutan_barang to have leading zeros
                 $validatedData['urutan_barang'] = str_pad($urutanBarang, 3, '0', STR_PAD_LEFT);
@@ -124,14 +138,11 @@ class BarangController extends Controller
                 // Generate the item code
                 $item_code = $companyCode . "/" . $template->category->category_code . "/" . $barang_code . "/" . $template->barang_code . "." . $template->name . " " . $validatedData['urutan_barang'] . "/" . $request->bidding_year;
                 $validatedData['item_code'] = $item_code;
-
-                // Create the Barang and ReportBarang records
+                // return dd($validatedData);
                 Barang::create($validatedData);
                 ReportBarang::create($reportData);
             }
-        }
 
-        try {
             return response()->json(['message' => "Berhasil ditambahkan!"], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

@@ -109,6 +109,12 @@
                 templates: controls,
                 format: "dd-mm-yyyy"
             });
+            $('#datepicker-modal-3').datepicker({
+                todayHighlight: true,
+                orientation: "bottom left",
+                templates: controls,
+                format: "dd-mm-yyyy"
+            });
         }
 
         $(document).ready(function() {
@@ -237,6 +243,23 @@
 
             oFReader.onload = function(oFREvent) {
                 imgPreview.src = oFREvent.target.result;
+            }
+        }
+
+        function toggleGroup(keterangan, estimasi) {
+            const keteranganGroup = document.getElementById('keterangan-group');
+            const estimasiGroup = document.getElementById('estimasi-group');
+
+            if (keterangan) {
+                keteranganGroup.style.display = 'block';
+            } else {
+                keteranganGroup.style.display = 'none';
+            }
+
+            if (estimasi) {
+                estimasiGroup.style.display = 'block';
+            } else {
+                estimasiGroup.style.display = 'none';
             }
         }
     </script>

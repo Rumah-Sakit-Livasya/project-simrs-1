@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventaris;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\Inventaris\Barang;
 use App\Models\Inventaris\CategoryBarang;
 use App\Models\Inventaris\RoomMaintenance;
@@ -103,6 +104,7 @@ class RoomMaintenanceController extends Controller
             'ruang' => $room,
             'categories' => CategoryBarang::orderBy('name')->get(),
             'barang' => $item,
+            'companies' => Company::all(),
             'templates' => TemplateBarang::orderBy('name')->get(),
             'jumlah' => count(Barang::where('room_id', $room->id)->get())
         ]);

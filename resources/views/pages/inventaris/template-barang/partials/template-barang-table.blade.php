@@ -281,5 +281,51 @@
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
             });
         });
+
+        function toggleForm() {
+            var formContainer = document.getElementById('form-container');
+            var toggleButton = document.getElementById('toggle-form-btn');
+            var closeButton = document.getElementById('close-form-btn');
+
+            if (formContainer.style.display === 'none' || formContainer.style.display === '') {
+                formContainer.style.display = 'block';
+                formContainer.style.maxHeight = formContainer.scrollHeight + 'px';
+                toggleButton.innerText = 'Tutup';
+            } else if (formContainer.style.display === 'block') {
+                formContainer.style.maxHeight = '0';
+                setTimeout(function() {
+                    formContainer.style.display = 'none';
+                }, 500); // Sesuaikan dengan durasi transisi (0.5 detik)
+                toggleButton.innerText = 'Tambah Template Barang';
+            } else {
+                formContainer.style.maxHeight = '0';
+                setTimeout(function() {
+                    formContainer.style.display = 'none';
+                }, 500); // Sesuaikan dengan durasi transisi (0.5 detik)
+                toggleButton.innerText = 'Tambah Template Barang';
+            }
+        }
+
+        function previewImage() {
+            const image = document.querySelector('#foto');
+            const imgPreview = document.querySelector('.image-preview');
+            const fileLabel = document.querySelector('#foto-label');
+
+            imgPreview.style.display = 'block';
+
+            const oFReader = new FileReader();
+            oFReader.readAsDataURL(image.files[0]);
+
+            oFReader.onload = function(oFREvent) {
+                imgPreview.src = oFREvent.target.result;
+            }
+
+            // Ubah label menjadi nama file yang dipilih
+            if (image.files.length > 0) {
+                fileLabel.textContent = image.files[0].name;
+            } else {
+                fileLabel.textContent = 'Pilih Gambar Galeri';
+            }
+        }
     </script>
 @endsection

@@ -46,10 +46,10 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form autocomplete="off" novalidate action="/rooms/barang" method="post"
-                                enctype="multipart/form-data">
+                            <form autocomplete="off" novalidate action="javascript:void(0)" method="post"
+                                enctype="multipart/form-data" id="store-barang-form">
                                 @csrf
-                                {{-- <input type="hidden" name="instance_code" value="{{ $i->instance_code }}"> --}}
+                                <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
                                 <input type="hidden" name="room_id" value="{{ $ruang->id }}">
 
                                 <div class="modal-body">
@@ -139,6 +139,24 @@
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="company_id">
+                                                    Perusahaan
+                                                </label>
+                                                <select
+                                                    class="form-control w-100 @error('company_id') is-invalid @enderror"
+                                                    id="company_id" name="company_id">
+                                                    <optgroup label="Perusahaan">
+                                                        @foreach ($companies as $row)
+                                                            <option value="{{ $row->id }}">{{ $row->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                </select>
+                                                @error('company_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -170,110 +188,4 @@
         </div>
     </main>
 
-@endsection
-@section('plugin')
-    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
-    <script src="/js/datatable/jszip.min.js"></script>
-    <script src="/js/formplugins/select2/select2.bundle.js"></script>
-
-    <script>
-        /* demo scripts for change table color */
-        /* change background */
-        $(document).ready(function() {
-            $(function() {
-                $('#tambahBarang').select2({
-                    placeholder: 'Pilih Barang',
-                });
-                $('#kondisiBarang').select2({
-                    placeholder: 'Pilih Kondisi Barang',
-                });
-                $('#tahunPengadaan').select2({
-                    placeholder: 'Pilih Tahun Pengadaan',
-                });
-            });
-
-            $('#dt-basic-example').dataTable({
-                responsive: true,
-                dom: 'Bfrtip',
-                buttons: [{
-                        extend: 'print',
-                        text: 'Print',
-                        className: 'float-right btn btn-primary',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        text: 'Download as Excel',
-                        className: 'float-right btn btn-success',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                    {
-                        extend: 'colvis',
-                        text: 'Column Visibility',
-                        titleAttr: 'Col visibility',
-                        className: 'float-right mb-3 btn btn-warning',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        },
-                        postfixButtons: [{
-                                extend: 'print',
-                                text: 'Print',
-                                exportOptions: {
-                                    columns: ':visible:not(.no-export)'
-                                }
-                            },
-                            {
-                                extend: 'excel',
-                                text: 'Download as Excel',
-                                exportOptions: {
-                                    columns: ':visible:not(.no-export)'
-                                }
-                            }
-                        ]
-                    }
-                ]
-            });
-
-            $('.js-thead-colors a').on('click', function() {
-                var theadColor = $(this).attr("data-bg");
-                console.log(theadColor);
-                $('#dt-basic-example thead').removeClassPrefix('bg-').addClass(theadColor);
-            });
-
-            $('.js-tbody-colors a').on('click', function() {
-                var theadColor = $(this).attr("data-bg");
-                console.log(theadColor);
-                $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
-            });
-
-        });
-
-        function toggleForm() {
-            var formContainer = document.getElementById('form-container');
-            var toggleButton = document.getElementById('toggle-form-btn');
-            var closeButton = document.getElementById('close-form-btn');
-
-            if (formContainer.style.display === 'none' || formContainer.style.display === '') {
-                formContainer.style.display = 'block';
-                formContainer.style.maxHeight = formContainer.scrollHeight + 'px';
-                toggleButton.innerText = 'Tutup';
-            } else if (formContainer.style.display === 'block') {
-                formContainer.style.maxHeight = '0';
-                setTimeout(function() {
-                    formContainer.style.display = 'none';
-                }, 500); // Sesuaikan dengan durasi transisi (0.5 detik)
-                toggleButton.innerText = 'Tambah Barang';
-            } else {
-                formContainer.style.maxHeight = '0';
-                setTimeout(function() {
-                    formContainer.style.display = 'none';
-                }, 500); // Sesuaikan dengan durasi transisi (0.5 detik)
-                toggleButton.innerText = 'Tambah Barang';
-            }
-        }
-    </script>
 @endsection

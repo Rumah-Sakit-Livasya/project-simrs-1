@@ -463,6 +463,51 @@
                 });
             });
 
+            $('#store-barang-form').on('submit', function(e) {
+                e.preventDefault(); // Mencegah form submit secara default
+
+                var formData = $(this).serialize(); // Mengambil semua data dari form
+
+                $.ajax({
+                    url: '/api/inventaris/barang/',
+                    type: 'POST',
+                    data: formData,
+                    beforeSend: function() {
+                        $('#store-form').find('.ikon-tambah').hide();
+                        $('#store-form').find('.spinner-text').removeClass(
+                            'd-none');
+                    },
+                    success: function(response) {
+                        $('#modal-tambah').modal('hide');
+                        showSuccessAlert(response.message);
+
+                        setTimeout(() => {
+                            console.log('Reloading the page now.');
+                            window.location.reload();
+                        }, 1000);
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status === 422) {
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessages = '';
+
+                            $.each(errors, function(key, value) {
+                                errorMessages += value +
+                                    '\n';
+                            });
+
+                            $('#modal-tambah').modal('hide');
+                            showErrorAlert('Terjadi kesalahan:\n' +
+                                errorMessages);
+                        } else {
+                            $('#modal-tambah').modal('hide');
+                            showErrorAlert('Terjadi kesalahan: ' + error);
+                            console.log(error);
+                        }
+                    }
+                });
+            });
+
             $('.btn-delete').click(function() {
                 var barangId = $(this).attr('data-id');
 

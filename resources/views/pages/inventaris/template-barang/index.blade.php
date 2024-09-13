@@ -14,7 +14,6 @@
 
         <div class="row">
             <div class="col-xl-12">
-
                 <div id="form-container" style="display: none;" class="panel form-container">
                     <div class="panel-hdr">
                         <h2>
@@ -27,12 +26,13 @@
                                 enctype="multipart/form-data" id="store-form">
                                 @csrf
                                 <div class="form-group">
-                                    <label for="foto2">Gambar</label>
-                                    <img class="image-preview2 img-fluid mb-3 col-sm-5 d-block">
+                                    <label for="foto">Gambar</label>
+                                    <img class="image-preview img-fluid mb-3 col-sm-5 d-block">
                                     <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="foto2" name="foto"
+                                        <input type="file" class="custom-file-input" id="foto" name="foto"
                                             onchange="previewImage()">
-                                        <label class="custom-file-label" for="foto">Pilih Gambar Galeri</label>
+                                        <label class="custom-file-label" id="foto-label" for="foto">Pilih Gambar
+                                            Galeri</label>
                                     </div>
                                     @error('foto')
                                         <p class="text-danger">{{ $message }}</p>
@@ -105,31 +105,5 @@
     </main>
 @endsection
 @section('plugin')
-    <script>
-        $(document).ready(function() {});
-
-        function toggleForm() {
-            var formContainer = document.getElementById('form-container');
-            var toggleButton = document.getElementById('toggle-form-btn');
-            var closeButton = document.getElementById('close-form-btn');
-
-            if (formContainer.style.display === 'none' || formContainer.style.display === '') {
-                formContainer.style.display = 'block';
-                formContainer.style.maxHeight = formContainer.scrollHeight + 'px';
-                toggleButton.innerText = 'Tutup';
-            } else if (formContainer.style.display === 'block') {
-                formContainer.style.maxHeight = '0';
-                setTimeout(function() {
-                    formContainer.style.display = 'none';
-                }, 500); // Sesuaikan dengan durasi transisi (0.5 detik)
-                toggleButton.innerText = 'Tambah Template Barang';
-            } else {
-                formContainer.style.maxHeight = '0';
-                setTimeout(function() {
-                    formContainer.style.display = 'none';
-                }, 500); // Sesuaikan dengan durasi transisi (0.5 detik)
-                toggleButton.innerText = 'Tambah Template Barang';
-            }
-        }
-    </script>
+    <script></script>
 @endsection
