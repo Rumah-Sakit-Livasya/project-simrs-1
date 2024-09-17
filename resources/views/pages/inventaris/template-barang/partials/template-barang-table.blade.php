@@ -62,7 +62,7 @@
                 $('#modal-edit').modal('show');
                 templateId = $(this).attr('data-id');
                 $.ajax({
-                    url: '/api/inventaris/template-barang/' + templateId,
+                    url: '/api/inventaris/template-barang' + templateId,
                     type: 'GET',
                     success: function(response) {
                         // Isi form dengan data yang diterima
