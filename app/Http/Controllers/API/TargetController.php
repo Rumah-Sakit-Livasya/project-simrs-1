@@ -27,6 +27,9 @@ class TargetController extends Controller
                 'organization_id' => 'required',
                 'user_id' => 'required',
                 'title' => 'required',
+                'pic' => 'required',
+                'bulan' => 'required',
+                'satuan' => 'required',
                 'actual' => 'max:255',
                 'target' => 'max:255',
                 'min_target' => 'max:255',
@@ -71,6 +74,9 @@ class TargetController extends Controller
             // Validasi input request
             $validator = request()->validate([
                 'organization_id' => 'required',
+                'pic' => 'required',
+                'bulan' => 'required',
+                'satuan' => 'required',
                 'user_id' => 'required',
                 'title' => 'required',
                 'actual' => 'max:255',

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('harga_tarif_registrasi', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tarif_registrasi_id')->references('id')->on('tarig_registrasi')->cascadeOnDelete();
+            $table->foreignId('tarif_registrasi_id')->references('id')->on('tarif_registrasi')->cascadeOnDelete();
             $table->foreignId('group_penjamin_id')->references('id')->on('group_penjamin')->cascadeOnDelete();
             $table->bigInteger('harga');
             $table->softDeletes();

@@ -419,8 +419,8 @@
                             </div>
                         </div>
                     </div>
-                    @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
-                    {{-- @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan') --}}
+                    {{-- @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal') --}}
+                    @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan')
                 </div>
             </div>
         </div>

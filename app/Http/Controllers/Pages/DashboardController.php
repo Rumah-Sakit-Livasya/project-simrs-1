@@ -677,15 +677,36 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function getDataTargets()
+    public function getDataTargets(Request $request)
     {
         // Mendapatkan organization_id dari pengguna yang sedang login
         $organizationId = auth()->user()->employee->organization_id;
+        $employees = Employee::where('is_active', 1)->get();
+
+        // Mendapatkan input dari form
+        $bulan = $request->input('bulan');
+        $tahun = $request->input('tahun');
+        $organizationId = $request->input('organization_id');
+        // return dd($request);
+
+        // Mengambil data target sesuai dengan bulan dan tahun yang dipilih
+        $targets = Target::when($organizationId, function ($query) use ($organizationId) {
+            // Jika organization_id dipilih, filter berdasarkan organization_id
+            return $query->where('organization_id', $organizationId);
+        })
+            ->when($bulan, function ($query) use ($bulan) {
+                // Jika bulan dipilih, filter berdasarkan bulan
+                return $query->where('bulan', $bulan);
+            })
+            ->whereYear('created_at', $tahun)
+            ->get();
+
 
         // Mengambil data target sesuai dengan organization_id pengguna
-        $targets = Target::where('organization_id', $organizationId)->get();
+        // $targets = Target::where('organization_id', $organizationId)->get();
         return view('pages.target.index', [
             'targets' => $targets,
+            'employees' => $employees,
             'getNotify' => $this->getNotify()
         ]);
     }
@@ -699,12 +720,17 @@ class DashboardController extends Controller
         $bulan = $request->input('bulan');
         $tahun = $request->input('tahun');
         $organizationId = $request->input('organization_id');
+        // return dd($request);
 
-        // Mengambil data target sesuai dengan organization_id, bulan, dan tahun yang dipilih
-        $targets = Target::where('organization_id', $organizationId)
-            ->whereMonth('created_at', $bulan)
+        // Mengambil data target sesuai dengan bulan dan tahun yang dipilih
+        $targets = Target::when($organizationId, function ($query) use ($organizationId) {
+            // Jika organization_id dipilih, filter berdasarkan organization_id
+            return $query->where('organization_id', $organizationId);
+        })
+            ->where('bulan', $bulan)
             ->whereYear('created_at', $tahun)
             ->get();
+
 
         // Jika ingin mengirimkan semua organisasi ke view (sepertinya Anda ingin mengirim yang sedang dipilih saja?)
         $organizations = Organization::all();

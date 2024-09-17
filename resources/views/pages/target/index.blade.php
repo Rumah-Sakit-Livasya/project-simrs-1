@@ -1,3 +1,6 @@
+@php
+    use App\Models\Employee;
+@endphp
 @extends('inc.layout')
 @section('title', 'Targets')
 @section('content')
@@ -16,6 +19,129 @@
 
         <div class="row">
             <div class="col-xl-12">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div id="panel-1" class="panel mb-3">
+                            <div class="panel-hdr">
+                                <h2>
+                                    Filter
+                                </h2>
+                            </div>
+                            <div class="panel-container show">
+                                <div class="panel-content">
+                                    <form action="{{ route('targets') }}" method="get">
+                                        @method('GET')
+                                        @csrf
+                                        <div class="row" id="step-1">
+                                            <div class="col-md-4">
+                                                <div class="form-group mb-3">
+                                                    <label for="filter-bulan">Bulan</label>
+                                                    <!-- Mengubah input menjadi select2 -->
+                                                    <select
+                                                        class="select2 form-control @error('bulan') is-invalid @enderror"
+                                                        name="bulan" id="filter-bulan">
+                                                        <option value="1"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 1 ? 'selected' : '') }}>
+                                                            Januari</option>
+                                                        <option value="2"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 2 ? 'selected' : '') }}>
+                                                            Februari</option>
+                                                        <option value="3"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 3 ? 'selected' : '') }}>
+                                                            Maret</option>
+                                                        <option value="4"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 4 ? 'selected' : '') }}>
+                                                            April</option>
+                                                        <option value="5"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 5 ? 'selected' : '') }}>
+                                                            Mei</option>
+                                                        <option value="6"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 6 ? 'selected' : '') }}>
+                                                            Juni</option>
+                                                        <option value="7"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 7 ? 'selected' : '') }}>
+                                                            Juli</option>
+                                                        <option value="8"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 8 ? 'selected' : '') }}>
+                                                            Agustus</option>
+                                                        <option value="9"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 9 ? 'selected' : '') }}>
+                                                            September</option>
+                                                        <option value="10"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 10 ? 'selected' : '') }}>
+                                                            Oktober</option>
+                                                        <option value="11"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 11 ? 'selected' : '') }}>
+                                                            November</option>
+                                                        <option value="12"
+                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 12 ? 'selected' : '') }}>
+                                                            Desember</option>
+                                                    </select>
+
+                                                    @error('bulan')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group mb-3">
+                                                    <label for="tahun">Tahun</label>
+                                                    <!-- Mengubah input menjadi select2 -->
+                                                    <select
+                                                        class="select2 form-control @error('tahun') is-invalid @enderror"
+                                                        name="tahun" id="tahun">
+
+                                                        <option value="2024"
+                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            2024</option>
+                                                        <option value="2025"
+                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            2025</option>
+                                                        <option value="2026"
+                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            2026</option>
+                                                        <option value="2027"
+                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            2027</option>
+                                                        <option value="2028"
+                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            2028</option>
+                                                        <option value="2029"
+                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            2029</option>
+                                                        <option value="2030"
+                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            2030</option>
+                                                    </select>
+                                                    @error('tahun')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 d-flex align-items-center">
+                                                <button type="submit" class="btn btn-primary btn-block w-100">
+                                                    <div class="ikon-tambah">
+                                                        <span class="fal fa-search mr-1"></span>Cari
+                                                    </div>
+                                                    <div class="span spinner-text d-none">
+                                                        <span class="spinner-border spinner-border-sm" role="status"
+                                                            aria-hidden="true"></span>
+                                                        Loading...
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
@@ -29,18 +155,46 @@
                                 <thead>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
+                                        @can('edit okr')
+                                            <th style="white-space: nowrap">Aksi</th>
+                                        @endcan
                                         <th style="white-space: nowrap">Judul</th>
                                         <th style="white-space: nowrap">Status</th>
                                         <th style="white-space: nowrap">Actual</th>
                                         <th style="white-space: nowrap">Target</th>
                                         <th style="white-space: nowrap">Difference</th>
-                                        <th style="white-space: nowrap">Aksi</th>
+                                        <th style="white-space: nowrap">PIC</th>
+                                        <th style="white-space: nowrap">Bulan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($targets as $row)
                                         <tr>
                                             <td style="white-space: nowrap">{{ $loop->iteration }}</td>
+                                            @can('edit okr')
+                                                <td style="white-space: nowrap">
+                                                    <button type="button" data-backdrop="static" data-keyboard="false"
+                                                        class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
+                                                        data-id="{{ $row->id }}" title="Ubah">
+                                                        <span class="fal fa-pencil ikon-edit"></span>
+                                                        <div class="span spinner-text d-none">
+                                                            <span class="spinner-border spinner-border-sm" role="status"
+                                                                aria-hidden="true"></span>
+                                                            Loading...
+                                                        </div>
+                                                    </button>
+                                                    {{-- <button type="button" data-backdrop="static" data-keyboard="false"
+                                                    class="badge mx-1 badge-success p-2 border-0 text-white btn-hapus"
+                                                    data-id="{{ $row->id }}" title="Hapus">
+                                                    <span class="fal fa-trash ikon-hapus"></span>
+                                                    <div class="span spinner-text d-none">
+                                                        <span class="spinner-border spinner-border-sm" role="status"
+                                                            aria-hidden="true"></span>
+                                                        Loading...
+                                                    </div>
+                                                </button> --}}
+                                                </td>
+                                            @endcan
                                             <td style="white-space: nowrap">{{ $row->title }}</td>
                                             @if ($row->status === 'Di luar rentang target')
                                                 <td style="white-space: nowrap; background-color: #282828; color: #e6e6e6">
@@ -58,30 +212,17 @@
                                                 <td style="white-space: nowrap; background-color: #00cd3a; color: #ffffff">
                                                     {{ $row->status }}</td>
                                             @endif
-                                            <td style="white-space: nowrap">{{ $row->actual }}</td>
-                                            <td style="white-space: nowrap">{{ $row->target }}</td>
-                                            <td style="white-space: nowrap">{{ $row->difference }}</td>
+                                            <td style="white-space: nowrap">{{ $row->actual }}
+                                                {{ $row->satuan == 'persen' ? '%' : '' }}</td>
+                                            <td style="white-space: nowrap">{{ $row->target }}
+                                                {{ $row->satuan == 'persen' ? '%' : '' }}</td>
+                                            <td style="white-space: nowrap">{{ $row->difference }}
+                                                {{ $row->satuan == 'persen' ? '%' : '' }}</td>
                                             <td style="white-space: nowrap">
-                                                <button type="button" data-backdrop="static" data-keyboard="false"
-                                                    class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
-                                                    data-id="{{ $row->id }}" title="Ubah">
-                                                    <span class="fal fa-pencil ikon-edit"></span>
-                                                    <div class="span spinner-text d-none">
-                                                        <span class="spinner-border spinner-border-sm" role="status"
-                                                            aria-hidden="true"></span>
-                                                        Loading...
-                                                    </div>
-                                                </button>
-                                                {{-- <button type="button" data-backdrop="static" data-keyboard="false"
-                                                    class="badge mx-1 badge-success p-2 border-0 text-white btn-hapus"
-                                                    data-id="{{ $row->id }}" title="Hapus">
-                                                    <span class="fal fa-trash ikon-hapus"></span>
-                                                    <div class="span spinner-text d-none">
-                                                        <span class="spinner-border spinner-border-sm" role="status"
-                                                            aria-hidden="true"></span>
-                                                        Loading...
-                                                    </div>
-                                                </button> --}}
+                                                {{ Employee::where('id', $row->pic)->first()->fullname ?? '' }}
+                                            </td>
+                                            <td style="white-space: nowrap">
+                                                {{ angkaKeBulan($row->bulan) }}
                                             </td>
                                         </tr>
                                     @endforeach
@@ -89,12 +230,16 @@
                                 <tfoot>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
+                                        @can('edit okr')
+                                            <th style="white-space: nowrap">Aksi</th>
+                                        @endcan
                                         <th style="white-space: nowrap">Judul</th>
                                         <th style="white-space: nowrap">Status</th>
                                         <th style="white-space: nowrap">Actual</th>
                                         <th style="white-space: nowrap">Target</th>
                                         <th style="white-space: nowrap">Difference</th>
-                                        <th style="white-space: nowrap">Aksi</th>
+                                        <th style="white-space: nowrap">PIC</th>
+                                        <th style="white-space: nowrap">Bulan</th>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -113,6 +258,22 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            $(function() {
+                $('.select2').select2();
+                $('#tambah-data #pic').select2({
+                    placeholder: 'Pilih PIC',
+                    dropdownParent: $('#tambah-data')
+                });
+                $('#tambah-data #bulan').select2({
+                    placeholder: 'Pilih bulan',
+                    dropdownParent: $('#tambah-data')
+                });
+                $('#filter-bulan').select2({
+                    placeholder: 'Pilih Bulan',
+                    allowClear: true
+                });
+            });
+
             $('#status').change(function() {
                 if ($(this).is(':checked')) {
                     $('#status-text').text('Aktif');
@@ -144,6 +305,18 @@
                         $('#ubah-data #actual').val(data.actual);
                         $('#ubah-data #target').val(data.target);
                         $('#ubah-data #min_target').val(data.min_target);
+                        $('#ubah-data #pic').val(data.pic).select2({
+                            dropdownParent: $('#ubah-data')
+                        });
+                        $('#ubah-data #bulan').val(data.bulan).select2({
+                            dropdownParent: $('#ubah-data')
+                        });
+                        // Cek radio button sesuai dengan data satuan
+                        if (data.satuan === 'baku') {
+                            $('#update-baku').prop('checked', true);
+                        } else if (data.satuan === 'persen') {
+                            $('#update-persen').prop('checked', true);
+                        }
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);

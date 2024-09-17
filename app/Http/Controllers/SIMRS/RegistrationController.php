@@ -403,10 +403,10 @@ class RegistrationController extends Controller
             }
             // Find the registration record
             $registration = Registration::findOrFail($id);
-            $bed = Bed::findOrFail($registration->patient->bed->id);
 
             // Kosongkan Bed
             if ($registration['registration_type'] == 'rawat-inap') {
+                $bed = Bed::findOrFail($registration->patient->bed->id);
                 $bed->patient_id = null;
                 $bed->save();
             }
@@ -498,10 +498,10 @@ class RegistrationController extends Controller
             }
             // Find the registration record
             $registration = Registration::findOrFail($id);
-            $bed = Bed::findOrFail($registration->patient->bed->id);
 
             // Kosongkan Bed
             if ($registration['registration_type'] == 'rawat-inap') {
+                $bed = Bed::findOrFail($registration->patient->bed->id);
                 $bed->patient_id = null;
                 $bed->save();
             }

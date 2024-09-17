@@ -111,6 +111,7 @@
                                                         class="select2 form-control @error('organization_id') is-invalid @enderror"
                                                         name="organization_id" id="organization_id">
                                                         @foreach ($organizations as $organization)
+                                                            <option></option>
                                                             <option value="{{ $organization->id }}">
                                                                 {{ $organization->name }}
                                                             </option>
@@ -155,20 +156,28 @@
                                     <thead>
                                         <tr>
                                             <th style="white-space: nowrap">No</th>
+                                            <th style="white-space: nowrap">Bulan</th>
                                             <th style="white-space: nowrap">Unit</th>
                                             <th style="white-space: nowrap">Judul</th>
-                                            <th style="white-space: nowrap">Status</th>
                                             <th style="white-space: nowrap">Actual</th>
                                             <th style="white-space: nowrap">Target</th>
                                             <th style="white-space: nowrap">Difference</th>
+                                            <th style="white-space: nowrap">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($targets as $row)
                                             <tr>
                                                 <td style="white-space: nowrap">{{ $loop->iteration }}</td>
+                                                <td style="white-space: nowrap">{{ angkaKeBulan($row->bulan) }}</td>
                                                 <td style="white-space: nowrap">{{ $row->organization->name }}</td>
                                                 <td style="white-space: nowrap">{{ $row->title }}</td>
+                                                <td style="white-space: nowrap">
+                                                    {{ $row->actual }}{{ $row->satuan == 'persen' ? '%' : '' }}</td>
+                                                <td style="white-space: nowrap">
+                                                    {{ $row->target }}{{ $row->satuan == 'persen' ? '%' : '' }}</td>
+                                                <td style="white-space: nowrap">
+                                                    {{ $row->difference }}{{ $row->satuan == 'persen' ? '%' : '' }}</td>
                                                 @if ($row->status === 'Di luar rentang target')
                                                     <td
                                                         style="white-space: nowrap; background-color: #282828; color: #e6e6e6">
@@ -190,21 +199,19 @@
                                                         style="white-space: nowrap; background-color: #00cd3a; color: #ffffff">
                                                         {{ $row->status }}</td>
                                                 @endif
-                                                <td style="white-space: nowrap">{{ $row->actual }}</td>
-                                                <td style="white-space: nowrap">{{ $row->target }}</td>
-                                                <td style="white-space: nowrap">{{ $row->difference }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
                                     <tfoot>
                                         <tr>
                                             <th style="white-space: nowrap">No</th>
+                                            <th style="white-space: nowrap">Bulan</th>
                                             <th style="white-space: nowrap">Unit</th>
                                             <th style="white-space: nowrap">Judul</th>
-                                            <th style="white-space: nowrap">Status</th>
                                             <th style="white-space: nowrap">Actual</th>
                                             <th style="white-space: nowrap">Target</th>
                                             <th style="white-space: nowrap">Difference</th>
+                                            <th style="white-space: nowrap">Status</th>
                                         </tr>
                                     </tfoot>
                                 </table>

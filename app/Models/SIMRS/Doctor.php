@@ -18,6 +18,11 @@ class Doctor extends Model
         return $this->hasMany(Departement::class, 'default_dokter');
     }
 
+    public function departement()
+    {
+        return $this->belongsTo(Departement::class, 'departement_id');
+    }
+
     public function employee()
     {
         return $this->belongsTo(Employee::class);

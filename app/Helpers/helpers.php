@@ -395,3 +395,28 @@ function getIndonesianDateFormat($date)
     $carbonDate = Carbon::parse($date)->locale('id_ID');
     return $carbonDate->isoFormat('D MMMM YYYY');
 }
+
+function angkaKeBulan($angka)
+{
+    $bulan = [
+        1 => 'Januari',
+        2 => 'Februari',
+        3 => 'Maret',
+        4 => 'April',
+        5 => 'Mei',
+        6 => 'Juni',
+        7 => 'Juli',
+        8 => 'Agustus',
+        9 => 'September',
+        10 => 'Oktober',
+        11 => 'November',
+        12 => 'Desember'
+    ];
+
+    // Periksa apakah angka valid antara 1 dan 12
+    if (array_key_exists($angka, $bulan)) {
+        return $bulan[$angka];
+    } else {
+        return "Bulan tidak valid";
+    }
+}
