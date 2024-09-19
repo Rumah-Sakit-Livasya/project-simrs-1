@@ -23,6 +23,7 @@
                             Riwayat Kerusakan <span
                                 class="fw-300"><i>{{ $barang->custom_name ?? $barang->template_barang->name }}</i></span>
                         </h2>
+                        @include('pages.partials.panel-toolbar')
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">

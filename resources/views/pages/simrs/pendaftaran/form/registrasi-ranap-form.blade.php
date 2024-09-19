@@ -1,4 +1,4 @@
-<form action="{{ route('simpan.registrasi') }}" method="post">
+<form action="{{ route('simpan.registrasi') }}" method="POST" id="form-registrasi">
     @method('post')
     @csrf
     <input type="hidden" name="patient_id" value="{{ $patient->id }}">
@@ -58,12 +58,12 @@
                     </div>
                     <div class="col-xl-8">
                         <div class="input-group bg-white shadow-inset-2">
-                            <input id="kelas_rawat_input" name="kamar_tujuan" type="text"
+                            <input id="kelas_rawat_input" readonly name="kamar_tujuan" type="text"
                                 class="form-control border-right-0 bg-transparent pr-0" placeholder="">
-                            <input type="hidden" id="bed_id" name="bed_id">
+                            <input type="hidden" id="bed_id_input" name="bed_id">
                             <input type="hidden" id="kelas_rawat_id_input" name="kelas_rawat_id">
                             <div class="input-group-append">
-                                <span class="input-group-text bg-transparent border-left-0">
+                                <span class="input-group-text">
                                     <i class="fal fa-search" style="cursor: pointer" data-toggle="modal"
                                         data-target="#kelas-rawat-form"></i>
                                 </span>
@@ -254,7 +254,8 @@
                     </a>
                 </div>
                 <div class="col-xl-6 text-right">
-                    <button type="submit" class="btn btn-lg btn-primary waves-effect waves-themed">
+                    <button type="submit" class="btn btn-lg btn-primary waves-effect waves-themed" id="simpan-btn"
+                        onclick="disableButton(event)">
                         <span class="fal fa-save mr-1"></span>
                         Simpan
                     </button>

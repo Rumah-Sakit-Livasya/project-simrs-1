@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 
 class KelasRawat extends Model
 {
@@ -16,6 +17,14 @@ class KelasRawat extends Model
 
     protected $guarded = ['id'];
     protected $table = 'kelas_rawat';
+
+    // Global Scope untuk menghilangkan data dengan id 1
+    protected static function booted()
+    {
+        static::addGlobalScope('excludeIdOne', function (Builder $builder) {
+            $builder->where('id', '!=', 1);
+        });
+    }
 
     public function rooms()
     {

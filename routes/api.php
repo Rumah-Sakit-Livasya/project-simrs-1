@@ -251,6 +251,7 @@ Route::prefix('dashboard')->group(function () {
     Route::prefix('targets')->group(function () {
         Route::post('/store', [TargetController::class, 'store']);
         Route::put('/update/{id}', [TargetController::class, 'update']);
+        Route::put('/update-hasil/{id}', [TargetController::class, 'updateHasil']);
         Route::get('/get/{id}', [TargetController::class, 'getTarget']);
         Route::get('/delete/{id}', [TargetController::class, 'destroy']);
     });

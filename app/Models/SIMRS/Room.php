@@ -15,19 +15,17 @@ class Room extends Model
 
     public function beds()
     {
-        return $this->hasMany(Bed::class, 'room_id', 'id');
+        return $this->hasMany(Bed::class);
     }
 
     public function bedTambahan()
     {
-        return $this->hasMany(Bed::class, 'room_id', 'id')
-            ->where('beds.is_tambahan', 1);
+        return $this->beds()->where('is_tambahan', 1);
     }
 
     public function bedBor()
     {
-        return $this->hasMany(Bed::class, 'room_id', 'id')
-            ->where('beds.is_tambahan', 0);
+        return $this->beds()->where('is_tambahan', 0);
     }
 
     public function kelas_rawat()

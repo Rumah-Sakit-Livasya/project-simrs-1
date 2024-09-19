@@ -155,9 +155,7 @@
                                 <thead>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
-                                        @can('edit okr')
-                                            <th style="white-space: nowrap">Aksi</th>
-                                        @endcan
+                                        <th style="white-space: nowrap">Aksi</th>
                                         <th style="white-space: nowrap">Judul</th>
                                         <th style="white-space: nowrap">Status</th>
                                         <th style="white-space: nowrap">Actual</th>
@@ -165,17 +163,20 @@
                                         <th style="white-space: nowrap">Difference</th>
                                         <th style="white-space: nowrap">PIC</th>
                                         <th style="white-space: nowrap">Bulan</th>
+                                        <th style="white-space: nowrap">Hasil</th>
+                                        <th style="white-space: nowrap">Evaluasi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($targets as $row)
                                         <tr>
                                             <td style="white-space: nowrap">{{ $loop->iteration }}</td>
-                                            @can('edit okr')
-                                                <td style="white-space: nowrap">
+                                            <td style="white-space: nowrap">
+                                                @can('edit okr')
                                                     <button type="button" data-backdrop="static" data-keyboard="false"
                                                         class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
-                                                        data-id="{{ $row->id }}" title="Ubah">
+                                                        data-id="{{ $row->id }}" title="Ubah" data-toggle="tooltip"
+                                                        data-placement="top">
                                                         <span class="fal fa-pencil ikon-edit"></span>
                                                         <div class="span spinner-text d-none">
                                                             <span class="spinner-border spinner-border-sm" role="status"
@@ -183,18 +184,21 @@
                                                             Loading...
                                                         </div>
                                                     </button>
-                                                    {{-- <button type="button" data-backdrop="static" data-keyboard="false"
-                                                    class="badge mx-1 badge-success p-2 border-0 text-white btn-hapus"
-                                                    data-id="{{ $row->id }}" title="Hapus">
-                                                    <span class="fal fa-trash ikon-hapus"></span>
-                                                    <div class="span spinner-text d-none">
-                                                        <span class="spinner-border spinner-border-sm" role="status"
-                                                            aria-hidden="true"></span>
-                                                        Loading...
-                                                    </div>
-                                                </button> --}}
-                                                </td>
-                                            @endcan
+                                                @endcan
+                                                @can('edit okr')
+                                                    <button type="button" data-backdrop="static" data-keyboard="false"
+                                                        class="badge mx-1 btn-edit-hasil badge-warning p-2 border-0 text-white"
+                                                        data-id="{{ $row->id }}" title="Hasil" data-toggle="tooltip"
+                                                        data-placement="top">
+                                                        <i class='bx bx-select-multiple m-0 ikon-hasil'></i>
+                                                        <div class="span spinner-text d-none">
+                                                            <span class="spinner-border spinner-border-sm" role="status"
+                                                                aria-hidden="true"></span>
+                                                            Loading...
+                                                        </div>
+                                                    </button>
+                                                @endcan
+                                            </td>
                                             <td style="white-space: nowrap">{{ $row->title }}</td>
                                             @if ($row->status === 'Di luar rentang target')
                                                 <td style="white-space: nowrap; background-color: #282828; color: #e6e6e6">
@@ -221,18 +225,16 @@
                                             <td style="white-space: nowrap">
                                                 {{ Employee::where('id', $row->pic)->first()->fullname ?? '' }}
                                             </td>
-                                            <td style="white-space: nowrap">
-                                                {{ angkaKeBulan($row->bulan) }}
-                                            </td>
+                                            <td style="white-space: nowrap">{{ angkaKeBulan($row->bulan) }}</td>
+                                            <td style="white-space: nowrap">{{ $row->hasil }}</td>
+                                            <td style="white-space: nowrap">{{ $row->evaluasi }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                                 <tfoot>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
-                                        @can('edit okr')
-                                            <th style="white-space: nowrap">Aksi</th>
-                                        @endcan
+                                        <th style="white-space: nowrap">Aksi</th>
                                         <th style="white-space: nowrap">Judul</th>
                                         <th style="white-space: nowrap">Status</th>
                                         <th style="white-space: nowrap">Actual</th>
@@ -240,6 +242,8 @@
                                         <th style="white-space: nowrap">Difference</th>
                                         <th style="white-space: nowrap">PIC</th>
                                         <th style="white-space: nowrap">Bulan</th>
+                                        <th style="white-space: nowrap">Hasil</th>
+                                        <th style="white-space: nowrap">Evaluasi</th>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -251,6 +255,7 @@
         </div>
         @include('pages.target.partials.create-data')
         @include('pages.target.partials.update-data')
+        @include('pages.target.partials.update-hasil')
     </main>
 @endsection
 @section('plugin')
@@ -282,7 +287,8 @@
                     $('#status-text').text('Tidak Aktif');
                     $('input[name=status]').val('off');
                 }
-            })
+            });
+
             $('.btn-edit').click(function(e) {
                 e.preventDefault();
                 let button = $(this);
@@ -338,6 +344,55 @@
                         },
                         success: function(response) {
                             $('#ubah-data').modal('hide');
+                            showSuccessAlert(response.message)
+                            setTimeout(function() {
+                                location.reload();
+                            }, 500);
+                        },
+                        error: function(xhr) {
+                            console.log(xhr.responseText);
+                        }
+                    });
+                });
+            });
+
+            $('.btn-edit-hasil').click(function(e) {
+                e.preventDefault();
+                let button = $(this);
+                let id = button.attr('data-id');
+                button.find('.ikon-hasil').hide();
+                button.find('.spinner-text').removeClass('d-none');
+                $.ajax({
+                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
+                    url: `/api/dashboard/targets/get/${id}`, // Isi dengan url/path file php yang dituju
+                    dataType: "json",
+                    success: function(data) {
+                        button.find('.ikon-hasil').show();
+                        button.find('.spinner-text').addClass('d-none');
+                        $('#ubah-data-hasil').modal('show');
+                        $('#ubah-data-hasil #hasil').val(data.hasil);
+                        $('#ubah-data-hasil #evaluasi').val(data.evaluasi);
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
+
+                $('#update-form-hasil').on('submit', function(e) {
+                    e.preventDefault();
+                    let formData = $(this).serialize();
+                    $.ajax({
+                        type: "POST",
+                        url: '/api/dashboard/targets/update-hasil/' + id,
+                        data: formData,
+                        beforeSend: function() {
+                            $('#update-form-hasil').find('.ikon-hasil').hide();
+                            $('#update-form-hasil').find('.spinner-text')
+                                .removeClass(
+                                    'd-none');
+                        },
+                        success: function(response) {
+                            $('#ubah-data-hasil').modal('hide');
                             showSuccessAlert(response.message)
                             setTimeout(function() {
                                 location.reload();

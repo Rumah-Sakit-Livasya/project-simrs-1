@@ -86,7 +86,7 @@ class RegistrationController extends Controller
         }
 
         return view('pages.simrs.pendaftaran.daftar-registrasi-pasien', [
-            'registrations' => $registrations,
+            'registrations' => $registrations->where('status', 'online'),
             'departements' => Departement::orderBy('name')->get(),
         ]);
     }
@@ -214,8 +214,6 @@ class RegistrationController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request);
-        // Validate the incoming request data
         $validatedData = $request->validate([
             'patient_id' => 'nullable',
             'user_id' => 'nullable',
@@ -273,7 +271,6 @@ class RegistrationController extends Controller
     public function show($id)
     {
         $registration = Registration::findOrFail($id);
-        // return dd($registration);
 
         $jaminan = $registration->penjamin->name;
         if ($jaminan === 'Umum') {
@@ -341,10 +338,6 @@ class RegistrationController extends Controller
                 return $bed->patient ? '<span class="text-danger">(Terisi)</span>' : '<button type="button" class="btn btn-sm btn-info pilih-bed" data-kelas-id="' . $bed->room->kelas_rawat->id . '" data-bed-id="' . $bed->id . '" data-room-info="' . $bed->room->ruangan . ' - ' . $bed->room->no_ruang . ' (' . $bed->nama_tt . ')">Pilih</button>';
             })
             ->rawColumns(['fungsi'])
-            ->orderColumn('ruangan', function ($query, $order) {
-                $query->join('rooms', 'beds.room_id', '=', 'rooms.id')
-                    ->orderBy('rooms.ruangan', $order);
-            })
             ->filterColumn('ruangan', function ($query, $keyword) {
                 $query->whereHas('room', function ($q) use ($keyword) {
                     $q->where('ruangan', 'like', "%$keyword%")

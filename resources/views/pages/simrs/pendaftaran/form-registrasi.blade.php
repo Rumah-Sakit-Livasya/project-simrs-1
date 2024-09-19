@@ -81,20 +81,20 @@
         }
 
         /* .box-menu li {
-                                                                                                                                                padding: 20px 30px;
-                                                                                                                                                margin: 20px;
-                                                                                                                                                width: 200px;
-                                                                                                                                                background: #f2f0f5;
-                                                                                                                                                text-align: center;
-                                                                                                                                                cursor: pointer;
-                                                                                                                                                border: 1px solid #e5e5e5;
-                                                                                                                                                border-radius: 8px;
-                                                                                                                                                display: flex;
-                                                                                                                                                align-items: center;
-                                                                                                                                                justify-content: center;
-                                                                                                                                                flex-direction: column;
-                                                                                                                                                box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
-                                                                                                                                            } */
+                                                                            padding: 20px 30px;
+                                                                            margin: 20px;
+                                                                            width: 200px;
+                                                                            background: #f2f0f5;
+                                                                            text-align: center;
+                                                                            cursor: pointer;
+                                                                            border: 1px solid #e5e5e5;
+                                                                            border-radius: 8px;
+                                                                            display: flex;
+                                                                            align-items: center;
+                                                                            justify-content: center;
+                                                                            flex-direction: column;
+                                                                            box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
+                                                                        } */
 
         .box-menu .circle-menu {
             height: 50px;
@@ -575,7 +575,7 @@
                 var roomInfo = $(this).data('room-info');
 
                 $('#kelas_rawat_id_input').val(kelasId);
-                $('#bed_id').val(bedId);
+                $('#bed_id_input').val(bedId);
                 $('#kelas_rawat_input').val(roomInfo);
 
                 $('#kelas-rawat-form').modal('hide');
@@ -620,6 +620,23 @@
                 });
             });
         });
+
+        function disableButton(event) {
+            var button = event.target;
+
+            // Cek apakah tombol sudah disabled
+            if (button.disabled) {
+                return; // Jika sudah disabled, hentikan fungsi
+            }
+
+            event.preventDefault(); // Mencegah submit form secara default
+            button.disabled = true; // Menonaktifkan tombol
+            button.innerHTML =
+                '<span class="fal fa-spinner fa-spin mr-1"></span> Menyimpan...'; // Ubah teks menjadi "Menyimpan..."
+
+            // Lanjutkan submit form secara manual
+            document.getElementById("form-registrasi").submit();
+        }
 
         function enableInput() {
             var radioPaket = document.getElementById("paket-terapi");

@@ -123,6 +123,32 @@ class TargetController extends Controller
         }
     }
 
+    public function updateHasil($id)
+    {
+        try {
+            // Validasi input request
+            $validator = request()->validate([
+                'hasil' => 'nullable',
+                'evaluasi' => 'nullable',
+            ]);
+
+            // Temukan Target yang akan diupdate
+            $targetItem = Target::findOrFail($id);
+
+            // Update data target
+            $targetItem->update($validator);
+
+            // Response sukses
+            return response()->json(['message' => 'Target Berhasil Diperbarui!']);
+        } catch (\Exception $e) {
+            // Response error
+            return response()->json([
+                'error' => 'Gagal memperbarui target',
+                'errorLaravel' => $e->getMessage()
+            ], 404);
+        }
+    }
+
     public function destroy($id)
     {
         try {

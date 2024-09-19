@@ -248,7 +248,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/inventaris/category-barang/',
+                    url: '/api/inventaris/category-barang',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {

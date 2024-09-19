@@ -1,4 +1,4 @@
-<form action="{{ route('simpan.registrasi') }}" method="post">
+<form action="{{ route('simpan.registrasi') }}" method="post" id="form-registrasi">
     @csrf
     <input type="hidden" name="patient_id" value="{{ $patient->id }}">
     <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
@@ -302,7 +302,8 @@
                     </a>
                 </div>
                 <div class="col-xl-6 text-right">
-                    <button type="submit" class="btn btn-lg btn-primary waves-effect waves-themed">
+                    <button type="submit" class="btn btn-lg btn-primary waves-effect waves-themed" id="simpan-btn"
+                        onclick="disableButton(event)">
                         <span class="fal fa-save mr-1"></span>
                         Simpan
                     </button>

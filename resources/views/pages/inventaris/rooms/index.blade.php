@@ -274,7 +274,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/inventaris/room-maintenance/',
+                    url: '/api/inventaris/room-maintenance',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {

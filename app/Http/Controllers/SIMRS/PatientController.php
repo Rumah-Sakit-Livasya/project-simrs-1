@@ -205,7 +205,7 @@ class PatientController extends Controller
     {
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
-        return view('pages.simrs.pendaftaran.history-kunjungan-pasien', [
+        return view('pages.simrs.pendaftaran.history-kunjungan', [
             'patient' => $patient,
             'age' => $age
         ]);
