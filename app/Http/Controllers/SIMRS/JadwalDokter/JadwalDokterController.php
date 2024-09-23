@@ -7,5 +7,8 @@ use Illuminate\Http\Request;
 
 class JadwalDokterController extends Controller
 {
-    public function index() {}
+    public function index()
+    {
+        return view('pages.simrs.master-data.jadwal-dokter.index');
+    }
 }

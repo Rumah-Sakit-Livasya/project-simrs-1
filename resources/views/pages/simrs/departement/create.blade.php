@@ -95,8 +95,7 @@
                                                     <label for="Kode Poli" class="form-label">Kode Poli *</label>
                                                 </div>
                                                 <div class="col-sm-10">
-                                                    <select class="form-control w-100" id="kode_poli"
-                                                        name="revenue_and_cost_center">
+                                                    <select class="form-control w-100" id="kode_poli" name="kode_poli">
                                                         <option value="" selected></option>
                                                     </select>
                                                     @error('kode_poli')

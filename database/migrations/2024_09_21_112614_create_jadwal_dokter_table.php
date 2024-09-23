@@ -16,9 +16,8 @@ return new class extends Migration
             $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');  // Relasi ke tabel dokter
             $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');  // Relasi ke tabel dokter
             $table->enum('hari', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']);  // Hari Senin sampai Minggu
-            $table->time('jam_mulai');  // Jam mulai praktik
-            $table->time('jam_selesai');  // Jam selesai praktik
-            $table->timestamps();  // created_at dan updated_at
+            $table->time('jam_mulai');
+            $table->time('jam_selesai');
             $table->timestamps();
         });
     }
