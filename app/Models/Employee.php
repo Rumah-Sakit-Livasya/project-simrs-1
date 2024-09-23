@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -84,6 +85,11 @@ class Employee extends Model
     public function deduction()
     {
         return $this->hasOne(Deduction::class);
+    }
+
+    public function departments()
+    {
+        return $this->belongsToMany(Departement::class, 'doctors', 'employee_id', 'departement_id');
     }
 
     public function payroll()

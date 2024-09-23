@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('jadwal_dokter', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');  // Relasi ke tabel dokter
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');  // Relasi ke tabel dokter
+            $table->foreignId('doctor_id')->constrained('doctors')->onDelete('cascade');
             $table->enum('hari', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']);  // Hari Senin sampai Minggu
             $table->time('jam_mulai');
             $table->time('jam_selesai');
+            $table->time('kuota_regis_online');
             $table->timestamps();
         });
     }

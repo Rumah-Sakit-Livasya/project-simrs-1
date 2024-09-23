@@ -115,14 +115,79 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        @foreach ($departements as $row)
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ $row->name }}</strong>
+                                                </td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
 
+                                            @if ($row->employees->count() > 0)
+                                                @foreach ($row->employees as $employee)
+                                                    <tr>
+                                                        <td>
+                                                            {{ $employee->fullname ?? '' }}
+                                                        </td>
+
+                                                        {{-- Definisikan kolom untuk tiap hari --}}
+                                                        @php
+                                                            $days = [
+                                                                'Senin',
+                                                                'Selasa',
+                                                                'Rabu',
+                                                                'Kamis',
+                                                                'Jumat',
+                                                                'Sabtu',
+                                                                'Minggu',
+                                                            ];
+
+                                                            // Buat array untuk setiap hari
+                                                            $scheduleByDay = array_fill_keys($days, []);
+
+                                                            // Cek jika employee memiliki doctor, lalu ambil jadwal
+                                                            if ($employee->doctor && $employee->doctor->schedules) {
+                                                                foreach ($employee->doctor->schedules as $schedule) {
+                                                                    if (in_array($schedule->hari, $days)) {
+                                                                        $scheduleByDay[$schedule->hari][] = $schedule;
+                                                                    }
+                                                                }
+                                                            }
+                                                        @endphp
+
+                                                        {{-- Tampilkan jadwal per hari --}}
+                                                        @foreach ($days as $day)
+                                                            <td>
+                                                                @if (isset($scheduleByDay[$day]) && count($scheduleByDay[$day]) > 0)
+                                                                    @foreach ($scheduleByDay[$day] as $schedule)
+                                                                        <span class="text-info d-block">
+                                                                            {{ \Carbon\Carbon::parse($schedule->jam_mulai)->format('G:i') }}
+                                                                            -
+                                                                            {{ \Carbon\Carbon::parse($schedule->jam_selesai)->format('G:i') }}
+                                                                        </span>
+                                                                    @endforeach
+                                                                @else
+                                                                    <span class="text-muted">-</span>
+                                                                @endif
+                                                            </td>
+                                                        @endforeach
+                                                    </tr>
+                                                @endforeach
+                                            @endif
+                                        @endforeach
                                     </tbody>
                                     <tfoot>
                                         <tr>
                                             <th colspan="8" class="text-center">
                                                 <button type="button"
                                                     class="btn btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-persalinan">
+                                                    id="btn-tambah-jadwal-dokter">
                                                     <span class="fal fa-plus-circle"></span>
                                                     Tambah Jadwal Dokter
                                                 </button>
@@ -132,14 +197,15 @@
                                 </table>
                             </div>
                             <!-- datatable end -->
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-    @include('pages.simrs.master-data.persalinan.daftar-persalinan.partials.create')
-    @include('pages.simrs.master-data.persalinan.daftar-persalinan.partials.edit')
+    @include('pages.simrs.master-data.jadwal-dokter.partials.create')
+    @include('pages.simrs.master-data.jadwal-dokter.partials.edit')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -147,39 +213,40 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            let persalinanId = null;
+            let jadwalId = null;
             $('#loading-spinner').show();
 
-            $('#modal-tambah-persalinan .select2').select2({
-                dropdownParent: $('#modal-tambah-persalinan')
+            $('#modal-tambah-jadwal-dokter .select2').select2({
+                dropdownParent: $('#modal-tambah-jadwal-dokter')
             });
 
-            $('#btn-tambah-persalinan').click(function() {
-                $('#modal-tambah-persalinan').modal('show');
+            $('#btn-tambah-jadwal-dokter').click(function() {
+                $('#modal-tambah-jadwal-dokter').modal('show');
             });
 
             $('.btn-edit').click(function() {
                 console.log('clicked');
-                $('#modal-edit-persalinan').modal('show');
-                persalinanId = $(this).attr('data-id');
-                $('#modal-edit-persalinan form').attr('data-id', persalinanId);
+                $('#modal-edit-jadwal-dokter').modal('show');
+                jadwalId = $(this).attr('data-id');
+                $('#modal-edit-jadwal-dokter form').attr('data-id', jadwalId);
 
                 $.ajax({
-                    url: '/api/simrs/master-data/persalinan/daftar-persalinan/' +
-                        persalinanId,
+                    url: '/api/simrs/master-data/jadwal-dokter/daftar-jadwal-dokter/' +
+                        jadwalId,
                     type: 'GET',
                     success: function(response) {
-                        $('#modal-edit-persalinan #tipe_edit').val(response.tipe).select2({
-                            dropdownParent: $('#modal-edit-persalinan')
+                        $('#modal-edit-jadwal-dokter #tipe_edit').val(response.tipe).select2({
+                            dropdownParent: $('#modal-edit-jadwal-dokter')
                         });
-                        $('#modal-edit-persalinan input[name="kode"]').val(response.kode);
-                        $('#modal-edit-persalinan input[name="nama_persalinan"]').val(response
-                            .nama_persalinan);
-                        $('#modal-edit-persalinan input[name="nama_billing"]').val(response
+                        $('#modal-edit-jadwal-dokter input[name="kode"]').val(response.kode);
+                        $('#modal-edit-jadwal-dokter input[name="nama_jadwal-dokter"]').val(
+                            response
+                            .nama_jadwal - dokter);
+                        $('#modal-edit-jadwal-dokter input[name="nama_billing"]').val(response
                             .nama_billing);
                     },
                     error: function(xhr, status, error) {
-                        $('#modal-edit-persalinan').modal('hide');
+                        $('#modal-edit-jadwal-dokter').modal('hide');
                         showErrorAlert('Terjadi kesalahan: ' + error);
                     }
                 });
@@ -187,7 +254,7 @@
             });
 
             $('.btn-delete').click(function() {
-                var persalinanId = $(this).attr('data-id');
+                var jadwalId = $(this).attr('data-id');
 
                 // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
                 var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
@@ -195,8 +262,8 @@
                 if (userConfirmed) {
                     // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
                     $.ajax({
-                        url: '/api/simrs/master-data/persalinan/daftar-persalinan/' +
-                            persalinanId +
+                        url: '/api/simrs/master-data/jadwal-dokter/daftar-jadwal-dokter/' +
+                            jadwalId +
                             '/delete',
                         type: 'DELETE',
                         success: function(response) {
@@ -220,10 +287,10 @@
                 e.preventDefault(); // Mencegah form submit secara default
 
                 var formData = $(this).serialize();
-                persalinanId = $(this).attr('data-id');
+                jadwalId = $(this).attr('data-id');
                 $.ajax({
-                    url: '/api/simrs/master-data/persalinan/daftar-persalinan/' +
-                        persalinanId +
+                    url: '/api/simrs/master-data/jadwal-dokter/daftar-jadwal-dokter/' +
+                        jadwalId +
                         '/update',
                     type: 'PATCH',
                     data: formData,
@@ -233,7 +300,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-edit-persalinan').modal('hide');
+                        $('#modal-edit-jadwal-dokter').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -251,11 +318,11 @@
                                     '\n';
                             });
 
-                            $('#modal-edit-persalinan').modal('hide');
+                            $('#modal-edit-jadwal-dokter').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-edit-persalinan').modal('hide');
+                            $('#modal-edit-jadwal-dokter').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
@@ -269,7 +336,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/simrs/master-data/persalinan/daftar-persalinan',
+                    url: '/api/simrs/master-data/jadwal-dokter/daftar-jadwal-dokter',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {
@@ -278,7 +345,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-tambah-persalinan').modal('hide');
+                        $('#modal-tambah-jadwal-dokter').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -296,11 +363,11 @@
                                     '\n';
                             });
 
-                            $('#modal-tambah-persalinan').modal('hide');
+                            $('#modal-tambah-jadwal-dokter').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-tambah-persalinan').modal('hide');
+                            $('#modal-tambah-jadwal-dokter').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
@@ -316,7 +383,7 @@
                 },
                 responsive: false, // Responsif diaktifkan
                 scrollX: true, // Tambahkan scroll horizontal
-                lengthChange: false,
+                ordering: false,
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end buttons-container'B>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
