@@ -131,7 +131,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <th colspan="3" class="text-center">
+                                            <th colspan="4" class="text-center">
                                                 <button type="button"
                                                     class="btn btn-outline-primary waves-effect waves-themed"
                                                     id="btn-tambah-penjamin">

@@ -9,6 +9,7 @@ use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
+use App\Http\Controllers\SIMRS\JadwalDokter\JadwalDokterController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
@@ -159,6 +160,10 @@ Route::group(['middleware' => ['auth']], function () {
 
             Route::prefix('penjamin')->group(function () {
                 Route::get('/', [PenjaminController::class, 'index'])->name('master-data.penjamin.index');
+            });
+
+            Route::prefix('jadwal-dokter')->group(function () {
+                Route::get('setting', [JadwalDokterController::class, 'index'])->name('master-data.jadwal-dokter.index');
             });
         });
     });
