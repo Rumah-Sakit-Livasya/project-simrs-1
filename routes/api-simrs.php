@@ -7,6 +7,7 @@ use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
+use App\Http\Controllers\SIMRS\JadwalDokter\JadwalDokterController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
@@ -47,6 +48,10 @@ Route::prefix('simrs')->group(function () {
             Route::post('/grup-rehab-medik', [GrupTindakanMedisController::class, 'store'])->name('master-data.grup-rehab-medik.store');
             Route::patch('/grup-rehab-medik/{id}/update', [GrupTindakanMedisController::class, 'update'])->name('master-data.layanan-medis.grup-rehab-medik.update');
             Route::delete('/grup-rehab-medik/{id}/delete', [GrupTindakanMedisController::class, 'delete'])->name('master-data.layanan-medis.grup-rehab-medik.delete');
+        });
+
+        Route::prefix('jadwal-dokter')->group(function () {
+            Route::post('/tambah-jadwal-dokter', [JadwalDokterController::class, 'store']);
         });
 
         Route::prefix('setup')->group(function () {

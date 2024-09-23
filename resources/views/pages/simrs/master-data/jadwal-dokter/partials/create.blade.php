@@ -41,6 +41,7 @@
                                         <option value="Jumat">Jumat</option>
                                         <option value="Sabtu">Sabtu</option>
                                         <option value="Minggu">Minggu</option>
+                                        <option value="Semua Hari">Semua Hari</option>
                                     </select>
                                 </div>
                             </div>

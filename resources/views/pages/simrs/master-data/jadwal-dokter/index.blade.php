@@ -336,7 +336,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/simrs/master-data/jadwal-dokter/daftar-jadwal-dokter',
+                    url: '/api/simrs/master-data/jadwal-dokter/tambah-jadwal-dokter',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {
