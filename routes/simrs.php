@@ -29,8 +29,10 @@ use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
+use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Models\SIMRS\Setup\BiayaAdministrasiRawatInap;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -105,6 +107,9 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('/master-data')->group(function () {
             Route::prefix('setup')->group(function () {
+                Route::prefix('biaya-administrasi-ranap')->group(function () {
+                    Route::get('/', [BiayaAdministrasiRawatInapController::class, 'index'])->name('master-data.setup.biaya-administrasi-ranap');
+                });
                 Route::get('/kelas-rawat', [KelasRawatController::class, 'index'])->name('master-data.setup.kelas-rawat');
                 Route::get('/rooms/{kelas:id}', [RoomController::class, 'index'])->name('master-data.setup.rooms');
                 Route::get('/beds/{room:id}', [BedController::class, 'index'])->name('master-data.setup.beds');
@@ -168,7 +173,7 @@ Route::group(['middleware' => ['auth']], function () {
             });
 
             Route::prefix('harga-jual')->group(function () {
-                Route::get('margin', [MarginHargaJualController::class, 'index'])->name('master-date.harga-jual.margin.index');
+                Route::get('margin', [MarginHargaJualController::class, 'index'])->name('master-date.setup.harga-jual.margin.index');
             });
         });
     });

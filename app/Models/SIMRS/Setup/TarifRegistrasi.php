@@ -11,4 +11,9 @@ class TarifRegistrasi extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'tarif_registrasi', $fillable = ['nama_tarif', 'tipe', 'coa'];
+
+    public function harga_tarif()
+    {
+        return $this->hasMany(HargaTarifRegistrasi::class, 'tarif_registrasi_id');
+    }
 }

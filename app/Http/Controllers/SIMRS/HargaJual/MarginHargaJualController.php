@@ -55,7 +55,7 @@ class MarginHargaJualController extends Controller
         try {
             $margin_harga_jual = MarginHargaJual::where('group_penjamin_id', $grupPenjaminId)->get();
 
-            return response()->json($margin_harga_jual, 200);
+            return response()->json($margin_harga_jual->harga, 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'message' => 'Data tidak ditemukan',

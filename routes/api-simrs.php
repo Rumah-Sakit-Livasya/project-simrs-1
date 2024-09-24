@@ -86,6 +86,9 @@ Route::prefix('simrs')->group(function () {
                 Route::post('/', [TarifRegistrasiController::class, 'store'])->name('master-data.setup.tarif-registrasi.store');
                 Route::patch('/{id}/update', [TarifRegistrasiController::class, 'update'])->name('master-data.setup.tarif-registrasi.update');
                 Route::delete('/{id}/delete', [TarifRegistrasiController::class, 'delete'])->name('master-data.setup.tarif-registrasi.delete');
+
+                Route::get('/{tarifRegistId}/tarif/{grupPenjaminId}', [TarifRegistrasiController::class, 'getTarif'])->name('master-data.setup.tarif-registrasi.tarif.get');
+                Route::post('/{tarifRegistId}/tarif/{grupPenjaminId}', [TarifRegistrasiController::class, 'storeTarif'])->name('master-data.setup.tarif-registrasi.tarif.store');
             });
         });
 
