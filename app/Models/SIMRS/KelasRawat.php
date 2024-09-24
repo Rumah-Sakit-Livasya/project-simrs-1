@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\SIMRS\HargaJual\MarginHargaJual;
 use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
 use App\Models\SIMRS\Peralatan\TarifPeralatan;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
@@ -66,5 +67,10 @@ class KelasRawat extends Model
     public function tarif_peralatan()
     {
         return $this->hasMany(TarifPeralatan::class, 'kelas_rawat_id');
+    }
+
+    public function margin_harga_jual()
+    {
+        return $this->hasMany(MarginHargaJual::class, 'kelas_rawat_id');
     }
 }
