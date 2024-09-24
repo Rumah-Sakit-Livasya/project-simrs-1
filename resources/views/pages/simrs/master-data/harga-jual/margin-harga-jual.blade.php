@@ -28,7 +28,7 @@
                             <form id="store-form">
                                 <div class="table-responsive">
                                     <div class="mb-3">
-                                        <select id="grup-penjamin-id" class="form-control select2" name="grup_penjamin_id">
+                                        <select id="grup-penjamin-id" class="form-control select2" name="group_penjamin_id">
                                             @foreach ($grup_penjamin as $row)
                                                 <option value="{{ $row->id }}">{{ $row->name }}</option>
                                             @endforeach
@@ -37,38 +37,24 @@
 
                                     <table id="dt-basic-example"
                                         class="table table-bordered table-hover table-striped w-100">
-                                        <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
                                         <thead class="bg-primary-600">
                                             <tr>
                                                 <th>Nama Kelas</th>
-                                                <th>Share Dr</th>
-                                                <th>Share Dr</th>
-                                                <th>Total</th>
+                                                <th>Margin (%)</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($kelas_rawat as $row)
                                                 @php
-                                                    $tarif = $row->tarif_peralatan
+                                                    $margin_standar = $row->margin_harga_jual
                                                         ->where('group_penjamin_id', 1)
-                                                        ->where('peralatan_id', $peralatan->id)
                                                         ->first();
                                                 @endphp
                                                 <tr>
                                                     <td>{{ $row->kelas }}</td>
                                                     <td>
-                                                        <input type="text" name="share_dr[{{ $row->id }}]"
-                                                            value="{{ $tarif->share_dr ?? 0 }}"
-                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" name="share_rs[{{ $row->id }}]"
-                                                            value="{{ $tarif->share_rs ?? 0 }}"
-                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" name="total[{{ $row->id }}]"
-                                                            value="{{ $tarif->total ?? 0 }}"
+                                                        <input type="text" name="margin[{{ $row->id }}]"
+                                                            value="{{ $margin_standar->margin ?? 0 }}"
                                                             class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
                                                     </td>
                                                 </tr>
@@ -94,7 +80,7 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            let parameterId = null;
+            let marginId = null;
             $('#loading-spinner').show();
 
             $('.select2').select2();
@@ -103,13 +89,10 @@
                 e.preventDefault(); // Mencegah form dari pengiriman default
 
                 let grupPenjaminId = $('#grup-penjamin-id').val(); // Ambil grup_penjamin_id
-                let peralatanId = @json($peralatan->id);
+
 
                 // Route Laravel dengan menggunakan nama route
-                let url =
-                    "{{ route('master-data.peralatan.tarif.store', ['peralatanId' => ':peralatanId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
-                    .replace(':peralatanId', peralatanId)
-                    .replace(':grupPenjaminId', grupPenjaminId);
+                let url = "{{ route('master-data.harga-jual.margin.store') }}";
 
                 $.ajax({
                     url: url,
@@ -132,12 +115,10 @@
 
             $('#grup-penjamin-id').on('change', function() {
 
-                let grupPenjaminId = $(this).val(); // Ambil grup_penjamin_id
-                let peralatanId = @json($peralatan->id);
+                let grupPenjaminId = $(this).val();
 
                 let url =
-                    "{{ route('master-data.peralatan.tarif.get', ['peralatanId' => ':peralatanId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
-                    .replace(':peralatanId', peralatanId)
+                    "{{ route('master-data.harga-jual.margin.getTarif', ['grupPenjaminId' => ':grupPenjaminId']) }}"
                     .replace(':grupPenjaminId', grupPenjaminId);
 
                 $.ajax({
@@ -145,15 +126,11 @@
                     type: 'GET',
                     data: $(this).serialize(), // Ambil semua data dari form
                     success: function(response) {
-                        if (response.data.length > 0) {
-                            response.data.forEach(function(item) {
+                        if (response.length > 0) {
+                            response.forEach(function(item) {
                                 // Set the value of the corresponding input fields
-                                $('input[name="share_dr[' + item.kelas_rawat_id + ']"]')
-                                    .val(item.share_dr);
-                                $('input[name="share_rs[' + item.kelas_rawat_id + ']"]')
-                                    .val(item.share_rs);
-                                $('input[name="total[' + item.kelas_rawat_id + ']"]')
-                                    .val(item.total);
+                                $('input[name="margin[' + item.kelas_rawat_id + ']"]')
+                                    .val(item.margin);
                             });
                         } else {
                             $('#dt-basic-example tbody input').val(0);
@@ -185,7 +162,7 @@
                         customize: function(doc) {
                             var table = doc.content[1].table.body;
                             var inputs = $(
-                                'input[name^="share_dr"], input[name^="share_rs"], input[name^="total"]'
+                                'input[name^="margin"], input[name^="share_rs"], input[name^="total"]'
                             );
                             var rowIdx = 1;
 
@@ -212,7 +189,7 @@
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
                             var table = $('#dt-basic-example').DataTable().rows().data();
                             var inputs = $(
-                                'input[name^="share_dr"], input[name^="share_rs"], input[name^="total"]'
+                                'input[name^="margin"], input[name^="share_rs"], input[name^="total"]'
                             );
                             var rowIdx = 1;
 

@@ -9,6 +9,7 @@ use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
+use App\Http\Controllers\SIMRS\HargaJual\MarginHargaJualController;
 use App\Http\Controllers\SIMRS\JadwalDokter\JadwalDokterController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
@@ -164,6 +165,10 @@ Route::group(['middleware' => ['auth']], function () {
 
             Route::prefix('jadwal-dokter')->group(function () {
                 Route::get('setting', [JadwalDokterController::class, 'index'])->name('master-data.jadwal-dokter.index');
+            });
+
+            Route::prefix('harga-jual')->group(function () {
+                Route::get('margin', [MarginHargaJualController::class, 'index'])->name('master-date.harga-jual.margin.index');
             });
         });
     });

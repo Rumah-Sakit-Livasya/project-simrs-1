@@ -7,6 +7,7 @@ use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
+use App\Http\Controllers\SIMRS\HargaJual\MarginHargaJualController;
 use App\Http\Controllers\SIMRS\JadwalDokter\JadwalDokterController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
@@ -220,6 +221,11 @@ Route::prefix('simrs')->group(function () {
             Route::get('/{id}', [GrupSuplierController::class, 'getGrup'])->name('master-data.grup-suplier.get');
             Route::patch('/{id}/update', [GrupSuplierController::class, 'update'])->name('master-data.grup-suplier.update');
             Route::delete('/{id}/delete', [GrupSuplierController::class, 'delete'])->name('master-data.grup-suplier.delete');
+        });
+
+        Route::prefix('harga-jual')->group(function () {
+            Route::post('/', [MarginHargaJualController::class, 'storeTarif'])->name('master-data.harga-jual.margin.store');
+            Route::get('/getTarif/{grupPenjaminId}', [MarginHargaJualController::class, 'getTarif'])->name('master-data.harga-jual.margin.getTarif');
         });
     });
 });

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('margin_harga_jual', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('group_penjamin_id')->constrained('group_penjamin')->cascadeOnDelete();
             $table->foreignId('kelas_rawat_id')->constrained('kelas_rawat')->cascadeOnDelete();
             $table->integer('margin');
             $table->softDeletes();
