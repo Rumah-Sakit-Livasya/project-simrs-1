@@ -222,7 +222,7 @@
                                         <th style="white-space: nowrap">Bulan</th>
                                         <th style="white-space: nowrap">Hasil</th>
                                         <th style="white-space: nowrap">Evaluasi</th>
-                                        <th style="white-space: nowrap">Evaluasi</th>
+                                        <th style="white-space: nowrap">Nama Unit</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -321,7 +321,7 @@
                                         <th style="white-space: nowrap">Bulan</th>
                                         <th style="white-space: nowrap">Hasil</th>
                                         <th style="white-space: nowrap">Evaluasi</th>
-                                        <th style="white-space: nowrap">Evaluasi</th>
+                                        <th style="white-space: nowrap">Nama Unit</th>
                                     </tr>
                                 </tfoot>
                             </table>
