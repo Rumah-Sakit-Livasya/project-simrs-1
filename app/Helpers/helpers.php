@@ -69,36 +69,6 @@ function toHijriah($tanggal)
     return $hijriah;
 }
 
-// function set_active($uri, $output = 'active')
-// {
-//     if (is_array($uri)) {
-//         foreach ($uri as $u) {
-//             if (Request::is($u)) {
-//                 return $output;
-//             }
-//         }
-//     } else {
-//         if (Request::is($uri)) {
-//             return $output;
-//         }
-//     }
-// }
-
-// function set_active_mainmenu($uri, $output = 'active open')
-// {
-//     if (is_array($uri)) {
-//         foreach ($uri as $u) {
-//             if (Request::is($u)) {
-//                 return $output;
-//             }
-//         }
-//     } else {
-//         if (Request::is($uri)) {
-//             return $output;
-//         }
-//     }
-// }
-
 if (!function_exists('set_active')) {
     function set_active($paths, $class = 'active')
     {
@@ -419,4 +389,16 @@ function angkaKeBulan($angka)
     } else {
         return "Bulan tidak valid";
     }
+}
+
+function formatTanggalDetail($tanggal)
+{
+    $tanggalFormat = date('d M Y', strtotime($tanggal));
+    $tanggalLahir = new DateTime($tanggal);
+    $sekarang = new DateTime();
+    $umur = $sekarang->diff($tanggalLahir);
+
+    $umurString = $umur->y . 'thn ' . $umur->m . 'bln ' . $umur->d . 'hr';
+
+    return $tanggalFormat . ' (' . $umurString . ')';
 }

@@ -318,7 +318,7 @@
     {{-- Select 2 --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     {{-- Datepicker --}}
-    <script src="js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     {{-- Datepicker Range --}}
     <script src="/js/dependency/moment/moment.js"></script>
     <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>

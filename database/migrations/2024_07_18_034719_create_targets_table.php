@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->string('title');
             $table->string('status');
-            $table->string('actual');
+            $table->string('actual')->nullable();
             $table->string('target');
             $table->string('min_target');
             $table->string('max_target');

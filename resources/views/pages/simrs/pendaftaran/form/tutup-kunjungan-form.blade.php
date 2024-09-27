@@ -38,7 +38,7 @@
                                     <label for="alasan_keluar">Alasan Keluar</label>
                                 </div>
                                 <div class="col-xl">
-                                    <select class="form-control w-100 select2" id="alasan_keluar"
+                                    <select class="form-control w-100" id="alasan_keluar"
                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
                                         name="alasan_keluar">
                                         <option value=""></option>
@@ -71,7 +71,7 @@
                                     <label for="proses_keluar">Proses Keluar</label>
                                 </div>
                                 <div class="col-xl">
-                                    <select class="form-control w-100 select2" id="proses_keluar"
+                                    <select class="form-control w-100" id="proses_keluar"
                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
                                         name="proses_keluar">
                                         <option value=""></option>

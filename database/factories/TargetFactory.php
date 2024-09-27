@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Target;
 use App\Models\User;
-use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,36 +20,43 @@ class TargetFactory extends Factory
      */
     public function definition(): array
     {
-        $minTarget = $this->faker->randomFloat(2, 0, 50);
-        $target = $this->faker->randomFloat(2, 10, 100);
-        $maxTarget = $this->faker->randomFloat(2, 50, 150);
-        $actual = $this->faker->randomFloat(2, 0, 200); // Angka acak antara 0 dan 200
+        $baseline_data = $this->faker->randomNumber(2, false); // Generate a random integer
+        $target = $this->faker->numberBetween($baseline_data + 1, 100); // Target must be greater than baseline_data
+        $actual = $this->faker->numberBetween($baseline_data + 1, $target); // Actual must be greater than baseline_data
+        $bulan = $this->faker->numberBetween(1, 12);
+        $satuan = $this->faker->randomElement(['persen', 'baku']);
+        $organisasi = $this->faker->randomElement(['10', '11', '13', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '28', '32', '33', '40', '42', '44', '45']);
+
+        // Calculate movement and percentage
+        $movement = (($actual - $baseline_data) / $target) * 100;
+        $persentase = ($baseline_data > 0) ? ($actual  / $target) * 100 : 0; // Avoid division by zero
 
         return [
-            'organization_id' => Organization::inRandomOrder()->value('id'),
+            'organization_id' => $organisasi,
             'user_id' => User::inRandomOrder()->value('id'),
             'title' => $this->faker->sentence,
+            'status' => $this->determineStatus($persentase), // Determine status based on percentage
+            'baseline_data' => $baseline_data,
             'actual' => $actual,
             'target' => $target,
-            'min_target' => $minTarget,
-            'max_target' => $maxTarget,
-            'difference' => $actual - $target,
-            'status' => $this->determineStatus($actual, $minTarget, $target, $maxTarget), // Menetapkan status
+            'movement' => $movement,
+            'persentase' => $persentase,
+            'pic' => User::inRandomOrder()->value('id'),
+            'satuan' => $satuan,
+            'bulan' => 1,
         ];
     }
 
-    private function determineStatus($actual, $minTarget, $target, $maxTarget)
+    private function determineStatus($persentase)
     {
-        if ($actual == 0) {
-            return 'Belum dikerjakan sama sekali';
-        } elseif ($actual < $minTarget) {
-            return 'Belum sesuai target';
-        } elseif ($actual >= $minTarget && $actual < $target) {
-            return 'Hampir mendekati target';
-        } elseif ($actual >= $target) {
-            return 'Sesuai target';
+        if ($persentase >= 100) {
+            return 'green';
+        } elseif ($persentase >= 60) {
+            return 'blue';
+        } elseif ($persentase >= 30) {
+            return 'yellow';
         } else {
-            return 'Di luar rentang target';
+            return 'red';
         }
     }
 }

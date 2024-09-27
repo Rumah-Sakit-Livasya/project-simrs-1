@@ -16,7 +16,7 @@
             $unitLayanan = 'RAWAT INAP';
         }
     @endphp
-    <main id="js-page-content" role="main" class="page-content">
+    <main id="js-page-content" role="main" class="page-content overflow-hidden">
         <div class="row">
             <div class="col-xl-3">
                 <div id="panel-1" class="panel h-100">
@@ -24,8 +24,14 @@
                         <div class="panel-content">
                             <div class="row">
                                 <div class="col biodata-pasien">
-                                    <img src="http://192.168.1.253/real/include/avatar/woman-icon.png"
-                                        style="width: 120px; height: 120px;">
+                                    @if ($patient->gender == 'Laki-laki')
+                                        <img src="http://103.191.196.126:8888/real/include/avatar/man-icon.png"
+                                            style="width: 120px; height: 120px;">
+                                    @else
+                                        <img src="http://103.191.196.126:8888/real/include/avatar/woman-icon.png"
+                                            style="width: 120px; height: 120px;">
+                                    @endif
+
                                     <h3 class="text-center mt-3 text-black">
                                         {{ strtoupper($patient->name) }}
                                         <small class="text-danger text-accent-2 mt-1">
@@ -419,8 +425,8 @@
                             </div>
                         </div>
                     </div>
-                    {{-- @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal') --}}
-                    @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan')
+                    @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
+                    {{-- @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan') --}}
                 </div>
             </div>
         </div>
@@ -435,17 +441,21 @@
 @section('plugin')
     {{-- Select 2 --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script type="text/javascript" src="/js/painterro-1.2.3.min.js"></script>
     <script>
         $(document).ready(function() {
 
             // Select 2
             $(function() {
-                $('#alasan_keluar').select2({
+                $('.select2').select2();
+
+                $('#tutup-kunjungan #alasan_keluar').select2({
                     dropdownCssClass: "move-up",
                     dropdownParent: $('#tutup-kunjungan'),
                     placeholder: "Pilih Alasan Keluar"
                 });
-                $('#proses_keluar').select2({
+                $('#tutup-kunjungan #proses_keluar').select2({
                     dropdownCssClass: "move-up",
                     dropdownParent: $('#tutup-kunjungan'),
                     placeholder: "Pilih Proses Keluar"

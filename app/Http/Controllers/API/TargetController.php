@@ -30,39 +30,48 @@ class TargetController extends Controller
                 'pic' => 'required',
                 'bulan' => 'required',
                 'satuan' => 'required',
+                'baseline_data' => 'required',
                 'actual' => 'max:255',
                 'target' => 'max:255',
-                'min_target' => 'max:255',
+                'custom_target' => 'max:255',
             ]);
 
             $target = $validator['target'] ?? 0;
             $actual = $validator['actual'] ?? 0;
-            $minTarget = $validator['min_target'] ?? 0;
-            $maxTarget = $validator['target'] ?? 0;
-            $validator['max_target'] = $validator['target'] ?? 0;
+            $baselineData = $validator['baseline_data'] ?? 0;
 
-            // Menentukan status berdasarkan perbandingan antara actual dan target
-            if ($actual == 0) {
-                $validator['status'] = 'Belum dikerjakan sama sekali';
-            } elseif ($actual < $minTarget) {
-                $validator['status'] = 'Belum sesuai target';
-            } elseif ($actual >= $minTarget && $actual < $target) {
-                $validator['status'] = 'Hampir mendekati target';
-            } elseif ($actual >= $target) {
-                $validator['status'] = 'Sesuai target';
+            // Menghitung movement
+            $movement = (($actual - $baselineData) / ($target > 0 ? $target : 1)) * 100;
+
+            // Menghitung persentase pencapaian
+            $persentase = ($actual / ($target > 0 ? $target : 1)) * 100;
+
+            // Menggunakan logika dari calculateTargetStats untuk menentukan status
+            if ($persentase >= 100) {
+                $validator['status'] = 'green';
+            } elseif ($persentase >= 60) {
+                $validator['status'] = 'blue';
+            } elseif ($persentase >= 30) {
+                $validator['status'] = 'yellow';
+            } elseif ($persentase < 30) {
+                $validator['status'] = 'red';
             } else {
-                $validator['status'] = 'Di luar rentang target';
+                $validator['status'] = 'invalid';
             }
 
-            // Menentukan selisih antara target dan actual
-            $validator['difference'] = $actual - $target;
+            // Tambahkan hasil movement dan persentase ke dalam data yang akan disimpan
+            $validator['movement'] = $movement;
+            $validator['persentase'] = $persentase;
 
+            // Simpan data target ke database
             Target::create($validator);
-            //return response
-            return response()->json(['message' => 'Target Berhasil di Tambahkan!']);
+
+            // Response sukses
+            return response()->json(['message' => 'Target Berhasil Ditambahkan!']);
         } catch (\Exception $e) {
+            // Response error
             return response()->json([
-                'error' => 'No result',
+                'error' => 'Gagal menambahkan target',
                 'errorLaravel' => $e->getMessage()
             ], 404);
         }
@@ -71,40 +80,45 @@ class TargetController extends Controller
     public function update($id)
     {
         try {
-            // Validasi input request
             $validator = request()->validate([
                 'organization_id' => 'required',
+                'user_id' => 'required',
+                'title' => 'required',
                 'pic' => 'required',
                 'bulan' => 'required',
                 'satuan' => 'required',
-                'user_id' => 'required',
-                'title' => 'required',
+                'baseline_data' => 'required',
                 'actual' => 'max:255',
                 'target' => 'max:255',
-                'min_target' => 'max:255',
+                'custom_target' => 'max:255',
             ]);
 
             $target = $validator['target'] ?? 0;
             $actual = $validator['actual'] ?? 0;
-            $minTarget = $validator['min_target'] ?? 0;
-            $maxTarget = $validator['target'] ?? 0;
-            $validator['max_target'] = $validator['target'] ?? 0;
+            $baselineData = $validator['baseline_data'] ?? 0;
 
-            // Menentukan status berdasarkan perbandingan antara actual dan target
-            if ($actual == 0) {
-                $validator['status'] = 'Belum dikerjakan sama sekali';
-            } elseif ($actual < $minTarget) {
-                $validator['status'] = 'Belum sesuai target';
-            } elseif ($actual >= $minTarget && $actual < $target) {
-                $validator['status'] = 'Hampir mendekati target';
-            } elseif ($actual >= $target) {
-                $validator['status'] = 'Sesuai target';
+            // Menghitung movement
+            $movement = (($actual - $baselineData) / ($target > 0 ? $target : 1)) * 100;
+
+            // Menghitung persentase pencapaian
+            $persentase = ($actual / ($target > 0 ? $target : 1)) * 100;
+
+            // Menggunakan logika dari calculateTargetStats untuk menentukan status
+            if ($persentase >= 100) {
+                $validator['status'] = 'green';
+            } elseif ($persentase >= 60) {
+                $validator['status'] = 'blue';
+            } elseif ($persentase >= 30) {
+                $validator['status'] = 'yellow';
+            } elseif ($persentase < 30) {
+                $validator['status'] = 'red';
             } else {
-                $validator['status'] = 'Di luar rentang target';
+                $validator['status'] = 'invalid';
             }
 
-            // Menentukan selisih antara target dan actual
-            $validator['difference'] = $actual - $target;
+            // Tambahkan hasil movement dan persentase ke dalam data yang akan diperbarui
+            $validator['movement'] = $movement;
+            $validator['persentase'] = $persentase;
 
             // Temukan Target yang akan diupdate
             $targetItem = Target::findOrFail($id);
@@ -123,6 +137,7 @@ class TargetController extends Controller
         }
     }
 
+
     public function updateHasil($id)
     {
         try {
@@ -130,6 +145,10 @@ class TargetController extends Controller
             $validator = request()->validate([
                 'hasil' => 'nullable',
                 'evaluasi' => 'nullable',
+                'initiative' => 'nullable',
+                'goal' => 'nullable',
+                'key_result' => 'nullable',
+                'anggaran' => 'nullable',
             ]);
 
             // Temukan Target yang akan diupdate

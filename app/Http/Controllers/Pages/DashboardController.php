@@ -677,76 +677,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function getDataTargets(Request $request)
-    {
-        // Mendapatkan organization_id dari pengguna yang sedang login
-        $organizationId = auth()->user()->employee->organization_id;
-        $employees = Employee::where('is_active', 1)->get();
-
-        // Mendapatkan input dari form
-        $bulan = $request->input('bulan');
-        $tahun = $request->input('tahun');
-        $organizationId = $request->input('organization_id');
-        // return dd($request);
-
-        // Mengambil data target sesuai dengan bulan dan tahun yang dipilih
-        $targets = Target::when($organizationId, function ($query) use ($organizationId) {
-            // Jika organization_id dipilih, filter berdasarkan organization_id
-            return $query->where('organization_id', $organizationId);
-        })
-            ->when($bulan, function ($query) use ($bulan) {
-                // Jika bulan dipilih, filter berdasarkan bulan
-                return $query->where('bulan', $bulan);
-            })
-            ->whereYear('created_at', $tahun)
-            ->get();
-
-
-        // Mengambil data target sesuai dengan organization_id pengguna
-        // $targets = Target::where('organization_id', $organizationId)->get();
-        return view('pages.target.index', [
-            'targets' => $targets,
-            'employees' => $employees,
-            'getNotify' => $this->getNotify()
-        ]);
-    }
-
-    public function getDataTargetReport(Request $request)
-    {
-        // Mendapatkan organization_id dari pengguna yang sedang login
-        $organizationId = auth()->user()->employee->organization_id;
-
-        // Mendapatkan input dari form
-        $bulan = $request->input('bulan');
-        $tahun = $request->input('tahun');
-        $organizationId = $request->input('organization_id');
-        // return dd($request);
-
-        // Mengambil data target sesuai dengan bulan dan tahun yang dipilih
-        $targets = Target::when($organizationId, function ($query) use ($organizationId) {
-            // Jika organization_id dipilih, filter berdasarkan organization_id
-            return $query->where('organization_id', $organizationId);
-        })
-            ->where('bulan', $bulan)
-            ->whereYear('created_at', $tahun)
-            ->get();
-
-
-        // Jika ingin mengirimkan semua organisasi ke view (sepertinya Anda ingin mengirim yang sedang dipilih saja?)
-        $organizations = Organization::all();
-
-        $selectedBulan = request()->bulan;
-        $selectedTahun = request()->tahun;
-
-        return view('pages.target.report', [
-            'targets' => $targets,
-            'organizations' => $organizations,
-            'selectedBulan' => $selectedBulan,
-            'selectedTahun' => $selectedTahun,
-            'getNotify' => $this->getNotify()
-        ]);
-    }
-
     public function getDataBanks()
     {
         return view('pages.master-data.banks.index', [
@@ -773,6 +703,7 @@ class DashboardController extends Controller
             'getNotify' => $this->getNotify(),
         ]);
     }
+
     public function getManagementShift()
     {
         if (auth()->user()->hasRole('super admin')) {
@@ -792,6 +723,7 @@ class DashboardController extends Controller
             'organizations' => $organizations
         ]);
     }
+
     public function editManagementShift($id)
     {
         $getNotify = $this->getNotify();
@@ -822,6 +754,7 @@ class DashboardController extends Controller
             return redirect()->route('management-shift')->with('error', 'Shift Tidak ditemukan!');
         }
     }
+
     public function dayOffRequest()
     {
         $getNotify = $this->getNotify();
@@ -1490,5 +1423,168 @@ class DashboardController extends Controller
     {
         $permissions = Permission::orderBy('group')->get();
         return view('pages.master-data.permissions.index', compact('permissions'));
+    }
+
+    // Target
+    public function getDataTargets(Request $request)
+    {
+        $employees = Employee::where('is_active', 1)->get();
+
+        // Mendapatkan input dari form
+        $bulan = $request->input('bulan');
+        $tahun = $request->input('tahun');
+        $status = $request->input('status');
+        $organizationId = auth()->user()->can('admin okr') ? $request->input('organization_id') : auth()->user()->employee->organization_id;
+
+        // Mengambil data target sesuai dengan filter
+        $targets = $this->getFilteredTargets($organizationId, $bulan, $tahun, $status);
+
+        // Menghitung data target
+        $targetData = $this->calculateTargetStats($targets);
+
+        // Ambil persentase dan nama target untuk view
+        $percentages = $targets->pluck('persentase')->toArray();
+        $targetNames = $targets->pluck('title')->toArray();
+
+        return view('pages.target.index', [
+            'organizations' => Organization::whereHas('targets')->get(),
+            'employees' => $employees,
+            'targets' => $targets,
+            'targetData' => $targetData,
+            'percentages' => $percentages,
+            'targetNames' => $targetNames,
+            'getNotify' => $this->getNotify(),
+            'selectedBulan' => $bulan,
+            'selectedTahun' => $tahun,
+            'selectedOrganization' => $organizationId,
+        ]);
+    }
+
+    public function getDataTargetReport(Request $request)
+    {
+        // Mendapatkan organization_id dari pengguna yang sedang login
+        $organizationId = auth()->user()->employee->organization_id;
+        $organizationIdInput = $request->input('organization_id', $organizationId);
+
+        // Mendapatkan input dari form
+        $bulan = $request->input('bulan');
+        $tahun = $request->input('tahun');
+        $status = $request->input('status');
+
+        // Mengambil data target sesuai filter dan mengurutkan sesuai dengan status dan persentase
+        $organizationTarget = Organization::with(['targets' => function ($query) use ($bulan, $tahun, $status, $organizationIdInput) {
+            $this->applyFilters($query, $bulan, $tahun, $status, $organizationIdInput);
+            // Hanya menambahkan urutan berdasarkan status dan persentase, tanpa mempengaruhi perhitungan statistik
+            $query->orderByRaw("FIELD(status, 'invalid', 'red', 'yellow', 'blue', 'green')")
+                ->orderBy('persentase', 'asc');
+        }])->whereHas('targets', function ($query) use ($bulan, $tahun, $status, $organizationIdInput) {
+            $this->applyFilters($query, $bulan, $tahun, $status, $organizationIdInput);
+        })->get();
+
+        // Menghitung data target per organisasi dengan nama organisasi
+        $organizationData = $organizationTarget->map(fn($org) => $this->calculateTargetStats($org->targets, $org->name));
+
+        // Urutkan dan siapkan data untuk grafik
+        $sortedOrganizationDataRev = $organizationData->sortBy(function ($item) {
+            // Mengurutkan berdasarkan status menggunakan FIELD
+            $statusOrder = [
+                'invalid' => 1,
+                'red' => 2,
+                'yellow' => 3,
+                'blue' => 4,
+                'green' => 5,
+            ];
+
+            // Mengembalikan urutan berdasarkan status dan persentase
+            return [$statusOrder[$item['status']] ?? 99, $item['percentage']];
+        })->values();
+        $organizationList = $sortedOrganizationDataRev->pluck('name');
+        $percentages = $sortedOrganizationDataRev->pluck('percentage');
+        $targetData = array_fill(0, $organizationList->count(), 80);
+
+        // Mem-flatten dan mengurutkan target sesuai status
+        $flattenedTargets = $organizationTarget->pluck('targets')->flatten()
+            ->sortBy(function ($target) {
+                // Mengurutkan berdasarkan status
+                return array_search($target->status, ['invalid', 'red', 'yellow', 'blue', 'green']);
+            })
+            ->sortBy('persentase'); // Anda bisa menambahkan urutan berdasarkan persentase jika diperlukan
+
+
+        return view('pages.target.report', [
+            'targets' => $flattenedTargets,
+            'jumlahUnit' => $organizationList->count(),
+            'organizations' => Organization::whereHas('targets')->get(),
+            'organizationTarget' => $organizationTarget,
+            'organizationList' => $organizationList,
+            'organizationData' => $sortedOrganizationDataRev,
+            'percentages' => $percentages,
+            'targetData' => $targetData,
+            'selectedBulan' => $bulan,
+            'selectedTahun' => $tahun,
+            'selectedOrganization' => $organizationIdInput,
+            'getNotify' => $this->getNotify()
+        ]);
+    }
+
+
+    // Method untuk filter query berdasarkan bulan, tahun, dan status
+    private function applyFilters($query, $bulan, $tahun, $status, $organization)
+    {
+        $query->when($bulan, fn($q) => $q->where('bulan', $bulan))
+            ->when($tahun, fn($q) => $q->whereYear('created_at', $tahun))
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->when($organization, fn($q) => $q->where('organization_id', $organization));
+        // ->where('organization_id', $organizationId);
+    }
+
+    // Method untuk mengambil target berdasarkan filter dan mengurutkannya sesuai urutan status
+    private function getFilteredTargets($organizationId, $bulan, $tahun, $status)
+    {
+        return Target::where('organization_id', $organizationId)
+            ->when($bulan, fn($q) => $q->where('bulan', $bulan))
+            ->when($tahun, fn($q) => $q->whereYear('created_at', $tahun))
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->orderByRaw("FIELD(status, 'invalid', 'red', 'yellow', 'blue', 'green')") // Urutkan sesuai urutan status
+            ->orderBy('persentase', 'asc') // Urutkan berdasarkan persentase terkecil
+            ->get();
+    }
+
+    // Method untuk menghitung statistik target dengan nama organisasi opsional
+    private function calculateTargetStats($targets, $namaUnit = null)
+    {
+        $totalTargets = $targets->count();
+        $matchingTargets = $targets->where('persentase', '>=', 100)->count();
+        $hampirTercapai = $targets->whereBetween('persentase', [60, 99])->count();
+        $tidakTercapai = $targets->whereBetween('persentase', [30, 59])->count();
+        $minimProgress = $targets->where('persentase', '<', 30)->count();
+        $noMoveTarget = $targets->where('movement', 0)->count();
+        $percentage = $totalTargets > 0 ? round(($matchingTargets / $totalTargets) * 100, 1) : 0;
+
+        // Menentukan status berdasarkan persentase
+        if ($percentage >= 100) {
+            $status = 'green';
+        } elseif ($percentage >= 60) {
+            $status = 'blue';
+        } elseif ($percentage >= 30) {
+            $status = 'yellow';
+        } elseif ($percentage < 30) {
+            $status = 'red';
+        } else {
+            $status = 'invalid';
+        }
+
+
+        return [
+            'name' => $namaUnit ?? 'Tidak Ada Nama Organisasi', // Nama organisasi opsional
+            'percentage' => $percentage,
+            'jumlah_target' => $totalTargets,
+            'target_tercapai' => $matchingTargets,
+            'target_hampir_tercapai' => $hampirTercapai,
+            'target_tidak_tercapai' => $tidakTercapai,
+            'minim_progress' => $minimProgress,
+            'target_tidak_dikerjakan' => $noMoveTarget,
+            'status' => $status,
+        ];
     }
 }

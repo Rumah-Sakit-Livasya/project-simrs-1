@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Target::factory()->count(500)->create();
+        Target::factory()->count(100)->create();
         // $this->call(RolePermissionSeeder::class);
         // $this->call(MenusTableSeeder::class);
         // $this->call(BankSeeder::class);

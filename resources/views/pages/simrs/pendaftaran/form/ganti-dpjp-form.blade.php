@@ -41,7 +41,7 @@
                             </div>
                             <div class="col-xl">
                                 <div class="form-group">
-                                    <select class="select2 form-control w-100" id="doctor_id" name="doctor_id">
+                                    <select class="form-control w-100" id="doctor_id" name="doctor_id">
                                         <option value=""></option>
                                         @foreach ($groupedDoctors as $department => $doctors)
                                             <optgroup label="{{ $department }}">

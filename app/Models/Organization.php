@@ -24,4 +24,9 @@ class Organization extends Model
     {
         return $this->hasMany(Employee::class);
     }
+
+    public function targets()
+    {
+        return $this->hasMany(Target::class);
+    }
 }

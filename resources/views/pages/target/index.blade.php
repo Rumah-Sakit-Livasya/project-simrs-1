@@ -29,52 +29,54 @@
                             </div>
                             <div class="panel-container show">
                                 <div class="panel-content">
-                                    <form action="{{ route('targets') }}" method="get">
+                                    <form action="{{ route('targets') }}" method="post">
                                         @method('GET')
                                         @csrf
-                                        <div class="row" id="step-1">
-                                            <div class="col-md-4">
+                                        <div class="row" id="filter-pencarian">
+                                            <div class="col">
                                                 <div class="form-group mb-3">
-                                                    <label for="filter-bulan">Bulan</label>
+                                                    <label for="bulan">Bulan</label>
                                                     <!-- Mengubah input menjadi select2 -->
                                                     <select
                                                         class="select2 form-control @error('bulan') is-invalid @enderror"
-                                                        name="bulan" id="filter-bulan">
+                                                        name="bulan" id="bulan-filter">
+                                                        <option value="">Pilih Bulan</option>
+                                                        <!-- Placeholder option -->
                                                         <option value="1"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 1 ? 'selected' : '') }}>
+                                                            {{ old('bulan', $selectedBulan) == 1 ? 'selected' : '' }}>
                                                             Januari</option>
                                                         <option value="2"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 2 ? 'selected' : '') }}>
+                                                            {{ old('bulan', $selectedBulan) == 2 ? 'selected' : '' }}>
                                                             Februari</option>
                                                         <option value="3"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 3 ? 'selected' : '') }}>
-                                                            Maret</option>
+                                                            {{ old('bulan', $selectedBulan) == 3 ? 'selected' : '' }}>Maret
+                                                        </option>
                                                         <option value="4"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 4 ? 'selected' : '') }}>
-                                                            April</option>
+                                                            {{ old('bulan', $selectedBulan) == 4 ? 'selected' : '' }}>April
+                                                        </option>
                                                         <option value="5"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 5 ? 'selected' : '') }}>
-                                                            Mei</option>
+                                                            {{ old('bulan', $selectedBulan) == 5 ? 'selected' : '' }}>Mei
+                                                        </option>
                                                         <option value="6"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 6 ? 'selected' : '') }}>
-                                                            Juni</option>
+                                                            {{ old('bulan', $selectedBulan) == 6 ? 'selected' : '' }}>Juni
+                                                        </option>
                                                         <option value="7"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 7 ? 'selected' : '') }}>
-                                                            Juli</option>
+                                                            {{ old('bulan', $selectedBulan) == 7 ? 'selected' : '' }}>Juli
+                                                        </option>
                                                         <option value="8"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 8 ? 'selected' : '') }}>
+                                                            {{ old('bulan', $selectedBulan) == 8 ? 'selected' : '' }}>
                                                             Agustus</option>
                                                         <option value="9"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 9 ? 'selected' : '') }}>
+                                                            {{ old('bulan', $selectedBulan) == 9 ? 'selected' : '' }}>
                                                             September</option>
                                                         <option value="10"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 10 ? 'selected' : '') }}>
+                                                            {{ old('bulan', $selectedBulan) == 10 ? 'selected' : '' }}>
                                                             Oktober</option>
                                                         <option value="11"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 11 ? 'selected' : '') }}>
+                                                            {{ old('bulan', $selectedBulan) == 11 ? 'selected' : '' }}>
                                                             November</option>
                                                         <option value="12"
-                                                            {{ old('bulan', isset($selectedBulan) && $selectedBulan == 12 ? 'selected' : '') }}>
+                                                            {{ old('bulan', $selectedBulan) == 12 ? 'selected' : '' }}>
                                                             Desember</option>
                                                     </select>
 
@@ -83,34 +85,34 @@
                                                     @enderror
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col">
                                                 <div class="form-group mb-3">
                                                     <label for="tahun">Tahun</label>
                                                     <!-- Mengubah input menjadi select2 -->
                                                     <select
                                                         class="select2 form-control @error('tahun') is-invalid @enderror"
                                                         name="tahun" id="tahun">
-
+                                                        <!-- Placeholder option -->
                                                         <option value="2024"
-                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            {{ old('tahun', $selectedTahun) == 2024 ? 'selected' : '' }}>
                                                             2024</option>
                                                         <option value="2025"
-                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            {{ old('tahun', $selectedTahun) == 2025 ? 'selected' : '' }}>
                                                             2025</option>
                                                         <option value="2026"
-                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            {{ old('tahun', $selectedTahun) == 2026 ? 'selected' : '' }}>
                                                             2026</option>
                                                         <option value="2027"
-                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            {{ old('tahun', $selectedTahun) == 2027 ? 'selected' : '' }}>
                                                             2027</option>
                                                         <option value="2028"
-                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            {{ old('tahun', $selectedTahun) == 2028 ? 'selected' : '' }}>
                                                             2028</option>
                                                         <option value="2029"
-                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            {{ old('tahun', $selectedTahun) == 2029 ? 'selected' : '' }}>
                                                             2029</option>
                                                         <option value="2030"
-                                                            {{ old('tahun', isset($selectedTahun) && $selectedTahun == 7 ? 'selected' : '') }}>
+                                                            {{ old('tahun', $selectedTahun) == 2030 ? 'selected' : '' }}>
                                                             2030</option>
                                                     </select>
                                                     @error('tahun')
@@ -118,7 +120,58 @@
                                                     @enderror
                                                 </div>
                                             </div>
-                                            <div class="col-md-4 d-flex align-items-center">
+                                            @can('admin okr')
+                                                <div class="col">
+                                                    <div class="form-group mb-3">
+                                                        <label for="organization_id">Unit</label>
+                                                        <!-- Mengubah input menjadi select2 -->
+                                                        <select
+                                                            class="select2 form-control @error('organization_id') is-invalid @enderror"
+                                                            name="organization_id" id="organization_id">
+                                                            <option value="">Pilih data berikut</option>
+                                                            <!-- Placeholder option -->
+                                                            @foreach ($organizations as $organization)
+                                                                <option value="{{ $organization->id }}"
+                                                                    {{ old('organization_id') == $organization->id || (isset($selectedOrganization) && $selectedOrganization == $organization->id) ? 'selected' : '' }}>
+                                                                    {{ $organization->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        @error('organization_id')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="form-group mb-3">
+                                                        <label for="status">Grade</label>
+                                                        <!-- Mengubah input menjadi select2 -->
+                                                        <select
+                                                            class="select2 form-control @error('status') is-invalid @enderror"
+                                                            name="status" id="status">
+                                                            <option value="">Pilih Grade</option>
+                                                            <!-- Placeholder option -->
+                                                            <option value="green"
+                                                                {{ (old('status') ?? request('status')) == 'green' ? 'selected' : '' }}>
+                                                                Hijau</option>
+                                                            <option value="blue"
+                                                                {{ (old('status') ?? request('status')) == 'blue' ? 'selected' : '' }}>
+                                                                Biru</option>
+                                                            <option value="yellow"
+                                                                {{ (old('status') ?? request('status')) == 'yellow' ? 'selected' : '' }}>
+                                                                Kuning</option>
+                                                            <option value="red"
+                                                                {{ (old('status') ?? request('status')) == 'red' ? 'selected' : '' }}>
+                                                                Merah</option>
+                                                        </select>
+
+                                                        @error('status')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            @endcan
+                                            <div class="col d-flex align-items-center">
                                                 <button type="submit" class="btn btn-primary btn-block w-100">
                                                     <div class="ikon-tambah">
                                                         <span class="fal fa-search mr-1"></span>Cari
@@ -155,15 +208,20 @@
                                 <thead>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
-                                        <th style="white-space: nowrap">Aksi</th>
+                                        @can('edit okr')
+                                            <th style="white-space: nowrap">Aksi</th>
+                                        @endcan
                                         <th style="white-space: nowrap">Judul</th>
-                                        <th style="white-space: nowrap">Status</th>
+                                        <th style="white-space: nowrap">Grade</th>
+                                        <th style="white-space: nowrap">Data Awal</th>
                                         <th style="white-space: nowrap">Actual</th>
                                         <th style="white-space: nowrap">Target</th>
-                                        <th style="white-space: nowrap">Difference</th>
+                                        <th style="white-space: nowrap">Movement</th>
+                                        <th style="white-space: nowrap">Persentase</th>
                                         <th style="white-space: nowrap">PIC</th>
                                         <th style="white-space: nowrap">Bulan</th>
                                         <th style="white-space: nowrap">Hasil</th>
+                                        <th style="white-space: nowrap">Evaluasi</th>
                                         <th style="white-space: nowrap">Evaluasi</th>
                                     </tr>
                                 </thead>
@@ -171,8 +229,8 @@
                                     @foreach ($targets as $row)
                                         <tr>
                                             <td style="white-space: nowrap">{{ $loop->iteration }}</td>
-                                            <td style="white-space: nowrap">
-                                                @can('edit okr')
+                                            @can('edit okr')
+                                                <td style="white-space: nowrap">
                                                     <button type="button" data-backdrop="static" data-keyboard="false"
                                                         class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
                                                         data-id="{{ $row->id }}" title="Ubah" data-toggle="tooltip"
@@ -184,70 +242,160 @@
                                                             Loading...
                                                         </div>
                                                     </button>
-                                                @endcan
-                                                @can('edit okr')
-                                                    <button type="button" data-backdrop="static" data-keyboard="false"
-                                                        class="badge mx-1 btn-edit-hasil badge-warning p-2 border-0 text-white"
-                                                        data-id="{{ $row->id }}" title="Hasil" data-toggle="tooltip"
-                                                        data-placement="top">
-                                                        <i class='bx bx-select-multiple m-0 ikon-hasil'></i>
-                                                        <div class="span spinner-text d-none">
-                                                            <span class="spinner-border spinner-border-sm" role="status"
-                                                                aria-hidden="true"></span>
-                                                            Loading...
-                                                        </div>
-                                                    </button>
+                                                    @can('edit hasil okr')
+                                                        <button type="button" data-backdrop="static" data-keyboard="false"
+                                                            class="badge mx-1 btn-edit-hasil badge-warning p-2 border-0 text-white"
+                                                            data-id="{{ $row->id }}" title="Hasil" data-toggle="tooltip"
+                                                            data-placement="top">
+                                                            <i class='bx bx-select-multiple m-0 ikon-hasil'></i>
+                                                            <div class="span spinner-text d-none">
+                                                                <span class="spinner-border spinner-border-sm" role="status"
+                                                                    aria-hidden="true"></span>
+                                                                Loading...
+                                                            </div>
+                                                        </button>
+                                                    @endcan
                                                 @endcan
                                             </td>
                                             <td style="white-space: nowrap">{{ $row->title }}</td>
-                                            @if ($row->status === 'Di luar rentang target')
-                                                <td style="white-space: nowrap; background-color: #282828; color: #e6e6e6">
-                                                    {{ $row->status }}</td>
-                                            @elseif($row->status === 'Belum dikerjakan sama sekali')
-                                                <td style="white-space: nowrap; background-color: #282828; color: #e6e6e6">
-                                                    {{ $row->status }}</td>
-                                            @elseif($row->status === 'Belum sesuai target')
-                                                <td style="white-space: nowrap; background-color: #f10000; color: #ffffff">
-                                                    {{ $row->status }}</td>
-                                            @elseif($row->status === 'Hampir mendekati target')
-                                                <td style="white-space: nowrap; background-color: #eaff00; color: #0a0a0a">
-                                                    {{ $row->status }}</td>
-                                            @elseif($row->status === 'Sesuai target')
-                                                <td style="white-space: nowrap; background-color: #00cd3a; color: #ffffff">
-                                                    {{ $row->status }}</td>
+                                            @if ($row->status === 'green')
+                                                <td
+                                                    style="white-space: nowrap; text-align: center; background-color: #00cd3a; color: #fefefe">
+                                                </td>
+                                            @elseif($row->status === 'blue')
+                                                <td
+                                                    style="white-space: nowrap; text-align: center; background-color: #0a15f7; color: #fefefe">
+                                                </td>
+                                            @elseif($row->status === 'yellow')
+                                                <td
+                                                    style="white-space: nowrap; text-align: center; background-color: #eaff00; color: #0a0a0a">
+                                                </td>
+                                            @elseif($row->status === 'red')
+                                                <td
+                                                    style="white-space: nowrap; text-align: center; background-color: #f10000; color: #fefefe">
+                                                </td>
+                                            @elseif($row->status === 'invalid')
+                                                <td
+                                                    style="white-space: nowrap; text-align: center; background-color: #000; color: #ffffff">
+                                                </td>
                                             @endif
-                                            <td style="white-space: nowrap">{{ $row->actual }}
-                                                {{ $row->satuan == 'persen' ? '%' : '' }}</td>
-                                            <td style="white-space: nowrap">{{ $row->target }}
-                                                {{ $row->satuan == 'persen' ? '%' : '' }}</td>
-                                            <td style="white-space: nowrap">{{ $row->difference }}
-                                                {{ $row->satuan == 'persen' ? '%' : '' }}</td>
+                                            <td style="white-space: nowrap">
+                                                {{ $row->satuan == 'rupiah' ? rp($row->baseline_data) : $row->baseline_data }}
+                                                {{ $row->satuan == 'persen' ? '%' : '' }}
+                                            </td>
+                                            <td style="white-space: nowrap">
+                                                {{ $row->satuan == 'rupiah' ? rp($row->actual) : $row->actual }}
+                                                {{ $row->satuan == 'persen' ? '%' : '' }}
+                                            </td>
+                                            <td style="white-space: nowrap">
+                                                {{ $row->satuan == 'rupiah' ? rp($row->target) : $row->target }}
+                                                {{ $row->satuan == 'persen' ? '%' : '' }}
+                                            </td>
+
+                                            <td style="white-space: nowrap">{{ round($row->movement, 1) }}%</td>
+                                            <td style="white-space: nowrap">{{ round($row->persentase, 1) }}%</td>
                                             <td style="white-space: nowrap">
                                                 {{ Employee::where('id', $row->pic)->first()->fullname ?? '' }}
                                             </td>
                                             <td style="white-space: nowrap">{{ angkaKeBulan($row->bulan) }}</td>
                                             <td style="white-space: nowrap">{{ $row->hasil }}</td>
                                             <td style="white-space: nowrap">{{ $row->evaluasi }}</td>
+                                            <td style="white-space: nowrap">{{ $row->organization->name }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                                 <tfoot>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
-                                        <th style="white-space: nowrap">Aksi</th>
+                                        @can('edit okr')
+                                            <th style="white-space: nowrap">Aksi</th>
+                                        @endcan
                                         <th style="white-space: nowrap">Judul</th>
-                                        <th style="white-space: nowrap">Status</th>
+                                        <th style="white-space: nowrap">Grade</th>
+                                        <th style="white-space: nowrap">Data Awal</th>
                                         <th style="white-space: nowrap">Actual</th>
                                         <th style="white-space: nowrap">Target</th>
-                                        <th style="white-space: nowrap">Difference</th>
+                                        <th style="white-space: nowrap">Movement</th>
+                                        <th style="white-space: nowrap">Persentase</th>
                                         <th style="white-space: nowrap">PIC</th>
                                         <th style="white-space: nowrap">Bulan</th>
                                         <th style="white-space: nowrap">Hasil</th>
+                                        <th style="white-space: nowrap">Evaluasi</th>
                                         <th style="white-space: nowrap">Evaluasi</th>
                                     </tr>
                                 </tfoot>
                             </table>
                             <!-- datatable end -->
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Tabel --}}
+                <div id="panel-3" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            Capaian
+                        </h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <!-- datatable start -->
+                            <div class="table-responsive">
+                                <table id="dt-basic-example2" class="table table-bordered table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class='text-center' rowspan="2">No</th>
+                                            <th class='text-center' rowspan="2">Unit</th>
+                                            <th class='text-center' colspan="6">OKR</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Jumlah OKR</th>
+                                            <th>Tercapai</th>
+                                            <th>Hampir Tercapai</th>
+                                            <th>Tidak Tercapai</th>
+                                            <th>Minim Progres</th>
+                                            <th>Persentase</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td>{{ $targetData['jumlah_target'] }}</td>
+                                            <td>{{ $targetData['target_tercapai'] }}</td>
+                                            <td>{{ $targetData['target_hampir_tercapai'] }}</td>
+                                            <td>{{ $targetData['target_tidak_tercapai'] }}</td>
+                                            <td>{{ $targetData['target_tidak_dikerjakan'] }}</td>
+                                            <td>{{ $targetData['percentage'] }}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- datatable end -->
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Grafik --}}
+                <div id="panel-2" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            Grafik <span class="fw-300"><i>Capaian</i></span>
+                        </h2>
+                        <div class="panel-toolbar">
+                            <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip"
+                                data-offset="0,10" data-original-title="Collapse"></button>
+                            <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip"
+                                data-offset="0,10" data-original-title="Fullscreen"></button>
+                            <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip"
+                                data-offset="0,10" data-original-title="Close"></button>
+                        </div>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <div id="barlineCombine">
+                                <canvas style="width:100%; height:600px;"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -261,20 +409,37 @@
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/statistics/chartjs/chartjs.bundle.js"></script>
     <script>
         $(document).ready(function() {
             $(function() {
                 $('.select2').select2();
-                $('#tambah-data #pic').select2({
-                    placeholder: 'Pilih PIC',
-                    dropdownParent: $('#tambah-data')
+                $('#create-bulan').select2({
+                    placeholder: 'Pilih data berikut',
+                    allowClear: true
                 });
-                $('#tambah-data #bulan').select2({
-                    placeholder: 'Pilih bulan',
-                    dropdownParent: $('#tambah-data')
+                $('#update-bulan').select2({
+                    placeholder: 'Pilih data berikut',
+                    allowClear: true
                 });
-                $('#filter-bulan').select2({
-                    placeholder: 'Pilih Bulan',
+                $('#create-pic').select2({
+                    placeholder: 'Pilih data berikut',
+                    allowClear: true
+                });
+                $('#update-pic').select2({
+                    placeholder: 'Pilih data berikut',
+                    allowClear: true
+                });
+                $('#bulan-filter').select2({
+                    placeholder: 'Pilih data berikut',
+                    allowClear: true
+                });
+                $('#status').select2({
+                    placeholder: 'Pilih data berikut',
+                    allowClear: true
+                });
+                $('#organization_id').select2({
+                    placeholder: 'Pilih data berikut',
                     allowClear: true
                 });
             });
@@ -307,10 +472,11 @@
                         $('#ubah-data').modal('show');
                         $('#ubah-data #user_id').val(data.user_id);
                         $('#ubah-data #organization_id').val(data.organization_id);
+                        $('#ubah-data #baseline_data').val(data.baseline_data);
                         $('#ubah-data #title').val(data.title);
                         $('#ubah-data #actual').val(data.actual);
                         $('#ubah-data #target').val(data.target);
-                        $('#ubah-data #min_target').val(data.min_target);
+                        $('#ubah-data #custom_target').val(data.custom_target);
                         $('#ubah-data #pic').val(data.pic).select2({
                             dropdownParent: $('#ubah-data')
                         });
@@ -322,6 +488,8 @@
                             $('#update-baku').prop('checked', true);
                         } else if (data.satuan === 'persen') {
                             $('#update-persen').prop('checked', true);
+                        } else if (data.satuan === 'rupiah') {
+                            $('#update-rupiah').prop('checked', true);
                         }
                     },
                     error: function(xhr) {
@@ -372,6 +540,10 @@
                         $('#ubah-data-hasil').modal('show');
                         $('#ubah-data-hasil #hasil').val(data.hasil);
                         $('#ubah-data-hasil #evaluasi').val(data.evaluasi);
+                        $('#ubah-data-hasil #initiative').val(data.initiative);
+                        $('#ubah-data-hasil #goal').val(data.goal);
+                        $('#ubah-data-hasil #key_result').val(data.key_result);
+                        $('#ubah-data-hasil #anggaran').val(data.anggaran);
                     },
                     error: function(xhr) {
                         console.log(xhr.responseText);
@@ -475,6 +647,68 @@
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
             });
 
+            barlineCombine();
         });
+
+        var barlineCombine = function() {
+            var barlineCombineData = {
+                labels: {!! json_encode($targetNames) !!}, // Gunakan nama target sebagai label
+                datasets: [{
+                    type: 'bar',
+                    label: 'Capaian (%)',
+                    backgroundColor: function(context) {
+                        var index = context.dataIndex;
+                        var value = context.dataset.data[index];
+                        return value >= 100 ? myapp_get_color.success_300 :
+                            value >= 60 ? myapp_get_color.info_300 :
+                            value >= 30 ? myapp_get_color.warning_300 :
+                            myapp_get_color.danger_300;
+                    },
+                    data: {!! json_encode($percentages) !!}, // Gunakan data persentase yang diambil
+                    borderWidth: 0
+                }]
+            };
+
+            var config = {
+                type: 'bar',
+                data: barlineCombineData,
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Persentase Target Terpenuhi'
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: true,
+                            gridLines: {
+                                display: true,
+                                color: "#f2f2f2"
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                                fontSize: 11
+                            }
+                        }],
+                        yAxes: [{
+                            display: true,
+                            ticks: {
+                                beginAtZero: true,
+                                fontSize: 11,
+                                max: 100,
+                                callback: function(value) {
+                                    return value + '%'; // Menambahkan simbol % pada label
+                                }
+                            }
+                        }]
+                    }
+                }
+            }
+
+            new Chart($("#barlineCombine > canvas").get(0).getContext("2d"), config);
+        }
     </script>
 @endsection
