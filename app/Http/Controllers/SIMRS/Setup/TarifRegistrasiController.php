@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SIMRS\Setup;
 
 use App\Http\Controllers\Controller;
 use App\Models\SIMRS\GroupPenjamin;
+use App\Models\SIMRS\Setup\HargaTarifRegistrasi;
 use App\Models\SIMRS\Setup\TarifRegistrasi;
 use Illuminate\Http\Request;
 
@@ -19,19 +20,16 @@ class TarifRegistrasiController extends Controller
     {
         $tarif_registrasi = TarifRegistrasi::find($id);
         $grup_penjamin = GroupPenjamin::all();
-        // dd($tarif_registrasi);
-        return view('pages.simrs.master-data.setup.tarif-registrasi-layanan.tarif', compact('tarif_registrasi', 'grup_penjamin'));
+        $harga = $tarif_registrasi->harga_tarif->where('group_penjamin_id', 1)->first();
+        return view('pages.simrs.master-data.setup.tarif-registrasi-layanan.tarif', compact('tarif_registrasi', 'grup_penjamin', 'harga'));
     }
 
-    public function getTarif($id)
+    public function getTarif($tarifRegistId, $grupPenjaminId)
     {
         try {
-            $tarif_registrasi = TarifRegistrasi::findOrFail($id);
+            $tarif_registrasi = HargaTarifRegistrasi::where('tarif_registrasi_id', $tarifRegistId)->where('group_penjamin_id', $grupPenjaminId)->first();
 
-            return response()->json([
-                'nama_tarif' => $tarif_registrasi->nama_tarif,
-                'tipe' => $tarif_registrasi->tipe,
-            ], 200);
+            return response()->json($tarif_registrasi, 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'message' => 'Data tidak ditemukan',
@@ -42,6 +40,25 @@ class TarifRegistrasiController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function storeTarif(Request $request, $tarifRegistId, $grupPenjaminId)
+    {
+        // Ambil semua input share_dr, share_rs, dan total dari request
+        $harga = $request->harga;
+        $group_penjamin_id = $grupPenjaminId;
+
+        HargaTarifRegistrasi::updateOrCreate(
+            [
+                'tarif_registrasi_id' => $tarifRegistId,
+                'group_penjamin_id' => $grupPenjaminId,
+            ],
+            [
+                'harga' => $harga
+            ]
+        );
+
+        return response()->json(['message' => 'Data berhasil diperbarui!']);
     }
 
     public function store(Request $request)

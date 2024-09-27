@@ -96,9 +96,7 @@
                                                 </div>
                                                 <div class="col-sm-10">
                                                     <select class="form-control w-100" id="kode_poli" name="kode_poli">
-                                                        <option value="OBGYN" selected>OBGYN</option>
-                                                        <option value="ANAK">ANAK</option>
-                                                        <option value="PENYAKIT DALAM">PENYAKIT DALAM</option>
+                                                        <option value="" selected></option>
                                                     </select>
                                                     @error('kode_poli')
                                                         <p class="invalid-feedback">{{ $message }}</p>

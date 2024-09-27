@@ -13,12 +13,12 @@ class Doctor extends Model
 
     protected $guarded = ['id'];
 
-    public function departements()
+    public function departement()
     {
         return $this->hasMany(Departement::class, 'default_dokter');
     }
 
-    public function departement()
+    public function department_from_doctors()
     {
         return $this->belongsTo(Departement::class, 'departement_id');
     }
@@ -26,6 +26,11 @@ class Doctor extends Model
     public function employee()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(JadwalDokter::class, 'doctor_id');
     }
 
     public function time_tables()

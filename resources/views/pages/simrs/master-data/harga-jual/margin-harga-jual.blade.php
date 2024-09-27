@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Parameter Radiologi')
+@section('title', 'Margin Harga Jual')
 @section('extended-css')
     <style>
         div.table-responsive>div.dataTables_wrapper>div.row>div[class^="col-"]:last-child {
@@ -19,40 +19,50 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Tarif Biaya Registrasi Layanan
+                            Margin Harga Jual
                         </h2>
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
                             <!-- datatable start -->
-                            <div class="mb-3">
-                                <select id="grup-penjamin-id" class="form-control select2" name="group_penjamin_id">
-                                    @foreach ($grup_penjamin as $row)
-                                        <option value="{{ $row->id }}">{{ $row->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
                             <form id="store-form">
-                                <table>
-                                    <tr>
-                                        <td>Biaya Administrasi</td>
-                                        <td class="pl-2"> : </td>
-                                        <td class="pl-3">{{ $tarif_registrasi->nama_tarif }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="3" class="p-1"></td>
-                                    </tr>
-                                    <tr class="mt-3">
-                                        <td>Tarif</td>
-                                        <td class="pl-2"> : </td>
-                                        <td class="pl-3">
-                                            <input type="number" id="example-input-material" name="harga"
-                                                class="form-control form-control-lg rounded-0 border-top-0 border-left-0 border-right-0 px-0 py-0"
-                                                style="height: auto;" value="{{ $harga->harga ?? 0 }}">
+                                <div class="table-responsive">
+                                    <div class="mb-3">
+                                        <select id="grup-penjamin-id" class="form-control select2" name="group_penjamin_id">
+                                            @foreach ($grup_penjamin as $row)
+                                                <option value="{{ $row->id }}">{{ $row->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                                        </td>
-                                    </tr>
-                                </table>
+                                    <table id="dt-basic-example"
+                                        class="table table-bordered table-hover table-striped w-100">
+                                        <thead class="bg-primary-600">
+                                            <tr>
+                                                <th>Nama Kelas</th>
+                                                <th>Margin (%)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($kelas_rawat as $row)
+                                                @php
+                                                    $margin_standar = $row->margin_harga_jual
+                                                        ->where('group_penjamin_id', 1)
+                                                        ->first();
+                                                @endphp
+                                                <tr>
+                                                    <td>{{ $row->kelas }}</td>
+                                                    <td>
+                                                        <input type="text" name="margin[{{ $row->id }}]"
+                                                            value="{{ $margin_standar->margin ?? 0 }}"
+                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+
                                 <button type="submit" class="btn btn-primary mt-3 btn-block">Update Tarif</button>
                             </form>
 
@@ -70,8 +80,7 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            // let tarifRegistId = null;
-            const tarifRegistId = @json($tarif_registrasi->id);
+            let marginId = null;
             $('#loading-spinner').show();
 
             $('.select2').select2();
@@ -80,11 +89,10 @@
                 e.preventDefault(); // Mencegah form dari pengiriman default
 
                 let grupPenjaminId = $('#grup-penjamin-id').val(); // Ambil grup_penjamin_id
+
+
                 // Route Laravel dengan menggunakan nama route
-                let url =
-                    "{{ route('master-data.setup.tarif-registrasi.tarif.store', ['tarifRegistId' => ':tarifRegistId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
-                    .replace(':tarifRegistId', tarifRegistId)
-                    .replace(':grupPenjaminId', grupPenjaminId);
+                let url = "{{ route('master-data.harga-jual.margin.store') }}";
 
                 $.ajax({
                     url: url,
@@ -107,11 +115,10 @@
 
             $('#grup-penjamin-id').on('change', function() {
 
-                let grupPenjaminId = $(this).val(); // Ambil grup_penjamin_id
+                let grupPenjaminId = $(this).val();
 
                 let url =
-                    "{{ route('master-data.setup.tarif-registrasi.tarif.get', ['tarifRegistId' => ':tarifRegistId', 'grupPenjaminId' => ':grupPenjaminId']) }}"
-                    .replace(':tarifRegistId', tarifRegistId)
+                    "{{ route('master-data.harga-jual.margin.getTarif', ['grupPenjaminId' => ':grupPenjaminId']) }}"
                     .replace(':grupPenjaminId', grupPenjaminId);
 
                 $.ajax({
@@ -119,11 +126,14 @@
                     type: 'GET',
                     data: $(this).serialize(), // Ambil semua data dari form
                     success: function(response) {
-                        if ($.isEmptyObject(response)) {
-                            console.log(response);
-                            $('input[name="harga"]').val(0);
+                        if (response.length > 0) {
+                            response.forEach(function(item) {
+                                // Set the value of the corresponding input fields
+                                $('input[name="margin[' + item.kelas_rawat_id + ']"]')
+                                    .val(item.margin);
+                            });
                         } else {
-                            $('input[name="harga"]').val(response.harga);
+                            $('#dt-basic-example tbody input').val(0);
                         }
                     },
                     error: function(xhr, status, error) {
@@ -152,7 +162,7 @@
                         customize: function(doc) {
                             var table = doc.content[1].table.body;
                             var inputs = $(
-                                'input[name^="share_dr"], input[name^="share_rs"], input[name^="total"]'
+                                'input[name^="margin"], input[name^="share_rs"], input[name^="total"]'
                             );
                             var rowIdx = 1;
 
@@ -179,7 +189,7 @@
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
                             var table = $('#dt-basic-example').DataTable().rows().data();
                             var inputs = $(
-                                'input[name^="share_dr"], input[name^="share_rs"], input[name^="total"]'
+                                'input[name^="margin"], input[name^="share_rs"], input[name^="total"]'
                             );
                             var rowIdx = 1;
 

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\SIMRS\Penjamin;
 
-use App\Models\Penjamin;
+use App\Models\SIMRS\Penjamin;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class PenjaminController extends Controller
@@ -14,7 +15,8 @@ class PenjaminController extends Controller
      */
     public function index()
     {
-        //
+        $penjamin = Penjamin::all();
+        return view('pages.simrs.master-data.penjamin.index', compact('penjamin'));
     }
 
     /**

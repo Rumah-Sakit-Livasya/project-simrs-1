@@ -44,10 +44,10 @@ class DepartementController extends Controller
             'name' => 'required|max:255',
             'kode' => 'required',
             'keterangan' => 'required|max:255',
-            'quota' => 'required|max:255',
+            'quota' => 'nullable|max:255',
             'kode_poli' => 'nullable|max:255',
             'default_dokter' => 'nullable|max:255',
-            'publish_online' => 'required',
+            'publish_online' => 'nullable',
             'revenue_and_cost_center' => 'nullable',
             'master_layanan_rl' => 'nullable',
         ]);

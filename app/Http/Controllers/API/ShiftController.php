@@ -119,7 +119,7 @@ class ShiftController extends Controller
 
         // Nama file Excel
         $fileName = 'shift.xlsx';
-
+        ini_set('memory_limit', '512M');
         // Export data karyawan dan data nama shift ke dalam file Excel
         return Excel::download(new ShiftExport($employees, $shifts, $month, $year), $fileName);
     }

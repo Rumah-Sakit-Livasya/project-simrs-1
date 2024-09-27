@@ -3,6 +3,7 @@
 namespace App\Models\SIMRS;
 
 use App\Models\SIMRS\Peralatan\TarifPeralatan;
+use App\Models\SIMRS\Setup\BiayaAdministrasiRawatInap;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,5 +28,10 @@ class GroupPenjamin extends Model
     public function tarif_peralatan()
     {
         return $this->belongsToMany(TarifPeralatan::class, 'tarif_peralatan');
+    }
+
+    public function biaya_administrasi_ranap()
+    {
+        return $this->hasOne(BiayaAdministrasiRawatInap::class, 'group_penjamin_id');
     }
 }

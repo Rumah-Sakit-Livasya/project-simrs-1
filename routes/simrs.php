@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\DepartementController;
@@ -8,6 +9,8 @@ use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
+use App\Http\Controllers\SIMRS\HargaJual\MarginHargaJualController;
+use App\Http\Controllers\SIMRS\JadwalDokter\JadwalDokterController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
@@ -21,17 +24,15 @@ use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
+use App\Http\Controllers\SIMRS\Penjamin\PenjaminController as PenjaminPenjaminController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
+use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
-use App\Models\SIMRS\GrupSuplier\GrupSuplier;
-use App\Models\SIMRS\GrupTindakanMedis;
-use App\Models\SIMRS\Persalinan\DaftarPersalinan;
-use App\Models\SIMRS\Persalinan\KategoriPersalinan;
-use App\Models\SIMRS\TindakanMedis;
+use App\Models\SIMRS\Setup\BiayaAdministrasiRawatInap;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -106,6 +107,9 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('/master-data')->group(function () {
             Route::prefix('setup')->group(function () {
+                Route::prefix('biaya-administrasi-ranap')->group(function () {
+                    Route::get('/', [BiayaAdministrasiRawatInapController::class, 'index'])->name('master-data.setup.biaya-administrasi-ranap');
+                });
                 Route::get('/kelas-rawat', [KelasRawatController::class, 'index'])->name('master-data.setup.kelas-rawat');
                 Route::get('/rooms/{kelas:id}', [RoomController::class, 'index'])->name('master-data.setup.rooms');
                 Route::get('/beds/{room:id}', [BedController::class, 'index'])->name('master-data.setup.beds');
@@ -158,6 +162,18 @@ Route::group(['middleware' => ['auth']], function () {
 
             Route::prefix('grup-suplier')->group(function () {
                 Route::get('/', [GrupSuplierController::class, 'index'])->name('master-data.grup-suplier.index');
+            });
+
+            Route::prefix('penjamin')->group(function () {
+                Route::get('/', [PenjaminController::class, 'index'])->name('master-data.penjamin.index');
+            });
+
+            Route::prefix('jadwal-dokter')->group(function () {
+                Route::get('setting', [JadwalDokterController::class, 'index'])->name('master-data.jadwal-dokter.index');
+            });
+
+            Route::prefix('harga-jual')->group(function () {
+                Route::get('margin', [MarginHargaJualController::class, 'index'])->name('master-date.setup.harga-jual.margin.index');
             });
         });
     });
