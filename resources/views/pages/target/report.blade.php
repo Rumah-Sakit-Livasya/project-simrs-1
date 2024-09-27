@@ -226,10 +226,10 @@
                                         <tr>
                                             <th>Jumlah OKR</th>
                                             <th>Tercapai</th>
-                                            <th>Hampir Tercapai</th>
+                                            {{-- <th>Hampir Tercapai</th> --}}
                                             <th>Tidak Tercapai</th>
-                                            <th>Minim Progres</th>
-                                            <th>Tidak Dikerjakan</th>
+                                            {{-- <th>Minim Progres</th> --}}
+                                            {{-- <th>Tidak Dikerjakan</th> --}}
                                             <th>Persentase</th>
                                         </tr>
                                     </thead>
@@ -240,10 +240,10 @@
                                                 <td>{{ $item['name'] }}</td>
                                                 <td>{{ $item['jumlah_target'] }}</td>
                                                 <td>{{ $item['target_tercapai'] }}</td>
-                                                <td>{{ $item['target_hampir_tercapai'] }}</td>
+                                                {{-- <td>{{ $item['target_hampir_tercapai'] }}</td> --}}
                                                 <td>{{ $item['target_tidak_tercapai'] }}</td>
-                                                <td>{{ $item['minim_progress'] }}</td>
-                                                <td>{{ $item['target_tidak_dikerjakan'] }}</td>
+                                                {{-- <td>{{ $item['minim_progress'] }}</td> --}}
+                                                {{-- <td>{{ $item['target_tidak_dikerjakan'] }}</td> --}}
                                                 <td>{{ $item['percentage'] }}%</td>
                                             </tr>
                                         @endforeach

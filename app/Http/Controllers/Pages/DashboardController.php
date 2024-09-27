@@ -1437,10 +1437,14 @@ class DashboardController extends Controller
         $organizationId = auth()->user()->can('admin okr') ? $request->input('organization_id') : auth()->user()->employee->organization_id;
 
         // Mengambil data target sesuai dengan filter
+
         $targets = $this->getFilteredTargets($organizationId, $bulan, $tahun, $status);
 
+        // $targetNames = $targets->pluck('title')->toArray();
+        // return dd($targets);
         // Menghitung data target
-        $targetData = $this->calculateTargetStats($targets);
+        $namaOrganisasi = Organization::where('id', $organizationId)->first();
+        $targetData = $this->calculateTargetStats($targets, $namaOrganisasi);
 
         // Ambil persentase dan nama target untuk view
         $percentages = $targets->pluck('persentase')->toArray();
@@ -1551,14 +1555,14 @@ class DashboardController extends Controller
     }
 
     // Method untuk menghitung statistik target dengan nama organisasi opsional
-    private function calculateTargetStats($targets, $namaUnit = null)
+    private function calculateTargetStats($targets, $organisasi = null)
     {
         $totalTargets = $targets->count();
         $matchingTargets = $targets->where('persentase', '>=', 100)->count();
-        $hampirTercapai = $targets->whereBetween('persentase', [60, 99])->count();
-        $tidakTercapai = $targets->whereBetween('persentase', [30, 59])->count();
-        $minimProgress = $targets->where('persentase', '<', 30)->count();
-        $noMoveTarget = $targets->where('movement', 0)->count();
+        // $hampirTercapai = $targets->whereBetween('persentase', [60, 99])->count();
+        $tidakTercapai = $targets->whereBetween('persentase', [0, 99])->count();
+        // $minimProgress = $targets->where('persentase', '<', 30)->count();
+        // $noMoveTarget = $targets->where('movement', 0)->count();
         $percentage = $totalTargets > 0 ? round(($matchingTargets / $totalTargets) * 100, 1) : 0;
 
         // Menentukan status berdasarkan persentase
@@ -1576,14 +1580,14 @@ class DashboardController extends Controller
 
 
         return [
-            'name' => $namaUnit ?? 'Tidak Ada Nama Organisasi', // Nama organisasi opsional
+            'name' => $organisasi->name ?? 'Tidak Ada Nama Organisasi', // Nama organisasi opsional
             'percentage' => $percentage,
             'jumlah_target' => $totalTargets,
             'target_tercapai' => $matchingTargets,
-            'target_hampir_tercapai' => $hampirTercapai,
+            // 'target_hampir_tercapai' => $hampirTercapai,
             'target_tidak_tercapai' => $tidakTercapai,
-            'minim_progress' => $minimProgress,
-            'target_tidak_dikerjakan' => $noMoveTarget,
+            // 'minim_progress' => $minimProgress,
+            // 'target_tidak_dikerjakan' => $noMoveTarget,
             'status' => $status,
         ];
     }

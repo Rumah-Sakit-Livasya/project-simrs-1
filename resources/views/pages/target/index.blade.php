@@ -344,28 +344,26 @@
                                 <table id="dt-basic-example2" class="table table-bordered table-hover table-striped">
                                     <thead>
                                         <tr>
-                                            <th class='text-center' rowspan="2">No</th>
                                             <th class='text-center' rowspan="2">Unit</th>
-                                            <th class='text-center' colspan="6">OKR</th>
+                                            <th class='text-center' colspan="4">OKR</th>
                                         </tr>
                                         <tr>
                                             <th>Jumlah OKR</th>
                                             <th>Tercapai</th>
-                                            <th>Hampir Tercapai</th>
+                                            {{-- <th>Hampir Tercapai</th> --}}
                                             <th>Tidak Tercapai</th>
-                                            <th>Minim Progres</th>
+                                            {{-- <th>Minim Progres</th> --}}
                                             <th>Persentase</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td></td>
-                                            <td></td>
+                                            <td>{{ $targetData['name'] }}</td>
                                             <td>{{ $targetData['jumlah_target'] }}</td>
                                             <td>{{ $targetData['target_tercapai'] }}</td>
-                                            <td>{{ $targetData['target_hampir_tercapai'] }}</td>
+                                            {{-- <td>{{ $targetData['target_hampir_tercapai'] }}</td> --}}
                                             <td>{{ $targetData['target_tidak_tercapai'] }}</td>
-                                            <td>{{ $targetData['target_tidak_dikerjakan'] }}</td>
+                                            {{-- <td>{{ $targetData['target_tidak_dikerjakan'] }}</td> --}}
                                             <td>{{ $targetData['percentage'] }}%</td>
                                         </tr>
                                     </tbody>
@@ -416,18 +414,22 @@
                 $('.select2').select2();
                 $('#create-bulan').select2({
                     placeholder: 'Pilih data berikut',
+                    dropdownParent: $('#tambah-data'),
                     allowClear: true
                 });
                 $('#update-bulan').select2({
                     placeholder: 'Pilih data berikut',
+                    dropdownParent: $('#ubah-data'),
                     allowClear: true
                 });
                 $('#create-pic').select2({
                     placeholder: 'Pilih data berikut',
+                    dropdownParent: $('#tambah-data'),
                     allowClear: true
                 });
                 $('#update-pic').select2({
                     placeholder: 'Pilih data berikut',
+                    dropdownParent: $('#ubah-data'),
                     allowClear: true
                 });
                 $('#bulan-filter').select2({
