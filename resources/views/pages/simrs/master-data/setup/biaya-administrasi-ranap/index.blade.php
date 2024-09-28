@@ -100,51 +100,59 @@
                         <div class="panel-content">
                             <!-- datatable start -->
                             <div class="table-responsive">
-                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                    <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
-                                    <thead class="bg-primary-600">
-                                        <tr>
-                                            <th>Group Name</th>
-                                            <th>Persentase</th>
-                                            <th>Min Tarif</th>
-                                            <th>Max Tarif</th>
-                                            <th>Fungsi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($tarif as $row)
+                                <form id="update-biaya">
+                                    @method('POST')
+                                    @csrf
+                                    <table id="dt-basic-example"
+                                        class="table table-bordered table-hover table-striped w-100">
+                                        <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
+                                        <thead class="bg-primary-600">
                                             <tr>
-                                                <td>{{ $row->group_penjamin->name }}</td>
-                                                <td>{{ $row->persentase }}</td>
-                                                <td>{{ $row->min_tarif }}</td>
-                                                <td>{{ $row->max_tarif }}</td>
-                                                <td>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
-                                                        data-id="{{ $row->id }}">
-                                                        <i class="fas fa-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-danger px-2 py-1 btn-delete"
-                                                        data-id="{{ $row->id }}">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </td>
+                                                <th>Group Name</th>
+                                                <th>Persentase</th>
+                                                <th>Min Tarif</th>
+                                                <th>Max Tarif</th>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th colspan="5" class="text-center">
-                                                <button type="button"
-                                                    class="btn btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-tarif-registrasi">
-                                                    <span class="fal fa-plus-circle"></span>
-                                                    Tambah Biaya
-                                                </button>
-                                            </th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($tarif as $row)
+                                                <tr>
+                                                    <td>{{ $row->group_penjamin->name }}</td>
+                                                    <td>
+                                                        <input type="text" id="example-input-material"
+                                                            value="{{ $row->persentase }}"
+                                                            class="form-control form-control-lg rounded-0 border-top-0 border-left-0 border-right-0 px-0"
+                                                            placeholder="Material">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="example-input-material"
+                                                            value="{{ $row->min_tarif }}"
+                                                            class="form-control form-control-lg rounded-0 border-top-0 border-left-0 border-right-0 px-0"
+                                                            placeholder="Material">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="example-input-material"
+                                                            value="{{ $row->max_tarif }}"
+                                                            class="form-control form-control-lg rounded-0 border-top-0 border-left-0 border-right-0 px-0"
+                                                            placeholder="Material">
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="4" class="text-center">
+                                                    <button type="submit"
+                                                        class="btn btn-outline-primary waves-effect waves-themed"
+                                                        id="btn-tambah-tarif-registrasi">
+                                                        <span class="fal fa-plus-circle"></span>
+                                                        Update Biaya
+                                                    </button>
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </form>
                             </div>
                             <!-- datatable end -->
                         </div>
