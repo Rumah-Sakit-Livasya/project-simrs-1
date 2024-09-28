@@ -1486,7 +1486,7 @@ class DashboardController extends Controller
         })->get();
 
         // Menghitung data target per organisasi dengan nama organisasi
-        $organizationData = $organizationTarget->map(fn($org) => $this->calculateTargetStats($org->targets, $org->name));
+        $organizationData = $organizationTarget->map(fn($org) => $this->calculateTargetStats($org->targets, $org));
 
         // Urutkan dan siapkan data untuk grafik
         $sortedOrganizationDataRev = $organizationData->sortBy(function ($item) {
