@@ -42,7 +42,7 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('detail.registrasi.pasien', $registration->id) }}">
-                                            {{ $registration->doctor->departement->name }}
+                                            {{ $registration->doctor->department_from_doctors->name }}
                                         </a>
                                     </td>
                                     <td>

@@ -12,7 +12,7 @@
                 </div>
                 <div class="modal-body py-0">
                     {{-- Form Fields --}}
-                    <input type="hidden" id="organization_id" name="organization_id"
+                    <input type="hidden" name="organization_id"
                         value="{{ auth()->user()->employee->organization->id }}" required>
                     <input type="hidden" id="user_id" name="user_id" value="{{ auth()->user()->id }}" required>
                     <div class="row">

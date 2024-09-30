@@ -66,8 +66,10 @@ class PatientController extends Controller
     public function pendaftaran_pasien_baru()
     {
         $response = Http::get('https://dev.farizdotid.com/api/daerahindonesia/provinsi');
+        $dataPenjamin = Penjamin::all();
         $provinces = $response->json()['provinsi'];
         return view('pages.simrs.pendaftaran.pendaftaran-pasien-baru', [
+            'penjamins' => $dataPenjamin,
             'provinces' => $provinces,
             'ethnics' => Ethnic::all()
         ]);
@@ -76,8 +78,10 @@ class PatientController extends Controller
     public function detail_patient(Patient $patient)
     {
         $lastRegis = $patient->registration->last();
-        if ($lastRegis->status === 'online') {
-            return redirect("/daftar-registrasi-pasien/" . $lastRegis->id);
+        if ($lastRegis) {
+            if ($lastRegis->status === 'online') {
+                return redirect("/daftar-registrasi-pasien/" . $lastRegis->id);
+            }
         }
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
@@ -92,15 +96,14 @@ class PatientController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|max:255',
             'nickname' => 'max:255',
-            'penjamin_id' => 'nullable',
             'title' => 'required|max:255',
             'gender' => 'required|max:255',
             'place' => 'required|max:255',
             'date_of_birth' => 'required|max:255',
             'religion' => 'required|max:255',
             'blood_group' => 'max:255',
+            'allergy' => 'max:255',
             'married_status' => 'max:255',
-            'job' => 'required|max:255',
             'language' => 'required|max:255',
             'citizenship' => 'max:255',
             'id_card' => 'required|max:255',
@@ -113,16 +116,20 @@ class PatientController extends Controller
             'email' => 'max:255',
             'last_education' => 'required|max:255',
             'ethnic' => 'required|max:255',
+            'job' => 'required|max:255',
 
             // Informasi Keluarga
-            'family_name' => 'required|max:255',
-            'father_name' => 'required|max:255',
-            'mother_name' => 'required|max:255',
-            'family_number' => 'required|max:255',
-            'family_age' => 'required|max:255',
-            'family_job' => 'required|max:255',
-            'family_relation' => 'required|max:255',
-            'family_address' => 'required|max:255',
+            'family_name' => 'max:255',
+            'father_name' => 'max:255',
+            'mother_name' => 'max:255',
+            'family_number' => 'max:255',
+            'family_age' => 'max:255',
+            'family_job' => 'max:255',
+            'family_relation' => 'max:255',
+            'family_address' => 'max:255',
+
+            // Informasi Penjamin
+            'penjamin_id' => 'nullable',
         ]);
 
         if ($request['penjamin_id']) {

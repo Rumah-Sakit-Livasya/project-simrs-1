@@ -370,7 +370,7 @@
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
-                                                    <label for="province" class="form-label">Provinsi</label>
+                                                    <label for="province" class="form-label">Provinsi *</label>
                                                 </div>
                                                 <div class="col-sm-8">
                                                     <select
@@ -802,10 +802,10 @@
                                                 <div class="col-sm-8">
                                                     <select class="form-control w-100" id="guarantor_name"
                                                         name="penjamin_id">
-                                                        <option value="" disabled selected></option>
-                                                        <option value="1">BPJS KESEHATAN</option>
-                                                        <option value="2">ASURANSI</option>
-                                                        <option value="3">UMUM</option>
+                                                        @foreach ($penjamins as $penjamin)
+                                                            <option value="{{ $penjamin->id }}">
+                                                                {{ $penjamin->nama_perusahaan }}</option>
+                                                        @endforeach
                                                     </select>
                                                     @error('penjamin_id')
                                                         <p class="invalid-feedback">{{ $message }}</p>

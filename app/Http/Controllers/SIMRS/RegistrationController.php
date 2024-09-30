@@ -102,7 +102,7 @@ class RegistrationController extends Controller
         // Group doctors by department
         $groupedDoctors = [];
         foreach ($doctors as $doctor) {
-            $groupedDoctors[$doctor->departement->name][] = $doctor;
+            $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
         }
 
         $doctorsIGD = Doctor::with('employee', 'departement')
@@ -146,7 +146,7 @@ class RegistrationController extends Controller
                 // Group doctors by department
                 $groupedDoctors = [];
                 foreach ($doctors as $doctor) {
-                    $groupedDoctors[$doctor->departement->name][] = $doctor;
+                    $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
                 }
 
                 return view('pages.simrs.pendaftaran.form-registrasi', [
@@ -239,7 +239,7 @@ class RegistrationController extends Controller
         $validatedData['status'] = 'online';
 
         if ($validatedData['registration_type'] == 'rawat-jalan' || $validatedData['registration_type'] == 'igd') {
-            $validatedData['departement_id'] = Doctor::where('id', $validatedData['doctor_id'])->first()->departement->id;
+            $validatedData['departement_id'] = Doctor::where('id', $validatedData['doctor_id'])->first()->department_from_doctors->id;
         } else if ($validatedData['registration_type'] == 'odc') {
             $departement_id = Departement::where('kode', 'ODC')->first('id')->id;
             $validatedData['departement_id'] = $departement_id;
@@ -293,7 +293,7 @@ class RegistrationController extends Controller
         // Group doctors by department
         $groupedDoctors = [];
         foreach ($doctors as $doctor) {
-            $groupedDoctors[$doctor->departement->name][] = $doctor;
+            $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
         }
 
         // $patient = $registration->patient;

@@ -11,7 +11,7 @@
                 <ul id="patient-menu-icon">
                     <li>
                         <div class="circle-menu waves-effect pink accent-2 menu-layanan"
-                            data-layanan="pengkajian/menu_rajal">
+                            data-layanan="pengkajian-nurse-rajal">
                             <i class="mdi mdi-clipboard-pulse"></i>
                         </div>
                         <span>Catatan Medis</span>

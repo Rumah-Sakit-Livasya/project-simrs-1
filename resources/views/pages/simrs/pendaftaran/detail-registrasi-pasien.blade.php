@@ -1,6 +1,24 @@
 @extends('inc.layout')
 @section('extended-css')
     <link rel="stylesheet" href="/css/framework_custom.min.css">
+    <style>
+        .wongbaker {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            justify-items: center;
+        }
+
+
+        .card-head .header-pasien {
+            display: grid;
+            padding: 15px 24px;
+            line-height: 1.864;
+            grid-template-columns: 100px 1fr 100px 1fr;
+            grid-column-gap: 10px;
+            font-weight: 300;
+            color: #9E9E9E;
+        }
+    </style>
 @endsection
 @section('content')
     @php
@@ -425,8 +443,12 @@
                             </div>
                         </div>
                     </div>
-                    @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
-                    {{-- @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan') --}}
+                    <div id="menu-layanan">
+                        @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan')
+                    </div>
+                    <div id="pengkajian-nurse-rajal" style="display: none;">
+                        @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
+                    </div>
                 </div>
             </div>
         </div>
@@ -445,6 +467,25 @@
     <script type="text/javascript" src="/js/painterro-1.2.3.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Ketika elemen dengan kelas .menu-layanan diklik
+            $('.menu-layanan').on('click', function() {
+                // Sembunyikan menu layanan dengan efek fade out
+                $('#menu-layanan').fadeOut(500); // 500ms untuk transisi
+
+                // Ambil data-layanan untuk menentukan ID elemen yang akan ditampilkan
+                var layananId = $(this).data('layanan');
+
+                // Tampilkan elemen layanan yang dipilih dengan efek fade in
+                $('#' + layananId).delay(500).fadeIn(500); // 500ms untuk transisi
+            });
+
+            // Fungsi untuk tombol kembali
+            $('.btn-kembali').on('click', function() {
+                // Sembunyikan div layanan yang aktif dan tampilkan kembali menu layanan
+                $('#pengkajian-nurse-rajal').fadeOut(500, function() {
+                    $('#menu-layanan').fadeIn(500);
+                });
+            });
 
             // Select 2
             $(function() {
