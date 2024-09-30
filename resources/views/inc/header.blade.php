@@ -202,6 +202,10 @@
         overflow: hidden;
         transition: max-height 0.5s ease-in-out;
     }
+
+    aside.page-sidebar {
+        margin-left: -3px;
+    }
 </style>
 @yield('extended-css')
 
