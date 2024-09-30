@@ -582,6 +582,7 @@
                 url: `/api/dashboard/targets/get/${targetId}`, // Isi dengan url/path file php yang dituju
                 dataType: "json",
                 success: function(data) {
+                    console.log(data);
                     ikonEdit.classList.remove('d-none');
                     ikonEdit.classList.add('d-block');
                     spinnerText.classList.add('d-none');
@@ -593,7 +594,7 @@
                     $('#ubah-data #actual').val(data.actual);
                     $('#ubah-data #target').val(data.target);
                     $('#ubah-data #custom_target').val(data.custom_target);
-                    $('#ubah-data #pic').val(data.pic).select2({
+                    $('#ubah-data #update-pic').val(data.pic).select2({
                         dropdownParent: $('#ubah-data')
                     });
                     $('#ubah-data #bulan').val(data.bulan).select2({
