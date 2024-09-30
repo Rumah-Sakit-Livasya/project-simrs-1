@@ -295,8 +295,22 @@
                                             <td style="white-space: nowrap">{{ round($row->movement, 1) }}%</td>
                                             <td style="white-space: nowrap">{{ round($row->persentase, 1) }}%</td>
                                             <td style="white-space: nowrap">
-                                                {{ Employee::where('id', $row->pic)->first()->fullname ?? '' }}
+                                                @php
+                                                    // Mengambil data pic sebagai array
+                                                    $picArray = json_decode($row->pic, true); // true untuk mengembalikan sebagai array asosiatif
+                                                @endphp
+
+                                                @if ($picArray)
+                                                    @foreach ($picArray as $picId)
+                                                        {{ Employee::where('id', $picId)->first()->fullname ?? '' }}
+                                                        @if (!$loop->last)
+                                                            {{-- Cek jika bukan elemen terakhir --}}
+                                                            , <!-- Tambahkan koma sebagai pemisah -->
+                                                        @endif
+                                                    @endforeach
+                                                @endif
                                             </td>
+
                                             <td style="white-space: nowrap">{{ angkaKeBulan($row->bulan) }}</td>
                                             <td style="white-space: nowrap">{{ $row->hasil }}</td>
                                             <td style="white-space: nowrap">{{ $row->evaluasi }}</td>
@@ -572,21 +586,23 @@
             let targetId = button.getAttribute('data-id');
             idTarget = targetId;
             let ikonEdit = button.querySelector('.ikon-edit');
-            let ikonUbah = button.querySelector('.ikon-ubah');
             let spinnerText = button.querySelector('.spinner-text');
             ikonEdit.classList.add('d-none');
             spinnerText.classList.remove('d-none');
 
             $.ajax({
-                type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                url: `/api/dashboard/targets/get/${targetId}`, // Isi dengan url/path file php yang dituju
+                type: "GET",
+                url: `/api/dashboard/targets/get/${targetId}`,
                 dataType: "json",
                 success: function(data) {
-                    console.log(data);
+                    console.log(data.pic); // Cek data pic di console
                     ikonEdit.classList.remove('d-none');
-                    ikonEdit.classList.add('d-block');
                     spinnerText.classList.add('d-none');
+
+                    // Tampilkan modal
                     $('#ubah-data').modal('show');
+
+                    // Isi field lain dengan data yang didapat
                     $('#ubah-data #user_id').val(data.user_id);
                     $('#ubah-data #organization_id').val(data.organization_id);
                     $('#ubah-data #baseline_data').val(data.baseline_data);
@@ -594,12 +610,25 @@
                     $('#ubah-data #actual').val(data.actual);
                     $('#ubah-data #target').val(data.target);
                     $('#ubah-data #custom_target').val(data.custom_target);
-                    $('#ubah-data #update-pic').val(data.pic).select2({
+
+                    // Set nilai untuk select2 multiple PIC
+                    if (Array.isArray(data.pic)) {
+                        $('#ubah-data #update-pic').val(data.pic).trigger(
+                            'change'); // Jika data pic sudah array
+                    } else if (typeof data.pic === 'string') {
+                        let picArray = data.pic.split(','); // Jika data pic adalah string, ubah ke array
+                        $('#ubah-data #update-pic').val(picArray).trigger('change'); // Set nilai ke select2
+                    }
+
+                    // Inisialisasi select2 untuk PIC dan Bulan
+                    $('#ubah-data #update-pic').select2({
                         dropdownParent: $('#ubah-data')
                     });
+
                     $('#ubah-data #update-bulan').val(data.bulan).select2({
                         dropdownParent: $('#ubah-data')
                     });
+
                     // Cek radio button sesuai dengan data satuan
                     if (data.satuan === 'baku') {
                         $('#update-baku').prop('checked', true);
@@ -614,6 +643,7 @@
                 }
             });
         }
+
 
         $('#update-form').on('submit', function(e) {
             e.preventDefault();

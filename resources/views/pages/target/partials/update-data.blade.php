@@ -86,8 +86,8 @@
                                         data-toggle="tooltip"
                                         title="Orang yang bertanggungjawab atas target ini"></i></label>
                                 <!-- Mengubah input menjadi select2 -->
-                                <select class="select2 form-control @error('pic') is-invalid @enderror" name="pic"
-                                    id="update-pic">
+                                <select class="select2 form-control @error('pic') is-invalid @enderror" name="pic[]"
+                                    multiple id="update-pic">
                                     @foreach ($employees as $employee)
                                         <option value="{{ $employee->id }}">{{ old('pic', $employee->fullname) }}
                                         </option>

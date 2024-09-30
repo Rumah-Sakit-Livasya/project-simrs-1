@@ -12,6 +12,8 @@ class TargetController extends Controller
     {
         try {
             $target = Target::findOrFail($id);
+            // Jika data pic disimpan sebagai JSON string, parse dulu
+            $target->pic = json_decode($target->pic, true);
             return response()->json($target, 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -20,6 +22,7 @@ class TargetController extends Controller
         }
     }
 
+
     public function store()
     {
         try {
@@ -27,7 +30,7 @@ class TargetController extends Controller
                 'organization_id' => 'required',
                 'user_id' => 'required',
                 'title' => 'required',
-                'pic' => 'required',
+                'pic' => 'required|array', // pastikan pic adalah array
                 'bulan' => 'required',
                 'satuan' => 'required',
                 'baseline_data' => 'required',
@@ -35,6 +38,9 @@ class TargetController extends Controller
                 'target' => 'max:255',
                 'custom_target' => 'max:255',
             ]);
+
+            // Konversi array pic menjadi string sebelum disimpan ke database
+            $validator['pic'] = implode(',', $validator['pic']); // menggabungkan array menjadi string dengan pemisah koma
 
             $target = $validator['target'] ?? 0;
             $actual = $validator['actual'] ?? 0;
