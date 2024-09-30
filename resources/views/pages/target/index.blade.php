@@ -234,7 +234,7 @@
                                                     <button type="button" data-backdrop="static" data-keyboard="false"
                                                         class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
                                                         data-id="{{ $row->id }}" title="Ubah" data-toggle="tooltip"
-                                                        data-placement="top">
+                                                        data-placement="top" onclick="ubahTarget(event)">
                                                         <span class="fal fa-pencil ikon-edit"></span>
                                                         <div class="span spinner-text d-none">
                                                             <span class="spinner-border spinner-border-sm" role="status"
@@ -456,76 +456,6 @@
                 }
             });
 
-            $('.btn-edit').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                console.log('clicked');
-                let id = button.attr('data-id');
-                button.find('.ikon-edit').hide();
-                button.find('.spinner-text').removeClass('d-none');
-
-                $.ajax({
-                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                    url: `/api/dashboard/targets/get/${id}`, // Isi dengan url/path file php yang dituju
-                    dataType: "json",
-                    success: function(data) {
-                        button.find('.ikon-edit').show();
-                        button.find('.spinner-text').addClass('d-none');
-                        $('#ubah-data').modal('show');
-                        $('#ubah-data #user_id').val(data.user_id);
-                        $('#ubah-data #organization_id').val(data.organization_id);
-                        $('#ubah-data #baseline_data').val(data.baseline_data);
-                        $('#ubah-data #title').val(data.title);
-                        $('#ubah-data #actual').val(data.actual);
-                        $('#ubah-data #target').val(data.target);
-                        $('#ubah-data #custom_target').val(data.custom_target);
-                        $('#ubah-data #pic').val(data.pic).select2({
-                            dropdownParent: $('#ubah-data')
-                        });
-                        $('#ubah-data #bulan').val(data.bulan).select2({
-                            dropdownParent: $('#ubah-data')
-                        });
-                        // Cek radio button sesuai dengan data satuan
-                        if (data.satuan === 'baku') {
-                            $('#update-baku').prop('checked', true);
-                        } else if (data.satuan === 'persen') {
-                            $('#update-persen').prop('checked', true);
-                        } else if (data.satuan === 'rupiah') {
-                            $('#update-rupiah').prop('checked', true);
-                        }
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
-                });
-
-                $('#update-form').on('submit', function(e) {
-                    e.preventDefault();
-                    let formData = $(this).serialize();
-                    $.ajax({
-                        type: "POST",
-                        url: '/api/dashboard/targets/update/' + id,
-                        data: formData,
-                        beforeSend: function() {
-                            $('#update-form').find('.ikon-edit').hide();
-                            $('#update-form').find('.spinner-text')
-                                .removeClass(
-                                    'd-none');
-                        },
-                        success: function(response) {
-                            $('#ubah-data').modal('hide');
-                            showSuccessAlert(response.message)
-                            setTimeout(function() {
-                                location.reload();
-                            }, 500);
-                        },
-                        error: function(xhr) {
-                            console.log(xhr.responseText);
-                        }
-                    });
-                });
-            });
-
             $('.btn-edit-hasil').click(function(e) {
                 e.preventDefault();
                 let button = $(this);
@@ -650,6 +580,82 @@
             });
 
             barlineCombine();
+        });
+
+        let idTarget = null;
+
+        function ubahTarget(event) {
+            event.preventDefault();
+            let button = event.currentTarget;
+            let targetId = button.getAttribute('data-id');
+            idTarget = targetId;
+            let ikonEdit = button.querySelector('.ikon-edit');
+            let ikonUbah = button.querySelector('.ikon-ubah');
+            let spinnerText = button.querySelector('.spinner-text');
+            ikonEdit.classList.add('d-none');
+            spinnerText.classList.remove('d-none');
+
+            $.ajax({
+                type: "GET", // Method pengiriman data bisa dengan GET atau POST
+                url: `/api/dashboard/targets/get/${targetId}`, // Isi dengan url/path file php yang dituju
+                dataType: "json",
+                success: function(data) {
+                    ikonEdit.classList.remove('d-none');
+                    ikonEdit.classList.add('d-block');
+                    spinnerText.classList.add('d-none');
+                    $('#ubah-data').modal('show');
+                    $('#ubah-data #user_id').val(data.user_id);
+                    $('#ubah-data #organization_id').val(data.organization_id);
+                    $('#ubah-data #baseline_data').val(data.baseline_data);
+                    $('#ubah-data #title').val(data.title);
+                    $('#ubah-data #actual').val(data.actual);
+                    $('#ubah-data #target').val(data.target);
+                    $('#ubah-data #custom_target').val(data.custom_target);
+                    $('#ubah-data #pic').val(data.pic).select2({
+                        dropdownParent: $('#ubah-data')
+                    });
+                    $('#ubah-data #bulan').val(data.bulan).select2({
+                        dropdownParent: $('#ubah-data')
+                    });
+                    // Cek radio button sesuai dengan data satuan
+                    if (data.satuan === 'baku') {
+                        $('#update-baku').prop('checked', true);
+                    } else if (data.satuan === 'persen') {
+                        $('#update-persen').prop('checked', true);
+                    } else if (data.satuan === 'rupiah') {
+                        $('#update-rupiah').prop('checked', true);
+                    }
+                },
+                error: function(xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
+        $('#update-form').on('submit', function(e) {
+            e.preventDefault();
+            let formData = $(this).serialize();
+            $.ajax({
+                type: "POST",
+                url: '/api/dashboard/targets/update/' + idTarget,
+                data: formData,
+                beforeSend: function() {
+                    $('#update-form').find('.ikon-edit').hide();
+                    $('#update-form').find('.spinner-text')
+                        .removeClass(
+                            'd-none');
+                },
+                success: function(response) {
+                    $('#ubah-data').modal('hide');
+                    showSuccessAlert(response.message)
+                    setTimeout(function() {
+                        location.reload();
+                    }, 500);
+                },
+                error: function(xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
         });
 
         var barlineCombine = function() {
