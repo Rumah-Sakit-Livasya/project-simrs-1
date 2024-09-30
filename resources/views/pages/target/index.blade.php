@@ -597,7 +597,7 @@
                     $('#ubah-data #update-pic').val(data.pic).select2({
                         dropdownParent: $('#ubah-data')
                     });
-                    $('#ubah-data #bulan').val(data.bulan).select2({
+                    $('#ubah-data #update-bulan').val(data.bulan).select2({
                         dropdownParent: $('#ubah-data')
                     });
                     // Cek radio button sesuai dengan data satuan
