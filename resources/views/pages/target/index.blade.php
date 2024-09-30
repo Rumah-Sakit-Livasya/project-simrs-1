@@ -246,7 +246,7 @@
                                                         <button type="button" data-backdrop="static" data-keyboard="false"
                                                             class="badge mx-1 btn-edit-hasil badge-warning p-2 border-0 text-white"
                                                             data-id="{{ $row->id }}" title="Hasil" data-toggle="tooltip"
-                                                            data-placement="top">
+                                                            data-placement="top" onclick="ubahHasil(event)">
                                                             <i class='bx bx-select-multiple m-0 ikon-hasil'></i>
                                                             <div class="span spinner-text d-none">
                                                                 <span class="spinner-border spinner-border-sm" role="status"
@@ -456,62 +456,11 @@
                 }
             });
 
-            $('.btn-edit-hasil').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                let id = button.attr('data-id');
-                button.find('.ikon-hasil').hide();
-                button.find('.spinner-text').removeClass('d-none');
-                $.ajax({
-                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                    url: `/api/dashboard/targets/get/${id}`, // Isi dengan url/path file php yang dituju
-                    dataType: "json",
-                    success: function(data) {
-                        button.find('.ikon-hasil').show();
-                        button.find('.spinner-text').addClass('d-none');
-                        $('#ubah-data-hasil').modal('show');
-                        $('#ubah-data-hasil #hasil').val(data.hasil);
-                        $('#ubah-data-hasil #evaluasi').val(data.evaluasi);
-                        $('#ubah-data-hasil #initiative').val(data.initiative);
-                        $('#ubah-data-hasil #goal').val(data.goal);
-                        $('#ubah-data-hasil #key_result').val(data.key_result);
-                        $('#ubah-data-hasil #anggaran').val(data.anggaran);
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
-                });
-
-                $('#update-form-hasil').on('submit', function(e) {
-                    e.preventDefault();
-                    let formData = $(this).serialize();
-                    $.ajax({
-                        type: "POST",
-                        url: '/api/dashboard/targets/update-hasil/' + id,
-                        data: formData,
-                        beforeSend: function() {
-                            $('#update-form-hasil').find('.ikon-hasil').hide();
-                            $('#update-form-hasil').find('.spinner-text')
-                                .removeClass(
-                                    'd-none');
-                        },
-                        success: function(response) {
-                            $('#ubah-data-hasil').modal('hide');
-                            showSuccessAlert(response.message)
-                            setTimeout(function() {
-                                location.reload();
-                            }, 500);
-                        },
-                        error: function(xhr) {
-                            console.log(xhr.responseText);
-                        }
-                    });
-                });
-            });
-
             $('#store-form').on('submit', function(e) {
                 e.preventDefault();
                 let formData = $(this).serialize();
+                const submitButton = $('#store-form').find('button[type="submit"]');
+                submitButton.prop('disabled', true);
                 $.ajax({
                     type: "POST",
                     url: '/api/dashboard/targets/store',
@@ -584,6 +533,39 @@
 
         let idTarget = null;
 
+        function ubahHasil(event) {
+            event.preventDefault();
+            let button = event.currentTarget;
+            let targetId = button.getAttribute('data-id');
+            idTarget = targetId;
+            let ikonHasil = button.querySelector('.ikon-hasil');
+            let ikonUbah = button.querySelector('.ikon-ubah');
+            let spinnerText = button.querySelector('.spinner-text');
+            ikonHasil.classList.add('d-none');
+            spinnerText.classList.remove('d-none');
+            $.ajax({
+                type: "GET", // Method pengiriman data bisa dengan GET atau POST
+                url: `/api/dashboard/targets/get/${targetId}`, // Isi dengan url/path file php yang dituju
+                dataType: "json",
+                success: function(data) {
+                    ikonHasil.classList.remove('d-none');
+                    ikonHasil.classList.add('d-block');
+                    spinnerText.classList.add('d-none');
+                    $('#ubah-data-hasil').modal('show');
+                    $('#ubah-data-hasil #hasil').val(data.hasil);
+                    $('#ubah-data-hasil #evaluasi').val(data.evaluasi);
+                    $('#ubah-data-hasil #initiative').val(data.initiative);
+                    $('#ubah-data-hasil #goal').val(data.goal);
+                    $('#ubah-data-hasil #key_result').val(data.key_result);
+                    $('#ubah-data-hasil #anggaran').val(data.anggaran);
+                },
+                error: function(xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+
+        }
+
         function ubahTarget(event) {
             event.preventDefault();
             let button = event.currentTarget;
@@ -647,6 +629,32 @@
                 },
                 success: function(response) {
                     $('#ubah-data').modal('hide');
+                    showSuccessAlert(response.message)
+                    setTimeout(function() {
+                        location.reload();
+                    }, 500);
+                },
+                error: function(xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+        });
+
+        $('#update-form-hasil').on('submit', function(e) {
+            e.preventDefault();
+            let formData = $(this).serialize();
+            $.ajax({
+                type: "POST",
+                url: '/api/dashboard/targets/update-hasil/' + idTarget,
+                data: formData,
+                beforeSend: function() {
+                    $('#update-form-hasil').find('.ikon-hasil').hide();
+                    $('#update-form-hasil').find('.spinner-text')
+                        .removeClass(
+                            'd-none');
+                },
+                success: function(response) {
+                    $('#ubah-data-hasil').modal('hide');
                     showSuccessAlert(response.message)
                     setTimeout(function() {
                         location.reload();
