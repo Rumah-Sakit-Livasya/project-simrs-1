@@ -54,40 +54,6 @@
 @endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        <div class="row justify-content-center">
-            <div class="col-xl-10">
-                <div id="panel-1" class="panel">
-                    <div class="panel-hdr">
-                        <h2>
-                            Form Pencarian</span>
-                        </h2>
-                    </div>
-                    <div class="panel-container show">
-                        <div class="panel-content" id="filter-wrapper">
-
-                            <form action="/daftar-rekam-medis" method="get">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-md-12 mb-3">
-                                        <div class="form-group d-flex align-items-center">
-                                            <label for="nama_tindakan_1" class="form-label">Nama</label>
-                                            <input type="text" name="nama_tindakan" id="nama_tindakan_1"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <button type="submit" class="btn btn-sm float-right mt-2 btn-primary">
-                                            <i class="fas fa-search mr-1"></i> Cari
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="row">
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
@@ -100,51 +66,62 @@
                         <div class="panel-content">
                             <!-- datatable start -->
                             <div class="table-responsive">
-                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                    <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
-                                    <thead class="bg-primary-600">
-                                        <tr>
-                                            <th>Group Name</th>
-                                            <th>Persentase</th>
-                                            <th>Min Tarif</th>
-                                            <th>Max Tarif</th>
-                                            <th>Fungsi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($tarif as $row)
+                                <form id="update-biaya">
+                                    @method('POST')
+                                    @csrf
+                                    <table id="dt-basic-example"
+                                        class="table table-bordered table-hover table-striped w-100">
+                                        <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
+                                        <thead class="bg-primary-600">
                                             <tr>
-                                                <td>{{ $row->group_penjamin->name }}</td>
-                                                <td>{{ $row->persentase }}</td>
-                                                <td>{{ $row->min_tarif }}</td>
-                                                <td>{{ $row->max_tarif }}</td>
-                                                <td>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
-                                                        data-id="{{ $row->id }}">
-                                                        <i class="fas fa-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-danger px-2 py-1 btn-delete"
-                                                        data-id="{{ $row->id }}">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </td>
+                                                <th>Group Name</th>
+                                                <th>Persentase</th>
+                                                <th>Min Tarif</th>
+                                                <th>Max Tarif</th>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th colspan="5" class="text-center">
-                                                <button type="button"
-                                                    class="btn btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-tarif-registrasi">
-                                                    <span class="fal fa-plus-circle"></span>
-                                                    Tambah Biaya
-                                                </button>
-                                            </th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($tarif as $row)
+                                                <tr>
+                                                    <td>{{ $row->group_penjamin->name }}</td>
+                                                    <td>
+                                                        <input type="text" id="example-input-material"
+                                                            value="{{ $row->persentase }}"
+                                                            name="persentase[{{ $row->group_penjamin_id }}]"
+                                                            class="form-control form-control-lg rounded-0 border-top-0 border-left-0 border-right-0 px-0"
+                                                            placeholder="Material">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="example-input-material"
+                                                            value="{{ $row->min_tarif }}"
+                                                            name="min_tarif[{{ $row->group_penjamin_id }}]"
+                                                            class="form-control form-control-lg rounded-0 border-top-0 border-left-0 border-right-0 px-0"
+                                                            placeholder="Material">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="example-input-material"
+                                                            value="{{ $row->max_tarif }}"
+                                                            name="max_tarif[{{ $row->group_penjamin_id }}]"
+                                                            class="form-control form-control-lg rounded-0 border-top-0 border-left-0 border-right-0 px-0"
+                                                            placeholder="Material">
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="4" class="text-center">
+                                                    <button type="submit"
+                                                        class="btn btn-outline-primary waves-effect waves-themed"
+                                                        id="btn-tambah-tarif-registrasi">
+                                                        <span class="fal fa-plus-circle"></span>
+                                                        Update Biaya
+                                                    </button>
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </form>
                             </div>
                             <!-- datatable end -->
                         </div>
@@ -162,108 +139,21 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            let biayaRegistId = null;
             $('#loading-spinner').show();
-
-            $('#modal-tambah-tarif-registrasi .select2').select2({
-                dropdownParent: $('#modal-tambah-tarif-registrasi')
-            });
-
-            $('#btn-tambah-tarif-registrasi').click(function() {
-                $('#modal-tambah-tarif-registrasi').modal('show');
-            });
-
-            $('.btn-tarif').click(function() {
-                const id_param = $(this).attr('data-id');
-                const url = `{{ route('master-data.setup.tarif-registrasi.set-tarif', ':id') }}`
-                    .replace(':id', id_param);
-                const popupWidth = 850;
-                const popupHeight = 600;
-                const left = (screen.width - popupWidth) / 2;
-                const top = (screen.height - popupHeight) / 2;
-
-                window.open(
-                    url,
-                    "popupWindow",
-                    "width=" + popupWidth + ",height=" + popupHeight + ",top=" + top + ",left=" + left +
-                    ",scrollbars=yes,resizable=yes"
-                );
-            });
-
-            $('.btn-edit').click(function() {
-                $('#modal-edit-tarif-registrasi').modal('show');
-                biayaRegistId = $(this).attr('data-id');
-                $('#modal-edit-tarif-registrasi form').attr('data-id', biayaRegistId);
-
-                $.ajax({
-                    url: '/api/simrs/master-data/setup/tarif-registrasi-layanan/' +
-                        biayaRegistId,
-                    type: 'GET',
-                    success: function(response) {
-                        $('#modal-edit-tarif-registrasi #tipe_edit').val(response.tipe)
-                            .select2({
-                                dropdownParent: $('#modal-edit-tarif-registrasi')
-                            });
-                        $('#modal-edit-tarif-registrasi input[name="nama_tarif"]').val(
-                            response
-                            .nama_tarif);
-                    },
-                    error: function(xhr, status, error) {
-                        $('#modal-edit-tarif-registrasi').modal('hide');
-                        showErrorAlert('Terjadi kesalahan: ' + error);
-                    }
-                });
-
-            });
-
-            $('.btn-delete').click(function() {
-                var biayaRegistId = $(this).attr('data-id');
-
-                // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
-                var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
-
-                if (userConfirmed) {
-                    // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
-                    $.ajax({
-                        url: '/api/simrs/master-data/setup/tarif-registrasi-layanan/' +
-                            biayaRegistId +
-                            '/delete',
-                        type: 'DELETE',
-                        success: function(response) {
-                            showSuccessAlert(response.message);
-
-                            setTimeout(() => {
-                                console.log('Reloading the page now.');
-                                window.location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr, status, error) {
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                        }
-                    });
-                } else {
-                    console.log('Penghapusan dibatalkan oleh pengguna.');
-                }
-            });
-
-            $('#update-form').on('submit', function(e) {
+            $('#update-biaya').on('submit', function(e) {
                 e.preventDefault(); // Mencegah form submit secara default
 
                 var formData = $(this).serialize();
-                biayaRegistId = $(this).attr('data-id');
                 $.ajax({
-                    url: '/api/simrs/master-data/setup/tarif-registrasi-layanan/' +
-                        biayaRegistId +
-                        '/update',
+                    url: '/api/simrs/master-data/setup/biaya-administrasi-ranap/update',
                     type: 'PATCH',
                     data: formData,
                     beforeSend: function() {
-                        $('#update-form').find('.ikon-edit').hide();
-                        $('#update-form').find('.spinner-text').removeClass(
+                        $('#update-biaya').find('.ikon-edit').hide();
+                        $('#update-biaya').find('.spinner-text').removeClass(
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-edit-tarif-registrasi').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {

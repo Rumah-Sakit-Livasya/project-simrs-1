@@ -21,8 +21,6 @@ class PatientController extends Controller
     public function daftar_rm(Request $request)
     {
         $query = Patient::query();
-
-        // Apply filters based on form inputs
         $filters = ['medical_record_number', 'telp', 'name', 'mobile_phone_number', 'date_of_birth', 'address'];
         $filterApplied = false;
 

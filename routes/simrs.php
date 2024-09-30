@@ -15,7 +15,6 @@ use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
 use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
-use App\Http\Controllers\SIMRS\Laboratorium\NilaiParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
@@ -24,15 +23,14 @@ use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
-use App\Http\Controllers\SIMRS\Penjamin\PenjaminController as PenjaminPenjaminController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
+use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
-use App\Models\SIMRS\Setup\BiayaAdministrasiRawatInap;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -110,6 +108,8 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::prefix('biaya-administrasi-ranap')->group(function () {
                     Route::get('/', [BiayaAdministrasiRawatInapController::class, 'index'])->name('master-data.setup.biaya-administrasi-ranap');
                 });
+
+                Route::get('/biaya-materai', [BiayaMateraiController::class, 'index'])->name('master-data.setup.biaya-materai');
                 Route::get('/kelas-rawat', [KelasRawatController::class, 'index'])->name('master-data.setup.kelas-rawat');
                 Route::get('/rooms/{kelas:id}', [RoomController::class, 'index'])->name('master-data.setup.rooms');
                 Route::get('/beds/{room:id}', [BedController::class, 'index'])->name('master-data.setup.beds');
