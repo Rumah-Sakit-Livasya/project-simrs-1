@@ -18,8 +18,6 @@ class BiayaAdministrasiRawatInapController extends Controller
 
     public function update(Request $request)
     {
-
-
         try {
             // Ambil semua input dari request
             $persentase = $request->input('persentase');

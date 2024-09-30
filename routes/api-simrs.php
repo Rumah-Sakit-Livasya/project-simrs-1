@@ -29,10 +29,12 @@ use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
+use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Models\SIMRS\Departement;
+use App\Models\SIMRS\Setup\BiayaMaterai;
 
 Route::prefix('simrs')->group(function () {
     Route::prefix('master-data')->group(function () {
@@ -94,6 +96,13 @@ Route::prefix('simrs')->group(function () {
 
             Route::prefix('biaya-administrasi-ranap')->group(function () {
                 Route::patch('/update', [BiayaAdministrasiRawatInapController::class, 'update']);
+            });
+
+            Route::prefix('biaya-materai')->group(function () {
+                Route::post('/', [BiayaMateraiController::class, 'store']);
+                Route::get('/{biayaMateraiId}/get', [BiayaMateraiController::class, 'getBiayaMaterai']);
+                Route::patch('/{biayaMateraiId}/update', [BiayaMateraiController::class, 'update']);
+                Route::delete('/{biayaMateraiId}/delete', [BiayaMateraiController::class, 'destroy']);
             });
         });
 
