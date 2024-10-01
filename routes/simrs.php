@@ -12,6 +12,7 @@ use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\HargaJual\MarginHargaJualController;
 use App\Http\Controllers\SIMRS\JadwalDokter\JadwalDokterController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
+use App\Http\Controllers\SIMRS\KepustakaanController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
 use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
@@ -175,6 +176,14 @@ Route::group(['middleware' => ['auth']], function () {
             Route::prefix('harga-jual')->group(function () {
                 Route::get('margin', [MarginHargaJualController::class, 'index'])->name('master-date.setup.harga-jual.margin.index');
             });
+        });
+
+        Route::prefix('kepustakaan')->group(function () {
+            Route::get('/list', [KepustakaanController::class, 'index']);
+            Route::get('/{id}', [KepustakaanController::class, 'showFolder'])->name('kepustakaan.folder');
+
+
+            // Route::get('/tambah', [KepustakaanController::class, 'index']);
         });
     });
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');

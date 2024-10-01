@@ -15,6 +15,7 @@ use App\Http\Controllers\SIMRS\Laboratorium\KategoriLaboratorumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
+use App\Http\Controllers\SIMRS\KepustakaanController;
 use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TarifParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
@@ -244,5 +245,8 @@ Route::prefix('simrs')->group(function () {
             Route::post('/', [MarginHargaJualController::class, 'storeTarif'])->name('master-data.harga-jual.margin.store');
             Route::get('/getTarif/{grupPenjaminId}', [MarginHargaJualController::class, 'getTarif'])->name('master-data.harga-jual.margin.getTarif');
         });
+    });
+    Route::prefix('kepustakaan')->group(function () {
+        Route::post('/tambah', [KepustakaanController::class, 'store'])->name('kepustakaan.store');
     });
 });
