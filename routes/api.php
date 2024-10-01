@@ -253,7 +253,7 @@ Route::prefix('dashboard')->group(function () {
         Route::put('/update/{id}', [TargetController::class, 'update']);
         Route::put('/update-hasil/{id}', [TargetController::class, 'updateHasil']);
         Route::get('/get/{id}', [TargetController::class, 'getTarget']);
-        Route::get('/delete/{id}', [TargetController::class, 'destroy']);
+        Route::delete('/delete/{id}', [TargetController::class, 'destroy']);
     });
     Route::prefix('payroll')->group(function () {
         Route::prefix('salary')->group(function () {

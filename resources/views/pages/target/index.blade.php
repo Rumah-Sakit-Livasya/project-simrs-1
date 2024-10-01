@@ -255,6 +255,10 @@
                                                             </div>
                                                         </button>
                                                     @endcan
+                                                    <button class="btn btn-sm btn-danger px-2 py-1 btn-delete"
+                                                        data-id="{{ $row->id }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 @endcan
                                             </td>
                                             <td style="white-space: nowrap">{{ $row->title }}</td>
@@ -499,29 +503,49 @@
                 });
             });
 
-            $('.btn-hapus').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                alert('Yakin ingin menghapus ini ?');
-                let id = button.attr('data-id');
-                $.ajax({
-                    type: "GET",
-                    url: '/api/dashboard/targets/delete/' + id,
-                    beforeSend: function() {
-                        button.find('.ikon-hapus').hide();
-                        button.find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        button.find('.ikon-edit').show();
-                        button.find('.spinner-text').addClass('d-none');
-                        showSuccessAlert(response.message)
-                        setTimeout(function() {
-                            location.reload();
-                        }, 500);
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
+            $('.btn-delete').click(function() {
+                var targetId = $(this).attr('data-id');
+
+                // Using SweetAlert2 for confirmation
+                Swal.fire({
+                    title: 'Anda Yakin ingin menghapus ini?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // If user clicks "Yes, delete it!", proceed with the AJAX request
+                        $.ajax({
+                            url: '/api/dashboard/targets/delete/' + targetId,
+                            type: 'DELETE',
+                            success: function(response) {
+                                Swal.fire({
+                                    title: 'Dihapus!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+
+                                setTimeout(() => {
+                                    console.log('Reloading the page now.');
+                                    window.location.reload();
+                                }, 800);
+                            },
+                            error: function(xhr, status, error) {
+                                Swal.fire(
+                                    'Error!',
+                                    'Terjadi kesalahan: ' + error,
+                                    'error'
+                                );
+                            }
+                        });
+                    } else {
+                        console.log('Penghapusan dibatalkan oleh pengguna.');
                     }
                 });
             });
