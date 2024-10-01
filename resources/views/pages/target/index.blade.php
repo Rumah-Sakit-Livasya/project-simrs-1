@@ -509,8 +509,25 @@
                             location.reload();
                         }, 500);
                     },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
+                    error: function(xhr, status, error) {
+                        $('#tambah-data').modal('hide');
+                        if (xhr.status === 422) {
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessages = '';
+
+                            $.each(errors, function(key, value) {
+                                errorMessages += value +
+                                    '\n';
+                            });
+
+                            // $('#modal-tambah-grup-tindakan').modal('hide');
+                            showErrorAlert('Terjadi kesalahan:\n' +
+                                errorMessages);
+                        } else {
+                            // $('#modal-tambah-grup-tindakan').modal('hide');
+                            showErrorAlert('Terjadi kesalahan: ' + error);
+                            console.log(error);
+                        }
                     }
                 });
             });

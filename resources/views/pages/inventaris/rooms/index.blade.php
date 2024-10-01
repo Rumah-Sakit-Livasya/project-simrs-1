@@ -18,7 +18,6 @@
 
         <div class="row">
             <div class="col-xl-12">
-
                 <div id="form-container" style="display: none;" class="panel form-container">
                     <div class="panel-hdr">
                         <h2>

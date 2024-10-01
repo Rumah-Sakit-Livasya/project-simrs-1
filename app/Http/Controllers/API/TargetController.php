@@ -23,63 +23,71 @@ class TargetController extends Controller
     }
 
 
-    public function store()
+    public function store(Request $request)
     {
+
+        $validator = $request->validate([
+            'organization_id' => 'required',
+            'user_id' => 'required',
+            'title' => 'required',
+            'pic' => 'required|array',
+            'bulan' => 'required',
+            'satuan' => 'required',
+            'baseline_data' => 'required',
+            'actual' => 'max:255',
+            'target' => 'max:255',
+            'custom_target' => 'max:255',
+        ], [
+            'organization_id.required' => 'ID organisasi diperlukan.',
+            'user_id.required' => 'ID pengguna diperlukan.',
+            'title.required' => 'Judul diperlukan.',
+            'pic.required' => 'PIC diperlukan.',
+            'bulan.required' => 'Bulan diperlukan.',
+            'satuan.required' => 'Satuan diperlukan.',
+            'baseline_data.required' => 'Data baseline diperlukan.',
+            'actual.max' => 'Nilai aktual tidak boleh lebih dari 255 karakter.',
+            'target.max' => 'Nilai target tidak boleh lebih dari 255 karakter.',
+            'custom_target.max' => 'Nilai target kustom tidak boleh lebih dari 255 karakter.',
+        ]);
+
+
+        // Konversi array pic menjadi string sebelum disimpan ke database
+        $validator['pic'] = implode(',', $validator['pic']); // menggabungkan array menjadi string dengan pemisah koma
+
+        $target = $validator['target'] ?? 0;
+        $actual = $validator['actual'] ?? 0;
+        $baselineData = $validator['baseline_data'] ?? 0;
+
+        // Menghitung movement
+        $movement = (($actual - $baselineData) / ($target > 0 ? $target : 1)) * 100;
+
+        // Menghitung persentase pencapaian
+        $persentase = ($actual / ($target > 0 ? $target : 1)) * 100;
+
+        // Menggunakan logika dari calculateTargetStats untuk menentukan status
+        if ($persentase >= 100) {
+            $validator['status'] = 'green';
+        } elseif ($persentase >= 60) {
+            $validator['status'] = 'blue';
+        } elseif ($persentase >= 30) {
+            $validator['status'] = 'yellow';
+        } elseif ($persentase < 30) {
+            $validator['status'] = 'red';
+        } else {
+            $validator['status'] = 'invalid';
+        }
+
+        // Tambahkan hasil movement dan persentase ke dalam data yang akan disimpan
+        $validator['movement'] = $movement;
+        $validator['persentase'] = $persentase;
+
         try {
-            $validator = request()->validate([
-                'organization_id' => 'required',
-                'user_id' => 'required',
-                'title' => 'required',
-                'pic' => 'required|array', // pastikan pic adalah array
-                'bulan' => 'required',
-                'satuan' => 'required',
-                'baseline_data' => 'required',
-                'actual' => 'max:255',
-                'target' => 'max:255',
-                'custom_target' => 'max:255',
-            ]);
-
-            // Konversi array pic menjadi string sebelum disimpan ke database
-            $validator['pic'] = implode(',', $validator['pic']); // menggabungkan array menjadi string dengan pemisah koma
-
-            $target = $validator['target'] ?? 0;
-            $actual = $validator['actual'] ?? 0;
-            $baselineData = $validator['baseline_data'] ?? 0;
-
-            // Menghitung movement
-            $movement = (($actual - $baselineData) / ($target > 0 ? $target : 1)) * 100;
-
-            // Menghitung persentase pencapaian
-            $persentase = ($actual / ($target > 0 ? $target : 1)) * 100;
-
-            // Menggunakan logika dari calculateTargetStats untuk menentukan status
-            if ($persentase >= 100) {
-                $validator['status'] = 'green';
-            } elseif ($persentase >= 60) {
-                $validator['status'] = 'blue';
-            } elseif ($persentase >= 30) {
-                $validator['status'] = 'yellow';
-            } elseif ($persentase < 30) {
-                $validator['status'] = 'red';
-            } else {
-                $validator['status'] = 'invalid';
-            }
-
-            // Tambahkan hasil movement dan persentase ke dalam data yang akan disimpan
-            $validator['movement'] = $movement;
-            $validator['persentase'] = $persentase;
-
             // Simpan data target ke database
             Target::create($validator);
-
             // Response sukses
             return response()->json(['message' => 'Target Berhasil Ditambahkan!']);
         } catch (\Exception $e) {
-            // Response error
-            return response()->json([
-                'error' => 'Gagal menambahkan target',
-                'errorLaravel' => $e->getMessage()
-            ], 404);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
