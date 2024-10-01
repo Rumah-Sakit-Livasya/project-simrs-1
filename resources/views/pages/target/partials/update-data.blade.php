@@ -70,12 +70,12 @@
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label clas for="title">Tujuan <i class="fas fa-info-circle text-primary"
+                                <label clas for="title">Objective <i class="fas fa-info-circle text-primary"
                                         data-template="<div class='tooltip' role='tooltip'><div class='tooltip-inner bg-primary-500'></div></div>"
                                         data-toggle="tooltip" title="Tujuan target ini apa?"></i></label>
                                 <input type="text" class="form-control" id="title" name="title"
-                                    placeholder="Masukkan Tujuan" required>
-                                <div class="invalid-feedback">Tujuan wajib diisi.</div>
+                                    placeholder="Masukkan Objective" required>
+                                <div class="invalid-feedback">Objective wajib diisi.</div>
                             </div>
                         </div>
                         <div class="col-lg-6">
