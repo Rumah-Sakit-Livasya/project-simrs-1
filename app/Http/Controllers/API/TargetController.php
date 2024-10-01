@@ -95,7 +95,6 @@ class TargetController extends Controller
     {
         try {
             $validator = request()->validate([
-                'organization_id' => 'required',
                 'user_id' => 'required',
                 'title' => 'required',
                 'pic' => 'required',
