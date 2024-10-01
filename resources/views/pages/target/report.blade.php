@@ -265,90 +265,119 @@
                     <div class="panel-container show">
                         <div class="panel-content">
                             <!-- datatable start -->
-                            <div class="table-responsive">
-                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                    <thead>
+                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                                <thead>
+                                    <tr>
+                                        <th style="white-space: nowrap">No</th>
+                                        <th style="white-space: nowrap">Nama Unit</th>
+                                        <th style="white-space: nowrap">Objective</th>
+                                        <th style="white-space: nowrap">Grade</th>
+                                        <th style="white-space: nowrap">Data Awal</th>
+                                        <th style="white-space: nowrap">Actual</th>
+                                        <th style="white-space: nowrap">Target</th>
+                                        <th style="white-space: nowrap">Movement</th>
+                                        <th style="white-space: nowrap">Persentase</th>
+                                        <th style="white-space: nowrap">PIC</th>
+                                        <th style="white-space: nowrap">Bulan</th>
+                                        <th style="white-space: nowrap">Key Result</th>
+                                        <th style="white-space: nowrap">Goal</th>
+                                        <th style="white-space: nowrap">Initiative</th>
+                                        <th style="white-space: nowrap">Hasil</th>
+                                        <th style="white-space: nowrap">Evaluasi</th>
+                                        <th style="white-space: nowrap">Anggaran</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($targets as $row)
                                         <tr>
-                                            <th style="white-space: nowrap">No</th>
-                                            <th style="white-space: nowrap">Unit</th>
-                                            <th style="white-space: nowrap">Judul</th>
-                                            <th style="white-space: nowrap">Grade</th>
-                                            <th style="white-space: nowrap">Data Awal</th>
-                                            <th style="white-space: nowrap">Actual</th>
-                                            <th style="white-space: nowrap">Target</th>
-                                            <th style="white-space: nowrap">Movement</th>
-                                            <th style="white-space: nowrap">Persentase</th>
-                                            <th style="white-space: nowrap">PIC</th>
-                                            <th style="white-space: nowrap">Bulan</th>
-                                            <th style="white-space: nowrap">Hasil</th>
-                                            <th style="white-space: nowrap">Evaluasi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($targets as $row)
-                                            <tr>
-                                                <td style="white-space: nowrap">{{ $loop->iteration }}</td>
-                                                <td style="white-space: nowrap">
-                                                    {{ $row->organization->name }}
+                                            <td style="white-space: nowrap">{{ $loop->iteration }}</td>
+                                            <td style="white-space: nowrap">{{ $row->organization->name }}</td>
+                                            <td>{{ $row->title }}</td>
+                                            @if ($row->status === 'green')
+                                                <td
+                                                    style="white-space: nowrap; text-align: center; background-color: #00cd3a; color: #fefefe">
                                                 </td>
-                                                <td style="white-space: nowrap">{{ $row->title }}</td>
-                                                @if ($row->status === 'green')
-                                                    <td
-                                                        style="white-space: nowrap; text-align: center; background-color: #00cd3a; color: #fefefe">
-                                                    </td>
-                                                @elseif($row->status === 'blue')
-                                                    <td
-                                                        style="white-space: nowrap; text-align: center; background-color: #0a15f7; color: #fefefe">
-                                                    </td>
-                                                @elseif($row->status === 'yellow')
-                                                    <td
-                                                        style="white-space: nowrap; text-align: center; background-color: #eaff00; color: #0a0a0a">
-                                                    </td>
-                                                @elseif($row->status === 'red')
-                                                    <td
-                                                        style="white-space: nowrap; text-align: center; background-color: #f10000; color: #fefefe">
-                                                    </td>
-                                                @elseif($row->status === 'invalid')
-                                                    <td
-                                                        style="white-space: nowrap; text-align: center; background-color: #000; color: #ffffff">
-                                                    </td>
+                                            @elseif($row->status === 'blue')
+                                                <td
+                                                    style="white-space: nowrap; text-align: center; background-color: #0a15f7; color: #fefefe">
+                                                </td>
+                                            @elseif($row->status === 'yellow')
+                                                <td
+                                                    style="white-space: nowrap; text-align: center; background-color: #eaff00; color: #0a0a0a">
+                                                </td>
+                                            @elseif($row->status === 'red')
+                                                <td
+                                                    style="white-space: nowrap; text-align: center; background-color: #f10000; color: #fefefe">
+                                                </td>
+                                            @elseif($row->status === 'invalid')
+                                                <td
+                                                    style="white-space: nowrap; text-align: center; background-color: #000; color: #ffffff">
+                                                </td>
+                                            @endif
+                                            <td style="white-space: nowrap">
+                                                {{ $row->satuan == 'rupiah' ? rp($row->baseline_data) : $row->baseline_data }}
+                                                {{ $row->satuan == 'persen' ? '%' : '' }}
+                                            </td>
+                                            <td style="white-space: nowrap">
+                                                {{ $row->satuan == 'rupiah' ? rp($row->actual) : $row->actual }}
+                                                {{ $row->satuan == 'persen' ? '%' : '' }}
+                                            </td>
+                                            <td style="white-space: nowrap">
+                                                {{ $row->satuan == 'rupiah' ? rp($row->target) : $row->target }}
+                                                {{ $row->satuan == 'persen' ? '%' : '' }}
+                                            </td>
+
+                                            <td style="white-space: nowrap">{{ round($row->movement, 1) }}%</td>
+                                            <td style="white-space: nowrap">{{ round($row->persentase, 1) }}%</td>
+                                            <td style="white-space: nowrap">
+                                                @php
+                                                    // Mengambil data pic sebagai array
+                                                    $picArray = json_decode($row->pic, true); // true untuk mengembalikan sebagai array asosiatif
+                                                @endphp
+
+                                                @if ($picArray)
+                                                    @foreach ($picArray as $picId)
+                                                        {{ Employee::where('id', $picId)->first()->fullname ?? '' }}
+                                                        @if (!$loop->last)
+                                                            {{-- Cek jika bukan elemen terakhir --}}
+                                                            , <!-- Tambahkan koma sebagai pemisah -->
+                                                        @endif
+                                                    @endforeach
                                                 @endif
-                                                <td style="white-space: nowrap">{{ round($row->baseline_data, 1) }}
-                                                    {{ $row->satuan == 'persen' ? '%' : '' }}</td>
-                                                <td style="white-space: nowrap">{{ round($row->actual, 1) }}
-                                                    {{ $row->satuan == 'persen' ? '%' : '' }}</td>
-                                                <td style="white-space: nowrap">{{ round($row->target, 1) }}
-                                                    {{ $row->satuan == 'persen' ? '%' : '' }}</td>
-                                                <td style="white-space: nowrap">{{ round($row->movement, 1) }}%</td>
-                                                <td style="white-space: nowrap">{{ round($row->persentase, 1) }}%</td>
-                                                <td style="white-space: nowrap">
-                                                    {{ Employee::where('id', $row->pic)->first()->fullname ?? '' }}
-                                                </td>
-                                                <td style="white-space: nowrap">{{ angkaKeBulan($row->bulan) }}</td>
-                                                <td style="white-space: nowrap">{{ $row->hasil }}</td>
-                                                <td style="white-space: nowrap">{{ $row->evaluasi }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th style="white-space: nowrap">No</th>
-                                            <th style="white-space: nowrap">Unit</th>
-                                            <th style="white-space: nowrap">Judul</th>
-                                            <th style="white-space: nowrap">Grade</th>
-                                            <th style="white-space: nowrap">Data Awal</th>
-                                            <th style="white-space: nowrap">Actual</th>
-                                            <th style="white-space: nowrap">Target</th>
-                                            <th style="white-space: nowrap">Movement</th>
-                                            <th style="white-space: nowrap">Persentase</th>
-                                            <th style="white-space: nowrap">PIC</th>
-                                            <th style="white-space: nowrap">Bulan</th>
-                                            <th style="white-space: nowrap">Hasil</th>
-                                            <th style="white-space: nowrap">Evaluasi</th>
+                                            </td>
+
+                                            <td style="white-space: nowrap">{{ angkaKeBulan($row->bulan) }}</td>
+                                            <td>{{ $row->key_result }}</td>
+                                            <td>{{ $row->goal }}</td>
+                                            <td>{{ $row->initiative }}</td>
+                                            <td>{{ $row->hasil }}</td>
+                                            <td>{{ $row->evaluasi }}</td>
+                                            <td>{{ $row->anggaran }}</td>
                                         </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th style="white-space: nowrap">No</th>
+                                        <th style="white-space: nowrap">Objective</th>
+                                        <th style="white-space: nowrap">Grade</th>
+                                        <th style="white-space: nowrap">Nama Unit</th>
+                                        <th style="white-space: nowrap">Data Awal</th>
+                                        <th style="white-space: nowrap">Actual</th>
+                                        <th style="white-space: nowrap">Target</th>
+                                        <th style="white-space: nowrap">Movement</th>
+                                        <th style="white-space: nowrap">Persentase</th>
+                                        <th style="white-space: nowrap">PIC</th>
+                                        <th style="white-space: nowrap">Bulan</th>
+                                        <th style="white-space: nowrap">Key Result</th>
+                                        <th style="white-space: nowrap">Goal</th>
+                                        <th style="white-space: nowrap">Initiative</th>
+                                        <th style="white-space: nowrap">Hasil</th>
+                                        <th style="white-space: nowrap">Evaluasi</th>
+                                        <th style="white-space: nowrap">Anggaran</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
                             <!-- datatable end -->
                         </div>
                     </div>

@@ -211,7 +211,7 @@
                                         @can('edit okr')
                                             <th style="white-space: nowrap">Aksi</th>
                                         @endcan
-                                        <th style="white-space: nowrap">Judul</th>
+                                        <th style="white-space: nowrap">Objective</th>
                                         <th style="white-space: nowrap">Grade</th>
                                         <th style="white-space: nowrap">Data Awal</th>
                                         <th style="white-space: nowrap">Actual</th>
@@ -220,8 +220,12 @@
                                         <th style="white-space: nowrap">Persentase</th>
                                         <th style="white-space: nowrap">PIC</th>
                                         <th style="white-space: nowrap">Bulan</th>
+                                        <th style="white-space: nowrap">Key Result</th>
+                                        <th style="white-space: nowrap">Goal</th>
+                                        <th style="white-space: nowrap">Initiative</th>
                                         <th style="white-space: nowrap">Hasil</th>
                                         <th style="white-space: nowrap">Evaluasi</th>
+                                        <th style="white-space: nowrap">Anggaran</th>
                                         <th style="white-space: nowrap">Nama Unit</th>
                                     </tr>
                                 </thead>
@@ -261,7 +265,7 @@
                                                     </button>
                                                 @endcan
                                             </td>
-                                            <td style="white-space: nowrap">{{ $row->title }}</td>
+                                            <td>{{ $row->title }}</td>
                                             @if ($row->status === 'green')
                                                 <td
                                                     style="white-space: nowrap; text-align: center; background-color: #00cd3a; color: #fefefe">
@@ -316,8 +320,12 @@
                                             </td>
 
                                             <td style="white-space: nowrap">{{ angkaKeBulan($row->bulan) }}</td>
-                                            <td style="white-space: nowrap">{{ $row->hasil }}</td>
-                                            <td style="white-space: nowrap">{{ $row->evaluasi }}</td>
+                                            <td>{{ $row->key_result }}</td>
+                                            <td>{{ $row->goal }}</td>
+                                            <td>{{ $row->initiative }}</td>
+                                            <td>{{ $row->hasil }}</td>
+                                            <td>{{ $row->evaluasi }}</td>
+                                            <td>{{ $row->anggaran }}</td>
                                             <td style="white-space: nowrap">{{ $row->organization->name }}</td>
                                         </tr>
                                     @endforeach
@@ -328,7 +336,7 @@
                                         @can('edit okr')
                                             <th style="white-space: nowrap">Aksi</th>
                                         @endcan
-                                        <th style="white-space: nowrap">Judul</th>
+                                        <th style="white-space: nowrap">Objective</th>
                                         <th style="white-space: nowrap">Grade</th>
                                         <th style="white-space: nowrap">Data Awal</th>
                                         <th style="white-space: nowrap">Actual</th>
@@ -337,8 +345,12 @@
                                         <th style="white-space: nowrap">Persentase</th>
                                         <th style="white-space: nowrap">PIC</th>
                                         <th style="white-space: nowrap">Bulan</th>
+                                        <th style="white-space: nowrap">Key Result</th>
+                                        <th style="white-space: nowrap">Goal</th>
+                                        <th style="white-space: nowrap">Initiative</th>
                                         <th style="white-space: nowrap">Hasil</th>
                                         <th style="white-space: nowrap">Evaluasi</th>
+                                        <th style="white-space: nowrap">Anggaran</th>
                                         <th style="white-space: nowrap">Nama Unit</th>
                                     </tr>
                                 </tfoot>
