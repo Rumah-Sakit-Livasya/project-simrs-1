@@ -43,10 +43,8 @@
                                     <div class="col-md-12 mt-3">
                                         <div class="form-group">
                                             <label for="organization_id">
-                                                Unit <span class="text-danger fw-bold">*</span>
+                                                Unit
                                             </label>
-                                            <p>Selected Organization ID: {{ auth()->user()->employee->organization_id }}
-                                            </p>
                                             <select class="select2 form-control w-100" id="organization_id"
                                                 name="organization_id">
                                                 <option value=""></option>
