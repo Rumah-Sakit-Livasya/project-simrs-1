@@ -198,7 +198,7 @@
                         </div>
                     @endforeach
                 @else
-                    @foreach ($kepustakaan->where('organization_id', auth()->user()->employee->organization_id)->get() as $item)
+                    @foreach ($kepustakaan->where('organization_id', auth()->user()->employee->organization_id) as $item)
                         <div class="card">
                             <div class="card-header p-0 bg-white">
                                 <div class="row align-items-center py-2">
