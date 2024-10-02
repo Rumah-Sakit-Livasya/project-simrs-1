@@ -18,7 +18,8 @@ class KepustakaanController extends Controller
             ->get();
 
         $organizations = Organization::all();
-        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'organizations'));
+        $breadcrumbs = collect();
+        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'organizations'));
     }
 
     public function showFolder($encryptedId)
@@ -29,12 +30,20 @@ class KepustakaanController extends Controller
             ->where('type', 'folder') // Memastikan hanya folder
             ->firstOrFail();
 
+        $breadcrumbs = getBreadcrumbs($folder);
+
         $kepustakaan = Kepustakaan::where('parent_id', $folder->id)
             ->orderByRaw("CASE WHEN type = 'folder' THEN 1 ELSE 2 END")
             ->orderBy('name', 'asc')
             ->get();
 
-        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'folder'));
+        if (auth()->user()->hasRole('super admin') || auth()->user()->can('master kepustakaan')) {
+            $organizations = Organization::all();
+        } else {
+            $organizations = Organization::where('id', auth()->user()->employee->organization_id)->first();
+        }
+
+        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'folder', 'organizations'));
     }
 
 
@@ -46,7 +55,17 @@ class KepustakaanController extends Controller
             'parent_id' => 'nullable',
             'organization_id' => 'nullable',
             'name' => 'required',
+            'size' => 'nullable',
+            'file' => 'nullable',
         ]);
+
+        if (request()->hasFile('file')) {
+            $file = request()->file('file');
+            $fileName = $request->name . '.' . $file->getClientOriginalExtension();
+            $path = 'kepustakaan/' . \Str::slug($request->kategori);
+            $pathFix = $file->storeAs($path, $fileName, 'public');
+            $validatedData['path'] = $fileName;
+        }
 
         try {
             $store = Kepustakaan::create($validatedData);

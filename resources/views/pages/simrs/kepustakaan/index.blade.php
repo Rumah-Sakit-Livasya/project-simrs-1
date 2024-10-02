@@ -91,15 +91,44 @@
 @endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        <div class="row mb-5">
+
+        @if (count($breadcrumbs) > 0 || auth()->user()->hasRole('super admin'))
+            <div class="row mb-5">
+                <div class="col-xl-12 pl-0">
+                    <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
+                        id="btn-tambah-kepustakaan">
+                        <span class="fal fa-plus-circle mr-1"></span>
+                        Tambah Folder / File
+                    </button>
+                </div>
+            </div>
+        @endif
+
+        <div class="row">
             <div class="col-xl-12 pl-0">
-                <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
-                    id="btn-tambah-kepustakaan">
-                    <span class="fal fa-plus-circle mr-1"></span>
-                    Tambah Folder / File
-                </button>
+                <div class="demo-v-spacing mb-4">
+                    <ol class="breadcrumb breadcrumb-seperator-1">
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('kepustakaan.index') }}" class="text-info">/</a>
+                        </li>
+
+                        @if (empty($breadcrumbs))
+                            <!-- Jika tidak ada breadcrumbs (Root folder) -->
+                            <li class="breadcrumb-item active">Root Folder</li>
+                        @else
+                            <!-- Jika ada breadcrumbs -->
+                            @foreach ($breadcrumbs as $crumb)
+                                <li class="breadcrumb-item">
+                                    <a href="{{ route('kepustakaan.folder', Crypt::encrypt($crumb->id)) }}"
+                                        class="text-info">{{ $crumb->name }}</a>
+                                </li>
+                            @endforeach
+                        @endif
+                    </ol>
+                </div>
             </div>
         </div>
+
 
         <div class="frame-wrap w-100">
             <div class="accordion" id="js_demo_accordion-4">
@@ -123,9 +152,38 @@
                                         </a>
                                     @else
                                         <i class="fas fa-file text-primary fs-xl mr-2"></i>
-                                        <a href="{{ $item->path }}" class="card-title" target="_blank">
-                                            {{ $item->name }}
-                                        </a>
+                                        @php
+                                            $filename = $item->path;
+                                            $extension = pathinfo($filename, PATHINFO_EXTENSION);
+
+                                            if ($extension === 'pdf') {
+                                                $extension = 'pdf';
+                                            } elseif ($extension === 'doc' || $extension === 'docx') {
+                                                $extension = 'word';
+                                            } elseif ($extension === 'xls' || $extension === 'xlsx') {
+                                                $extension = 'excel';
+                                            } elseif ($extension === 'ppt' || $extension === 'pptx') {
+                                                $extension = 'ppt';
+                                            } else {
+                                                $extension = 'others';
+                                            }
+                                        @endphp
+                                        @if ($extension == 'pdf')
+                                            <a href="{{ asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->path) }}"
+                                                class="card-title" target="_blank">
+                                                {{ $item->path ?? $item->name }}
+                                            </a>
+                                        @elseif ($extension == 'word' || $extension == 'excel' || $extension == 'ppt')
+                                            <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->path)) }}&embedded=true"
+                                                class="card-title" target="_blank">
+                                                {{ $item->path ?? $item->name }}
+                                            </a>
+                                        @elseif ($extension == 'others')
+                                            <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->path)) }}&embedded=true"
+                                                class="card-title" target="_blank">
+                                                Lainya
+                                            </a>
+                                        @endif
                                     @endif
                                 </div>
                                 <div class="col-3 text-center file-info">
@@ -144,7 +202,12 @@
 
 
     </main>
-    @include('pages.simrs.kepustakaan.partials.create')
+    @if (auth()->user()->can('master kepustakaan'))
+        {{-- @dd(auth()->user()->can('kepustakaan delete')) --}}
+        @include('pages.simrs.kepustakaan.partials.create')
+    @else
+        @include('pages.simrs.kepustakaan.partials.create-for-employee')
+    @endif
     {{-- @include('pages.simrs.master-data.kepustakaan.partials.edit') --}}
 @endsection
 @section('plugin')
@@ -154,6 +217,25 @@
     <script>
         $(document).ready(function() {
             let grupSuplierId = null;
+
+            // Hide the file upload section by default if Folder is selected
+            toggleFileUpload();
+
+            // Detect changes on the radio buttons
+            $('input[name="type"]').change(function() {
+                toggleFileUpload();
+            });
+
+
+            function toggleFileUpload() {
+                // If 'File' is selected, show the file upload section, otherwise hide it
+                if ($('#type_file').is(':checked')) {
+                    $('#file_upload_section').show();
+                } else {
+                    $('#file_upload_section').hide();
+                }
+            }
+
             $('#loading-spinner').show();
 
             $('#modal-tambah-kepustakaan .select2').select2({
@@ -274,16 +356,30 @@
             $('#store-form').on('submit', function(e) {
                 e.preventDefault(); // Mencegah form submit secara default
 
-                var formData = $(this).serialize(); // Mengambil semua data dari form
+                // Pastikan elemen ini adalah form HTML
+                var formElement = document.getElementById('store-form');
+
+                // Menggunakan FormData dengan benar
+                var formData = new FormData(formElement);
+
+                var fileInput = $('#customFile')[0]; // Mengambil input file
+                if (fileInput.files.length > 0) {
+                    var file = fileInput.files[0]; // Mengambil file yang dipilih
+                    // Mendapatkan ukuran file dalam byte
+                    var fileSize = file.size;
+                    // Menambahkan ukuran file ke FormData
+                    formData.append('size', fileSize);
+                }
 
                 $.ajax({
                     url: "{{ route('kepustakaan.store') }}",
                     type: 'POST',
                     data: formData,
+                    processData: false, // Tidak memproses data menjadi string
+                    contentType: false, // Tidak menetapkan tipe konten secara otomatis
                     beforeSend: function() {
                         $('#store-form').find('.ikon-tambah').hide();
-                        $('#store-form').find('.spinner-text').removeClass(
-                            'd-none');
+                        $('#store-form').find('.spinner-text').removeClass('d-none');
                     },
                     success: function(response) {
                         $('#modal-tambah-kepustakaan').modal('hide');
@@ -300,13 +396,11 @@
                             var errorMessages = '';
 
                             $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
+                                errorMessages += value + '\n';
                             });
 
                             $('#modal-tambah-kepustakaan').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
+                            showErrorAlert('Terjadi kesalahan:\n' + errorMessages);
                         } else {
                             $('#modal-tambah-kepustakaan').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);

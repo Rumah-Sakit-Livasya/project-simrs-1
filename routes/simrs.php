@@ -179,7 +179,7 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
         Route::prefix('kepustakaan')->group(function () {
-            Route::get('/list', [KepustakaanController::class, 'index']);
+            Route::get('/list', [KepustakaanController::class, 'index'])->name('kepustakaan.index');
             Route::get('/{id}', [KepustakaanController::class, 'showFolder'])->name('kepustakaan.folder');
 
 
