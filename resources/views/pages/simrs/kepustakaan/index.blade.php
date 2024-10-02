@@ -139,63 +139,123 @@
                     <div class="col-3 text-center">Last Modified</div>
                 </div>
 
-                @foreach ($kepustakaan as $item)
-                    <div class="card">
-                        <div class="card-header p-0 bg-white">
-                            <div class="row align-items-center py-2">
-                                <div class="col-6 d-flex align-items-center" style="height: 15px">
-                                    @if ($item->type == 'folder')
-                                        <i class="fas fa-folder text-success fs-xl mr-2"></i>
-                                        <a href="{{ route('kepustakaan.folder', Crypt::encrypt($item->id)) }}"
-                                            class="card-title">
-                                            {{ $item->name }}
-                                        </a>
-                                    @else
-                                        <i class="fas fa-file text-primary fs-xl mr-2"></i>
-                                        @php
-                                            $filename = $item->file;
-                                            $extension = pathinfo($filename, PATHINFO_EXTENSION);
+                @if (auth()->user()->can('master kepustakaan'))
+                    @foreach ($kepustakaan as $item)
+                        <div class="card">
+                            <div class="card-header p-0 bg-white">
+                                <div class="row align-items-center py-2">
+                                    <div class="col-6 d-flex align-items-center" style="height: 15px">
+                                        @if ($item->type == 'folder')
+                                            <i class="fas fa-folder text-success fs-xl mr-2"></i>
+                                            <a href="{{ route('kepustakaan.folder', Crypt::encrypt($item->id)) }}"
+                                                class="card-title">
+                                                {{ $item->name }}
+                                            </a>
+                                        @else
+                                            <i class="fas fa-file text-primary fs-xl mr-2"></i>
+                                            @php
+                                                $filename = $item->file;
+                                                $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
-                                            if ($extension === 'pdf') {
-                                                $extension = 'pdf';
-                                            } elseif ($extension === 'doc' || $extension === 'docx') {
-                                                $extension = 'word';
-                                            } elseif ($extension === 'xls' || $extension === 'xlsx') {
-                                                $extension = 'excel';
-                                            } elseif ($extension === 'ppt' || $extension === 'pptx') {
-                                                $extension = 'ppt';
-                                            } else {
-                                                $extension = 'others';
-                                            }
-                                        @endphp
-                                        @if ($extension == 'pdf')
-                                            <a href="{{ asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file) }}"
-                                                class="card-title" target="_blank">
-                                                {{ $item->file ?? $item->name }}
-                                            </a>
-                                        @elseif ($extension == 'word' || $extension == 'excel' || $extension == 'ppt')
-                                            <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file)) }}&embedded=true"
-                                                class="card-title" target="_blank">
-                                                {{ $item->file ?? $item->name }}
-                                            </a>
-                                        @elseif ($extension == 'others')
-                                            <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file)) }}&embedded=true"
-                                                class="card-title" target="_blank">
-                                                Lainya
-                                            </a>
+                                                if ($extension === 'pdf') {
+                                                    $extension = 'pdf';
+                                                } elseif ($extension === 'doc' || $extension === 'docx') {
+                                                    $extension = 'word';
+                                                } elseif ($extension === 'xls' || $extension === 'xlsx') {
+                                                    $extension = 'excel';
+                                                } elseif ($extension === 'ppt' || $extension === 'pptx') {
+                                                    $extension = 'ppt';
+                                                } else {
+                                                    $extension = 'others';
+                                                }
+                                            @endphp
+                                            @if ($extension == 'pdf')
+                                                <a href="{{ asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file) }}"
+                                                    class="card-title" target="_blank">
+                                                    {{ $item->file ?? $item->name }}
+                                                </a>
+                                            @elseif ($extension == 'word' || $extension == 'excel' || $extension == 'ppt')
+                                                <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file)) }}&embedded=true"
+                                                    class="card-title" target="_blank">
+                                                    {{ $item->file ?? $item->name }}
+                                                </a>
+                                            @elseif ($extension == 'others')
+                                                <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file)) }}&embedded=true"
+                                                    class="card-title" target="_blank">
+                                                    Lainya
+                                                </a>
+                                            @endif
                                         @endif
-                                    @endif
-                                </div>
-                                <div class="col-3 text-center file-info">
-                                    {{ $item->size > 0 ? number_format($item->size / 1024, 2) . ' KB' : '-' }}
-                                </div>
-                                <div class="col-3 text-center file-info">
-                                    {{ $item->updated_at ? $item->updated_at->format('d M Y') : '--' }}
+                                    </div>
+                                    <div class="col-3 text-center file-info">
+                                        {{ $item->size > 0 ? number_format($item->size / 1024, 2) . ' KB' : '-' }}
+                                    </div>
+                                    <div class="col-3 text-center file-info">
+                                        {{ $item->updated_at ? $item->updated_at->format('d M Y') : '--' }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                @endforeach
+                    @endforeach
+                @else
+                    @foreach ($kepustakaan->where('organization_id', auth()->user()->employee->organization_id)->get() as $item)
+                        <div class="card">
+                            <div class="card-header p-0 bg-white">
+                                <div class="row align-items-center py-2">
+                                    <div class="col-6 d-flex align-items-center" style="height: 15px">
+                                        @if ($item->type == 'folder')
+                                            <i class="fas fa-folder text-success fs-xl mr-2"></i>
+                                            <a href="{{ route('kepustakaan.folder', Crypt::encrypt($item->id)) }}"
+                                                class="card-title">
+                                                {{ $item->name }}
+                                            </a>
+                                        @else
+                                            <i class="fas fa-file text-primary fs-xl mr-2"></i>
+                                            @php
+                                                $filename = $item->file;
+                                                $extension = pathinfo($filename, PATHINFO_EXTENSION);
+
+                                                if ($extension === 'pdf') {
+                                                    $extension = 'pdf';
+                                                } elseif ($extension === 'doc' || $extension === 'docx') {
+                                                    $extension = 'word';
+                                                } elseif ($extension === 'xls' || $extension === 'xlsx') {
+                                                    $extension = 'excel';
+                                                } elseif ($extension === 'ppt' || $extension === 'pptx') {
+                                                    $extension = 'ppt';
+                                                } else {
+                                                    $extension = 'others';
+                                                }
+                                            @endphp
+                                            @if ($extension == 'pdf')
+                                                <a href="{{ asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file) }}"
+                                                    class="card-title" target="_blank">
+                                                    {{ $item->file ?? $item->name }}
+                                                </a>
+                                            @elseif ($extension == 'word' || $extension == 'excel' || $extension == 'ppt')
+                                                <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file)) }}&embedded=true"
+                                                    class="card-title" target="_blank">
+                                                    {{ $item->file ?? $item->name }}
+                                                </a>
+                                            @elseif ($extension == 'others')
+                                                <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file)) }}&embedded=true"
+                                                    class="card-title" target="_blank">
+                                                    Lainya
+                                                </a>
+                                            @endif
+                                        @endif
+                                    </div>
+                                    <div class="col-3 text-center file-info">
+                                        {{ $item->size > 0 ? number_format($item->size / 1024, 2) . ' KB' : '-' }}
+                                    </div>
+                                    <div class="col-3 text-center file-info">
+                                        {{ $item->updated_at ? $item->updated_at->format('d M Y') : '--' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
 
             </div>
         </div>
