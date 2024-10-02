@@ -92,7 +92,7 @@
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
 
-        @if (count($breadcrumbs) > 0 || auth()->user()->hasRole('super admin'))
+        @if (count($breadcrumbs) > 1 || auth()->user()->hasRole('super admin'))
             <div class="row mb-5">
                 <div class="col-xl-12 pl-0">
                     <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
