@@ -202,12 +202,11 @@
 
 
     </main>
-    @if (auth()->user()->can('master kepustakaan'))
-        {{-- @dd(auth()->user()->can('kepustakaan delete')) --}}
+    {{-- @if (auth()->user()->can('master kepustakaan'))
         @include('pages.simrs.kepustakaan.partials.create')
-    @else
-        @include('pages.simrs.kepustakaan.partials.create-for-employee')
-    @endif
+    @else --}}
+    @include('pages.simrs.kepustakaan.partials.create-for-employee')
+    {{-- @endif --}}
     {{-- @include('pages.simrs.master-data.kepustakaan.partials.edit') --}}
 @endsection
 @section('plugin')
