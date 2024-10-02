@@ -31,11 +31,18 @@ class KepustakaanController extends Controller
             ->firstOrFail();
 
         $breadcrumbs = getBreadcrumbs($folder);
-
-        $kepustakaan = Kepustakaan::where('parent_id', $folder->id)
-            ->orderByRaw("CASE WHEN type = 'folder' THEN 1 ELSE 2 END")
-            ->orderBy('name', 'asc')
-            ->get();
+        if (auth()->user()->can('master kepustakaan')) {
+            $kepustakaan = Kepustakaan::where('parent_id', $folder->id)
+                ->orderByRaw("CASE WHEN type = 'folder' THEN 1 ELSE 2 END")
+                ->orderBy('name', 'asc')
+                ->get();
+        } else {
+            $kepustakaan = Kepustakaan::where('parent_id', $folder->id)
+                ->where('organization_id', auth()->user()->employee->organization_id)
+                ->orderByRaw("CASE WHEN type = 'folder' THEN 1 ELSE 2 END")
+                ->orderBy('name', 'asc')
+                ->get();
+        }
 
         if (auth()->user()->hasRole('super admin') || auth()->user()->can('master kepustakaan')) {
             $organizations = Organization::all();
