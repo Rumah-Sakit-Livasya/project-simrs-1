@@ -53,6 +53,18 @@
                 /* Header menjadi full width */
             }
         }
+
+        @media (max-width: 768px) {
+            .col-3 {
+                display: none !important;
+            }
+
+            .col-6 {
+                width: 100% !important;
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
     </style>
 
     <!-- Custom CSS -->
