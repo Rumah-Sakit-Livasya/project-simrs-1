@@ -50,7 +50,7 @@
                                                 <option value=""></option>
                                                 @foreach ($organizations as $item)
                                                     <option value="{{ $item->id }}"
-                                                        {{ $item->id == auth()->user()->employee->organization_id ? 'selected' : '' }}>
+                                                        {{ $item->id == $folder->organization_id ? 'selected' : '' }}>
                                                         {{ $item->name }}</option>
                                                 @endforeach
                                             </select>
