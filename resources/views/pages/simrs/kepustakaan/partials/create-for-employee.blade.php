@@ -33,10 +33,28 @@
                                         </div>
                                         <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
                                         <input type="hidden" name="parent_id" value="{{ $folder->id ?? '' }}">
-                                        <input type="hidden" name="organization_id"
-                                            value="{{ auth()->user()->employee->organization_id ?? '' }}">
+                                        @if (auth()->user()->can('tambah kepustakaan'))
+                                            <input type="hidden" name="organization_id"
+                                                value="{{ auth()->user()->employee->organization_id ?? '' }}">
+                                        @endif
                                     </div>
                                 </div>
+                                @if (auth()->user()->can('master kepustakaan') || auth()->user()->hasRole('super admin'))
+                                    <div class="col-md-12 mt-3">
+                                        <div class="form-group">
+                                            <label for="organization_id">
+                                                Unit <span class="text-danger fw-bold">*</span>
+                                            </label>
+                                            <select class="select2 form-control w-100" id="organization_id"
+                                                name="organization_id">
+                                                <option value=""></option>
+                                                @foreach ($organizations as $item)
+                                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                @endif
                                 <div class="col-md-12 mt-3">
                                     <label for="name">Nama (File/Folder) <span
                                             class="text-danger fw-bold">*</span></label>
