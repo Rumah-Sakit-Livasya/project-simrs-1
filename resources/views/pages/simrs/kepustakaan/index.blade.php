@@ -153,7 +153,7 @@
                                     @else
                                         <i class="fas fa-file text-primary fs-xl mr-2"></i>
                                         @php
-                                            $filename = $item->path;
+                                            $filename = $item->file;
                                             $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
                                             if ($extension === 'pdf') {
@@ -169,17 +169,17 @@
                                             }
                                         @endphp
                                         @if ($extension == 'pdf')
-                                            <a href="{{ asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->path) }}"
+                                            <a href="{{ asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file) }}"
                                                 class="card-title" target="_blank">
-                                                {{ $item->path ?? $item->name }}
+                                                {{ $item->file ?? $item->name }}
                                             </a>
                                         @elseif ($extension == 'word' || $extension == 'excel' || $extension == 'ppt')
-                                            <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->path)) }}&embedded=true"
+                                            <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file)) }}&embedded=true"
                                                 class="card-title" target="_blank">
-                                                {{ $item->path ?? $item->name }}
+                                                {{ $item->file ?? $item->name }}
                                             </a>
                                         @elseif ($extension == 'others')
-                                            <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->path)) }}&embedded=true"
+                                            <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->file)) }}&embedded=true"
                                                 class="card-title" target="_blank">
                                                 Lainya
                                             </a>
