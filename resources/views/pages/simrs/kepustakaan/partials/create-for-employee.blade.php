@@ -45,11 +45,15 @@
                                             <label for="organization_id">
                                                 Unit <span class="text-danger fw-bold">*</span>
                                             </label>
+                                            <p>Selected Organization ID: {{ auth()->user()->employee->organization_id }}
+                                            </p>
                                             <select class="select2 form-control w-100" id="organization_id"
                                                 name="organization_id">
                                                 <option value=""></option>
                                                 @foreach ($organizations as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                                    <option value="{{ $item->id }}"
+                                                        {{ $item->id == auth()->user()->employee->organization_id ? 'selected' : '' }}>
+                                                        {{ $item->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
