@@ -55,10 +55,10 @@
         </div>
     </div>
 
-    <form method="post" class="form" id="form-builder" autocomplete="off" enctype='multipart/form-data'>
-        <input type="hidden" name="pregid" id="pregid" value="183016">
+    <form method="post" id="pengkajian-nurse-rajal" autocomplete="off">
+        <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
         <input type="hidden" name="ftid" id="ftid" value="-24">
-        <input type="hidden" name="pkid" id="pkid" value="">
+        <input type="hidden" name="pkid" id="pkid" value="123">
         <div class="card-actionbar">
             <div class="card-actionbar-row mt-3">
                 <button class="btn btn-primary m-3" id="histori_pengkajian" type="button"><i
@@ -78,9 +78,9 @@
                             <div class="form-group mb-3">
                                 <div class="input-group">
                                     <input type="text" name="tgl_masuk" class="form-control " placeholder="Tanggal"
-                                        id="tgl_masuk">
+                                        id="tgl_masuk" value="{{ $registration->created_at->format('d-m-Y') }}">
                                     <input type="time" name="jam_masuk" class="form-control " placeholder="Jam"
-                                        id="jam_masuk">
+                                        id="jam_masuk" value="{{ $registration->created_at->format('h:i') }}">
                                 </div>
                             </div>
                         </div>
@@ -89,10 +89,10 @@
                         <div class="form-group mb-3">
                             <label for="tgl_masuk" class="control-label text-primary">Tanggal &amp; jam masuk</label>
                             <div class="input-group">
-                                <input type="text" name="tgl_dilayani" class="form-control " placeholder="Tanggal"
-                                    id="tgl_dilayani">
-                                <input type="time" name="jam_dilayani" class="form-control " placeholder="Jam"
-                                    id="jam_dilayani">
+                                <input type="text" name="tgl_dilayani" class="form-control" placeholder="Tanggal"
+                                    id="tgl_dilayani" value="{{ now()->format('d-m-Y') }}">
+                                <input type="time" name="jam_dilayani" class="form-control" placeholder="Jam"
+                                    id="jam_dilayani" value="{{ now()->format('h:i') }}">
                             </div>
                         </div>
                     </div>
@@ -1336,11 +1336,16 @@
                     <a href="#!" class="btn btn-primary">
                         <span class="mdi mdi-printer"></span> Print
                     </a>
-                    <button type="button" class="btn btn-warning waves-effect waves-light save-form">
-                        <span class="mdi mdi-content-save"></span> Simpan (draft)
-                    </button>
-                    <button type="button" class="btn btn-save-final waves-effect waves-light save-form">
-                        <span class="mdi mdi-content-save"></span> Simpan (final)
+                    <button type="submit" class="btn btn-success waves-effect waves-light save-form">
+                        <div class="ikon-tambah">
+                            <span class="fal fa-plus-circle mr-1"></span>
+                            Tambah
+                        </div>
+                        <div class="span spinner-text d-none">
+                            <span class="spinner-border spinner-border-sm" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </div>
                     </button>
                 </div>
             </div>

@@ -25,7 +25,6 @@ class TargetController extends Controller
 
     public function store(Request $request)
     {
-
         $validator = $request->validate([
             'organization_id' => 'required',
             'user_id' => 'required',
@@ -51,8 +50,8 @@ class TargetController extends Controller
         ]);
 
 
-        // Konversi array pic menjadi string sebelum disimpan ke database
-        $validator['pic'] = implode(',', $validator['pic']); // menggabungkan array menjadi string dengan pemisah koma
+        // Misalkan $validator['pic'] adalah array yang berisi ID pengguna
+        $validator['pic'] = json_encode($validator['pic']); // Mengonversi array menjadi string JSON
 
         $target = $validator['target'] ?? 0;
         $actual = $validator['actual'] ?? 0;
@@ -80,6 +79,8 @@ class TargetController extends Controller
         // Tambahkan hasil movement dan persentase ke dalam data yang akan disimpan
         $validator['movement'] = $movement;
         $validator['persentase'] = $persentase;
+
+        return dd($validator);
 
         try {
             // Simpan data target ke database

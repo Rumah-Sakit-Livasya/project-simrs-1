@@ -509,6 +509,52 @@
                     dropdownParent: $('#ganti-dpjp')
                 });
             });
+
+            // Pengkajian Nurse Rajal
+            $('#pengkajian-nurse-rajal').on('submit', function(e) {
+                e.preventDefault();
+                let formData = $(this).serialize();
+                const submitButton = $('#pengkajian-nurse-rajal').find('button[type="submit"]');
+                submitButton.prop('disabled', true);
+                $.ajax({
+                    type: "POST",
+                    url: '/api/simrs/pengkajian/nurse-rajal/store',
+                    data: formData,
+                    beforeSend: function() {
+                        $('#pengkajian-nurse-rajal').find('.ikon-tambah').hide();
+                        $('#pengkajian-nurse-rajal').find('.spinner-text').removeClass(
+                            'd-none');
+                    },
+                    success: function(response) {
+                        $('#pengkajian-nurse-rajal').find('.ikon-edit').show();
+                        $('#pengkajian-nurse-rajal').find('.spinner-text').addClass('d-none');
+                        $('#tambah-data').modal('hide');
+                        showSuccessAlert(response.message)
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status === 422) {
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessages = '';
+
+                            $.each(errors, function(key, value) {
+                                errorMessages += value +
+                                    '\n';
+                            });
+
+                            // $('#modal-tambah-grup-tindakan').modal('hide');
+                            showErrorAlert('Terjadi kesalahan:\n' +
+                                errorMessages);
+                        } else {
+                            // $('#modal-tambah-grup-tindakan').modal('hide');
+                            showErrorAlert('Terjadi kesalahan: ' + error);
+                            console.log(error);
+                        }
+                    }
+                });
+            });
         });
     </script>
 @endsection

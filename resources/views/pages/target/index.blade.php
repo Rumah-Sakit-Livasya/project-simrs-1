@@ -200,6 +200,7 @@
                         <h2>
                             Tabel OKR
                         </h2>
+                        @include('pages.partials.panel-toolbar')
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
