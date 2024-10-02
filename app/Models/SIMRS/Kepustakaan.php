@@ -10,7 +10,7 @@ class Kepustakaan extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'kepustakaan', $fillable = ['name', 'organization_id', 'kategori', 'type', 'parent_id', 'size', 'path'];
+    protected $table = 'kepustakaan', $fillable = ['name', 'organization_id', 'kategori', 'type', 'parent_id', 'size', 'file'];
 
     // Relasi ke parent
     public function parent()

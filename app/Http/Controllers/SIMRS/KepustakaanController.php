@@ -64,7 +64,7 @@ class KepustakaanController extends Controller
             $fileName = $request->name . '.' . $file->getClientOriginalExtension();
             $path = 'kepustakaan/' . \Str::slug($request->kategori);
             $pathFix = $file->storeAs($path, $fileName, 'public');
-            $validatedData['path'] = $fileName;
+            $validatedData['file'] = $fileName;
         }
 
         try {
