@@ -50,8 +50,9 @@
                                                 <option value=""></option>
                                                 @foreach ($organizations as $item)
                                                     <option value="{{ $item->id }}"
-                                                        {{ $item->id == $folder->organization_id ? 'selected' : '' }}>
-                                                        {{ $item->name }}</option>
+                                                        {{ count($breadcrumbs) > 0 ? ($item->id == $folder->organization_id ? 'selected' : '') : '' }}>
+                                                        {{ $item->name }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
