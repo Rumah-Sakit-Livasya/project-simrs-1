@@ -51,7 +51,7 @@ class TargetController extends Controller
 
 
         // Misalkan $validator['pic'] adalah array yang berisi ID pengguna
-        $validator['pic'] = json_encode($validator['pic']); // Mengonversi array menjadi string JSON
+        $validator['pic'] = json_encode($validator['pic']); // Mengonversi array menjadi string JSONg
 
         $target = $validator['target'] ?? 0;
         $actual = $validator['actual'] ?? 0;
@@ -79,8 +79,6 @@ class TargetController extends Controller
         // Tambahkan hasil movement dan persentase ke dalam data yang akan disimpan
         $validator['movement'] = $movement;
         $validator['persentase'] = $persentase;
-
-        return dd($validator);
 
         try {
             // Simpan data target ke database
