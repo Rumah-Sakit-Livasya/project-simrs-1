@@ -35,6 +35,18 @@ function displayAge($birthdate)
     return $result;
 }
 
+function getBreadcrumbs($folder)
+{
+    $breadcrumbs = [];
+
+    while ($folder) {
+        array_unshift($breadcrumbs, $folder); // Tambah folder di awal array
+        $folder = $folder->parent; // Ambil parent folder
+    }
+
+    return $breadcrumbs;
+}
+
 function toHijriah($tanggal)
 {
     $array_month = array("Muharram", "Safar", "Rabiul Awwal", "Rabiul Akhir", "Jumadil Awwal", "Jumadil Akhir", "Rajab", "Sya'ban", "Ramadhan", "Syawwal", "Zulqaidah", "Zulhijjah");
