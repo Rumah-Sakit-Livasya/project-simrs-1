@@ -252,5 +252,8 @@ Route::prefix('simrs')->group(function () {
     });
     Route::prefix('kepustakaan')->group(function () {
         Route::post('/tambah', [KepustakaanController::class, 'store'])->name('kepustakaan.store');
+        Route::get('/edit/{encryptedId}', [KepustakaanController::class, 'getKepustakaan'])->name('kepustakaan.get');
+        Route::patch('/update/{encryptedId}', [KepustakaanController::class, 'update'])->name('kepustakaan.update');
+        Route::delete('/delete/{encryptedId}', [KepustakaanController::class, 'delete'])->name('kepustakaan.delete');
     });
 });

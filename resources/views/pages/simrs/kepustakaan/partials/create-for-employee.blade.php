@@ -31,7 +31,7 @@
                                                 name="type" value="folder">
                                             <label class="custom-control-label" for="type_folder">Folder</label>
                                         </div>
-                                        <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
+
                                         <input type="hidden" name="parent_id" value="{{ $folder->id ?? '' }}">
                                         @if (auth()->user()->can('tambah kepustakaan'))
                                             <input type="hidden" name="organization_id"
@@ -57,6 +57,26 @@
                                             </select>
                                         </div>
                                     </div>
+                                    @if (count($breadcrumbs) < 1)
+                                        <div class="col-md-12 mt-3">
+                                            <div class="form-group">
+                                                <label for="kategori">
+                                                    Kategori
+                                                </label>
+                                                <select class="select2 form-control w-100" id="kategori"
+                                                    name="kategori">
+                                                    <option value="Regulasi">Regulasi</option>
+                                                    <option value="Laporan">Laporan</option>
+                                                    <option value="Perizinan">Perizinan</option>
+                                                    <option value="Mutu dan Manajemen Resiko">Mutu dan Manajemen Resiko
+                                                    </option>
+                                                    <option value="File Unit Lainnya">File Unit Lainnya</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
+                                    @endif
                                 @endif
                                 <div class="col-md-12 mt-3">
                                     <label for="name">Nama (File/Folder) <span
@@ -72,6 +92,7 @@
                                         <label class="custom-file-label" for="customFile">Choose file</label>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </div>
