@@ -119,20 +119,20 @@
                     </button>
                 </div>
             </div>
-        @endif
-
-        @if (
-            (count($breadcrumbs) > 1 && auth()->user()->organization_id == $folder->organization_id) ||
-                auth()->user()->can('tambah kepustakaan'))
-            <div class="row mb-5">
-                <div class="col-xl-12 pl-0">
-                    <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
-                        id="btn-tambah-kepustakaan">
-                        <span class="fal fa-plus-circle mr-1"></span>
-                        Tambah Folder / File
-                    </button>
+        @else
+            @if (
+                (count($breadcrumbs) > 1 && auth()->user()->organization_id != $folder->organization_id) ||
+                    auth()->user()->can('tambah kepustakaan'))
+                <div class="row mb-5">
+                    <div class="col-xl-12 pl-0">
+                        <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
+                            id="btn-tambah-kepustakaan">
+                            <span class="fal fa-plus-circle mr-1"></span>
+                            Tambah Folder / File
+                        </button>
+                    </div>
                 </div>
-            </div>
+            @endif
         @endif
 
         <div class="row">
