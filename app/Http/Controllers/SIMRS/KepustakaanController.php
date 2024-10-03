@@ -45,6 +45,7 @@ class KepustakaanController extends Controller
         } else {
             $kepustakaan = Kepustakaan::where('parent_id', $folder->id)
                 ->where('organization_id', auth()->user()->employee->organization_id)
+                ->orWhere('organization_id', null)
                 ->orderByRaw("CASE WHEN type = 'folder' THEN 1 ELSE 2 END")
                 ->orderBy('name', 'asc')
                 ->get();
