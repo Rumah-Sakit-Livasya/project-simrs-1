@@ -109,7 +109,21 @@
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
 
-        @if (count($breadcrumbs) > 1 || auth()->user()->hasRole('super admin') || auth()->user()->can('master kepustakaan'))
+        @if (auth()->user()->hasRole('super admin') || auth()->user()->can('master kepustakaan'))
+            <div class="row mb-5">
+                <div class="col-xl-12 pl-0">
+                    <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
+                        id="btn-tambah-kepustakaan">
+                        <span class="fal fa-plus-circle mr-1"></span>
+                        Tambah Folder / File
+                    </button>
+                </div>
+            </div>
+        @endif
+
+        @if (
+            (count($breadcrumbs) > 1 && auth()->user()->organization_id == $folder->organization_id) ||
+                auth()->user()->can('tambah kepustakaan'))
             <div class="row mb-5">
                 <div class="col-xl-12 pl-0">
                     <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
