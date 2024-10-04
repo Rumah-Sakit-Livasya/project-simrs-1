@@ -196,7 +196,7 @@
                                                     data-id = "{{ Crypt::encrypt($item->id) }}"></i>
                                             @endcan
                                         @endif
-                                        @can('hapus kepustakaan')
+                                        @can('delete kepustakaan')
                                             <i class="btn-action btn-delete fas fa-trash text-danger fs-xl mr-2"
                                                 data-url="{{ route('kepustakaan.delete', Crypt::encrypt($item->id)) }}"
                                                 data-type = "{{ $item->type }}"></i>
