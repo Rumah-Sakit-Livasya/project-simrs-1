@@ -5,11 +5,12 @@ namespace App\Models\SIMRS;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Auditable;
+// use OwenIt\Auditing\Auditable;
 
-class Kepustakaan extends Model implements \OwenIt\Auditing\Contracts\Auditable
+class Kepustakaan extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use HasFactory, SoftDeletes;
+    // use HasFactory, SoftDeletes, Auditable;
 
     protected $table = 'kepustakaan', $fillable = ['name', 'organization_id', 'kategori', 'type', 'parent_id', 'size', 'file'];
 
