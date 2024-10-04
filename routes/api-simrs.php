@@ -36,7 +36,7 @@ use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 
-Route::prefix('simrs')->group(function () {
+Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::prefix('pengkajian')->group(function () {
         Route::prefix('nurse-rajal')->group(function () {
             Route::post('/store', [PengkajianController::class, 'store'])->name('pengkajian.nurse-rajal.store');

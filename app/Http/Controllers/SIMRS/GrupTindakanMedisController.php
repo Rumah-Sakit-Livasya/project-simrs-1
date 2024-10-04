@@ -11,6 +11,7 @@ class GrupTindakanMedisController extends Controller
 {
     public function index()
     {
+        // dd(session()->all());
         $grup_tindakan_medis = GrupTindakanMedis::all();
         $departements = Departement::all();
         return view('pages.simrs.master-data.layanan-medis.grup-tindakan-medis', compact('grup_tindakan_medis', 'departements'));

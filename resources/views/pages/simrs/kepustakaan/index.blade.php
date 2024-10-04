@@ -305,6 +305,9 @@
                         $.ajax({
                             url: url,
                             type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
                             data: {
                                 email: email,
                                 password: password

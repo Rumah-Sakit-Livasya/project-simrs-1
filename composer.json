@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.9",
         "maatwebsite/excel": "^3.1",
         "munafio/chatify": "^1.6",
+        "owen-it/laravel-auditing": "^13.6",
         "spatie/laravel-permission": "^6.9",
         "yajra/laravel-datatables-oracle": "^11.0"
     },

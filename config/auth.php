@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'api' => [
+            'driver' => 'token', // atau bisa 'passport' atau 'sanctum' tergantung setup
+            'provider' => 'users',
+            'hash' => false,
+        ],
     ],
 
     /*
