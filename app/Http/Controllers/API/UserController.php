@@ -131,7 +131,7 @@ class UserController extends Controller
         try {
             // Validate the request
             $request->validate([
-                'permissions' => 'required|array',
+                'permissions' => 'nullable|array',
                 'permissions.*' => 'exists:permissions,id',
                 'user_id' => 'required|exists:users,id'
             ]);
