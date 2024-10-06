@@ -238,6 +238,9 @@
                 $.ajax({
                     url: '/api/dashboard/management-shift/store', // Ganti dengan endpoint API Anda
                     type: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: formData,
                     async: true, // Set async menjadi true untuk melakukan operasi secara asynchronous
                     cache: false,
