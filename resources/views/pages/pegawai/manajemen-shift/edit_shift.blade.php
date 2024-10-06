@@ -116,6 +116,12 @@
                     .format('YYYY-MM-DD'));
             });
 
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
             $('#update-form').on('submit', function(e) {
                 e.preventDefault();
                 let employeeId = "{{ $attendances[1]->employee_id ?? null }}";
@@ -153,6 +159,7 @@
                         }, 1000);
                     },
                     error: function(xhr) {
+                        console.log(xhr.responseText);
                         showErrorAlert(xhr.responseJSON.error);
                     }
                 });

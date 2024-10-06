@@ -55,10 +55,11 @@
         </div>
     </div>
 
-    <form method="post" id="pengkajian-nurse-rajal" autocomplete="off">
+    <form autocomplete="off" novalidate method="post" id="nurse-rajal">
+        @method('post')
+        @csrf
         <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
-        <input type="hidden" name="ftid" id="ftid" value="-24">
-        <input type="hidden" name="pkid" id="pkid" value="123">
+        <input type="hidden" name="registration_id" value="{{ $registration->id }}">
         <div class="card-actionbar">
             <div class="card-actionbar-row mt-3">
                 <button class="btn btn-primary m-3" id="histori_pengkajian" type="button"><i
@@ -115,7 +116,7 @@
                             <label class="text-primary" for="pr">Nadi (PR)</label>
                             <div class="input-group">
                                 <div class="input-group">
-                                    <input id="pr" type="text" class="form-control">
+                                    <input id="pr" type="text" name="pr" class="form-control">
                                     <div class="input-group-append">
                                         <span class="input-group-text">x/menit</span>
                                     </div>
