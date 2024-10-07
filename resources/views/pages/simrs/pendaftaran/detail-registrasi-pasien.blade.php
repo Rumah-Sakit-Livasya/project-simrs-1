@@ -18,6 +18,32 @@
             font-weight: 300;
             color: #9E9E9E;
         }
+
+        .menu-detail-regist .nav-item .dropdown-toggle::after {
+            margin-left: 10px;
+        }
+
+        .menu-detail-regist .nav-item .dropdown-toggle {
+            font-size: 0.9rem !important;
+            color: #a07adb !important;
+            font-family: "Poppins", sans-serif !important;
+            /* Menggunakan Poppins dengan sans-serif sebagai fallback */
+        }
+
+        .detail-regist-name {
+            color: #ff00ff;
+            font-weight: 500;
+            text-decoration: underline;
+            text-transform: uppercase;
+        }
+
+        .fade:not(.show) {
+            display: none;
+        }
+
+        .font-weight-bold h2 {
+            font-weight: 600 !important;
+        }
     </style>
 @endsection
 @section('content')
@@ -446,8 +472,10 @@
                     <div id="menu-layanan">
                         @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan')
                     </div>
-                    <div id="pengkajian-nurse-rajal" style="display: none;">
+                    <div id="pengkajian-nurse-rajal">
                         @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
+                        @include('pages.simrs.pendaftaran.partials.pengkajian-dokter-rajal')
+                        @include('pages.simrs.pendaftaran.partials.dokter.cppt')
                     </div>
                 </div>
             </div>
@@ -471,6 +499,7 @@
     <script type="text/javascript" src="/js/painterro-1.2.3.min.js"></script>
     <script>
         $(document).ready(function() {
+            $('#pengkajian-nurse-rajal').hide();
             // Ketika elemen dengan kelas .menu-layanan diklik
             $('.menu-layanan').on('click', function() {
                 // Sembunyikan menu layanan dengan efek fade out
@@ -479,12 +508,12 @@
                 // Ambil data-layanan untuk menentukan ID elemen yang akan ditampilkan
                 var namaLayanan = $(this).data('layanan');
                 var pengkajianId = $('#pengkajian-rajal-id').val();
-                console.log(pengkajianId);
 
                 // Tampilkan elemen layanan yang dipilih dengan efek fade in
                 $('#' + namaLayanan).delay(500).fadeIn(500); // 500ms untuk transisi
                 if (namaLayanan == 'pengkajian-nurse-rajal') {
                     if (pengkajianId !== undefined) {
+                        $('#pengkajian-nurse-rajal').show();
                         $.ajax({
                             type: "GET", // Method pengiriman data bisa dengan GET atau POST
                             url: `/api/simrs/pengkajian/nurse-rajal/${pengkajianId}/get`, // Isi dengan url/path file php yang dituju
@@ -669,7 +698,7 @@
               $('#ket_alergi_obat').hide();
 
             $('#alergi_obat1').on('click',function(){
-              $('#ket_alergi_obat').show();      
+              $('#ket_alergi_obat').show();
             });
 
             $('#alergi_obat2').on('click',function(){
