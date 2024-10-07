@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Inventaris\RoomMaintenance;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,5 +29,10 @@ class Organization extends Model
     public function targets()
     {
         return $this->hasMany(Target::class);
+    }
+
+    public function room_maintenance()
+    {
+        return $this->belongsToMany(RoomMaintenance::class, 'room_maintenance_organization');
     }
 }

@@ -523,6 +523,12 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
+
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
                         // If the user confirms deletion, proceed with the AJAX request
                         $.ajax({
                             url: '/api/inventaris/barang/' + barangId + '/delete',

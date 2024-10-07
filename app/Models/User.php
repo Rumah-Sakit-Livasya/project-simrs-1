@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Permission\Contracts\Permission;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements Auditable

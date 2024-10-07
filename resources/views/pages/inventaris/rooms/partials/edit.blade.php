@@ -42,6 +42,28 @@
                         @enderror
                     </div>
                     <div class="form-group">
+                        <div class="form-group mb-3">
+                            <label for="update-organization_id">Unit Penanggungjawab Ruangan <i
+                                    class="fas fa-info-circle text-primary"
+                                    data-template="<div class='tooltip' role='tooltip'><div class='tooltip-inner bg-primary-500'></div></div>"
+                                    data-toggle="tooltip"
+                                    title="Unit yang bertanggungjawab atas ruangan ini"></i></label>
+                            <!-- Mengubah input menjadi select2 -->
+                            <select class="select2 form-control @error('organization_id') is-invalid @enderror"
+                                name="organization_id[]" id="update-organization_id" multiple>
+                                @foreach ($organizations as $organization)
+                                    <option value="{{ $organization->id }}">
+                                        {{ old('organization_id', $organization->name) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('organization_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @include('components.notification.error')
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="status">Status</label>
                         <div class="custom-control custom-switch">
                             <input type="checkbox" class="custom-control-input" id="status" name="status"

@@ -19,7 +19,7 @@
                         <select class="form-control w-100 @error('ruang_pinjam') is-invalid @enderror" id="room_id"
                             name="ruang_pinjam">
                             <optgroup label="Ruangan">
-                                @foreach ($rooms as $room)
+                                @foreach ($allRoom as $room)
                                     <option value="{{ $room->id }}">
                                         {{ strtoupper($room->name) }}
                                     </option>

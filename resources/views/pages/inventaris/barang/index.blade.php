@@ -12,7 +12,7 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form action="{{ route('inventaris.barang.search') }}" method="get">
+                            <form action="{{ route('inventaris.barang.search') }}" method="post">
                                 @csrf
                                 <div class="row justify-content-center mt-5">
                                     <div class="col-lg-4">
@@ -283,9 +283,13 @@
                                             <select class="form-control w-100 @error('company_id') is-invalid @enderror"
                                                 id="company_id" name="company_id">
                                                 <optgroup label="Perusahaan">
-                                                    @foreach ($companies as $row)
-                                                        <option value="{{ $row->id }}">{{ $row->name }}</option>
-                                                    @endforeach
+                                                    @can('admin inventaris barang')
+                                                        @foreach ($companies as $row)
+                                                            <option value="{{ $row->id }}">{{ $row->name }}</option>
+                                                        @endforeach
+                                                    @else
+                                                        <option value="{{ $companies->id }}">{{ $companies->name }}</option>
+                                                    @endcan
                                                 </optgroup>
                                             </select>
                                             @error('company_id')

@@ -14,6 +14,7 @@ class Barang extends Model
     protected $guarded = ['id'];
     protected $table = 'barang';
 
+
     public function room()
     {
         return $this->belongsTo(RoomMaintenance::class);

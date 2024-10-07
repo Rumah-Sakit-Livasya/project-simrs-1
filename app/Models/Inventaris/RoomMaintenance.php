@@ -2,6 +2,7 @@
 
 namespace App\Models\Inventaris;
 
+use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,5 +22,10 @@ class RoomMaintenance extends Model
     public function reportBarang()
     {
         return $this->hasMany(ReportBarang::class);
+    }
+
+    public function organizations()
+    {
+        return $this->belongsToMany(Organization::class, 'room_maintenance_organization');
     }
 }

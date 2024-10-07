@@ -23,40 +23,62 @@ class BarangController extends Controller
         $identitasBarang = $request->input('identitas_barang');
         $barang = [];
 
-        // Cek apakah ada parameter pencarian
-        if ($customName || $templateBarang || $kategoriBarang || $identitasBarang) {
-
-            // Query pencarian
-            $query = Barang::query();
-
-            // Lakukan filter pencarian jika ada nilai dari input pencarian
-            if ($customName) {
-                $query->where('custom_name', 'like', '%' . $customName . '%');
-            }
-            if ($identitasBarang) {
-                $query->where('item_code', 'like', '%' . $identitasBarang . '%');
-            }
-            if ($templateBarang) {
-                $query->where('template_barang_id', $templateBarang);
-            }
-            if ($kategoriBarang) {
-                $query->where('category_barang_id', $kategoriBarang);
-            }
-
-            // Ambil hasil pencarian
-            $barang = $query->orderBy('custom_name', 'asc')->get();
+        // Check if the user has admin permissions
+        if (Auth::user()->can('admin inventaris barang')) {
+            // If the user is an admin, retrieve all items
+            $barang = Barang::orderBy('id', 'desc')->get();
+            $rooms = RoomMaintenance::orderBy('name', 'asc')->get();
+            $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
+            $companies = Company::all();
         } else {
-            $barang = Barang::orderBy('id', 'desc')
-                ->limit(100)
-                ->get();
+            // Get the organization of the authenticated user
+            $rooms = Auth::user()->employee->organization->room_maintenance;
+            $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
+            $organizationId = Auth::user()->employee->organization_id;
+            $companies = Auth::user()->employee->company;
+            // return dd($companies);
+
+            // Check if there are search parameters
+            if ($customName || $templateBarang || $kategoriBarang || $identitasBarang) {
+                // Query for searching
+                $query = Barang::query();
+
+                // Apply filters based on input
+                if ($customName) {
+                    $query->where('custom_name', 'like', '%' . $customName . '%');
+                }
+                if ($identitasBarang) {
+                    $query->where('item_code', 'like', '%' . $identitasBarang . '%');
+                }
+                if ($templateBarang) {
+                    $query->where('template_barang_id', $templateBarang);
+                }
+                if ($kategoriBarang) {
+                    $query->where('category_barang_id', $kategoriBarang);
+                }
+
+                // Filter by organization through the room maintenance relationship
+                $query->whereHas('room.organizations', function ($q) use ($organizationId) {
+                    $q->where('organization_id', $organizationId);
+                });
+
+                // Get the search results
+                $barang = $query->orderBy('custom_name', 'asc')->get();
+            } else {
+                // If no search parameters, get items related to the user's organization
+                $barang = Barang::whereHas('room.organizations', function ($q) use ($organizationId) {
+                    $q->where('organization_id', $organizationId);
+                })->orderBy('id', 'desc')->limit(100)->get();
+            }
         }
 
         return view('pages.inventaris.barang.index', [
             'barang' => $barang,
-            'companies' => Company::all(),
+            'companies' => $companies,
             'templates' => TemplateBarang::orderBy('name', 'asc')->get(),
             'categories' => CategoryBarang::orderBy('name', 'asc')->get(),
-            'rooms' => RoomMaintenance::orderBy('name', 'asc')->get(),
+            'rooms' => $rooms,
+            'allRoom' => $allRoom,
             'jumlah' => count(Barang::all())
         ]);
     }
@@ -73,6 +95,7 @@ class BarangController extends Controller
                 'merk' => "max:5120",
                 'room_id' => "max:255",
             ]);
+
             $template = $validatedData['template_barang_id'];
             $category = TemplateBarang::where('id', $template)->get('category_id')->first()->category_id;
             $validatedData['category_barang_id'] = $category;
