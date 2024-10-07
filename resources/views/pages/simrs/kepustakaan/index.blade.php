@@ -34,6 +34,11 @@
             text-decoration: underline !important;
         }
 
+        .btn-action:hover {
+            text-decoration: underline;
+            color: #336bc5 !important;
+        }
+
         @media (max-width: 767.98px) {
 
             /* Sembunyikan kolom file size dan last modified */
@@ -51,6 +56,18 @@
             .accordion .row.bg-light .col-6 {
                 width: 100%;
                 /* Header menjadi full width */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .col-3 {
+                display: none !important;
+            }
+
+            .col-6 {
+                width: 100% !important;
+                flex: 0 0 100%;
+                max-width: 100%;
             }
         }
     </style>
@@ -92,7 +109,7 @@
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
 
-        @if (count($breadcrumbs) > 0 || auth()->user()->hasRole('super admin'))
+        @if (auth()->user()->hasRole('super admin') || auth()->user()->can('master kepustakaan'))
             <div class="row mb-5">
                 <div class="col-xl-12 pl-0">
                     <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
@@ -102,6 +119,20 @@
                     </button>
                 </div>
             </div>
+        @else
+            @if (
+                (count($breadcrumbs) > 1 && auth()->user()->organization_id != $folder->organization_id) ||
+                    auth()->user()->can('tambah kepustakaan'))
+                <div class="row mb-5">
+                    <div class="col-xl-12 pl-0">
+                        <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
+                            id="btn-tambah-kepustakaan">
+                            <span class="fal fa-plus-circle mr-1"></span>
+                            Tambah Folder / File
+                        </button>
+                    </div>
+                </div>
+            @endif
         @endif
 
         <div class="row">
@@ -143,48 +174,34 @@
                     <div class="card">
                         <div class="card-header p-0 bg-white">
                             <div class="row align-items-center py-2">
-                                <div class="col-6 d-flex align-items-center" style="height: 15px">
-                                    @if ($item->type == 'folder')
-                                        <i class="fas fa-folder text-success fs-xl mr-2"></i>
-                                        <a href="{{ route('kepustakaan.folder', Crypt::encrypt($item->id)) }}"
-                                            class="card-title">
-                                            {{ $item->name }}
-                                        </a>
-                                    @else
-                                        <i class="fas fa-file text-primary fs-xl mr-2"></i>
-                                        @php
-                                            $filename = $item->path;
-                                            $extension = pathinfo($filename, PATHINFO_EXTENSION);
-
-                                            if ($extension === 'pdf') {
-                                                $extension = 'pdf';
-                                            } elseif ($extension === 'doc' || $extension === 'docx') {
-                                                $extension = 'word';
-                                            } elseif ($extension === 'xls' || $extension === 'xlsx') {
-                                                $extension = 'excel';
-                                            } elseif ($extension === 'ppt' || $extension === 'pptx') {
-                                                $extension = 'ppt';
-                                            } else {
-                                                $extension = 'others';
-                                            }
-                                        @endphp
-                                        @if ($extension == 'pdf')
-                                            <a href="{{ asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->path) }}"
-                                                class="card-title" target="_blank">
-                                                {{ $item->path ?? $item->name }}
+                                <div class="col-6 d-flex justify-content-between" style="height: 15px">
+                                    <div class="folder-wrapper d-flex align-items-center">
+                                        @if ($item->type == 'folder')
+                                            <i class="fas fa-folder text-success fs-xl mr-2"></i>
+                                            <a href="{{ route('kepustakaan.folder', Crypt::encrypt($item->id)) }}"
+                                                class="card-title">
+                                                {{ $item->name }}
                                             </a>
-                                        @elseif ($extension == 'word' || $extension == 'excel' || $extension == 'ppt')
-                                            <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->path)) }}&embedded=true"
-                                                class="card-title" target="_blank">
-                                                {{ $item->path ?? $item->name }}
-                                            </a>
-                                        @elseif ($extension == 'others')
-                                            <a href="https://docs.google.com/viewer?url={{ urlencode(asset('storage/kepustakaan/' . Str::slug($item->kategori) . '/' . $item->path)) }}&embedded=true"
-                                                class="card-title" target="_blank">
-                                                Lainya
-                                            </a>
+                                        @else
+                                            <i class="fas fa-file text-primary fs-xl mr-2"></i>
+                                            <a href="{{ route('kepustakaan.download', Crypt::encrypt($item->id)) }}"
+                                                class="card-title">{{ $item->file }}</a>
                                         @endif
-                                    @endif
+                                    </div>
+                                    <div class="action-kepustakaan float-right">
+                                        @if ($item->type == 'folder')
+                                            @can('edit kepustakaan')
+                                                <i class="btn-action btn-edit fas fa-pencil text-warning fs-xl mr-2"
+                                                    data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
+                                                    data-id = "{{ Crypt::encrypt($item->id) }}"></i>
+                                            @endcan
+                                        @endif
+                                        @can('delete kepustakaan')
+                                            <i class="btn-action btn-delete fas fa-trash text-danger fs-xl mr-2"
+                                                data-url="{{ route('kepustakaan.delete', Crypt::encrypt($item->id)) }}"
+                                                data-type = "{{ $item->type }}"></i>
+                                        @endcan
+                                    </div>
                                 </div>
                                 <div class="col-3 text-center file-info">
                                     {{ $item->size > 0 ? number_format($item->size / 1024, 2) . ' KB' : '-' }}
@@ -202,12 +219,12 @@
 
 
     </main>
-    @if (auth()->user()->can('master kepustakaan'))
-        {{-- @dd(auth()->user()->can('kepustakaan delete')) --}}
+    {{-- @if (auth()->user()->can('master kepustakaan'))
         @include('pages.simrs.kepustakaan.partials.create')
-    @else
-        @include('pages.simrs.kepustakaan.partials.create-for-employee')
-    @endif
+    @else --}}
+    @include('pages.simrs.kepustakaan.partials.create-for-employee')
+    @include('pages.simrs.kepustakaan.partials.edit')
+    {{-- @endif --}}
     {{-- @include('pages.simrs.master-data.kepustakaan.partials.edit') --}}
 @endsection
 @section('plugin')
@@ -216,7 +233,7 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            let grupSuplierId = null;
+            let kepustakaanId = null;
 
             // Hide the file upload section by default if Folder is selected
             toggleFileUpload();
@@ -224,6 +241,13 @@
             // Detect changes on the radio buttons
             $('input[name="type"]').change(function() {
                 toggleFileUpload();
+            });
+
+            $('#customFile').on('change', function() {
+                // Ambil nama file
+                var fileName = $(this).val().split('\\').pop();
+                // Tampilkan nama file di label
+                $(this).next('.custom-file-label').addClass("selected").html(fileName);
             });
 
 
@@ -248,25 +272,15 @@
             });
 
             $('.btn-edit').click(function() {
-                console.log('clicked');
-                $('#modal-edit-kepustakaan').modal('show');
-                grupSuplierId = $(this).attr('data-id');
-                $('#modal-edit-kepustakaan form').attr('data-id', grupSuplierId);
 
+                let url = $(this).data('url');
+                kepustakaanId = $(this).data('id');
                 $.ajax({
-                    url: '/api/simrs/master-data/kepustakaan/' +
-                        grupSuplierId,
+                    url: url,
                     type: 'GET',
                     success: function(response) {
-                        $('#modal-edit-kepustakaan input[name="kategori"]').val(response
-                            .kategori);
-                        $('#modal-edit-kepustakaan input[name="status"][value="' +
-                                response
-                                .status + '"]')
-                            .prop(
-                                'checked', true);
-                        $('#modal-edit-kepustakaan input[name="coa_utang"]').val(response
-                            .coa_utang);
+                        $('#modal-edit-kepustakaan').modal('show');
+                        $('#modal-edit-kepustakaan #name').val(response);
                     },
                     error: function(xhr, status, error) {
                         $('#modal-edit-kepustakaan').modal('hide');
@@ -277,44 +291,61 @@
             });
 
             $('.btn-delete').click(function() {
-                var grupSuplierId = $(this).attr('data-id');
+                let url = $(this).data('url');
+                let type = $(this).data('type');
+                const email = "{{ auth()->user()->email }}";
+                let confirmationMessage = type == 'file' ?
+                    'Yakin ingin menghapus file ini?' :
+                    'Yakin ingin menghapus folder ini? semua file yang ada pada folder ini akan ikut terhapus juga!';
 
-                // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
-                var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
+                if (confirm(confirmationMessage)) {
+                    let password = prompt('Masukkan password untuk konfirmasi penghapusan:');
 
-                if (userConfirmed) {
-                    // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
-                    $.ajax({
-                        url: '/api/simrs/master-data/kepustakaan/' +
-                            grupSuplierId +
-                            '/delete',
-                        type: 'DELETE',
-                        success: function(response) {
-                            showSuccessAlert(response.message);
+                    if (password !== null) {
+                        $.ajax({
+                            url: url,
+                            type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                email: email,
+                                password: password
+                            }, // Kirim password ke server
+                            success: function(response) {
+                                showSuccessAlert(response.message);
 
-                            setTimeout(() => {
-                                console.log('Reloading the page now.');
-                                window.location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr, status, error) {
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                        }
-                    });
+                                setTimeout(() => {
+                                    console.log('Reloading the page now.');
+                                    window.location.reload();
+                                }, 1000);
+                            },
+                            error: function(xhr, status, error) {
+                                if (xhr.status === 403) {
+                                    showErrorAlert('Password salah. Penghapusan dibatalkan.');
+                                } else {
+                                    showErrorAlert('Terjadi kesalahan: ' + error);
+                                }
+                            }
+                        });
+                    } else {
+                        console.log('Penghapusan dibatalkan oleh pengguna.');
+                    }
                 } else {
                     console.log('Penghapusan dibatalkan oleh pengguna.');
                 }
             });
 
-            $('#update-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
 
-                var formData = $(this).serialize();
-                grupSuplierId = $(this).attr('data-id');
+            $('#update-form').on('submit', function(e) {
+                e.preventDefault();
+
+                let updateUrl =
+                    "{{ route('kepustakaan.update', ':id') }}";
+                updateUrl = updateUrl.replace(':id', kepustakaanId);
+                let formData = $(this).serialize();
                 $.ajax({
-                    url: '/api/simrs/master-data/kepustakaan/' +
-                        grupSuplierId +
-                        '/update',
+                    url: updateUrl,
                     type: 'PATCH',
                     data: formData,
                     beforeSend: function() {

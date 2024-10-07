@@ -46,6 +46,7 @@ class AuthenticatedSessionController extends Controller
             }
             Auth::login($user, true); // Log the user in
             $request->session()->regenerate(); // Regenerate session
+
             return redirect()->intended(RouteServiceProvider::HOME);
         } else {
             // Both local and Zimbra authentication failed

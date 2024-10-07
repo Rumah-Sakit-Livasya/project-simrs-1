@@ -36,7 +36,7 @@ use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 
-Route::prefix('simrs')->group(function () {
+Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::prefix('pengkajian')->group(function () {
         Route::prefix('nurse-rajal')->group(function () {
             Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
@@ -253,5 +253,8 @@ Route::prefix('simrs')->group(function () {
     });
     Route::prefix('kepustakaan')->group(function () {
         Route::post('/tambah', [KepustakaanController::class, 'store'])->name('kepustakaan.store');
+        Route::get('/edit/{encryptedId}', [KepustakaanController::class, 'getKepustakaan'])->name('kepustakaan.get');
+        Route::patch('/update/{encryptedId}', [KepustakaanController::class, 'update'])->name('kepustakaan.update');
+        Route::delete('/delete/{encryptedId}', [KepustakaanController::class, 'delete'])->name('kepustakaan.delete');
     });
 });

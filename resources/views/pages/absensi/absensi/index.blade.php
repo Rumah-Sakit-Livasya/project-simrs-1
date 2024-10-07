@@ -982,6 +982,9 @@
                 try {
                     const response = await fetch(apiUrl, {
                         method: 'POST', // Update method to PUT if required
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         body: formData
                     });
 

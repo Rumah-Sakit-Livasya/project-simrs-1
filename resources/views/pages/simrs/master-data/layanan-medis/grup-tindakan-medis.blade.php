@@ -147,8 +147,7 @@
                                             <th colspan="6" class="text-center">
                                                 <button type="button"
                                                     class="btn btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-grup-tindakan" data-toggle="modal"
-                                                    data-target="#modal-tambah-grup-tindakan" data-action="tambah">
+                                                    id="btn-tambah-grup-tindakan">
                                                     <span class="fal fa-plus-circle"></span>
                                                     Tambah Grup Tindakan
                                                 </button>
@@ -184,50 +183,6 @@
 
             $('#loading-spinner').show();
 
-            // initialize datatable
-            $('#dt-basic-example').DataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
-                },
-                responsive: false, // Responsif diaktifkan
-                scrollX: true, // Tambahkan scroll horizontal
-                lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end buttons-container'B>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [{
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1 custom-margin'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1 custom-margin'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm custom-margin'
-                    }
-                ]
-            });
 
             $('#btn-tambah-grup-tindakan').click(function() {
                 $('#modal-tambah-grup-tindakan').modal('show');
@@ -377,6 +332,50 @@
                         }
                     }
                 });
+            });
+            // initialize datatable
+            $('#dt-basic-example').DataTable({
+                "drawCallback": function(settings) {
+                    // Menyembunyikan preloader setelah data berhasil dimuat
+                    $('#loading-spinner').hide();
+                },
+                responsive: false, // Responsif diaktifkan
+                scrollX: true, // Tambahkan scroll horizontal
+                lengthChange: false,
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end buttons-container'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [{
+                        extend: 'pdfHtml5',
+                        text: 'PDF',
+                        titleAttr: 'Generate PDF',
+                        className: 'btn-outline-danger btn-sm mr-1 custom-margin'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        titleAttr: 'Generate Excel',
+                        className: 'btn-outline-success btn-sm mr-1 custom-margin'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        text: 'CSV',
+                        titleAttr: 'Generate CSV',
+                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
+                    },
+                    {
+                        extend: 'copyHtml5',
+                        text: 'Copy',
+                        titleAttr: 'Copy to clipboard',
+                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        titleAttr: 'Print Table',
+                        className: 'btn-outline-primary btn-sm custom-margin'
+                    }
+                ]
             });
         });
     </script>
