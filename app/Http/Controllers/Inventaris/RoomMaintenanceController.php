@@ -26,10 +26,14 @@ class RoomMaintenanceController extends Controller
             'name' => 'max:255|required',
             'room_code' => 'max:255|required',
             'floor' => 'integer|max:255|required',
+            'organization_id' => 'required|array', // Ensure organization_id is an array
+            'organization_id.*' => 'integer|exists:organizations,id', // Validate each organization ID
         ]);
 
         try {
             $store = RoomMaintenance::create($validatedData);
+            // Sync the organizations with the room
+            RoomMaintenance::where('id', $store->id)->first()->organizations()->sync($request->organization_id);
             return response()->json(['message' => "$store->name Berhasil ditambahkan!"], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

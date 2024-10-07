@@ -43,14 +43,14 @@
                     </div>
                     <div class="form-group">
                         <div class="form-group mb-3">
-                            <label for="organization_id">Unit Penanggungjawab Ruangan <i
+                            <label for="update-organization_id">Unit Penanggungjawab Ruangan <i
                                     class="fas fa-info-circle text-primary"
                                     data-template="<div class='tooltip' role='tooltip'><div class='tooltip-inner bg-primary-500'></div></div>"
                                     data-toggle="tooltip"
-                                    title="Orang yang bertanggungjawab atas target ini"></i></label>
+                                    title="Unit yang bertanggungjawab atas ruangan ini"></i></label>
                             <!-- Mengubah input menjadi select2 -->
                             <select class="select2 form-control @error('organization_id') is-invalid @enderror"
-                                name="organization_id[]" id="organization_id" multiple>
+                                name="organization_id[]" id="update-organization_id" multiple>
                                 @foreach ($organizations as $organization)
                                     <option value="{{ $organization->id }}">
                                         {{ old('organization_id', $organization->name) }}

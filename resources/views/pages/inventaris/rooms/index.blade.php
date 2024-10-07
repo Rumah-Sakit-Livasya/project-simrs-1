@@ -58,21 +58,39 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                         @include('components.notification.error')
                                     @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label for="create-organization_id">Unit Penanggungjawab Ruangan <i
+                                            class="fas fa-info-circle text-primary"
+                                            data-template="<div class='tooltip' role='tooltip'><div class='tooltip-inner bg-primary-500'></div></div>"
+                                            data-toggle="tooltip"
+                                            title="Unit yang bertanggungjawab atas ruangan ini"></i></label>
+                                    <!-- Mengubah input menjadi select2 -->
+                                    <select class="select2 form-control @error('organization_id') is-invalid @enderror"
+                                        name="organization_id[]" id="create-organization_id" multiple>
+                                        @foreach ($organizations as $organization)
+                                            <option value="{{ $organization->id }}">
+                                                {{ old('organization_id', $organization->name) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('organization_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        @include('components.notification.error')
+                                    @enderror
+                                </div>
 
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="submit" class="btn btn-primary">
-                                            <span class="fal fa-plus-circle mr-1"></span>
-                                            Tambah
-                                        </button>
-                                    </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="fal fa-plus-circle mr-1"></span>
+                                        Tambah
+                                    </button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
-
-
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
@@ -162,7 +180,12 @@
         /* change background */
         $(document).ready(function() {
             $(function() {
-                $('#update-form #organization_id').select2({
+                $('#store-form #create-organization_id').select2({
+                    placeholder: 'Pilih data berikut',
+                    allowClear: true
+                });
+
+                $('#update-form #update-organization_id').select2({
                     placeholder: 'Pilih data berikut',
                     dropdownParent: $('#modal-edit'),
                     allowClear: true
@@ -352,8 +375,8 @@
                     $('#modal-edit #status[value="' + response.status + '"]').prop('checked', true);
 
                     // Populate the Select2 for organizations
-                    $('#modal-edit #organization_id').val(response.organization_ids).trigger(
-                    'change'); // Assuming response.organization_ids is an array of IDs
+                    $('#modal-edit #update-organization_id').val(response.organization_ids).trigger(
+                        'change'); // Assuming response.organization_ids is an array of IDs
 
                     // Reset the icon and spinner after loading data
                     ikonEdit.classList.remove('d-none');
