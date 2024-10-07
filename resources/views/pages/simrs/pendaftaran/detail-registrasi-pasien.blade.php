@@ -453,6 +453,10 @@
             </div>
         </div>
     </main>
+    {{-- {{ $registration->pengkajian_nurse_rajal->id }} --}}
+    @if ($registration->pengkajian_nurse_rajal)
+        <input type="hidden" id="pengkajian-rajal-id" value="{{ $registration->pengkajian_nurse_rajal->id }}">
+    @endif
 
     @include('pages.simrs.pendaftaran.form.batal-register-form')
     @include('pages.simrs.pendaftaran.form.batal-keluar-form')
@@ -473,10 +477,69 @@
                 $('#menu-layanan').fadeOut(500); // 500ms untuk transisi
 
                 // Ambil data-layanan untuk menentukan ID elemen yang akan ditampilkan
-                var layananId = $(this).data('layanan');
+                var namaLayanan = $(this).data('layanan');
+                var pengkajianId = $('#pengkajian-rajal-id').val();
+                console.log(pengkajianId);
 
                 // Tampilkan elemen layanan yang dipilih dengan efek fade in
-                $('#' + layananId).delay(500).fadeIn(500); // 500ms untuk transisi
+                $('#' + namaLayanan).delay(500).fadeIn(500); // 500ms untuk transisi
+                if (namaLayanan == 'pengkajian-nurse-rajal') {
+                    if (pengkajianId !== undefined) {
+                        $.ajax({
+                            type: "GET", // Method pengiriman data bisa dengan GET atau POST
+                            url: `/api/simrs/pengkajian/nurse-rajal/${pengkajianId}/get`, // Isi dengan url/path file php yang dituju
+                            dataType: "json",
+                            success: function(data) {
+                                $('#nurse-rajal #tgl_masuk').val(data.tgl_masuk);
+                                $('#nurse-rajal #jam_masuk').val(data.jam_masuk);
+                                $('#nurse-rajal #tgl_dilayani').val(data.tgl_dilayani);
+                                $('#nurse-rajal #jam_dilayani').val(data.jam_dilayani);
+                                $('#nurse-rajal #keluhan_utama').val(data.keluhan_utama);
+                                $('#nurse-rajal #pr').val(data.pr);
+                                $('#nurse-rajal #rr').val(data.rr);
+                                $('#nurse-rajal #bp').val(data.bp);
+                                $('#nurse-rajal #temperatur').val(data.temperatur);
+                                $('#nurse-rajal #body_height').val(data.body_height);
+                                $('#nurse-rajal #body_weight').val(data.body_weight);
+                                $('#nurse-rajal #bmi').val(data.bmi);
+                                $('#nurse-rajal #kat_bmi').val(data.kat_bmi);
+                                $('#nurse-rajal #sp02').val(data.sp02);
+                                $('#nurse-rajal #lingkar_kepala').val(data.lingkar_kepala);
+                                $('#nurse-rajal #lingkar_kepala').val(data.lingkar_kepala);
+                                // Set the value for Select2 elements
+                                $('#nurse-rajal #diagnosa_keperawatan').val(data
+                                    .diagnosa_keperawatan).trigger('change');
+                                $('#nurse-rajal #rencana_tindak_lanjut').val(data
+                                    .rencana_tindak_lanjut).trigger('change');
+                                // Assuming 'data' is the object retrieved from the database
+                                if (data.alergi_obat === "Ya") {
+                                    $('#nurse-rajal #ket_alergi_obat').val(data
+                                        .ket_alergi_obat);
+                                    $('#nurse-rajal #alergi_obat1').prop('checked', true);
+                                } else if (data.alergi_obat === "Tidak") {
+                                    $('#nurse-rajal #alergi_obat2').prop('checked', true);
+                                }
+                                if (data.alergi_makanan === "Ya") {
+                                    $('#nurse-rajal #ket_alergi_makanan').val(data
+                                        .ket_alergi_makanan);
+                                    $('#nurse-rajal #alergi_makanan1').prop('checked', true);
+                                } else if (data.alergi_makanan === "Tidak") {
+                                    $('#nurse-rajal #alergi_makanan2').prop('checked', true);
+                                }
+                                if (data.alergi_lainnya === "Ya") {
+                                    $('#nurse-rajal #ket_alergi_lainnya').val(data
+                                        .ket_alergi_lainnya);
+                                    $('#nurse-rajal #alergi_lainnya1').prop('checked', true);
+                                } else if (data.alergi_lainnya === "Tidak") {
+                                    $('#nurse-rajal #alergi_lainnya2').prop('checked', true);
+                                }
+                            },
+                            error: function(xhr) {
+                                console.log(xhr.responseText);
+                            }
+                        });
+                    }
+                }
             });
 
             // Fungsi untuk tombol kembali
@@ -510,24 +573,23 @@
                 });
             });
 
-            // Pengkajian Nurse Rajal
-            $('#pengkajian-nurse-rajal').on('submit', function(e) {
+            $('#nurse-rajal').on('submit', function(e) {
                 e.preventDefault();
                 let formData = $(this).serialize();
-                const submitButton = $('#pengkajian-nurse-rajal').find('button[type="submit"]');
+                const submitButton = $('#nurse-rajal').find('button[type="submit"]');
                 submitButton.prop('disabled', true);
                 $.ajax({
                     type: "POST",
                     url: '/api/simrs/pengkajian/nurse-rajal/store',
                     data: formData,
                     beforeSend: function() {
-                        $('#pengkajian-nurse-rajal').find('.ikon-tambah').hide();
-                        $('#pengkajian-nurse-rajal').find('.spinner-text').removeClass(
+                        $('#nurse-rajal').find('.ikon-tambah').hide();
+                        $('#nurse-rajal').find('.spinner-text').removeClass(
                             'd-none');
                     },
                     success: function(response) {
-                        $('#pengkajian-nurse-rajal').find('.ikon-edit').show();
-                        $('#pengkajian-nurse-rajal').find('.spinner-text').addClass('d-none');
+                        $('#nurse-rajal').find('.ikon-edit').show();
+                        $('#nurse-rajal').find('.spinner-text').addClass('d-none');
                         $('#tambah-data').modal('hide');
                         showSuccessAlert(response.message)
                         setTimeout(function() {
@@ -535,6 +597,7 @@
                         }, 500);
                     },
                     error: function(xhr, status, error) {
+                        $('#tambah-data').modal('hide');
                         if (xhr.status === 422) {
                             var errors = xhr.responseJSON.errors;
                             var errorMessages = '';
@@ -556,5 +619,118 @@
                 });
             });
         });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('#histori_pengkajian').on('click', function() {
+                atmedic.App.popup({
+                    url: base_url() + 'pengkajian/histori_pengkajian/189221',
+                    mode: 'md',
+                    data: {
+                        pregid: '189221',
+                        ftid: '-24'
+                    },
+                    title: 'Histori pengkajian'
+                });
+            });
+
+            $('#btn-ttd').on('click', function() {
+                popupwindow(base_url() + 'pengkajian/signature/ttd', 'popup_ttd', 730, 420, 'no');
+            });
+
+            $('.img-baker .pointer').on('click', function() {
+                $('#skor_nyeri').val($(this).data('skor'));
+            });
+
+            $('.bartel').on('change', function() {
+                let skor = bartelIndex();
+                $('#skor_bartel').val(skor);
+                if (skor < 9)
+                    $('#analisis_bartel').val('Total Care');
+                else if (skor >= 9 && skor < 12)
+                    $('#analisis_bartel').val('Partial Care');
+                else
+                    $('#analisis_bartel').val('Self Care');
+            });
+
+            let bartelIndex = function() {
+                let data = 0;
+                $('.bartel').each(function(index) {
+                    data += isNaN($("option:selected", this).data('skor')) ? 0 : $("option:selected",
+                        this).data('skor');
+                });
+
+                return data;
+            }
+
+            /*if($('#alergi_obat1').is(':checked') || $('#ket_alergi_obat').val()!='')
+              $('#ket_alergi_obat').show();
+            else
+              $('#ket_alergi_obat').hide();
+
+            $('#alergi_obat1').on('click',function(){
+              $('#ket_alergi_obat').show();      
+            });
+
+            $('#alergi_obat2').on('click',function(){
+              $('#ket_alergi_obat').hide().val('');
+            });*/
+
+            function get_bmi() {
+                var A = $('#body_height').val();
+                var B = $('#body_weight').val();
+                console.log(A);
+
+
+                if (A != '' && B != '') {
+                    A = A / 100;
+                    C = B / (A * A);
+                    C = Math.round(C * 10) / 10;
+
+                    if (C < 18.5)
+                        document.getElementById('kat_bmi').value = 'Kurus';
+                    else if (C > 24.9)
+                        document.getElementById('kat_bmi').value = 'Gemuk';
+                    else if ((C >= 18.5) && (C <= 24.9))
+                        document.getElementById('kat_bmi').value = 'Normal';
+                    else
+                        document.getElementById('kat_bmi').value = '';
+                    document.getElementById('bmi').value = C;
+
+                    $('#bmi, #kat_bmi').addClass('dirty');
+                } else {
+                    document.getElementById('bmi').value = '';
+                    document.getElementById('kat_bmi').value = '';
+                    $('#bmi, #kat_bmi').removeClass('dirty');
+                }
+            }
+
+            get_bmi();
+
+            $('.calc-bmi').on('change', get_bmi);
+        });
+
+        function resiko_jatuh() {
+            var resiko_jatuh1 = document.getElementById('resiko_jatuh1').checked;
+            var resiko_jatuh2 = document.getElementById('resiko_jatuh2').checked;
+            var resiko_jatuh3 = document.getElementById('resiko_jatuh3').checked;
+
+            if (resiko_jatuh1 == false && resiko_jatuh2 == false && resiko_jatuh3 == false) {
+                $('#resiko_jatuh_hasil').val("Tidak Beresiko");
+            } else if (resiko_jatuh1 == true || resiko_jatuh2 == true) {
+                if (resiko_jatuh3 == true) {
+                    $('#resiko_jatuh_hasil').val("Resiko Tinggi");
+                } else if (resiko_jatuh3 == false) {
+                    $('#resiko_jatuh_hasil').val("Resiko Sedang");
+                }
+            } else if (resiko_jatuh1 == false || resiko_jatuh2 == false) {
+                if (resiko_jatuh3 == true) {
+                    $('#resiko_jatuh_hasil').val("Resiko Sedang");
+                } else if (resiko_jatuh3 == false) {
+                    $('#resiko_jatuh_hasil').val("Resiko Tinggi");
+                }
+            }
+        };
+        resiko_jatuh();
     </script>
 @endsection

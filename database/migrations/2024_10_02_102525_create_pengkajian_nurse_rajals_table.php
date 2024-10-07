@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('registration_id')->constrained('registrations')->cascadeOnDelete();
-            $table->dateTime('tgl_masuk')->nullable();
-            $table->dateTime('jam_masuk')->nullable();
-            $table->dateTime('tgl_dilayani')->nullable();
-            $table->dateTime('jam_dilayani')->nullable();
+            $table->string('tgl_masuk')->nullable();
+            $table->string('jam_masuk')->nullable();
+            $table->string('tgl_dilayani')->nullable();
+            $table->string('jam_dilayani')->nullable();
             $table->text('keluhan_utama')->nullable();
 
             //======== TTV =========
@@ -30,16 +30,20 @@ return new class extends Migration
             $table->string('body_weight')->nullable(); // berat badan
             $table->string('bmi')->nullable(); // index masa tubuh
             $table->string('kat_bmi')->nullable(); // kategori IMT
-            $table->string('sp02')->nullable(); // lingkar kepala
+            $table->string('sp02')->nullable(); // sp02
+            $table->string('lingkar_kepala')->nullable(); // lingkar kepala
             $table->string('diagnosa_keperawatan')->nullable();
             $table->string('rencana_tindak_lanjut')->nullable();
 
             //======== Alergi dan Reaksi =========
             $table->string('alergi_obat')->nullable();
+            $table->string('ket_alergi_obat')->nullable();
             $table->string('reaksi_alergi_obat')->nullable();
             $table->string('alergi_makanan')->nullable();
+            $table->string('ket_alergi_makanan')->nullable();
             $table->string('reaksi_alergi_makanan')->nullable();
             $table->string('alergi_lainnya')->nullable();
+            $table->string('ket_alergi_lainnya')->nullable();
             $table->string('reaksi_alergi_lainnya')->nullable();
             $table->boolean('gelang')->default(false);
 

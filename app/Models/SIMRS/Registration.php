@@ -4,6 +4,7 @@ namespace App\Models\SIMRS;
 
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
+use App\Models\PengkajianNurseRajal;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +20,12 @@ class Registration extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    // Define the relationship to PengkajianNurseRajal
+    public function pengkajian_nurse_rajal()
+    {
+        return $this->hasOne(PengkajianNurseRajal::class, 'registration_id');
     }
 
     public function departement()

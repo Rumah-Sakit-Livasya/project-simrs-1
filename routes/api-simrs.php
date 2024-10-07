@@ -39,7 +39,8 @@ use App\Http\Controllers\SIMRS\TindakanMedisController;
 Route::prefix('simrs')->group(function () {
     Route::prefix('pengkajian')->group(function () {
         Route::prefix('nurse-rajal')->group(function () {
-            Route::post('/store', [PengkajianController::class, 'store'])->name('pengkajian.nurse-rajal.store');
+            Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
+            Route::get('{id}/get', [PengkajianController::class, 'getPengkajianRajal'])->name('pengkajian.nurse-rajal.store');
         });
     });
     Route::prefix('master-data')->group(function () {
