@@ -120,7 +120,6 @@
                 e.preventDefault();
                 let employeeId = "{{ $attendances[1]->employee_id ?? null }}";
                 var data = []; // Array untuk menampung data yang akan dikirimkan
-                console.log(employeeId);
 
                 // Loop melalui setiap elemen formulir
                 $('form#update-form .row').each(function() {
@@ -154,7 +153,7 @@
                         }, 1000);
                     },
                     error: function(xhr) {
-                        console.log(xhr.responseJSON.error);
+                        console.log(xhr.responseText);
                         showErrorAlert(xhr.responseJSON.error);
                     }
                 });
