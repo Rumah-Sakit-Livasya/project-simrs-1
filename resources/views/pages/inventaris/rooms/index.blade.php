@@ -112,9 +112,16 @@
                                             <td style="white-space: nowrap">{{ $row->status == 1 ? 'Aktif' : 'Nonaktif' }}
                                             </td>
                                             <td style="white-space: nowrap">
-                                                <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
-                                                    data-id="{{ $row->id }}">
-                                                    <i class="fas fa-pencil"></i>
+                                                <button type="button" data-backdrop="static" data-keyboard="false"
+                                                    class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
+                                                    data-id="{{ $row->id }}" title="Ubah" data-toggle="tooltip"
+                                                    data-placement="top" onclick="ubahRuangan(event)">
+                                                    <span class="fal fa-pencil ikon-edit"></span>
+                                                    <div class="span spinner-text d-none">
+                                                        <span class="spinner-border spinner-border-sm" role="status"
+                                                            aria-hidden="true"></span>
+                                                        Loading...
+                                                    </div>
                                                 </button>
                                                 <button class="btn btn-sm btn-danger px-2 py-1 btn-delete"
                                                     data-id="{{ $row->id }}">
@@ -149,30 +156,23 @@
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datatable/jszip.min.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         /* demo scripts for change table color */
         /* change background */
         $(document).ready(function() {
+            $(function() {
+                $('#update-form #organization_id').select2({
+                    placeholder: 'Pilih data berikut',
+                    dropdownParent: $('#modal-edit'),
+                    allowClear: true
+                });
+            });
+
             let roomId = null;
 
             $('.btn-edit').click(function() {
-                $('#modal-edit').modal('show');
-                roomId = $(this).attr('data-id');
-                $.ajax({
-                    url: '/api/inventaris/room-maintenance/' + roomId,
-                    type: 'GET',
-                    success: function(response) {
-                        // Isi form dengan data yang diterima
-                        $('#modal-edit #name').val(response.name);
-                        $('#modal-edit #room_code').val(response.room_code);
-                        $('#modal-edit #floor').val(response.floor);
-                        $('#modal-edit #status[value="' + response.status + '"]').prop(
-                            'checked', true);
-                    },
-                    error: function(xhr, status, error) {
-                        showErrorAlert('Terjadi kesalahan: ' + error);
-                    }
-                });
+
             });
 
             $('.btn-delete').click(function() {
@@ -218,51 +218,6 @@
                         });
                     } else {
                         console.log('Penghapusan dibatalkan oleh pengguna.');
-                    }
-                });
-            });
-
-            $('#update-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
-
-                var formData = $(this).serialize(); // Mengambil semua data dari form
-
-                $.ajax({
-                    url: '/api/inventaris/room-maintenance/' + roomId + '/update',
-                    type: 'PATCH',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#update-form').find('.ikon-edit').hide();
-                        $('#update-form').find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        $('#modal-edit').modal('hide');
-                        showSuccessAlert(response.message);
-
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
-                    },
-                    error: function(xhr, status, error) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
-                            });
-
-                            $('#modal-edit').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
-                        } else {
-                            $('#modal-edit').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
-                        }
                     }
                 });
             });
@@ -370,6 +325,91 @@
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
             });
 
+        });
+
+        function ubahRuangan(event) {
+            event.preventDefault(); // Prevent default form submission
+            let button = event.currentTarget;
+            let roomId = button.getAttribute('data-id');
+            idRoom = roomId;
+            let ikonEdit = button.querySelector('.ikon-edit');
+            let spinnerText = button.querySelector('.spinner-text');
+
+            ikonEdit.classList.add('d-none');
+            spinnerText.classList.remove('d-none');
+
+            // Show the modal
+            $('#modal-edit').modal('show');
+
+            $.ajax({
+                url: '/api/inventaris/room-maintenance/' + idRoom,
+                type: 'GET',
+                success: function(response) {
+                    // Populate the form with the received data
+                    $('#modal-edit #name').val(response.name);
+                    $('#modal-edit #room_code').val(response.room_code);
+                    $('#modal-edit #floor').val(response.floor);
+                    $('#modal-edit #status[value="' + response.status + '"]').prop('checked', true);
+
+                    // Populate the Select2 for organizations
+                    $('#modal-edit #organization_id').val(response.organization_ids).trigger(
+                    'change'); // Assuming response.organization_ids is an array of IDs
+
+                    // Reset the icon and spinner after loading data
+                    ikonEdit.classList.remove('d-none');
+                    spinnerText.classList.add('d-none');
+                },
+                error: function(xhr, status, error) {
+                    showErrorAlert('Terjadi kesalahan: ' + error);
+                    // Reset the icon and spinner in case of error
+                    ikonEdit.classList.remove('d-none');
+                    spinnerText.classList.add('d-none');
+                }
+            });
+        }
+
+
+        $('#update-form').on('submit', function(e) {
+            e.preventDefault();
+            let formData = $(this).serialize();
+            $.ajax({
+                url: '/api/inventaris/room-maintenance/' + idRoom + '/update',
+                type: 'PATCH',
+                data: formData,
+                beforeSend: function() {
+                    $('#update-form').find('.ikon-edit').hide();
+                    $('#update-form').find('.spinner-text').removeClass(
+                        'd-none');
+                },
+                success: function(response) {
+                    $('#modal-edit').modal('hide');
+                    showSuccessAlert(response.message);
+
+                    setTimeout(() => {
+                        console.log('Reloading the page now.');
+                        window.location.reload();
+                    }, 1000);
+                },
+                error: function(xhr, status, error) {
+                    if (xhr.status === 422) {
+                        var errors = xhr.responseJSON.errors;
+                        var errorMessages = '';
+
+                        $.each(errors, function(key, value) {
+                            errorMessages += value +
+                                '\n';
+                        });
+
+                        $('#modal-edit').modal('hide');
+                        showErrorAlert('Terjadi kesalahan:\n' +
+                            errorMessages);
+                    } else {
+                        $('#modal-edit').modal('hide');
+                        showErrorAlert('Terjadi kesalahan: ' + error);
+                        console.log(error);
+                    }
+                }
+            });
         });
 
         function toggleForm() {
