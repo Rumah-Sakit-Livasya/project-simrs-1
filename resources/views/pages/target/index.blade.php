@@ -533,6 +533,12 @@
                 });
             });
 
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
             $('.btn-delete').click(function() {
                 var targetId = $(this).attr('data-id');
 
