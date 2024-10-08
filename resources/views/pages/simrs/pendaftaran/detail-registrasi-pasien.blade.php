@@ -44,6 +44,26 @@
         .font-weight-bold h2 {
             font-weight: 600 !important;
         }
+
+        #cppt-table th:nth-child(1),
+        #cppt-table td:nth-child(1) {
+            width: 25%;
+        }
+
+        #cppt-table th:nth-child(3),
+        #cppt-table td:nth-child(3) {
+            width: 5%;
+        }
+
+        #resume-medis-rajal .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+        }
+
+        #resume-medis-rajal .form-check-inline {
+            margin-right: 20px;
+        }
     </style>
 @endsection
 @section('content')
@@ -59,6 +79,7 @@
         } elseif ($registration->registration_type == 'rawat-inap') {
             $unitLayanan = 'RAWAT INAP';
         }
+
     @endphp
     <main id="js-page-content" role="main" class="page-content overflow-hidden">
         <div class="row">
@@ -476,6 +497,7 @@
                         @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
                         @include('pages.simrs.pendaftaran.partials.pengkajian-dokter-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.cppt')
+                        @include('pages.simrs.pendaftaran.partials.dokter.resume-medis-rajal')
                     </div>
                 </div>
             </div>
@@ -495,8 +517,10 @@
 @section('plugin')
     {{-- Select 2 --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script type="text/javascript" src="/js/painterro-1.2.3.min.js"></script>
+
     <script>
         $(document).ready(function() {
             $('#pengkajian-nurse-rajal').hide();
@@ -646,6 +670,26 @@
                         }
                     }
                 });
+            });
+
+            $('#cppt-table').DataTable({
+                responsive: true,
+                lengthChange: false,
+                pageLength: 4,
+                language: {
+                    search: "", // Kosongkan untuk tidak menampilkan label "Cari:"
+                    searchPlaceholder: "Cari...", // Placeholder untuk input pencarian
+                    zeroRecords: "Tidak ada data yang ditemukan",
+                    info: "Menampilkan halaman _PAGE_ dari _PAGES_",
+                    infoEmpty: "Tidak ada data yang tersedia",
+                    infoFiltered: "(difilter dari _MAX_ total entri)",
+                    paginate: {
+                        first: "Pertama",
+                        last: "Terakhir",
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
+                    }
+                }
             });
         });
     </script>

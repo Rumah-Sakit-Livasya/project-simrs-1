@@ -18,7 +18,8 @@
                     <a class="dropdown-item" data-toggle="tab" href="#pengkajian-dokter-rajal"
                         role="tab">Pengkajian</a>
                     <a class="dropdown-item" data-toggle="tab" href="#cppt-dokter-rajal" role="tab">CPPT</a>
-                    <a class="dropdown-item" href="#">Resume Medis</a>
+                    <a class="dropdown-item" data-toggle="tab" href="#resume-medis-rajal" role="tab">Resume
+                        Medis</a>
                     <a class="dropdown-item" href="#">Rujukan Antar Rumah Sakit</a>
                     <a class="dropdown-item" href="#">Echo</a>
                     <a class="dropdown-item" href="#">Profil Ringkas Rawat Jalan</a>
@@ -48,7 +49,8 @@
                 <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                     aria-haspopup="true" aria-expanded="false">LAYANAN</a>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Tindakan Medis</a>
+                    <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Tindakan
+                        Medis</a>
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pemakaian
                         Alat</a>
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Patologi
