@@ -3,7 +3,7 @@
         <h2>RINGKASAN PASIEN RAWAT JALAN</h4>
     </header>
     <div class="row">
-        <div class="col-md-12 p-4">
+        <div class="col-md-12 px-4 pb-2 pt-4">
             <table class="table table-borderless">
                 <tbody>
                     <tr>
@@ -151,97 +151,158 @@
                                 </div>
                                 <div class="card-body p-0">
                                     <textarea class="form-control border-0 rounded-0" id="anamnesa" name="anamnesa" rows="4">
-                                        {Anamnesa}
+                                        {{ $Anamnesa ?? 'Masukkan anamnesa di sini...' }}
                                     </textarea>
                                 </div>
                             </div>
 
                         </td>
                     </tr>
+                    <tr>
+                        <td colspan="4">
+                            <h5 class="bg-primary text-white p-2 rounded">KODE ICD-X</h5>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="form-group">
+                                                <label for="diagnosa_utama" class="form-label">DIAGNOSA UTAMA
+                                                    *</label>
+                                                <textarea class="form-control" id="diagnosa_utama" name="diagnosa_utama" rows="4" required>Diagnosa Kerja    : P3A1POST SC</textarea>
+                                            </div>
+                                        </td>
+                                        <td style="width: 25%">
+                                            <div class="form-group">
+                                                <label for="cari_icd" class="form-label">Cari ICD 10</label>
+                                                <input type="text" name="cari_icd" id="cari_icd"
+                                                    class="form-control ui-autocomplete-input"
+                                                    placeholder="Cari ICD 10" autocomplete="off">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-group">
+                                                <label for="diagnosa_tambahan" class="form-label">DIAGNOSA
+                                                    TAMBAHAN</label>
+                                                <textarea class="form-control" id="diagnosa_tambahan" name="diagnosa_tambahan" rows="4"></textarea>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <label for="cari_icd_tambahan" class="form-label">Cari ICD 10</label>
+                                                <input type="text" name="cari_icd_tambahan" id="cari_icd_tambahan"
+                                                    class="form-control ui-autocomplete-input"
+                                                    placeholder="Cari ICD 10" autocomplete="off">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h5 class="bg-primary text-white p-2 rounded">KODE ICD 9 CM</h5>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="form-group">
+                                                <label for="tindakan_utama" class="form-label">TINDAKAN UTAMA</label>
+                                                <textarea class="form-control" id="tindakan_utama" name="tindakan_utama" rows="4">Terapi / Tindakan : K AFF HC GV P. LUKA</textarea>
+                                            </div>
+                                        </td>
+                                        <td style="width: 25%">
+                                            <div class="form-group">
+                                                <label for="cari_icd2" class="form-label">Cari ICD 9</label>
+                                                <input type="text" name="cari_icd2" id="cari_icd2"
+                                                    class="form-control ui-autocomplete-input"
+                                                    placeholder="Cari ICD 9" autocomplete="off">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-group">
+                                                <label for="tindakan_tambahan" class="form-label">TINDAKAN
+                                                    TAMBAHAN</label>
+                                                <textarea class="form-control" id="tindakan_tambahan" name="tindakan_tambahan" rows="4"></textarea>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <label for="cari_icd2_tambahan" class="form-label">Cari ICD 9</label>
+                                                <input type="text" name="cari_icd2_tambahan"
+                                                    id="cari_icd2_tambahan" class="form-control ui-autocomplete-input"
+                                                    placeholder="Cari ICD 9" autocomplete="off">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 65%">
+
+                                        </td>
+                                        <td style="width: 25%">
+                                            <div class="text-center">
+                                                DPJP/Dokter Yang Memeriksa
+                                            </div>
+                                            <div class="text-center">
+                                                <input type="hidden" name="data_ttd3" id="data_ttd3" value="{ttd3}"
+                                                    data-imgview="img_ttd3">
+                                                <img class="clear_ttd"
+                                                    src="http://192.168.1.253/real/include/images/ttd_blank.png"
+                                                    id="img_ttd3" style="width: 200px; height:100px;"
+                                                    onerror="this.onerror=null; this.src='http://192.168.1.253/real/include/images/ttd_blank.png'">
+                                            </div>
+                                            <div>
+                                                <input type="text" name="nama_ttd3"
+                                                    class="form-control text-center">
+                                            </div>
+                                            <div class="text-center">
+                                                <span class="badge blue pointer" id="btn-ttd3">TTD Pen Tablet</span>
+                                            </div>
+                                        </td>
+                                        <td style="width: 10%">
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div class="card-actionbar">
+                                <div class="card-actionbar-row d-flex justify-content-between align-items-center">
+                                    <button type="button"
+                                        class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                        data-dismiss="modal" data-status="0">
+                                        <span class="mdi mdi-printer"></span> Simpan (draft)
+                                    </button>
+                                    <div style="width: 33%" class="d-flex justify-content-between">
+                                        <button type="button"
+                                            class="btn btn-warning waves-effect text-white waves-light save-form d-flex align-items-center"
+                                            data-dismiss="modal" data-status="0">
+                                            <span class="mdi mdi-content-save"></span> Simpan (draft)
+                                        </button>
+                                        <button type="button"
+                                            class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                            data-dismiss="modal" data-status="1">
+                                            <span class="mdi mdi-content-save"></span> Simpan (final)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
-
-    <div class="row">
-        <div class="col-md-12 p-4">
-            <h5>KODE ICD-X</h5>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td>
-                            <div class="form-group">
-                                <label for="diagnosa_utama" class="form-label">DIAGNOSA UTAMA *</label>
-                                <textarea class="form-control" id="diagnosa_utama" name="diagnosa_utama" rows="4" required>Diagnosa Kerja    : P3A1POST SC</textarea>
-                            </div>
-                        </td>
-                        <td style="width: 25%">
-                            <div class="form-group">
-                                <label for="cari_icd" class="form-label">Cari ICD 10</label>
-                                <input type="text" name="cari_icd" id="cari_icd"
-                                    class="form-control ui-autocomplete-input" placeholder="Cari ICD 10"
-                                    autocomplete="off">
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="form-group">
-                                <label for="diagnosa_tambahan" class="form-label">DIAGNOSA TAMBAHAN</label>
-                                <textarea class="form-control" id="diagnosa_tambahan" name="diagnosa_tambahan" rows="4"></textarea>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="form-group">
-                                <label for="cari_icd_tambahan" class="form-label">Cari ICD 10</label>
-                                <input type="text" name="cari_icd_tambahan" id="cari_icd_tambahan"
-                                    class="form-control ui-autocomplete-input" placeholder="Cari ICD 10"
-                                    autocomplete="off">
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h5>KODE ICD 9 CM</h5>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td>
-                            <div class="form-group">
-                                <label for="tindakan_utama" class="form-label">TINDAKAN UTAMA</label>
-                                <textarea class="form-control" id="tindakan_utama" name="tindakan_utama" rows="4">Terapi / Tindakan : K AFF HC GV P. LUKA</textarea>
-                            </div>
-                        </td>
-                        <td style="width: 25%">
-                            <div class="form-group">
-                                <label for="cari_icd2" class="form-label">Cari ICD 9</label>
-                                <input type="text" name="cari_icd2" id="cari_icd2"
-                                    class="form-control ui-autocomplete-input" placeholder="Cari ICD 9"
-                                    autocomplete="off">
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="form-group">
-                                <label for="tindakan_tambahan" class="form-label">TINDAKAN TAMBAHAN</label>
-                                <textarea class="form-control" id="tindakan_tambahan" name="tindakan_tambahan" rows="4"></textarea>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="form-group">
-                                <label for="cari_icd2_tambahan" class="form-label">Cari ICD 9</label>
-                                <input type="text" name="cari_icd2_tambahan" id="cari_icd2_tambahan"
-                                    class="form-control ui-autocomplete-input" placeholder="Cari ICD 9"
-                                    autocomplete="off">
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-
 </div>

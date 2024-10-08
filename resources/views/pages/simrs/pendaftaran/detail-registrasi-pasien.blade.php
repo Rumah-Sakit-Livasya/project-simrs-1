@@ -2,6 +2,12 @@
 @section('extended-css')
     <link rel="stylesheet" href="/css/framework_custom.min.css">
     <style>
+        input[type="time"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
         .wongbaker {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -495,7 +501,7 @@
                     </div>
                     <div id="pengkajian-nurse-rajal">
                         @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
-                        @include('pages.simrs.pendaftaran.partials.pengkajian-dokter-rajal')
+                        @include('pages.simrs.pendaftaran.partials.dokter.pengkajian-dokter-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.cppt')
                         @include('pages.simrs.pendaftaran.partials.dokter.resume-medis-rajal')
                     </div>
