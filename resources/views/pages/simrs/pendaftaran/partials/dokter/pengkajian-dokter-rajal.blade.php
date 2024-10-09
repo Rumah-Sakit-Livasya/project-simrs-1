@@ -13,18 +13,20 @@
             <div class="row">
                 <div class="col-md-6 mt-3">
                     <div class="form-group">
-                        <label for="pr">Nadi (PR)</label>
+                        <label class="text-primary" for="pr">Nadi (PR)</label>
                         <div class="input-group">
-                            <input class="form-control numeric" id="pr" name="pr" type="text">
-                            <div class="input-group-append">
-                                <span class="input-group-text">x/menit</span>
+                            <div class="input-group">
+                                <input id="pr" type="text" name="pr" class="form-control">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">x/menit</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 mt-3">
                     <div class="form-group">
-                        <label for="rr">Respirasi (RR)</label>
+                        <label for="rr" class="text-primary">Respirasi (RR)</label>
                         <div class="input-group">
                             <input class="form-control numeric" id="rr" name="rr" type="text">
                             <div class="input-group-append">
@@ -33,7 +35,30 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-md-6 mt-3">
+                    <div class="form-group">
+                        <label for="body_height">Tinggi Badan (cm)</label>
+                        <div class="input-group">
+                            <input class="form-control numeric" id="body_height" name="body_height" type="text">
+                            <div class="input-group-append">
+                                <span class="input-group-text">cm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mt-3">
+                    <div class="form-group">
+                        <label for="body_weight">Berat Badan (kg)</label>
+                        <div class="input-group">
+                            <input class="form-control numeric" id="body_weight" name="body_weight" type="text">
+                            <div class="input-group-append">
+                                <span class="input-group-text">kg</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
 
             <div class="row">
                 <div class="col-md-6 mt-3">
@@ -92,7 +117,8 @@
                     <div class="form-group">
                         <label for="bmi">Index Massa Tubuh</label>
                         <div class="input-group">
-                            <input class="form-control numeric" id="bmi" name="bmi" readonly type="text">
+                            <input class="form-control numeric" id="bmi" name="bmi" readonly
+                                type="text">
                             <div class="input-group-append">
                                 <span class="input-group-text">Kg/m²</span>
                             </div>
@@ -109,9 +135,12 @@
 
             <div class="row">
                 <div class="col-md-6 mt-3">
-                    <div class="form-group">
-                        <label for="sp02">SP 02</label>
+                    <label for="sp02">SP 02</label>
+                    <div class="input-group">
                         <input class="form-control" id="sp02" name="sp02" type="text">
+                        <div class="input-group-append">
+                            <span class="input-group-text">%</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -120,7 +149,7 @@
                 <div class="col-md-6 mt-3">
                     <div class="form-group">
                         <label for="diagnosa_keperawatan">Diagnosa Keperawatan</label>
-                        <select name="diagnosa_keperawatan" id="diagnosa_keperawatan" class="form-control">
+                        <select name="diagnosa_keperawatan" id="diagnosa_keperawatan" class="form-control select2">
                             <option value="-">-</option>
                             <option value="Gangguan rasa nyaman">Gangguan rasa nyaman</option>
                             <option value="Nyeri">Nyeri</option>
@@ -143,7 +172,7 @@
                 <div class="col-md-6 mt-3">
                     <div class="form-group">
                         <label for="rencana_tindak_lanjut">Rencana Tindak Lanjut</label>
-                        <select name="rencana_tindak_lanjut" id="rencana_tindak_lanjut" class="form-control">
+                        <select name="rencana_tindak_lanjut" id="rencana_tindak_lanjut" class="form-control select2">
                             <option value="-">-</option>
                             <option value="Kolaborasi Dokter">Kolaborasi Dokter</option>
                             <option value="Perawatan Luka">Perawatan Luka</option>
@@ -167,12 +196,12 @@
                                 <td width="20%">Asesment dilakukan melalui</td>
                                 <td>
                                     <div class="form-check form-check-inline mr-2">
-                                        <input type="checkbox" id="autoanamnesa" name="asesmen_dilakukan_melalui_1"
+                                        <input type="checkbox" id="autoanamnesa" name="asesmen_dilakukan_melalui[]"
                                             value="autoanamnesa" class="form-check-input">
                                         <label for="autoanamnesa" class="form-check-label">Autoanamnesa</label>
                                     </div>
                                     <div class="form-check form-check-inline mr-2">
-                                        <input type="checkbox" id="alloamnesa" name="asesmen_dilakukan_melalui_2"
+                                        <input type="checkbox" id="alloamnesa" name="asesmen_dilakukan_melalui[]"
                                             value="alloamnesa" class="form-check-input">
                                         <label for="alloamnesa" class="form-check-label">Alloanamnesa</label>
                                     </div>
@@ -217,13 +246,13 @@
                                 <td style="vertical-align: top;">Riwayat Alergi Obat</td>
                                 <td colspan="2">
                                     <div class="form-check">
-                                        <input type="radio" id="tidak_ada" name="awal_riwayat_alergi_obat"
-                                            value="Tidak" class="form-check-input">
+                                        <input type="radio" id="tidak_ada" name="awal_riwayat_alergi_obat" value=0
+                                            class="form-check-input">
                                         <label for="tidak_ada" class="form-check-label">Tidak Ada</label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="radio" id="ada" name="awal_riwayat_alergi_obat"
-                                            value="Ya" class="form-check-input">
+                                        <input type="radio" id="ada" name="awal_riwayat_alergi_obat" value=1
+                                            class="form-check-input">
                                         <label for="ada" class="form-check-label">Ada, Sebutkan</label>
                                         <input type="text" name="awal_riwayat_alergi_obat_lain"
                                             class="form-control d-inline" style="width: 60%;">
@@ -264,18 +293,18 @@
                                 <td style="vertical-align: top;">Edukasi</td>
                                 <td colspan="2">
                                     <div class="form-check">
-                                        <input type="checkbox" id="edukasi_proses_penyakit" name="awal_edukasi1"
+                                        <input type="checkbox" id="edukasi_proses_penyakit" name="awal_edukasi[]"
                                             value="proses_penyakit" class="form-check-input">
                                         <label for="edukasi_proses_penyakit" class="form-check-label">Proses
                                             Penyakit</label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="checkbox" id="edukasi_terapi" name="awal_edukasi2"
+                                        <input type="checkbox" id="edukasi_terapi" name="awal_edukasi[]"
                                             value="terapi" class="form-check-input">
                                         <label for="edukasi_terapi" class="form-check-label">Terapi</label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="checkbox" id="edukasi_tindakan_medis" name="awal_edukasi3"
+                                        <input type="checkbox" id="edukasi_tindakan_medis" name="awal_edukasi[]"
                                             value="tindakan_medis" class="form-check-input">
                                         <label for="edukasi_tindakan_medis" class="form-check-label">Tindakan
                                             Medis</label>
@@ -286,12 +315,12 @@
                                 <td style="vertical-align: top;">Evaluasi Penyakit</td>
                                 <td colspan="2">
                                     <div class="form-check">
-                                        <input type="checkbox" id="evaluasi_akut" name="awal_evaluasi_penyakit1"
+                                        <input type="checkbox" id="evaluasi_akut" name="awal_evaluasi_penyakit[]"
                                             value="akut" class="form-check-input">
                                         <label for="evaluasi_akut" class="form-check-label">Akut</label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="checkbox" id="evaluasi_kronis" name="awal_evaluasi_penyakit2"
+                                        <input type="checkbox" id="evaluasi_kronis" name="awal_evaluasi_penyakit[]"
                                             value="kronis" class="form-check-input">
                                         <label for="evaluasi_kronis" class="form-check-label">Kronis</label>
                                     </div>
@@ -302,24 +331,25 @@
                                 <td colspan="2">
                                     <div class="form-check">
                                         <input type="checkbox" id="rencana_rawat_jalan"
-                                            name="awal_rencana_tindak_lanjut1" value="akut"
+                                            name="awal_rencana_tindak_lanjut[]" value="akut"
                                             class="form-check-input">
                                         <label for="rencana_rawat_jalan" class="form-check-label">Rawat Jalan</label>
                                     </div>
                                     <div class="form-check">
                                         <input type="checkbox" id="rencana_rawat_inap"
-                                            name="awal_rencana_tindak_lanjut2" value="kronis"
+                                            name="awal_rencana_tindak_lanjut[]" value="kronis"
                                             class="form-check-input">
                                         <label for="rencana_rawat_inap" class="form-check-label">Rawat Inap</label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="checkbox" id="rencana_rujuk" name="awal_rencana_tindak_lanjut3"
+                                        <input type="checkbox" id="rencana_rujuk" name="awal_rencana_tindak_lanjut[]"
                                             value="rujuk" class="form-check-input">
                                         <label for="rencana_rujuk" class="form-check-label">Rujuk</label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="checkbox" id="rencana_konsul" name="awal_rencana_tindak_lanjut4"
-                                            value="konsul" class="form-check-input">
+                                        <input type="checkbox" id="rencana_konsul"
+                                            name="awal_rencana_tindak_lanjut[]" value="konsul"
+                                            class="form-check-input">
                                         <label for="rencana_konsul" class="form-check-label">Konsul</label>
                                     </div>
                                 </td>
@@ -387,6 +417,7 @@
             submitForm(actionType); // Panggil fungsi submitForm dengan parameter draft
         });
 
+
         // Saat tombol Save Final diklik
         $('#sf-pengkajian-dokter-rajal').on('click', function() {
             actionType = 'final';
@@ -407,19 +438,25 @@
                 data: formData,
                 success: function(response) {
                     if (actionType === 'draft') {
-                        alert('Data berhasil disimpan sebagai draft!');
+                        showSuccessAlert('Data berhasil disimpan sebagai draft!');
                     } else {
-                        alert('Data berhasil disimpan sebagai final!');
+                        showSuccessAlert('Data berhasil disimpan sebagai final!');
                     }
+                    setTimeout(() => {
+                        console.log('Reloading the page now.');
+                        window.location.reload();
+                    }, 1000);
                 },
                 error: function(response) {
                     // Tangani error
                     var errors = response.responseJSON.errors;
                     $.each(errors, function(key, value) {
-                        alert(value[0]);
+                        showErrorAlert(value[0]);
                     });
                 }
             });
         }
+
+
     })
 </script>
