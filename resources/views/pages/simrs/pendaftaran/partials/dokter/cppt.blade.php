@@ -66,7 +66,20 @@
                                     </div>
                                     <div class="card-body p-0">
                                         <textarea class="form-control border-0 rounded-0" id="subje" name="subje" rows="4"
-                                            placeholder="Keluhan Utama"></textarea>
+                                            placeholder="Keluhan Utama">Alergi obat : 
+Reaksi alergi obat : 
+Keluhan Utama : KONSULTASI
+PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
+DI PUSKESMAS JATITUJUH 
+Riwayat Penyakit Sekarang : KONSULTASI
+PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
+DI PUSKESMAS JATITUJUH 
+Riwayat Penyakit Dahulu : TIDAK ADA
+Riwayat Penyakit Keluarga : TIDAK ADA
+Alergi makan : 
+Reaksi alergi makan : 
+Alergi lainya : 
+Reaksi alergi lainya : </textarea>
                                     </div>
                                 </div>
                             </div>
@@ -78,8 +91,14 @@
                                         <span>Objective</span>
                                     </div>
                                     <div class="card-body p-0">
-                                        <textarea class="form-control border-0 rounded-0" id="obje" name="obje" rows="4"
-                                            placeholder="Nadi (PR), Respirasi (RR), Tensi (BP), Suhu (T), Tinggi Badan, Berat Badan, Skrining Nyeri"></textarea>
+                                        <textarea class="form-control border-0 rounded-0" id="obje" name="obje" rows="4">Nadi (PR): 
+Respirasi (RR): 
+Tensi (BP): 
+Suhu (T): 
+Tinggi Badan: 
+Berat Badan: 
+Skrining Nyeri:
+                                        </textarea>
                                     </div>
                                 </div>
                             </div>
@@ -97,7 +116,7 @@
                                     </div>
                                     <div class="card-body p-0">
                                         <textarea class="form-control border-0 rounded-0" id="asse" name="asse" rows="4"
-                                            placeholder="Diagnosa Keperawatan"></textarea>
+                                            placeholder="Diagnosa Keperawatan">Diagnosa Kerja:</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -112,7 +131,7 @@
                                     </div>
                                     <div class="card-body p-0">
                                         <textarea class="form-control border-0 rounded-0" id="plan" name="plan" rows="4"
-                                            placeholder="Rencana Tindak Lanjut"></textarea>
+                                            placeholder="Rencana Tindak Lanjut">Terapi / Tindakan :</textarea>
                                     </div>
                                 </div>
                             </div>
