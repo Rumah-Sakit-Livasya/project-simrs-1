@@ -81,6 +81,21 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $('.click-menu').click(function() {
+
+            const targetTab = $(this).attr('href');
+
+            // Menghapus class 'active' dari semua dropdown-item dan tab
+            $('.dropdown-menu').removeClass('show');
+            $('.dropdown-toggle').removeClass('active');
+            $('.dropdown-item').removeClass('active');
+            $('.tab-pane').removeClass('show active');
+
+            // Menambahkan class 'active' pada item yang diklik dan menampilkan tab terkait
+            $(this).closest('.dropdown-menu').prev('.dropdown-toggle').addClass('active');
+            $(this).parent().addClass('hide');
+            $(this).addClass('active');
+            $(targetTab).addClass('show active');
+
             let menu = $(this).attr('data-action');
             let type = $(this).attr('data-type');
             let registration_number = $(this).attr('data-regist');
@@ -173,26 +188,36 @@
                             $('#alergiInput').val('').prop('disabled',
                                 true); // Kosongkan dan disable
                         }
+
+                        if (response.is_final == 0) {
+                            $('#alert-pengkajian').html(`
+                                <div class="alert alert-warning" role="alert">
+									<strong>Pegnkajian masih save draft! harap save final jika sudah fix!</strong>
+								</div>
+                            `);
+                        }
+                    } else if (menu == 'dokter-cppt') {
+                        console.log(true);
                     }
                 },
-                error: function(xhr, status, error) {
-                    $('#tambah-data').modal('hide');
-                    if (xhr.status === 422) {
-                        var errors = xhr.responseJSON.errors;
-                        var errorMessages = '';
+                // error: function(xhr, status, error) {
+                //     $('#tambah-data').modal('hide');
+                //     if (xhr.status === 422) {
+                //         var errors = xhr.responseJSON.errors;
+                //         var errorMessages = '';
 
-                        $.each(errors, function(key, value) {
-                            errorMessages += value +
-                                '\n';
-                        });
+                //         $.each(errors, function(key, value) {
+                //             errorMessages += value +
+                //                 '\n';
+                //         });
 
-                        // $('#modal-tambah-grup-tindakan').modal('hide');
-                        console.log('Terjadi kesalahan:\n' +
-                            errorMessages);
-                    } else {
-                        console.log(error);
-                    }
-                }
+                //         // $('#modal-tambah-grup-tindakan').modal('hide');
+                //         console.log('Terjadi kesalahan:\n' +
+                //             errorMessages);
+                //     } else {
+                //         console.log(error);
+                //     }
+                // }
             });
         });
     });

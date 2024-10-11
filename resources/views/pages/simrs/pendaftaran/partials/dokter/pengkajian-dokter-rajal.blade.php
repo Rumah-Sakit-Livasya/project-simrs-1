@@ -1,6 +1,7 @@
 <div class="tab-pane fade" id="pengkajian-dokter-rajal" role="tabpanel">
     <div class="card-body">
         <header class="text-primary text-center font-weight-bold mb-4">
+            <div id="alert-pengkajian"></div>
             <h2>PENGKAJIAN DOKTER</h4>
         </header>
         <form action="javascript:void(0)" id="pengkajian-dokter-rajal-form">
