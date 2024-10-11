@@ -36,7 +36,6 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
-use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 
 Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::prefix('pengkajian')->group(function () {
@@ -49,6 +48,11 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
         });
     });
+
+    Route::prefix('erm')->group(function () {
+        Route::get('/dokter-pengkajian/{type}/{registration_number}/get', [PengkajianDokterRajalController::class, 'getPengkajian'])->name('pengkajian.dokter-rajal.get');
+    });
+
     Route::prefix('master-data')->group(function () {
         Route::prefix('layanan-medis')->group(function () {
             Route::get('/tindakan-medis/{id}', [TindakanMedisController::class, 'getTindakan'])->name('master-data.layanan-medis.tindakan-medis.get');

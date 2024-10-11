@@ -1,6 +1,6 @@
 @include('pages.simrs.pendaftaran.partials.menu')
 @include('pages.simrs.pendaftaran.partials.header-pasien')
-<div id="pengkajian-perawat-rajal" class="tab-pane fade" role="tabpanel">
+<div id="pengkajian-perawat-rajal" class="tab-pane fade show active" role="tabpanel">
     <form autocomplete="off" novalidate method="post" id="nurse-rajal">
         @method('post')
         @csrf

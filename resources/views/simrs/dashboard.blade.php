@@ -25,7 +25,7 @@
         }
 
         .logo-dashboard-simrs {
-            width: 350px;
+            width: 100%;
         }
     </style>
 @endsection

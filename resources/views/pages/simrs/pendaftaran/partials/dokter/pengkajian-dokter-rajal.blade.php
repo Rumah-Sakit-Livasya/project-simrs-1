@@ -88,37 +88,9 @@
             <div class="row">
                 <div class="col-md-6 mt-3">
                     <div class="form-group">
-                        <label for="height_badan">Tinggi Badan</label>
-                        <div class="input-group">
-                            <input class="form-control numeric calc-bmi" id="height_badan" name="height_badan"
-                                type="text">
-                            <div class="input-group-append">
-                                <span class="input-group-text">Cm</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mt-3">
-                    <div class="form-group">
-                        <label for="weight_badan">Berat Badan</label>
-                        <div class="input-group">
-                            <input class="form-control numeric calc-bmi" id="weight_badan" name="weight_badan"
-                                type="text">
-                            <div class="input-group-append">
-                                <span class="input-group-text">Kg</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mt-3">
-                    <div class="form-group">
                         <label for="bmi">Index Massa Tubuh</label>
                         <div class="input-group">
-                            <input class="form-control numeric" id="bmi" name="bmi" readonly
-                                type="text">
+                            <input class="form-control numeric" id="bmi" name="bmi" readonly type="text">
                             <div class="input-group-append">
                                 <span class="input-group-text">Kg/m²</span>
                             </div>
@@ -201,45 +173,49 @@
                                         <label for="autoanamnesa" class="form-check-label">Autoanamnesa</label>
                                     </div>
                                     <div class="form-check form-check-inline mr-2">
-                                        <input type="checkbox" id="alloamnesa" name="asesmen_dilakukan_melalui[]"
-                                            value="alloamnesa" class="form-check-input">
-                                        <label for="alloamnesa" class="form-check-label">Alloanamnesa</label>
+                                        <input type="checkbox" id="alloanamnesa" name="asesmen_dilakukan_melalui[]"
+                                            value="alloanamnesa" class="form-check-input">
+                                        <label for="alloanamnesa" class="form-check-label">Alloanamnesa</label>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td>Tanggal / Jam</td>
                                 <td colspan="2">
-                                    <input type="date" name="awal_tgl_rajal" class="form-control d-inline"
-                                        style="width: 40%;" value="{{ now()->format('Y-m-d') }}">
+                                    <input type="date" id="awal_tgl_rajal" name="awal_tgl_rajal"
+                                        class="form-control d-inline" style="width: 40%;"
+                                        value="{{ now()->format('Y-m-d') }}">
 
                                     /
-                                    <input type="time" name="awal_jam_rajal" class="form-control d-inline"
-                                        style="width: 40%;">
+                                    <input type="time" id="awal_jam_rajal" name="awal_jam_rajal"
+                                        class="form-control d-inline" style="width: 40%;">
                                 </td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: top;">Keluhan</td>
                                 <td colspan="2">
-                                    <textarea name="awal_keluhan" rows="4" class="form-control" style="width: 80%;"></textarea>
+                                    <textarea id="awal_keluhan" name="awal_keluhan" rows="4" class="form-control" style="width: 80%;"></textarea>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: top;">Riwayat Penyakit Sekarang</td>
                                 <td colspan="2">
-                                    <textarea name="awal_riwayat_penyakit_sekarang" rows="4" class="form-control" style="width: 80%;"></textarea>
+                                    <textarea id="awal_riwayat_penyakit_sekarang" name="awal_riwayat_penyakit_sekarang" rows="4"
+                                        class="form-control" style="width: 80%;"></textarea>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: top;">Riwayat Penyakit Dahulu</td>
                                 <td colspan="2">
-                                    <textarea name="awal_riwayat_penyakit_dahulu" rows="4" class="form-control" style="width: 80%;"></textarea>
+                                    <textarea id="awal_riwayat_penyakit_dahulu" name="awal_riwayat_penyakit_dahulu" rows="4" class="form-control"
+                                        style="width: 80%;"></textarea>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: top;">Riwayat Penyakit Keluarga</td>
                                 <td colspan="2">
-                                    <textarea name="awal_riwayat_penyakit_keluarga" rows="4" class="form-control" style="width: 80%;"></textarea>
+                                    <textarea id="awal_riwayat_penyakit_keluarga" name="awal_riwayat_penyakit_keluarga" rows="4"
+                                        class="form-control" style="width: 80%;"></textarea>
                                 </td>
                             </tr>
                             <tr>
@@ -254,7 +230,7 @@
                                         <input type="radio" id="ada" name="awal_riwayat_alergi_obat" value=1
                                             class="form-check-input">
                                         <label for="ada" class="form-check-label">Ada, Sebutkan</label>
-                                        <input type="text" name="awal_riwayat_alergi_obat_lain"
+                                        <input type="text" id="alergiInput" name="awal_riwayat_alergi_obat_lain"
                                             class="form-control d-inline" style="width: 60%;">
                                     </div>
                                 </td>
@@ -262,31 +238,36 @@
                             <tr>
                                 <td style="vertical-align: top;">Pemeriksaan Fisik</td>
                                 <td colspan="2">
-                                    <textarea name="awal_pemeriksaan_fisik" rows="4" class="form-control" style="width: 80%;"></textarea>
+                                    <textarea id="awal_pemeriksaan_fisik" name="awal_pemeriksaan_fisik" rows="4" class="form-control"
+                                        style="width: 80%;"></textarea>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: top;">Pemeriksaan Penunjang</td>
                                 <td colspan="2">
-                                    <textarea name="awal_pemeriksaan_penunjang" rows="4" class="form-control" style="width: 80%;"></textarea>
+                                    <textarea id="awal_pemeriksaan_penunjang" name="awal_pemeriksaan_penunjang" rows="4" class="form-control"
+                                        style="width: 80%;"></textarea>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: top;">Diagnosa Kerja</td>
                                 <td colspan="2">
-                                    <textarea name="awal_diagnosa_kerja" rows="4" class="form-control" style="width: 80%;"></textarea>
+                                    <textarea id="awal_diagnosa_kerja" name="awal_diagnosa_kerja" rows="4" class="form-control"
+                                        style="width: 80%;"></textarea>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: top;">Diagnosa Banding</td>
                                 <td colspan="2">
-                                    <textarea name="awal_diagnosa_banding" rows="4" class="form-control" style="width: 80%;"></textarea>
+                                    <textarea id="awal_diagnosa_banding" name="awal_diagnosa_banding" rows="4" class="form-control"
+                                        style="width: 80%;"></textarea>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: top;">Terapi/Tindakan</td>
                                 <td colspan="2">
-                                    <textarea name="awal_terapi_tindakan" rows="4" class="form-control" style="width: 80%;"></textarea>
+                                    <textarea id="awal_terapi_tindakan" name="awal_terapi_tindakan" rows="4" class="form-control"
+                                        style="width: 80%;"></textarea>
                                 </td>
                             </tr>
                             <tr>
@@ -358,7 +339,6 @@
                     </table>
                 </div>
             </div>
-
 
             <div class="row">
                 <div class="col-md-12 px-3">

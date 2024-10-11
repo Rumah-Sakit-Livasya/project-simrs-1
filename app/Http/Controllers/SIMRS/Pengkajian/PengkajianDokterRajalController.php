@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SIMRS\Pengkajian;
 
 use App\Http\Controllers\Controller;
 use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
+use App\Models\SIMRS\Registration;
 use Illuminate\Http\Request;
 
 class PengkajianDokterRajalController extends Controller
@@ -60,6 +61,22 @@ class PengkajianDokterRajalController extends Controller
             }
             $store = PengkajianDokterRajal::create($validatedData);
             return response()->json(['message' => ' berhasil ditambahkan!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getPengkajian(Request $request, $type, $registration_number)
+    {
+        try {
+            $registration = Registration::where('registration_number', $registration_number)->where('registration_type', $type)->first();
+            $pengkajian = $registration->pengkajian_dokter_rajal;
+            if ($pengkajian) {
+                return response()->json($pengkajian, 200);
+            } else {
+
+                return response()->json(['error' => 'Data tidak ditemukan!'], 404);
+            }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
