@@ -2,6 +2,12 @@
 @section('extended-css')
     <link rel="stylesheet" href="/css/framework_custom.min.css">
     <style>
+        input[type="time"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
         .wongbaker {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -44,6 +50,26 @@
         .font-weight-bold h2 {
             font-weight: 600 !important;
         }
+
+        #cppt-table th:nth-child(1),
+        #cppt-table td:nth-child(1) {
+            width: 25%;
+        }
+
+        #cppt-table th:nth-child(3),
+        #cppt-table td:nth-child(3) {
+            width: 5%;
+        }
+
+        #resume-medis-rajal .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+        }
+
+        #resume-medis-rajal .form-check-inline {
+            margin-right: 20px;
+        }
     </style>
 @endsection
 @section('content')
@@ -59,6 +85,7 @@
         } elseif ($registration->registration_type == 'rawat-inap') {
             $unitLayanan = 'RAWAT INAP';
         }
+
     @endphp
     <main id="js-page-content" role="main" class="page-content overflow-hidden">
         <div class="row">
@@ -474,9 +501,9 @@
                     </div>
                     <div id="pengkajian-nurse-rajal">
                         @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
-                        @include('pages.simrs.pendaftaran.partials.perawat.transfer-pasien-antar-ruangan')
                         @include('pages.simrs.pendaftaran.partials.pengkajian-dokter-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.cppt')
+                        @include('pages.simrs.pendaftaran.partials.dokter.resume-medis-rajal')
                     </div>
                 </div>
             </div>
@@ -496,8 +523,10 @@
 @section('plugin')
     {{-- Select 2 --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script type="text/javascript" src="/js/painterro-1.2.3.min.js"></script>
+
     <script>
         $(document).ready(function() {
             $('#pengkajian-nurse-rajal').hide();
@@ -648,10 +677,69 @@
                     }
                 });
             });
+
+            $('#cppt-table').DataTable({
+                responsive: true,
+                lengthChange: false,
+                pageLength: 4,
+                language: {
+                    search: "", // Kosongkan untuk tidak menampilkan label "Cari:"
+                    searchPlaceholder: "Cari...", // Placeholder untuk input pencarian
+                    zeroRecords: "Tidak ada data yang ditemukan",
+                    info: "Menampilkan halaman _PAGE_ dari _PAGES_",
+                    infoEmpty: "Tidak ada data yang tersedia",
+                    infoFiltered: "(difilter dari _MAX_ total entri)",
+                    paginate: {
+                        first: "Pertama",
+                        last: "Terakhir",
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
+                    }
+                }
+            });
         });
     </script>
     <script>
         $(document).ready(function() {
+
+            function get_bmi_pd() {
+                var pdA = $('#pengkajian-dokter-rajal #body_height').val();
+                var pdB = $('#pengkajian-dokter-rajal #body_weight').val();
+                console.log(pdA);
+
+                if (pdA !== '' && pdB !== '') {
+                    pdA = pdA / 100; // Mengonversi tinggi dari cm ke m
+                    var pdC = pdB / (pdA * pdA); // Menghitung BMI
+                    pdC = Math.round(pdC * 10) / 10; // Membulatkan BMI
+
+                    // Menentukan kategori BMI
+                    if (pdC < 18.5) {
+                        $('#pengkajian-dokter-rajal #kat_bmi').val('Kurus');
+                    } else if (pdC > 24.9) {
+                        $('#pengkajian-dokter-rajal #kat_bmi').val('Gemuk');
+                    } else {
+                        $('#pengkajian-dokter-rajal #kat_bmi').val('Normal');
+                    }
+
+                    // Mengatur nilai BMI
+                    $('#pengkajian-dokter-rajal #bmi').val(pdC);
+
+                    // Menandai input sebagai 'dirty'
+                    $('#pengkajian-dokter-rajal #bmi, #pengkajian-dokter-rajal #kat_bmi').addClass('dirty');
+                } else {
+                    // Reset nilai jika input tidak valid
+                    $('#pengkajian-dokter-rajal #bmi').val('');
+                    $('#pengkajian-dokter-rajal #kat_bmi').val('');
+                    $('#pengkajian-dokter-rajal #bmi, #pengkajian-dokter-rajal #kat_bmi').removeClass('dirty');
+                }
+            }
+
+            // Memanggil fungsi get_bmi_pd pada saat halaman dimuat
+            get_bmi_pd();
+
+            // Mengikat fungsi get_bmi_pd ke event change pada elemen dengan kelas calc-bmi
+            $('.calc-bmi').on('change', get_bmi_pd);
+
             $('#histori_pengkajian').on('click', function() {
                 atmedic.App.popup({
                     url: base_url() + 'pengkajian/histori_pengkajian/189221',

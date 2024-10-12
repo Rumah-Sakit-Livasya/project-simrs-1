@@ -2,10 +2,10 @@
     <div class="col-md-12">
         <ul class="nav nav-tabs px-3 py-2" role="tablist" style="border-top: 1px solid #dddddd !important;">
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
+                <a class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#" role="button"
                     aria-haspopup="true" aria-expanded="false">PERAWAT</a>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item" data-toggle="tab" href="#pengkajian-perawat-rajal"
+                    <a class="dropdown-item active" data-toggle="tab" href="#pengkajian-perawat-rajal"
                         role="tab">Pengkajian</a>
                     <a class="dropdown-item" href="#">CPPT</a>
                     <a class="dropdown-item" data-toggle="tab" href="#transfer-pasien-antar-ruangan"
@@ -17,13 +17,19 @@
                 <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                     aria-haspopup="true" aria-expanded="false">DOKTER</a>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item" data-toggle="tab" href="#pengkajian-dokter-rajal"
-                        role="tab">Pengkajian</a>
-                    <a class="dropdown-item" data-toggle="tab" href="#cppt-dokter-rajal" role="tab">CPPT</a>
-                    <a class="dropdown-item" href="#">Resume Medis</a>
-                    <a class="dropdown-item" href="#">Rujukan Antar Rumah Sakit</a>
-                    <a class="dropdown-item" href="#">Echo</a>
-                    <a class="dropdown-item" href="#">Profil Ringkas Rawat Jalan</a>
+                    <a class="dropdown-item click-menu" data-toggle="tab" data-action="dokter-pengkajian"
+                        data-regist="{{ $registration->registration_number }}" data-type="rawat-jalan"
+                        href="#pengkajian-dokter-rajal" role="tab">Pengkajian</a>
+                    <a class="dropdown-item click-menu" data-toggle="tab" data-action="dokter-cppt"
+                        data-regist="{{ $registration->registration_number }}" data-type="rawat-jalan"
+                        href="#cppt-dokter-rajal" role="tab">CPPT</a>
+                    <a class="dropdown-item click-menu" data-toggle="tab" data-action="dokter-resume-medis"
+                        data-regist="{{ $registration->registration_number }}" data-type="rawat-jalan"
+                        href="#resume-medis-rajal" role="tab">Resume
+                        Medis</a>
+                    <a class="dropdown-item click-menu" href="#">Rujukan Antar Rumah Sakit</a>
+                    <a class="dropdown-item click-menu" href="#">Echo</a>
+                    <a class="dropdown-item click-menu" href="#">Profil Ringkas Rawat Jalan</a>
                 </div>
             </li>
             <li class="nav-item dropdown">
@@ -69,27 +75,152 @@
                 </div>
             </li>
         </ul>
-        {{-- <div class="tab-content p-3">
-            <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
-                Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown
-                aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan
-                helvetica. Reprehenderit butcher retro keffiyeh dreamcatcher synth. Cosby sweater eu
-                banh mi, qui irure terry richardson ex squid. Aliquip placeat salvia cillum iphone.
-            </div>
-            <div class="tab-pane fade" id="tab_default-2" role="tabpanel">
-                Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid.
-                Exercitation +1 labore velit, blog sartorial PBR leggings next level wes anderson
-                artisan four loko farm-to-table craft beer twee. Qui photo booth letterpress, commodo
-                enim craft beer mlkshk aliquip jean shorts ullamco ad vinyl cillum PBR. Homo nostrud
-                organic.
-            </div>
-            <div class="tab-pane fade" id="tab_default-3" role="tabpanel">
-                Etsy mixtape wayfarers, ethical wes anderson tofu before they sold out mcsweeney's
-                organic lomo retro fanny pack lo-fi farm-to-table readymade. Messenger bag gentrify
-                pitchfork tattooed craft beer, iphone skateboard locavore carles etsy salvia banksy
-                hoodie helvetica. DIY synth PBR banksy irony. Leggings gentrify squid 8-bit cred
-                pitchfork.
-            </div>
-        </div> --}}
+
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.click-menu').click(function() {
+
+            const targetTab = $(this).attr('href');
+
+            // Menghapus class 'active' dari semua dropdown-item dan tab
+            $('.dropdown-menu').removeClass('show');
+            $('.dropdown-toggle').removeClass('active');
+            $('.dropdown-item').removeClass('active');
+            $('.tab-pane').removeClass('show active');
+
+            // Menambahkan class 'active' pada item yang diklik dan menampilkan tab terkait
+            $(this).closest('.dropdown-menu').prev('.dropdown-toggle').addClass('active');
+            $(this).parent().addClass('hide');
+            $(this).addClass('active');
+            $(targetTab).addClass('show active');
+
+            let menu = $(this).attr('data-action');
+            let type = $(this).attr('data-type');
+            let registration_number = $(this).attr('data-regist');
+
+            $.ajax({
+                type: "GET",
+                url: `/api/simrs/erm/${menu}/${type}/${registration_number}/get`,
+                success: function(response) {
+
+                    if (menu == 'dokter-pengkajian') {
+                        $('#pengkajian-dokter-rajal #registration_id').val(response
+                            .registration_id);
+                        $('#pengkajian-dokter-rajal #pr').val(response.pr);
+                        $('#pengkajian-dokter-rajal #rr').val(response.rr);
+                        $('#pengkajian-dokter-rajal #body_height').val(response
+                            .body_height);
+                        $('#pengkajian-dokter-rajal #body_weight').val(response
+                            .body_weight);
+                        $('#pengkajian-dokter-rajal #bp').val(response.bp);
+                        $('#pengkajian-dokter-rajal #temperatur').val(response.temperatur);
+                        $('#pengkajian-dokter-rajal #bmi').val(response.bmi);
+                        $('#pengkajian-dokter-rajal #kat_bmi').val(response.kat_bmi);
+                        $('#pengkajian-dokter-rajal #sp02').val(response.sp02);
+                        $('#pengkajian-dokter-rajal #diagnosa_keperawatan').val(response
+                            .diagnosa_keperawatan);
+                        $('#pengkajian-dokter-rajal #rencana_tindak_lanjut').val(response
+                            .rencana_tindak_lanjut);
+                        $('#pengkajian-dokter-rajal #rencana_tindak_lanjut').val(response
+                            .rencana_tindak_lanjut);
+                        $('#pengkajian-dokter-rajal #awal_tgl_rajal').val(response
+                            .awal_tgl_rajal);
+                        $('#pengkajian-dokter-rajal #awal_jam_rajal').val(response
+                            .awal_jam_rajal);
+                        $('#pengkajian-dokter-rajal #awal_keluhan').text(response
+                            .awal_keluhan);
+                        $('#pengkajian-dokter-rajal #awal_riwayat_penyakit_dahulu').text(
+                            response
+                            .awal_riwayat_penyakit_dahulu);
+                        $('#pengkajian-dokter-rajal #awal_riwayat_penyakit_keluarga').text(
+                            response
+                            .awal_riwayat_penyakit_keluarga);
+                        $('#pengkajian-dokter-rajal #awal_pemeriksaan_fisik').text(response
+                            .awal_pemeriksaan_fisik);
+                        $('#pengkajian-dokter-rajal #awal_pemeriksaan_penunjang').text(
+                            response
+                            .awal_pemeriksaan_penunjang);
+                        $('#pengkajian-dokter-rajal #awal_diagnosa_kerja').text(response
+                            .awal_diagnosa_kerja);
+                        $('#pengkajian-dokter-rajal #awal_diagnosa_banding').text(response
+                            .awal_diagnosa_banding);
+                        $('#pengkajian-dokter-rajal #awal_terapi_tindakan').text(response
+                            .awal_terapi_tindakan);
+                        $('#pengkajian-dokter-rajal #awal_riwayat_penyakit_sekarang').text(
+                            response
+                            .awal_riwayat_penyakit_sekarang);
+
+                        const asesmenArray = JSON.parse(response.asesmen_dilakukan_melalui);
+                        const awal_edukasi = JSON.parse(response.awal_edukasi);
+                        const awal_rencana_tindak_lanjut = JSON.parse(response
+                            .awal_rencana_tindak_lanjut);
+                        const awal_evaluasi_penyakit = JSON.parse(response
+                            .awal_evaluasi_penyakit);
+
+                        // Memeriksa setiap checkbox dan menandai yang sesuai
+                        $.each(asesmenArray, function(index, value) {
+                            $(`input[name="asesmen_dilakukan_melalui[]"][value="${value}"]`)
+                                .prop('checked', true);
+                        });
+                        $.each(awal_edukasi, function(index, value) {
+                            $(`input[name="awal_edukasi[]"][value="${value}"]`)
+                                .prop('checked', true);
+                        });
+                        $.each(awal_evaluasi_penyakit, function(index, value) {
+                            $(`input[name="awal_evaluasi_penyakit[]"][value="${value}"]`)
+                                .prop('checked', true);
+                        });
+                        $.each(awal_rencana_tindak_lanjut, function(index, value) {
+                            $(`input[name="awal_rencana_tindak_lanjut[]"][value="${value}"]`)
+                                .prop('checked', true);
+                        });
+
+                        if (response.awal_riwayat_alergi_obat === 1) {
+                            $('#pengkajian-dokter-rajal #ada').prop('checked', true);
+                            $('#alergiInput').prop('disabled', false); // Enable input field
+                            $('#alergiInput').val(response
+                                .awal_riwayat_alergi_obat_lain
+                            ); // Isi dengan data alergi lain
+                        } else {
+                            $('#pengkajian-dokter-rajal #tidak_ada').prop('checked', true);
+                            $('#alergiInput').val('').prop('disabled',
+                                true); // Kosongkan dan disable
+                        }
+
+                        if (response.is_final == 0) {
+                            $('#alert-pengkajian').html(`
+                                <div class="alert alert-warning" role="alert">
+									<strong>Pegnkajian masih save draft! harap save final jika sudah fix!</strong>
+								</div>
+                            `);
+                        }
+                    } else if (menu == 'dokter-cppt') {
+                        console.log(true);
+                    }
+                },
+                // error: function(xhr, status, error) {
+                //     $('#tambah-data').modal('hide');
+                //     if (xhr.status === 422) {
+                //         var errors = xhr.responseJSON.errors;
+                //         var errorMessages = '';
+
+                //         $.each(errors, function(key, value) {
+                //             errorMessages += value +
+                //                 '\n';
+                //         });
+
+                //         // $('#modal-tambah-grup-tindakan').modal('hide');
+                //         console.log('Terjadi kesalahan:\n' +
+                //             errorMessages);
+                //     } else {
+                //         console.log(error);
+                //     }
+                // }
+            });
+        });
+    });
+</script>

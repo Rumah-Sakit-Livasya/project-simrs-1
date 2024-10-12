@@ -24,6 +24,7 @@ use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
+use App\Http\Controllers\SIMRS\Pengkajian\PengkajianDokterRajalController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
@@ -42,7 +43,16 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
             Route::get('{id}/get', [PengkajianController::class, 'getPengkajianRajal'])->name('pengkajian.nurse-rajal.get');
         });
+
+        Route::prefix('dokter-rajal')->group(function () {
+            Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
+        });
     });
+
+    Route::prefix('erm')->group(function () {
+        Route::get('/dokter-pengkajian/{type}/{registration_number}/get', [PengkajianDokterRajalController::class, 'getPengkajian'])->name('pengkajian.dokter-rajal.get');
+    });
+
     Route::prefix('master-data')->group(function () {
         Route::prefix('layanan-medis')->group(function () {
             Route::get('/tindakan-medis/{id}', [TindakanMedisController::class, 'getTindakan'])->name('master-data.layanan-medis.tindakan-medis.get');
