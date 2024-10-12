@@ -580,7 +580,8 @@
 
                                                                     <div id="tombol-pegawai">
                                                                         <a class="btn btn-primary btn-sm text-white"
-                                                                            data-id="{{ $group_penilaian->penilai }}">Pilih Pegawai Dahulu</a>
+                                                                            data-id="{{ $group_penilaian->penilai }}">Pilih
+                                                                            Pegawai Dahulu</a>
                                                                         <br>
                                                                     </div>
                                                                     <img id="signature-display" src=""
@@ -953,6 +954,7 @@
                     $('#tombol-' + idSignature).hide();
                     $('#signature-display-' + idSignature).attr('src', response.path).show();
                     $('#signatureModal').modal('hide'); // Hide the modal
+                    clearCanvas();
                 },
                 error: function(xhr, status, error) {
                     console.error(xhr.responseText);

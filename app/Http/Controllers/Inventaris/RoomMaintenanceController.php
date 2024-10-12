@@ -110,6 +110,7 @@ class RoomMaintenanceController extends Controller
     {
         $room = RoomMaintenance::find($id);
         $namaRuang = strtoupper($room->name);
+        $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
 
         $item = Barang::where('room_id', $room->id)
             ->orWhere('ruang_pinjam', $room->id)
@@ -121,6 +122,7 @@ class RoomMaintenanceController extends Controller
             'title' => "$namaRuang",
             'rooms' => RoomMaintenance::orderBy('name')->get(),
             'ruang' => $room,
+            'allRoom' => $allRoom,
             'categories' => CategoryBarang::orderBy('name')->get(),
             'barang' => $item,
             'companies' => Company::all(),

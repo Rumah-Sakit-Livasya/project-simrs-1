@@ -8,7 +8,9 @@
                     <a class="dropdown-item" data-toggle="tab" href="#pengkajian-perawat-rajal"
                         role="tab">Pengkajian</a>
                     <a class="dropdown-item" href="#">CPPT</a>
-                    <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
+                    <a class="dropdown-item" data-toggle="tab" href="#transfer-pasien-antar-ruangan"
+                        role="tab">Transfer
+                        Pasien Antar Ruangan</a>
                 </div>
             </li>
             <li class="nav-item dropdown">
@@ -48,7 +50,8 @@
                 <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                     aria-haspopup="true" aria-expanded="false">LAYANAN</a>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Tindakan Medis</a>
+                    <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Tindakan
+                        Medis</a>
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pemakaian
                         Alat</a>
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Patologi

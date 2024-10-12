@@ -474,6 +474,7 @@
                     </div>
                     <div id="pengkajian-nurse-rajal">
                         @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
+                        @include('pages.simrs.pendaftaran.partials.perawat.transfer-pasien-antar-ruangan')
                         @include('pages.simrs.pendaftaran.partials.pengkajian-dokter-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.cppt')
                     </div>
@@ -761,5 +762,95 @@
             }
         };
         resiko_jatuh();
+
+        function openSignaturePad() {
+            idSignature = $(this).attr('data-id');
+            $('#signatureModal').modal('show'); // Example using Bootstrap modal
+        }
+    </script>
+    <script>
+        let idSignature = null;
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let painting = false;
+        let history = [];
+        const offsetX = 0;
+        const offsetY = 5;
+
+        function startPosition(e) {
+            painting = true;
+            draw(e);
+        }
+
+        function endPosition() {
+            painting = false;
+            ctx.beginPath();
+            history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        }
+
+        function draw(e) {
+            if (!painting) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left - offsetX;
+            const y = e.clientY - rect.top - offsetY;
+
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'black';
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            history = [];
+        }
+
+        function undo() {
+            if (history.length > 0) {
+                ctx.putImageData(history.pop(), 0, 0);
+            }
+        }
+
+        function saveSignature() {
+            const dataURL = canvas.toDataURL('image/png');
+            $.ajax({
+                url: '/api/dashboard/kpi/save-signature/' + idSignature,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    signature_image: dataURL
+                },
+                success: function(response) {
+                    // Update the signature display
+                    $('#tombol-' + idSignature).hide();
+                    $('#signature-display-' + idSignature).attr('src', response.path).show();
+                    $('#signatureModal').modal('hide'); // Hide the modal
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+
+        function openSignaturePad(id) {
+            if (id == null) {
+                $('#tombol-pegawai').attr('id', 'tombol-' + idSignature);
+                $('#signature-display').attr('id', 'signature-display-' + idSignature);
+            } else {
+                idSignature = id;
+            }
+
+
+            $('#signatureModal').modal('show');
+        }
+
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', endPosition);
+        canvas.addEventListener('mousemove', draw);
     </script>
 @endsection

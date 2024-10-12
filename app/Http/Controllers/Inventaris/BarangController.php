@@ -21,6 +21,7 @@ class BarangController extends Controller
         $templateBarang = $request->input('template_barang_id');
         $kategoriBarang = $request->input('category_barang_id');
         $identitasBarang = $request->input('identitas_barang');
+        $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
         $barang = [];
 
         // Check if the user has admin permissions
@@ -28,12 +29,10 @@ class BarangController extends Controller
             // If the user is an admin, retrieve all items
             $barang = Barang::orderBy('id', 'desc')->get();
             $rooms = RoomMaintenance::orderBy('name', 'asc')->get();
-            $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
             $companies = Company::all();
         } else {
             // Get the organization of the authenticated user
             $rooms = Auth::user()->employee->organization->room_maintenance;
-            $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
             $organizationId = Auth::user()->employee->organization_id;
             $companies = Auth::user()->employee->company;
             // return dd($companies);
