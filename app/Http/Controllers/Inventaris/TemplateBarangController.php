@@ -91,13 +91,14 @@ class TemplateBarangController extends Controller
     {
         $templateBarang = TemplateBarang::findOrFail($id);
         $barang = Barang::where("template_barang_id", $templateBarang->id)->orderBy('urutan_barang')->get();
+        $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
 
         return view('pages.inventaris.template-barang.show', [
             'barang' => $barang,
             'templates' => TemplateBarang::orderBy('name')->get(),
             'nama_template' => $templateBarang,
             'categories' => CategoryBarang::orderBy('name')->get(),
-            'rooms' => RoomMaintenance::orderBy('name')->get(),
+            'allRoom' => $allRoom,
             'jumlah' => count(Barang::where('template_barang_id', $templateBarang->id)->get())
         ]);
     }
