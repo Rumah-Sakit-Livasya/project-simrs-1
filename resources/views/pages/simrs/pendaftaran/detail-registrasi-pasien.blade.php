@@ -434,12 +434,11 @@
                         {{-- Header Pasien --}}
                         @include('pages.simrs.pendaftaran.partials.menu')
                         @include('pages.simrs.pendaftaran.partials.header-pasien')
-
                         {{-- Perawat --}}
                         @include('pages.simrs.pendaftaran.partials.perawat.transfer-pasien-antar-ruangan')
                         @include('pages.simrs.pendaftaran.partials.perawat.pengkajian-nurse-rajal')
-
                         {{-- Dokter --}}
+                        @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.pengkajian-dokter-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.cppt')
                         @include('pages.simrs.pendaftaran.partials.dokter.resume-medis-rajal')
@@ -468,6 +467,7 @@
 
     <script>
         $(document).ready(function() {
+            var doctorOptions = @json($groupedDoctors);
             $('#pengkajian-nurse-rajal').hide();
             // Select 2
             $(function() {

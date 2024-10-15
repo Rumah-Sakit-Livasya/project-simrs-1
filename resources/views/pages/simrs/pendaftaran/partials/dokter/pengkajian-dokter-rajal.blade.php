@@ -408,10 +408,11 @@
         function submitForm(actionType) {
             const form = $('#pengkajian-dokter-rajal-form'); // Ambil form
             const url = "{{ route('pengkajian.dokter-rajal.store') }}" // Ambil URL dari action form
+
             let formData = form.serialize(); // Ambil data dari form
 
             // Tambahkan tipe aksi (draft atau final) ke data form
-            formData += '&action_type=' + actionType;
+            formData += '&action_type=' + actionType + '&registration_id=' + "{{ $registration->id }}";
 
             $.ajax({
                 type: 'POST',
