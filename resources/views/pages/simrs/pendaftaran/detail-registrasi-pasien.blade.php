@@ -89,6 +89,7 @@
     @endphp
     <main id="js-page-content" role="main" class="page-content overflow-hidden">
         <div class="row">
+
             <div class="col-xl-3">
                 <div id="panel-1" class="panel h-100">
                     <div class="panel-container show">
@@ -219,6 +220,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-xl-9">
                 <div id="panel-1" class="panel h-100">
                     <div class="panel-hdr">
@@ -417,91 +419,28 @@
 
                                     <!-- end info registrasi -->
                                 </div><!--end .card-body -->
-                                <div class="row mt-3">
-                                    <div class="col-md-12" style="display: none">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <label for="s_tgl_1" class="col-md-4 control-label pointer"><u>Informasi
-                                                        Billing</u></label>
-                                                <div class="col-md-12">
-                                                    <input class="form-control {infocolor} blinkme"
-                                                        style="font-weight: bold;" type="text" value="0 - 0 -  - "
-                                                        readonly="readonly">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div class="card-actionbar">
-                                    <div class="card-actionbar-row " id="group-print-pasien">
-                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupwindow('http://192.168.1.253/real/regprint/print_kartu_pdf/53432/180789','p_card', 400,400,'no'); return false"><i
-                                                class="mdi mdi-printer"></i> Kartu pasien</button>
-                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupwindow('http://192.168.1.253/real/regprint/print_identitas/53432/180789','p_card', 400,400,'yes'); return false"><i
-                                                class="mdi mdi-printer"></i> Identitas Pasien</button>
-                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupwindow('http://192.168.1.253/real/regprint/label_rm_pdf/53432/180789','p_card', 400,400,'no'); return false;"><i
-                                                class="mdi mdi-printer"></i> Label RM (PDF)</button>
-                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupwindow('http://192.168.1.253/real/regprint/label_rm_new/53432/180789','p_card', 400,400,'no'); return false;"><i
-                                                class="mdi mdi-printer"></i> Label RM</button>
-                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupwindow('http://192.168.1.253/real/regprint/label_gelang_anak_pdf/53432/180789','p_card', 400,400,'no'); return false;"><i
-                                                class="mdi mdi-printer"></i> Label Gelang Anak</button>
-                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupwindow('http://192.168.1.253/real/regprint/label_gelang_dewasa_pdf/53432/180789','p_card', 400,400,'no'); return false;"><i
-                                                class="mdi mdi-printer"></i> Label Gelang Dewasa</button>
-                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupwindow('http://192.168.1.253/real/regprint/tracer_new/53432/180789','p_tracer_new', 800,500,'no'); return false;"><i
-                                                class="mdi mdi-printer"></i> Tracer</button>
-                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupwindow('http://192.168.1.253/real/regprint/slip_dokter/53432/180789','p_card', 400,400,'no'); return false;"><i
-                                                class="mdi mdi-printer"></i> Charges Slip</button>
-                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupwindow('http://192.168.1.253/real/persalinan/skl/180789/modul_pasien','p_card', 400,400,'no'); return false;"><i
-                                                class="mdi mdi-printer"></i> Surat Keterangan Lahir</button>
-                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-                                            style="display: none"
-                                            onclick="popupwindow('http://192.168.1.253/real/regprint/print_surat_ket_mati/53432/180789','p_card', 2000,2000,'no'); return false;"><i
-                                                class="mdi mdi-printer"></i> Surat Keterangan Kematian</button>
-                                        <button class="btn btn-primary pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupwindow('http://192.168.1.253/real/pengkajian/general_consent?pregid=180789','p_card', 1000,900,'yes'); return false;"><i
-                                                class="mdi mdi-printer"></i> General Consent</button>
-                                        <div class="col-sm-12"></div>
-                                        <button class="btn btn-danger pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupFull('http://192.168.1.253/real/vclaim/print_sep_pdf/180789'); return false;"><i
-                                                class="mdi mdi-printer"></i> Print SEP</button>
-                                        <button class="btn btn-danger pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupFull('http://192.168.1.253/real/vclaim/sep_internal/180789'); return false;"><i
-                                                class="mdi mdi-printer"></i> Cek SEP Internal</button>
-                                        <button class="btn btn-danger pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupFull('http://192.168.1.253/real/vclaim/form_rencana_kontrol/2/180789'); return false;"><i
-                                                class="mdi mdi-printer"></i> Rencana Kontrol</button>
-                                        <button class="btn btn-danger pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupFull('http://192.168.1.253/real/vclaim/form_rencana_kontrol/1/180789'); return false;"><i
-                                                class="mdi mdi-printer"></i> Surat SPRI</button>
-                                        <button class="btn btn-danger pull-left waves-effect" style="margin: 2px"
-                                            onclick="popupFull('http://192.168.1.253/real/vclaim/rujukan/180789'); return false;"><i
-                                                class="mdi mdi-printer"></i> Rujukan BPJS</button>
-                                        <button class="btn btn-danger pull-left waves-effect"
-                                            onclick="popupwindow('http://192.168.1.253/real/vclaim/pengajuan_add/180789','p_card', 900,600,'no'); return false;"><i
-                                                class="mdi mdi-printer" style="margin: 2px"></i> Pengajuan</button>
-                                        <button style="display: ;" class="btn btn-success pull-left waves-effect"
-                                            onclick="popupwindow('http://192.168.1.253/real/satu_sehat/get_encounter/180789','p_card', 900,600,'no'); return false;"><i
-                                                class="mdi mdi-history" style="margin: 2px"></i> Status Kunjungan
-                                            (SatuSehat)</button>
-                                    </div>
+                                    {{-- Tombol Tombol Aksi --}}
+                                    @include('pages.simrs.pendaftaran.partials.button-registrasi')
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div id="menu-layanan">
+                        {{-- Menu Daftar Layanan1 --}}
                         @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan')
                     </div>
                     <div id="pengkajian-nurse-rajal">
-                        @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
-                        @include('pages.simrs.pendaftaran.partials.pengkajian-dokter-rajal')
+                        {{-- Header Pasien --}}
+                        @include('pages.simrs.pendaftaran.partials.menu')
+                        @include('pages.simrs.pendaftaran.partials.header-pasien')
+
+                        {{-- Perawat --}}
+                        @include('pages.simrs.pendaftaran.partials.perawat.transfer-pasien-antar-ruangan')
+                        @include('pages.simrs.pendaftaran.partials.perawat.pengkajian-nurse-rajal')
+
+                        {{-- Dokter --}}
+                        @include('pages.simrs.pendaftaran.partials.dokter.pengkajian-dokter-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.cppt')
                         @include('pages.simrs.pendaftaran.partials.dokter.resume-medis-rajal')
                     </div>
@@ -530,85 +469,6 @@
     <script>
         $(document).ready(function() {
             $('#pengkajian-nurse-rajal').hide();
-            // Ketika elemen dengan kelas .menu-layanan diklik
-            $('.menu-layanan').on('click', function() {
-                // Sembunyikan menu layanan dengan efek fade out
-                $('#menu-layanan').fadeOut(500); // 500ms untuk transisi
-
-                // Ambil data-layanan untuk menentukan ID elemen yang akan ditampilkan
-                var namaLayanan = $(this).data('layanan');
-                var pengkajianId = $('#pengkajian-rajal-id').val();
-
-                // Tampilkan elemen layanan yang dipilih dengan efek fade in
-                $('#' + namaLayanan).delay(500).fadeIn(500); // 500ms untuk transisi
-                if (namaLayanan == 'pengkajian-nurse-rajal') {
-                    if (pengkajianId !== undefined) {
-                        $('#pengkajian-nurse-rajal').show();
-                        $.ajax({
-                            type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                            url: `/api/simrs/pengkajian/nurse-rajal/${pengkajianId}/get`, // Isi dengan url/path file php yang dituju
-                            dataType: "json",
-                            success: function(data) {
-                                $('#nurse-rajal #tgl_masuk').val(data.tgl_masuk);
-                                $('#nurse-rajal #jam_masuk').val(data.jam_masuk);
-                                $('#nurse-rajal #tgl_dilayani').val(data.tgl_dilayani);
-                                $('#nurse-rajal #jam_dilayani').val(data.jam_dilayani);
-                                $('#nurse-rajal #keluhan_utama').val(data.keluhan_utama);
-                                $('#nurse-rajal #pr').val(data.pr);
-                                $('#nurse-rajal #rr').val(data.rr);
-                                $('#nurse-rajal #bp').val(data.bp);
-                                $('#nurse-rajal #temperatur').val(data.temperatur);
-                                $('#nurse-rajal #body_height').val(data.body_height);
-                                $('#nurse-rajal #body_weight').val(data.body_weight);
-                                $('#nurse-rajal #bmi').val(data.bmi);
-                                $('#nurse-rajal #kat_bmi').val(data.kat_bmi);
-                                $('#nurse-rajal #sp02').val(data.sp02);
-                                $('#nurse-rajal #lingkar_kepala').val(data.lingkar_kepala);
-                                $('#nurse-rajal #lingkar_kepala').val(data.lingkar_kepala);
-                                // Set the value for Select2 elements
-                                $('#nurse-rajal #diagnosa_keperawatan').val(data
-                                    .diagnosa_keperawatan).trigger('change');
-                                $('#nurse-rajal #rencana_tindak_lanjut').val(data
-                                    .rencana_tindak_lanjut).trigger('change');
-                                // Assuming 'data' is the object retrieved from the database
-                                if (data.alergi_obat === "Ya") {
-                                    $('#nurse-rajal #ket_alergi_obat').val(data
-                                        .ket_alergi_obat);
-                                    $('#nurse-rajal #alergi_obat1').prop('checked', true);
-                                } else if (data.alergi_obat === "Tidak") {
-                                    $('#nurse-rajal #alergi_obat2').prop('checked', true);
-                                }
-                                if (data.alergi_makanan === "Ya") {
-                                    $('#nurse-rajal #ket_alergi_makanan').val(data
-                                        .ket_alergi_makanan);
-                                    $('#nurse-rajal #alergi_makanan1').prop('checked', true);
-                                } else if (data.alergi_makanan === "Tidak") {
-                                    $('#nurse-rajal #alergi_makanan2').prop('checked', true);
-                                }
-                                if (data.alergi_lainnya === "Ya") {
-                                    $('#nurse-rajal #ket_alergi_lainnya').val(data
-                                        .ket_alergi_lainnya);
-                                    $('#nurse-rajal #alergi_lainnya1').prop('checked', true);
-                                } else if (data.alergi_lainnya === "Tidak") {
-                                    $('#nurse-rajal #alergi_lainnya2').prop('checked', true);
-                                }
-                            },
-                            error: function(xhr) {
-                                console.log(xhr.responseText);
-                            }
-                        });
-                    }
-                }
-            });
-
-            // Fungsi untuk tombol kembali
-            $('.btn-kembali').on('click', function() {
-                // Sembunyikan div layanan yang aktif dan tampilkan kembali menu layanan
-                $('#pengkajian-nurse-rajal').fadeOut(500, function() {
-                    $('#menu-layanan').fadeIn(500);
-                });
-            });
-
             // Select 2
             $(function() {
                 $('.select2').select2();
@@ -632,51 +492,52 @@
                 });
             });
 
-            $('#nurse-rajal').on('submit', function(e) {
-                e.preventDefault();
-                let formData = $(this).serialize();
-                const submitButton = $('#nurse-rajal').find('button[type="submit"]');
-                submitButton.prop('disabled', true);
-                $.ajax({
-                    type: "POST",
-                    url: '/api/simrs/pengkajian/nurse-rajal/store',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#nurse-rajal').find('.ikon-tambah').hide();
-                        $('#nurse-rajal').find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        $('#nurse-rajal').find('.ikon-edit').show();
-                        $('#nurse-rajal').find('.spinner-text').addClass('d-none');
-                        $('#tambah-data').modal('hide');
-                        showSuccessAlert(response.message)
-                        setTimeout(function() {
-                            location.reload();
-                        }, 500);
-                    },
-                    error: function(xhr, status, error) {
-                        $('#tambah-data').modal('hide');
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
+            // $('pengkajian-nurse-rajal-form').on('submit', function(e) {
+            //     e.preventDefault();
+            //     let formData = $(this).serialize();
+            //     const submitButton = $('pengkajian-nurse-rajal-form').find('button[type="submit"]');
+            //     submitButton.prop('disabled', true);
+            //     $.ajax({
+            //         type: "POST",
+            //         url: '/api/simrs/pengkajian/nurse-rajal/store',
+            //         data: formData,
+            //         beforeSend: function() {
+            //             $('pengkajian-nurse-rajal-form').find('.ikon-tambah').hide();
+            //             $('pengkajian-nurse-rajal-form').find('.spinner-text').removeClass(
+            //                 'd-none');
+            //         },
+            //         success: function(response) {
+            //             $('pengkajian-nurse-rajal-form').find('.ikon-edit').show();
+            //             $('pengkajian-nurse-rajal-form').find('.spinner-text').addClass(
+            //                 'd-none');
+            //             $('#tambah-data').modal('hide');
+            //             showSuccessAlert(response.message)
+            //             setTimeout(function() {
+            //                 location.reload();
+            //             }, 500);
+            //         },
+            //         error: function(xhr, status, error) {
+            //             $('#tambah-data').modal('hide');
+            //             if (xhr.status === 422) {
+            //                 var errors = xhr.responseJSON.errors;
+            //                 var errorMessages = '';
 
-                            $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
-                            });
+            //                 $.each(errors, function(key, value) {
+            //                     errorMessages += value +
+            //                         '\n';
+            //                 });
 
-                            // $('#modal-tambah-grup-tindakan').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
-                        } else {
-                            // $('#modal-tambah-grup-tindakan').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
-                        }
-                    }
-                });
-            });
+            //                 // $('#modal-tambah-grup-tindakan').modal('hide');
+            //                 showErrorAlert('Terjadi kesalahan:\n' +
+            //                     errorMessages);
+            //             } else {
+            //                 // $('#modal-tambah-grup-tindakan').modal('hide');
+            //                 showErrorAlert('Terjadi kesalahan: ' + error);
+            //                 console.log(error);
+            //             }
+            //         }
+            //     });
+            // });
 
             $('#cppt-table').DataTable({
                 responsive: true,

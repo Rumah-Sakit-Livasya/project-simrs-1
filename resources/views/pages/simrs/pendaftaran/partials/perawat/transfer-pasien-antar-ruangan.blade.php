@@ -1,7 +1,5 @@
-{{-- @include('pages.simrs.pendaftaran.partials.menu')
-@include('pages.simrs.pendaftaran.partials.header-pasien') --}}
 <div id="transfer-pasien-antar-ruangan" class="tab-pane fade" role="tabpanel">
-    <form autocomplete="off" novalidate method="post" id="nurse-rajal">
+    <form autocomplete="off" novalidate method="post" id="transfer-pasien-antar-ruangan-form">
         @method('post')
         @csrf
         <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
@@ -48,7 +46,7 @@
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="tgl_masuk" class="text-primary d-block">Tanggal &amp; jam
+                            <label for="tgl_masuk_pasien" class="text-primary d-block">Tanggal &amp; jam
                                 Transfer Pasien :</label>
                             <div class="form-group mb-3">
                                 <div class="input-group">
@@ -263,7 +261,7 @@
                                 <div class="form-group">
                                     <div class="form-radio">
                                         <label class="custom-control custom-radio custom-control-inline">
-                                            <input name="tindakan" id="tindakan3" value="Lainnya" type="radio"
+                                            <input name="tindakan" id="ket_tindakan" value="Lainnya" type="radio"
                                                 class="custom-control-input">
                                             <span class="custom-control-label text-primary">Lainnya</span>
                                             <input name="ket_lainnya" id="ket_lainnya"
@@ -277,7 +275,7 @@
                                 <div class="form-group">
                                     <div class="form-checkbox">
                                         <label class="custom-control custom-radio custom-control-inline">
-                                            <input name="app_lainnya" id="app_lainnya3" value="Lainnya"
+                                            <input name="app_lainnya" id="app_lainnya" value="Lainnya"
                                                 type="checkbox" class="custom-control-input">
                                             <span class="custom-control-label text-primary">Lainnya</span>
                                             <input name="app_lainnya_text" id="app_lainnya_text"
@@ -296,13 +294,13 @@
                 </header>
                 <div class="row mt-3">
                     <div class="col-md-6">
-                        <label for="kondisi_khusus1" class="control-label text-primary mt-3">Keadaan Umum:</label>
+                        <label for="keadaan_umum" class="control-label text-primary mt-3">Keadaan Umum:</label>
                         <div class="row mt-3">
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <div class="form-radio">
                                         <label class="custom-control custom-radio custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="Baik"
+                                            <input name="keadaan_umum" id="keadaan_umum" value="Baik"
                                                 type="radio" class="custom-control-input">
                                             <span class="custom-control-label text-primary">Baik</span>
                                         </label>
@@ -313,7 +311,7 @@
                                 <div class="form-group">
                                     <div class="form-radio">
                                         <label class="custom-control custom-radio custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus2" value="Sedang"
+                                            <input name="keadaan_umum" id="keadaan_umum2" value="Sedang"
                                                 type="radio" class="custom-control-input">
                                             <span class="custom-control-label text-primary">Sedang</span>
                                         </label>
@@ -324,7 +322,7 @@
                                 <div class="form-group">
                                     <div class="form-radio">
                                         <label class="custom-control custom-radio custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus3" value="Berat"
+                                            <input name="keadaan_umum" id="keadaan_umum3" value="Berat"
                                                 type="radio" class="custom-control-input">
                                             <span class="custom-control-label text-primary">Berat</span>
                                         </label>
@@ -440,15 +438,16 @@
                             <label for="kesadaran" class="control-label text-primary">Kesadaran: </label>
                             <input name="kesadaran" id="kesadaran" class="form-control alergi" type="text">
                         </div>
-                        <label for="kondisi_khusus1" class="control-label text-primary mt-3">Metode pemindahan
+                        <label for="mpp_kuro" class="control-label text-primary mt-3">Metode pemindahan
                             pasien:</label>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="Kursi Roda"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline"
+                                            for="mpp_kuro">
+                                            <input name="mpp" id="mpp_kuro" value="Kursi Roda" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Kursi Roda</span>
                                         </label>
                                     </div>
@@ -456,10 +455,11 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus2" value="Tempat Tidur"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline"
+                                            for="mpp_temti">
+                                            <input name="mpp" id="mpp_temti" value="Tempat Tidur" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Tempat Tidur</span>
                                         </label>
                                     </div>
@@ -467,10 +467,11 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus3" value="Brangkar"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline"
+                                            for="mpp_brangkar">
+                                            <input name="mpp" id="mpp_brangkar" value="Brangkar" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Brangkar</span>
                                         </label>
                                     </div>
@@ -478,10 +479,11 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="Bok bayi"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline"
+                                            for="mpp_bok_bayi">
+                                            <input name="mpp" id="mpp_bok_bayi" value="Bok bayi" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Bok bayi</span>
                                         </label>
                                     </div>
@@ -489,10 +491,11 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus2" value="Jalan/Gendong"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline"
+                                            for="jalan_gendong">
+                                            <input name="mpp" id="jalan_gendong" value="Jalan/Gendong"
+                                                type="radio" class="custom-control-input">
                                             <span class="custom-control-label text-primary">Jalan/Gendong</span>
                                         </label>
                                     </div>
@@ -503,14 +506,14 @@
                 </div>
                 <div class="row mt-3">
                     <div class="col-md-6">
-                        <label for="kondisi_khusus1" class="control-label text-primary mt-3">Risiko Jatuh:</label>
+                        <label for="rj_tidak_berisiko" class="control-label text-primary mt-3">Risiko Jatuh:</label>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="Tidak Beresiko"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline">
+                                            <input name="rj" id="rj_tidak_berisiko" value="Tidak Beresiko"
+                                                type="radio" class="custom-control-input">
                                             <span class="custom-control-label text-primary">Tidak Beresiko</span>
                                         </label>
                                     </div>
@@ -518,10 +521,11 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus2" value="Rendah"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline"
+                                            for="rj_rendah">
+                                            <input name="rj" id="rj_rendah" value="Rendah" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Rendah</span>
                                         </label>
                                     </div>
@@ -529,25 +533,25 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus3" value="Tinggi"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline">
+                                            <input name="rj" id="rj_tinggi" value="Tinggi" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Tinggi</span>
                                         </label>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <label for="kondisi_khusus1" class="control-label text-primary mt-3">Kewaspadaan
+                        <label for="kti_kontak" class="control-label text-primary mt-3">Kewaspadaan
                             transmisi/infeksi:</label>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="Kontak"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline">
+                                            <input name="kti" id="kti_kontak" value="Kontak" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Kontak</span>
                                         </label>
                                     </div>
@@ -555,10 +559,10 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus2" value="Percikan"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline">
+                                            <input name="kti" id="kti_percikan" value="Percikan" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Percikan</span>
                                         </label>
                                     </div>
@@ -566,10 +570,10 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus3" value="Udara"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline">
+                                            <input name="kti" id="kti_udara" value="Udara" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Udara</span>
                                         </label>
                                     </div>
@@ -582,10 +586,10 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="Ya"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline">
+                                            <input name="mpi" id="mpi_ya" value="Ya" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Ya</span>
                                         </label>
                                     </div>
@@ -593,17 +597,17 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus2" value="Tidak"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline">
+                                            <input name="mpi" id="mpi_tidak" value="Tidak" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Tidak</span>
                                         </label>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <label for="kondisi_khusus1" class="control-label text-primary mt-3">Peralatan yang menyertai
+                        <label for="pmp_kuro" class="control-label text-primary mt-3">Peralatan yang menyertai
                             saat pemindahan:
                         </label>
                         <div class="row">
@@ -611,8 +615,8 @@
                                 <div class="form-group">
                                     <div class="form-checkbox">
                                         <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="Oksigen"
-                                                type="checkbox" class="custom-control-input">
+                                            <input name="pmp_kuro" id="pmp_kuro" value="pmp_kuro" type="checkbox"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Oksigen</span>
                                         </label>
                                     </div>
@@ -620,7 +624,7 @@
                             </div>
                             <div class="col-md-10">
                                 <div class="input-group">
-                                    <input class="form-control numeric calc-bmi" id="body_weight" name="body_weight"
+                                    <input class="form-control numeric calc-bmi" id="pmp_text" name="pmp_text"
                                         type="text">
                                     <div class="input-group-append">
                                         <span class="input-group-text">ltr/mnt</span>
@@ -631,8 +635,9 @@
                                 <div class="form-group">
                                     <div class="form-checkbox">
                                         <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="Cateter urine"
-                                                type="checkbox" class="custom-control-input">
+                                            <input name="pmp_cateter_urine" id="pmp_cateter_urine"
+                                                value="pmp_cateter_urine" type="checkbox"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Cateter urine</span>
                                         </label>
                                     </div>
@@ -641,9 +646,10 @@
                             <div class="col-md-4 mt-3">
                                 <div class="form-group">
                                     <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="NGT"
-                                                type="checkbox" class="custom-control-input">
+                                        <label class="custom-control custom-checkbox custom-control-inline"
+                                            for="pmp_ngt">
+                                            <input name="pmp_ngt" id="pmp_ngt" value="pmp_ngt" type="checkbox"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">NGT</span>
                                         </label>
                                     </div>
@@ -651,31 +657,34 @@
                             </div>
                             <div class="col-md-12 mt-3">
                                 <div class="form-group">
-                                    <label for="keluhan_utama" class="control-label text-primary">Intruksi dokter
+                                    <label for="alasan_pdh_temuan_anamesis"
+                                        class="control-label text-primary">Intruksi dokter
                                         Umum</label>
-                                    <textarea class="form-control" id="keluhan_utama" name="keluhan_utama" rows="1"
+                                    <textarea class="form-control" id="alasan_pdh_temuan_anamesis" name="alasan_pdh_temuan_anamesis" rows="1"
                                         data-label="Intruksi dokter Umum"></textarea>
                                 </div>
                             </div>
                             <div class="col-md-12 mt-3">
                                 <div class="form-group">
-                                    <label for="keluhan_utama" class="control-label text-primary">Advice DPJP</label>
-                                    <textarea class="form-control" id="keluhan_utama" name="keluhan_utama" rows="4" data-label="Advice DPJP"></textarea>
+                                    <label for="intervensi_tindakan" class="control-label text-primary">Advice
+                                        DPJP</label>
+                                    <textarea class="form-control" id="intervensi_tindakan" name="intervensi_tindakan" rows="4"
+                                        data-label="Advice DPJP"></textarea>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <label for="kondisi_khusus1" class="control-label text-primary mt-3">Pasien atau keluarga
+                        <label for="ap_ya" class="control-label text-primary mt-3">Pasien atau keluarga
                             mengetahui alasan pemindahan:
                         </label>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="Ya"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline">
+                                            <input name="ap" id="ap_ya" value="ap_ya" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Ya</span>
                                         </label>
                                     </div>
@@ -683,10 +692,11 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus2" value="Tidak"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline"
+                                            for="ap_tidak">
+                                            <input name="ap" id="ap_tidak" value="ap_tidak" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Tidak</span>
                                         </label>
                                     </div>
@@ -696,29 +706,29 @@
                         <div class="row mt-3">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="kesadaran" class="control-label text-primary">Bila ya: Nama </label>
-                                    <input name="kesadaran" id="kesadaran" class="form-control alergi"
-                                        type="text">
+                                    <label for="ap_nama" class="control-label text-primary">Bila ya: Nama </label>
+                                    <input name="ap_nama" id="ap_nama" class="form-control alergi" type="text">
                                 </div>
                             </div>
                             <div class="col-md-12 mt-3">
                                 <div class="form-group">
-                                    <label for="kesadaran" class="control-label text-primary">Hubungan Keluarga
+                                    <label for="ap_hubungan" class="control-label text-primary">Hubungan Keluarga
                                     </label>
-                                    <input name="kesadaran" id="kesadaran" class="form-control alergi"
+                                    <input name="ap_hubungan" id="ap_hubungan" class="form-control alergi"
                                         type="text">
                                 </div>
                             </div>
                             <div class="col-md-12 mt-3">
-                                <label for="kondisi_khusus1" class="control-label text-primary mt-3">Status fungsional
+                                <label for="sfp_mandiri" class="control-label text-primary mt-3">Status fungsional
                                     pasien:</label>
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <div class="form-checkbox">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus" id="kondisi_khusus1" value="Mandiri"
-                                                        type="checkbox" class="custom-control-input">
+                                            <div class="form-radio">
+                                                <label class="custom-control custom-radio custom-control-inline"
+                                                    for="sfp_mandiri">
+                                                    <input name="sfp" id="sfp_mandiri" value="Mandiri"
+                                                        type="radio" class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Mandiri</span>
                                                 </label>
                                             </div>
@@ -726,11 +736,11 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <div class="form-checkbox">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus" id="kondisi_khusus2"
-                                                        value="Partial care" type="checkbox"
-                                                        class="custom-control-input">
+                                            <div class="form-radio">
+                                                <label class="custom-control custom-radio custom-control-inline"
+                                                    for="sfp_partial_care">
+                                                    <input name="sfp" id="sfp_partial_care" value="Partial care"
+                                                        type="radio" class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Partial care</span>
                                                 </label>
                                             </div>
@@ -738,11 +748,11 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <div class="form-checkbox">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus" id="kondisi_khusus3"
-                                                        value="Total care" type="checkbox"
-                                                        class="custom-control-input">
+                                            <div class="form-radio">
+                                                <label class="custom-control custom-radio custom-control-inline"
+                                                    for="sfp_total_care">
+                                                    <input name="sfp" id="sfp_total_care" value="Total care"
+                                                        type="radio" class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Total care</span>
                                                 </label>
                                             </div>
@@ -750,18 +760,19 @@
                                     </div>
                                     <div class="col-md-12 mt-3">
                                         <div class="form-group mt-5">
-                                            <label for="keluhan_utama" class="control-label text-primary">Hasil
+                                            <label for="pemeriksaan_penunjang"
+                                                class="control-label text-primary">Hasil
                                                 Pemeriksaan Tindakan & penunjang/diagnostik yang sudah dilakukan
                                                 (lab,ekg dll):</label>
-                                            <textarea class="form-control" id="keluhan_utama" name="keluhan_utama" rows="1"
+                                            <textarea class="form-control" id="pemeriksaan_penunjang" name="pemeriksaan_penunjang" rows="1"
                                                 data-label="Hasil Pemeriksaan Tindakan & penunjang/diagnostik yang sudah dilakukan (lab,ekg dll)"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-md-12 mt-3">
                                         <div class="form-group">
-                                            <label for="keluhan_utama" class="control-label text-primary">
+                                            <label for="diet" class="control-label text-primary">
                                                 Diet (bila pindah ruangan):</label>
-                                            <textarea class="form-control" id="keluhan_utama" name="keluhan_utama" rows="4"
+                                            <textarea class="form-control" id="diet" name="diet" rows="4"
                                                 data-label="Diet (bila pindah ruangan)">
 Jenis Diet : 
 Puasa : 
@@ -785,21 +796,23 @@ Terakhir makan :
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="Infus"
-                                                type="checkbox" class="custom-control-input">
+                                        <label class="custom-control custom-checkbox custom-control-inline"
+                                            for="ptsp_infus">
+                                            <input name="ptsp_infus" id="ptsp_infus" value="Infus" type="checkbox"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Infus</span>
                                         </label>
                                     </div>
                                 </div>
-                                <input class="form-control numeric calc-bmi" id="body_weight" name="body_weight"
-                                    type="text">
+                                <input class="form-control numeric calc-bmi" id="ptsp_infus_text"
+                                    name="ptsp_infus_text" type="text">
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="kesadaran" class="control-label text-primary">Kesadaran: </label>
-                                    <input name="kesadaran" id="kesadaran" class="form-control alergi mt-4"
-                                        type="text">
+                                    <label for="ptsp_infus_tetesan" class="control-label text-primary">Tetesan:
+                                    </label>
+                                    <input name="ptsp_infus_tetesan" id="ptsp_infus_tetesan"
+                                        class="form-control alergi mt-4" type="text">
                                 </div>
                             </div>
                         </div>
@@ -813,50 +826,50 @@ Terakhir makan :
                         <div class="form-group">
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="text" name="tgl_masuk" class="form-control "
-                                        placeholder="TERAPI DAN TINDAKAN 1" id="tgl_masuk">
-                                    <input type="time" name="jam_masuk" class="form-control"
-                                        style="width: 100px !important" placeholder="Jam" id="jam_masuk">
+                                    <input type="text" name="resep1" class="form-control "
+                                        placeholder="TERAPI DAN TINDAKAN 1" id="resep1">
+                                    <input type="time" name="jam_pemberian1" class="form-control"
+                                        style="width: 100px !important" placeholder="Jam" id="jam_pemberian1">
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="text" name="tgl_masuk" class="form-control "
-                                        placeholder="TERAPI DAN TINDAKAN 2" id="tgl_masuk">
-                                    <input type="time" name="jam_masuk" class="form-control"
-                                        style="width: 100px !important" placeholder="Jam" id="jam_masuk">
+                                    <input type="text" name="resep2" class="form-control "
+                                        placeholder="TERAPI DAN TINDAKAN 2" id="resep2">
+                                    <input type="time" name="jam_pemberian2" class="form-control"
+                                        style="width: 100px !important" placeholder="Jam" id="jam_pemberian2">
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="text" name="tgl_masuk" class="form-control "
-                                        placeholder="TERAPI DAN TINDAKAN 3" id="tgl_masuk">
-                                    <input type="time" name="jam_masuk" class="form-control"
-                                        style="width: 100px !important" placeholder="Jam" id="jam_masuk">
+                                    <input type="text" name="resep3" class="form-control "
+                                        placeholder="TERAPI DAN TINDAKAN 3" id="resep3">
+                                    <input type="time" name="jam_pemberian3" class="form-control"
+                                        style="width: 100px !important" placeholder="Jam" id="jam_pemberian3">
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="text" name="tgl_masuk" class="form-control "
-                                        placeholder="TERAPI DAN TINDAKAN 4" id="tgl_masuk">
-                                    <input type="time" name="jam_masuk" class="form-control"
-                                        style="width: 100px !important" placeholder="Jam" id="jam_masuk">
+                                    <input type="text" name="resep4" class="form-control "
+                                        placeholder="TERAPI DAN TINDAKAN 4" id="resep4">
+                                    <input type="time" name="jam_pemberian4" class="form-control"
+                                        style="width: 100px !important" placeholder="Jam" id="jam_pemberian4">
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="text" name="tgl_masuk" class="form-control "
-                                        placeholder="TERAPI DAN TINDAKAN 5" id="tgl_masuk">
-                                    <input type="time" name="jam_masuk" class="form-control"
-                                        style="width: 100px !important" placeholder="Jam" id="jam_masuk">
+                                    <input type="text" name="resep5" class="form-control "
+                                        placeholder="TERAPI DAN TINDAKAN 5" id="resep5">
+                                    <input type="time" name="jam_pemberian5" class="form-control"
+                                        style="width: 100px !important" placeholder="Jam" id="jam_pemberian5">
                                 </div>
                             </div>
                         </div>
@@ -865,50 +878,50 @@ Terakhir makan :
                         <div class="form-group">
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="text" name="tgl_masuk" class="form-control "
-                                        placeholder="TERAPI DAN TINDAKAN 1" id="tgl_masuk">
-                                    <input type="time" name="jam_masuk" class="form-control"
-                                        style="width: 100px !important" placeholder="Jam" id="jam_masuk">
+                                    <input type="text" name="resep6" class="form-control "
+                                        placeholder="TERAPI DAN TINDAKAN 6" id="resep6">
+                                    <input type="time" name="jam_pemberian6" class="form-control"
+                                        style="width: 100px !important" placeholder="Jam" id="jam_pemberian6">
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="text" name="tgl_masuk" class="form-control "
-                                        placeholder="TERAPI DAN TINDAKAN 2" id="tgl_masuk">
-                                    <input type="time" name="jam_masuk" class="form-control"
-                                        style="width: 100px !important" placeholder="Jam" id="jam_masuk">
+                                    <input type="text" name="resep7" class="form-control "
+                                        placeholder="TERAPI DAN TINDAKAN 7" id="resep7">
+                                    <input type="time" name="jam_pemberian7" class="form-control"
+                                        style="width: 100px !important" placeholder="Jam" id="jam_pemberian7">
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="text" name="tgl_masuk" class="form-control "
-                                        placeholder="TERAPI DAN TINDAKAN 3" id="tgl_masuk">
-                                    <input type="time" name="jam_masuk" class="form-control"
-                                        style="width: 100px !important" placeholder="Jam" id="jam_masuk">
+                                    <input type="text" name="resep8" class="form-control "
+                                        placeholder="TERAPI DAN TINDAKAN 8" id="resep8">
+                                    <input type="time" name="jam_pemberian8" class="form-control"
+                                        style="width: 100px !important" placeholder="Jam" id="jam_pemberian8">
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="text" name="tgl_masuk" class="form-control "
-                                        placeholder="TERAPI DAN TINDAKAN 4" id="tgl_masuk">
-                                    <input type="time" name="jam_masuk" class="form-control"
-                                        style="width: 100px !important" placeholder="Jam" id="jam_masuk">
+                                    <input type="text" name="resep9" class="form-control "
+                                        placeholder="TERAPI DAN TINDAKAN 9" id="resep9">
+                                    <input type="time" name="jam_pemberian9" class="form-control"
+                                        style="width: 100px !important" placeholder="Jam" id="jam_pemberian9">
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="text" name="tgl_masuk" class="form-control "
-                                        placeholder="TERAPI DAN TINDAKAN 5" id="tgl_masuk">
-                                    <input type="time" name="jam_masuk" class="form-control"
-                                        style="width: 100px !important" placeholder="Jam" id="jam_masuk">
+                                    <input type="text" name="resep10" class="form-control "
+                                        placeholder="TERAPI DAN TINDAKAN 10" id="resep10">
+                                    <input type="time" name="jam_pemberian10" class="form-control"
+                                        style="width: 100px !important" placeholder="Jam" id="jam_pemberian10">
                                 </div>
                             </div>
                         </div>
@@ -959,10 +972,12 @@ Terakhir makan :
                 <div class="row mt-3">
                     <div class="col-md-4 mb-3">
                         <div class="form-group">
-                            <label class="text-primary" for="pr">Pasien kembali ke ruang semula pukul:</label>
+                            <label class="text-primary" for="pasien_kembali">Pasien kembali ke ruang semula
+                                pukul:</label>
                             <div class="input-group">
                                 <div class="input-group">
-                                    <input id="pr" type="text" name="pr" class="form-control">
+                                    <input id="pasien_kembali" type="text" name="pasien_kembali"
+                                        class="form-control">
                                     <div class="input-group-append">
                                         <span class="input-group-text">wib</span>
                                     </div>
@@ -972,16 +987,17 @@ Terakhir makan :
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="form-group">
-                            <label class="text-primary" for="pr">Keadaan Umum:</label>
-                            <input id="pr" type="text" name="pr" class="form-control">
+                            <label class="text-primary" for="keadaan_umum_after">Keadaan Umum:</label>
+                            <input id="keadaan_umum_after" type="text" name="keadaan_umum_after"
+                                class="form-control">
                         </div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="form-group">
-                            <label class="text-primary" for="pr">TD:</label>
+                            <label class="text-primary" for="td_after">TD:</label>
                             <div class="input-group">
                                 <div class="input-group">
-                                    <input id="pr" type="text" name="pr" class="form-control">
+                                    <input id="td_after" type="text" name="td_after" class="form-control">
                                     <div class="input-group-append">
                                         <span class="input-group-text">mmHg</span>
                                     </div>
@@ -993,10 +1009,10 @@ Terakhir makan :
                 <div class="row mt-3">
                     <div class="col-md-4 mb-3">
                         <div class="form-group">
-                            <label class="text-primary" for="pr">ND:</label>
+                            <label class="text-primary" for="nd_after">ND:</label>
                             <div class="input-group">
                                 <div class="input-group">
-                                    <input id="pr" type="text" name="pr" class="form-control">
+                                    <input id="nd_after" type="text" name="nd_after" class="form-control">
                                     <div class="input-group-append">
                                         <span class="input-group-text">x/menit</span>
                                     </div>
@@ -1006,10 +1022,10 @@ Terakhir makan :
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="form-group">
-                            <label class="text-primary" for="pr">RR:</label>
+                            <label class="text-primary" for="rr_after">RR:</label>
                             <div class="input-group">
                                 <div class="input-group">
-                                    <input id="pr" type="text" name="pr" class="form-control">
+                                    <input id="rr_after" type="text" name="rr_after" class="form-control">
                                     <div class="input-group-append">
                                         <span class="input-group-text">x/menit</span>
                                     </div>
@@ -1019,10 +1035,10 @@ Terakhir makan :
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="form-group">
-                            <label class="text-primary" for="pr">SB:</label>
+                            <label class="text-primary" for="sb_after">SB:</label>
                             <div class="input-group">
                                 <div class="input-group">
-                                    <input id="pr" type="text" name="pr" class="form-control">
+                                    <input id="sb_after" type="text" name="sb_after" class="form-control">
                                     <div class="input-group-append">
                                         <span class="input-group-text">°C</span>
                                     </div>
@@ -1033,14 +1049,14 @@ Terakhir makan :
                 </div>
                 <div class="row mt-3">
                     <div class="col-md-6">
-                        <label for="kondisi_khusus1" class="control-label text-primary mt-3">Risiko Jatuh:</label>
+                        <label for="rj_tidak_beresiko" class="control-label text-primary mt-3">Resiko Jatuh:</label>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus1" value="Tidak Beresiko"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline">
+                                            <input name="rj_after" id="rj_tidak_beresiko" value="Tidak Beresiko"
+                                                type="radio" class="custom-control-input">
                                             <span class="custom-control-label text-primary">Tidak Beresiko</span>
                                         </label>
                                     </div>
@@ -1048,10 +1064,10 @@ Terakhir makan :
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus2" value="Rendah"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline">
+                                            <input name="rj_after" id="rj_rendah2" value="Rendah" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Rendah</span>
                                         </label>
                                     </div>
@@ -1059,10 +1075,10 @@ Terakhir makan :
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <div class="form-checkbox">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus" id="kondisi_khusus3" value="Tinggi"
-                                                type="checkbox" class="custom-control-input">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-radio custom-control-inline">
+                                            <input name="rj_after" id="rj_tinggi2" value="Tinggi" type="radio"
+                                                class="custom-control-input">
                                             <span class="custom-control-label text-primary">Tinggi</span>
                                         </label>
                                     </div>
@@ -1072,8 +1088,8 @@ Terakhir makan :
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="text-primary" for="pr">Diet:</label>
-                            <input id="pr" type="text" name="pr" class="form-control">
+                            <label class="text-primary" for="diet_after">Diet:</label>
+                            <input id="diet_after" type="text" name="diet_after" class="form-control">
                         </div>
                     </div>
                 </div>
@@ -1114,30 +1130,97 @@ Terakhir makan :
                 </div>
             </div>
 
-            <div class="card-actionbar m-3">
-                <div class="card-actionbar-row mt-3">
-                    <!-- Tambahkan Tombol Kembali -->
-                    <button type="button" class="btn btn-secondary waves-effect waves-light btn-kembali"
-                        data-dismiss='modal'>
-                        <span class="mdi mdi-arrow-left"></span> Kembali
-                    </button>
-                    <a href="#!" class="btn btn-primary">
-                        <span class="mdi mdi-printer"></span> Print
-                    </a>
-                    <button type="submit" class="btn btn-success waves-effect waves-light save-form">
-                        <div class="ikon-tambah">
-                            <span class="fal fa-plus-circle mr-1"></span>
-                            Tambah
+            <div class="row">
+                <div class="col-md-12 px-3">
+                    <div class="card-actionbar">
+                        <div class="card-actionbar-row d-flex justify-content-between align-items-center">
+                            <button type="button"
+                                class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                data-dismiss="modal" data-status="0">
+                                <span class="mdi mdi-printer mr-2"></span> Print
+                            </button>
+                            <div style="width: 33%" class="d-flex justify-content-between">
+                                <button type="button"
+                                    class="btn btn-warning waves-effect text-white waves-light save-form d-flex align-items-center"
+                                    data-dismiss="modal" data-status="0" id="sd-transfer-pasien-antar-ruangan">
+                                    <span class="mdi mdi-content-save mr-2"></span> Simpan (draft)
+                                </button>
+                                <button type="button"
+                                    class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                    data-dismiss="modal" data-status="1" id="sf-transfer-pasien-antar-ruangan">
+                                    <span class="mdi mdi-content-save mr-2"></span> Simpan (final)
+                                </button>
+                            </div>
                         </div>
-                        <div class="span spinner-text d-none">
-                            <span class="spinner-border spinner-border-sm" role="status"
-                                aria-hidden="true"></span>
-                            Loading...
-                        </div>
-                    </button>
+                    </div>
                 </div>
             </div>
         </div>
     </form>
 </div>
 @include('pages.kpi.penilaian.partials.ttd')
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        let actionType = '';
+
+        // Saat tombol Save Draft diklik
+        $('#sd-transfer-pasien-antar-ruangan').on('click', function() {
+            actionType = 'draft';
+            submitForm(actionType); // Panggil fungsi submitForm dengan parameter draft
+        });
+
+        // Saat tombol Save Final diklik
+        $('#sf-transfer-pasien-antar-ruangan').on('click', function() {
+            actionType = 'final';
+            submitForm(actionType); // Panggil fungsi submitForm dengan parameter final
+        });
+
+        function submitForm(actionType) {
+            const form = $('#transfer-pasien-antar-ruangan-form'); // Ambil form
+            const url =
+                "{{ route('pengkajian.transfer-pasien-antar-ruangan.store') }}" // Ambil URL dari action form
+            let formData = form.serialize(); // Ambil data dari form
+
+            // Tambahkan tipe aksi (draft atau final) ke data form
+            formData += '&action_type=' + actionType;
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: formData,
+                success: function(response) {
+                    if (actionType === 'draft') {
+                        showSuccessAlert('Data berhasil disimpan sebagai draft!');
+                    } else {
+                        showSuccessAlert('Data berhasil disimpan sebagai final!');
+                    }
+                    setTimeout(() => {
+                        console.log('Reloading the page now.');
+                        window.location.reload();
+                    }, 1000);
+                },
+                error: function(xhr, status, error) {
+                    if (xhr.status === 422) {
+                        var errors = xhr.responseJSON.errors;
+                        var errorMessages = '';
+
+                        $.each(errors, function(key, value) {
+                            errorMessages += value +
+                                '\n';
+                        });
+
+                        // $('#modal-tambah-grup-tindakan').modal('hide');
+                        showErrorAlert('Terjadi kesalahan:\n' +
+                            errorMessages);
+                    } else {
+                        // $('#modal-tambah-grup-tindakan').modal('hide');
+                        showErrorAlert('Terjadi kesalahan: ' + error);
+                        console.log(error);
+                    }
+                }
+            });
+        }
+    })
+</script>

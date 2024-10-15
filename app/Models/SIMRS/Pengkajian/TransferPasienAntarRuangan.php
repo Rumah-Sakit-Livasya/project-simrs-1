@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\SIMRS\Pengkajian;
 
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Auditable;
 
-class PengkajianNurseRajal extends Model
+class TransferPasienAntarRuangan extends Model implements \OwenIt\Auditing\Contracts\Auditable
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Auditable;
 
     protected $guarded = ['id'];
-    protected $table = 'pengkajian_nurse_rajal';
+    protected $table = 'transfer_pasien_antar_ruangan';
 
     // Define the inverse relationship to Registration
     public function registration()
