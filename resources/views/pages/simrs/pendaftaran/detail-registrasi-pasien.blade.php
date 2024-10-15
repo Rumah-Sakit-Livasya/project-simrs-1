@@ -501,7 +501,7 @@
                     </div>
                     <div id="pengkajian-nurse-rajal">
                         @include('pages.simrs.pendaftaran.partials.pengkajian-nurse-rajal')
-                        @include('pages.simrs.pendaftaran.partials.pengkajian-dokter-rajal')
+                        @include('pages.simrs.pendaftaran.partials.dokter.pengkajian-dokter-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.cppt')
                         @include('pages.simrs.pendaftaran.partials.dokter.resume-medis-rajal')
                     </div>
@@ -529,7 +529,10 @@
 
     <script>
         $(document).ready(function() {
+
+            var doctorOptions = @json($groupedDoctors);
             $('#pengkajian-nurse-rajal').hide();
+
             // Ketika elemen dengan kelas .menu-layanan diklik
             $('.menu-layanan').on('click', function() {
                 // Sembunyikan menu layanan dengan efek fade out

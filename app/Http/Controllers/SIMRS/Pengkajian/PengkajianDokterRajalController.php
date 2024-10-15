@@ -12,6 +12,7 @@ class PengkajianDokterRajalController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
+            'registration_id' => 'required',
             'pr' => 'required',
             'rr' => 'required',
             'bp' => 'required',
@@ -50,7 +51,6 @@ class PengkajianDokterRajalController extends Controller
 
         try {
             $validatedData['is_verified'] = 1;
-            $validatedData['registration_id'] = 1;
             $validatedData['awal_rencana_tindak_lanjut'] = json_encode($request->awal_rencana_tindak_lanjut);
             $validatedData['awal_evaluasi_penyakit'] = json_encode($request->awal_evaluasi_penyakit);
             $validatedData['awal_edukasi'] = json_encode($request->awal_edukasi);

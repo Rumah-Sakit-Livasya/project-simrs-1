@@ -5,10 +5,12 @@ namespace App\Models\SIMRS\Pengkajian;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class PengkajianDokterRajal extends Model
+class PengkajianDokterRajal extends Model implements AuditableContract
 {
-    use HasFactory;
+    use HasFactory, Auditable;
     protected $table = 'pengkajian_dokter_rajal', $guarded = ['id'];
 
     public function registration()

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\SIMRS\BedController;
+use App\Http\Controllers\SIMRS\CPPT\CPPTController;
 use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Models\SIMRS\CPPT\CPPT;
 
 Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::prefix('pengkajian')->group(function () {
@@ -51,6 +53,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
     Route::prefix('erm')->group(function () {
         Route::get('/dokter-pengkajian/{type}/{registration_number}/get', [PengkajianDokterRajalController::class, 'getPengkajian'])->name('pengkajian.dokter-rajal.get');
+        Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
+        Route::post('/dokter-cppt/{type}/{registration_number}/store', [CPPTController::class, 'store'])->name('cppt.dokter-rajal.store');
     });
 
     Route::prefix('master-data')->group(function () {

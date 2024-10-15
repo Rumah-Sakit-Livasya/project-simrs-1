@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SIMRS;
 use App\Http\Controllers\Controller;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\SIMRS\Bed;
+use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GantiDiagnosa;
@@ -271,7 +272,8 @@ class RegistrationController extends Controller
     public function show($id)
     {
         $registration = Registration::findOrFail($id);
-
+        $cppt = CPPT::where('registration_id', $id)->get();
+        dd($cppt);
         $jaminan = $registration->penjamin->name;
         if ($jaminan === 'Umum') {
             $penjamin = 'Jaminan Pribadi';
