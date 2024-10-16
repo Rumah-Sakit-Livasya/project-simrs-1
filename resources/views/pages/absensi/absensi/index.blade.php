@@ -862,17 +862,25 @@
             }
 
             async function getLocation() {
+                // tambahkan loading indicator ketika peta sedang dimuat
+                toggleLoadingIndicator(true);
                 return new Promise((resolve, reject) => {
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(position => {
+                            // Hapus loading indicator ketika peta selesai dimuat
+                            toggleLoadingIndicator(false);
                             latitude = position.coords.latitude;
                             longitude = position.coords.longitude;
                             resolve(position);
                         }, error => {
+                            // tambahkan loading indicator ketika peta sedang dimuat
+                            toggleLoadingIndicator(true);
                             console.error("Geolocation failed: " + error.message);
                             reject(error);
                         });
                     } else {
+                        // tambahkan loading indicator ketika peta sedang dimuat
+                        toggleLoadingIndicator(true);
                         console.error("Geolocation is not supported by this browser.");
                         reject(new Error("Geolocation not supported"));
                     }
@@ -891,7 +899,6 @@
 
             // Fungsi untuk menginisialisasi peta
             async function initializeMap() {
-                toggleLoadingIndicator(true); // Tampilkan loading indicator
 
                 var map = L.map('map').setView([0, 0], 13); // Koordinat awal
 
@@ -901,9 +908,6 @@
 
 
                 try {
-                    // Hapus loading indicator ketika peta selesai dimuat
-                    toggleLoadingIndicator(false); // Sembunyikan loading indicator
-
                     const position = await getLocation(); // Pastikan fungsi ini berfungsi
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
@@ -916,7 +920,6 @@
                         .openPopup();
                 } catch (error) {
                     console.error("Error initializing map: ", error);
-                    toggleLoadingIndicator(true); // Sembunyikan loading indicator
                     alert("Gagal memuat peta. Silakan coba lagi.");
                 }
             }
