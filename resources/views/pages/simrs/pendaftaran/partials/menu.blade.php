@@ -113,24 +113,23 @@
                         console.log(true);
                     }
                 },
-                // error: function(xhr, status, error) {
-                //     $('#tambah-data').modal('hide');
-                //     if (xhr.status === 422) {
-                //         var errors = xhr.responseJSON.errors;
-                //         var errorMessages = '';
+                error: function(xhr, status, error) {
+                    if (xhr.status === 422) {
+                        var errors = xhr.responseJSON.errors;
+                        var errorMessages = '';
 
-                //         $.each(errors, function(key, value) {
-                //             errorMessages += value +
-                //                 '\n';
-                //         });
+                        $.each(errors, function(key, value) {
+                            errorMessages += value +
+                                '\n';
+                        });
 
-                //         // $('#modal-tambah-grup-tindakan').modal('hide');
-                //         console.log('Terjadi kesalahan:\n' +
-                //             errorMessages);
-                //     } else {
-                //         console.log(error);
-                //     }
-                // }
+                        // $('#modal-tambah-grup-tindakan').modal('hide');
+                        console.log('Terjadi kesalahan:\n' +
+                            errorMessages);
+                    } else {
+                        console.log(error);
+                    }
+                }
             });
 
             function handleDokterPengkajian(response) {

@@ -121,6 +121,25 @@
                 width: 15px;
             }
         }
+
+        /* Tambahkan CSS untuk loading indicator */
+        .loading-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-text {
+            font-size: 24px;
+            font-weight: bold;
+        }
     </style>
     <script defer src="/js/face-api/face-api.min.js"></script>
 @endsection
@@ -134,7 +153,14 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <!-- Map container -->
+
+                            <!-- Tambahkan elemen loading indicator di dalam body -->
+                            <div id="loading-indicator" class="loading-indicator">
+                                <div class="spinner-border text-primary font-weight-bold" role="status">
+                                </div>
+                            </div>
+
+                            <!-- Elemen peta -->
                             <div id="map"></div>
 
                             <!-- Time attendance section -->
@@ -853,25 +879,45 @@
                 });
             }
 
+            // Fungsi untuk menampilkan atau menyembunyikan loading indicator
+            function toggleLoadingIndicator(show) {
+                const loadingIndicator = document.getElementById('loading-indicator');
+                if (show) {
+                    loadingIndicator.style.display = 'flex';
+                } else {
+                    loadingIndicator.style.display = 'none';
+                }
+            }
+
+            // Fungsi untuk menginisialisasi peta
             async function initializeMap() {
-                var map = L.map('map').setView([0, 0], 13); // Initial placeholder coordinates
+                toggleLoadingIndicator(true); // Tampilkan loading indicator
+
+                var map = L.map('map').setView([0, 0], 13); // Koordinat awal
+
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
+
                 try {
-                    const position = await getLocation();
+                    // Hapus loading indicator ketika peta selesai dimuat
+                    toggleLoadingIndicator(false); // Sembunyikan loading indicator
+
+                    const position = await getLocation(); // Pastikan fungsi ini berfungsi
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     const accuracy = position.coords.accuracy;
 
-                    map.setView([lat, lng], 17); // Zoom level set to 17 for closer view
+                    map.setView([lat, lng], 17); // Zoom level set to 17 untuk tampilan lebih dekat
 
                     L.marker([lat, lng]).addTo(map)
                         .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
                         .openPopup();
                 } catch (error) {
                     console.error("Error initializing map: ", error);
+                    toggleLoadingIndicator(true); // Sembunyikan loading indicator
+                    alert("Gagal memuat peta. Silakan coba lagi.");
                 }
             }
 
