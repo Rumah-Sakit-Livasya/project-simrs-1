@@ -9,13 +9,13 @@ use Illuminate\Http\Request;
 
 class CPPTController extends Controller
 {
-    public function getCPPT(Request $request, $type, $registration_number)
+    public function getCPPT(Request $request)
     {
         try {
-            $registration = Registration::where('registration_number', $registration_number)->where('registration_type', $type)->first();
-            $pengkajian = $registration->pengkajian_dokter_rajal;
-            if ($pengkajian) {
-                return response()->json($pengkajian, 200);
+            $noRM = $request->no_rm;
+            $cppt = CPPT::where('medical_record_number', $noRM)->get();
+            if ($cppt) {
+                return response()->json($cppt, 200);
             } else {
 
                 return response()->json(['error' => 'Data tidak ditemukan!'], 404);
@@ -38,7 +38,7 @@ class CPPTController extends Controller
             'instruksi' => 'required',
             'evaluasi' => 'nullable',
             'implementasi' => 'nullable',
-
+            'medical_record_number' => 'required'
         ]);
 
         try {
