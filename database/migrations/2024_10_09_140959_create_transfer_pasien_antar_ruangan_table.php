@@ -14,7 +14,9 @@ return new class extends Migration
 
         Schema::create('transfer_pasien_antar_ruangan', function (Blueprint $table) {
             $table->id();
-            // ================ Transfer Pasien Antar Ruangan ================
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('registration_id')->constrained('registrations')->cascadeOnDelete();
+
             // ================ Transfer Pasien Antar Ruangan ================
             $table->string('tgl', 50)->nullable();
             $table->string('jam', 50)->nullable();
@@ -49,27 +51,39 @@ return new class extends Migration
             $table->string('status_nyeri', 50)->nullable();
 
             // ----------------- Alasan pemindahan pasien: ------------------
-            $table->string('kondisi_pasien')->nullable();
             $table->string('tindakan')->nullable();
-            $table->string('app_lainnya_text')->nullable();
+            $table->text('ket_lainnya')->nullable();
+            $table->string('app_lainnya')->nullable();
+            $table->text('app_lainnya_text')->nullable();
             $table->string('kesadaran')->nullable();
 
-            // ----------------- Alasan pemindahan pasien: ------------------
-            $table->string('rj_tidak_beresiko')->nullable();
-            $table->string('mpp_kuro')->nullable();
-            $table->string('kti_kontak')->nullable();
+            // Metode Pemindahan Pasien
+            $table->string('mpp')->nullable();
+
+            // Risiko Jatuh
+            $table->string('rj')->nullable();
+
+            // Kewaspadaam Transmisi/Infeksi
+            $table->string('kti')->nullable();
+
+            // Kewaspadaam Transmisi/Infeksi
             $table->boolean('mpi')->nullable();
+
+
+            // ----------------- Alasan pemindahan pasien: ------------------
             $table->boolean('ap')->nullable();
             $table->string('ap_nama')->nullable();
             $table->string('ap_hubungan')->nullable();
+            $table->text('alasan_pdh_temuan_anamesis')->nullable();
+
+            // Status Fungsional Pasien
+            $table->string('sfp')->nullable();
 
             // ----------------- Peralatan yang menyertai saat pemindahan: ------------------
             $table->string('pmp_kuro')->nullable();
             $table->text('pmp_text')->nullable();
             $table->string('pmp_cateter_urine')->nullable();
             $table->string('pmp_ngt')->nullable();
-            $table->string('sfp_mandiri')->nullable();
-            $table->text('alasan_pdh_temuan_anamesis')->nullable();
             $table->text('pemeriksaan_penunjang')->nullable();
             $table->text('intervensi_tindakan')->nullable();
             $table->text('diet')->nullable();
@@ -80,42 +94,48 @@ return new class extends Migration
             $table->string('ptsp_infus_tetesan')->nullable();
 
             // ----------------- Terapi Dan Tindakan Yang Dilakukan: ------------------
-            $table->string('resep1')->nullable();
-            $table->string('jam_pemberian1')->nullable();
-            $table->string('resep2')->nullable();
-            $table->string('jam_pemberian2')->nullable();
-            $table->string('resep3')->nullable();
-            $table->string('jam_pemberian3')->nullable();
-            $table->string('resep4')->nullable();
-            $table->string('jam_pemberian4')->nullable();
-            $table->string('resep5')->nullable();
-            $table->string('jam_pemberian5')->nullable();
-            $table->string('resep6')->nullable();
-            $table->string('jam_pemberian6')->nullable();
-            $table->string('resep7')->nullable();
-            $table->string('jam_pemberian7')->nullable();
-            $table->string('resep8')->nullable();
-            $table->string('jam_pemberian8')->nullable();
-            $table->string('resep9')->nullable();
-            $table->string('jam_pemberian9')->nullable();
-            $table->string('resep10')->nullable();
-            $table->string('jam_pemberian10')->nullable();
+            $table->text('resep1')->nullable();
+            $table->text('jam_pemberian1')->nullable();
+            $table->text('resep2')->nullable();
+            $table->text('jam_pemberian2')->nullable();
+            $table->text('resep3')->nullable();
+            $table->text('jam_pemberian3')->nullable();
+            $table->text('resep4')->nullable();
+            $table->text('jam_pemberian4')->nullable();
+            $table->text('resep5')->nullable();
+            $table->text('jam_pemberian5')->nullable();
+            $table->text('resep6')->nullable();
+            $table->text('jam_pemberian6')->nullable();
+            $table->text('resep7')->nullable();
+            $table->text('jam_pemberian7')->nullable();
+            $table->text('resep8')->nullable();
+            $table->text('jam_pemberian8')->nullable();
+            $table->text('resep9')->nullable();
+            $table->text('jam_pemberian9')->nullable();
+            $table->text('resep10')->nullable();
+            $table->text('jam_pemberian10')->nullable();
+
             $table->string('data_ttd1')->nullable();
             $table->string('nama_perawat_pengirim')->nullable();
             $table->string('data_ttd2')->nullable();
             $table->string('nama_perawat_penerima')->nullable();
 
-            // ---------------- pasien kembali keruang semula pasca tindakan/ prosedur ----------------
+            // pasien kembali keruang semula pasca tindakan/ prosedur 
             $table->string('pasien_kelmbali')->nullable();
-            $table->string('keadaan_umum2')->nullable();
-            $table->string('td2')->nullable();
-            $table->string('nd2')->nullable();
-            $table->string('rr2')->nullable();
-            $table->string('sb2')->nullable();
+            $table->string('keadaan_umum_after')->nullable();
+            $table->string('td_after')->nullable();
+            $table->string('nd_after')->nullable();
+            $table->string('rr_after')->nullable();
+            $table->string('sb_after')->nullable();
+            $table->string('rj_after')->nullable();
+            $table->text('diet_after')->nullable();
+
             $table->string('data_ttd3')->nullable();
-            $table->string('nama_perawat_pengirim2')->nullable();
+            $table->string('nama_perawat_pengirim_after')->nullable();
             $table->string('data_ttd4')->nullable();
-            $table->string('nama_perawat_penerima2')->nullable();
+            $table->string('nama_perawat_penerima_after')->nullable();
+
+            $table->softDeletes();
             $table->timestamps();
         });
     }

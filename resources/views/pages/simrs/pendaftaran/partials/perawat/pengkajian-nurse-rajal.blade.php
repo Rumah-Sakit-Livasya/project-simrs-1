@@ -1,7 +1,7 @@
-@include('pages.simrs.pendaftaran.partials.menu')
-@include('pages.simrs.pendaftaran.partials.header-pasien')
+{{-- @include('pages.simrs.pendaftaran.partials.menu')
+@include('pages.simrs.pendaftaran.partials.header-pasien') --}}
 <div id="pengkajian-perawat-rajal" class="tab-pane fade show active" role="tabpanel">
-    <form autocomplete="off" novalidate method="post" id="nurse-rajal">
+    <form autocomplete="off" novalidate method="post" id="pengkajian-nurse-rajal-form">
         @method('post')
         @csrf
         <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
@@ -1276,29 +1276,184 @@
                 </div>
             </div>
 
-            <div class="card-actionbar m-3">
-                <div class="card-actionbar-row mt-3">
-                    <!-- Tambahkan Tombol Kembali -->
-                    <button type="button" class="btn btn-secondary waves-effect waves-light btn-kembali"
-                        data-dismiss='modal'>
-                        <span class="mdi mdi-arrow-left"></span> Kembali
-                    </button>
-                    <a href="#!" class="btn btn-primary">
-                        <span class="mdi mdi-printer"></span> Print
-                    </a>
-                    <button type="submit" class="btn btn-success waves-effect waves-light save-form">
-                        <div class="ikon-tambah">
-                            <span class="fal fa-plus-circle mr-1"></span>
-                            Tambah
+            <div class="row">
+                <div class="col-md-12 px-3">
+                    <div class="card-actionbar">
+                        <div class="card-actionbar-row d-flex justify-content-between align-items-center">
+                            <button type="button"
+                                class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                data-dismiss="modal" data-status="0">
+                                <span class="mdi mdi-printer mr-2"></span> Print
+                            </button>
+                            <div style="width: 33%" class="d-flex justify-content-between">
+                                <button type="button"
+                                    class="btn btn-warning waves-effect text-white waves-light save-form d-flex align-items-center"
+                                    data-dismiss="modal" data-status="0" id="sd-pengkajian-nurse-rajal">
+                                    <span class="mdi mdi-content-save mr-2"></span> Simpan (draft)
+                                </button>
+                                <button type="button"
+                                    class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                    data-dismiss="modal" data-status="1" id="sf-pengkajian-nurse-rajal">
+                                    <span class="mdi mdi-content-save mr-2"></span> Simpan (final)
+                                </button>
+                            </div>
                         </div>
-                        <div class="span spinner-text d-none">
-                            <span class="spinner-border spinner-border-sm" role="status"
-                                aria-hidden="true"></span>
-                            Loading...
-                        </div>
-                    </button>
+                    </div>
                 </div>
             </div>
         </div>
     </form>
 </div>
+
+@include('pages.kpi.penilaian.partials.ttd')
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Ketika elemen dengan kelas .menu-layanan diklik
+        $('.menu-layanan').on('click', function() {
+            // Sembunyikan menu layanan dengan efek fade out
+            $('#menu-layanan').fadeOut(500); // 500ms untuk transisi
+
+            // Ambil data-layanan untuk menentukan ID elemen yang akan ditampilkan
+            var namaLayanan = $(this).data('layanan');
+            var pengkajianId = $('#pengkajian-rajal-id').val();
+
+            // Tampilkan elemen layanan yang dipilih dengan efek fade in
+            $('#' + namaLayanan).delay(500).fadeIn(500); // 500ms untuk transisi
+            if (namaLayanan == 'pengkajian-nurse-rajal') {
+                if (pengkajianId !== undefined) {
+                    // $('#pengkajian-nurse-rajal').show();
+                    $.ajax({
+                        type: "GET", // Method pengiriman data bisa dengan GET atau POST
+                        url: `/api/simrs/pengkajian/nurse-rajal/${pengkajianId}/get`, // Isi dengan url/path file php yang dituju
+                        dataType: "json",
+                        success: function(data) {
+                            $('pengkajian-nurse-rajal-form #tgl_masuk').val(data.tgl_masuk);
+                            $('pengkajian-nurse-rajal-form #jam_masuk').val(data.jam_masuk);
+                            $('pengkajian-nurse-rajal-form #tgl_dilayani').val(data
+                                .tgl_dilayani);
+                            $('pengkajian-nurse-rajal-form #jam_dilayani').val(data
+                                .jam_dilayani);
+                            $('pengkajian-nurse-rajal-form #keluhan_utama').val(data
+                                .keluhan_utama);
+                            $('pengkajian-nurse-rajal-form #pr').val(data.pr);
+                            $('pengkajian-nurse-rajal-form #rr').val(data.rr);
+                            $('pengkajian-nurse-rajal-form #bp').val(data.bp);
+                            $('pengkajian-nurse-rajal-form #temperatur').val(data
+                                .temperatur);
+                            $('pengkajian-nurse-rajal-form #body_height').val(data
+                                .body_height);
+                            $('pengkajian-nurse-rajal-form #body_weight').val(data
+                                .body_weight);
+                            $('pengkajian-nurse-rajal-form #bmi').val(data.bmi);
+                            $('pengkajian-nurse-rajal-form #kat_bmi').val(data.kat_bmi);
+                            $('pengkajian-nurse-rajal-form #sp02').val(data.sp02);
+                            $('pengkajian-nurse-rajal-form #lingkar_kepala').val(data
+                                .lingkar_kepala);
+                            $('pengkajian-nurse-rajal-form #lingkar_kepala').val(data
+                                .lingkar_kepala);
+                            // Set the value for Select2 elements
+                            $('pengkajian-nurse-rajal-form #diagnosa_keperawatan').val(data
+                                .diagnosa_keperawatan).trigger('change');
+                            $('pengkajian-nurse-rajal-form #rencana_tindak_lanjut').val(data
+                                .rencana_tindak_lanjut).trigger('change');
+                            // Assuming 'data' is the object retrieved from the database
+                            if (data.alergi_obat === "Ya") {
+                                $('pengkajian-nurse-rajal-form #ket_alergi_obat').val(data
+                                    .ket_alergi_obat);
+                                $('pengkajian-nurse-rajal-form #alergi_obat1').prop(
+                                    'checked', true);
+                            } else if (data.alergi_obat === "Tidak") {
+                                $('pengkajian-nurse-rajal-form #alergi_obat2').prop(
+                                    'checked', true);
+                            }
+                            if (data.alergi_makanan === "Ya") {
+                                $('pengkajian-nurse-rajal-form #ket_alergi_makanan').val(
+                                    data
+                                    .ket_alergi_makanan);
+                                $('pengkajian-nurse-rajal-form #alergi_makanan1').prop(
+                                    'checked', true);
+                            } else if (data.alergi_makanan === "Tidak") {
+                                $('pengkajian-nurse-rajal-form #alergi_makanan2').prop(
+                                    'checked', true);
+                            }
+                            if (data.alergi_lainnya === "Ya") {
+                                $('pengkajian-nurse-rajal-form #ket_alergi_lainnya').val(
+                                    data
+                                    .ket_alergi_lainnya);
+                                $('pengkajian-nurse-rajal-form #alergi_lainnya1').prop(
+                                    'checked', true);
+                            } else if (data.alergi_lainnya === "Tidak") {
+                                $('pengkajian-nurse-rajal-form #alergi_lainnya2').prop(
+                                    'checked', true);
+                            }
+                        },
+                        error: function(xhr) {
+                            console.log(xhr.responseText);
+                        }
+                    });
+                }
+            }
+        });
+
+        // Fungsi untuk tombol kembali
+        $('.btn-kembali').on('click', function() {
+            // Sembunyikan div layanan yang aktif dan tampilkan kembali menu layanan
+            $('#pengkajian-nurse-rajal').fadeOut(500, function() {
+                $('#menu-layanan').fadeIn(500);
+            });
+        });
+
+        // ===================================================
+        // :                    STORE                        :
+        // ===================================================
+        let actionType = '';
+
+        // Saat tombol Save Draft diklik
+        $('#sd-pengkajian-nurse-rajal').on('click', function() {
+            actionType = 'draft';
+            submitForm(actionType); // Panggil fungsi submitForm dengan parameter draft
+        });
+
+        // Saat tombol Save Final diklik
+        $('#sf-pengkajian-nurse-rajal').on('click', function() {
+            actionType = 'final';
+            submitForm(actionType); // Panggil fungsi submitForm dengan parameter final
+        });
+
+        function submitForm(actionType) {
+            const form = $('#pengkajian-nurse-rajal-form'); // Ambil form
+            const url =
+                "{{ route('pengkajian.nurse-rajal.store') }}" // Ambil URL dari action form
+            let formData = form.serialize(); // Ambil data dari form
+
+            // Tambahkan tipe aksi (draft atau final) ke data form
+            formData += '&action_type=' + actionType;
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: formData,
+                success: function(response) {
+                    if (actionType === 'draft') {
+                        showSuccessAlert('Data berhasil disimpan sebagai draft!');
+                    } else {
+                        showSuccessAlert('Data berhasil disimpan sebagai final!');
+                    }
+                    setTimeout(() => {
+                        console.log('Reloading the page now.');
+                        window.location.reload();
+                    }, 1000);
+                },
+                error: function(response) {
+                    // Tangani error
+                    var errors = response.responseJSON.errors;
+                    $.each(errors, function(key, value) {
+                        showErrorAlert(value[0]);
+                    });
+                }
+            });
+        }
+    })
+</script>
