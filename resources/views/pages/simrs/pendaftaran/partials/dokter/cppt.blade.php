@@ -450,7 +450,7 @@ Skrining Nyeri:
 
         function loadCPPTData() {
             $.ajax({
-                url: '{{ route('cppt.get') }}', // Mengambil route Laravel
+                // url: '{{-- route('cppt.get') --}}', // Mengambil route Laravel
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {

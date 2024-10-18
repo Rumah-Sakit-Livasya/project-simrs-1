@@ -43,7 +43,6 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::prefix('pengkajian')->group(function () {
         Route::prefix('nurse-rajal')->group(function () {
             Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
-            Route::get('{id}/get', [PengkajianController::class, 'getPengkajianRajal'])->name('pengkajian.nurse-rajal.get');
         });
 
         Route::prefix('dokter-rajal')->group(function () {
@@ -53,6 +52,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
     Route::prefix('erm')->group(function () {
         Route::get('/dokter-pengkajian/{type}/{registration_number}/get', [PengkajianDokterRajalController::class, 'getPengkajian'])->name('pengkajian.dokter-rajal.get');
+        Route::get('/perawat-pengkajian/{type}/{registration_number}/get', [PengkajianController::class, 'getPengkajianRajal'])->name('pengkajian.perawat-rajal.get');
         Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
         Route::post('/dokter-cppt/{type}/{registration_number}/store', [CPPTController::class, 'store'])->name('cppt.dokter-rajal.store');
     });

@@ -1180,8 +1180,7 @@ Terakhir makan :
         function submitForm(actionType) {
             const form = $('#transfer-pasien-antar-ruangan-form'); // Ambil form
             const url =
-                "{{ route('pengkajian.transfer-pasien-antar-ruangan.store') }}" // Ambil URL dari action form
-            let formData = form.serialize(); // Ambil data dari form
+                let formData = form.serialize(); // Ambil data dari form
 
             // Tambahkan tipe aksi (draft atau final) ke data form
             formData += '&action_type=' + actionType;

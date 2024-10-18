@@ -273,7 +273,6 @@ class RegistrationController extends Controller
     {
         $registration = Registration::findOrFail($id);
         $cppt = CPPT::where('registration_id', $id)->get();
-        dd($cppt);
         $jaminan = $registration->penjamin->name;
         if ($jaminan === 'Umum') {
             $penjamin = 'Jaminan Pribadi';
