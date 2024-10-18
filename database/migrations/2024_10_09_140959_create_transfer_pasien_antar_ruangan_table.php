@@ -11,46 +11,44 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::create('transfer_pasien_antar_ruangan', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('registration_id')->constrained('registrations')->cascadeOnDelete();
 
             // ================ Transfer Pasien Antar Ruangan ================
-            $table->string('tgl')->nullable();
-            $table->string('jam')->nullable();
-            $table->string('tgl_masuk_pasien')->nullable();
-            $table->string('jam_masuk_pasien')->nullable();
+            $table->string('tgl', 50)->nullable();
+            $table->string('jam', 50)->nullable();
+            $table->string('tgl_masuk_pasien', 50)->nullable();
+            $table->string('jam_masuk_pasien', 50)->nullable();
             $table->text('asesmen')->nullable();
             $table->text('masalah_keperawatan')->nullable();
-
-            $table->string('dokter')->nullable();
-            $table->string('dokter2')->nullable();
-            $table->string('dokter3')->nullable();
+            $table->string('dokter', 100)->nullable();
+            $table->string('dokter2', 100)->nullable();
+            $table->string('dokter3', 100)->nullable();
 
             // ----------------- Asal Ruangan : ------------------
-            $table->string('ruangan_asal')->nullable();
-            $table->string('kelas_asal')->nullable();
-            $table->string('ruangan_pindah')->nullable();
-            $table->string('kelas_pindah')->nullable();
-            $table->string('tiba_diruangan')->nullable();
+            $table->string('ruangan_asal', 100)->nullable();
+            $table->string('kelas_asal', 50)->nullable();
+            $table->string('ruangan_pindah', 100)->nullable();
+            $table->string('kelas_pindah', 50)->nullable();
 
             // ----------------- Asal Ruangan : ------------------
             $table->text('keluhan_utama')->nullable();
-            $table->string('kondisi_pasien')->nullable();
-            $table->string('keadaan_umum')->nullable();
-            $table->string('keadaan_umum_gcs')->nullable();
-            $table->string('ket_gcs')->nullable();
+            $table->string('tiba_diruangan', 100)->nullable();
+            $table->string('keadaan_umum', 100)->nullable();
+            $table->string('ket_gcs', 100)->nullable();
 
             // ----------------- TTV : ------------------
-            $table->string('td')->nullable();
-            $table->string('nd')->nullable();
-            $table->string('rr')->nullable();
-            $table->string('sb')->nullable();
-            $table->string('bb')->nullable();
-            $table->string('tb')->nullable();
-            $table->string('spo2')->nullable();
-            $table->string('status_nyeri')->nullable();
+            $table->string('td', 50)->nullable();
+            $table->string('nd', 50)->nullable();
+            $table->string('rr', 50)->nullable();
+            $table->string('sb', 50)->nullable();
+            $table->string('bb', 50)->nullable();
+            $table->string('tb', 50)->nullable();
+            $table->string('spo2', 50)->nullable();
+            $table->string('status_nyeri', 50)->nullable();
 
             // ----------------- Alasan pemindahan pasien: ------------------
             $table->string('tindakan')->nullable();

@@ -438,7 +438,6 @@
                         @include('pages.simrs.pendaftaran.partials.perawat.pengkajian-nurse-rajal')
                         @include('pages.simrs.pendaftaran.partials.perawat.transfer-pasien-antar-ruangan')
                         {{-- Dokter --}}
-                        @include('pages.simrs.pendaftaran.partials.perawat.pengkajian-nurse-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.pengkajian-dokter-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.cppt')
                         @include('pages.simrs.pendaftaran.partials.dokter.resume-medis-rajal')

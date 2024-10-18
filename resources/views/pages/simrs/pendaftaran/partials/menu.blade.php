@@ -85,7 +85,7 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $('.click-menu').click(function() {
-
+            const no_rm = "{{ $registration->patient->medical_record_number }}";
             const targetTab = $(this).attr('href');
 
             // Menghapus class 'active' dari semua dropdown-item dan tab
@@ -109,13 +109,16 @@
             $.ajax({
                 type: "GET",
                 url: `/api/simrs/erm/${menu}/${type}/${registration_number}/get`,
+                data: {
+                    no_rm: no_rm
+                },
                 success: function(response) {
                     if (menu == 'dokter-pengkajian') {
                         handleDokterPengkajian(response);
-                    } else if (menu == 'dokter-cppt') {
-                        console.log(true);
                     } else if (menu == 'perawat-pengkajian') {
                         handlePerawatPengkajian(response);
+                    } else if (menu == 'dokter-cppt') {
+                        console.log(true);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -136,6 +139,49 @@
                     }
                 }
             });
+
+            function loadCPPTData(response) {
+                $('#list_soap').empty();
+
+                // Iterasi setiap data dan tambahkan ke dalam tabel
+                $.each(response, function(index, data) {
+                    var row = `
+                        <tr>
+                            <td class="text-center">
+                                <div class="deep-purple-text">${data.created_at}<br>
+                                    <span class="green-text" style="font-weight:400;">${data.tipe_rawat}</span><br>
+                                    <b style="font-weight: 400;">Dokter ID: ${data.doctor_id}</b><br>
+                                    <div class="input-oleh deep-orange-text">Input oleh: ${data.user_id}</div>
+                                    <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
+                                    <div>
+                                        <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <table width="100%" class="table-soap nurse">
+                                    <tbody>
+                                        <tr><td colspan="3" class="soap-text title">CPPT</td></tr>
+                                        <tr><td class="soap-text deep-purple-text text-center" width="8%">S</td><td>${data.subjective.replace(/\n/g, "<br>")}</td></tr>
+                                        <tr><td class="soap-text deep-purple-text text-center">O</td><td>${data.objective.replace(/\n/g, "<br>")}</td></tr>
+                                        <tr><td class="soap-text deep-purple-text text-center">A</td><td>${data.assesment}</td></tr>
+                                        <tr><td class="soap-text deep-purple-text text-center">P</td><td>${data.planning}</td></tr>
+                                        <tr><td class="soap-text deep-purple-text text-center">I</td><td>${data.instruksi}</td></tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td>
+                                <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap" data-id="${data.id}" title="Copy"></i>
+                                <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap" data-id="${data.id}" title="Hapus"></i>
+                                <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap" data-id="${data.id}" title="Edit SOAP & Resep Elektronik"></i>
+                                <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print Antrian Resep"></i>
+                            </td>
+                        </tr>
+                    `;
+                    // Tambahkan ke dalam tabel
+                    $('#list_soap').append(row);
+                });
+            }
 
             function handleDokterPengkajian(response) {
                 $('#pengkajian-dokter-rajal #registration_id').val(response.registration_id);

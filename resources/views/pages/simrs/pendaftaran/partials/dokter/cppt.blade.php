@@ -26,7 +26,8 @@
                     <div id="add_soap" class="panel-content collapse in" aria-expanded="true">
                         <form method="post" class="form-horizontal" id="fsSOAP" autocomplete="off">
                             <input type="hidden" name="registration_id" value="{{ $registration->id }}" />
-                            <input type="hidden" name="departement_id" value="{{ $registration->departement_id }}" />
+                            <input type="hidden" name="medical_record_number" id="noRM_cppt"
+                                value="{{ $registration->patient->medical_record_number }}" />
 
                             <!-- Perawat -->
                             <div class="row">
@@ -503,9 +504,8 @@ Skrining Nyeri:
         }
 
         function submitFormCPPT(actionType) {
-            const form = $('#cppt-dokter-rajal-form'); // Ambil form
-            const registrationNumber = "{{ $registration->registration_number }}"; // Ambil registration number
-            // const actionType = 'rawat-jalan';
+            const form = $('#cppt-dokter-rajal-form');
+            const registrationNumber = "{{ $registration->registration_number }}";
 
             const url =
                 "{{ route('cppt.dokter-rajal.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
