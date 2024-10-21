@@ -56,6 +56,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::get('/dokter-cppt/get', [CPPTController::class, 'getCPPT'])->name('cppt.get');
         Route::post('/dokter-cppt/{type}/{registration_number}/store', [CPPTController::class, 'store'])->name('cppt.dokter-rajal.store');
         Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
+        Route::get('/dokter-resume-medis/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('resume-medis.dokter-rajal.get');
+        Route::post('/dokter-resume-medis/{type}/{registration_number}/store', [CPPTController::class, 'getCPPT'])->name('resume-medis.dokter-rajal.store');
     });
 
     Route::prefix('master-data')->group(function () {
