@@ -435,8 +435,8 @@
                         @include('pages.simrs.pendaftaran.partials.menu')
                         @include('pages.simrs.pendaftaran.partials.header-pasien')
                         {{-- Perawat --}}
-                        @include('pages.simrs.pendaftaran.partials.perawat.transfer-pasien-antar-ruangan')
                         @include('pages.simrs.pendaftaran.partials.perawat.pengkajian-nurse-rajal')
+                        @include('pages.simrs.pendaftaran.partials.perawat.transfer-pasien-antar-ruangan')
                         {{-- Dokter --}}
                         @include('pages.simrs.pendaftaran.partials.dokter.pengkajian-dokter-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.cppt')
@@ -466,8 +466,20 @@
 
     <script>
         $(document).ready(function() {
+
+            $('.menu-layanan').on('click', function() {
+                // Sembunyikan menu layanan dengan efek fade out
+                $('#menu-layanan').fadeOut(500); // 500ms untuk transisi
+
+                // Ambil data-layanan untuk menentukan ID elemen yang akan ditampilkan
+                var namaLayanan = $(this).data('layanan');
+                var pengkajianId = $('#pengkajian-rajal-id').val();
+
+                // Tampilkan elemen layanan yang dipilih dengan efek fade in
+                $('#' + namaLayanan).delay(500).fadeIn(500); // 500ms untuk transisi
+            });
+
             var doctorOptions = @json($groupedDoctors);
-            $('#pengkajian-nurse-rajal').hide();
             // Select 2
             $(function() {
                 $('.select2').select2();
@@ -490,53 +502,6 @@
                     dropdownParent: $('#ganti-dpjp')
                 });
             });
-
-            // $('pengkajian-nurse-rajal-form').on('submit', function(e) {
-            //     e.preventDefault();
-            //     let formData = $(this).serialize();
-            //     const submitButton = $('pengkajian-nurse-rajal-form').find('button[type="submit"]');
-            //     submitButton.prop('disabled', true);
-            //     $.ajax({
-            //         type: "POST",
-            //         url: '/api/simrs/pengkajian/nurse-rajal/store',
-            //         data: formData,
-            //         beforeSend: function() {
-            //             $('pengkajian-nurse-rajal-form').find('.ikon-tambah').hide();
-            //             $('pengkajian-nurse-rajal-form').find('.spinner-text').removeClass(
-            //                 'd-none');
-            //         },
-            //         success: function(response) {
-            //             $('pengkajian-nurse-rajal-form').find('.ikon-edit').show();
-            //             $('pengkajian-nurse-rajal-form').find('.spinner-text').addClass(
-            //                 'd-none');
-            //             $('#tambah-data').modal('hide');
-            //             showSuccessAlert(response.message)
-            //             setTimeout(function() {
-            //                 location.reload();
-            //             }, 500);
-            //         },
-            //         error: function(xhr, status, error) {
-            //             $('#tambah-data').modal('hide');
-            //             if (xhr.status === 422) {
-            //                 var errors = xhr.responseJSON.errors;
-            //                 var errorMessages = '';
-
-            //                 $.each(errors, function(key, value) {
-            //                     errorMessages += value +
-            //                         '\n';
-            //                 });
-
-            //                 // $('#modal-tambah-grup-tindakan').modal('hide');
-            //                 showErrorAlert('Terjadi kesalahan:\n' +
-            //                     errorMessages);
-            //             } else {
-            //                 // $('#modal-tambah-grup-tindakan').modal('hide');
-            //                 showErrorAlert('Terjadi kesalahan: ' + error);
-            //                 console.log(error);
-            //             }
-            //         }
-            //     });
-            // });
 
             $('#cppt-table').DataTable({
                 responsive: true,
@@ -641,18 +606,6 @@
                 return data;
             }
 
-            /*if($('#alergi_obat1').is(':checked') || $('#ket_alergi_obat').val()!='')
-              $('#ket_alergi_obat').show();
-            else
-              $('#ket_alergi_obat').hide();
-
-            $('#alergi_obat1').on('click',function(){
-              $('#ket_alergi_obat').show();
-            });
-
-            $('#alergi_obat2').on('click',function(){
-              $('#ket_alergi_obat').hide().val('');
-            });*/
 
             function get_bmi() {
                 var A = $('#body_height').val();

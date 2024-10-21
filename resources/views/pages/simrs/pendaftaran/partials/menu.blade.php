@@ -2,11 +2,12 @@
     <div class="col-md-12">
         <ul class="nav nav-tabs px-3 py-2" role="tablist" style="border-top: 1px solid #dddddd !important;">
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#" role="button"
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                     aria-haspopup="true" aria-expanded="false">PERAWAT</a>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item active" data-toggle="tab" href="#pengkajian-perawat-rajal"
-                        role="tab">Pengkajian</a>
+                    <a class="dropdown-item click-menu" data-toggle="tab" href="#pengkajian-perawat-rajal"
+                        role="tab" data-regist="{{ $registration->registration_number }}" data-type="rawat-jalan"
+                        data-action="perawat-pengkajian">Pengkajian</a>
                     <a class="dropdown-item" href="#">CPPT</a>
                     <a class="dropdown-item" data-toggle="tab" href="#transfer-pasien-antar-ruangan"
                         role="tab">Transfer
@@ -48,7 +49,8 @@
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian Resep</a>
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Form Meso</a>
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Profil Obat</a>
-                    <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Form Rekonsoliasi
+                    <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Form
+                        Rekonsoliasi
                         Obat</a>
                 </div>
             </li>
@@ -101,6 +103,8 @@
             let menu = $(this).attr('data-action');
             let type = $(this).attr('data-type');
             let registration_number = $(this).attr('data-regist');
+            console.log(`/api/simrs/erm/${menu}/${type}/${registration_number}/get`);
+
 
             $.ajax({
                 type: "GET",
@@ -111,8 +115,10 @@
                 success: function(response) {
                     if (menu == 'dokter-pengkajian') {
                         handleDokterPengkajian(response);
+                    } else if (menu == 'perawat-pengkajian') {
+                        handlePerawatPengkajian(response);
                     } else if (menu == 'dokter-cppt') {
-                        // loadCPPTData(response);
+                        console.log(true);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -239,6 +245,77 @@
                 } else {
                     $('#pengkajian-dokter-rajal #tidak_ada').prop('checked', true);
                     $('#alergiInput').val('').prop('disabled', true);
+                }
+
+                // Menampilkan alert jika masih dalam draft
+                if (response.is_final == 0) {
+                    $('#alert-pengkajian').html(`
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Pegnkajian masih save draft! harap save final jika sudah fix!</strong>
+                        </div>
+                    `);
+                }
+            }
+
+            function handlePerawatPengkajian(response) {
+                $('#pengkajian-nurse-rajal-form #tgl_masuk').val(response.tgl_masuk);
+                $('#pengkajian-nurse-rajal-form #jam_masuk').val(response.jam_masuk);
+                $('#pengkajian-nurse-rajal-form #tgl_dilayani').val(response
+                    .tgl_dilayani);
+                $('#pengkajian-nurse-rajal-form #jam_dilayani').val(response
+                    .jam_dilayani);
+                $('#pengkajian-nurse-rajal-form #keluhan_utama').val(response
+                    .keluhan_utama);
+                $('#pengkajian-nurse-rajal-form #pr').val(response.pr);
+                $('#pengkajian-nurse-rajal-form #rr').val(response.rr);
+                $('#pengkajian-nurse-rajal-form #bp').val(response.bp);
+                $('#pengkajian-nurse-rajal-form #temperatur').val(response
+                    .temperatur);
+                $('#pengkajian-nurse-rajal-form #body_height').val(response
+                    .body_height);
+                $('#pengkajian-nurse-rajal-form #body_weight').val(response
+                    .body_weight);
+                $('#pengkajian-nurse-rajal-form #bmi').val(response.bmi);
+                $('#pengkajian-nurse-rajal-form #kat_bmi').val(response.kat_bmi);
+                $('#pengkajian-nurse-rajal-form #sp02').val(response.sp02);
+                $('#pengkajian-nurse-rajal-form #lingkar_kepala').val(response
+                    .lingkar_kepala);
+                $('#pengkajian-nurse-rajal-form #lingkar_kepala').val(response
+                    .lingkar_kepala);
+                // Set the value for Select2 elements
+                $('#pengkajian-nurse-rajal-form #diagnosa_keperawatan').val(response
+                    .diagnosa_keperawatan).trigger('change');
+                $('#pengkajian-nurse-rajal-form #rencana_tindak_lanjut').val(response
+                    .rencana_tindak_lanjut).trigger('change');
+                // Assuming 'response' is the object retrieved from the responsebase
+                if (response.alergi_obat === "Ya") {
+                    $('#pengkajian-nurse-rajal-form #ket_alergi_obat').val(response
+                        .ket_alergi_obat);
+                    $('#pengkajian-nurse-rajal-form #alergi_obat1').prop(
+                        'checked', true);
+                } else if (response.alergi_obat === "Tidak") {
+                    $('#pengkajian-nurse-rajal-form #alergi_obat2').prop(
+                        'checked', true);
+                }
+                if (response.alergi_makanan === "Ya") {
+                    $('#pengkajian-nurse-rajal-form #ket_alergi_makanan').val(
+                        response
+                        .ket_alergi_makanan);
+                    $('#pengkajian-nurse-rajal-form #alergi_makanan1').prop(
+                        'checked', true);
+                } else if (response.alergi_makanan === "Tidak") {
+                    $('#pengkajian-nurse-rajal-form #alergi_makanan2').prop(
+                        'checked', true);
+                }
+                if (response.alergi_lainnya === "Ya") {
+                    $('#pengkajian-nurse-rajal-form #ket_alergi_lainnya').val(
+                        response
+                        .ket_alergi_lainnya);
+                    $('#pengkajian-nurse-rajal-form #alergi_lainnya1').prop(
+                        'checked', true);
+                } else if (response.alergi_lainnya === "Tidak") {
+                    $('#pengkajian-nurse-rajal-form #alergi_lainnya2').prop(
+                        'checked', true);
                 }
 
                 // Menampilkan alert jika masih dalam draft

@@ -10,16 +10,19 @@ use Illuminate\Http\Request;
 
 class PengkajianController extends Controller
 {
-    public function getPengkajianRajal($id)
+    public function getPengkajianRajal(Request $request, $type, $registration_number)
     {
         try {
-            $pengkajian = PengkajianNurseRajal::findOrFail($id);
-            // Jika data pic disimpan sebagai JSON string, parse dulu
-            return response()->json($pengkajian, 200);
+            $registration = Registration::where('registration_number', $registration_number)->where('registration_type', $type)->first();
+            $pengkajian = $registration->pengkajian_nurse_rajal;
+            if ($pengkajian) {
+                return response()->json($pengkajian, 200);
+            } else {
+
+                return response()->json(['error' => 'Data tidak ditemukan!'], 404);
+            }
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'No result'
-            ], 404);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -104,6 +107,7 @@ class PengkajianController extends Controller
 
         // Check if a PengkajianNurseRajal already exists for this registration
         $existingPengkajian = $registration->pengkajian_nurse_rajal;
+
 
         try {
             if ($existingPengkajian) {
