@@ -390,19 +390,16 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        let actionType = '';
 
         // Saat tombol Save Draft diklik
         $('#sd-pengkajian-dokter-rajal').on('click', function() {
-            actionType = 'draft';
-            submitForm(actionType); // Panggil fungsi submitForm dengan parameter draft
+            submitForm('draft'); // Panggil fungsi submitForm dengan parameter draft
         });
 
 
         // Saat tombol Save Final diklik
         $('#sf-pengkajian-dokter-rajal').on('click', function() {
-            actionType = 'final';
-            submitForm(actionType); // Panggil fungsi submitForm dengan parameter final
+            submitForm('final'); // Panggil fungsi submitForm dengan parameter final
         });
 
         function submitForm(actionType) {

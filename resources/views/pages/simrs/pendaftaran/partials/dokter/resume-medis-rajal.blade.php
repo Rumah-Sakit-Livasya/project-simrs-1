@@ -283,16 +283,16 @@
                                     <button type="button"
                                         class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
                                         data-dismiss="modal" data-status="0">
-                                        <span class="mdi mdi-printer"></span> Simpan (draft)
+                                        <span class="mdi mdi-printer"></span> Cetak
                                     </button>
                                     <div style="width: 33%" class="d-flex justify-content-between">
                                         <button type="button"
-                                            class="btn btn-warning waves-effect text-white waves-light save-form d-flex align-items-center"
+                                            class="btn bsd-resume-medis-rajal btn-warning waves-effect text-white waves-light save-form d-flex align-items-center"
                                             data-dismiss="modal" data-status="0">
                                             <span class="mdi mdi-content-save"></span> Simpan (draft)
                                         </button>
                                         <button type="button"
-                                            class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                            class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center bsf-resume-medis-rajal"
                                             data-dismiss="modal" data-status="1">
                                             <span class="mdi mdi-content-save"></span> Simpan (final)
                                         </button>
@@ -306,3 +306,50 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('.bsd-resume-medis-rajal').on('click', function() {
+            console.log('draft');
+            // submitForm(actionType); // Panggil fungsi submitForm dengan parameter final
+        });
+        $('.bsf-resume-medis-rajal').on('click', function() {
+            console.log('final');
+            // submitForm(actionType); // Panggil fungsi submitForm dengan parameter final
+        });
+
+        function submitForm(actionType) {
+            const form = $('#pengkajian-dokter-rajal-form'); // Ambil form
+            const url = "{{ route('pengkajian.dokter-rajal.store') }}" // Ambil URL dari action form
+
+            let formData = form.serialize(); // Ambil data dari form
+
+            // Tambahkan tipe aksi (draft atau final) ke data form
+            formData += '&action_type=' + actionType + '&registration_id=' + "{{ $registration->id }}";
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: formData,
+                success: function(response) {
+                    if (actionType === 'draft') {
+                        showSuccessAlert('Data berhasil disimpan sebagai draft!');
+                    } else {
+                        showSuccessAlert('Data berhasil disimpan sebagai final!');
+                    }
+                    setTimeout(() => {
+                        console.log('Reloading the page now.');
+                        window.location.reload();
+                    }, 1000);
+                },
+                error: function(response) {
+                    // Tangani error
+                    var errors = response.responseJSON.errors;
+                    $.each(errors, function(key, value) {
+                        showErrorAlert(value[0]);
+                    });
+                }
+            });
+        }
+    });
+</script>
