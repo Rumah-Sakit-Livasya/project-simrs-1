@@ -82,7 +82,7 @@ class KPIController extends Controller
 
         // Save the image to the storage
         $path = 'employee/ttd/' . $imageName;
-        Storage::disk('public')->put($path, base64_decode($image));
+        Storage::disk('private')->put($path, base64_decode($image));
 
         $employee = Employee::find($id);
         if ($employee) {

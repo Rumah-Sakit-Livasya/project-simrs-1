@@ -31,6 +31,7 @@ use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
+use App\Http\Controllers\SIMRS\ResumeMedisRajal\ResumeMedisRajalController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
 use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
@@ -38,8 +39,20 @@ use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Models\SIMRS\CPPT\CPPT;
+use Illuminate\Support\Facades\Storage;
 
 Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
+    Route::get('/signature/{filename}', function ($filename) {
+        // Pastikan user terautentikasi memiliki akses untuk file ini
+        $path = 'employee/ttd/' . $filename;
+
+        if (Storage::disk('private')->exists($path)) {
+            return Storage::disk('private')->response($path);
+        }
+
+        abort(404, 'File not found');
+    })->name('signature.show');
+
     Route::prefix('pengkajian')->group(function () {
         Route::prefix('nurse-rajal')->group(function () {
             Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
@@ -58,7 +71,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::post('/dokter-cppt/{type}/{registration_number}/store', [CPPTController::class, 'store'])->name('cppt.dokter-rajal.store');
         Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
         Route::get('/dokter-resume-medis/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('resume-medis.dokter-rajal.get');
-        Route::post('/dokter-resume-medis/{type}/{registration_number}/store', [CPPTController::class, 'getCPPT'])->name('resume-medis.dokter-rajal.store');
+        Route::post('/dokter-resume-medis/store', [ResumeMedisRajalController::class, 'store'])->name('resume-medis.dokter-rajal.store');
+        Route::post('/transfer/store', [CPPTController::class, 'getCPPT'])->name('pengkajian.transfer-pasien-antar-ruangan.store');
     });
 
     Route::prefix('master-data')->group(function () {

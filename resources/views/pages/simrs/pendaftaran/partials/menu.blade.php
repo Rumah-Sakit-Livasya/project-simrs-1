@@ -24,7 +24,7 @@
                     <a class="dropdown-item click-menu" data-toggle="tab" data-action="dokter-cppt"
                         data-regist="{{ $registration->registration_number }}" data-type="rawat-jalan"
                         href="#cppt-dokter-rajal" role="tab">CPPT</a>
-                    <a class="dropdown-item click-menu" data-toggle="tab" data-action="dokter-resume-medis"
+                    <a class="dropdown-item click-menu" data-toggle="tab" data-action="dokter-resume-medis-rajal"
                         data-regist="{{ $registration->registration_number }}" data-type="rawat-jalan"
                         href="#resume-medis-rajal" role="tab">Resume
                         Medis</a>
@@ -103,7 +103,7 @@
             let menu = $(this).attr('data-action');
             let type = $(this).attr('data-type');
             let registration_number = $(this).attr('data-regist');
-            console.log(`/api/simrs/erm/${menu}/${type}/${registration_number}/get`);
+            // console.log(`/api/simrs/erm/${menu}/${type}/${registration_number}/get`);
 
 
             $.ajax({
@@ -118,6 +118,8 @@
                     } else if (menu == 'perawat-pengkajian') {
                         handlePerawatPengkajian(response);
                     } else if (menu == 'dokter-cppt') {
+                        console.log(true);
+                    } else if (menu == 'dokter-resume-medis-rajal') {
                         console.log(true);
                     }
                 },

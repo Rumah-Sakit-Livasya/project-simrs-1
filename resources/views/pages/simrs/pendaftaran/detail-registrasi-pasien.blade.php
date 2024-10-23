@@ -527,44 +527,6 @@
     <script>
         $(document).ready(function() {
 
-            function get_bmi_pd() {
-                var pdA = $('#pengkajian-dokter-rajal #body_height').val();
-                var pdB = $('#pengkajian-dokter-rajal #body_weight').val();
-                console.log(pdA);
-
-                if (pdA !== '' && pdB !== '') {
-                    pdA = pdA / 100; // Mengonversi tinggi dari cm ke m
-                    var pdC = pdB / (pdA * pdA); // Menghitung BMI
-                    pdC = Math.round(pdC * 10) / 10; // Membulatkan BMI
-
-                    // Menentukan kategori BMI
-                    if (pdC < 18.5) {
-                        $('#pengkajian-dokter-rajal #kat_bmi').val('Kurus');
-                    } else if (pdC > 24.9) {
-                        $('#pengkajian-dokter-rajal #kat_bmi').val('Gemuk');
-                    } else {
-                        $('#pengkajian-dokter-rajal #kat_bmi').val('Normal');
-                    }
-
-                    // Mengatur nilai BMI
-                    $('#pengkajian-dokter-rajal #bmi').val(pdC);
-
-                    // Menandai input sebagai 'dirty'
-                    $('#pengkajian-dokter-rajal #bmi, #pengkajian-dokter-rajal #kat_bmi').addClass('dirty');
-                } else {
-                    // Reset nilai jika input tidak valid
-                    $('#pengkajian-dokter-rajal #bmi').val('');
-                    $('#pengkajian-dokter-rajal #kat_bmi').val('');
-                    $('#pengkajian-dokter-rajal #bmi, #pengkajian-dokter-rajal #kat_bmi').removeClass('dirty');
-                }
-            }
-
-            // Memanggil fungsi get_bmi_pd pada saat halaman dimuat
-            get_bmi_pd();
-
-            // Mengikat fungsi get_bmi_pd ke event change pada elemen dengan kelas calc-bmi
-            $('.calc-bmi').on('change', get_bmi_pd);
-
             $('#histori_pengkajian').on('click', function() {
                 atmedic.App.popup({
                     url: base_url() + 'pengkajian/histori_pengkajian/189221',
