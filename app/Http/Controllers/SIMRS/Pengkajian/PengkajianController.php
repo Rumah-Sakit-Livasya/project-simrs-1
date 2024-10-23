@@ -97,7 +97,94 @@ class PengkajianController extends Controller
             'resiko_jatuh1' => 'nullable|string',
             'resiko_jatuh2' => 'nullable|string',
             'resiko_jatuh3' => 'nullable|string',
+
+            //======== RIWAYAT PSIKOSOSIAL, SPIRITUAL & KEPERCAYAAN =========
+            'status_psikologis' => 'nullable|string',
+            'status_spiritual' => 'nullable|string',
+            'masalah_prilaku' => 'nullable|string',
+            'hub_dengan_keluarga' => 'nullable|string',
+            'tempat_tinggal' => 'nullable|string',
+            'kerabat_dihub' => 'nullable|string',
+            'no_kontak_kerabat' => 'nullable|string',
+            'status_perkawinan' => 'nullable|string',
+            'pekerjaan' => 'nullable|string',
+            'penghasilan' => 'nullable|string',
+            'pendidikan' => 'nullable|string',
+
+            //======== KEBUTUHAN EDUKASI =========
+            'hambatan_belajar1' => 'nullable|string',
+            'hambatan_belajar2' => 'nullable|string',
+            'hambatan_belajar3' => 'nullable|string',
+            'hambatan_belajar4' => 'nullable|string',
+            'hambatan_belajar5' => 'nullable|string',
+            'hambatan_belajar6' => 'nullable|string',
+            'hambatan_belajar7' => 'nullable|string',
+            'hambatan_belajar8' => 'nullable|string',
+            'hambatan_belajar9' => 'nullable|string',
+            'hambatan_lainnya' => 'nullable|string',
+            'kebutuhan_penerjemah' => 'nullable|string',
+            'kebuthan_pembelajaran1' => 'nullable|string',
+            'kebuthan_pembelajaran2' => 'nullable|string',
+            'kebuthan_pembelajaran3' => 'nullable|string',
+            'kebuthan_pembelajaran4' => 'nullable|string',
+            'kebuthan_pembelajaran5' => 'nullable|string',
+            'kebuthan_pembelajaran6' => 'nullable|string',
+            'kebuthan_pembelajaran7' => 'nullable|string',
+            'pembelajaran_lainnya' => 'nullable|string',
+            'kebuthan_pembelajaran1' => 'nullable|string',
+
+            //======== Assesment fungsional =========
+            'sensorik_penglihatan' => 'nullable|string',
+            'sensorik_penciuman' => 'nullable|string',
+            'sensorik_pendengaran' => 'nullable|string',
+
+            //======== Kognitif =========
+            'kognitif' => 'nullable|string',
+
+            //======== Motorik =========
+            'motorik_aktifitas' => 'nullable|string',
+            'motorik_berjalan' => 'nullable|string',
         ]);
+        // Daftar semua checkbox yang diharapkan
+        $checkboxes = [
+            'hambatan_belajar1',
+            'hambatan_belajar2',
+            'hambatan_belajar3',
+            'hambatan_belajar4',
+            'hambatan_belajar5',
+            'hambatan_belajar6',
+            'hambatan_belajar7',
+            'hambatan_belajar8',
+            'hambatan_belajar9',
+            'kebuthan_pembelajaran1',
+            'kebuthan_pembelajaran2',
+            'kebuthan_pembelajaran3',
+            'kebuthan_pembelajaran4',
+            'kebuthan_pembelajaran5',
+            'kebuthan_pembelajaran6',
+            'kebuthan_pembelajaran7',
+            'kondisi_khusus1',
+            'kondisi_khusus2',
+            'kondisi_khusus3',
+            'kondisi_khusus4',
+            'kondisi_khusus5',
+            'kondisi_khusus6',
+            'kondisi_khusus7',
+            'kondisi_khusus8',
+            'imunisasi_dasar1',
+            'imunisasi_dasar2',
+            'imunisasi_dasar3',
+            'imunisasi_dasar4',
+            'imunisasi_dasar5',
+            'resiko_jatuh1',
+            'resiko_jatuh2',
+            'resiko_jatuh3',
+        ];
+
+        // Mengatur nilai ke null jika tidak ada request
+        foreach ($checkboxes as $key) {
+            $validatedData[$key] = $validatedData[$key] ?? null; // Jika tidak ada nilai, set ke null
+        }
 
         // Check if the registration type is 'rawat-jalan'
         $registration = Registration::find($validatedData['registration_id']);

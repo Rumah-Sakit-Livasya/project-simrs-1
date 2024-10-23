@@ -189,10 +189,11 @@
                 <div class="row mt-3">
                     <div class="col-md-6 mb-3">
                         <div class="form-group">
-                            <label for="nyeri" class="control-label text-primary">Diagnosa Keperawatan</label>
-                            <select name="diagnosa_keperawatan" id="diagnosa_keperawatan" class="select2">
+                            <label for="diagnosa-keperawatan" class="control-label text-primary">Diagnosa
+                                Keperawatan</label>
+                            <select name="diagnosa_keperawatan" id="diagnosa-keperawatan" class="select2">
                                 <option value="-">-</option>
-                                <option value="Gangguan rasa nyaman">Gangguan rasa nyaman</option>
+                                <option value="Gangguan rasa nyaman">Gangguan rasa nyaman</option>`
                                 <option value="Nyeri">Nyeri</option>
                                 <option value="Pola Nafas tidak efektif">Pola Nafas tidak efektif</option>
                                 <option value="Bersihan jalan nafas tidak efektif">Bersihan jalan nafas tidak efektif
@@ -211,8 +212,9 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="nyeri" class="control-label text-primary">Rencana Tindak Lanjut</label>
-                            <select name="rencana_tindak_lanjut" id="rencana_tindak_lanjut" class="select2">
+                            <label for="rencana-tindak-lanjut" class="control-label text-primary">Rencana Tindak
+                                Lanjut</label>
+                            <select name="rencana_tindak_lanjut" id="rencana-tindak-lanjut" class="select2">
                                 <option value="-">-</option>
                                 <option value="Kolaborasi Dokter">Kolaborasi Dokter</option>
                                 <option value="Perawatan Luka">Perawatan Luka</option>
@@ -324,8 +326,8 @@
                             <label for="kondisi_khusus1" class="control-label text-primary margin-tb-10">Gelang tanda
                                 alergi</label>
                             <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" value="warna merah"
-                                    name="gelang" id="gelang1">
+                                <input type="checkbox" class="custom-control-input" value="1" name="gelang"
+                                    id="gelang1">
                                 <label class="custom-control-label text-primary" for="gelang1">Dipasang (warna
                                     merah)</label>
                             </div>
@@ -823,93 +825,110 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="hambatan_belajar1" id="hambatan_belajar1" value="Pendengaran"
-                                        type="checkbox"> <span>Pendengaran</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="hambatan_belajar1"
+                                        id="hambatan_belajar1" value="Pendengaran" type="checkbox">
+                                    <label for="hambatan_belajar1"
+                                        class="custom-control-label text-primary">Pendengaran</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="hambatan_belajar2" id="hambatan_belajar2" value="Penglihatan"
-                                        type="checkbox"> <span>Penglihatan</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="hambatan_belajar2"
+                                        id="hambatan_belajar2" value="Penglihatan" type="checkbox">
+                                    <label for="hambatan_belajar2"
+                                        class="custom-control-label text-primary">Penglihatan</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="hambatan_belajar3" id="hambatan_belajar3" value="Kognitif"
-                                        type="checkbox"> <span>Kognitif</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="hambatan_belajar3"
+                                        id="hambatan_belajar3" value="Kognitif" type="checkbox">
+                                    <label for="hambatan_belajar3"
+                                        class="custom-control-label text-primary">Kognitif</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="hambatan_belajar4" id="hambatan_belajar4" value="Fisik"
-                                        type="checkbox"> <span>Fisik</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="hambatan_belajar4"
+                                        id="hambatan_belajar4" value="Fisik" type="checkbox">
+                                    <label for="hambatan_belajar4"
+                                        class="custom-control-label text-primary">Fisik</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row mt-3">
-                    <div class="col-md-3">
+                <div class="row">
+                    <div class="col-md-3 mt-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="hambatan_belajar5" id="hambatan_belajar5" value="Budaya"
-                                        type="checkbox"> <span>Budaya</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="hambatan_belajar5"
+                                        id="hambatan_belajar5" value="Budaya" type="checkbox">
+                                    <label for="hambatan_belajar5"
+                                        class="custom-control-label text-primary">Budaya</label>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 mt-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="hambatan_belajar6" id="hambatan_belajar6" value="Agama"
-                                        type="checkbox"> <span>Agama</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="hambatan_belajar6"
+                                        id="hambatan_belajar6" value="Agama" type="checkbox">
+                                    <label for="hambatan_belajar6"
+                                        class="custom-control-label text-primary">Agama</label>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 mt-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="hambatan_belajar7" id="hambatan_belajar7" value="Emosi"
-                                        type="checkbox"> <span>Emosi</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="hambatan_belajar7"
+                                        id="hambatan_belajar7" value="Emosi" type="checkbox">
+                                    <label for="hambatan_belajar7"
+                                        class="custom-control-label text-primary">Emosi</label>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 mt-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="hambatan_belajar8" id="hambatan_belajar8" value="Bahasa"
-                                        type="checkbox"> <span>Bahasa</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="hambatan_belajar8"
+                                        id="hambatan_belajar8" value="Bahasa" type="checkbox">
+                                    <label for="hambatan_belajar8"
+                                        class="custom-control-label text-primary">Bahasa</label>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-md-3">
+                    <div class="col-md-3 mt-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="ambatan_belajar9" id="ambatan_belajar9" value="Tidak ada Hamabatan"
-                                        type="checkbox"> <span>Tidak ada Hamabatan</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="hambatan_belajar9"
+                                        id="hambatan_belajar9" value="Tidak ada Hamabatan" type="checkbox">
+                                    <label for="hambatan_belajar9" class="custom-control-label text-primary">Tidak ada
+                                        Hamabatan</label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -937,40 +956,48 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="kebuthan_pembelajaran1" id="kebuthan_pembelajaran1"
-                                        value="Diagnosa managemen" type="checkbox"> <span>Diagnosa managemen</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="kebuthan_pembelajaran1"
+                                        id="kebuthan_pembelajaran1" value="Diagnosa managemen" type="checkbox">
+                                    <label for="kebuthan_pembelajaran1"
+                                        class="custom-control-label text-primary">Diagnosa managemen</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="kebuthan_pembelajaran2" id="kebuthan_pembelajaran2"
-                                        value="Obat-obatan" type="checkbox"> <span>Obat-obatan</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="kebuthan_pembelajaran2"
+                                        id="kebuthan_pembelajaran2" value="Obat-obatan" type="checkbox">
+                                    <label for="kebuthan_pembelajaran2"
+                                        class="custom-control-label text-primary">Obat-obatan</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="kebuthan_pembelajaran3" id="kebuthan_pembelajaran3"
-                                        value="Perawatan luka" type="checkbox"> <span>Perawatan luka</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="kebuthan_pembelajaran3"
+                                        id="kebuthan_pembelajaran3" value="Perawatan luka" type="checkbox">
+                                    <label for="kebuthan_pembelajaran3"
+                                        class="custom-control-label text-primary">Perawatan luka</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="kebuthan_pembelajaran4" id="kebuthan_pembelajaran4"
-                                        value="Rehabilitasi" type="checkbox"> <span>Rehabilitasi</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="kebuthan_pembelajaran4"
+                                        id="kebuthan_pembelajaran4" value="Rehabilitasi" type="checkbox">
+                                    <label for="kebuthan_pembelajaran4"
+                                        class="custom-control-label text-primary">Rehabilitasi</label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -979,30 +1006,36 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="kebuthan_pembelajaran5" id="kebuthan_pembelajaran5"
-                                        value="Manajemen nyeri" type="checkbox"> <span>Manajemen nyeri</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="kebuthan_pembelajaran5"
+                                        id="kebuthan_pembelajaran5" value="Manajemen nyeri" type="checkbox">
+                                    <label for="kebuthan_pembelajaran5"
+                                        class="custom-control-label text-primary">Manajemen nyeri</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="kebuthan_pembelajaran6" id="kebuthan_pembelajaran6"
-                                        value="Diet &amp; nutrisi" type="checkbox"> <span>Diet &amp; nutrisi</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="kebuthan_pembelajaran6"
+                                        id="kebuthan_pembelajaran6" value="Diet &amp; nutrisi" type="checkbox">
+                                    <label for="kebuthan_pembelajaran6" class="custom-control-label text-primary">Diet
+                                        &amp; nutrisi</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <div class="form-radio">
-                                <label class="checkbox-styled checkbox-success no-margin">
-                                    <input name="kebuthan_pembelajaran7" id="kebuthan_pembelajaran7"
-                                        value="Tidak ada Hamabatan" type="checkbox"> <span>Tidak ada Hamabatan</span>
-                                </label>
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" name="kebuthan_pembelajaran7"
+                                        id="kebuthan_pembelajaran7" value="Tidak ada Hamabatan" type="checkbox">
+                                    <label for="kebuthan_pembelajaran7"
+                                        class="custom-control-label text-primary">Tidak ada Hamabatan</label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1031,90 +1064,86 @@
                             <tr>
                                 <td>Penglihatan</td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="sensorik_penglihatan" value="Normal" data-skor="0"
-                                                class="apgar" type="radio">
-                                            <span>Normal</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="sensorik_penglihatan" id="sensorik_penglihatan1"
+                                            value="Normal" data-skor="0" class="custom-control-input"
+                                            type="radio">
+                                        <label class="custom-control-label"
+                                            for="sensorik_penglihatan1">Normal</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="sensorik_penglihatan" value="Kabur" data-skor="1"
-                                                class="apgar" type="radio">
-                                            <span>Kabur</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="sensorik_penglihatan" id="sensorik_penglihatan2"
+                                            value="Kabur" data-skor="1" class="custom-control-input"
+                                            type="radio">
+                                        <label class="custom-control-label"
+                                            for="sensorik_penglihatan2">Kabur</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="sensorik_penglihatan" value="Kaca Mata" data-skor="2"
-                                                class="apgar" type="radio">
-                                            <span>Kaca Mata</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="sensorik_penglihatan" id="sensorik_penglihatan3"
+                                            value="Kaca Mata" data-skor="2" class="custom-control-input"
+                                            type="radio">
+                                        <label class="custom-control-label" for="sensorik_penglihatan3">Kaca
+                                            Mata</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="sensorik_penglihatan" value="Lensa Kontak" data-skor="3"
-                                                class="apgar" type="radio">
-                                            <span>Lensa Kontak</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="sensorik_penglihatan" id="sensorik_penglihatan4"
+                                            value="Lensa Kontak" data-skor="3" class="custom-control-input"
+                                            type="radio">
+                                        <label class="custom-control-label" for="sensorik_penglihatan4">Lensa
+                                            Kontak</label>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td>Penciuman</td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="sensorik_penciuman" value="Normal" data-skor="0"
-                                                class="apgar" type="radio">
-                                            <span>Normal</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="sensorik_penciuman" id="sensorik_penciuman1" value="Normal"
+                                            data-skor="0" class="custom-control-input" type="radio">
+                                        <label class="custom-control-label" for="sensorik_penciuman1">Normal</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="sensorik_penciuman" value="Tidak" data-skor="1"
-                                                class="apgar" type="radio">
-                                            <span>Tidak</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="sensorik_penciuman" id="sensorik_penciuman2" value="Tidak"
+                                            data-skor="1" class="custom-control-input" type="radio">
+                                        <label class="custom-control-label" for="sensorik_penciuman2">Tidak</label>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td>Pendengaran</td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="sensorik_pendengaran" value="Normal" data-skor="0"
-                                                class="apgar" type="radio">
-                                            <span>Normal</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="sensorik_pendengaran" id="sensorik_pendengaran1"
+                                            value="Normal" data-skor="0" class="custom-control-input"
+                                            type="radio">
+                                        <label class="custom-control-label"
+                                            for="sensorik_pendengaran1">Normal</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="sensorik_pendengaran" value="Tuli Ka / Ki" data-skor="1"
-                                                class="apgar" type="radio">
-                                            <span>Tuli Ka / Ki</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="sensorik_pendengaran" id="sensorik_pendengaran2"
+                                            value="Tuli Ka / Ki" data-skor="1" class="custom-control-input"
+                                            type="radio">
+                                        <label class="custom-control-label" for="sensorik_pendengaran2">Tuli Ka /
+                                            Ki</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="sensorik_pendengaran" value="Ada alat bantu dengar ka/ki"
-                                                data-skor="2" class="apgar" type="radio">
-                                            <span>Ada alat bantu dengar ka/ki</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="sensorik_pendengaran" id="sensorik_pendengaran3"
+                                            value="Ada alat bantu dengar ka/ki" data-skor="2"
+                                            class="custom-control-input" type="radio">
+                                        <label class="custom-control-label" for="sensorik_pendengaran3">Ada alat
+                                            bantu dengar ka/ki</label>
                                     </div>
                                 </td>
                             </tr>
@@ -1132,37 +1161,32 @@
                                 <td>&nbsp;</td>
                                 <td>
                                     <div class="custom-control custom-radio custom-control-inline">
-                                        <input name="kognitif" class="custom-control-input" id="kognitif"
-                                            value="Normal" data-skor="0" class="apgar" type="radio">
+                                        <input name="kognitif" class="custom-control-input" id="kognitif1"
+                                            value="Normal" data-skor="0" type="radio">
                                         <label class="custom-control-label text-primary"
-                                            for="kognitif">Normal</label>
+                                            for="kognitif1">Normal</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="kognitif" value="Bingung" data-skor="1" class="apgar"
-                                                type="radio">
-                                            <span>Bingung</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="kognitif" class="custom-control-input" id="kognitif2"
+                                            value="Bingung" data-skor="1" type="radio">
+                                        <label class="custom-control-label" for="kognitif2">Bingung</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="kognitif" value="Pelupa" data-skor="2" class="apgar"
-                                                type="radio">
-                                            <span>Pelupa</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="kognitif" class="custom-control-input" id="kognitif3"
+                                            value="Pelupa" data-skor="2" type="radio">
+                                        <label class="custom-control-label" for="kognitif3">Pelupa</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="kognitif" value="Tidak Dapat dimengerti" data-skor="3"
-                                                class="apgar" type="radio">
-                                            <span>Tidak Dapat dimengerti</span>
-                                        </label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input name="kognitif" class="custom-control-input" id="kognitif4"
+                                            value="Tidak Dapat dimengerti" data-skor="3" type="radio">
+                                        <label class="custom-control-label" for="kognitif4">Tidak Dapat
+                                            dimengerti</label>
                                     </div>
                                 </td>
                             </tr>
@@ -1179,96 +1203,88 @@
                             <tr>
                                 <td>Aktifitas Sehari - hari</td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="motorik_aktifitas" value="Mandiri" data-skor="0"
-                                                class="apgar" type="radio">
-                                            <span>Mandiri</span>
-                                        </label>
+                                    <div class="custom-control custom-radio">
+                                        <input name="motorik_aktifitas" id="motorik_aktifitas1" value="Mandiri"
+                                            data-skor="0" class="custom-control-input" type="radio">
+                                        <label class="custom-control-label text-primary"
+                                            for="motorik_aktifitas1">Mandiri</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="motorik_aktifitas" value="Bantuan Minimal" data-skor="1"
-                                                class="apgar" type="radio">
-                                            <span>Bantuan Minimal</span>
-                                        </label>
+                                    <div class="custom-control custom-radio">
+                                        <input name="motorik_aktifitas" id="motorik_aktifitas2"
+                                            value="Bantuan Minimal" data-skor="1" class="custom-control-input"
+                                            type="radio">
+                                        <label class="custom-control-label text-primary"
+                                            for="motorik_aktifitas2">Bantuan Minimal</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="motorik_aktifitas" value="Bantuan Ketergantungan Total"
-                                                data-skor="2" class="apgar" type="radio">
-                                            <span>Bantuan Ketergantungan Total</span>
-                                        </label>
+                                    <div class="custom-control custom-radio">
+                                        <input name="motorik_aktifitas" id="motorik_aktifitas3"
+                                            value="Bantuan Ketergantungan Total" data-skor="2"
+                                            class="custom-control-input" type="radio">
+                                        <label class="custom-control-label text-primary"
+                                            for="motorik_aktifitas3">Bantuan Ketergantungan Total</label>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td>Berjalan</td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="motorik_berjalan" value="Tidak Ada kesulitan"
-                                                data-skor="0" class="apgar" type="radio">
-                                            <span>Tidak Ada kesulitan</span>
-                                        </label>
+                                    <div class="custom-control custom-radio">
+                                        <input name="motorik_berjalan" id="motorik_berjalan1"
+                                            value="Tidak Ada kesulitan" data-skor="0"
+                                            class="custom-control-input" type="radio">
+                                        <label class="custom-control-label text-primary"
+                                            for="motorik_berjalan1">Tidak Ada kesulitan</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="motorik_berjalan" value="Perlu Bantuan" data-skor="1"
-                                                class="apgar" type="radio">
-                                            <span>Perlu Bantuan</span>
-                                        </label>
+                                    <div class="custom-control custom-radio">
+                                        <input name="motorik_berjalan" id="motorik_berjalan2"
+                                            value="Perlu Bantuan" data-skor="1" class="custom-control-input"
+                                            type="radio">
+                                        <label class="custom-control-label text-primary"
+                                            for="motorik_berjalan2">Perlu Bantuan</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="motorik_berjalan" value="Sering Jatuh" data-skor="0"
-                                                class="apgar" type="radio">
-                                            <span>Sering Jatuh</span>
-                                        </label>
+                                    <div class="custom-control custom-radio">
+                                        <input name="motorik_berjalan" id="motorik_berjalan3" value="Sering Jatuh"
+                                            data-skor="0" class="custom-control-input" type="radio">
+                                        <label class="custom-control-label text-primary"
+                                            for="motorik_berjalan3">Sering Jatuh</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="radio radio-styled">
-                                        <label>
-                                            <input name="motorik_berjalan" value="Kelumpuhan" data-skor="1"
-                                                class="apgar" type="radio">
-                                            <span>Kelumpuhan</span>
-                                        </label>
+                                    <div class="custom-control custom-radio">
+                                        <input name="motorik_berjalan" id="motorik_berjalan4" value="Kelumpuhan"
+                                            data-skor="1" class="custom-control-input" type="radio">
+                                        <label class="custom-control-label text-primary"
+                                            for="motorik_berjalan4">Kelumpuhan</label>
                                     </div>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+
                 <div class="row mt-3">
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div
-                                style="min-height: 150px; display: flex; justify-content: flex-end; flex-direction: column; align-items: center;">
-                                <div>Perawat,</div>
-                                <div>
-                                    <input type="hidden" name="data_ttd" id="data_ttd" value="{ttd_perawat}"
-                                        data-imgview="img_ttd">
-                                    <img src="http://103.191.196.126:8888/testing/include/images/ttd_blank.png"
-                                        id="img_ttd" style="width: 200px; height:100px;"
-                                        onerror="this.onerror=null; this.src='http://103.191.196.126:8888/testing/include/images/ttd_blank.png'">
-                                </div>
-                                <div style="width: 70%;">
-                                    <input type="text" name="nama_dokter" class="form-control text-center">
-                                </div>
-                                <div>
-                                    <span class="badge blue pointer" id="btn-ttd">TTD Pen Tablet</span>
-                                </div>
-                            </div>
+                    <div class="col-md-4 text-center">
+                        <span>Perawat,</span>
+                        <div id="tombol-1" class="mt-3">
+                            <a class="btn btn-primary btn-sm text-white ttd" onclick="openSignaturePad(1)"
+                                id="ttd_pegawai">Tanda tangan</a>
                         </div>
+                        <div class="mt-3">
+                            <img id="signature-display-1" src="" alt="Signature Image"
+                                style="display:none; max-width:60%;">
+                        </div>
+                        <div class="mt-3">
+                            <span>{{ auth()->user()->employee->fullname }}</span>
+                        </div>
+
                     </div>
                 </div>
             </div>

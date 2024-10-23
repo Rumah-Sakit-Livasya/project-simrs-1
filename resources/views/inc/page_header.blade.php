@@ -1,5 +1,8 @@
 @php
+    use App\Models\User;
+
     $appType = session('app_type', 'hr'); // Default ke 'hr' jika tidak ada session
+    $users = User::where('is_active', 1)->get();
 @endphp
 
 <!-- BEGIN Page Header -->
@@ -42,6 +45,28 @@
         </a>
     </div>
     <div class="ml-auto d-flex">
+        <!-- Tombol untuk Memanggil Modal Impersonasi User -->
+        @if (Auth::user()->hasRole('super admin') && !session('original_user_id'))
+            <div class="d-flex align-items-center mr-4">
+                <button type="button" class="btn btn-sm btn-primary mr-3" data-toggle="modal"
+                    data-target="#impersonateModal">
+                    Impersonate
+                </button>
+            </div>
+        @endif
+
+        <!-- Tombol untuk Switchback ke Pengguna Asli -->
+        @if (session('original_user_id'))
+            <div class="d-flex align-items-center mr-4">
+                <form action="{{ route('switchback') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        Switch Back to Original User
+                    </button>
+                </form>
+            </div>
+        @endif
+
         @if ($appType == 'simrs')
             <div class="form-group mt-4 mr-3" id="header-search-bar">
                 <div class="input-group global-search d-flex align-items-center">
@@ -598,3 +623,32 @@
 
     </div>
 </header>
+
+<!-- Modal untuk Impersonasi User -->
+<div class="modal fade" id="impersonateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="impersonateModalLabel">Impersonate User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('impersonate') }}" method="POST">
+                    <input type="hidden" name="original_user" value="{{ auth()->user()->id }}">
+                    @csrf
+                    <div class="form-group">
+                        <label for="impersonate">Select User</label>
+                        <select name="user_id" id="impersonate" class="form-control select2">
+                            @foreach ($users as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Impersonate User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

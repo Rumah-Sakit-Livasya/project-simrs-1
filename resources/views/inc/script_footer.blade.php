@@ -56,6 +56,14 @@ DOC: if you remove pace.js from core please note on Internet Explorer some CSS a
     }
 
     $(document).ready(function() {
+        $('#impersonateModal').on('shown.bs.modal', function() {
+            $('#impersonate').select2({
+                placeholder: "Select a user",
+                dropdownParent: $('#impersonateModal'),
+                allowClear: true,
+            });
+        });
+
         $('.employeeId').click(function() {
             var employeeId = $(this).data('employee-id');
             var width = screen.width;
