@@ -7,6 +7,7 @@ use App\Models\Employee;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 use App\Models\SIMRS\Pengkajian\TransferPasienAntarRuangan;
+use App\Models\SIMRS\ResumeMedisRajal\ResumeMedisRajal;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -41,6 +42,11 @@ class Registration extends Model implements AuditableContract
     public function pengkajian_dokter_rajal()
     {
         return $this->hasOne(PengkajianDokterRajal::class, 'registration_id');
+    }
+
+    public function resume_medis_rajal()
+    {
+        return $this->hasOne(ResumeMedisRajal::class, 'registration_id');
     }
 
     public function departement()

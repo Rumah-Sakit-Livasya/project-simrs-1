@@ -14,13 +14,15 @@ return new class extends Migration
         Schema::create('resume_medis_rajal', function (Blueprint $table) {
             $table->id();
             $table->string('nama_pasien', 100);
+            $table->foreignId('registration_id')->constrained('registrations')->cascadeOnDelete();
             $table->string('medical_record_number');
             $table->foreign('medical_record_number')
                 ->references('medical_record_number')->on('patients')
                 ->onDelete('cascade');
             $table->date('tgl_lahir');
             $table->string('jenis_kelamin', 100);
-            $table->date('tgl_masuk');
+            $table->dateTime('tgl_masuk');
+            $table->string('alasan_masuk_rs');
             $table->string('cara_keluar');
             $table->string('berat_lahir', 30)->nullable();
             $table->text('anamnesa');

@@ -104,13 +104,16 @@
             let type = $(this).attr('data-type');
             let registration_number = $(this).attr('data-regist');
             // console.log(`/api/simrs/erm/${menu}/${type}/${registration_number}/get`);
+            const token = "{{ csrf_token() }}";
+
 
 
             $.ajax({
                 type: "GET",
                 url: `/api/simrs/erm/${menu}/${type}/${registration_number}/get`,
                 data: {
-                    no_rm: no_rm
+                    no_rm: no_rm,
+                    token: token
                 },
                 success: function(response) {
                     if (menu == 'dokter-pengkajian') {
@@ -120,7 +123,7 @@
                     } else if (menu == 'dokter-cppt') {
                         console.log(true);
                     } else if (menu == 'dokter-resume-medis-rajal') {
-                        console.log(true);
+                        handleResumeMedisRajal(response);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -328,6 +331,67 @@
                         </div>
                     `);
                 }
+            }
+
+            function handleResumeMedisRajal(response) {
+                $('#resume-medis-rajal-form #nama_pasien').val(response.nama_pasien);
+                $('#resume-medis-rajal-form #medical_record_number').val(response
+                    .medical_record_number);
+                $('#resume-medis-rajal-form #tgl_lahir').val(response
+                    .tgl_lahir);
+                $('#resume-medis-rajal-form #jenis_kelamin').val(response
+                    .jenis_kelamin);
+                let tgl_masuk = response.tgl_masuk; // Misalnya '2024-10-23 07:00:00'
+
+                // Ganti spasi dengan 'T' dan potong bagian detik (SS)
+                let formatted_tgl_masuk = tgl_masuk.replace(' ', 'T').slice(0, 16);
+
+                // Set nilai ke input datetime-local
+                $('#resume-medis-rajal-form #tgl_masuk').val(formatted_tgl_masuk);
+                $('#resume-medis-rajal-form #anamnesa').text(response
+                    .anamnesa);
+                $('#resume-medis-rajal-form #diagnosa_utama').text(response
+                    .diagnosa_utama);
+                $('#resume-medis-rajal-form #diagnosa_tambahan').text(response
+                    .diagnosa_tambahan);
+                $('#resume-medis-rajal-form #tindakan_utama').text(response
+                    .tindakan_utama);
+                $('#resume-medis-rajal-form #tindakan_tambahan').text(response
+                    .tindakan_tambahan);
+
+                // Untuk alasan_masuk_rs
+                $('#resume-medis-rajal-form input[name="alasan_masuk_rs"][value="' + response
+                    .alasan_masuk_rs + '"]').prop(
+                    'checked', true);
+
+                // Untuk cara_keluar
+                $('#resume-medis-rajal-form input[name="cara_keluar"][value="' + response.cara_keluar +
+                    '"]').prop('checked',
+                    true);
+
+                if (response.is_final == 0 && response.is_final != null) {
+                    $('#alert-resume-medis-rajal').html(`
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Resume masih save draft! harap save final jika sudah fix!</strong>
+                        </div>
+                    `);
+                } else if (response.is_final == 1 && response.is_final != null) {
+                    $('#alert-resume-medis-rajal').html(`
+                        <div class="alert alert-primary" role="alert">
+                            <strong>Resume medis sudah di save final!</strong>
+                        </div>
+                    `);
+
+                }
+
+                if (response.is_ttd == 1) {
+                    const ttd = "{{ auth()->user()->employee->ttd }}"
+                    const path = "/api/simrs/signature/" + ttd + "?token=" + token;
+                    $('#resume-medis-rajal-form .btn-ttd-resume-medis').hide();
+                    $('#signature-display').attr('src', path).show();
+                }
+
+                $('#resume-medis-rajal-form #rmj-button-wrapper').addClass('hidden');
             }
 
         });

@@ -1,4 +1,5 @@
 <div class="tab-pane fade mt-3 border-top" id="resume-medis-rajal" role="tabpanel">
+    <div id="alert-resume-medis-rajal"></div>
     <header class="text-primary text-center font-weight-bold mt-4 mb-4">
         <h2>RINGKASAN PASIEN RAWAT JALAN</h4>
     </header>
@@ -85,7 +86,7 @@
                                 <label>:</label>
                             </td>
                             <td>
-                                <input type="text" class="form-control" id="kelamin" name="kelamin"
+                                <input type="text" class="form-control" id="jenis_kelamin" name="jenis_kelamin"
                                     value="{{ $registration->patient->gender }}" readonly>
                             </td>
                             <td>
@@ -133,32 +134,32 @@
                             <td colspan="2">
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input custom-checkbox" type="radio" id="sembuh"
-                                        name="cara_keluar_rs" value="sembuh">
+                                        name="cara_keluar" value="sembuh">
                                     <label class="form-check-label" for="sembuh">Sembuh</label>
                                 </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input custom-checkbox" type="radio" id="meninggal"
-                                        name="cara_keluar_rs" value="meninggal">
+                                        name="cara_keluar" value="meninggal">
                                     <label class="form-check-label" for="meninggal">Meninggal</label>
                                 </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input custom-checkbox" type="radio" id="rawat"
-                                        name="cara_keluar_rs" value="rawat">
+                                        name="cara_keluar" value="rawat">
                                     <label class="form-check-label" for="rawat">Rawat</label>
                                 </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input custom-checkbox" type="radio" id="rujuk"
-                                        name="cara_keluar_rs" value="rujuk">
+                                        name="cara_keluar" value="rujuk">
                                     <label class="form-check-label" for="rujuk">Rujuk</label>
                                 </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input custom-checkbox" type="radio" id="aps"
-                                        name="cara_keluar_rs" value="aps">
+                                        name="cara_keluar" value="aps">
                                     <label class="form-check-label" for="aps">APS</label>
                                 </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input custom-checkbox" type="radio" id="kontrol"
-                                        name="cara_keluar_rs" value="kontrol">
+                                        name="cara_keluar" value="kontrol">
                                     <label class="form-check-label" for="kontrol">Kontrol</label>
                                 </div>
                             </td>
@@ -287,7 +288,7 @@
                                                 </div>
                                             </td>
                                             <td style="width: 10%">
-
+                                                <input type="hidden" name="is_ttd">
                                             </td>
                                         </tr>
                                     </tbody>
@@ -303,15 +304,16 @@
                                             data-dismiss="modal" data-status="0">
                                             <span class="mdi mdi-printer"></span> Cetak
                                         </button>
-                                        <div style="width: 33%" class="d-flex justify-content-between">
+                                        <div style="width: 33%" class="d-flex justify-content-between"
+                                            id="rmj-button-wrapper">
                                             <button type="button"
                                                 class="btn bsd-resume-medis-rajal btn-warning waves-effect text-white waves-light save-form d-flex align-items-center"
-                                                data-dismiss="modal" data-status="0">
+                                                data-status="0">
                                                 <span class="mdi mdi-content-save"></span> Simpan (draft)
                                             </button>
                                             <button type="button"
                                                 class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center bsf-resume-medis-rajal"
-                                                data-dismiss="modal" data-status="1">
+                                                data-status="1">
                                                 <span class="mdi mdi-content-save"></span> Simpan (final)
                                             </button>
                                         </div>
@@ -346,13 +348,13 @@
 
         $('.btn-ttd-resume-medis').on('click', function() {
             const idUser = $(this).attr('data-id');
-
+            const token = "{{ csrf_token() }}";
             const ttd = "{{ auth()->user()->employee->ttd ? auth()->user()->employee->ttd : '' }}";
 
             if (ttd) {
-                const path =
-                    "{{ route('signature.show', ['filename' => auth()->user()->employee->ttd]) }}";
+                const path = "/api/simrs/signature/" + ttd + "?token=" + token;
                 $(this).hide();
+                $('input[name=is_ttd]').val(1);
                 $('#signature-display').attr('src', path).show();
             } else {
                 showErrorAlert('Tanda tangan tidak ditemukan!');
@@ -384,11 +386,7 @@
                     }, 1000);
                 },
                 error: function(response) {
-                    // Tangani error
-                    var errors = response.responseJSON.errors;
-                    $.each(errors, function(key, value) {
-                        showErrorAlert(value[0]);
-                    });
+                    showErrorAlert('Gagal Disimpan!');
                 }
             });
         }

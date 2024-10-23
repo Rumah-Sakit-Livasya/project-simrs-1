@@ -70,6 +70,10 @@
         #resume-medis-rajal .form-check-inline {
             margin-right: 20px;
         }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 @endsection
 @section('content')
