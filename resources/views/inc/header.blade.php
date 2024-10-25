@@ -206,6 +206,10 @@
     aside.page-sidebar {
         margin-left: -3px;
     }
+
+    .swal2-popup {
+        margin-top: 80px !important;
+    }
 </style>
 @yield('extended-css')
 
