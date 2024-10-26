@@ -12,6 +12,7 @@ use App\Http\Controllers\Pages\UpdateProfileController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SurveiKebersihanKamarController;
 use App\Http\Controllers\SwitchUserController;
 use App\Http\Controllers\WhatsappController;
 use Illuminate\Support\Facades\Artisan;
@@ -181,6 +182,12 @@ Route::middleware('auth')->group(function () {
     Route::get("/targets/report", [DashboardController::class, 'getDataTargetReport'])->name("targets.report");
     /* END MASTER DATA --------------------------------------------------------*/
 
+    /*
+    |--------------------------------------------------------------------------
+    |  Survei
+    |--------------------------------------------------------------------------
+    */
+    Route::get("/survei", [SurveiKebersihanKamarController::class, 'getDataSurvei']);
     /*
     |--------------------------------------------------------------------------
     |  MASTER DATA

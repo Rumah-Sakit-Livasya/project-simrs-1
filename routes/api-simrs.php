@@ -75,7 +75,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
         Route::post('/dokter-resume-medis/store', [ResumeMedisRajalController::class, 'store'])->name('resume-medis.dokter-rajal.store');
         Route::get('/dokter-resume-medis-rajal/{type}/{registration_number}/get', [ResumeMedisRajalController::class, 'getResumeMedis'])->name('resume-medis.dokter-rajal.get');
-        Route::post('/transfer/store', [CPPTController::class, 'getCPPT'])->name('pengkajian.transfer-pasien-antar-ruangan.store');
+        // Route::post('/transfer/store', [CPPTController::class, 'getCPPT'])->name('pengkajian.transfer-pasien-antar-ruangan.store');
     });
 
     Route::prefix('master-data')->group(function () {
@@ -286,6 +286,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::get('/getTarif/{grupPenjaminId}', [MarginHargaJualController::class, 'getTarif'])->name('master-data.harga-jual.margin.getTarif');
         });
     });
+
     Route::prefix('kepustakaan')->group(function () {
         Route::post('/tambah', [KepustakaanController::class, 'store'])->name('kepustakaan.store');
         Route::get('/edit/{encryptedId}', [KepustakaanController::class, 'getKepustakaan'])->name('kepustakaan.get');

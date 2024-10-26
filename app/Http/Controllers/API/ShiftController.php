@@ -116,7 +116,7 @@ class ShiftController extends Controller
                 $shifts[] = $shift;
             }
         }
-
+        set_time_limit(300);
         // Nama file Excel
         $fileName = 'shift.xlsx';
         ini_set('memory_limit', '512M');
