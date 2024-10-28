@@ -40,7 +40,7 @@
                         @enderror
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="hasil">Hasil</label>
+                        <label class="form-label" for="hasil">Hasil Pengecekan</label>
                         <textarea class="form-control @error('kondisi') is-invalid @enderror" name="hasil" id="hasil" rows="5"></textarea>
                         @error('hasil')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -74,6 +74,11 @@
                                 <label class="custom-control-label" for="dalam-proses">Dalam Proses</label>
                             </div>
                             <div class="custom-control custom-radio custom-control-inline custom-radio-rounded">
+                                <input type="radio" class="custom-control-input" id="ditunda" name="status"
+                                    value="ditunda" onclick="toggleKeterangan(true)">
+                                <label class="custom-control-label" for="ditunda">Ditunda</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline custom-radio-rounded">
                                 <input type="radio" class="custom-control-input" id="diperlukan-persetujuan"
                                     name="status" value="diperlukan-persetujuan" onclick="toggleKeterangan(true)">
                                 <label class="custom-control-label" for="diperlukan-persetujuan">Diperlukan
@@ -85,14 +90,9 @@
                                 <label class="custom-control-label" for="tidak-dapat-diperbaiki">Tidak Dapat
                                     Diperbaiki</label>
                             </div>
-                            <div class="custom-control custom-radio custom-control-inline custom-radio-rounded">
-                                <input type="radio" class="custom-control-input" id="ditunda" name="status"
-                                    value="ditunda" onclick="toggleKeterangan(true)">
-                                <label class="custom-control-label" for="ditunda">Ditunda</label>
-                            </div>
                         </div>
                     </div>
-                    <div class="form-group" id="estimasi-group" style="display: none;">
+                    <div class="form-group" id="estimasi-group">
                         <label class="form-label" for="datepicker-modal-3">Estimasi</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -107,9 +107,9 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="form-group" id="keterangan-group" style="display: none;">
-                        <label class="form-label" for="rtl">Keterangan</label>
-                        <textarea class="form-control @error('keterangan') is-invalid @enderror" name="rtl" id="rtl"
+                    <div class="form-group" id="keterangan-group">
+                        <label class="form-label" for="keterangan">Keterangan</label>
+                        <textarea class="form-control @error('keterangan') is-invalid @enderror" name="keterangan" id="keterangan"
                             rows="5"></textarea>
                         @error('keterangan')
                             <div class="invalid-feedback">{{ $message }}</div>

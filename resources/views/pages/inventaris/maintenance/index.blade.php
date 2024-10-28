@@ -247,22 +247,43 @@
             }
         }
 
-        function toggleGroup(keterangan, estimasi) {
-            const keteranganGroup = document.getElementById('keterangan-group');
-            const estimasiGroup = document.getElementById('estimasi-group');
+        // Fungsi untuk mengontrol visibilitas input Estimasi dan Keterangan
+        function toggleKeterangan(showKeterangan) {
+            var estimasiGroup = document.getElementById('estimasi-group');
+            var keteranganGroup = document.getElementById('keterangan-group');
 
-            if (keterangan) {
+            // Jika input radio memilih Menunggu Sparepart atau Dalam Proses, maka input Estimasi harus ditampilkan
+            if (document.getElementById('menunggu-sparepart').checked || document.getElementById('dalam-proses').checked) {
+                estimasiGroup.style.display = 'block';
+                keteranganGroup.style.display = showKeterangan ? 'block' : 'none';
+            }
+            // Jika input radio memilih Diperlukan Persetujuan atau Tidak Dapat Diperbaiki, maka input Keterangan harus ditampilkan
+            else if (document.getElementById('diperlukan-persetujuan').checked || document.getElementById(
+                    'tidak-dapat-diperbaiki').checked) {
+                estimasiGroup.style.display = 'none';
                 keteranganGroup.style.display = 'block';
-            } else {
+            }
+            // Jika input radio memilih Ditunda, maka input Estimasi dan Keterangan harus ditampilkan
+            else if (document.getElementById('ditunda').checked) {
+                estimasiGroup.style.display = 'block';
+                keteranganGroup.style.display = 'block';
+            }
+            // Jika input radio memilih Selesai, maka input Estimasi dan Keterangan harus disembunyikan
+            else {
+                estimasiGroup.style.display = 'none';
                 keteranganGroup.style.display = 'none';
             }
-
-            if (estimasi) {
-                estimasiGroup.style.display = 'block';
-            } else {
-                estimasiGroup.style.display = 'none';
-            }
         }
+
+        // Panggil fungsi toggleKeterangan pada saat radio button diubah
+        document.querySelectorAll('input[type="radio"][name="status"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                toggleKeterangan(true);
+            });
+        });
+
+        // Panggil fungsi toggleKeterangan pada saat halaman dimuat
+        toggleKeterangan(false);
     </script>
 
 

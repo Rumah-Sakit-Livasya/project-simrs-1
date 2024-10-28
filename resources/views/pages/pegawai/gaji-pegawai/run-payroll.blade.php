@@ -692,6 +692,9 @@
                     data: {
                         is_review: 1 // Setiap data payroll akan ditandai sebagai di-review
                     },
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}' // Add CSRF token for security
+                    },
                     success: function(response) {
                         // Tanggapan dari server berhasil diterima
                         showSuccessAlert(response.message);
