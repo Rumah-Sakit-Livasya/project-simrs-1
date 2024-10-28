@@ -59,6 +59,8 @@
             <div class="modal-body">
                 <p>Pilih bulan dan tahun untuk mengunduh template potongan:</p>
                 <form id="downloadTemplateDeductionForm" action="{{ route('deduction.export') }}" method="post">
+                    @csrf
+                    @method('POST')
                     <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
 
                     <div class="form-row">
