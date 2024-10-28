@@ -562,113 +562,23 @@ class DashboardController extends Controller
         $employees = Employee::where('id', $id)->get();
         $attendance_codes = AttendanceCode::all();
         $shifts = Shift::all();
-        $day_off['ct'] = $attendances->filter(function ($attendance) {
-            if ($attendance->attendance_code_id == 3) {
-                return true;
-            }
+        $day_off['ct'] = 12;
 
-            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 3) {
-                return true;
-            }
+        $day_off['cm'] = 12;
 
-            return false;
-        })->count();
+        $day_off['cma'] = 12;
 
-        $day_off['cm'] = $attendances->filter(function ($attendance) {
-            if ($attendance->attendance_code_id == 7) {
-                return true;
-            }
+        $day_off['cka'] = 12;
 
-            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 7) {
-                return true;
-            }
+        $day_off['cim'] = 12;
 
-            return false;
-        })->count();
+        $day_off['ck'] = 12;
 
-        $day_off['cma'] = $attendances->filter(function ($attendance) {
-            if ($attendance->attendance_code_id == 8) {
-                return true;
-            }
+        $day_off['ckm'] = 12;
 
-            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 8) {
-                return true;
-            }
+        $day_off['crm'] = 12;
 
-            return false;
-        })->count();
-
-        $day_off['cka'] = $attendances->filter(function ($attendance) {
-            if ($attendance->attendance_code_id == 9) {
-                return true;
-            }
-
-            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 9) {
-                return true;
-            }
-
-            return false;
-        })->count();
-
-        $day_off['cim'] = $attendances->filter(function ($attendance) {
-            if ($attendance->attendance_code_id == 10) {
-                return true;
-            }
-
-            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 10) {
-                return true;
-            }
-
-            return false;
-        })->count();
-
-        $day_off['ck'] = $attendances->filter(function ($attendance) {
-            if ($attendance->attendance_code_id == 12) {
-                return true;
-            }
-
-            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 12) {
-                return true;
-            }
-
-            return false;
-        })->count();
-
-        $day_off['ckm'] = $attendances->filter(function ($attendance) {
-            if ($attendance->attendance_code_id == 13) {
-                return true;
-            }
-
-            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 13) {
-                return true;
-            }
-
-            return false;
-        })->count();
-
-        $day_off['crm'] = $attendances->filter(function ($attendance) {
-            if ($attendance->attendance_code_id == 14) {
-                return true;
-            }
-
-            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 14) {
-                return true;
-            }
-
-            return false;
-        })->count();
-
-        $day_off['cl'] = $attendances->filter(function ($attendance) {
-            if ($attendance->attendance_code_id == 15) {
-                return true;
-            }
-
-            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 15) {
-                return true;
-            }
-
-            return false;
-        })->count();
+        $day_off['cl'] = 12;
 
         return view('pages.monitoring.daftar-absensi.payroll', compact('attendances', 'shifts', 'employees', 'attendance_codes', 'day_off'));
     }
