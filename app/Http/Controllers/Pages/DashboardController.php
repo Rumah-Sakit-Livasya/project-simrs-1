@@ -1189,6 +1189,23 @@ class DashboardController extends Controller
             $total_ditolak = $day_off_requests->where('is_approved', 'Ditolak')->count() + $attendance_requests->where('is_approved', 'Ditolak')->count();
         }
 
+        $day_off['ct'] = 12;
+
+        $day_off['cm'] = 12;
+
+        $day_off['cma'] = 12;
+
+        $day_off['cka'] = 12;
+
+        $day_off['cim'] = 12;
+
+        $day_off['ck'] = 12;
+
+        $day_off['ckm'] = 12;
+
+        $day_off['crm'] = 12;
+
+        $day_off['cl'] = 12;
 
         return view('pages.monitoring.daftar-pengajuan.index', compact('day_off_requests', 'attendance_requests', 'total_disetujui', 'total_pending', 'total_verifikasi', 'total_ditolak', 'attendance_codes', 'employees', 'day_off'));
     }
