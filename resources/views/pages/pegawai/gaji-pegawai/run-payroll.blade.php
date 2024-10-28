@@ -333,6 +333,9 @@
         function deletePayroll(id) {
             $.ajax({
                 type: "DELETE", // Menggunakan metode DELETE untuk penghapusan data
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 url: '/api/dashboard/payroll/delete/' +
                     id, // Ubah URL sesuai dengan rute yang benar untuk penghapusan data
                 dataType: "json",
