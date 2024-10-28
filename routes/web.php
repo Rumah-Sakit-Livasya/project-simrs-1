@@ -187,7 +187,8 @@ Route::middleware('auth')->group(function () {
     |  Survei
     |--------------------------------------------------------------------------
     */
-    Route::get("/survei", [SurveiKebersihanKamarController::class, 'getDataSurvei']);
+    Route::get("/survei/kebersihan-kamar", [SurveiKebersihanKamarController::class, 'index']);
+    Route::get("/survei/kebersihan-kamar/tambah", [SurveiKebersihanKamarController::class, 'create'])->name('tambah.survei.kebersihan-kamar');
     /*
     |--------------------------------------------------------------------------
     |  MASTER DATA

@@ -13,6 +13,21 @@ return new class extends Migration
     {
         Schema::create('survei_kebersihan_kamar', function (Blueprint $table) {
             $table->id();
+            $table->dateTime('tanggal');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('room_maintenance_id')->constrained('room_maintenance')->cascadeOnDelete();
+            $table->text('lantai_kamar');
+            $table->text('sudut_kamar');
+            $table->text('plafon_kamar');
+            $table->text('dinding_kamar');
+            $table->text('bed_head');
+            $table->text('lantai_toilet');
+            $table->text('wastafel_toilet');
+            $table->text('closet_toilet');
+            $table->text('kaca_toilet');
+            $table->text('dinding_toilet');
+            $table->text('shower_toilet');
+            $table->string('dokumentasi');
             $table->timestamps();
         });
     }

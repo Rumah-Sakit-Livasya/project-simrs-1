@@ -2,15 +2,6 @@
 @section('title', 'Organisasi')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        <div class="row mb-5">
-            <div class="col-xl-12">
-                <a href="{{ route('tambah.survei.kebersihan-kamar') }}" class="btn btn-primary waves-effect waves-themed"
-                    title="Tambah Survei">
-                    <span class="fal fa-plus-circle mr-1"></span>
-                    Tambah Survei
-                </a>
-            </div>
-        </div>
 
         <div class="row">
             <div class="col-xl-12">
@@ -22,69 +13,59 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <!-- datatable start -->
-                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                <thead>
-                                    <tr>
-                                        {{-- <th style="white-space: nowrap">Foto</th> --}}
-                                        <th style="white-space: nowrap">No</th>
-                                        <th style="white-space: nowrap">Tanggal</th>
-                                        <th style="white-space: nowrap">Petugas</th>
-                                        <th style="white-space: nowrap">Ruangan</th>
-                                        <th style="white-space: nowrap">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($survei as $row)
-                                        <tr>
-                                            {{-- <td style="white-space: nowrap">{{ $user->template_user->foto }}</td> --}}
-                                            <td style="white-space: nowrap">{{ $loop->iteration }}</td>
-                                            <td style="white-space: nowrap">{{ $row->tanggal }}</td>
-                                            <td style="white-space: nowrap">{{ $row->user_id }}</td>
-                                            <td style="white-space: nowrap">{{ $row->room_maintenance_id }}</td>
-                                            <td style="white-space: nowrap">
-                                                <button type="button" data-backdrop="static" data-keyboard="false"
-                                                    class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
-                                                    data-id="{{ $row->id }}" title="Ubah">
-                                                    <span class="fal fa-pencil ikon-edit"></span>
-                                                    <div class="span spinner-text d-none">
-                                                        <span class="spinner-border spinner-border-sm" role="status"
-                                                            aria-hidden="true"></span>
-                                                        Loading...
-                                                    </div>
-                                                </button>
-                                                <button type="button" data-backdrop="static" data-keyboard="false"
-                                                    class="badge mx-1 badge-success p-2 border-0 text-white btn-hapus"
-                                                    data-id="{{ $row->id }}" title="Hapus">
-                                                    <span class="fal fa-trash ikon-hapus"></span>
-                                                    <div class="span spinner-text d-none">
-                                                        <span class="spinner-border spinner-border-sm" role="status"
-                                                            aria-hidden="true"></span>
-                                                        Loading...
-                                                    </div>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th style="white-space: nowrap">No</th>
-                                        <th style="white-space: nowrap">Tanggal</th>
-                                        <th style="white-space: nowrap">Petugas</th>
-                                        <th style="white-space: nowrap">Ruangan</th>
-                                        <th style="white-space: nowrap">Aksi</th>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                            <!-- datatable end -->
+                            <h2>Kondisi Kamar</h2>
+                            <hr>
+                            <div class="form-group">
+                                <label class="form-label" for="lantai_kamar">Lantai</label>
+                                <textarea class="form-control" id="lantai_kamar" name="lantai_kamar" rows="5"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="sudut_kamar">Sudut</label>
+                                <textarea class="form-control" id="sudut_kamar" name="sudut_kamar" rows="5"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="plafon_kamar">Plafon</label>
+                                <textarea class="form-control" id="plafon_kamar" name="plafon_kamar" rows="5"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="dinding_kamar">Dinding</label>
+                                <textarea class="form-control" id="dinding_kamar" name="dinding_kamar" rows="5"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="bed_head">Bed Head</label>
+                                <textarea class="form-control" id="bed_head" name="bed_head" rows="5"></textarea>
+                            </div>
+                            <h2>Kondisi Toilet</h2>
+                            <hr>
+                            <div class="form-group">
+                                <label class="form-label" for="lantai_toilet">Lantai</label>
+                                <textarea class="form-control" id="lantai_toilet" name="lantai_toilet" rows="5"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="wastafel_toilet">Wastafel</label>
+                                <textarea class="form-control" id="wastafel_toilet" name="wastafel_toilet" rows="5"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="closet_toilet">Kloset</label>
+                                <textarea class="form-control" id="closet_toilet" name="closet_toilet" rows="5"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="kaca_toilet">Kaca</label>
+                                <textarea class="form-control" id="kaca_toilet" name="kaca_toilet" rows="5"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="dinding_toilet">Dinding</label>
+                                <textarea class="form-control" id="dinding_toilet" name="dinding_toilet" rows="5"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="shower_toilet">Shower</label>
+                                <textarea class="form-control" id="shower_toilet" name="shower_toilet" rows="5"></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        @include('pages.master-data.banks.partials.create-data')
-        @include('pages.master-data.banks.partials.update-data')
     </main>
 @endsection
 @section('plugin')

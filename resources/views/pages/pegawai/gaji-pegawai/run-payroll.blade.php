@@ -190,8 +190,8 @@
         </div>
     </main>
 
-    {{-- @include('pages.pegawai.gaji-pegawai.partials.update-payroll')
-    @include('pages.pegawai.gaji-pegawai.partials.tambah-potongan') --}}
+    @include('pages.pegawai.gaji-pegawai.partials.update-payroll')
+    @include('pages.pegawai.gaji-pegawai.partials.tambah-potongan')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -279,7 +279,7 @@
                 url: '/api/dashboard/payroll/get/' + dataId, // Isi dengan url/path file php yang dituju
                 dataType: "json",
                 success: function(data) {
-                    console.log(data);
+                    // console.log(data);
                     ikonEdit.classList.remove('d-none');
                     ikonEdit.classList.add('d-block');
                     spinnerText.classList.add('d-none');
