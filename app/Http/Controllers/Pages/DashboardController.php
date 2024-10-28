@@ -562,7 +562,115 @@ class DashboardController extends Controller
         $employees = Employee::where('id', $id)->get();
         $attendance_codes = AttendanceCode::all();
         $shifts = Shift::all();
-        return view('pages.monitoring.daftar-absensi.payroll', compact('attendances', 'shifts', 'employees', 'attendance_codes'));
+        $day_off['ct'] = $attendances->filter(function ($attendance) {
+            if ($attendance->attendance_code_id == 3) {
+                return true;
+            }
+
+            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 3) {
+                return true;
+            }
+
+            return false;
+        })->count();
+
+        $day_off['cm'] = $attendances->filter(function ($attendance) {
+            if ($attendance->attendance_code_id == 7) {
+                return true;
+            }
+
+            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 7) {
+                return true;
+            }
+
+            return false;
+        })->count();
+
+        $day_off['cma'] = $attendances->filter(function ($attendance) {
+            if ($attendance->attendance_code_id == 8) {
+                return true;
+            }
+
+            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 8) {
+                return true;
+            }
+
+            return false;
+        })->count();
+
+        $day_off['cka'] = $attendances->filter(function ($attendance) {
+            if ($attendance->attendance_code_id == 9) {
+                return true;
+            }
+
+            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 9) {
+                return true;
+            }
+
+            return false;
+        })->count();
+
+        $day_off['cim'] = $attendances->filter(function ($attendance) {
+            if ($attendance->attendance_code_id == 10) {
+                return true;
+            }
+
+            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 10) {
+                return true;
+            }
+
+            return false;
+        })->count();
+
+        $day_off['ck'] = $attendances->filter(function ($attendance) {
+            if ($attendance->attendance_code_id == 12) {
+                return true;
+            }
+
+            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 12) {
+                return true;
+            }
+
+            return false;
+        })->count();
+
+        $day_off['ckm'] = $attendances->filter(function ($attendance) {
+            if ($attendance->attendance_code_id == 13) {
+                return true;
+            }
+
+            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 13) {
+                return true;
+            }
+
+            return false;
+        })->count();
+
+        $day_off['crm'] = $attendances->filter(function ($attendance) {
+            if ($attendance->attendance_code_id == 14) {
+                return true;
+            }
+
+            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 14) {
+                return true;
+            }
+
+            return false;
+        })->count();
+
+        $day_off['cl'] = $attendances->filter(function ($attendance) {
+            if ($attendance->attendance_code_id == 15) {
+                return true;
+            }
+
+            if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 15) {
+                return true;
+            }
+
+            return false;
+        })->count();
+
+        return view('pages.monitoring.daftar-absensi.payroll', compact('attendances', 'shifts', 'employees', 'attendance_codes', 'day_off'));
     }
 
     public function getDataUser()
@@ -1171,7 +1279,8 @@ class DashboardController extends Controller
             $total_ditolak = $day_off_requests->where('is_approved', 'Ditolak')->count() + $attendance_requests->where('is_approved', 'Ditolak')->count();
         }
 
-        return view('pages.monitoring.daftar-pengajuan.index', compact('day_off_requests', 'attendance_requests', 'total_disetujui', 'total_pending', 'total_verifikasi', 'total_ditolak', 'attendance_codes', 'employees'));
+
+        return view('pages.monitoring.daftar-pengajuan.index', compact('day_off_requests', 'attendance_requests', 'total_disetujui', 'total_pending', 'total_verifikasi', 'total_ditolak', 'attendance_codes', 'employees', 'day_off'));
     }
 
     public function getGroupPenilaian()

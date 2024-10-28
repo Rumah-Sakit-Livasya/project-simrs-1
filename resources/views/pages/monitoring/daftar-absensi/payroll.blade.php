@@ -390,6 +390,17 @@
         /* demo scripts for change table color */
         /* change background */
         $(document).ready(function() {
+
+            const totalCT = @json($day_off['ct']);
+            const totalCM = @json($day_off['cm']);
+            const totalCL = @json($day_off['cl']);
+            const totalCK = @json($day_off['ck']);
+            const totalCMA = @json($day_off['cma']);
+            const totalCKA = @json($day_off['cka']);
+            const totalCKM = @json($day_off['ckm']);
+            const totalCRM = @json($day_off['crm']);
+            const totalCIM = @json($day_off['cim']);
+
             // stackedBar();
             $('#btnFilter').click(function(e) {
                 $('#filterModal').modal('show');
