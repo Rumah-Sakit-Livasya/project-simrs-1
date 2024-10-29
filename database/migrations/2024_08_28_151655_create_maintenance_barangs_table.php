@@ -17,8 +17,12 @@ return new class extends Migration
             $table->foreignId('user_id');
             $table->string('kondisi');
             $table->string('hasil');
+            $table->string('tanggal');
+            $table->string('estimasi')->nullable();
+            $table->string('keterangan')->nullable();
             $table->string('rtl');
             $table->string('foto');
+            $table->string('status');
             $table->softDeletes();
             $table->timestamps();
         });

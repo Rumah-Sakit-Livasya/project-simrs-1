@@ -58,19 +58,23 @@ class MaintenanceBarangController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'tanggal' => 'required|date',
+            'barang_id' => 'required',
+            'user_id' => 'required',
             'kondisi' => 'required',
             'hasil' => 'required',
+            'tanggal' => 'required|date',
             'rtl' => 'required',
-            'barang_id' => 'required',
-            'foto' => "max:5120|required",
+            'status' => 'required',
+            'estimasi' => 'nullable',
+            'keterangan' => 'nullable',
+            'foto' => "max:5120",
         ], [
             'tanggal.required' => 'Kolom tanggal harus diisi.',
             'tanggal.date' => 'Kolom tanggal harus berupa format tanggal yang valid.',
             'kondisi.required' => 'Kolom kondisi harus diisi.',
             'hasil.required' => 'Kolom hasil harus diisi.',
             'rtl.required' => 'Kolom rencana tindak lanjut harus diisi.',
-            'foto.required' => 'Kolom foto harus berupa file.',
+            'status.required' => 'Kolom Status lanjut harus diisi.',
             'foto.max' => 'Ukuran file foto tidak boleh melebihi 5120 kilobita (5 MB).',
         ]);
 
