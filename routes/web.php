@@ -187,8 +187,10 @@ Route::middleware('auth')->group(function () {
     |  Survei
     |--------------------------------------------------------------------------
     */
-    Route::get("/survei/kebersihan-kamar", [SurveiKebersihanKamarController::class, 'index']);
+    Route::get("/survei/kebersihan-kamar", [SurveiKebersihanKamarController::class, 'index'])->name('survei.kebersihan-kamar');
     Route::get("/survei/kebersihan-kamar/tambah", [SurveiKebersihanKamarController::class, 'create'])->name('tambah.survei.kebersihan-kamar');
+    Route::post("/survei/kebersihan-kamar/store", [SurveiKebersihanKamarController::class, 'store'])->name('store.survei.kebersihan-kamar');
+    Route::delete("/survei/kebersihan-kamar/{id}/delete", [SurveiKebersihanKamarController::class, 'delete'])->name('delete.survei.kebersihan-kamar');
     /*
     |--------------------------------------------------------------------------
     |  MASTER DATA

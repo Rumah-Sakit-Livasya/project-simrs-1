@@ -39,9 +39,9 @@
                                         <tr>
                                             {{-- <td style="white-space: nowrap">{{ $user->template_user->foto }}</td> --}}
                                             <td style="white-space: nowrap">{{ $loop->iteration }}</td>
-                                            <td style="white-space: nowrap">{{ $row->tanggal }}</td>
-                                            <td style="white-space: nowrap">{{ $row->user_id }}</td>
-                                            <td style="white-space: nowrap">{{ $row->room_maintenance_id }}</td>
+                                            <td style="white-space: nowrap">{{ tgl_waktu($row->tanggal) }}</td>
+                                            <td style="white-space: nowrap">{{ $row->employee->name }}</td>
+                                            <td style="white-space: nowrap">{{ $row->kamar->name }}</td>
                                             <td style="white-space: nowrap">
                                                 <button type="button" data-backdrop="static" data-keyboard="false"
                                                     class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
@@ -174,31 +174,37 @@
                 });
             });
 
-            $('.btn-hapus').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                alert('Yakin ingin menghapus ini ?');
-                let id = button.attr('data-id');
-                $.ajax({
-                    type: "GET",
-                    url: '/api/dashboard/banks/delete/' + id,
-                    beforeSend: function() {
-                        button.find('.ikon-hapus').hide();
-                        button.find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        button.find('.ikon-edit').show();
-                        button.find('.spinner-text').addClass('d-none');
-                        showSuccessAlert(response.message)
-                        setTimeout(function() {
-                            location.reload();
-                        }, 500);
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
-                });
+            $('.btn-hapus').click(function() {
+                let id = $(this).data('id')
+                let url = "{{ route('delete.survei.kebersihan-kamar', ':id') }}".replace(':id', id);
+
+                let confirmationMessage = 'Yakin ingin menghapus survei ini?';
+
+
+                if (confirm(confirmationMessage)) {
+
+
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            showSuccessAlert(response.message);
+
+                            setTimeout(() => {
+                                console.log('Reloading the page now.');
+                                window.location.reload();
+                            }, 1000);
+                        },
+                        error: function(xhr, status, error) {
+                            showErrorAlert('Terjadi kesalahan: ' + error);
+                        }
+                    });
+                } else {
+                    console.log('Penghapusan dibatalkan oleh pengguna.');
+                }
             });
 
             $('#dt-basic-example').dataTable({

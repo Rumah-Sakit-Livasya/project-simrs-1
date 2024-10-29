@@ -97,4 +97,8 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(MaintenanceBarang::class);
     }
+    public function survei_kebersihan_kamar()
+    {
+        return $this->hasMany(SurveiKebersihanKamar::class);
+    }
 }

@@ -2,71 +2,171 @@
 @section('title', 'Organisasi')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-
         <div class="row">
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
-                        <h2>
-                            Tabel Survei
-                        </h2>
+                        <h2>Tambah Survei</h2>
                     </div>
                     <div class="panel-container show">
-                        <div class="panel-content">
-                            <h2>Kondisi Kamar</h2>
-                            <hr>
-                            <div class="form-group">
-                                <label class="form-label" for="lantai_kamar">Lantai</label>
-                                <textarea class="form-control" id="lantai_kamar" name="lantai_kamar" rows="5"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="sudut_kamar">Sudut</label>
-                                <textarea class="form-control" id="sudut_kamar" name="sudut_kamar" rows="5"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="plafon_kamar">Plafon</label>
-                                <textarea class="form-control" id="plafon_kamar" name="plafon_kamar" rows="5"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="dinding_kamar">Dinding</label>
-                                <textarea class="form-control" id="dinding_kamar" name="dinding_kamar" rows="5"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="bed_head">Bed Head</label>
-                                <textarea class="form-control" id="bed_head" name="bed_head" rows="5"></textarea>
-                            </div>
-                            <h2>Kondisi Toilet</h2>
-                            <hr>
-                            <div class="form-group">
-                                <label class="form-label" for="lantai_toilet">Lantai</label>
-                                <textarea class="form-control" id="lantai_toilet" name="lantai_toilet" rows="5"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="wastafel_toilet">Wastafel</label>
-                                <textarea class="form-control" id="wastafel_toilet" name="wastafel_toilet" rows="5"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="closet_toilet">Kloset</label>
-                                <textarea class="form-control" id="closet_toilet" name="closet_toilet" rows="5"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="kaca_toilet">Kaca</label>
-                                <textarea class="form-control" id="kaca_toilet" name="kaca_toilet" rows="5"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="dinding_toilet">Dinding</label>
-                                <textarea class="form-control" id="dinding_toilet" name="dinding_toilet" rows="5"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="shower_toilet">Shower</label>
-                                <textarea class="form-control" id="shower_toilet" name="shower_toilet" rows="5"></textarea>
-                            </div>
+                        <div class="panel-content p-2">
+                            <form action="{{ route('store.survei.kebersihan-kamar') }}" method="POST"
+                                enctype="multipart/form-data">
+                                @csrf
+                                @method('POST')
+                                <div class="p-1 mb-3">
+                                    <div class="mb-2">
+                                        <label for="room_maintenance_id" class="form-label">Pilih Kamar</label>
+                                        <select name="room_maintenance_id" id="room_maintenance_id"
+                                            class="form-control select2">
+                                            @foreach ($kamar as $row)
+                                                <option value="{{ $row->id }}">
+                                                    {{ $row->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="petugas" class="form-label">Petugas</label>
+                                        <input type="text" class="form-control"
+                                            value="{{ auth()->user()->employee->fullname }}" readonly>
+                                    </div>
+                                    <h2 class="text-white bg-primary p-2 rounded">Kondisi Kamar</h2>
+                                    <hr>
+                                    <div class="card mt-2">
+                                        <div class="card-header p-2"
+                                            style="background-color: rgba(136, 106, 181, 0.8); color: white;">Lantai</div>
+                                        <div class="card-body p-0">
+                                            <textarea class="form-control border-0 rounded-0" id="lantai_kamar" name="lantai_kamar" rows="4"
+                                                placeholder="Deskripsi kondisi lantai kamar"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sudut -->
+                                    <div class="card mt-2">
+                                        <div class="card-header p-2"
+                                            style="background-color: rgba(136, 106, 181, 0.8); color: white;">Sudut</div>
+                                        <div class="card-body p-0">
+                                            <textarea class="form-control border-0 rounded-0" id="sudut_kamar" name="sudut_kamar" rows="4"
+                                                placeholder="Deskripsi kondisi sudut kamar"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Plafon -->
+                                    <div class="card mt-2">
+                                        <div class="card-header p-2"
+                                            style="background-color: rgba(136, 106, 181, 0.8); color: white;">Plafon</div>
+                                        <div class="card-body p-0">
+                                            <textarea class="form-control border-0 rounded-0" id="plafon_kamar" name="plafon_kamar" rows="4"
+                                                placeholder="Deskripsi kondisi plafon kamar"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dinding -->
+                                    <div class="card mt-2">
+                                        <div class="card-header p-2"
+                                            style="background-color: rgba(136, 106, 181, 0.8); color: white;">Dinding</div>
+                                        <div class="card-body p-0">
+                                            <textarea class="form-control border-0 rounded-0" id="dinding_kamar" name="dinding_kamar" rows="4"
+                                                placeholder="Deskripsi kondisi dinding kamar"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bed Head -->
+                                    <div class="card mt-2">
+                                        <div class="card-header p-2"
+                                            style="background-color: rgba(136, 106, 181, 0.8); color: white;">Bed Head</div>
+                                        <div class="card-body p-0">
+                                            <textarea class="form-control border-0 rounded-0" id="bed_head" name="bed_head" rows="4"
+                                                placeholder="Deskripsi kondisi bed head"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Kondisi Toilet Section -->
+                                <div class="p-1 mb-3">
+                                    <h2 class="text-white bg-danger p-2 rounded">Kondisi Toilet</h2>
+                                    <hr>
+
+                                    <!-- Lantai -->
+                                    <div class="card mt-2">
+                                        <div class="card-header p-2"
+                                            style="background-color: rgba(253, 57, 149, 0.8); color: white;">Lantai</div>
+                                        <div class="card-body p-0">
+                                            <textarea class="form-control border-0 rounded-0" id="lantai_toilet" name="lantai_toilet" rows="4"
+                                                placeholder="Deskripsi kondisi lantai toilet"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Wastafel -->
+                                    <div class="card mt-2">
+                                        <div class="card-header p-2"
+                                            style="background-color: rgba(253, 57, 149, 0.8); color: white;">Wastafel</div>
+                                        <div class="card-body p-0">
+                                            <textarea class="form-control border-0 rounded-0" id="wastafel_toilet" name="wastafel_toilet" rows="4"
+                                                placeholder="Deskripsi kondisi wastafel toilet"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Kloset -->
+                                    <div class="card mt-2">
+                                        <div class="card-header p-2"
+                                            style="background-color: rgba(253, 57, 149, 0.8); color: white;">Kloset</div>
+                                        <div class="card-body p-0">
+                                            <textarea class="form-control border-0 rounded-0" id="closet_toilet" name="closet_toilet" rows="4"
+                                                placeholder="Deskripsi kondisi kloset toilet"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Kaca -->
+                                    <div class="card mt-2">
+                                        <div class="card-header p-2"
+                                            style="background-color: rgba(253, 57, 149, 0.8); color: white;">Kaca</div>
+                                        <div class="card-body p-0">
+                                            <textarea class="form-control border-0 rounded-0" id="kaca_toilet" name="kaca_toilet" rows="4"
+                                                placeholder="Deskripsi kondisi kaca toilet"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dinding -->
+                                    <div class="card mt-2">
+                                        <div class="card-header p-2"
+                                            style="background-color: rgba(253, 57, 149, 0.8); color: white;">Dinding</div>
+                                        <div class="card-body p-0">
+                                            <textarea class="form-control border-0 rounded-0" id="dinding_toilet" name="dinding_toilet" rows="4"
+                                                placeholder="Deskripsi kondisi dinding toilet"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Shower -->
+                                    <div class="card mt-2">
+                                        <div class="card-header p-2"
+                                            style="background-color: rgba(253, 57, 149, 0.8); color: white;">Shower</div>
+                                        <div class="card-body p-0">
+                                            <textarea class="form-control border-0 rounded-0" id="shower_toilet" name="shower_toilet" rows="4"
+                                                placeholder="Deskripsi kondisi shower toilet"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Dokumentasi Section -->
+                                <div class="form-group p-1 mb-4">
+                                    <label class="form-label" for="dokumentasi">Dokumentasi</label>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="dokumentasi"
+                                            name="dokumentasi">
+                                        <label class="custom-file-label" for="dokumentasi">Choose file</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary mt-3 btn-block">Tambahkan</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -75,129 +175,7 @@
         /* demo scripts for change table color */
         /* change background */
         $(document).ready(function() {
-            let dataId = null;
-
-            $('.btn-edit').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                let id = button.attr('data-id');
-                dataId = id;
-                button.find('.ikon-edit').hide();
-                button.find('.spinner-text').removeClass('d-none');
-
-                $.ajax({
-                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                    url: `/api/dashboard/banks/get/${id}`, // Isi dengan url/path file php yang dituju
-                    dataType: "json",
-                    success: function(data) {
-                        button.find('.ikon-edit').show();
-                        button.find('.spinner-text').addClass('d-none');
-                        $('#ubah-data').modal('show');
-                        $('#ubah-data #name').val(data.name)
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
-                });
-
-            });
-
-            $('#update-form').on('submit', function(e) {
-                e.preventDefault();
-                let formData = $(this).serialize();
-                $.ajax({
-                    type: "POST",
-                    url: '/api/dashboard/banks/update/' + dataId,
-                    data: formData,
-                    beforeSend: function() {
-                        $('#update-form').find('.ikon-edit').hide();
-                        $('#update-form').find('.spinner-text')
-                            .removeClass(
-                                'd-none');
-                    },
-                    success: function(response) {
-                        $('#ubah-data').modal('hide');
-                        showSuccessAlert(response.message)
-                        setTimeout(function() {
-                            location.reload();
-                        }, 500);
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
-                });
-            });
-
-            $('#store-form').on('submit', function(e) {
-                e.preventDefault();
-                let formData = $(this).serialize();
-                $.ajax({
-                    type: "POST",
-                    url: '/api/dashboard/banks/store/',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#store-form').find('.ikon-tambah').hide();
-                        $('#store-form').find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        $('#store-form').find('.ikon-edit').show();
-                        $('#store-form').find('.spinner-text').addClass('d-none');
-                        $('#tambah-data').modal('hide');
-                        showSuccessAlert(response.message)
-                        setTimeout(function() {
-                            location.reload();
-                        }, 500);
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
-                });
-            });
-
-            $('.btn-hapus').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                alert('Yakin ingin menghapus ini ?');
-                let id = button.attr('data-id');
-                $.ajax({
-                    type: "GET",
-                    url: '/api/dashboard/banks/delete/' + id,
-                    beforeSend: function() {
-                        button.find('.ikon-hapus').hide();
-                        button.find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        button.find('.ikon-edit').show();
-                        button.find('.spinner-text').addClass('d-none');
-                        showSuccessAlert(response.message)
-                        setTimeout(function() {
-                            location.reload();
-                        }, 500);
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
-                });
-            });
-
-            $('#dt-basic-example').dataTable({
-                responsive: true
-            });
-
-            $('.js-thead-colors a').on('click', function() {
-                var theadColor = $(this).attr("data-bg");
-                console.log(theadColor);
-                $('#dt-basic-example thead').removeClassPrefix('bg-').addClass(theadColor);
-            });
-
-            $('.js-tbody-colors a').on('click', function() {
-                var theadColor = $(this).attr("data-bg");
-                console.log(theadColor);
-                $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
-            });
-
+            $('.select2').select2();
         });
     </script>
 @endsection
