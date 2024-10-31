@@ -712,11 +712,12 @@
                 type: "POST",
                 url: '/api/dashboard/targets/update/' + idTarget,
                 data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 beforeSend: function() {
                     $('#update-form').find('.ikon-edit').hide();
-                    $('#update-form').find('.spinner-text')
-                        .removeClass(
-                            'd-none');
+                    $('#update-form').find('.spinner-text').removeClass('d-none');
                 },
                 success: function(response) {
                     $('#ubah-data').modal('hide');
@@ -729,6 +730,7 @@
                     console.log(xhr.responseText);
                 }
             });
+
         });
 
         $('#update-form-hasil').on('submit', function(e) {
@@ -738,6 +740,9 @@
                 type: "POST",
                 url: '/api/dashboard/targets/update-hasil/' + idTarget,
                 data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 beforeSend: function() {
                     $('#update-form-hasil').find('.ikon-hasil').hide();
                     $('#update-form-hasil').find('.spinner-text')
