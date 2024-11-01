@@ -20,6 +20,7 @@ class SurveiKebersihanKamarController extends Controller
             'survei' => SurveiKebersihanKamar::all(),
         ]);
     }
+
     public function create()
     {
         $kamar = RoomMaintenance::where('room_code', 'like', '%KMR%')->get();
@@ -61,6 +62,54 @@ class SurveiKebersihanKamarController extends Controller
             SurveiKebersihanKamar::create($validatedData);
 
             return redirect()->route('survei.kebersihan-kamar')->with('success', 'Survei Berhasil Ditambahkan!');
+        } catch (\Exception $e) {
+            // Return error response if any exceptions occur
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function edit(Request $request, $id)
+    {
+        $kamar = RoomMaintenance::where('room_code', 'like', '%KMR%')->get();
+        $survei_kebersihan = SurveiKebersihanKamar::findOrFail($id);
+        return view('pages.survei.edit_kebersihan_kamar', [
+            'kamar' => $kamar,
+            'survei' => $survei_kebersihan
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'lantai_kamar' => 'nullable',
+            'sudut_kamar' => 'nullable',
+            'plafon_kamar' => 'nullable',
+            'dinding_kamar' => 'nullable',
+            'bed_head' => 'nullable',
+            'lantai_toilet' => 'nullable',
+            'wastafel_toilet' => 'nullable',
+            'closet_toilet' => 'nullable',
+            'kaca_toilet' => 'nullable',
+            'dinding_toilet' => 'nullable',
+            'shower_toilet' => 'nullable',
+            'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10000', // max 10MB
+            'room_maintenance_id' => 'required',
+            'user_id' => 'required'
+        ]);
+
+        try {
+            $survei = SurveiKebersihanKamar::findOrFail($id);
+            $validatedData['tanggal'] = $survei->tanggal;
+
+            // if (request()->hasFile('dokumentasi')) {
+            //     $image = request()->file('dokumentasi');
+            //     $imageName = now()->format('Y-m-d') . '_survei_kebersihan_kamar_' . time() . '.' . $image->getClientOriginalExtension();
+            //     $path = $image->storeAs('survei/kebersihan_kamar/', $imageName, 'private');
+            //     $validatedData['dokumentasi'] = $imageName;
+            // }
+            $survei->update($validatedData);
+
+            return redirect()->route('survei.kebersihan-kamar')->with('success', 'Survei Berhasil Diupdate!');
         } catch (\Exception $e) {
             // Return error response if any exceptions occur
             return response()->json(['error' => $e->getMessage()], 500);

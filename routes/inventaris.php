@@ -31,7 +31,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/maintenances/{barang:id}', [MaintenanceBarangController::class, 'index'])->name("inventaris.maintenance.index");
         Route::get('/report-barang', [ReportBarangController::class, 'index'])->name('inventaris.report.index');
         Route::get('/report-bulanan', [ReportBarangController::class, 'laporanBulanan'])->name('inventaris.report.bulanan');
-        Route::post('/report-bulanan', [ReportBarangController::class, 'laporanBulanan'])->name('inventaris.report.bulanan');
+        Route::post('/report-bulanan', [ReportBarangController::class, 'laporanBulanan'])->name('inventaris.report.bulanan.store');
         Route::get('/report/maintenance', [ReportBarangController::class, 'getMaintenanceData'])->name('inventaris.report.maintenance');
     });
 });

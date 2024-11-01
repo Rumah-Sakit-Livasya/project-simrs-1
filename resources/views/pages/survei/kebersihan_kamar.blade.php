@@ -43,16 +43,15 @@
                                             <td style="white-space: nowrap">{{ $row->employee->name }}</td>
                                             <td style="white-space: nowrap">{{ $row->kamar->name }}</td>
                                             <td style="white-space: nowrap">
-                                                <button type="button" data-backdrop="static" data-keyboard="false"
-                                                    class="badge mx-1 btn-edit badge-primary p-2 border-0 text-white"
-                                                    data-id="{{ $row->id }}" title="Ubah">
+                                                <a href="{{ route('edit.survei.kebersihan-kamar', $row->id) }}"
+                                                    class="badge mx-1 badge-primary p-2 border-0 text-white" title="Ubah">
                                                     <span class="fal fa-pencil ikon-edit"></span>
                                                     <div class="span spinner-text d-none">
                                                         <span class="spinner-border spinner-border-sm" role="status"
                                                             aria-hidden="true"></span>
                                                         Loading...
                                                     </div>
-                                                </button>
+                                                </a>
                                                 <button type="button" data-backdrop="static" data-keyboard="false"
                                                     class="badge mx-1 badge-success p-2 border-0 text-white btn-hapus"
                                                     data-id="{{ $row->id }}" title="Hapus">
@@ -95,31 +94,6 @@
         /* change background */
         $(document).ready(function() {
             let dataId = null;
-
-            $('.btn-edit').click(function(e) {
-                e.preventDefault();
-                let button = $(this);
-                let id = button.attr('data-id');
-                dataId = id;
-                button.find('.ikon-edit').hide();
-                button.find('.spinner-text').removeClass('d-none');
-
-                $.ajax({
-                    type: "GET", // Method pengiriman data bisa dengan GET atau POST
-                    url: `/api/dashboard/banks/get/${id}`, // Isi dengan url/path file php yang dituju
-                    dataType: "json",
-                    success: function(data) {
-                        button.find('.ikon-edit').show();
-                        button.find('.spinner-text').addClass('d-none');
-                        $('#ubah-data').modal('show');
-                        $('#ubah-data #name').val(data.name)
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
-                });
-
-            });
 
             $('#update-form').on('submit', function(e) {
                 e.preventDefault();

@@ -190,6 +190,8 @@ Route::middleware('auth')->group(function () {
     Route::get("/survei/kebersihan-kamar", [SurveiKebersihanKamarController::class, 'index'])->name('survei.kebersihan-kamar');
     Route::get("/survei/kebersihan-kamar/tambah", [SurveiKebersihanKamarController::class, 'create'])->name('tambah.survei.kebersihan-kamar');
     Route::post("/survei/kebersihan-kamar/store", [SurveiKebersihanKamarController::class, 'store'])->name('store.survei.kebersihan-kamar');
+    Route::get("/survei/kebersihan-kamar/{id}/edit", [SurveiKebersihanKamarController::class, 'edit'])->name('edit.survei.kebersihan-kamar');
+    Route::patch("/survei/kebersihan-kamar/{id}/edit", [SurveiKebersihanKamarController::class, 'update'])->name('update.survei.kebersihan-kamar');
     Route::delete("/survei/kebersihan-kamar/{id}/delete", [SurveiKebersihanKamarController::class, 'delete'])->name('delete.survei.kebersihan-kamar');
     /*
     |--------------------------------------------------------------------------
