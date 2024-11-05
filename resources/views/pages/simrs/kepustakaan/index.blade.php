@@ -140,7 +140,7 @@
                 <div class="demo-v-spacing mb-4">
                     <ol class="breadcrumb breadcrumb-seperator-1">
                         <li class="breadcrumb-item">
-                            <a href="{{ route('kepustakaan.index') }}" class="text-info">/</a>
+                            <a href="{{ route('kepustakaan.index') }}" class="text-info">/kepustakaan</a>
                         </li>
 
                         @if (empty($breadcrumbs))
