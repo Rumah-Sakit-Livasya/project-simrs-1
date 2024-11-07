@@ -18,8 +18,7 @@ use App\Http\Controllers\WhatsappController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\ImpersonateUser;
-
-
+use Illuminate\Support\Facades\File;
 
 Route::get('/', [AuthenticatedSessionController::class, 'create'])
     ->middleware('guest')
@@ -193,6 +192,15 @@ Route::middleware('auth')->group(function () {
     Route::get("/survei/kebersihan-kamar/{id}/edit", [SurveiKebersihanKamarController::class, 'edit'])->name('edit.survei.kebersihan-kamar');
     Route::patch("/survei/kebersihan-kamar/{id}/edit", [SurveiKebersihanKamarController::class, 'update'])->name('update.survei.kebersihan-kamar');
     Route::delete("/survei/kebersihan-kamar/{id}/delete", [SurveiKebersihanKamarController::class, 'delete'])->name('delete.survei.kebersihan-kamar');
+    Route::get('storage/private/survei/kebersihan_kamar/{filename}', function ($filename) {
+        $path = storage_path('app/private/survei/kebersihan_kamar/' . $filename);
+
+        if (!File::exists($path)) {
+            abort(404);
+        }
+
+        return response()->file($path);
+    });
     /*
     |--------------------------------------------------------------------------
     |  MASTER DATA

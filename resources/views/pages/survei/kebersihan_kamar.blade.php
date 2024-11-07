@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Organisasi')
+@section('title', 'Survei Kebersihan Kamar')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row mb-5">
@@ -31,6 +31,7 @@
                                         <th style="white-space: nowrap">Tanggal</th>
                                         <th style="white-space: nowrap">Petugas</th>
                                         <th style="white-space: nowrap">Ruangan</th>
+                                        <th style="white-space: nowrap">Dokumentasi</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </thead>
@@ -42,6 +43,10 @@
                                             <td style="white-space: nowrap">{{ tgl_waktu($row->tanggal) }}</td>
                                             <td style="white-space: nowrap">{{ $row->employee->name }}</td>
                                             <td style="white-space: nowrap">{{ $row->kamar->name }}</td>
+                                            <td style="white-space: nowrap">
+                                                <img src="{{ url('storage/private/survei/kebersihan_kamar/' . $row->dokumentasi) }}"
+                                                    width="100%" alt="">
+                                            </td>
                                             <td style="white-space: nowrap">
                                                 <a href="{{ route('edit.survei.kebersihan-kamar', $row->id) }}"
                                                     class="badge mx-1 badge-primary p-2 border-0 text-white" title="Ubah">
@@ -72,6 +77,7 @@
                                         <th style="white-space: nowrap">Tanggal</th>
                                         <th style="white-space: nowrap">Petugas</th>
                                         <th style="white-space: nowrap">Ruangan</th>
+                                        <th style="white-space: nowrap">Dokumentasi</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </tfoot>
