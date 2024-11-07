@@ -171,7 +171,11 @@
                 </div>
 
                 @foreach ($kepustakaan as $item)
-                    @if ($item->organization_id == auth()->user()->employee->organization_id || $item->organization_id == null)
+                    @if (
+                        $item->organization_id == auth()->user()->employee->organization_id ||
+                            $item->organization_id == null ||
+                            auth()->user()->hasRole('super admin') ||
+                            auth()->user()->can('master kepustakaan'))
                         <div class="card">
                             <div class="card-header p-0 bg-white">
                                 <div class="row align-items-center py-2">
@@ -222,7 +226,11 @@
                             </div>
                         </div>
                     @endif
-                    @if (in_array($item->organization_id, [26, 27, 25]) && in_array(auth()->user()->employee->organization_id, [26, 27, 25]))
+                    @if (
+                        (in_array($item->organization_id, [26, 27, 25]) &&
+                            in_array(auth()->user()->employee->organization_id, [26, 27, 25])) ||
+                            auth()->user()->hasRole('super admin') ||
+                            auth()->user()->can('master kepustakaan'))
                         <div class="card">
                             <div class="card-header p-0 bg-white">
                                 <div class="row align-items-center py-2">
