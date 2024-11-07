@@ -223,7 +223,6 @@
                         </div>
                     @endif
                     @if (in_array($item->organization_id, [26, 27, 25]) && in_array(auth()->user()->employee->organization_id, [26, 27, 25]))
-                        @dd($item->organization_id)
                         <div class="card">
                             <div class="card-header p-0 bg-white">
                                 <div class="row align-items-center py-2">
