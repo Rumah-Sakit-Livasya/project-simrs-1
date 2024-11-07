@@ -171,11 +171,7 @@
                 </div>
 
                 @foreach ($kepustakaan as $item)
-                    @if (
-                        $item->organization_id == auth()->user()->employee->organization_id ||
-                            $item->organization_id == null ||
-                            (in_array($item->organization_id, [26, 27, 25]) &&
-                                in_array(auth()->user()->employee->organization_id, [26, 27, 25])))
+                    @if ($item->organization_id == auth()->user()->employee->organization_id || $item->organization_id == null)
                         <div class="card">
                             <div class="card-header p-0 bg-white">
                                 <div class="row align-items-center py-2">
@@ -209,6 +205,56 @@
                                                     ($item->organization_id == auth()->user()->employee->organization_id ||
                                                         (in_array($item->organization_id, [26, 27, 25]) &&
                                                             in_array(auth()->user()->employee->organization_id, [26, 27, 25]))))
+                                                <i class="btn-action btn-delete fas fa-trash text-danger fs-xl mr-2"
+                                                    data-url="{{ route('kepustakaan.delete', Crypt::encrypt($item->id)) }}"
+                                                    data-type="{{ $item->type }}"></i>
+                                            @endif
+
+                                        </div>
+                                    </div>
+                                    <div class="col-3 text-center file-info">
+                                        {{ $item->size > 0 ? number_format($item->size / 1024, 2) . ' KB' : '-' }}
+                                    </div>
+                                    <div class="col-3 text-center file-info">
+                                        {{ $item->updated_at ? $item->updated_at->format('d M Y') : '--' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    @if (in_array($item->organization_id, [26, 27, 25]) && in_array(auth()->user()->employee->organization_id, [26, 27, 25]))
+                        @dd($item->organization_id)
+                        <div class="card">
+                            <div class="card-header p-0 bg-white">
+                                <div class="row align-items-center py-2">
+                                    <div class="col-6 d-flex justify-content-between" style="height: 15px">
+                                        <div class="folder-wrapper d-flex align-items-center">
+                                            @if ($item->type == 'folder')
+                                                <i class="fas fa-folder text-success fs-xl mr-2"></i>
+                                                <a href="{{ route('kepustakaan.folder', Crypt::encrypt($item->id)) }}"
+                                                    class="card-title">
+                                                    {{ $item->name }}
+                                                </a>
+                                            @else
+                                                <i class="fas fa-file text-primary fs-xl mr-2"></i>
+                                                <a href="{{ route('kepustakaan.download', Crypt::encrypt($item->id)) }}"
+                                                    class="card-title">{{ $item->file }}</a>
+                                            @endif
+                                        </div>
+                                        <div class="action-kepustakaan float-right">
+                                            @if ($item->type == 'folder')
+                                                @if (auth()->user()->can('edit kepustakaan') &&
+                                                        (in_array($item->organization_id, [26, 27, 25]) &&
+                                                            in_array(auth()->user()->employee->organization_id, [26, 27, 25])))
+                                                    <i class="btn-action btn-edit fas fa-pencil text-warning fs-xl mr-2"
+                                                        data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
+                                                        data-id="{{ Crypt::encrypt($item->id) }}"></i>
+                                                @endif
+                                            @endif
+
+                                            @if (auth()->user()->can('delete kepustakaan') &&
+                                                    (in_array($item->organization_id, [26, 27, 25]) &&
+                                                        in_array(auth()->user()->employee->organization_id, [26, 27, 25])))
                                                 <i class="btn-action btn-delete fas fa-trash text-danger fs-xl mr-2"
                                                     data-url="{{ route('kepustakaan.delete', Crypt::encrypt($item->id)) }}"
                                                     data-type="{{ $item->type }}"></i>
