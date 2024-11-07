@@ -174,7 +174,8 @@
                     @if (
                         $item->organization_id == auth()->user()->employee->organization_id ||
                             $item->organization_id == null ||
-                            in_array($item->organization_id, [26, 27, 25]))
+                            in_array($item->organization_id, [26, 27, 25]) ==
+                                in_array(auth()->user()->employee->organization_id, [26, 27, 25]))
                         <div class="card">
                             <div class="card-header p-0 bg-white">
                                 <div class="row align-items-center py-2">
@@ -196,7 +197,8 @@
                                             @if ($item->type == 'folder')
                                                 @if (auth()->user()->can('edit kepustakaan') &&
                                                         ($item->organization_id == auth()->user()->employee->organization_id ||
-                                                            in_array($item->organization_id, [26, 27, 25])))
+                                                            in_array($item->organization_id, [26, 27, 25]) ==
+                                                                in_array(auth()->user()->employee->organization_id, [26, 27, 25])))
                                                     <i class="btn-action btn-edit fas fa-pencil text-warning fs-xl mr-2"
                                                         data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
                                                         data-id="{{ Crypt::encrypt($item->id) }}"></i>
@@ -205,7 +207,8 @@
 
                                             @if (auth()->user()->can('edit kepustakaan') &&
                                                     ($item->organization_id == auth()->user()->employee->organization_id ||
-                                                        in_array($item->organization_id, [26, 27, 25])))
+                                                        in_array($item->organization_id, [26, 27, 25]) ==
+                                                            in_array(auth()->user()->employee->organization_id, [26, 27, 25])))
                                                 <i class="btn-action btn-delete fas fa-trash text-danger fs-xl mr-2"
                                                     data-url="{{ route('kepustakaan.delete', Crypt::encrypt($item->id)) }}"
                                                     data-type="{{ $item->type }}"></i>
