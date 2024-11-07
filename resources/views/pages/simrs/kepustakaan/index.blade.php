@@ -186,16 +186,11 @@
                                             @php
                                                 // Mendapatkan tanggal created_at dari item
                                                 $createdAt = \Carbon\Carbon::parse($item->created_at);
-
-                                                // Tentukan batas tanggal (5 bulan depan jika created_at di akhir bulan atau sebelum tanggal 1)
-                                                $firstDayOfNextMonth = $createdAt->copy()->addMonth()->startOfMonth(); // Tanggal pertama bulan depan
-                                                $endOfCurrentMonth = $createdAt->copy()->endOfMonth(); // Tanggal terakhir bulan saat ini
-
                                                 // Tentukan batas tanggal untuk 'created_at'
                                                 $dateLimit =
-                                                    $createdAt->day < 1 || $createdAt->isSameDay($endOfCurrentMonth)
-                                                        ? $firstDayOfNextMonth->copy()->addDays(4) // 5 hari setelah tanggal pertama bulan depan
-                                                        : $createdAt->copy()->startOfMonth()->addDays(4); // 5 hari bulan saat ini
+                                                    $createdAt->day > 5 && $createdAt->day < 15
+                                                        ? true // 5 hari setelah tanggal pertama bulan depan
+                                                        : false; // 5 hari bulan saat ini
                                             @endphp
                                             @if ($item->type == 'folder')
                                                 <i class="fas fa-folder text-success fs-xl mr-2"></i>
@@ -206,7 +201,7 @@
                                             @else
                                                 <i class="fas fa-file text-primary fs-xl mr-2"></i>
                                                 <a href="{{ route('kepustakaan.download', Crypt::encrypt($item->id)) }}"
-                                                    class="card-title {{ $createdAt->lessThanOrEqualTo($dateLimit) ? 'text-red' : '' }}">{{ $item->file }}</a>
+                                                    class="card-title {{ $dateLimit == true ? 'text-danger' : '' }}">{{ $item->file }}</a>
                                             @endif
                                         </div>
                                         <div class="action-kepustakaan float-right">
