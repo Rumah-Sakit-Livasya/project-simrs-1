@@ -638,6 +638,7 @@
                 <form action="{{ route('impersonate') }}" method="POST">
                     <input type="hidden" name="original_user" value="{{ auth()->user()->id }}">
                     @csrf
+                    @method('POST')
                     <div class="form-group">
                         <label for="impersonate">Select User</label>
                         <select name="user_id" id="impersonate" class="form-control select2">

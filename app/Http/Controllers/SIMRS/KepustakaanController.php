@@ -46,7 +46,8 @@ class KepustakaanController extends Controller
             $kepustakaan = Kepustakaan::where('parent_id', $folder->id)
                 ->where(function ($query) {
                     $query->where('organization_id', auth()->user()->employee->organization_id)
-                        ->orWhere('organization_id', null);
+                        ->orWhere('organization_id', null)
+                        ->orWhereIn('organization_id', [25, 26, 27]);
                 })
                 ->orderByRaw("CASE WHEN type = 'folder' THEN 1 ELSE 2 END")
                 ->orderBy('name', 'asc')
