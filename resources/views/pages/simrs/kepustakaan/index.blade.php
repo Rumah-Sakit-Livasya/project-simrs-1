@@ -185,8 +185,25 @@
                                         <div class="folder-wrapper d-flex align-items-center">
                                             @if ($item->type == 'folder')
                                                 <i class="fas fa-folder text-success fs-xl mr-2"></i>
+                                                @php
+                                                    // Mendapatkan tanggal created_at dari item
+                                                    $createdAt = \Carbon\Carbon::parse($item->created_at);
+
+                                                    // Tentukan batas tanggal (5 bulan depan jika created_at di akhir bulan atau sebelum tanggal 1)
+                                                    $firstDayOfNextMonth = $createdAt
+                                                        ->copy()
+                                                        ->addMonth()
+                                                        ->startOfMonth(); // Tanggal pertama bulan depan
+                                                    $endOfCurrentMonth = $createdAt->copy()->endOfMonth(); // Tanggal terakhir bulan saat ini
+
+                                                    // Tentukan batas tanggal untuk 'created_at'
+                                                    $dateLimit =
+                                                        $createdAt->day < 1 || $createdAt->isSameDay($endOfCurrentMonth)
+                                                            ? $firstDayOfNextMonth->copy()->addDays(4) // 5 hari setelah tanggal pertama bulan depan
+                                                            : $createdAt->copy()->startOfMonth()->addDays(4); // 5 hari bulan saat ini
+                                                @endphp
                                                 <a href="{{ route('kepustakaan.folder', Crypt::encrypt($item->id)) }}"
-                                                    class="card-title">
+                                                    class="card-title {{ $createdAt->lessThanOrEqualTo($dateLimit) ? 'text-red' : '' }}">
                                                     {{ $item->name }}
                                                 </a>
                                             @else
