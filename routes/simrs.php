@@ -28,10 +28,12 @@ use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
+use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
 use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
 use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Models\SIMRS\Registration;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -176,6 +178,10 @@ Route::group(['middleware' => ['auth']], function () {
             Route::prefix('harga-jual')->group(function () {
                 Route::get('margin', [MarginHargaJualController::class, 'index'])->name('master-date.setup.harga-jual.margin.index');
             });
+        });
+
+        Route::prefix('poliklinik')->group(function () {
+            Route::get('/daftar-pasien', [PoliklinikController::class, 'index'])->name('poliklinik.daftar-pasien');
         });
 
         Route::prefix('kepustakaan')->group(function () {

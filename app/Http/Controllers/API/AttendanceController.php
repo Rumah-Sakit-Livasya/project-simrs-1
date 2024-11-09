@@ -70,7 +70,7 @@ class AttendanceController extends Controller
 
             if ($is_clock_in) {
                 // Store the photo
-                $photoPath = $request->file('photo')->store('absensi/clock-in', 'public');
+                $photoPath = $request->file('photo')->store('absensi/clock-in/' . now()->format('m-Y') . '/', 'public');
 
                 $tanggal_sekarang = now()->format('Y-m-d');
                 $request['location'] = "{$request->latitude},{$request->longitude}";
@@ -163,7 +163,7 @@ class AttendanceController extends Controller
                 $photoPath = null;
                 if ($request->hasFile('photo')) {
                     $photo = $request->file('photo');
-                    $photoPath = $photo->store('absensi/clock-out', 'public'); // Save photo in storage/absensi
+                    $photoPath = $photo->store('absensi/clock-out/' . now()->format('m-Y') . '/', 'public'); // Save photo in storage/absensi
                 }
 
                 // Check for attendance from yesterday
