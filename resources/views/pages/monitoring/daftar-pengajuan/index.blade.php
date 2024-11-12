@@ -113,6 +113,7 @@
                                 <thead>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
+                                        <th style="white-space: nowrap">Waktu Pengajuan</th>
                                         <th style="white-space: nowrap">Nama</th>
                                         <th style="white-space: nowrap">Tanggal</th>
                                         <th style="white-space: nowrap">Keterangan</th>
@@ -126,6 +127,9 @@
                                     @foreach ($day_off_requests as $row)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
+                                            <td style="white-space: nowrap">
+                                                {{ tgl_waktu($row->created_at) }}
+                                            </td>
                                             <td style="white-space: nowrap">
                                                 {{ $row->employee->fullname }}
                                             </td>
@@ -178,6 +182,7 @@
                                 <tfoot>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
+                                        <th style="white-space: nowrap">Waktu Pengajuan</th>
                                         <th style="white-space: nowrap">Nama</th>
                                         <th style="white-space: nowrap">Tanggal</th>
                                         <th style="white-space: nowrap">Keterangan</th>
