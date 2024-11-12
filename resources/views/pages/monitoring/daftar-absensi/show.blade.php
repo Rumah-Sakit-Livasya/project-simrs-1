@@ -183,7 +183,7 @@
                                             <th style="white-space: nowrap">Early Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('super admin'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring detail absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>
@@ -253,8 +253,8 @@
                                                         -
                                                     @endisset
                                                 </td>
-                                                @if (auth()->user()->hasRole('super admin'))
-                                                    <td>
+                                                <td>
+                                                    @if (auth()->user()->hasRole('super admin'))
                                                         <a href="#" data-backdrop="static" data-keyboard="false"
                                                             class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
                                                             data-id="{{ $row->id }}" title="Edit Absensi">
@@ -265,16 +265,16 @@
                                                                 Loading...
                                                             </div>
                                                         </a>
-                                                        @can('monitoring detail absensi')
-                                                            <button
-                                                                class="badge mx-1 badge-primary p-2 border-0 text-white detail-absensi"
-                                                                data-employee-id="{{ $row->employee_id }}"
-                                                                data-tanggal="{{ $row->date }}">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                        @endcan
-                                                    </td>
-                                                @endif
+                                                    @endif
+                                                    @can('monitoring detail absensi')
+                                                        <button
+                                                            class="badge mx-1 badge-primary p-2 border-0 text-white detail-absensi"
+                                                            data-employee-id="{{ $row->employee_id }}"
+                                                            data-tanggal="{{ $row->date }}">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    @endcan
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -291,7 +291,7 @@
                                             <th style="white-space: nowrap">Early Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('super admin'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring detail absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>
@@ -304,7 +304,7 @@
                 </div>
             </div>
         </div>
-        @if (auth()->user()->hasRole('super admin'))
+        @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring detail absensi'))
             @include('pages.monitoring.daftar-absensi.partials.edit')
             @include('pages.absensi.absensi.partials.detail-absensi')
         @endif
