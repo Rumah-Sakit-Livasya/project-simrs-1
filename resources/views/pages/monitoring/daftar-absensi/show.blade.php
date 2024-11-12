@@ -1,6 +1,8 @@
 @extends('inc.layout')
 @section('title', 'Monitoring Dashboard')
 @section('extended-css')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
         #gambar-detail-absensi {
             display: flex;
@@ -306,7 +308,6 @@
             @include('pages.monitoring.daftar-absensi.partials.edit')
             @include('pages.absensi.absensi.partials.detail-absensi')
         @endif
-
     </main>
 @endsection
 @section('plugin')
