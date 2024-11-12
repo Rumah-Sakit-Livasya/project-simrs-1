@@ -145,7 +145,7 @@
                                             <th style="white-space: nowrap">Early Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('super admin'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring detail absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>
@@ -267,9 +267,11 @@
                                             <th style="white-space: nowrap">Time Out</th>
                                             <th style="white-space: nowrap">Clock In</th>
                                             <th style="white-space: nowrap">Clock Out</th>
+                                            <th style="white-space: nowrap">Late Clock In</th>
+                                            <th style="white-space: nowrap">Early Clock Out</th>
                                             <th style="white-space: nowrap">Libur</th>
                                             <th style="white-space: nowrap">Keterangan</th>
-                                            @if (auth()->user()->hasRole('super admin'))
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring detail absensi'))
                                                 <th style="white-space: nowrap">Action</th>
                                             @endif
                                         </tr>
