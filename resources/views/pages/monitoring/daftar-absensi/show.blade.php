@@ -430,7 +430,6 @@
                         // Show modal
                         modal.modal('show');
 
-                        // Render map after modal is shown
                         modal.on('shown.bs.modal', function() {
                             if (attendance.location) {
                                 const [lat, long] = attendance.location.split(',');
