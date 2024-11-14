@@ -74,28 +74,40 @@ class AttendanceController extends Controller
 
                 $tanggal_sekarang = now()->format('Y-m-d');
                 $request['location'] = "{$request->latitude},{$request->longitude}";
-                $request['foto_clock_in'] = $photoPath;
+                $request['foto_clock_in'] = $photoPath;  // Ensure this is added to the request data
+
+                // Set clock_in to current time
                 $request['clock_in'] = now();
 
                 // Kurangi satu hari dari waktu sekarang untuk check apakah kemarin shift malam atau tidak
                 $tanggal_kemarin = Carbon::now()->subDay();
-                //cek absen kemarin apakah shift malam
-                $attendance_kemarin = Attendance::where('employee_id', $employee_id)->where('date', $tanggal_kemarin->format('Y-m-d'))->first();
 
-                $request['clock_in'] = Carbon::now();
-                // $waktu_absen = Carbon::createFromFormat('H:i', '08:00');
-                $attendance = Attendance::where('employee_id', $employee_id)->where('date', $tanggal_sekarang)->first();
+                // Cek absen kemarin apakah shift malam
+                $attendance_kemarin = Attendance::where('employee_id', $employee_id)
+                    ->where('date', $tanggal_kemarin->format('Y-m-d'))
+                    ->first();
+
+                $attendance = Attendance::where('employee_id', $employee_id)
+                    ->where('date', $tanggal_sekarang)
+                    ->first();
+
                 if (!isset($attendance)) {
                     throw new \Exception("Pegawai Belum Memiliki Shift!");
                 }
-                if ($attendance_kemarin->is_day_off != 1 && $attendance_kemarin->shift->time_in >= '19.00' && $attendance_kemarin->shift->time_in <= '21.00' && $attendance_kemarin->clock_in == null) {
-                    $request['late_clock_in'] = 60;
-                    $attendance_kemarin->update($request->all());
-                } else {
-                    $waktu_absen = $attendance->shift->time_in;
-                    $perbedaanMenit = $request->clock_in->greaterThan($waktu_absen) ? Carbon::parse($waktu_absen)->seconds(0)->diffInMinutes(Carbon::parse($request->clock_in)->seconds(0)) : null;
-                    $request['late_clock_in'] = ($perbedaanMenit == '0') ? null : $perbedaanMenit;
-                    $attendance->update($request->all());
+
+                if ($attendance_kemarin) {
+                    if ($attendance_kemarin->is_day_off != 1 && $attendance_kemarin->shift->time_in >= '19:00' && $attendance_kemarin->shift->time_in <= '21:00' && $attendance_kemarin->clock_in == null) {
+                        $request['late_clock_in'] = 60;
+                        $attendance_kemarin->update($request->only(['clock_in', 'foto_clock_in', 'location', 'late_clock_in']));
+                    } else {
+                        $waktu_absen = $attendance->shift->time_in;
+                        $perbedaanMenit = $request['clock_in']->greaterThan($waktu_absen)
+                            ? Carbon::parse($waktu_absen)->seconds(0)->diffInMinutes(Carbon::parse($request['clock_in'])->seconds(0))
+                            : null;
+
+                        $request['late_clock_in'] = ($perbedaanMenit == '0') ? null : $perbedaanMenit;
+                        $attendance->update($request->only(['clock_in', 'foto_clock_in', 'location', 'late_clock_in']));
+                    }
                 }
 
                 return response()->json(['message' => 'Berhasil Clock In!']);
@@ -149,10 +161,11 @@ class AttendanceController extends Controller
 
             // Validate location
             if ($is_clock_in) {
+                // Validate input
                 $validator = Validator::make($request->all(), [
                     'latitude' => 'required',
                     'longitude' => 'required',
-                    'photo' => 'nullable|image'
+                    'photo' => 'nullable|image' // Ensure it's an image, nullable because it is optional
                 ]);
 
                 if ($validator->fails()) {
@@ -163,16 +176,17 @@ class AttendanceController extends Controller
                 $photoPath = null;
                 if ($request->hasFile('photo')) {
                     $photo = $request->file('photo');
-                    $photoPath = $photo->store('absensi/clock-out/' . now()->format('m-Y') . '/', 'public'); // Save photo in storage/absensi
+                    // Store photo in 'absensi/clock-out/yyyy-mm/' directory
+                    $photoPath = $photo->store('absensi/clock-out/' . now()->format('m-Y') . '/', 'public');
                 }
 
-                // Check for attendance from yesterday
+                // Check attendance data for yesterday
                 $tanggal_kemarin = Carbon::now()->subDay();
                 $attendance_kemarin = Attendance::where('employee_id', $request->employee_id)
                     ->where('date', $tanggal_kemarin->format('Y-m-d'))
                     ->first();
 
-                // Get today's attendance data
+                // Get today's attendance
                 $tanggal_sekarang = Carbon::now();
                 $attendance = Attendance::where('employee_id', $request->employee_id)
                     ->where('date', $tanggal_sekarang->format('Y-m-d'))
@@ -180,9 +194,11 @@ class AttendanceController extends Controller
 
                 if ($attendance_kemarin) {
                     if ($attendance_kemarin->clock_out === null && $attendance_kemarin->shift->time_out > '06:00' && $attendance_kemarin->shift->time_out < '07:10') {
+                        // Process for yesterday's clock-out
                         if (!isset($attendance_kemarin)) {
                             throw new \Exception("Pegawai Belum Memiliki Shift!");
                         }
+
                         $waktu_absen_pulang = $attendance_kemarin->shift->time_out;
                         if ($tanggal_sekarang->format('Y-m-d') == $attendance_kemarin->date) {
                             $waktu_dikonversi = Carbon::createFromFormat('H:i', $attendance_kemarin->shift->time_out);
@@ -195,6 +211,7 @@ class AttendanceController extends Controller
                         $perbedaanMenit = ($perbedaanMenit == 0) ? null : $perbedaanMenit;
 
                         if ($attendance_kemarin->clock_in != null) {
+                            // Update attendance with clock-out time and photo path
                             $attendance_kemarin->update([
                                 'clock_out' => $tanggal_sekarang,
                                 'early_clock_out' => $perbedaanMenit,
@@ -210,6 +227,7 @@ class AttendanceController extends Controller
 
                 if ($attendance) {
                     if ($attendance->clock_in !== null) {
+                        // Calculate clock-out time difference
                         $waktu_absen_pulang = $attendance->shift->time_out;
 
                         if ($attendance->shift->time_out > '06:00' && $attendance->shift->time_out < '07:10') {
@@ -221,10 +239,11 @@ class AttendanceController extends Controller
                             $perbedaanMenit = $tanggal_sekarang->lessThan($waktu_absen_pulang) ? abs($tanggal_sekarang->diffInMinutes($waktu_absen_pulang)) : null;
                         }
 
+                        // Update today's clock-out details with photo path
                         $attendance->update([
                             'clock_out' => $tanggal_sekarang,
                             'early_clock_out' => $perbedaanMenit,
-                            'foto_clock_out' => $photoPath,
+                            'foto_clock_out' => $photoPath, // Store the photo path
                         ]);
 
                         return response()->json(['message' => 'Berhasil Clock Out!']);
