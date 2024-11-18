@@ -21,6 +21,7 @@ class AttendanceController extends Controller
 {
     public function clock_in(Request $request)
     {
+        dd($request);
         try {
             $validator = Validator::make($request->all(), [
                 'employee_id' => 'required|exists:employees,id',
