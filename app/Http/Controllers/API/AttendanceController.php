@@ -21,6 +21,7 @@ class AttendanceController extends Controller
 {
     public function clock_in(Request $request)
     {
+        //tes
         try {
             $validator = Validator::make($request->all(), [
                 'employee_id' => 'required|exists:employees,id',
@@ -121,6 +122,7 @@ class AttendanceController extends Controller
 
     public function clock_out(Request $request)
     {
+        // tes
         try {
             // Find the employee and company
             $employee = Employee::where('id', $request->employee_id)->first();
