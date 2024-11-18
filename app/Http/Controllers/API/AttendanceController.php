@@ -21,7 +21,7 @@ class AttendanceController extends Controller
 {
     public function clock_in(Request $request)
     {
-        dd($request);
+        // dd($request);
         try {
             $validator = Validator::make($request->all(), [
                 'employee_id' => 'required|exists:employees,id',
@@ -56,6 +56,7 @@ class AttendanceController extends Controller
 
             if ($is_clock_in) {
                 $photoPath = $request->file('photo')->store('absensi/clock-in/' . now()->format('m-Y'), 'public');
+                dd($photoPath);
                 $request->merge(['foto_clock_in' => $photoPath]);
 
                 $attendance = Attendance::where('employee_id', $request->employee_id)
