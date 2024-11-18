@@ -201,7 +201,6 @@ class AttendanceRequestController extends Controller
 
     public function store()
     {
-
         try {
             if (request()->clockin == null && request()->clockout == null) {
                 throw new \Exception('Clockin atau Clockout harap diisi!');
@@ -216,16 +215,6 @@ class AttendanceRequestController extends Controller
                 'description' => 'nullable|string',
             ]);
 
-            $employee = Employee::where('id', request()->employee_id)->first(['approval_line', 'approval_line_parent', 'fullname']);
-            $is_approved = 'Pending';
-
-            if (!isset($employee->approval_line) && !isset($employee->approval_line_parent)) {
-                $is_approved = "Disetujui";
-            }
-            if (isset($employee->approval_line) && !isset($employee->approval_line_parent)) {
-                $is_approved = "Verifikasi";
-            }
-
             if ($validator->fails()) {
                 $errors = $validator->errors();
                 if ($errors->has('file')) {
@@ -236,17 +225,20 @@ class AttendanceRequestController extends Controller
                 }
             }
 
-            // Header untuk cURL
-            $headers = [
-                'Key:KeyAbcKey',
-                'Nama:arul',
-                'Sandi:123###!!',
-            ];
+            $employee = Employee::findOrFail(request()->employee_id, ['approval_line', 'approval_line_parent', 'fullname']);
+            $is_approved = 'Pending';
 
-            $approval_line = Employee::find($employee->approval_line);
-            // $approval_line_parent = Employee::find($employee->approval_line_parent);
-            $attendance = Attendance::where('date', request()->date)->where('employee_id', request()->employee_id)->first();
-            //messages wa
+            if (!isset($employee->approval_line) && !isset($employee->approval_line_parent)) {
+                $is_approved = "Disetujui";
+            } elseif (isset($employee->approval_line) && !isset($employee->approval_line_parent)) {
+                $is_approved = "Verifikasi";
+            }
+
+            $attendance = Attendance::where('date', request()->date)
+                ->where('employee_id', request()->employee_id)
+                ->firstOrFail();
+
+            // Setup pesan untuk WhatsApp
             $messages = "*Pengajuan Absensi: " . Carbon::parse(request()->date)->translatedFormat('j F Y') . "* \n";
             $messages .= "*" . $employee->fullname . "*\n\n";
             $messages .= "Clock In   : " . (request()->clockin ?? "-") . "\n";
@@ -254,89 +246,51 @@ class AttendanceRequestController extends Controller
             $messages .= "Keterangan : " . (request()->description ?? "-") . "\n";
             $messages .= "\nTolong acc melalui website Smart HR atau melalui link berikut: \n\n";
 
+            // Handle file upload
+            $filePath = null;
             if (request()->hasFile('file')) {
                 $image = request()->file('file');
                 $imageName = request()->date . '_absensi_' . time() . '.' . $image->getClientOriginalExtension();
-                $path = $image->storeAs('img/pengajuan/absensi', $imageName, 'public');
-                $attendance_request = AttendanceRequest::create([
-                    'employee_id' => request()->employee_id,
-                    'attendance_id' => $attendance->id,
-                    'date' => request()->date,
-                    'approved_line_child' => $employee->approval_line,
-                    'approved_line_parent' => $employee->approval_line_parent,
-                    'clockin' => request()->clockin,
-                    'clockout' => request()->clockout,
-                    'is_approved' => $is_approved,
-                    'file' => $imageName,
-                    'description' => request()->description,
-                ]);
-
-                $messages .= 'https://internal.livasya.com/attendances/attendance-requests/' . $attendance_request->id;
-            } else {
-                $attendance_request = AttendanceRequest::create([
-                    'employee_id' => request()->employee_id,
-                    'attendance_id' => $attendance->id,
-                    'date' => request()->date,
-                    'approved_line_child' => $employee->approval_line,
-                    'approved_line_parent' => $employee->approval_line_parent,
-                    'clockin' => request()->clockin,
-                    'clockout' => request()->clockout,
-                    'description' => request()->description,
-                    'is_approved' => $is_approved,
-                ]);
-                $messages .= 'https://internal.livasya.com/attendances/attendance-requests/' . $attendance_request->id;
+                $filePath = $image->storeAs('img/pengajuan/absensi', $imageName, 'public');
             }
 
-            if ($is_approved == "Disetujui") {
-                // Periksa apakah ada data clock_in dan clock_out yang dikirim
-                if (request()->clockin == null && request()->clockout != null) {
-                    $updateData = ['clock_out' => request()->clockout];
-                    $updateData['early_clock_out'] = null;
-                } else if (request()->clockout == null && request()->clockin != null) {
-                    $updateData['clock_in'] = request()->clockin;
-                    $updateData['late_clock_in'] = null;
-                } else if (request()->clockin != null && request()->clockout != null) {
-                    $updateData['clock_in'] = request()->clockin;
-                    $updateData['clock_out'] = request()->clockout;
-                    $updateData['late_clock_in'] = null;
-                    $updateData['early_clock_out'] = null;
+            // Create attendance request
+            $attendanceRequestData = [
+                'employee_id' => request()->employee_id,
+                'attendance_id' => $attendance->id,
+                'date' => request()->date,
+                'approved_line_child' => $employee->approval_line,
+                'approved_line_parent' => $employee->approval_line_parent,
+                'clockin' => request()->clockin,
+                'clockout' => request()->clockout,
+                'description' => request()->description,
+                'is_approved' => $is_approved,
+            ];
+            if ($filePath) {
+                $attendanceRequestData['file'] = $imageName;
+            }
+            $attendanceRequest = AttendanceRequest::create($attendanceRequestData);
+
+            $messages .= 'https://internal.livasya.com/attendances/attendance-requests/' . $attendanceRequest->id;
+
+            // Handle approval logic
+            if ($is_approved === "Disetujui") {
+                $updateData = [];
+                if (request()->clockin && request()->clockout) {
+                    $updateData = [
+                        'clock_in' => request()->clockin,
+                        'clock_out' => request()->clockout,
+                        'late_clock_in' => null,
+                        'early_clock_out' => null,
+                    ];
+                } elseif (request()->clockin) {
+                    $updateData = ['clock_in' => request()->clockin, 'late_clock_in' => null];
+                } elseif (request()->clockout) {
+                    $updateData = ['clock_out' => request()->clockout, 'early_clock_out' => null];
                 }
                 $attendance->update($updateData);
             } else {
-
-                if (isset($approval_line) && isset($approval_line->mobile_phone)) {
-                    $number = $approval_line->mobile_phone;
-                    if (substr($number, 0, 1) === '0') {
-                        // Hapus karakter pertama ('0') dan tambahkan awalan '62'
-                        $formattedNumber = '62' . substr($number, 1);
-                    } else {
-                        // Jika nomor telepon tidak dimulai dengan '0', gunakan nilai asli
-                        $formattedNumber = $number;
-                    }
-                    // Data untuk request HTTP
-                    $httpData = [
-                        'number' => $formattedNumber,
-                        'message' => $messages,
-                    ];
-
-                    if (request()->hasFile('file')) {
-                        $httpData['file_dikirim'] = new \CURLFile(storage_path('app/public/' . $path));
-                    }
-
-                    // Mengirim request HTTP menggunakan cURL
-                    $curl = curl_init();
-                    curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
-                    curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-                    curl_setopt($curl, CURLOPT_POST, 1);
-                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-                    curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
-                    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-                    $response = curl_exec($curl);
-                    $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-                    $curlError = curl_error($curl);
-                    curl_close($curl);
-                }
+                $this->sendWhatsAppNotification($employee, $messages, $filePath);
             }
 
             return response()->json(['message' => 'Request Absensi Berhasil di Tambahkan!']);
@@ -346,6 +300,48 @@ class AttendanceRequestController extends Controller
             ], 404);
         }
     }
+
+    private function sendWhatsAppNotification($employee, $messages, $filePath)
+    {
+        $approvalLine = Employee::find($employee->approval_line);
+        if (!isset($approvalLine) || !isset($approvalLine->mobile_phone)) {
+            return;
+        }
+
+        $number = $approvalLine->mobile_phone;
+        $formattedNumber = substr($number, 0, 1) === '0' ? '62' . substr($number, 1) : $number;
+
+        $httpData = [
+            'number' => $formattedNumber,
+            'message' => $messages,
+        ];
+
+        if ($filePath) {
+            $httpData['file_dikirim'] = new \CURLFile(storage_path('app/public/' . $filePath));
+        }
+
+        $headers = [
+            'Key:KeyAbcKey',
+            'Nama:arul',
+            'Sandi:123###!!',
+        ];
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+        $response = curl_exec($curl);
+        if (curl_errno($curl)) {
+            throw new \Exception('cURL Error: ' . curl_error($curl));
+        }
+        curl_close($curl);
+    }
+
+
 
     public function approve($id)
     {
