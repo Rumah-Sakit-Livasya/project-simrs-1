@@ -249,9 +249,25 @@ class AttendanceRequestController extends Controller
             // Handle file upload
             $filePath = null;
             if (request()->hasFile('file')) {
-                $image = request()->file('file');
-                $imageName = request()->date . '_absensi_' . time() . '.' . $image->getClientOriginalExtension();
-                $filePath = $image->storeAs('img/pengajuan/absensi', $imageName, 'public');
+                // $image = request()->file('file');
+                // $imageName = request()->date . '_absensi_' . time() . '.' . $image->getClientOriginalExtension();
+                // $filePath = $image->storeAs('img/pengajuan/absensi', $imageName, 'public');
+
+                $file = request()->file('file');
+                $imageName = request()->date . '_absensi_' . time() . '.'  . $file->getClientOriginalExtension();
+                $directory = 'img/pengajuan/absensi';
+
+                // Simpan file secara manual ke storage
+                $storagePath = storage_path('app/public/' . $directory);
+                if (!file_exists($storagePath)) {
+                    mkdir($storagePath, 0755, true); // Buat folder jika belum ada
+                }
+
+                // Pindahkan file ke folder tujuan
+                $file->move($storagePath, $imageName);
+
+                // Path relatif untuk database
+                $filePath = $directory . '/' . $imageName;
             }
 
             // Create attendance request
