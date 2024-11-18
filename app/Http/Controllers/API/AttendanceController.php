@@ -85,7 +85,7 @@ class AttendanceController extends Controller
 
                 // Path relatif untuk database
                 $photoPath = $directory . '/' . $fileName;
-                
+
                 $tanggal_sekarang = now()->format('Y-m-d');
                 $request['location'] = "{$request->latitude},{$request->longitude}";
                 $request['foto_clock_in'] = $photoPath;  // Ensure this is added to the request data
@@ -180,7 +180,7 @@ class AttendanceController extends Controller
                 $validator = Validator::make($request->all(), [
                     'latitude' => 'required',
                     'longitude' => 'required',
-                    'photo' => 'nullable|image' // Ensure it's an image, nullable because it is optional
+                    'photo' => 'required|image' // Ensure it's an image, nullable because it is optional
                 ]);
 
                 if ($validator->fails()) {
@@ -190,9 +190,21 @@ class AttendanceController extends Controller
                 // Store the photo if it exists
                 $photoPath = null;
                 if ($request->hasFile('photo')) {
-                    $photo = $request->file('photo');
-                    // Store photo in 'absensi/clock-out/yyyy-mm/' directory
-                    $photoPath = $photo->store('absensi/clock-out/' . now()->format('m-Y') . '/', 'public');
+                    $file = $request->file('photo');
+                    $fileName = 'clock-out-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $directory = 'absensi/clock-out/' . now()->format('m-Y');
+
+                    // Simpan file secara manual ke storage
+                    $storagePath = storage_path('app/public/' . $directory);
+                    if (!file_exists($storagePath)) {
+                        mkdir($storagePath, 0755, true); // Buat folder jika belum ada
+                    }
+
+                    // Pindahkan file ke folder tujuan
+                    $file->move($storagePath, $fileName);
+
+                    // Path relatif untuk database
+                    $photoPath = $directory . '/' . $fileName;
                 }
 
                 // Check attendance data for yesterday
