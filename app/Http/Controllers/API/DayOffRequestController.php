@@ -166,9 +166,25 @@ class DayOffRequestController extends Controller
                 $is_approved = request()->is_approved;
             }
             if (request()->hasFile('photo')) {
-                $image = request()->file('photo');
-                $imageName = request()->attendance_code_id . '_cuti_' . time() . '.' . $image->getClientOriginalExtension();
-                $path = $image->storeAs('img/pengajuan/cuti', $imageName, 'public');
+                // $image = request()->file('photo');
+                // $imageName = request()->attendance_code_id . '_cuti_' . time() . '.' . $image->getClientOriginalExtension();
+                // $path = $image->storeAs('img/pengajuan/cuti', $imageName, 'public');
+
+                $file = request()->file('photo');
+                $imageName = request()->attendance_code_id . '_cuti_' . time() . '.' . $file->getClientOriginalExtension();
+                $directory = 'img/pengajuan/cuti';
+
+                // Simpan file secara manual ke storage
+                $storagePath = storage_path('app/public/' . $directory);
+                if (!file_exists($storagePath)) {
+                    mkdir($storagePath, 0755, true); // Buat folder jika belum ada
+                }
+
+                // Pindahkan file ke folder tujuan
+                $file->move($storagePath, $imageName);
+
+                // Path relatif untuk database
+                $path = $directory . '/' . $imageName;
                 // Create company dengan file logo
 
                 $day_off_request = DayOffRequest::create([
