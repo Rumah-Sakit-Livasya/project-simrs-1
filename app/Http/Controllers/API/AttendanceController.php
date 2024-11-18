@@ -135,7 +135,6 @@ class AttendanceController extends Controller
 
     public function clock_out(Request $request)
     {
-        // tes
         try {
             // Find the employee and company
             $employee = Employee::where('id', $request->employee_id)->first();

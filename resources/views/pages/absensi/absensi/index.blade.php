@@ -852,7 +852,9 @@
                     });
                 } catch (error) {
                     console.error('Error accessing the camera:', error);
-                    alert('Error accessing the camera: ' + error.message);
+                    alert('Kamera harus aktif dan diizinkan agar dapat melanjutkan.');
+                    // Meminta izin kamera kembali setelah alert muncul
+                    requestCameraPermission();
                 }
             }
 
@@ -861,25 +863,47 @@
                 canvas.height = video.videoHeight;
             }
 
+            async function requestCameraPermission() {
+                try {
+                    const constraints = {
+                        video: {
+                            facingMode: 'user',
+                            width: {
+                                ideal: 640
+                            },
+                            height: {
+                                ideal: 720
+                            },
+                            playsinline: true
+                        }
+                    };
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true);
+                    video.addEventListener('loadedmetadata', () => {
+                        adjustCanvasSize();
+                    });
+                } catch (error) {
+                    console.error('Error accessing the camera again:', error);
+                    // alert('Kamera harus diizinkan untuk melanjutkan!');
+                }
+            }
+
             async function getLocation() {
-                // tambahkan loading indicator ketika peta sedang dimuat
                 toggleLoadingIndicator(true);
                 return new Promise((resolve, reject) => {
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(position => {
-                            // Hapus loading indicator ketika peta selesai dimuat
                             toggleLoadingIndicator(false);
                             latitude = position.coords.latitude;
                             longitude = position.coords.longitude;
                             resolve(position);
                         }, error => {
-                            // tambahkan loading indicator ketika peta sedang dimuat
                             toggleLoadingIndicator(true);
                             console.error("Geolocation failed: " + error.message);
                             reject(error);
                         });
                     } else {
-                        // tambahkan loading indicator ketika peta sedang dimuat
                         toggleLoadingIndicator(true);
                         console.error("Geolocation is not supported by this browser.");
                         reject(new Error("Geolocation not supported"));
@@ -887,7 +911,6 @@
                 });
             }
 
-            // Fungsi untuk menampilkan atau menyembunyikan loading indicator
             function toggleLoadingIndicator(show) {
                 const loadingIndicator = document.getElementById('loading-indicator');
                 if (show) {
@@ -897,23 +920,20 @@
                 }
             }
 
-            // Fungsi untuk menginisialisasi peta
             async function initializeMap() {
-
-                var map = L.map('map').setView([0, 0], 13); // Koordinat awal
+                var map = L.map('map').setView([0, 0], 13);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
-
                 try {
-                    const position = await getLocation(); // Pastikan fungsi ini berfungsi
+                    const position = await getLocation();
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     const accuracy = position.coords.accuracy;
 
-                    map.setView([lat, lng], 17); // Zoom level set to 17 untuk tampilan lebih dekat
+                    map.setView([lat, lng], 17); // Zoom level set to 17
 
                     L.marker([lat, lng]).addTo(map)
                         .bindPopup('You are here.<br> Accuracy: ' + accuracy + ' meters.')
@@ -927,13 +947,22 @@
             $('#clock_in').on('click', function(e) {
                 e.preventDefault();
                 actionType = 'clock_in'; // Set flag for Clock In
-                $('#picture-modal').modal('show');
+                if (video.srcObject) { // Cek apakah kamera sudah aktif
+                    $('#picture-modal').modal('show');
+                } else {
+                    alert('Kamera harus aktif dan diizinkan untuk clock in.');
+                }
             });
 
             $('#clock_out').on('click', function(e) {
                 e.preventDefault();
                 actionType = 'clock_out'; // Set flag for Clock Out
-                $('#picture-modal').modal('show');
+                if (video.srcObject) { // Cek apakah kamera sudah aktif
+                    $('#picture-modal').modal('show');
+                } else {
+                    alert('Kamera harus aktif dan diizinkan untuk clock out.');
+                    requestCameraPermission(); // Meminta izin untuk mengaktifkan kamera
+                }
             });
 
             $('#dt-basic-example').dataTable({
@@ -954,7 +983,6 @@
                             columns: ':visible',
                             format: {
                                 body: function(data, row, column, node) {
-                                    // Menghapus tag HTML dari data sebelum mengekspor ke Excel
                                     return $('<div/>').html(data).text();
                                 }
                             }
@@ -962,7 +990,7 @@
                         customize: function(xlsx) {
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
                             $('row:first c', sheet).attr('style',
-                                'text-align: center;'); // Mengatur gaya untuk heading
+                                'text-align: center;');
                             $('row:nth-child(2) c', sheet).attr('s', '43');
                             $('row:nth-child(2) c', sheet).attr('class', 'style43');
                         }
@@ -1008,19 +1036,18 @@
                 uploadButton.disabled = true;
                 toggleSpinner('upload', true);
 
-                // Reset transformasi canvas dan gambar tanpa efek mirror
                 context.resetTransform();
-                context.save(); // Simpan state saat ini
-                context.translate(canvas.width, 0); // Pindahkan origin ke kanan
-                context.scale(-1, 1); // Terapkan skala horizontal terbalik
+                context.save();
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                context.restore(); // Kembalikan state sebelumnya
+                context.restore();
 
                 const dataURL = canvas.toDataURL('image/png');
                 const file = dataURLToFile(dataURL, 'photo.png');
                 const formData = new FormData();
                 formData.append('employee_id', '{{ auth()->user()->employee->id }}');
-                formData.append('photo', file); // Use file object instead of dataURL
+                formData.append('photo', file);
                 formData.append('location', `${latitude}, ${longitude}`);
                 formData.append('latitude', latitude);
                 formData.append('longitude', longitude);
@@ -1030,7 +1057,7 @@
 
                 try {
                     const response = await fetch(apiUrl, {
-                        method: 'POST', // Update method to PUT if required
+                        method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
@@ -1058,7 +1085,6 @@
                     uploadButton.disabled = false;
                 }
             });
-
         });
 
         async function fetchAttendanceDetails(employeeId, tanggal) {
