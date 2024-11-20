@@ -18,7 +18,7 @@
                     </li>
                     <li>
                         <div class="circle-menu waves-effect light-green accent-3 menu-layanan"
-                            data-layanan="tindakan_medis/list_tindakan_medis">
+                            data-layanan="tindakan-medis">
                             <i class="mdi mdi-needle"></i>
                         </div>
                         <span>Tindakan Medis</span>

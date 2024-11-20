@@ -50,6 +50,38 @@
                 width: 100%;
             }
         }
+
+        /* Mengatur border untuk setiap sel */
+        td {
+            border: none;
+            /* Menghilangkan semua border */
+            border-bottom: 1px solid #ccc;
+            /* Menambahkan border bawah */
+            padding: 8px;
+            /* Menambahkan padding untuk estetika */
+        }
+
+        /* Mengatur border untuk input */
+        input {
+            border: none;
+            /* Menghilangkan semua border */
+            border-bottom: 1px solid #ccc;
+            /* Menambahkan border bawah */
+            outline: none;
+            /* Menghilangkan outline saat input aktif */
+            text-align: right;
+            /* Mengatur teks ke kanan */
+            width: 100%;
+            /* Mengatur lebar input agar sesuai dengan sel */
+            padding: 4px 0;
+            /* Menambahkan padding vertikal */
+        }
+
+        /* Jika Anda ingin mengatur border bawah untuk baris terakhir */
+        tr:last-child td {
+            border-bottom: none;
+            /* Menghilangkan border bawah pada baris terakhir */
+        }
     </style>
 @endsection
 @section('content')
@@ -145,10 +177,14 @@
                                                 <td>{{ $row->is_konsul }}</td>
                                                 <td>{{ $row->mapping_rl_13 }}</td>
                                                 <td>{{ $row->mapping_rl_34 }}</td>
-                                                <td>
+                                                <td style="white-space: nowrap">
                                                     <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
                                                         data-id="{{ $row->id }}">
                                                         <i class="fas fa-pencil"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-primary px-2 py-1 btn-tarif"
+                                                        data-id="{{ $row->id }}" data-nama="{{ $row->nama_tindakan }}">
+                                                        <i class="fas fa-money-bill"></i>
                                                     </button>
                                                     <button class="btn btn-sm btn-danger px-2 py-1 btn-delete"
                                                         data-id="{{ $row->id }}">
@@ -181,6 +217,7 @@
         </div>
     </main>
     @include('pages.simrs.master-data.layanan-medis.partials.edit-tindakan')
+    @include('pages.simrs.master-data.layanan-medis.partials.edit-tarif')
     @include('pages.simrs.master-data.layanan-medis.partials.tambah-tindakan')
 @endsection
 @section('plugin')
@@ -189,16 +226,183 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            let lastClickedTindakanId = null; // Variabel untuk menyimpan ID tindakan terakhir yang diklik
+
+            function resetDropdown() {
+                $('#group-penjamin').val('').trigger('change');
+            }
+
+            // Event handler untuk tombol ubah tarif
+            $('.btn-tarif').on('click', function() {
+                // Ambil nama tindakan dari atribut tombol
+
+                let currentTindakanId = $(this).data('id'); // Ambil ID tindakan dari tombol yang diklik
+
+                // Reset dropdown hanya jika tindakan yang diklik berbeda dari sebelumnya
+                if (lastClickedTindakanId !== currentTindakanId) {
+                    resetDropdown();
+                }
+
+                lastClickedTindakanId = currentTindakanId; // Update ID tindakan terakhir
+            });
+
+
+            // Set CSRF token untuk semua permintaan AJAX
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $('#group-penjamin').select2({
+                dropdownParent: $("#modal-edit-tarif"),
+            });
+
             let tindakanId = null;
             $('#loading-spinner').show();
 
             $('#btn-tambah-tindakan').click(function() {
                 $('#modal-tambah-tindakan').modal('show');
-                console.log('clicked');
             });
 
             $('#modal-tambah-tindakan .select2').select2({
                 dropdownParent: $('#modal-tambah-tindakan')
+            });
+
+            $('.btn-tarif').off('click').on('click', function() {
+                // Tampilkan modal dan reset tabel
+                $('#modal-edit-tarif').modal('show');
+                $('#tarif-inputs').html(`
+        <tr>
+            <td colspan="6" class="text-center">Silakan pilih grup penjamin terlebih dahulu.</td>
+            </tr>
+            `);
+
+                // Ambil ID tindakan dari atribut tombol
+                let tindakanId = $(this).attr('data-id');
+                let tindakanNama = $(this).data('nama');
+                console.log(tindakanNama);
+
+                // Set nama tindakan di modal
+                $('#nama-tindakan').text(tindakanNama);
+
+
+                // Reset dropdown grup penjamin ke nilai default
+                $('#group-penjamin').val('').trigger('change');
+
+                // Cek jika request sudah pernah dilakukan untuk tindakanId yang sama
+                if ($(this).data('loaded')) {
+                    console.log('Data sudah di-load, tidak melakukan request ulang.');
+                    return;
+                }
+                $(this).data('loaded', true); // Tandai data sudah dimuat
+
+                // Panggil API untuk mengambil tarif default
+                $.ajax({
+                    url: `/api/simrs/master-data/layanan-medis/tindakan-medis/tarif/${tindakanId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        console.log('Tarif default loaded:', response);
+
+                        // Tambahkan event listener untuk perubahan dropdown grup penjamin
+                        $('#group-penjamin').off('change').on('change', function() {
+                            const selectedGroup = $(this).val();
+
+                            if (selectedGroup) {
+                                updateTarifByGroup(selectedGroup, tindakanId);
+                            } else {
+                                // Reset tabel jika dropdown kembali kosong
+                                $('#tarif-inputs').html(`
+                        <tr>
+                            <td colspan="6" class="text-center">Silakan pilih grup penjamin terlebih dahulu.</td>
+                        </tr>
+                    `);
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        showErrorAlert('Terjadi kesalahan saat memuat tarif default: ' + error);
+                    }
+                });
+            });
+
+            // Fungsi untuk memperbarui tarif berdasarkan grup penjamin
+            function updateTarifByGroup(groupId, tindakanId) {
+                $.ajax({
+                    url: `/api/simrs/master-data/layanan-medis/tindakan-medis/tarif/${tindakanId}/${groupId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        let inputFields = response.map((tarif, index) => `
+                <tr>
+                    <td style="white-space: nowrap;">
+                        ${tarif.kelas || tarif.kelas_rawat.kelas}
+                        <input type="hidden" name="kelas_rawat_id_[${index}]" value="${tarif.kelas_rawat_id}" />
+                        <input type="hidden" name="group_penjamin_id_[${index}]" value="${groupId}" />
+                        <input type="hidden" name="tindakan_medis_id_[${index}]" value="${tarif.tindakan_medis_id}" />
+                    </td>
+                    <td><input style="text-align:right;" type="text" name="share_dr[${index}]" value="${tarif.share_dr || 0}" onkeyup="calc(${index});" /></td>
+                    <td><input style="text-align:right;" type="text" name="share_rs[${index}]" value="${tarif.share_rs || 0}" onkeyup="calc(${index});" /></td>
+                    <td><input style="text-align:right;" type="text" name="prasarana[${index}]" value="${tarif.prasarana || 0}" onkeyup="calc(${index});" /></td>
+                    <td><input style="text-align:right;" type="text" name="bhp[${index}]" value="${tarif.bhp || 0}" onkeyup="calc(${index});" /></td>
+                    <td><input style="text-align:right;" type="text" name="total[${index}]" value="${tarif.total || 0}" readonly="readonly" /></td>
+                </tr>`).join('');
+                        $('#tarif-inputs').html(inputFields);
+                    },
+                    error: function(xhr) {
+                        console.error('Error fetching tarif:', xhr);
+                    }
+                });
+            }
+
+            // Event listener untuk tombol save
+            $('#bSave').off('click').on('click', function() {
+                let dataToSave = [];
+
+                $('#tarif-inputs tr').each(function() {
+                    let kelasRawatId = $(this).find('input[name^="kelas_rawat_id_"]').val();
+                    let groupPenjaminId = $(this).find('input[name^="group_penjamin_id_"]').val();
+                    let tindakanMedisId = $(this).find('input[name^="tindakan_medis_id_"]').val();
+                    let shareDr = $(this).find('input[name^="share_dr"]').val();
+                    let shareRs = $(this).find('input[name^="share_rs"]').val();
+                    let prasarana = $(this).find('input[name^="prasarana"]').val();
+                    let bhp = $(this).find('input[name^="bhp"]').val();
+                    let total = $(this).find('input[name^="total"]').val();
+
+                    if (kelasRawatId) {
+                        dataToSave.push({
+                            kelas_rawat_id: kelasRawatId,
+                            group_penjamin_id: groupPenjaminId,
+                            tindakan_medis_id: tindakanMedisId,
+                            share_dr: shareDr || 0,
+                            share_rs: shareRs || 0,
+                            prasarana: prasarana || 0,
+                            bhp: bhp || 0,
+                            total: total || 0,
+                        });
+                    }
+                });
+
+                console.log('Data to save:', dataToSave);
+
+                $(this).prop('disabled', true);
+
+                $.ajax({
+                    url: `/api/simrs/master-data/layanan-medis/tindakan-medis/update/${tindakanId}/tarif`,
+                    type: 'PATCH',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSave),
+                    success: function(response) {
+                        showSuccessAlert(response.message);
+                        setTimeout(() => window.location.reload(), 1000);
+                        $('#modal-edit-tarif').modal('hide');
+                    },
+                    error: function(xhr, status, error) {
+                        showErrorAlert('Terjadi kesalahan: ' + error);
+                    },
+                    complete: function() {
+                        $('#bSave').prop('disabled', false);
+                    }
+                });
             });
 
             $('.btn-edit').click(function() {
@@ -223,7 +427,8 @@
                         $('#modal-edit-tindakan input[name="is_konsul"][value="' + response
                             .is_konsul + '"]').prop(
                             'checked', true);
-                        $('#modal-edit-tindakan input[name="auto_charge"][value="' + response
+                        $('#modal-edit-tindakan input[name="auto_charge"][value="' +
+                                response
                                 .auto_charge + '"]')
                             .prop(
                                 'checked', true);
@@ -255,7 +460,8 @@
                 if (userConfirmed) {
                     // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
                     $.ajax({
-                        url: '/api/simrs/master-data/layanan-medis/tindakan-medis/' + tindakanId +
+                        url: '/api/simrs/master-data/layanan-medis/tindakan-medis/' +
+                            tindakanId +
                             '/delete',
                         type: 'DELETE',
                         success: function(response) {
@@ -410,7 +616,20 @@
                     }
                 ]
             });
-
         });
+
+        function calc(index) {
+            // Ambil nilai dari input yang relevan
+            let shareDr = parseFloat($(`input[name="share_dr[${index}]"]`).val()) || 0;
+            let shareRs = parseFloat($(`input[name="share_rs[${index}]"]`).val()) || 0;
+            let prasarana = parseFloat($(`input[name="prasarana[${index}]"]`).val()) || 0;
+            let bhp = parseFloat($(`input[name="bhp[${index}]"]`).val()) || 0;
+
+            // Hitung total
+            let total = shareDr + shareRs + prasarana + bhp;
+
+            // Set nilai total ke input total
+            $(`input[name="total[${index}]"]`).val(total.toFixed(2)); // Format total dengan 2 desimal
+        }
     </script>
 @endsection

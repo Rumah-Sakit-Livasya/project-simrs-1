@@ -445,6 +445,11 @@
                         @include('pages.simrs.pendaftaran.partials.dokter.pengkajian-dokter-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.cppt')
                         @include('pages.simrs.pendaftaran.partials.dokter.resume-medis-rajal')
+
+                    </div>
+                    <div id="tindakan-medis">
+                        {{-- Tindakan Medis --}}
+                        @include('pages.simrs.pendaftaran.partials.tindakan-medis')
                     </div>
                 </div>
             </div>
@@ -471,12 +476,16 @@
     <script>
         $(document).ready(function() {
 
+            $('#pengkajian-nurse-rajal').hide();
             $('.menu-layanan').on('click', function() {
                 // Sembunyikan menu layanan dengan efek fade out
                 $('#menu-layanan').fadeOut(500); // 500ms untuk transisi
 
                 // Ambil data-layanan untuk menentukan ID elemen yang akan ditampilkan
                 var namaLayanan = $(this).data('layanan');
+                if (namaLayanan == 'pengkajian-nurse-rajal') {
+                    $('#pengkajian-nurse-rajal').show();
+                }
                 var pengkajianId = $('#pengkajian-rajal-id').val();
 
                 // Tampilkan elemen layanan yang dipilih dengan efek fade in

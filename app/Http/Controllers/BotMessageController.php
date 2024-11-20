@@ -99,6 +99,7 @@ class BotMessageController extends Controller
             $response .= "🔹 <code>Pegawai Izin: $total_izin </code>\n";
             $response .= "🔹 <code>Pegawai Sakit: $total_sakit </code>\n\n";
 
+
             $response .= "\n🟥 <b>DAFTAR PEGAWAI YANG TELAT:</b> \n\n";
             $pegawai_telat = Attendance::whereNotNull('clock_in')->whereNotNull('late_clock_in')->where('date', Carbon::now()->format('Y-m-d'))->orderBy('late_clock_in')->get();
             foreach ($pegawai_telat as $key => $row) {

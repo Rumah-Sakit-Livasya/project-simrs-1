@@ -26,6 +26,7 @@ use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianDokterRajalController;
+use App\Http\Controllers\SIMRS\Penjamin\GroupPenjaminController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
@@ -79,9 +80,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
 
     Route::prefix('master-data')->group(function () {
+        Route::get('/group-penjamin', [GroupPenjaminController::class, 'index']);
         Route::prefix('layanan-medis')->group(function () {
             Route::get('/tindakan-medis/{id}', [TindakanMedisController::class, 'getTindakan'])->name('master-data.layanan-medis.tindakan-medis.get');
             Route::post('/tindakan-medis', [TindakanMedisController::class, 'store'])->name('master-data.layanan-medis.tindakan-medis.store');
+            Route::get('/tindakan-medis/tarif/{id}', [TindakanMedisController::class, 'getTarif'])->name('master-data.layanan-medis.tindakan-medis.getTarif');
+            Route::get('/tindakan-medis/tarif/{tindakanId}/{groupId}', [TindakanMedisController::class, 'getTarifByGroup'])->name('master-data.layanan-medis.tindakan-medis.getTarifByGroup');
+            Route::patch('/tindakan-medis/update/{id}/tarif', [TindakanMedisController::class, 'updateTarif'])->name('master-data.layanan-medis.tindakan-medis.updateTarif');
             Route::patch('/tindakan-medis/{id}/update', [TindakanMedisController::class, 'update'])->name('master-data.layanan-medis.tindakan-medis.update');
             Route::delete('/tindakan-medis/{id}/delete', [TindakanMedisController::class, 'delete'])->name('master-data.layanan-medis.tindakan-medis.delete');
 
