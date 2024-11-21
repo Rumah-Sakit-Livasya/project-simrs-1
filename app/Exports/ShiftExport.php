@@ -19,12 +19,10 @@ class ShiftExport implements FromCollection, WithHeadings, ShouldAutoSize, WithE
     protected $employees;
     protected $month;
     protected $year;
-    protected $shifts; // Tambahkan properti shifts
 
-    public function __construct($employees, $shifts, $month, $year)
+    public function __construct($employees, $month, $year)
     {
         $this->employees = $employees;
-        $this->shifts = $shifts; // Inisialisasi shifts
         $this->month = $month;
         $this->year = $year;
     }
@@ -36,18 +34,11 @@ class ShiftExport implements FromCollection, WithHeadings, ShouldAutoSize, WithE
 
     public function headings(): array
     {
-        // Atur judul kolom untuk data karyawan
-        $headings = [
-            'Employee ID',
-            'Email',
-            'Employee Name',
-        ];
+        $headings = ['Employee ID', 'Email', 'Employee Name'];
 
-        // Tentukan tanggal awal dan akhir berdasarkan bulan dan tahun yang dipilih
-        $startDate = Carbon::createFromDate($this->year, $this->month - 1, 26);
-        $endDate = Carbon::createFromDate($this->year, $this->month - 1, 25)->addMonth();
+        $startDate = Carbon::create($this->year, $this->month - 1, 26);
+        $endDate = $startDate->copy()->addMonth()->subDay();
 
-        // Buat judul kolom berdasarkan rentang tanggal
         while ($startDate <= $endDate) {
             $headings[] = $startDate->format('d-m-Y');
             $startDate->addDay();
@@ -56,55 +47,36 @@ class ShiftExport implements FromCollection, WithHeadings, ShouldAutoSize, WithE
         return $headings;
     }
 
-    /**
-     * @return array
-     */
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $startDate = Carbon::createFromDate($this->year, $this->month - 1, 25);
-                $endDate = Carbon::createFromDate($this->year, $this->month - 1, 25)->addMonth();
+                $sheet = $event->sheet;
 
-                // Menambahkan data nama shift di samping nama employee
-                $startDateColumnIndex = 4; // Kolom pertama setelah Employee Name
-                $startDateRowIndex = 2; // Baris kedua (setelah header)
+                $startDate = Carbon::create($this->year, $this->month - 1, 26);
+                $endDate = $startDate->copy()->addMonth()->subDay();
+
+                $columnIndex = 4; // Dimulai setelah kolom nama
+                $rowIndex = 2; // Data karyawan dimulai dari baris kedua
 
                 foreach ($this->employees as $employee) {
-                    $currentColumnIndex = $startDateColumnIndex;
-                    foreach ($this->headings() as $index => $heading) {
-                        if ($index < 3) { // Skip Employee ID, Email, and Employee Name columns
-                            continue;
-                        }
+                    $currentColumn = $columnIndex;
 
-                        $dateColumnIndex = $index + 1; // Kolom tanggal dimulai dari indeks ke-4
-                        $attendanceDate = Carbon::createFromFormat('d-m-Y', $heading)->startOfDay();
-
-                        if ($attendanceDate->gte($startDate) && $attendanceDate->lte($endDate)) {
-                            // Tanggal pada attendance berada di antara startDate dan endDate
-                            $shift = null;
-                            $attendance = $employee->attendance->where('date', $attendanceDate->format('Y-m-d'))->first();
-                            if ($attendance) {
-                                if($attendance->shift) {
-                                $shift = $attendance->shift->name;
-                                    if ($attendance->attendance_code || $attendance->day_off) {
-                                        $shift = $attendance->attendance_code->code ?? $attendance->day_off->attendance_code->code;
-                                    }
-                                }
-                            }
-                            $event->sheet->setCellValueByColumnAndRow($currentColumnIndex, $startDateRowIndex, $shift);
-                        }
-
-                        $currentColumnIndex++;
+                    foreach (range(0, $endDate->diffInDays($startDate)) as $offset) {
+                        $currentDate = $startDate->copy()->addDays($offset);
+                        $attendance = $employee->attendance->firstWhere('date', $currentDate->format('Y-m-d'));
+                        $shift = $attendance?->shift?->name ?? ($attendance?->attendance_code?->code ?? $attendance?->day_off?->attendance_code?->code);
+                        $sheet->setCellValueByColumnAndRow($currentColumn, $rowIndex, $shift);
+                        $currentColumn++;
                     }
-                    $startDateRowIndex++;
+                    $rowIndex++;
                 }
 
-                // Menambahkan border ke setiap sel dalam lembar Excel
-                $highestRow = $event->sheet->getHighestRow();
-                $highestColumn = $event->sheet->getHighestColumn();
-                $range = 'A1:' . $highestColumn . $highestRow; // Mulai dari kolom Employee Name
-                $event->sheet->getStyle($range)->applyFromArray([
+                $highestRow = $sheet->getHighestRow();
+                $highestColumn = $sheet->getHighestColumn();
+                $range = "A1:{$highestColumn}{$highestRow}";
+
+                $sheet->getStyle($range)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
