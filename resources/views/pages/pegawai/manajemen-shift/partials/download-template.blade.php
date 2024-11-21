@@ -12,7 +12,7 @@
                 <p>Pilih bulan dan tahun untuk mengunduh template:</p>
                 <form id="downloadTemplateForm"
                     action="{{ route('shift.export', auth()->user()->employee->organization_id) }}" method="GET">
-
+                    @csrf
                     <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
 
                     <div class="form-row">
