@@ -96,9 +96,11 @@
         </div>
         <div class="row mt-4">
             {{-- Daftar yang libur dan Cuti/Izin/Sakit  --}}
-            <div class="col-xl-12 mb-3">
-                <button id="tambah_pengajuan_cuti" class="btn btn-primary">Tambah Pengajuan Cuti/Izin Sakit</button>
-            </div>
+            @if (auth()->user()->hasRole('super admin'))
+                <div class="col-xl-12 mb-3">
+                    <button id="tambah_pengajuan_cuti" class="btn btn-primary">Tambah Pengajuan Cuti/Izin Sakit</button>
+                </div>
+            @endif
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
@@ -319,7 +321,9 @@
         </div>
         @include('pages.monitoring.daftar-pengajuan.partials.edit-attendance')
         @include('pages.monitoring.daftar-pengajuan.partials.edit-day-off')
-        @include('pages.monitoring.daftar-pengajuan.partials.tambah-day-off')
+        @if (auth()->user()->hasRole('admin'))
+            @include('pages.monitoring.daftar-pengajuan.partials.tambah-day-off')
+        @endif
 
     </main>
 @endsection

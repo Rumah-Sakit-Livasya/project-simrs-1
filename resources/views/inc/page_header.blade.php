@@ -47,10 +47,10 @@
     <div class="ml-auto d-flex">
         <!-- Tombol untuk Memanggil Modal Impersonasi User -->
         @if (Auth::user()->hasRole('super admin') && !session('original_user_id'))
-            <div class="d-flex align-items-center mr-4">
-                <button type="button" class="btn btn-sm btn-primary mr-3" data-toggle="modal"
+            <div class="d-flex align-items-center">
+                <button type="button" class="btn btn-sm btn-primary mr-3 py-1 px-2" data-toggle="modal"
                     data-target="#impersonateModal">
-                    Impersonate
+                    <i class='fas fa-user-secret'></i>
                 </button>
             </div>
         @endif

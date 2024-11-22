@@ -124,7 +124,7 @@
                         <div class="panel-content pb-2">
                             <div class="tl-card mb-3 tl-dashboard-header">
                                 <h1>{{ greetings() }}, {{ auth()->user()->name }}!</h1>
-                                <div class="text-slate mt-1">{{ konversiTanggal(now()) }}</div>
+                                <div class="text-slate mt-1">{{ tgl_waktu(now()) }}</div>
                                 <div class="mt-5"><small class="text-dark font-weight-bold">Shortcut</small>
                                     <div class="tl-dashboard-request mt-2">
                                         <a href="{{ route('attendances') }}" class="badge badge-success p-2">Absen
