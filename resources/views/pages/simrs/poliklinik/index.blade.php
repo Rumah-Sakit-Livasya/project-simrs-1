@@ -8,6 +8,19 @@
                 -webkit-transition: 450ms cubic-bezier(0.9, 0.01, 0.09, 1);
                 transition: 450ms cubic-bezier(0.9, 0.01, 0.09, 1);
             }
+
+            .nav.nav-tabs.action-erm {
+                position: fixed;
+                background: #ffffff;
+                width: 100%;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                padding-left: 75px;
+            }
+
+            .tab-content {
+                margin-top: 55px;
+            }
         }
 
         .slide-on-mobile {
@@ -30,6 +43,11 @@
             top: 10px;
             right: -60px;
             z-index: 2;
+            background: #fff;
+        }
+
+        #toggle-pasien i {
+            color: #3366b9;
         }
 
         #js-slide-left {
@@ -116,7 +134,7 @@
             <!-- middle content area -->
             <div class="d-flex flex-column flex-grow-1 bg-white">
 
-                <div class="row" style="height: 90%">
+                {{-- <div class="row" style="height: 90%">
                     <div class="col-lg-12 d-flex align-items-center justify-content-center">
                         <div class="logo-dashboard-simrs text-center">
                             <h3 class="text-center spaced-text gradient-text">MODUL POLIKLINIK</h3>
@@ -125,6 +143,106 @@
                             <p style="letter-spacing: 0.2em">Jl. Raya Timur III Dawuan No. 875 Kab. Majalengka Telp
                                 081211151300</p>
                         </div>
+                    </div>
+                </div> --}}
+
+                <ul class="nav nav-tabs action-erm" role="tablist">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
+                            aria-haspopup="true" aria-expanded="false">Perawat</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian</a>
+                            <a class="dropdown-item" href="#">CPPT</a>
+                            <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
+                            aria-haspopup="true" aria-expanded="false">Dokter</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian</a>
+                            <a class="dropdown-item" href="#">CPPT</a>
+                            <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
+                            aria-haspopup="true" aria-expanded="false">Gizi</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian</a>
+                            <a class="dropdown-item" href="#">CPPT</a>
+                            <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
+                            aria-haspopup="true" aria-expanded="false">Farmasi Klinis</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2"
+                                role="tab">Pengkajian</a>
+                            <a class="dropdown-item" href="#">CPPT</a>
+                            <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
+                            aria-haspopup="true" aria-expanded="false">Pengkajian Lanjutan</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2"
+                                role="tab">Pengkajian</a>
+                            <a class="dropdown-item" href="#">CPPT</a>
+                            <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
+                            aria-haspopup="true" aria-expanded="false">Layanan</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2"
+                                role="tab">Pengkajian</a>
+                            <a class="dropdown-item" href="#">CPPT</a>
+                            <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
+                            aria-haspopup="true" aria-expanded="false">Lain-lain</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2"
+                                role="tab">Pengkajian</a>
+                            <a class="dropdown-item" href="#">CPPT</a>
+                            <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
+                        </div>
+                    </li>
+                </ul>
+                <div class="tab-content p-3">
+                    <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="row">
+                                    <div class="col-lg-3 d-flex align-items-center">
+                                        <img src="http://192.168.1.253/real/include/avatar/man-icon.png" alt="" width="100%">
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <h5>KIRANA HANNAH ADZKIYA</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="tab_default-2" role="tabpanel">
+                        Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid.
+                        Exercitation +1 labore velit, blog sartorial PBR leggings next level wes anderson
+                        artisan four loko farm-to-table craft beer twee. Qui photo booth letterpress, commodo
+                        enim craft beer mlkshk aliquip jean shorts ullamco ad vinyl cillum PBR. Homo nostrud
+                        organic.
+                    </div>
+                    <div class="tab-pane fade" id="tab_default-3" role="tabpanel">
+                        Etsy mixtape wayfarers, ethical wes anderson tofu before they sold out mcsweeney's
+                        organic lomo retro fanny pack lo-fi farm-to-table readymade. Messenger bag gentrify
+                        pitchfork tattooed craft beer, iphone skateboard locavore carles etsy salvia banksy
+                        hoodie helvetica. DIY synth PBR banksy irony. Leggings gentrify squid 8-bit cred
+                        pitchfork.
                     </div>
                 </div>
             </div>
