@@ -47,10 +47,10 @@
     <div class="ml-auto d-flex">
         <!-- Tombol untuk Memanggil Modal Impersonasi User -->
         @if (Auth::user()->hasRole('super admin') && !session('original_user_id'))
-            <div class="d-flex align-items-center mr-4">
-                <button type="button" class="btn btn-sm btn-primary mr-3" data-toggle="modal"
+            <div class="d-flex align-items-center">
+                <button type="button" class="btn btn-sm btn-primary mr-3 py-1 px-2" data-toggle="modal"
                     data-target="#impersonateModal">
-                    Impersonate
+                    <i class='fas fa-user-secret'></i>
                 </button>
             </div>
         @endif
@@ -551,7 +551,7 @@
         <div class="d-flex align-items-center">
             <a href="javascript:void(0)" data-toggle="dropdown" title="{{ auth()->user()->email }}"
                 class="header-icon d-flex align-items-center justify-content-center ml-2">
-                @if (auth()->user()->employee->foto && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
+                @if (auth()->user()->employee->foto)
                     <img src="{{ asset('storage/employee/profile/' . auth()->user()->employee->foto) }}"
                         class="rounded-circle" alt=""
                         style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;">
