@@ -551,7 +551,7 @@
         <div class="d-flex align-items-center">
             <a href="javascript:void(0)" data-toggle="dropdown" title="{{ auth()->user()->email }}"
                 class="header-icon d-flex align-items-center justify-content-center ml-2">
-                @if (auth()->user()->employee->foto)
+                @if (auth()->user()->employee->foto && Storage::exists('employee/profile/' . auth()->user()->employee->foto))
                     <img src="{{ asset('storage/employee/profile/' . auth()->user()->employee->foto) }}"
                         class="rounded-circle" alt=""
                         style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;">
