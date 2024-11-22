@@ -29,6 +29,7 @@
             position: absolute;
             top: 10px;
             right: -60px;
+            z-index: 2;
         }
 
         #js-slide-left {
