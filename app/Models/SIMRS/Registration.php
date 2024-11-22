@@ -102,6 +102,12 @@ class Registration extends Model implements AuditableContract
         // });
     }
 
+
+    public function order_tindakan_medis()
+    {
+        return $this->hasMany(OrderTindakanMedis::class);
+    }
+
     // public function generateNomorRegistrasi()
     // {
     //     $date = Carbon::now();

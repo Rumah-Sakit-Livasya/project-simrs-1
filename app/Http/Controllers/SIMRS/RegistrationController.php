@@ -14,6 +14,7 @@ use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\TindakanMedis;
 use App\Models\SIMRS\TutupKunjungan;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
@@ -26,6 +27,40 @@ use Yajra\DataTables\Facades\DataTables;
 
 class RegistrationController extends Controller
 {
+    public function getRegistrationData($id)
+    {
+        try {
+            // Cari data registrasi berdasarkan ID
+            $registration = Registration::findOrFail($id);
+
+            // Buat response dengan data yang sesuai
+            return response()->json([
+                'success' => true,
+                'message' => 'Data registrasi ditemukan.',
+                'data' => [
+                    // 'tanggal_tindakan' => $registration->tanggal_tindakan,
+                    'dokter_id' => $registration->doctor_id,
+                    'departement_id' => $registration->departement_id,
+                    'kelas_id' => $registration->registration_type,
+                ],
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Jika ID tidak ditemukan
+            return response()->json([
+                'success' => false,
+                'message' => 'Data registrasi tidak ditemukan.',
+                'error' => $e->getMessage(),
+            ], 404);
+        } catch (\Exception $e) {
+            // Error umum lainnya
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data registrasi.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function index(Request $request)
     {
         $query = Registration::query()->with('patient');
@@ -290,6 +325,8 @@ class RegistrationController extends Controller
         }
 
         $doctors = Doctor::with('employee', 'departement')->get();
+        $departements = Departement::with('grup_tindakan_medis.tindakan_medis')->get();
+        $tindakan_medis = TindakanMedis::all();
 
         // Group doctors by department
         $groupedDoctors = [];
@@ -309,6 +346,8 @@ class RegistrationController extends Controller
             'groupedDoctors' => $groupedDoctors,
             'registration' => $registration,
             'patient' => $patient,
+            'departements' => $departements,
+            'tindakan_medis' => $tindakan_medis,
             'age' => $age
         ]);
     }

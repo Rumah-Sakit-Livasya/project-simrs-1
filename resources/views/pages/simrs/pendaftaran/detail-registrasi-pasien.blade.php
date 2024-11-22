@@ -434,7 +434,7 @@
                         {{-- Menu Daftar Layanan1 --}}
                         @include('pages.simrs.pendaftaran.partials.menu-daftar-layanan')
                     </div>
-                    <div id="pengkajian-nurse-rajal">
+                    <div id="pengkajian-nurse-rajal" style="display: none;">
                         {{-- Header Pasien --}}
                         @include('pages.simrs.pendaftaran.partials.menu')
                         @include('pages.simrs.pendaftaran.partials.header-pasien')
@@ -445,9 +445,8 @@
                         @include('pages.simrs.pendaftaran.partials.dokter.pengkajian-dokter-rajal')
                         @include('pages.simrs.pendaftaran.partials.dokter.cppt')
                         @include('pages.simrs.pendaftaran.partials.dokter.resume-medis-rajal')
-
                     </div>
-                    <div id="tindakan-medis">
+                    <div id="tindakan-medis" style="display: none;">
                         {{-- Tindakan Medis --}}
                         @include('pages.simrs.pendaftaran.partials.tindakan-medis')
                     </div>
@@ -475,25 +474,30 @@
 
     <script>
         $(document).ready(function() {
+            // Set CSRF token untuk semua permintaan AJAX
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
 
+            // Hide and show services menu with fade effect
             $('#pengkajian-nurse-rajal').hide();
             $('.menu-layanan').on('click', function() {
-                // Sembunyikan menu layanan dengan efek fade out
-                $('#menu-layanan').fadeOut(500); // 500ms untuk transisi
+                $('#menu-layanan').fadeOut(500); // 500ms for transition
 
-                // Ambil data-layanan untuk menentukan ID elemen yang akan ditampilkan
+                // Get data-layanan to determine which element to show
                 var namaLayanan = $(this).data('layanan');
                 if (namaLayanan == 'pengkajian-nurse-rajal') {
                     $('#pengkajian-nurse-rajal').show();
                 }
                 var pengkajianId = $('#pengkajian-rajal-id').val();
 
-                // Tampilkan elemen layanan yang dipilih dengan efek fade in
-                $('#' + namaLayanan).delay(500).fadeIn(500); // 500ms untuk transisi
+                // Show the selected service element with fade in effect
+                $('#' + namaLayanan).delay(500).fadeIn(500); // 500ms for transition
             });
 
-            var doctorOptions = @json($groupedDoctors);
-            // Select 2
+            // Select2 initialization for various dropdowns
             $(function() {
                 $('.select2').select2();
 
@@ -516,13 +520,14 @@
                 });
             });
 
+            // DataTable initialization
             $('#cppt-table').DataTable({
                 responsive: true,
                 lengthChange: false,
                 pageLength: 4,
                 language: {
-                    search: "", // Kosongkan untuk tidak menampilkan label "Cari:"
-                    searchPlaceholder: "Cari...", // Placeholder untuk input pencarian
+                    search: "", // Empty to not display "Search:" label
+                    searchPlaceholder: "Cari...", // Placeholder for search input
                     zeroRecords: "Tidak ada data yang ditemukan",
                     info: "Menampilkan halaman _PAGE_ dari _PAGES_",
                     infoEmpty: "Tidak ada data yang tersedia",
@@ -535,11 +540,8 @@
                     }
                 }
             });
-        });
-    </script>
-    <script>
-        $(document).ready(function() {
 
+            // Event listener for history of assessments
             $('#histori_pengkajian').on('click', function() {
                 atmedic.App.popup({
                     url: base_url() + 'pengkajian/histori_pengkajian/189221',
@@ -552,14 +554,17 @@
                 });
             });
 
+            // Event listener for signature button
             $('#btn-ttd').on('click', function() {
                 popupwindow(base_url() + 'pengkajian/signature/ttd', 'popup_ttd', 730, 420, 'no');
             });
 
+            // Event listener for pain score selection
             $('.img-baker .pointer').on('click', function() {
                 $('#skor_nyeri').val($(this).data('skor'));
             });
 
+            // Bartel index calculation
             $('.bartel').on('change', function() {
                 let skor = bartelIndex();
                 $('#skor_bartel').val(skor);
@@ -577,17 +582,13 @@
                     data += isNaN($("option:selected", this).data('skor')) ? 0 : $("option:selected",
                         this).data('skor');
                 });
-
                 return data;
             }
 
-
+            // BMI calculation
             function get_bmi() {
                 var A = $('#body_height').val();
                 var B = $('#body_weight').val();
-                console.log(A);
-
-
                 if (A != '' && B != '') {
                     A = A / 100;
                     C = B / (A * A);
@@ -614,36 +615,41 @@
             get_bmi();
 
             $('.calc-bmi').on('change', get_bmi);
-        });
 
-        function resiko_jatuh() {
-            var resiko_jatuh1 = document.getElementById('resiko_jatuh1').checked;
-            var resiko_jatuh2 = document.getElementById('resiko_jatuh2').checked;
-            var resiko_jatuh3 = document.getElementById('resiko_jatuh3').checked;
+            // Fall risk assessment
+            function resiko_jatuh() {
+                var resiko_jatuh1 = document.getElementById('resiko_jatuh1').checked;
+                var resiko_jatuh2 = document.getElementById('resiko_jatuh2').checked;
+                var resiko_jatuh3 = document.getElementById('resiko_jatuh3').checked;
 
-            if (resiko_jatuh1 == false && resiko_jatuh2 == false && resiko_jatuh3 == false) {
-                $('#resiko_jatuh_hasil').val("Tidak Beresiko");
-            } else if (resiko_jatuh1 == true || resiko_jatuh2 == true) {
-                if (resiko_jatuh3 == true) {
-                    $('#resiko_jatuh_hasil').val("Resiko Tinggi");
-                } else if (resiko_jatuh3 == false) {
-                    $('#resiko_jatuh_hasil').val("Resiko Sedang");
-                }
-            } else if (resiko_jatuh1 == false || resiko_jatuh2 == false) {
-                if (resiko_jatuh3 == true) {
-                    $('#resiko_jatuh_hasil').val("Resiko Sedang");
-                } else if (resiko_jatuh3 == false) {
-                    $('#resiko_jatuh_hasil').val("Resiko Tinggi");
+                if (!resiko_jatuh1 && !resiko_jatuh2 && !resiko_jatuh3) {
+                    $('#resiko_jatuh_hasil').val("Tidak Beresiko");
+                } else if (resiko_jatuh1 || resiko_jatuh2) {
+                    if (resiko_jatuh3) {
+                        $('#resiko_jatuh_hasil').val("Resiko Tinggi");
+                    } else {
+                        $('#resiko_jatuh_hasil').val("Resiko Sedang");
+                    }
+                } else if (!resiko_jatuh1 || !resiko_jatuh2) {
+                    if (resiko_jatuh3) {
+                        $('#resiko_jatuh_hasil').val("Resiko Sedang");
+                    } else {
+                        $('#resiko_jatuh_hasil').val("Resiko Tinggi");
+                    }
                 }
             }
-        };
-        resiko_jatuh();
+            resiko_jatuh();
 
-        function openSignaturePad() {
-            idSignature = $(this).attr('data-id');
-            $('#signatureModal').modal('show'); // Example using Bootstrap modal
-        }
+            // Function to open signature pad
+            function openSignaturePad() {
+                idSignature = $(this).attr('data-id');
+                $('#signatureModal').modal('show'); // Example using Bootstrap modal
+            }
+        });
     </script>
+
+    @yield('script-tindakan-medis')
+
     <script>
         let idSignature = null;
         const canvas = document.getElementById('canvas');

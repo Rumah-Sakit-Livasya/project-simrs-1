@@ -23,6 +23,7 @@ use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
+use App\Http\Controllers\SIMRS\OrderTindakanMedisController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianDokterRajalController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
+use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\ResumeMedisRajal\ResumeMedisRajalController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
@@ -39,7 +41,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
-use App\Models\SIMRS\CPPT\CPPT;
+use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Support\Facades\Storage;
 
 Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
@@ -53,6 +55,11 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
         abort(404, 'File not found');
     })->name('signature.show');
+
+    Route::get('get-registrasi-data/{registrasiId}', [RegistrationController::class, 'getRegistrationData'])->name('registration.get');
+    Route::get('get-medical-actions/{registrationId}', [OrderTindakanMedisController::class, 'getMedicalActions'])->name('medical.action.get');
+    Route::delete('delete-medical-action/{id}', [OrderTindakanMedis::class, 'destroy'])->name('medical.action.destroy');
+    Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
 
     Route::prefix('pengkajian')->group(function () {
         Route::prefix('nurse-rajal')->group(function () {
