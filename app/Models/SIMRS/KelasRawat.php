@@ -6,6 +6,7 @@ use App\Models\SIMRS\HargaJual\MarginHargaJual;
 use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
 use App\Models\SIMRS\Peralatan\TarifPeralatan;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
+use App\Models\TarifTindakanMedis;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -20,12 +21,12 @@ class KelasRawat extends Model
     protected $table = 'kelas_rawat';
 
     // Global Scope untuk menghilangkan data dengan id 1
-    protected static function booted()
-    {
-        static::addGlobalScope('excludeIdOne', function (Builder $builder) {
-            $builder->where('id', '!=', 1);
-        });
-    }
+    // protected static function booted()
+    // {
+    //     static::addGlobalScope('excludeIdOne', function (Builder $builder) {
+    //         $builder->where('id', '!=', 1);
+    //     });
+    // }
 
     public function rooms()
     {
@@ -62,6 +63,10 @@ class KelasRawat extends Model
     public function tarif_parameter_laboratorium()
     {
         return $this->hasMany(TarifParameterLaboratorium::class, 'kelas_rawat_id');
+    }
+    public function tarif_tindakan_medis()
+    {
+        return $this->hasMany(TarifTindakanMedis::class, 'kelas_rawat_id');
     }
 
     public function tarif_peralatan()

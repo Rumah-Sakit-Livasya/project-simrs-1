@@ -12,4 +12,14 @@ class GrupTindakanMedis extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'grup_tindakan_medis';
     protected $fillable = ['departement_id', 'nama_grup', 'status', 'coa_pendapatan', 'coa_prasarana', 'coa_bhp', 'coa_biaya'];
+
+    public function departement()
+    {
+        return $this->belongsTo(Departement::class, 'departement_id');
+    }
+
+    public function tindakan_medis()
+    {
+        return $this->hasMany(TindakanMedis::class);
+    }
 }

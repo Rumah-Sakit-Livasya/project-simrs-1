@@ -42,4 +42,14 @@ class Departement extends Model
     {
         return $this->hasMany(TimeTable::class);
     }
+
+    public function order_tindakan_medis()
+    {
+        return $this->hasMany(OrderTindakanMedis::class);
+    }
+
+    public function grup_tindakan_medis()
+    {
+        return $this->hasMany(GrupTindakanMedis::class);
+    }
 }

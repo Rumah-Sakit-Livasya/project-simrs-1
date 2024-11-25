@@ -23,14 +23,17 @@ use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
+use App\Http\Controllers\SIMRS\OrderTindakanMedisController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianDokterRajalController;
+use App\Http\Controllers\SIMRS\Penjamin\GroupPenjaminController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
+use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\ResumeMedisRajal\ResumeMedisRajalController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
@@ -38,7 +41,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
-use App\Models\SIMRS\CPPT\CPPT;
+use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Support\Facades\Storage;
 
 Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
@@ -52,6 +55,11 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
         abort(404, 'File not found');
     })->name('signature.show');
+
+    Route::get('get-registrasi-data/{registrasiId}', [RegistrationController::class, 'getRegistrationData'])->name('registration.get');
+    Route::get('get-medical-actions/{registrationId}', [OrderTindakanMedisController::class, 'getMedicalActions'])->name('medical.action.get');
+    Route::delete('delete-medical-action/{id}', [OrderTindakanMedis::class, 'destroy'])->name('medical.action.destroy');
+    Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
 
     Route::prefix('pengkajian')->group(function () {
         Route::prefix('nurse-rajal')->group(function () {
@@ -79,9 +87,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
 
     Route::prefix('master-data')->group(function () {
+        Route::get('/group-penjamin', [GroupPenjaminController::class, 'index']);
         Route::prefix('layanan-medis')->group(function () {
             Route::get('/tindakan-medis/{id}', [TindakanMedisController::class, 'getTindakan'])->name('master-data.layanan-medis.tindakan-medis.get');
             Route::post('/tindakan-medis', [TindakanMedisController::class, 'store'])->name('master-data.layanan-medis.tindakan-medis.store');
+            Route::get('/tindakan-medis/tarif/{id}', [TindakanMedisController::class, 'getTarif'])->name('master-data.layanan-medis.tindakan-medis.getTarif');
+            Route::get('/tindakan-medis/tarif/{tindakanId}/{groupId}', [TindakanMedisController::class, 'getTarifByGroup'])->name('master-data.layanan-medis.tindakan-medis.getTarifByGroup');
+            Route::patch('/tindakan-medis/update/{id}/tarif', [TindakanMedisController::class, 'updateTarif'])->name('master-data.layanan-medis.tindakan-medis.updateTarif');
             Route::patch('/tindakan-medis/{id}/update', [TindakanMedisController::class, 'update'])->name('master-data.layanan-medis.tindakan-medis.update');
             Route::delete('/tindakan-medis/{id}/delete', [TindakanMedisController::class, 'delete'])->name('master-data.layanan-medis.tindakan-medis.delete');
 

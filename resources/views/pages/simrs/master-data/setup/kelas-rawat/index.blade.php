@@ -127,8 +127,8 @@
                                     </tfoot>
                                 </table>
                             </div>
+                            <!-- datatable end -->
                         </div>
-                        <!-- datatable end -->
                     </div>
                 </div>
             </div>

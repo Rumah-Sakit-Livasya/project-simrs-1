@@ -42,4 +42,9 @@ class Doctor extends Model
     {
         return $this->hasMany(Registration::class);
     }
+
+    public function order_tindakan_medis()
+    {
+        return $this->hasMany(OrderTindakanMedis::class);
+    }
 }
