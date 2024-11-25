@@ -188,7 +188,7 @@
                                             Clock Out
                                         </button>
 
-                                        <button id="request-camera-button btn-block">Izinkan Kamera</button>
+                                        <button id="request-camera-button" class="btn btn-primary btn-block">Izinkan Kamera</button>
                                     @else
                                         <button class="btn btn-primary btn-sm btn-clock-in mr-1" id="clock_in">Clock
                                             In</button>
