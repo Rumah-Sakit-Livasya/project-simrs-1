@@ -16,6 +16,7 @@
                 padding-top: 10px;
                 padding-bottom: 10px;
                 padding-left: 75px;
+                z-index: 1;
             }
 
             .tab-content {
@@ -25,6 +26,14 @@
 
         .slide-on-mobile {
             width: 20rem;
+        }
+
+        .text-decoration-underline {
+            text-decoration: underline;
+        }
+
+        .text-secondary {
+            font-size: 12px;
         }
 
         @media only screen and (max-width: 992px) {
@@ -215,34 +224,233 @@
                         </div>
                     </li>
                 </ul>
+
+                {{-- content start --}}
                 <div class="tab-content p-3">
                     <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="row">
                                     <div class="col-lg-3 d-flex align-items-center">
-                                        <img src="http://192.168.1.253/real/include/avatar/man-icon.png" alt="" width="100%">
+                                        <img src="http://192.168.1.253/real/include/avatar/man-icon.png" alt=""
+                                            width="100%">
                                     </div>
                                     <div class="col-lg-9">
-                                        <h5>KIRANA HANNAH ADZKIYA</h5>
+                                        <a href="#">
+                                            <h5 class="text-danger text-decoration-underline">KIRANA HANNAH ADZKIYA
+                                            </h5>
+                                        </a>
+                                        <p class="text-small text-secondary mb-1">13 Jun 2019 (5thn 5bln 9hr)</p>
+                                        <p class="text-small text-secondary mb-1">RM 05-76-94</p>
+                                        <p class="text-small text-secondary mb-1">BPJS KESEHATAN</p>
+                                        <p class="text-small text-secondary mb-1">Info Billing: 30.000</p>
+                                        <p class="text-small text-secondary mb-1">Tidak ada alergi</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="row d-flex align-items-center">
+                                    <div class="col-lg-3 d-flex align-items-center h-100">
+                                        <img src="http://192.168.1.253/real/include/avatar/woman-doctor.png"
+                                            alt="" width="100%">
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <a href="#">
+                                            <h5 class="text-danger text-decoration-underline">dr. Ratih Eka Pujasari Sp.A
+                                            </h5>
+                                        </a>
+                                        <p class="text-small text-secondary mb-1">KLINIK ANAK</p>
+                                        <p class="text-small text-secondary mb-1">Reg 2411220092 (22 Nov 2024)</p>
+                                        <p class="text-small text-secondary mb-1">Rawat Jalan</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="tab-pane fade" id="tab_default-2" role="tabpanel">
-                        Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid.
-                        Exercitation +1 labore velit, blog sartorial PBR leggings next level wes anderson
-                        artisan four loko farm-to-table craft beer twee. Qui photo booth letterpress, commodo
-                        enim craft beer mlkshk aliquip jean shorts ullamco ad vinyl cillum PBR. Homo nostrud
-                        organic.
-                    </div>
-                    <div class="tab-pane fade" id="tab_default-3" role="tabpanel">
-                        Etsy mixtape wayfarers, ethical wes anderson tofu before they sold out mcsweeney's
-                        organic lomo retro fanny pack lo-fi farm-to-table readymade. Messenger bag gentrify
-                        pitchfork tattooed craft beer, iphone skateboard locavore carles etsy salvia banksy
-                        hoodie helvetica. DIY synth PBR banksy irony. Leggings gentrify squid 8-bit cred
-                        pitchfork.
+                        <div class="row my-3">
+                            <div class="col-lg-12">
+                                <div class="card-actionbar">
+                                    <div class="card-actionbar-row-left">
+                                        <button type="button"
+                                            class="btn btn-outline-primary waves-effect waves-light margin-left-xl"
+                                            id="panggil" onclick="panggil()"><span
+                                                class="glyphicon glyphicon-music "></span>&nbsp;&nbsp;Panggil
+                                            Antrian</button>
+                                        <button class="btn btn-warning text-white"
+                                            onclick="popupFull('http://192.168.1.253/real/antrol_bpjs/update_waktu_antrean_vclaim/2411055632','p_card', 900,600,'no'); return false;">
+                                            <i class="mdi mdi-update"></i> Antrol BPJS
+                                        </button>
+                                        <button class="btn btn-danger waves-effect waves-light" onclick="showIcare();"><i
+                                                class="mdi mdi-account-convert"></i> Bridging Icare</button>
+                                        <button class="btn btn-info margin-left-md" id="popup_klpcm">
+                                            <i class="mdi mdi-file" id="mdi-chk"></i> KLPCM
+                                        </button>
+                                        <button class="btn btn-danger"
+                                            onclick="popupFull('http://192.168.1.253/real/vclaim/form_rencana_kontrol/2/197892'); return false;"><i
+                                                class="mdi mdi-printer"></i> Rencana Kontrol</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="tgl_masuk" class="control-label text-primary">Tanggal &amp; jam
+                                        masuk</label>
+                                    <div class="form-group mb-3">
+                                        <div class="input-group">
+                                            <input type="date" name="tgl_masuk" class="form-control "
+                                                placeholder="Tanggal" id="tgl_masuk" value="">
+                                            <input type="time" name="jam_masuk" class="form-control "
+                                                placeholder="Jam" id="jam_masuk" value="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="tgl_masuk" class="control-label text-primary">Tanggal &amp; jam
+                                        masuk</label>
+                                    <div class="input-group">
+                                        <input type="date" name="tgl_dilayani" class="form-control"
+                                            placeholder="Tanggal" id="tgl_dilayani" value="">
+                                        <input type="time" name="jam_dilayani" class="form-control" placeholder="Jam"
+                                            id="jam_dilayani" value="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label for="keluhan_utama" class="control-label text-primary">Keluhan utama *</label>
+                                    <textarea class="form-control" id="keluhan_utama" name="keluhan_utama" rows="3" required=""
+                                        data-label="Keluhan utama"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <header class="text-warning margin-top-lg mt-3">
+                            <h4 class=" mt-5 font-weight-bold">TANDA TANDA VITAL</h4>
+                        </header>
+                        <div class="row mt-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label class="text-primary" for="pr">Nadi (PR)</label>
+                                    <div class="input-group">
+                                        <div class="input-group">
+                                            <input id="pr" type="text" name="pr" class="form-control">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">x/menit</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="rr" class="text-primary">Respirasi (RR)</label>
+                                    <div class="input-group">
+                                        <input class="form-control numeric" id="rr" name="rr"
+                                            type="text">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">x/menit</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="bp" class="text-primary">Tensi (BP)</label>
+                                    <div class="input-group">
+                                        <input class="form-control numeric" id="bp" name="bp"
+                                            type="text">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">mmHg</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="temperatur" class="text-primary">Suhu (T)</label>
+                                    <div class="input-group">
+                                        <input class="form-control numeric" id="temperatur" name="temperatur"
+                                            type="text">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">C°</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="height" class="text-primary">Tinggi Badan</label>
+                                    <div class="input-group">
+                                        <input class="form-control numeric calc-bmi" id="body_height" name="body_height"
+                                            type="text">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">Cm</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="weight" class="text-primary">Berat Badan</label>
+                                    <div class="input-group">
+                                        <input class="form-control numeric calc-bmi" id="body_weight" name="body_weight"
+                                            type="text">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">Kg</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="bmi" class="text-primary">Index Massa Tubuh</label>
+                                    <div class="input-group">
+                                        <input class="form-control numeric" id="bmi" name="bmi"
+                                            readonly="readonly" type="text">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">Kg/m²</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="kat_bmi" class="text-primary">Kategori IMT</label>
+                                    <div class="input-group">
+                                        <input class="form-control" id="kat_bmi" name="kat_bmi" readonly="readonly"
+                                            type="text">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="sp02" class="text-primary">SP 02</label>
+                                    <div class="input-group">
+                                        <input class="form-control" id="sp02" name="sp02" type="text">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="lingkar_kepala" class="text-primary">Lingkar Kepala</label>
+                                    <div class="input-group">
+                                        <input class="form-control" id="lingkar_kepala" name="lingkar_kepala"
+                                            type="text">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">Cm</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

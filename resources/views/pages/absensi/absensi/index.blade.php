@@ -829,34 +829,45 @@
             }
 
             async function startCamera() {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    alert('Perangkat ini tidak mendukung akses kamera.');
+                    return;
+                }
+
                 try {
                     const constraints = {
                         video: {
-                            facingMode: 'user', // Use 'environment' for rear camera
                             width: {
                                 ideal: 640
                             },
                             height: {
                                 ideal: 720
-                            },
-                            playsinline: true // Ensure playsinline is true
+                            }
                         }
                     };
-                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                    video.srcObject = stream;
-                    video.setAttribute('playsinline', true); // Set playsinline attribute
 
-                    // Set canvas size when video metadata is loaded
-                    video.addEventListener('loadedmetadata', () => {
-                        adjustCanvasSize();
-                    });
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                        console.log('Stream berhasil didapatkan:', stream);
+                    } catch (error) {
+                        console.error('Kesalahan getUserMedia:', error);
+                    }
+
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true);
+                    video.addEventListener('loadedmetadata', adjustCanvasSize);
                 } catch (error) {
-                    console.error('Error accessing the camera:', error);
-                    alert('Kamera harus aktif dan diizinkan agar dapat melanjutkan.');
-                    // Meminta izin kamera kembali setelah alert muncul
-                    requestCameraPermission();
+                    console.error('Kesalahan saat mencoba mengakses kamera:', error);
+                    if (error.name === 'NotAllowedError') {
+                        alert('Izinkan akses kamera untuk melanjutkan.');
+                    } else if (error.name === 'NotFoundError') {
+                        alert('Kamera tidak ditemukan pada perangkat ini.');
+                    } else {
+                        alert('Gagal mengakses kamera. Silakan periksa pengaturan perangkat.');
+                    }
                 }
             }
+
 
             function adjustCanvasSize() {
                 canvas.width = video.videoWidth;
