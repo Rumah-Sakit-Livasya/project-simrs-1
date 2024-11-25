@@ -1112,10 +1112,13 @@
             const clockInButton = document.getElementById('clock_in');
             const clockOutButton = document.getElementById('clock_out');
             const pictureModal = document.getElementById('picture-modal');
+            const mapElement = document.getElementById('map'); // Element peta
 
             let latitude = null;
             let longitude = null;
             let actionType = null;
+            let map = null;
+            let marker = null;
 
             // Toggle Loading Indicator
             function toggleLoadingIndicator(show) {
@@ -1193,6 +1196,24 @@
                             longitude = position.coords.longitude;
                             console.log("Lokasi ditemukan:", latitude, longitude);
                             resolve(position);
+
+                            // Inisialisasi dan tampilkan peta
+                            if (map === null) {
+                                map = L.map(mapElement).setView([latitude, longitude],
+                                17); // Pusatkan peta di lokasi
+                                L.tileLayer(
+                                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                    }).addTo(map);
+
+                                // Tambahkan marker di lokasi
+                                marker = L.marker([latitude, longitude]).addTo(map);
+                                marker.bindPopup("Lokasi Anda").openPopup();
+                            } else {
+                                // Update marker posisi
+                                marker.setLatLng([latitude, longitude]);
+                                map.setView([latitude, longitude], 13);
+                            }
                         }, error => {
                             toggleLoadingIndicator(false);
                             console.error("Gagal mendapatkan lokasi:", error.message);
@@ -1220,6 +1241,7 @@
                 formData.append('photo', file);
                 formData.append('latitude', latitude);
                 formData.append('longitude', longitude);
+                formData.append('employee_id', '{{ auth()->user()->employee->id }}');
 
                 const apiUrl = actionType === 'clock_in' ? '/api/dashboard/clock-in' :
                     '/api/dashboard/clock-out';
@@ -1301,7 +1323,6 @@
             initialize();
             toggleRequestCameraButton(); // Check and update camera permission button on page load
         });
-
 
 
         async function fetchAttendanceDetails(employeeId, tanggal) {
