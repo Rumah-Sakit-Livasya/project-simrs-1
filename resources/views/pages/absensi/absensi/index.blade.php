@@ -188,7 +188,8 @@
                                             Clock Out
                                         </button>
 
-                                        <button id="request-camera-button" class="btn btn-primary btn-block">Izinkan Kamera</button>
+                                        <button id="request-camera-button" class="btn btn-primary btn-block">Izinkan
+                                            Kamera</button>
                                     @else
                                         <button class="btn btn-primary btn-sm btn-clock-in mr-1" id="clock_in">Clock
                                             In</button>
@@ -1107,6 +1108,9 @@
             const uploadButton = document.getElementById('upload');
             const loadingIndicator = document.getElementById('loading-indicator');
             const requestCameraButton = document.getElementById('request-camera-button');
+            const clockInButton = document.getElementById('clock_in');
+            const clockOutButton = document.getElementById('clock_out');
+            const pictureModal = document.getElementById('picture-modal');
 
             let latitude = null;
             let longitude = null;
@@ -1121,10 +1125,18 @@
             async function requestCameraAccess() {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({
-                        video: true
+                        video: {
+                            facingMode: 'user',
+                            width: {
+                                ideal: 640
+                            },
+                            height: {
+                                ideal: 720
+                            }
+                        }
                     });
                     video.srcObject = stream;
-                    console.log("Kamera berhasil diaktifkan.");
+                    video.setAttribute('playsinline', true);
                 } catch (error) {
                     console.error("Gagal mengakses kamera:", error);
                     if (error.name === 'NotAllowedError') {
@@ -1151,6 +1163,7 @@
                         }, error => {
                             toggleLoadingIndicator(false);
                             console.error("Gagal mendapatkan lokasi:", error.message);
+                            alert("Gagal mendapatkan lokasi.");
                             reject(error);
                         });
                     } else {
@@ -1161,57 +1174,100 @@
                 });
             }
 
-            // Initialize Map
-            async function initializeMap() {
-                const map = L.map('map').setView([0, 0], 13);
+            // Capture and Upload Image
+            async function captureAndUploadImage() {
+                uploadButton.disabled = true;
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
+                // Draw video frame to canvas
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataURL = canvas.toDataURL('image/png');
+                const file = dataURLToFile(dataURL, 'photo.png');
+
+                const formData = new FormData();
+                formData.append('photo', file);
+                formData.append('latitude', latitude);
+                formData.append('longitude', longitude);
+
+                const apiUrl = actionType === 'clock_in' ? '/api/dashboard/clock-in' :
+                    '/api/dashboard/clock-out';
 
                 try {
-                    const position = await getLocation();
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: formData
+                    });
 
-                    map.setView([lat, lng], 17);
-
-                    L.marker([lat, lng]).addTo(map)
-                        .bindPopup('You are here.')
-                        .openPopup();
+                    const result = await response.json();
+                    if (response.ok) {
+                        alert(`Berhasil ${actionType.replace('_', ' ')}: ${result.message}`);
+                        window.location.reload();
+                    } else {
+                        alert(`Gagal ${actionType.replace('_', ' ')}: ${result.error}`);
+                    }
                 } catch (error) {
-                    alert("Gagal memuat peta. Silakan coba lagi.");
+                    console.error(`Error saat ${actionType}:`, error);
+                    alert(`Gagal ${actionType}. Silakan coba lagi.`);
+                } finally {
+                    uploadButton.disabled = false;
                 }
             }
 
-            // Camera Button Events
-            document.getElementById('clock_in').addEventListener('click', () => {
+            // Convert Data URL to File
+            function dataURLToFile(dataURL, filename) {
+                const [header, data] = dataURL.split(',');
+                const mime = header.match(/:(.*?);/)[1];
+                const binary = atob(data);
+                const array = [];
+                for (let i = 0; i < binary.length; i++) {
+                    array.push(binary.charCodeAt(i));
+                }
+                return new File([new Uint8Array(array)], filename, {
+                    type: mime
+                });
+            }
+
+            // Initialize Camera and Map
+            async function initialize() {
+                await requestCameraAccess();
+                await getLocation();
+            }
+
+            // Clock In and Clock Out Events
+            clockInButton.addEventListener('click', async () => {
                 actionType = 'clock_in';
                 if (video.srcObject) {
-                    alert("Camera aktif. Siap untuk Clock In.");
+                    $(pictureModal).modal('show');
                 } else {
-                    alert("Kamera tidak aktif. Izinkan kamera terlebih dahulu.");
+                    alert("Kamera harus diaktifkan untuk Clock In.");
                 }
             });
 
-            document.getElementById('clock_out').addEventListener('click', () => {
+            clockOutButton.addEventListener('click', async () => {
                 actionType = 'clock_out';
                 if (video.srcObject) {
-                    alert("Camera aktif. Siap untuk Clock Out.");
+                    $(pictureModal).modal('show');
                 } else {
-                    alert("Kamera tidak aktif. Izinkan kamera terlebih dahulu.");
+                    alert("Kamera harus diaktifkan untuk Clock Out.");
                 }
             });
 
-            // Request Camera on Button Click
-            requestCameraButton.addEventListener('click', () => {
-                requestCameraAccess();
+            // Upload Button Event
+            uploadButton.addEventListener('click', async () => {
+                if (latitude && longitude) {
+                    await captureAndUploadImage();
+                    $(pictureModal).modal('hide');
+                } else {
+                    alert("Pastikan lokasi berhasil diakses sebelum upload.");
+                }
             });
 
-            // Start Camera and Map on Load
-            requestCameraAccess();
-            initializeMap();
+            // Start Camera and Initialize Map
+            initialize();
         });
+
 
         async function fetchAttendanceDetails(employeeId, tanggal) {
             const url = '/api/dashboard/attendances/detail';
