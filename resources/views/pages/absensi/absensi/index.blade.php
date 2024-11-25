@@ -1257,14 +1257,14 @@
 
                     const result = await response.json();
                     if (response.ok) {
-                        alert(`Berhasil ${actionType.replace('_', ' ')}: ${result.message}`);
+                        showSuccessAlert(`Berhasil ${actionType.replace('_', ' ')}: ${result.message}`);
                         window.location.reload();
                     } else {
-                        alert(`Gagal ${actionType.replace('_', ' ')}: ${result.error}`);
+                        showErrorAlert(`Gagal ${actionType.replace('_', ' ')}: ${result.error}`);
                     }
                 } catch (error) {
                     console.error(`Error saat ${actionType}:`, error);
-                    alert(`Gagal ${actionType}. Silakan coba lagi.`);
+                    showErrorAlert(`Gagal ${actionType}. Silakan coba lagi.`);
                 } finally {
                     uploadButton.disabled = false;
                 }
