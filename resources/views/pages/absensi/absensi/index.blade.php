@@ -188,8 +188,9 @@
                                             Clock Out
                                         </button>
 
-                                        <button id="request-camera-button" class="btn btn-primary btn-block">Izinkan
-                                            Kamera</button>
+                                        <button id="request-camera-button" class="btn btn-primary mt-3 btn-block d-none">
+                                            Izinkan Kamera
+                                        </button>
                                     @else
                                         <button class="btn btn-primary btn-sm btn-clock-in mr-1" id="clock_in">Clock
                                             In</button>
@@ -1121,6 +1122,37 @@
                 loadingIndicator.style.display = show ? 'flex' : 'none';
             }
 
+            // Check Camera Permission and Toggle Request Button
+            async function checkCameraPermission() {
+                try {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const camera = devices.find(device => device.kind === 'videoinput');
+                    if (!camera) {
+                        console.error("Tidak ada kamera yang terdeteksi.");
+                        return false;
+                    }
+
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: true
+                    });
+                    stream.getTracks().forEach(track => track.stop()); // Matikan stream setelah tes
+                    return true;
+                } catch (error) {
+                    console.warn("Izin kamera belum diberikan:", error.message);
+                    return false;
+                }
+            }
+
+            // Toggle Button Visibility
+            async function toggleRequestCameraButton() {
+                const permissionGranted = await checkCameraPermission();
+                if (permissionGranted) {
+                    requestCameraButton.classList.add('d-none'); // Hide button if permission is granted
+                } else {
+                    requestCameraButton.classList.remove('d-none'); // Show button if permission is not granted
+                }
+            }
+
             // Request Camera Access
             async function requestCameraAccess() {
                 try {
@@ -1137,6 +1169,7 @@
                     });
                     video.srcObject = stream;
                     video.setAttribute('playsinline', true);
+                    toggleRequestCameraButton(); // Update button visibility after permission
                 } catch (error) {
                     console.error("Gagal mengakses kamera:", error);
                     if (error.name === 'NotAllowedError') {
@@ -1264,9 +1297,11 @@
                 }
             });
 
-            // Start Camera and Initialize Map
+            // Start Camera, Initialize Map, and Check Camera Permission
             initialize();
+            toggleRequestCameraButton(); // Check and update camera permission button on page load
         });
+
 
 
         async function fetchAttendanceDetails(employeeId, tanggal) {
