@@ -89,7 +89,7 @@
                     @csrf
                     <input type="hidden" name="app_type" value="hr">
                     <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
-                        <i class="fas fa-users mr-2"></i> SMART HR BRO
+                        <i class="fas fa-users mr-2"></i> SMART HR
                     </button>
                 </form>
             @else
@@ -97,7 +97,7 @@
                     @csrf
                     <input type="hidden" name="app_type" value="simrs">
                     <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
-                        <i class="fas fa-notes-medical mr-2"></i> SIMRS BRO
+                        <i class="fas fa-notes-medical mr-2"></i> SIMRS
                     </button>
                 </form>
             @endif
