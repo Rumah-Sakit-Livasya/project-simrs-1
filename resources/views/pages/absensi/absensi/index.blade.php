@@ -170,8 +170,6 @@
                                 </span>
                                 <h2 class="col-md-12 mt-2 text-center" id="waktu-realtime">
                                     {{ \Carbon\Carbon::now()->translatedFormat('H:i:s') }}
-
-                                    Halo
                                 </h2>
                                 <div class="attendance-btn mt-2">
                                     @if (isset($last_attendance))
