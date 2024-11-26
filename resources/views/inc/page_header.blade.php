@@ -89,7 +89,7 @@
                     @csrf
                     <input type="hidden" name="app_type" value="hr">
                     <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
-                        <i class="fas fa-users mr-2"></i> SMART HR
+                        <i class="fas fa-users mr-2"></i> SMART HR COY
                     </button>
                 </form>
             @else
