@@ -441,33 +441,45 @@
                                             <tr>
                                                 <td style="white-space: nowrap">{{ $employee->fullname }}</td>
                                                 <td style="white-space: nowrap">{{ $employee->organization->name }}</td>
-                                                @if ($employee->attendance->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])->count() > 0)
-                                                    @foreach ($employee->attendance->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()]) as $absensi)
-                                                        @if ($absensi != null || !isset($absensi))
-                                                            <td style="white-space: nowrap">
-                                                                @if (isset($absensi->day_off) || isset($absensi->attendance_code))
-                                                                    {{ $absensi->day_off->attendance_code->code ?? $absensi->attendance_code->code }}
-                                                                @elseif($absensi->clock_in == null && $absensi->is_day_off == 1)
-                                                                    {{ $absensi->shift->name }}
-                                                                @elseif($absensi->clock_in != null && $absensi->is_day_off == null)
-                                                                    H
-                                                                @else
-                                                                    -
-                                                                @endif
-                                                            </td>
-                                                        @else
-                                                            <td>
+
+                                                @php
+                                                    $dateRange = \Carbon\CarbonPeriod::create(
+                                                        $startDateReport,
+                                                        $endDateReport,
+                                                    );
+                                                    $attendanceByDate = $employee->attendance
+                                                        ->whereBetween('date', [
+                                                            $startDateReport->toDateString(),
+                                                            $endDateReport->toDateString(),
+                                                        ])
+                                                        ->keyBy('date');
+                                                @endphp
+
+                                                @foreach ($dateRange as $date)
+                                                    @php
+                                                        $dateString = $date->toDateString();
+                                                        $absensi = $attendanceByDate[$dateString] ?? null;
+                                                    @endphp
+
+                                                    @if ($absensi)
+                                                        <td style="white-space: nowrap">
+                                                            @if (isset($absensi->day_off) || isset($absensi->attendance_code))
+                                                                {{ $absensi->day_off->attendance_code->code ?? $absensi->attendance_code->code }}
+                                                            @elseif ($absensi->clock_in == null && $absensi->is_day_off == 1)
+                                                                {{ $absensi->shift->name }}
+                                                            @elseif ($absensi->clock_in != null && $absensi->is_day_off == null)
+                                                                H
+                                                            @else
                                                                 -
-                                                            </td>
-                                                        @endif
-                                                    @endforeach
-                                                @else
-                                                    @foreach ($employees[0]->attendance->whereBetween('date', [$startDateReport->toDateString(), $endDateReport]) as $absensi)
+                                                            @endif
+                                                        </td>
+                                                    @else
                                                         <td>Belum ada shift</td>
-                                                    @endforeach
-                                                @endif
+                                                    @endif
+                                                @endforeach
                                             </tr>
                                         @endforeach
+
                                     </tbody>
                                     <tfoot>
                                         <tr>
