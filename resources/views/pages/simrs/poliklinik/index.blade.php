@@ -15,7 +15,7 @@
                 width: 100%;
                 padding-top: 10px;
                 padding-bottom: 10px;
-                padding-left: 75px;
+                padding-left: 15px;
                 z-index: 1;
             }
 
@@ -47,13 +47,13 @@
             }
         }
 
-        #toggle-pasien {
+        /* #toggle-pasien {
             position: absolute;
             top: 10px;
             right: -60px;
             z-index: 2;
             background: #fff;
-        }
+        } */
 
         #toggle-pasien i {
             color: #3366b9;
@@ -62,6 +62,10 @@
         #js-slide-left {
             border-right: 1px solid rgba(0, 0, 0, 0.3);
             background: white;
+        }
+
+        #js-slide-left.hide {
+            display: none;
         }
 
         .gradient-text {
@@ -98,10 +102,6 @@
             <!-- left slider panel : must have unique ID-->
             <div id="js-slide-left"
                 class="flex-wrap flex-shrink-0 position-relative slide-on-mobile slide-on-mobile-left bg-primary-200 pattern-0 p-3">
-                <a href="javascript:void(0);" class="btn btn-outline-primary" id="toggle-pasien" data-action="toggle"
-                    data-class="slide-on-mobile-left-show" data-target="#js-slide-left">
-                    <i class="ni ni-menu"></i>
-                </a>
                 <form action="javascript:void(0)" method="POST">
                     @csrf
                     <div class="form-group mb-2">
@@ -137,9 +137,6 @@
                     </div>
                 </form>
             </div>
-            <!-- left slider panel backdrop : activated on mobile, must be place immideately after left slider closing tag -->
-            <div class="slide-backdrop" data-action="toggle" data-class="slide-on-mobile-left-show"
-                data-target="#js-slide-left"></div>
             <!-- middle content area -->
             <div class="d-flex flex-column flex-grow-1 bg-white">
 
@@ -156,6 +153,12 @@
                 </div> --}}
 
                 <ul class="nav nav-tabs action-erm" role="tablist">
+                    <li class="nav-item mr-2">
+                        <a class="btn btn-outline-primary" id="toggle-pasien" data-action="toggle"
+                            data-class="slide-on-mobile-left-show" data-target="#js-slide-left">
+                            <i class="ni ni-menu"></i>
+                        </a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                             aria-haspopup="true" aria-expanded="false">Perawat</a>
@@ -187,8 +190,7 @@
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                             aria-haspopup="true" aria-expanded="false">Farmasi Klinis</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2"
-                                role="tab">Pengkajian</a>
+                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian</a>
                             <a class="dropdown-item" href="#">CPPT</a>
                             <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
                         </div>
@@ -467,6 +469,21 @@
             });
             $('#doctor_id').select2({
                 placeholder: 'Pilih Dokter',
+            });
+
+            $('#toggle-pasien').on('click', function() {
+                var target = $('#js-slide-left'); // Mengambil elemen target berdasarkan data-target
+                var backdrop = $('.slide-backdrop'); // Mengambil backdrop
+
+                // Toggle kelas untuk menampilkan atau menyembunyikan panel dan backdrop
+                target.toggleClass('hide');
+                backdrop.toggleClass('show');
+            });
+
+            // Close the panel if the backdrop is clicked
+            $('.slide-backdrop').on('click', function() {
+                $('#js-slide-left').removeClass('slide-on-mobile-left-show');
+                $(this).removeClass('show');
             });
         });
     </script>

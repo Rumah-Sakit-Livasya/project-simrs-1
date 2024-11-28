@@ -443,7 +443,7 @@
                                                 <td style="white-space: nowrap">{{ $employee->organization->name }}</td>
                                                 @if ($employee->attendance->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])->count() > 0)
                                                     @foreach ($employee->attendance->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()]) as $absensi)
-                                                        @if ($absensi)
+                                                        @if ($absensi != null || !isset($absensi))
                                                             <td style="white-space: nowrap">
                                                                 @if (isset($absensi->day_off) || isset($absensi->attendance_code))
                                                                     {{ $absensi->day_off->attendance_code->code ?? $absensi->attendance_code->code }}
