@@ -51,6 +51,14 @@
             /* Pastikan tidak ada transformasi CSS */
         }
 
+        canvas {
+            display: block;
+            width: 100%;
+            /* Sesuaikan dengan layout */
+            height: auto;
+            /* Pertahankan rasio aspek */
+        }
+
         .video-container {
             position: relative;
             width: 100%;
@@ -1112,48 +1120,18 @@
             const clockInButton = document.getElementById('clock_in');
             const clockOutButton = document.getElementById('clock_out');
             const pictureModal = document.getElementById('picture-modal');
-            const mapElement = document.getElementById('map'); // Element peta
+            const mapElement = document.getElementById('map');
 
             let latitude = null;
             let longitude = null;
             let actionType = null;
             let map = null;
             let marker = null;
+            let isCameraActive = false;
 
             // Toggle Loading Indicator
             function toggleLoadingIndicator(show) {
                 loadingIndicator.style.display = show ? 'flex' : 'none';
-            }
-
-            // Check Camera Permission and Toggle Request Button
-            async function checkCameraPermission() {
-                try {
-                    const devices = await navigator.mediaDevices.enumerateDevices();
-                    const camera = devices.find(device => device.kind === 'videoinput');
-                    if (!camera) {
-                        console.error("Tidak ada kamera yang terdeteksi.");
-                        return false;
-                    }
-
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        video: true
-                    });
-                    stream.getTracks().forEach(track => track.stop()); // Matikan stream setelah tes
-                    return true;
-                } catch (error) {
-                    console.warn("Izin kamera belum diberikan:", error.message);
-                    return false;
-                }
-            }
-
-            // Toggle Button Visibility
-            async function toggleRequestCameraButton() {
-                const permissionGranted = await checkCameraPermission();
-                if (permissionGranted) {
-                    requestCameraButton.classList.add('d-none'); // Hide button if permission is granted
-                } else {
-                    requestCameraButton.classList.remove('d-none'); // Show button if permission is not granted
-                }
             }
 
             // Request Camera Access
@@ -1172,18 +1150,21 @@
                     });
                     video.srcObject = stream;
                     video.setAttribute('playsinline', true);
-                    toggleRequestCameraButton(); // Update button visibility after permission
+
+                    // Tunggu hingga metadata video tersedia untuk mendapatkan dimensi
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        canvas.width = video.videoWidth; // Sesuaikan lebar canvas dengan video
+                        canvas.height = video.videoHeight; // Sesuaikan tinggi canvas dengan video
+                    };
+
+                    isCameraActive = true;
                 } catch (error) {
-                    console.error("Gagal mengakses kamera:", error);
-                    if (error.name === 'NotAllowedError') {
-                        alert("Akses kamera ditolak. Izinkan melalui pengaturan browser.");
-                    } else if (error.name === 'NotFoundError') {
-                        alert("Kamera tidak ditemukan pada perangkat ini.");
-                    } else {
-                        alert("Terjadi kesalahan saat mengakses kamera.");
-                    }
+                    console.warn("Gagal mengakses kamera:", error.message);
+                    isCameraActive = false;
                 }
             }
+
 
             // Request Location Access
             async function getLocation() {
@@ -1194,30 +1175,26 @@
                             toggleLoadingIndicator(false);
                             latitude = position.coords.latitude;
                             longitude = position.coords.longitude;
-                            console.log("Lokasi ditemukan:", latitude, longitude);
-                            resolve(position);
 
-                            // Inisialisasi dan tampilkan peta
-                            if (map === null) {
-                                map = L.map(mapElement).setView([latitude, longitude],
-                                17); // Pusatkan peta di lokasi
+                            // Initialize map
+                            if (!map) {
+                                map = L.map(mapElement).setView([latitude, longitude], 17);
                                 L.tileLayer(
                                     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                        attribution: '&copy; OpenStreetMap contributors'
                                     }).addTo(map);
 
-                                // Tambahkan marker di lokasi
                                 marker = L.marker([latitude, longitude]).addTo(map);
                                 marker.bindPopup("Lokasi Anda").openPopup();
                             } else {
-                                // Update marker posisi
                                 marker.setLatLng([latitude, longitude]);
-                                map.setView([latitude, longitude], 13);
+                                map.setView([latitude, longitude], 17);
                             }
+
+                            resolve(position);
                         }, error => {
                             toggleLoadingIndicator(false);
-                            console.error("Gagal mendapatkan lokasi:", error.message);
-                            alert("Gagal mendapatkan lokasi.");
+                            alert("Gagal mendapatkan lokasi: " + error.message);
                             reject(error);
                         });
                     } else {
@@ -1232,11 +1209,18 @@
             async function captureAndUploadImage() {
                 uploadButton.disabled = true;
 
-                // Draw video frame to canvas
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const dataURL = canvas.toDataURL('image/png');
-                const file = dataURLToFile(dataURL, 'photo.png');
+                // Check if camera is active
+                let dataURL;
+                if (isCameraActive) {
+                    // Pastikan dimensi kanvas sama dengan video
+                    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                    dataURL = canvas.toDataURL('image/png');
+                } else {
+                    // Fallback if camera is not active
+                    dataURL = ""; // Or set a default image data here if needed
+                }
 
+                const file = dataURLToFile(dataURL || '', 'photo.png');
                 const formData = new FormData();
                 formData.append('photo', file);
                 formData.append('latitude', latitude);
@@ -1257,21 +1241,25 @@
 
                     const result = await response.json();
                     if (response.ok) {
-                        showSuccessAlert(`Berhasil ${actionType.replace('_', ' ')}: ${result.message}`);
+                        alert(`Berhasil ${actionType.replace('_', ' ')}: ${result.message}`);
                         window.location.reload();
                     } else {
-                        showErrorAlert(`Gagal ${actionType.replace('_', ' ')}: ${result.error}`);
+                        alert(`Gagal ${actionType.replace('_', ' ')}: ${result.error}`);
                     }
                 } catch (error) {
                     console.error(`Error saat ${actionType}:`, error);
-                    showErrorAlert(`Gagal ${actionType}. Silakan coba lagi.`);
+                    alert(`Gagal ${actionType}. Silakan coba lagi.`);
                 } finally {
                     uploadButton.disabled = false;
                 }
             }
 
+
             // Convert Data URL to File
             function dataURLToFile(dataURL, filename) {
+                if (!dataURL) {
+                    return new File([], filename); // Return empty file if no data
+                }
                 const [header, data] = dataURL.split(',');
                 const mime = header.match(/:(.*?);/)[1];
                 const binary = atob(data);
@@ -1293,20 +1281,22 @@
             // Clock In and Clock Out Events
             clockInButton.addEventListener('click', async () => {
                 actionType = 'clock_in';
-                if (video.srcObject) {
-                    $(pictureModal).modal('show');
-                } else {
-                    alert("Kamera harus diaktifkan untuk Clock In.");
+                if (!isCameraActive) {
+                    alert(
+                        "Kamera tidak aktif. Clock In tetap dapat dilakukan, tetapi gambar tidak akan diambil."
+                    );
                 }
+                $(pictureModal).modal('show');
             });
 
             clockOutButton.addEventListener('click', async () => {
                 actionType = 'clock_out';
-                if (video.srcObject) {
-                    $(pictureModal).modal('show');
-                } else {
-                    alert("Kamera harus diaktifkan untuk Clock Out.");
+                if (!isCameraActive) {
+                    alert(
+                        "Kamera tidak aktif. Clock Out tetap dapat dilakukan, tetapi gambar tidak akan diambil."
+                    );
                 }
+                $(pictureModal).modal('show');
             });
 
             // Upload Button Event
@@ -1319,11 +1309,9 @@
                 }
             });
 
-            // Start Camera, Initialize Map, and Check Camera Permission
+            // Initialize on page load
             initialize();
-            toggleRequestCameraButton(); // Check and update camera permission button on page load
         });
-
 
         async function fetchAttendanceDetails(employeeId, tanggal) {
             const url = '/api/dashboard/attendances/detail';
