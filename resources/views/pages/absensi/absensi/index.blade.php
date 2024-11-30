@@ -1212,8 +1212,25 @@
                 // Check if camera is active
                 let dataURL;
                 if (isCameraActive) {
-                    // Pastikan dimensi kanvas sama dengan video
-                    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                    // Set canvas dimensions to match video dimensions
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+
+                    // Clear canvas and apply transformation to avoid mirror effect
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.save(); // Save current context state
+
+                    // Flip the canvas horizontally
+                    context.scale(-1, 1);
+                    context.translate(-canvas.width, 0);
+
+                    // Draw the video frame on the canvas
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    // Restore context to avoid affecting subsequent operations
+                    context.restore();
+
+                    // Convert canvas content to data URL
                     dataURL = canvas.toDataURL('image/png');
                 } else {
                     // Fallback if camera is not active
@@ -1253,7 +1270,6 @@
                     uploadButton.disabled = false;
                 }
             }
-
 
             // Convert Data URL to File
             function dataURLToFile(dataURL, filename) {
