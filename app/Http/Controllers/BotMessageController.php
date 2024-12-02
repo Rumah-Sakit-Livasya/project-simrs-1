@@ -387,27 +387,41 @@ class BotMessageController extends Controller
 
             $responseHRD .= "\n _Reported automatic by: Smart HR_";
 
-            $hrd = Employee::where('organization_id', 31)->latest()->first();
-            $httpDataHRD = [
-                'number' => formatNomorIndo($hrd->mobile_phone),
-                'message' => $responseHRD,
-            ];
+            $hrdList = Employee::where('organization_id', 31)->latest()->get();
+            $responses = [];
 
-            // Mengirim request HTTP menggunakan cURL
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
-            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-            curl_setopt($curl, CURLOPT_POST, 1);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+            foreach ($hrdList as $hrd) {
+                $httpDataHRD = [
+                    'number' => formatNomorIndo($hrd->mobile_phone),
+                    'message' => $responseHRD,
+                ];
 
-            $response = curl_exec($curl);
-            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            $curlError = curl_error($curl);
-            curl_close($curl);
+                // Mengirim request HTTP menggunakan cURL
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+                curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+                curl_setopt($curl, CURLOPT_POST, 1);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
+                curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
-            return response()->json(['error' => ($curlError ? "1" : "0"), 'data' => $response]);
+                $response = curl_exec($curl);
+                $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($curl);
+                curl_close($curl);
+
+                // Menyimpan hasil respons untuk setiap HRD
+                $responses[] = [
+                    'employee_id' => $hrd->id,
+                    'number' => $httpDataHRD['number'],
+                    'http_code' => $httpCode,
+                    'response' => $response,
+                    'error' => $curlError,
+                ];
+            }
+
+            // Mengembalikan hasil dalam bentuk JSON
+            return response()->json(['results' => $responses]);
         }
     }
 }
