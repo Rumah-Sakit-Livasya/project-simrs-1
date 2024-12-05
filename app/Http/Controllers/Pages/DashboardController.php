@@ -353,7 +353,7 @@ class DashboardController extends Controller
             $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
         })->orderBy('clock_in', 'ASC')->get();
         if (auth()->user()->hasRole('hr')) {
-            $total_employee = Employee::where('company_id', auth()->user()->employee->company_id)->count();
+            $total_employee = Employee::where('company_id', auth()->user()->employee->company_id)->where('is_active', 1)->count();
             $total_ontime = Attendance::where('clock_in', '!=', null)->where('date', Carbon::now()->format('Y-m-d'))->where('late_clock_in', null)->where('early_clock_out', null)
                 ->whereIn('employee_id', function ($query) {
                     $query->select('id')
@@ -421,7 +421,16 @@ class DashboardController extends Controller
                 }
             }
 
-            $total_employee = Employee::where('company_id', auth()->user()->employee->company_id)->where('is_active', 1)->whereIn('organization_id', $organizations)->count();
+            $total_employee = Employee::where('company_id', auth()->user()->employee->company_id)
+                ->where('is_active', 1)
+                ->whereIn('organization_id', $organizations)
+                ->count();
+            // $total_employee = Employee::where('company_id', auth()->user()->employee->company_id)
+            //     ->where('is_active', 1)
+            //     ->whereIn('organization_id', $organizations)
+            //     ->whereHas('attendances') // Mengambil hanya yang memiliki attendance
+            //     ->count();
+            // dd($total_employee);
             $total_ontime = Attendance::where('clock_in', '!=', null)->where('date', Carbon::now()->format('Y-m-d'))->where('late_clock_in', null)
                 ->whereIn('employee_id', function ($query) use ($organizations) {
                     $query->select('id')
