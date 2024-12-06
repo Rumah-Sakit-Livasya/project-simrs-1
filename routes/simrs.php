@@ -189,6 +189,10 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/{id}', [KepustakaanController::class, 'showFolder'])->name('kepustakaan.folder');
             Route::get('/download/{id}', [KepustakaanController::class, 'downloadFile'])->name('kepustakaan.download');
         });
+
+        Route::prefix('kasir')->group(function () {
+            // Route::get('/tagihan-pasien', [Kasi::class, 'index'])->name('kasir.index');
+        });
     });
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');
     // Route::post('/rnc', [RevenueAndCostCenterController::class, 'store'])->name('master.data.setup.rnc.store');

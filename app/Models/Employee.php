@@ -39,6 +39,13 @@ class Employee extends Model
         return $this->hasOne(BankEmployee::class);
     }
 
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'employee_id', 'id');
+        // 'employee_id' adalah foreign key di tabel attendances
+        // 'id' adalah primary key di tabel employees
+    }
+
     public function user()
     {
         return $this->hasOne(User::class);

@@ -72,7 +72,7 @@ class AttendanceController extends Controller
             if ($is_clock_in) {
                 $file = $request->file('photo');
                 $fileName = 'clock-in-' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $directory = 'absensi/clock-in/' . now()->format('m-Y');
+                $directory = 'absensi/clock-in/' . now()->format('m-Y') . '/' . now()->format('d-m-Y');
 
                 // Simpan file secara manual ke storage
                 $storagePath = storage_path('app/public/' . $directory);
@@ -191,7 +191,7 @@ class AttendanceController extends Controller
                 if ($request->hasFile('photo')) {
                     $file = $request->file('photo');
                     $fileName = 'clock-out-' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $directory = 'absensi/clock-out/' . now()->format('m-Y');
+                    $directory = 'absensi/clock-out/' . now()->format('m-Y') . '/' . now()->format('d-m-Y');
 
                     // Simpan file secara manual ke storage
                     $storagePath = storage_path('app/public/' . $directory);
