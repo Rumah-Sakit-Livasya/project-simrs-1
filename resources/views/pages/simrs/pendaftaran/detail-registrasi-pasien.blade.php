@@ -185,34 +185,32 @@
                                             <div class="card-body tab-content">
                                                 <div class="tab-pane active" id="second4" style="width: 125%;">
                                                     <div class="row">
-                                                        <div class="col-md">
-                                                            @foreach ($patient->registration as $item)
-                                                                @if ($item->status !== 'batal')
-                                                                    <div class="d-flex">
-                                                                        <span
-                                                                            class="d-block text-white display-4 mr-3 flex-shrink-0">
-                                                                            <i class="mdi mdi-stethoscope mdi-18px bg-primary p-3 white-text"
-                                                                                style="border-radius: 11px"></i>
-                                                                        </span>
-                                                                        <div class="d-inline-flex flex-column">
-                                                                            <a href="{{ route('detail.registrasi.pasien', $item->id) }}"
-                                                                                class="fs-lg fw-500 d-block">
-                                                                                {{ $item->departement->name }}
-                                                                            </a>
-                                                                            <div class="d-block text-muted fs-md mt-1">
-                                                                                {{ $item->doctor->employee->fullname }}
-                                                                            </div>
-                                                                            <p class="text-muted mt-1"
-                                                                                style="font-size: 9pt">
-                                                                                {{ tgl_waktu($item->registration_date) }}
-                                                                                -
-                                                                                {{ $item->registration_close_date ? tgl_waktu($item->registration_close_date) : 'sekarang' }}
-                                                                            </p>
+                                                        {{-- <div class="col-md"> --}}
+                                                        @foreach ($patient->registration as $item)
+                                                            @if ($item->status !== 'batal')
+                                                                <div class="d-flex">
+                                                                    <span
+                                                                        class="d-block text-white display-4 mr-3 flex-shrink-0">
+                                                                        <i class="mdi mdi-stethoscope mdi-18px bg-primary p-3 white-text"
+                                                                            style="border-radius: 11px"></i>
+                                                                    </span>
+                                                                    <div class="d-inline-flex flex-column">
+                                                                        <a href="{{ route('detail.registrasi.pasien', $item->id) }}"
+                                                                            class="fs-lg fw-500 d-block">
+                                                                            {{ $item->departement->name }}
+                                                                        </a>
+                                                                        <div class="d-block text-muted fs-md mt-1">
+                                                                            {{ $item->doctor->employee->fullname }}
                                                                         </div>
+                                                                        <p class="text-muted mt-1" style="font-size: 9pt">
+                                                                            {{ tgl_waktu($item->registration_date) }}
+                                                                            -
+                                                                            {{ $item->registration_close_date ? tgl_waktu($item->registration_close_date) : 'sekarang' }}
+                                                                        </p>
                                                                     </div>
-                                                                @endif
-                                                            @endforeach
-                                                        </div>
+                                                                </div>
+                                                            @endif
+                                                        @endforeach
                                                     </div>
                                                 </div>
                                             </div>
@@ -224,7 +222,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-xl-9">
                 <div id="panel-1" class="panel h-100">
                     <div class="panel-hdr">
@@ -452,6 +449,8 @@
                     </div>
                 </div>
             </div>
+        </div>
+
         </div>
     </main>
     {{-- {{ $registration->pengkajian_nurse_rajal->id }} --}}

@@ -185,7 +185,7 @@
                                 const newRow = `
                                 <tr>
                                     <td>${currentIndex++}</td>
-                                    <td>${action.tanggal_tindakan || 'Tidak Diketahui'}</td>
+                                    <td style="white-space: nowrap;">${action.tanggal_tindakan || 'Tidak Diketahui'}</td>
                                     <td>${doctorName}</td>
                                     <td>${actionName}</td>
                                     <td>${className}</td>
@@ -359,7 +359,7 @@
                 const newRow = `
                 <tr>
                     <td>${currentIndex++}</td>
-                    <td>${data.tanggal_tindakan || 'Tidak Diketahui'}</td>
+                    <td style="white-space: nowrap;">${data.tanggal_tindakan || 'Tidak Diketahui'}</td>
                     <td>${doctorName}</td>
                     <td>${actionName}</td>
                     <td>${className}</td>
