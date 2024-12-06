@@ -1137,8 +1137,12 @@
                     const stream = await navigator.mediaDevices.getUserMedia({
                         video: {
                             facingMode: 'user',
-                            width: { ideal: 640 },
-                            height: { ideal: 720 },
+                            width: {
+                                ideal: 640
+                            },
+                            height: {
+                                ideal: 720
+                            },
                         },
                     });
                     video.srcObject = stream;
@@ -1165,9 +1169,10 @@
 
                             if (!map) {
                                 map = L.map(mapElement).setView([latitude, longitude], 17);
-                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                    attribution: '&copy; OpenStreetMap contributors',
-                                }).addTo(map);
+                                L.tileLayer(
+                                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                        attribution: '&copy; OpenStreetMap contributors',
+                                    }).addTo(map);
 
                                 marker = L.marker([latitude, longitude]).addTo(map);
                                 marker.bindPopup('Lokasi Anda').openPopup();
@@ -1217,7 +1222,8 @@
                 formData.append('longitude', longitude);
                 formData.append('employee_id', '{{ auth()->user()->employee->id }}');
 
-                const apiUrl = actionType === 'clock_in' ? '/api/dashboard/clock-in' : '/api/dashboard/clock-out';
+                const apiUrl = actionType === 'clock_in' ? '/api/dashboard/clock-in' :
+                    '/api/dashboard/clock-out';
 
                 try {
                     const response = await fetch(apiUrl, {
@@ -1250,7 +1256,9 @@
                 for (let i = 0; i < binary.length; i++) {
                     array[i] = binary.charCodeAt(i);
                 }
-                return new File([array], filename, { type: mime });
+                return new File([array], filename, {
+                    type: mime
+                });
             }
 
             async function initialize() {

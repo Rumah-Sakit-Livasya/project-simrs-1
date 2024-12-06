@@ -7,7 +7,7 @@
                 <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan" data-backdrop="static"
                     data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah User">
                     <span class="fal fa-plus-circle mr-1"></span>
-                    Ajukan Absensi
+                    Pengajuan Absensi
                 </button>
             </div>
         </div>

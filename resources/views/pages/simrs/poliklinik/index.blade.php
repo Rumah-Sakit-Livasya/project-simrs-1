@@ -2,6 +2,34 @@
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
     <style>
+        input[type="time"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .badge {
+            cursor: pointer;
+        }
+
+        .badge.badge-orange {
+            background-color: #ff5722;
+            color: #ffffff;
+        }
+
+        .badge.badge-red {
+            background-color: #f44336;
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .img-baker {
+                width: 45%;
+                margin-bottom: 1rem;
+            }
+        }
+
+
         @media (min-width: 992px) {
             .nav-function-hidden:not(.nav-function-top) .page-sidebar:hover {
                 left: -16.25rem;
@@ -46,14 +74,6 @@
                 width: 17rem;
             }
         }
-
-        /* #toggle-pasien {
-            position: absolute;
-            top: 10px;
-            right: -60px;
-            z-index: 2;
-            background: #fff;
-        } */
 
         #toggle-pasien i {
             color: #3366b9;
@@ -452,7 +472,246 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="diagnosa-keperawatan" class="control-label text-primary">Diagnosa
+                                        Keperawatan</label>
+                                    <select name="diagnosa_keperawatan" id="diagnosa-keperawatan"
+                                        class="select2 form-select">
+                                        <option value="-">-</option>
+                                        <option value="Gangguan rasa nyaman">Gangguan rasa nyaman</option>`
+                                        <option value="Nyeri">Nyeri</option>
+                                        <option value="Pola Nafas tidak efektif">Pola Nafas tidak efektif</option>
+                                        <option value="Bersihan jalan nafas tidak efektif">Bersihan jalan nafas tidak
+                                            efektif
+                                        </option>
+                                        <option value="Nyeri Akut">Nyeri Akut</option>
+                                        <option value="Nyeri Kronis">Nyeri Kronis</option>
+                                        <option value="Resiko Infeksi">Resiko Infeksi</option>
+                                        <option value="Harga diri Rendah">Harga diri Rendah</option>
+                                        <option value="Resiko Perilaku Kekerasan">Resiko Perilaku Kekerasan</option>
+                                        <option value="Halusinasi">Halusinasi</option>
+                                        <option value="Isolasi Sosial">Isolasi Sosial</option>
+                                        <option value="Resiko Bunuh Diri">Resiko Bunuh Diri</option>
+                                        <option value="Waham">Waham</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="rencana-tindak-lanjut" class="control-label text-primary">Rencana Tindak
+                                        Lanjut</label>
+                                    <select name="rencana_tindak_lanjut" id="rencana-tindak-lanjut"
+                                        class="select2 form-select">
+                                        <option value="-">-</option>
+                                        <option value="Kolaborasi Dokter">Kolaborasi Dokter</option>
+                                        <option value="Perawatan Luka">Perawatan Luka</option>
+                                        <option value="Memberikan Edukasi">Memberikan Edukasi</option>
+                                        <option value="Mengukur tanda - tanda vital">Mengukur tanda - tanda vital</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
+                        <header class="text-danger mt-3">
+                            <h4 class="mt-5 font-weight-bold">ALERGI DAN REAKSI</h4>
+                        </header>
+                        <div class="row mt-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="alergi_obat"
+                                        class="control-label text-primary margin-tb-10 d-block">Alergi
+                                        Obat</label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" value="Ya"
+                                            name="alergi_obat" id="alergi_obat1">
+                                        <label class="custom-control-label text-primary" for="alergi_obat1">Ya</label>
+                                    </div>
+                                    <input name="ket_alergi_obat" id="ket_alergi_obat"
+                                        style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
+                                        type="text">
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" value="Tidak"
+                                            name="alergi_obat" id="alergi_obat2">
+                                        <label class="custom-control-label text-primary" for="alergi_obat2">Tidak</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="alergi_makanan"
+                                        class="control-label text-primary margin-tb-10 d-block">Alergi
+                                        Makanan</label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" value="Ya"
+                                            name="alergi_makanan" id="alergi_makanan1">
+                                        <label class="custom-control-label text-primary" for="alergi_makanan1">Ya</label>
+                                    </div>
+                                    <input name="ket_alergi_makanan" id="ket_alergi_makanan"
+                                        style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
+                                        type="text">
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" value="Tidak"
+                                            name="alergi_makanan" id="alergi_makanan2">
+                                        <label class="custom-control-label text-primary"
+                                            for="alergi_makanan2">Tidak</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="alergi_makanan"
+                                        class="control-label text-primary margin-tb-10 d-block">Alergi
+                                        Makanan</label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" value="Ya"
+                                            name="alergi_makanan" id="alergi_makanan1">
+                                        <label class="custom-control-label text-primary" for="alergi_makanan1">Ya</label>
+                                    </div>
+                                    <input name="ket_alergi_makanan" id="ket_alergi_makanan"
+                                        style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
+                                        type="text">
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" value="Tidak"
+                                            name="alergi_makanan" id="alergi_makanan2">
+                                        <label class="custom-control-label text-primary"
+                                            for="alergi_makanan2">Tidak</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group mb-3">
+                                    <label for="reaksi_alergi_obat" class="control-label text-primary ">Reaksi terhadap
+                                        alergi
+                                        obat</label>
+                                    <input name="reaksi_alergi_obat" id="reaksi_alergi_obat" class="form-control alergi"
+                                        type="text">
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="reaksi_alergi_makanan" class="control-label text-primary">Reaksi terhadap
+                                        alergi
+                                        makanan</label>
+                                    <input name="reaksi_alergi_makanan" id="reaksi_alergi_makanan"
+                                        class="form-control alergi" type="text">
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="reaksi_alergi_lainnya" class="control-label text-primary">Reaksi terhadap
+                                        alergi
+                                        lainnya</label>
+                                    <input name="reaksi_alergi_lainnya" id="reaksi_alergi_lainnya"
+                                        class="form-control alergi" type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label for="kondisi_khusus1" class="control-label text-primary margin-tb-10">Gelang
+                                        tanda
+                                        alergi</label>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" value="1"
+                                            name="gelang" id="gelang1">
+                                        <label class="custom-control-label text-primary" for="gelang1">Dipasang (warna
+                                            merah)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <header class="text-danger">
+                            <h4 class="mt-5 font-weight-bold">SKRINING NYERI</h4>
+                        </header>
+                        <div class="row mt-3">
+                            <div class="col-md-12 mb-4 d-flex flex-wrap justify-content-between">
+                                <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
+                                    <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/1.jpg"
+                                        class="mb-2 img-fluid">
+                                    <div class="text-center">
+                                        <span class="badge badge-warning text-white" data-skor="0">0</span>
+                                    </div>
+                                </div>
+                                <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
+                                    <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/2.jpg"
+                                        class="mb-2 img-fluid">
+                                    <div class="text-center">
+                                        <span class="badge badge-success" data-skor="1">1</span>
+                                        <span class="badge badge-success" data-skor="2">2</span>
+                                    </div>
+                                </div>
+                                <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
+                                    <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/3.jpg"
+                                        class="mb-2 img-fluid">
+                                    <div class="text-center">
+                                        <span class="badge badge-primary" data-skor="3">3</span>
+                                        <span class="badge badge-primary" data-skor="4">4</span>
+                                    </div>
+                                </div>
+                                <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
+                                    <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/4.jpg"
+                                        class="mb-2 img-fluid">
+                                    <div class="text-center">
+                                        <span class="badge badge-info" data-skor="5">5</span>
+                                        <span class="badge badge-info" data-skor="6">6</span>
+                                    </div>
+                                </div>
+                                <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
+                                    <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/5.jpg"
+                                        class="mb-2 img-fluid">
+                                    <div class="text-center">
+                                        <span class="badge badge-orange" data-skor="7">7</span>
+                                        <span class="badge badge-orange" data-skor="8">8</span>
+                                    </div>
+                                </div>
+                                <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
+                                    <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/6.jpg"
+                                        class="mb-2 img-fluid">
+                                    <div class="text-center">
+                                        <span class="badge badge-red" data-skor="9">9</span>
+                                        <span class="badge badge-red" data-skor="10">10</span>
+                                    </div>
+                                </div>
+                                <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
+                                    <input name="skor_nyeri" id="skor_nyeri" class="form-control text-center mt-3"
+                                        style="font-size: 3rem; height: 60px;" type="text">
+                                    <label for="skor_nyeri" class="control-label text-primary">Skor</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="provokatif" class="control-label text-primary">Provokatif</label>
+                                    <input name="provokatif" id="provokatif" class="form-control" type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="quality" class="control-label text-primary">Quality</label>
+                                    <input name="quality" id="quality" class="form-control" type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="region" class="control-label text-primary">Region</label>
+                                    <input name="region" id="region" class="form-control" type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="time" class="control-label text-primary">Time</label>
+                                    <input name="time" id="time" class="form-control" type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="nyeri" class="control-label text-primary">Nyeri</label>
+                                    <select name="nyeri" id="nyeri" class="select2">
+                                        <option value="-">-</option>
+                                        <option value="Nyeri kronis">Nyeri kronis</option>
+                                        <option value="Nyeri akut">Nyeri akut</option>
+                                        <option value="TIdak ada nyeri">TIdak ada nyeri</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="form-group">
+                                    <label for="nyeri_hilang" class="control-label text-primary">Nyeri hilang apabila</label>
+                                    <input name="nyeri_hilang" id="nyeri_hilang" class="form-control" type="text">
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -464,6 +723,9 @@
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');
+            $('.select2').select2({
+                placeholder: 'Pilih Item',
+            });
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
