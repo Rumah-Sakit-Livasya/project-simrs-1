@@ -1052,6 +1052,12 @@ class DashboardController extends Controller
         return view('pages.absensi.absensi.index', compact('selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
     }
 
+    public function getSettingAttendances()
+    {
+        $employees = Employee::all();
+        return view('pages.absensi.absensi.settings', compact('employees'));
+    }
+
     public function getAttendancesOutsourcing()
     {
         // Mendapatkan tanggal hari ini
@@ -1131,6 +1137,7 @@ class DashboardController extends Controller
         $attendance_requests = AttendanceRequest::where('employee_id', auth()->user()->employee->id)->get();
         return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify'));
     }
+
     public function getAttendanceRequest($id)
     {
         $getNotify = $this->getNotify();
@@ -1141,6 +1148,40 @@ class DashboardController extends Controller
             return redirect()->route('attendance-requests')->with('error', 'Tidak bisa mengakses halaman ini!');
         }
     }
+
+    public function attendanceRequestForm()
+    {
+        $organizations = [];
+        $organizations[] = auth()->user()->employee->organization->id;
+        $organizations_parent = auth()->user()->employee->organization->child_structures;
+        foreach ($organizations_parent as $row) {
+            $organizations[] = $row->organization->id;
+            $child = $row->organization->child_structures;
+            if ($child->count() > 0) {
+                foreach ($child as $col) {
+                    $organizations[] = $col->organization->id;
+                    $parent = $col->organization->child_structures;
+                    if ($parent->count() > 0) {
+                        foreach ($parent as $coll) {
+                            $organizations[] = $coll->organization->id;
+                        }
+                    }
+                }
+            }
+        }
+
+        $employees = Employee::select('fullname')->where('is_active', 1)
+            ->where('company_id', auth()->user()->employee->company_id)
+            ->whereIn('organization_id', $organizations)
+            ->orderBy('id')
+            ->get();
+
+
+        dd($employees);
+
+        return view('pages.absensi.pengajuan-absensi.pengajuan-absen', compact('organizations'));
+    }
+
     public function getDataLocations()
     {
         $locations = Location::all();

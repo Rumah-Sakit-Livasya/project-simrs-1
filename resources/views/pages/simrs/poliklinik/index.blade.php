@@ -512,7 +512,7 @@
                                 </div>
                             </div>
                         </div>
-                        <header class="text-danger mt-3">
+                        <header class="text-secondary mt-3">
                             <h4 class="mt-5 font-weight-bold">ALERGI DAN REAKSI</h4>
                         </header>
                         <div class="row mt-3">
@@ -611,7 +611,7 @@
                                 </div>
                             </div>
                         </div>
-                        <header class="text-danger">
+                        <header class="text-secondary">
                             <h4 class="mt-5 font-weight-bold">SKRINING NYERI</h4>
                         </header>
                         <div class="row mt-3">
@@ -669,31 +669,31 @@
                                     <label for="skor_nyeri" class="control-label text-primary">Skor</label>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3 mb-3">
                                 <div class="form-group">
                                     <label for="provokatif" class="control-label text-primary">Provokatif</label>
                                     <input name="provokatif" id="provokatif" class="form-control" type="text">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3 mb-3">
                                 <div class="form-group">
                                     <label for="quality" class="control-label text-primary">Quality</label>
                                     <input name="quality" id="quality" class="form-control" type="text">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3 mb-3">
                                 <div class="form-group">
                                     <label for="region" class="control-label text-primary">Region</label>
                                     <input name="region" id="region" class="form-control" type="text">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3 mb-3">
                                 <div class="form-group">
                                     <label for="time" class="control-label text-primary">Time</label>
                                     <input name="time" id="time" class="form-control" type="text">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3 mb-3">
                                 <div class="form-group">
                                     <label for="nyeri" class="control-label text-primary">Nyeri</label>
                                     <select name="nyeri" id="nyeri" class="select2">
@@ -704,14 +704,271 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-9">
+                            <div class="col-md-9 mb-3">
                                 <div class="form-group">
-                                    <label for="nyeri_hilang" class="control-label text-primary">Nyeri hilang apabila</label>
+                                    <label for="nyeri_hilang" class="control-label text-primary">Nyeri hilang
+                                        apabila</label>
                                     <input name="nyeri_hilang" id="nyeri_hilang" class="form-control" type="text">
                                 </div>
                             </div>
                         </div>
-
+                        <header class="text-secondary">
+                            <h4 class="mt-5 font-weight-bold">SKRINING GIZI</h4>
+                        </header>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="penurunan_bb" class="control-label text-primary">Penurunan berat badan 6
+                                        bln
+                                        terakhir</label>
+                                    <select name="penurunan_bb" id="penurunan_bb" class="select2">
+                                        <option></option>
+                                        <option value="Tidak">Tidak</option>
+                                        <option value="Tidak yakin / Ragu-ragu">Tidak yakin / Ragu-ragu</option>
+                                        <option value="Ya, 1-5 Kg">Ya, 1-5 Kg</option>
+                                        <option value="Ya, 6-10 Kg">Ya, 6-10 Kg</option>
+                                        <option value="Ya, 11-15 Kg">Ya, 11-15 Kg</option>
+                                        <option value="Ya, > 15 Kg">Ya, &gt; 15 Kg</option>
+                                        <option value="Ya, tidak tahu berapa Kg">Ya, tidak tahu berapa Kg</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="asupan_makan" class="control-label text-primary">Asupan makanan
+                                        pasien</label>
+                                    <select name="asupan_makan" id="asupan_makan" class="select2">
+                                        <option></option>
+                                        <option value="Normal">Normal</option>
+                                        <option value="Berkurang, penurunan nafsu makan/kesulitan menerima makan"
+                                            data-skor="1">
+                                            Berkurang, penurunan nafsu makan/kesulitan menerima makan</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <label for="kondisi_khusus1" class="control-label text-primary mt-3">Pasien dalam kondisi
+                            khusus</label>
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="kondisi_khusus1" id="kondisi_khusus1"
+                                                value="Anak usia 1-5 tahun" type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Anak usia 1-5 tahun</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="kondisi_khusus2" id="kondisi_khusus2" value="Lansia > 60 tahun"
+                                                type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Lansia &gt; 60 tahun</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="kondisi_khusus3" id="kondisi_khusus3"
+                                                value="Penyakit kronis dengan komplikasi" type="checkbox"
+                                                class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Penyakit kronis dengan
+                                                komplikasi</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="kondisi_khusus4" id="kondisi_khusus4"
+                                                value="Kanker stadium III/IV" type="checkbox"
+                                                class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Kanker stadium III/IV</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="kondisi_khusus5" id="kondisi_khusus5" value="HIV/AIDS"
+                                                type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-label text-primary">HIV/AIDS</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="kondisi_khusus6" id="kondisi_khusus6" value="TB"
+                                                type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-label text-primary">TB</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="kondisi_khusus7" id="kondisi_khusus7"
+                                                value="Bedah mayor degestif" type="checkbox"
+                                                class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Bedah mayor degestif</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="kondisi_khusus8" id="kondisi_khusus8" value="Luka bakar > 20%"
+                                                type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Luka bakar &gt; 20%</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <header class="text-secondary">
+                            <h4 class="mt-5 font-weight-bold">RIWAYAT IMUNISASI DASAR</h4>
+                        </header>
+                        <div class="row mt-3">
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="imunisasi_dasar1" id="imunisasi_dasar1" value="BCG"
+                                                type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-label text-primary">BCG</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="imunisasi_dasar2" id="imunisasi_dasar2" value="DPT"
+                                                type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-label text-primary">DPT</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="imunisasi_dasar3" id="imunisasi_dasar3" value="Hepatitis B"
+                                                type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Hepatitis B</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="imunisasi_dasar4" id="imunisasi_dasar4" value="Polio"
+                                                type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Polio</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input name="imunisasi_dasar5" id="imunisasi_dasar5" value="Campak"
+                                                type="checkbox" class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Campak</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <header class="text-secondary">
+                            <h4 class="mt-5 font-weight-bold">SKRINING RESIKO JATUH - GET UP & GO</h4>
+                        </header>
+                        <div class="row mt-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input onclick="resiko_jatuh()" name="resiko_jatuh1" id="resiko_jatuh1"
+                                                value="Tidak seimbang/sempoyongan/limbung" type="checkbox"
+                                                class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Tidak
+                                                seimbang/sempoyongan/limbung</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input onclick="resiko_jatuh()" name="resiko_jatuh2" id="resiko_jatuh2"
+                                                value="Alat bantu: kruk,kursi roda/dibantu" type="checkbox"
+                                                class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Jalan dengan alat
+                                                bantu(kruk,kursi
+                                                roda/dibantu)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="resiko_jatuh3" class="control-label text-primary margin-tb-10">B. Menopang
+                                        saat
+                                        duduk</label>
+                                    <div class="form-radio">
+                                        <label class="custom-control custom-checkbox custom-control-inline">
+                                            <input onclick="resiko_jatuh()" name="resiko_jatuh3" id="resiko_jatuh3"
+                                                value="Pegang pinggiran meja/kursi/alat bantu untuk duduk" type="checkbox"
+                                                class="custom-control-input">
+                                            <span class="custom-control-label text-primary">Pegang pinggiran
+                                                meja/kursi/alat
+                                                bantu
+                                                untuk
+                                                duduk</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <span class="input-group-addon grey-text">Hasil : </span>
+                                    <div class="input-group-content">
+                                        <input class="form-control" name="resiko_jatuh_hasil" id="resiko_jatuh_hasil"
+                                            type="text" readonly="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

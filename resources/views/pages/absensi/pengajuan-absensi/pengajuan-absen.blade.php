@@ -2,82 +2,26 @@
 @section('title', 'Pengajuan Absensi')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        <div class="row mb-4">
-            <div class="col-xl-12">
-                @if (auth()->user()->is_request_attendance == 1)
-                    <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan" data-backdrop="static"
-                        data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah User">
-                        <span class="fal fa-plus-circle mr-1"></span>
-                        Pengajuan Absensi
-                    </button>
-                @else
-                    <div class="alert alert-danger">
-                        Mohon maaf akses pengajuan absensi belum diberikan. Silahkan
-                        menghubungi atasan masing-masing untuk dibukakan aksesnya!
-                    </div>
-                @endcan
-            </div>
-        </div>
-
         <div class="row">
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Histori Pengajuan Absensi
+                            DAFTAR FORM PENGAJUAN ABSENSI
                         </h2>
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <!-- datatable start -->
-                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                <thead>
-                                    <tr>
-                                        <th style="white-space: nowrap">No</th>
-                                        <th style="white-space: nowrap">Tanggal</th>
-                                        <th style="white-space: nowrap">Clockin</th>
-                                        <th style="white-space: nowrap">Clockout</th>
-                                        <th style="white-space: nowrap">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($attendance_requests as $row)
-                                        <tr>
-                                            <td style="white-space: nowrap">{{ $loop->iteration }}</td>
-                                            <td style="white-space: nowrap">{{ tgl($row->date) }}
-                                            </td>
-                                            <td style="white-space: nowrap">{{ $row->clockin ?? '*tidak diajukan' }}
-                                            <td style="white-space: nowrap">{{ $row->clockout ?? '*tidak diajukan' }}
-                                            </td>
-                                            <td style="white-space: nowrap">
-                                                <span
-                                                    class="badge {{ $row->is_approved == 'Pending' ? 'badge-warning' : ($row->is_approved == 'Disetujui' ? 'badge-success' : ($row->is_approved == 'Ditolak' ? 'badge-danger' : ($row->is_approved == 'Verifikasi' ? 'badge-primary' : ''))) }}">
-                                                    {{ ucfirst($row->is_approved) }} </span>
-
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th style="white-space: nowrap">No</th>
-                                        <th style="white-space: nowrap">Tanggal</th>
-                                        <th style="white-space: nowrap">Clockin</th>
-                                        <th style="white-space: nowrap">Clockout</th>
-                                        <th style="white-space: nowrap">Status</th>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                            <!-- datatable end -->
+                            
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-    @if (auth()->user()->is_request_attendance == 1)
+    @can('create pengajuan absen')
         @include('pages.absensi.pengajuan-absensi.partials.create')
-    @endif
+    @endcan
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
