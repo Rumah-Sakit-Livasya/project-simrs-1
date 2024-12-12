@@ -1054,8 +1054,22 @@ class DashboardController extends Controller
 
     public function getSettingAttendances()
     {
-        $employees = Employee::all();
+        $employees = Employee::where('is_active', 1)->get();
         return view('pages.absensi.absensi.settings', compact('employees'));
+    }
+
+    public function updateStatusRequestAttendance(Request $request)
+    {
+        $user = User::find($request->userId);
+        if (!$user) {
+            return response()->json(['error' => 'User tidak ditemukan'], 404);
+        }
+
+        // Convert boolean to integer (1 or 0)
+        $user->is_request_attendance = $request->is_request_attendance ? 1 : 0;
+        $user->save();
+
+        return response()->json(['message' => 'Status berhasil diperbarui']);
     }
 
     public function getAttendancesOutsourcing()
@@ -1176,10 +1190,7 @@ class DashboardController extends Controller
             ->orderBy('id')
             ->get();
 
-
-        dd($employees);
-
-        return view('pages.absensi.pengajuan-absensi.pengajuan-absen', compact('organizations'));
+        return view('pages.absensi.pengajuan-absensi.pengajuan-absen', compact('employees'));
     }
 
     public function getDataLocations()

@@ -16,6 +16,13 @@
                         menghubungi atasan masing-masing untuk dibukakan aksesnya!
                     </div>
                 @endcan
+
+                @can('create attendance request form')
+                    <a href="{{route('attendance-requests.form')}}" class="btn btn-primary">
+                        <span class="fal fa-plus-circle mr-1"></span>
+                        Tambah Form Pengajuan
+                    </a>
+                @endcan
             </div>
         </div>
 

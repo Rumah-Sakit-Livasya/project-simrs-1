@@ -31,10 +31,17 @@
                                             </td>
                                             <td style="white-space: nowrap">
                                                 <div class="custom-control custom-switch">
-                                                    <input type="checkbox" class="custom-control-input"
-                                                        id="aksi-{{ $i }}" value="on">
-                                                    <label class="custom-control-label"
-                                                        for="aksi-{{ $i }}">Unchecked</label>
+                                                    @if ($row->user)
+                                                        <input type="checkbox" class="custom-control-input acc" 
+                                                            id="aksi-{{ $i }}" data-id="{{ $row->user->id }}"
+                                                            {{ $row->user->is_request_attendance == 1 ? 'checked' : '' }}
+                                                            value="{{ $row->user->is_request_attendance }}"
+                                                            autocomplete="off">
+                                                        <label class="custom-control-label" id="label-{{ $i }}"
+                                                            for="aksi-{{ $i }}">{{ $row->user->is_request_attendance == 1 ? 'On' : 'Off' }}</label>
+                                                    @else
+                                                        <p>User data not found.</p>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
@@ -61,7 +68,6 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script>
-        // Preview Image Update Profile
         function previewImage() {
             const image = document.querySelector('#file');
             const imgPreview = document.querySelector('.img-preview')
@@ -79,23 +85,18 @@
         $(document).ready(function() {
 
             $('.switch-control').on('change', function() {
-                // Dapatkan checkbox yang berubah
                 const checkbox = $(this);
-
-                // Temukan label yang terkait menggunakan atribut "for"
                 const label = $(`label[for="${checkbox.attr('id')}"]`);
 
-                // Perbarui teks label berdasarkan status checkbox
                 if (checkbox.is(':checked')) {
-                    label.text('Checked'); // Ubah teks menjadi "Checked" jika dicentang
-                    checkbox.val('on'); // Ubah nilai checkbox
+                    label.text('Checked');
+                    checkbox.val('on');
                 } else {
-                    label.text('Unchecked'); // Ubah teks menjadi "Unchecked" jika tidak dicentang
-                    checkbox.val('off'); // Ubah nilai checkbox
+                    label.text('Unchecked');
+                    checkbox.val('off');
                 }
             });
 
-            // Datatable
             $('#dt-basic-example').dataTable({
                 responsive: true
             });
@@ -110,6 +111,41 @@
                 var theadColor = $(this).attr("data-bg");
                 console.log(theadColor);
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
+            });
+
+            $('input.acc').on('change', function() {
+                var checkboxId = $(this).attr('id');
+                var userId = $(this).data('id');
+                var isChecked = $(this).is(':checked');
+                var labelId = 'label-' + checkboxId.split('-')[1];
+
+                // Set value berdasarkan checked state
+                $(this).val(isChecked ? 1 : 0);
+                
+                // Update label text
+                var label = $('#' + labelId);
+                if (label.length) {
+                    label.text(isChecked ? 'On' : 'Off');
+                }
+
+                $.ajax({
+                    url: "{{ route('acc.update', ['user_id' => ':user_id']) }}".replace(':user_id',
+                        userId),
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: {
+                        userId: userId,
+                        is_request_attendance: isChecked ? 1 : 0 // Kirim nilai 1 atau 0
+                    },
+                    success: function(response) {
+                        console.log(response.message);
+                    },
+                    error: function(error) {
+                        console.error(error);
+                    }
+                });
             });
         });
     </script>

@@ -54,7 +54,9 @@ Route::middleware('auth')->group(function () {
         Route::get("/attendance-requests/form", [DashboardController::class, 'attendanceRequestForm'])->name("attendance-requests.form");
         Route::get("/attendance-requests/{id}", [DashboardController::class, 'getAttendanceRequest'])->name("attendance-requests.get");
 
+        Route::post('/update/{user_id}/request', [DashboardController::class, 'updateStatusRequestAttendance'])->name("acc.update");
         Route::get("/settings", [DashboardController::class, 'getSettingAttendances'])->name('attendances.settings');
+        
         Route::get("/day-off-requests", [DashboardController::class, 'dayOffRequest'])->name("day-off-requests");
         Route::get("/day-off-requests/{id}", [DashboardController::class, 'getDayOffRequest'])->name("day-off-requests.get");
 
