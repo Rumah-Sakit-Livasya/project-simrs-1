@@ -49,6 +49,7 @@
                             <form autocomplete="off" novalidate action="javascript:void(0)" method="post"
                                 enctype="multipart/form-data" id="store-form">
                                 @csrf
+                                @method('post')
                                 <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
                                 <input type="hidden" name="room_id" value="{{ $ruang->id }}">
 
