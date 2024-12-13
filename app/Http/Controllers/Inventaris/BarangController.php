@@ -21,6 +21,7 @@ class BarangController extends Controller
         $templateBarang = $request->input('template_barang_id');
         $kategoriBarang = $request->input('category_barang_id');
         $identitasBarang = $request->input('identitas_barang');
+        $identitasBarang = $request->input('harga_barang');
         $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
         $barang = [];
 
@@ -92,6 +93,7 @@ class BarangController extends Controller
                 'condition' => "required|max:5120",
                 'bidding_year' => "required|max:255",
                 'merk' => "max:5120",
+                'harga_barang' => "max:5120",
                 'room_id' => "max:255",
             ]);
 
@@ -319,11 +321,13 @@ class BarangController extends Controller
             return response()->json([
                 'id' => $barang->id,
                 'room_id' => $barang->room_id,
+                'company_id' => $barang->company_id,
                 'custom_name' => $barang->custom_name,
                 'item_code' => $barang->item_code,
                 'condition' => $barang->condition,
                 'template_barang_id' => $barang->template_barang_id,
                 'merk' => $barang->merk,
+                'harga_barang' => $barang->harga_barang,
                 'bidding_year' => $barang->bidding_year,
                 'urutan_barang' => $barang->urutan_barang,
             ], 200);
@@ -347,6 +351,7 @@ class BarangController extends Controller
             'condition' => "required|max:255",
             // 'template_barang_id' => "required|max:255",
             'merk' => "max:255",
+            'harga_barang' => "max:255",
             'bidding_year' => "required|max:255",
             'urutan_barang' => "required|max:255",
         ]);
