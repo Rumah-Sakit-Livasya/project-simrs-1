@@ -47,7 +47,7 @@
                     <div class="panel-container show">
                         <div class="panel-content">
                             <form autocomplete="off" novalidate action="javascript:void(0)" method="post"
-                                enctype="multipart/form-data" id="store-barang-form">
+                                enctype="multipart/form-data" id="store-form">
                                 @csrf
                                 <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
                                 <input type="hidden" name="room_id" value="{{ $ruang->id }}">
@@ -89,6 +89,23 @@
                                                     </optgroup>
                                                 </select>
                                                 @error('template_barang_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="company_id">
+                                                    Perusahaan
+                                                </label>
+                                                <select class="form-control w-100 @error('company_id') is-invalid @enderror"
+                                                    id="company_id" name="company_id">
+                                                    <optgroup label="Perusahaan">
+                                                        @foreach ($companies as $row)
+                                                            <option value="{{ $row->id }}">{{ $row->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                </select>
+                                                @error('company_id')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
@@ -140,22 +157,17 @@
                                                 @enderror
                                             </div>
                                             <div class="form-group">
-                                                <label class="form-label" for="company_id">
-                                                    Perusahaan
-                                                </label>
-                                                <select
-                                                    class="form-control w-100 @error('company_id') is-invalid @enderror"
-                                                    id="company_id" name="company_id">
-                                                    <optgroup label="Perusahaan">
-                                                        @foreach ($companies as $row)
-                                                            <option value="{{ $row->id }}">{{ $row->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </optgroup>
-                                                </select>
-                                                @error('company_id')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
+                                                <label class="form-label" for="harga_barang">Harga Barang</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Rp</span>
+                                                    </div>
+                                                    <input type="number" class="form-control" id="harga_barang"
+                                                        name="harga_barang">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">.00</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
