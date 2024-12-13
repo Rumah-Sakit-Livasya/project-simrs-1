@@ -5,11 +5,14 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\AttendanceRequest;
+use App\Models\AttendanceRequestLamp;
+use App\Models\AttendanceRequestLampDetail;
 use App\Models\Employee;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon as SupportCarbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -509,5 +512,65 @@ class AttendanceRequestController extends Controller
         $attendance_request->delete();
 
         return response()->json(['message' => 'Pengajuan Berhasil di Hapus!']);
+    }
+
+    public function submitFormReqAttendance(Request $request)
+    {
+        $validated = $request->validate([
+            'employee_id_fix' => 'required|array',
+            'employee_id_fix.*' => 'exists:employees,id', // Pastikan setiap employee_id valid
+            'tanggal' => 'required|array',
+            'tanggal.*' => 'date', // Validasi tanggal
+            'clockin' => 'required|array',
+            'clockin.*' => 'date_format:H:i', // Validasi format waktu
+            'clockout' => 'required|array',
+            'clockout.*' => 'date_format:H:i', // Validasi format waktu
+            'lampiran' => 'required|file|mimes:pdf|max:2048',
+        ]);
+
+        try {
+            // Mulai transaksi untuk menyimpan data
+            \DB::beginTransaction();
+
+            $lampiranPath = null;
+            if ($request->hasFile('lampiran')) {
+                // Menyimpan file PDF ke storage
+                $lampiran = $request->file('lampiran');
+                // Membuat path berdasarkan tanggal sekarang
+                $file_path = 'lampiran/' . now()->format('Y-m-d') . '/'; // Menggunakan titik untuk concatenation
+                // Menyimpan file dengan nama yang unik dan path yang diinginkan
+                $lampiranPath = $lampiran->storeAs($file_path, 'lampiran_' . time() . '.' . $lampiran->getClientOriginalExtension(), 'public');
+            }
+            
+            $lamp = AttendanceRequestLamp::create([
+                'tanggal' => SupportCarbon::parse($request->tanggal[0]),
+                'lampiran' => $lampiranPath,
+            ]);
+
+            // Proses data form dan simpan ke database
+            foreach ($request->employee_id_fix as $index => $employee_id) {
+                // Simpan data ke model AttendanceRequestLamp
+                AttendanceRequestLampDetail::create([
+                    'attendance_request_lamp_id' => $lamp->id,
+                    'employee_id' => $employee_id,
+                    'tanggal' => $request->tanggal[$index],
+                    'clock_in' => $request->clockin[$index],
+                    'clock_out' => $request->clockout[$index],
+                    'lampiran' => $lampiranPath,
+                ]);
+            }
+
+            // Commit transaksi jika tidak ada error
+            \DB::commit();
+
+            // Mengembalikan response sukses
+            return response()->json(['message' => 'Form berhasil disubmit!'], 200);
+        } catch (\Exception $e) {
+            // Rollback transaksi jika terjadi error
+            \DB::rollBack();
+
+            // Tangani error dan kembalikan pesan kesalahan
+            return response()->json(['message' => 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.', 'error' => $e->getMessage()], 500);
+        }
     }
 }

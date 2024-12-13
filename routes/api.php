@@ -32,6 +32,7 @@ use App\Http\Controllers\Inventaris\RoomMaintenanceController;
 use App\Http\Controllers\Inventaris\TemplateBarangController;
 use App\Http\Controllers\ReportController;
 use App\Http\Middleware\CheckAuthorizationBot;
+use App\Models\AttendanceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -208,6 +209,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
     Route::prefix('attendances')->group(function () {
         Route::get('/report/employee/{employee_id}/{periode}/{tahun}', [ReportController::class, 'getReportAttendancesEmployee']);
         Route::post('/detail', [AttendanceController::class, 'getDetailAttendance']);
+        Route::post('/request/form', [AttendanceRequestController::class, 'submitFormReqAttendance'])->name('attendances.form.submit');
     });
 
     Route::prefix('day-off')->group(function () {
@@ -285,6 +287,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         Route::post('/update/{id}', [MenuController::class, 'update'])->name('master-data.menu.update');
         Route::delete('/delete/{id}', [MenuController::class, 'destroy'])->middleware('check.api.credentials')->name('master-data.menu.delete');
     });
+    Route::get('user/getByName', [UserController::class, 'getByName'])->name('user.getByName');
 });
 
 // Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');
