@@ -119,6 +119,11 @@
         }
 
         $(document).ready(function() {
+            $("form").on("submit", function(e) {
+                // Disable tombol submit setelah form dikirim
+                $(this).find("button[type='submit']").prop("disabled", true);
+            });
+
             $('#store-form').on('submit', function(e) {
                 e.preventDefault();
                 let formData = new FormData(this);

@@ -179,6 +179,11 @@
         /* demo scripts for change table color */
         /* change background */
         $(document).ready(function() {
+            $("form").on("submit", function(e) {
+                // Disable tombol submit setelah form dikirim
+                $(this).find("button[type='submit']").prop("disabled", true);
+            });
+
             $(function() {
                 $('#store-form #create-organization_id').select2({
                     placeholder: 'Pilih data berikut',

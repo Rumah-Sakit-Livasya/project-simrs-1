@@ -13,6 +13,7 @@
             <th style="white-space: nowrap">Kode Barang</th>
             <th style="white-space: nowrap">Ruangan</th>
             <th style="white-space: nowrap">Tanggal Input</th>
+            <th style="white-space: nowrap">Harga Barang</th>
             <th style="white-space: nowrap" class="no-export">Aksi</th>
         </tr>
     </thead>
@@ -55,6 +56,9 @@
                     @endif
                 @endif
                 <td style="white-space: normal">{{ $row->created_at }}</td>
+                <td style="white-space: normal">
+                    {{ $row->harga_barang == null ? '*belum disetting' : 'Rp. ' . rp2($row->harga_barang) }}
+                </td>
                 <td style="white-space: nowrap" class="no-export">
                     <button class="badge mx-1 badge-primary p-2 border-0 text-white btn-edit"
                         data-id="{{ $row->id }}">
@@ -121,6 +125,11 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            $("form").on("submit", function(e) {
+                // Disable tombol submit setelah form dikirim
+                $(this).find("button[type='submit']").prop("disabled", true);
+            });
+
             let barangId = null;
 
             $('.btn-edit').click(function() {
@@ -132,6 +141,7 @@
                     type: 'GET',
                     success: function(response) {
                         var templateBarangId = response.template_barang_id;
+                        var companyId = response.company_id;
                         var kondisi = response.condition;
                         var biddingYear = response.bidding_year;
                         // Assuming the response contains the URL of the image
@@ -144,6 +154,10 @@
                         //     dropdownParent: $('#modal-ubah'),
                         // });
                         $('#modal-ubah #template_barang_id').val(templateBarangId).select2({
+                            dropdownParent: $('#modal-ubah'),
+                            minimumResultsForSearch: Infinity // Hide the search box if not needed
+                        });
+                        $('#modal-ubah #company_id').val(companyId).select2({
                             dropdownParent: $('#modal-ubah'),
                             minimumResultsForSearch: Infinity // Hide the search box if not needed
                         });
@@ -565,7 +579,10 @@
                 $('#room_id').select2({
                     placeholder: 'Pilih Ruangan',
                 });
-                $('#company_id').select2({
+                $('#store-barang-form #company_id').select2({
+                    placeholder: 'Pilih Perusahaan',
+                });
+                $('#store-form #company_id').select2({
                     placeholder: 'Pilih Perusahaan',
                 });
                 $('#barang_category_id').select2();
