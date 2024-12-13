@@ -35,7 +35,10 @@ DOC: if you remove pace.js from core please note on Internet Explorer some CSS a
             title: 'Terjadi Kesalahan!',
             text: message,
             confirmButtonColor: '#3085d6',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            allowOutsideClick: false, // Mencegah penutupan saat klik di luar
+            allowEscapeKey: false, // Mencegah penutupan saat tekan tombol ESC
+            allowEnterKey: false // Mencegah penutupan saat tekan tombol Enter
         }).then((result) => {
             // Memuat ulang halaman jika pengguna mengklik tombol OK
             if (result.isConfirmed) {
@@ -44,6 +47,7 @@ DOC: if you remove pace.js from core please note on Internet Explorer some CSS a
         });
     }
 
+
     function showErrorAlertNoRefresh(message) {
         // alert('Terjadi Kesalahan');
         Swal.fire({
@@ -51,7 +55,10 @@ DOC: if you remove pace.js from core please note on Internet Explorer some CSS a
             title: 'Terjadi Kesalahan!',
             text: message,
             confirmButtonColor: '#3085d6',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            allowOutsideClick: false, // Mencegah penutupan saat klik di luar
+            allowEscapeKey: false, // Mencegah penutupan saat tekan tombol ESC
+            allowEnterKey: false // Mencegah penutupan saat tekan tombol Enter
         });
     }
 
