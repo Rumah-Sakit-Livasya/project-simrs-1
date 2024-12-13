@@ -130,6 +130,11 @@
 
     <script>
         $(document).ready(function() {
+            $("form").on("submit", function(e) {
+                // Disable tombol submit setelah form dikirim
+                $(this).find("button[type='submit']").prop("disabled", true);
+            });
+
             let categoryId = null;
 
             $('.btn-edit').click(function() {
