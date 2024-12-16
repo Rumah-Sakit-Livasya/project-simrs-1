@@ -1151,7 +1151,8 @@ class DashboardController extends Controller
     {
         $getNotify = $this->getNotify();
         $attendance_requests = AttendanceRequest::where('employee_id', auth()->user()->employee->id)->get();
-        return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify'));
+        $pengajuan = AttendanceRequestLampDetail::where('employee_id', auth()->user()->employee->id)->latest()->first();
+        return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify', 'pengajuan'));
     }
 
     public function getAttendanceRequest($id)

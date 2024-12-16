@@ -19,6 +19,7 @@
                                 <div class="input-group">
                                     <input type="text" name="date"
                                         class="form-control @error('date') is-invalid @enderror" placeholder="Tanggal"
+                                        value="{{ $pengajuan ? \Carbon\Carbon::parse($pengajuan->created_at)->format('Y-m-d') : now()->format('Y-m-d') }}"
                                         id="date">
                                     <div class="input-group-append">
                                         <span class="input-group-text fs-xl">
@@ -35,10 +36,10 @@
                             <div class="form-group mb-3">
                                 <label for="clockin">Clock In</label>
                                 <div class="input-group">
-                                    <input type="time" name="clockin"
-                                        class="form-control @error('clockin') is-invalid @enderror"
-                                        placeholder="Tanggal" id="clockin">
-                                    <div class="input-group-append">
+                                    <input type="text" name="clockin" value="{{ $pengajuan->clock_in }}"
+                                        class="form-control @error('clockin') is-invalid @enderror" readonly
+                                        placeholder="Tanggal" id="clockin" value="">
+                                    {{-- <div class="input-group-append">
                                         <span class="input-group-text">
                                             <div class="ml-2 custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input" id="check-clockin"
@@ -46,7 +47,7 @@
                                                 <label class="custom-control-label" for="check-clockin"></label>
                                             </div>
                                         </span>
-                                    </div>
+                                    </div> --}}
                                 </div>
                                 @error('clockin')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -57,10 +58,10 @@
                             <div class="form-group mb-3">
                                 <label for="clockout">Clock Out</label>
                                 <div class="input-group">
-                                    <input type="time" name="clockout"
-                                        class="form-control @error('clockout') is-invalid @enderror"
+                                    <input type="time" name="clockout" value="{{ $pengajuan->clock_out }}"
+                                        class="form-control @error('clockout') is-invalid @enderror" readonly
                                         placeholder="Tanggal" id="clockout">
-                                    <div class="input-group-append">
+                                    {{-- <div class="input-group-append">
                                         <span class="input-group-text">
                                             <div class="ml-2 custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input" id="check-clockout"
@@ -68,7 +69,7 @@
                                                 <label class="custom-control-label" for="check-clockout"></label>
                                             </div>
                                         </span>
-                                    </div>
+                                    </div> --}}
                                 </div>
                                 @error('clockout')
                                     <div class="invalid-feedback">{{ $message }}</div>

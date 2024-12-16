@@ -22,27 +22,32 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($employees as $i => $row)
+                                    @foreach ($pengajuan as $i => $row)
                                         <tr>
                                             <td style="white-space: nowrap">{{ $loop->iteration }}</td>
-                                            <td style="white-space: nowrap">{{ $row->fullname }}
+                                            <td style="white-space: nowrap">{{ \Carbon\Carbon::parse($row->created_at)->format('Y-m-d H:i') }}
                                             </td>
                                             <td style="white-space: nowrap">{{ $row->organization->name ?? '-' }}
                                             </td>
                                             <td style="white-space: nowrap">
-                                                <div class="custom-control custom-switch">
-                                                    @if ($row->user)
-                                                        <input type="checkbox" class="custom-control-input acc" 
-                                                            id="aksi-{{ $i }}" data-id="{{ $row->user->id }}"
-                                                            {{ $row->user->is_request_attendance == 1 ? 'checked' : '' }}
-                                                            value="{{ $row->user->is_request_attendance }}"
-                                                            autocomplete="off">
-                                                        <label class="custom-control-label" id="label-{{ $i }}"
-                                                            for="aksi-{{ $i }}">{{ $row->user->is_request_attendance == 1 ? 'On' : 'Off' }}</label>
-                                                    @else
-                                                        <p>User data not found.</p>
-                                                    @endif
-                                                </div>
+                                                @foreach ($row->attendance_request_lamp_details as $item)
+                                                <div class="wrapper-pegawai w-100 d-flex justify-content-between">
+                                                    <div class="pegawai">{{$item->employee->fullname}}</div>
+                                                    <div class="custom-control custom-switch">
+                                                        @if ($item->employee->user)
+                                                            <input type="checkbox" class="custom-control-input acc" 
+                                                                id="aksi-{{ $i }}" data-id="{{ $item->employee->user->id }}"
+                                                                {{ $item->employee->user->is_request_attendance == 1 ? 'checked' : '' }}
+                                                                value="{{ $item->employee->user->is_request_attendance }}"
+                                                                autocomplete="off">
+                                                            <label class="custom-control-label" id="label-{{ $i }}"
+                                                                for="aksi-{{ $i }}">{{ $item->employee->user->is_request_attendance == 1 ? 'On' : 'Off' }}</label>
+                                                        @else
+                                                            <p>User data not found.</p>
+                                                        @endif
+                                                    </div>
+                                                </div>    
+                                                @endforeach
                                             </td>
                                         </tr>
                                     @endforeach

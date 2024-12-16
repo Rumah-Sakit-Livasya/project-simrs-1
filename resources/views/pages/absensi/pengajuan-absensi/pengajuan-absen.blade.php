@@ -195,12 +195,24 @@
                         processData: false, // Jangan olah data secara otomatis
                         contentType: false, // Jangan tentukan content-type (untuk FormData)
                         success: function(response) {
-                            alert('Form berhasil diajukan!');
-                            console.log(response);
+                            showSuccessAlert('Form berhasil diajukan!');
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1000);
                         },
-                        error: function(xhr, status, error) {
-                            alert('Gagal mengajukan form. Silakan coba lagi.');
-                            console.error(xhr.responseText);
+                        error: function(xhr) {
+                            // Menangani error jika terjadi error di server
+                            if (xhr.status === 422) {
+                                // Mendapatkan respons error dari server (misalnya dari ValidationException)
+                                var response = JSON.parse(xhr.responseText);
+                                var firstError = response.message || 'Terjadi kesalahan.';
+
+                                // Tampilkan pesan error pertama
+                                alert(
+                                firstError); // Bisa diganti dengan menampilkan di elemen tertentu
+                            } else {
+                                console.error('Terjadi kesalahan:', xhr.responseText);
+                            }
                         }
                     });
                 } else {

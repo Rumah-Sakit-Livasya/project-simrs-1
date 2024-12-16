@@ -229,25 +229,25 @@ class AttendanceRequestController extends Controller
             }
 
             $employee = Employee::findOrFail(request()->employee_id, ['approval_line', 'approval_line_parent', 'fullname']);
-            $is_approved = 'Pending';
+            $is_approved = 'Disetujui';
 
-            if (!isset($employee->approval_line) && !isset($employee->approval_line_parent)) {
-                $is_approved = "Disetujui";
-            } elseif (isset($employee->approval_line) && !isset($employee->approval_line_parent)) {
-                $is_approved = "Verifikasi";
-            }
+            // if (!isset($employee->approval_line) && !isset($employee->approval_line_parent)) {
+            //     $is_approved = "Disetujui";
+            // } elseif (isset($employee->approval_line) && !isset($employee->approval_line_parent)) {
+            //     $is_approved = "Verifikasi";
+            // }
 
             $attendance = Attendance::where('date', request()->date)
                 ->where('employee_id', request()->employee_id)
                 ->firstOrFail();
 
             // Setup pesan untuk WhatsApp
-            $messages = "*Pengajuan Absensi: " . Carbon::parse(request()->date)->translatedFormat('j F Y') . "* \n";
-            $messages .= "*" . $employee->fullname . "*\n\n";
-            $messages .= "Clock In   : " . (request()->clockin ?? "-") . "\n";
-            $messages .= "Clock Out  : " . (request()->clockout ?? "-") . "\n";
-            $messages .= "Keterangan : " . (request()->description ?? "-") . "\n";
-            $messages .= "\nTolong acc melalui website Smart HR atau melalui link berikut: \n\n";
+            // $messages = "*Pengajuan Absensi: " . Carbon::parse(request()->date)->translatedFormat('j F Y') . "* \n";
+            // $messages .= "*" . $employee->fullname . "*\n\n";
+            // $messages .= "Clock In   : " . (request()->clockin ?? "-") . "\n";
+            // $messages .= "Clock Out  : " . (request()->clockout ?? "-") . "\n";
+            // $messages .= "Keterangan : " . (request()->description ?? "-") . "\n";
+            // $messages .= "\nTolong acc melalui website Smart HR atau melalui link berikut: \n\n";
 
             // Handle file upload
             $filePath = null;
@@ -290,7 +290,7 @@ class AttendanceRequestController extends Controller
             }
             $attendanceRequest = AttendanceRequest::create($attendanceRequestData);
 
-            $messages .= 'https://internal.livasya.com/attendances/attendance-requests/' . $attendanceRequest->id;
+            // $messages .= 'https://internal.livasya.com/attendances/attendance-requests/' . $attendanceRequest->id;
 
             // Handle approval logic
             if ($is_approved === "Disetujui") {
@@ -308,11 +308,11 @@ class AttendanceRequestController extends Controller
                     $updateData = ['clock_out' => request()->clockout, 'early_clock_out' => null];
                 }
                 $attendance->update($updateData);
-            } else {
-                $this->sendWhatsAppNotification($employee, $messages, $filePath);
             }
-
-            return response()->json(['message' => 'Request Absensi Berhasil di Tambahkan!']);
+            // } else {
+            //     $this->sendWhatsAppNotification($employee, $messages, $filePath);
+            // }
+            return response()->json(['message' => 'Absensi Berhasil Diubah!']);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
@@ -320,186 +320,184 @@ class AttendanceRequestController extends Controller
         }
     }
 
-    private function sendWhatsAppNotification($employee, $messages, $filePath)
-    {
-        $approvalLine = Employee::find($employee->approval_line);
-        if (!isset($approvalLine) || !isset($approvalLine->mobile_phone)) {
-            return;
-        }
+    // private function sendWhatsAppNotification($employee, $messages, $filePath)
+    // {
+    //     $approvalLine = Employee::find($employee->approval_line);
+    //     if (!isset($approvalLine) || !isset($approvalLine->mobile_phone)) {
+    //         return;
+    //     }
 
-        $number = $approvalLine->mobile_phone;
-        $formattedNumber = substr($number, 0, 1) === '0' ? '62' . substr($number, 1) : $number;
+    //     $number = $approvalLine->mobile_phone;
+    //     $formattedNumber = substr($number, 0, 1) === '0' ? '62' . substr($number, 1) : $number;
 
-        $httpData = [
-            'number' => $formattedNumber,
-            'message' => $messages,
-        ];
+    //     $httpData = [
+    //         'number' => $formattedNumber,
+    //         'message' => $messages,
+    //     ];
 
-        if ($filePath) {
-            $httpData['file_dikirim'] = new \CURLFile(storage_path('app/public/' . $filePath));
-        }
+    //     if ($filePath) {
+    //         $httpData['file_dikirim'] = new \CURLFile(storage_path('app/public/' . $filePath));
+    //     }
 
-        $headers = [
-            'Key:KeyAbcKey',
-            'Nama:arul',
-            'Sandi:123###!!',
-        ];
+    //     $headers = [
+    //         'Key:KeyAbcKey',
+    //         'Nama:arul',
+    //         'Sandi:123###!!',
+    //     ];
 
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
-        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+    //     $curl = curl_init();
+    //     curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+    //     curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+    //     curl_setopt($curl, CURLOPT_POST, 1);
+    //     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    //     curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
+    //     curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
-        $response = curl_exec($curl);
-        if (curl_errno($curl)) {
-            throw new \Exception('cURL Error: ' . curl_error($curl));
-        }
-        curl_close($curl);
-    }
+    //     $response = curl_exec($curl);
+    //     if (curl_errno($curl)) {
+    //         throw new \Exception('cURL Error: ' . curl_error($curl));
+    //     }
+    //     curl_close($curl);
+    // }
 
+    // public function approve($id)
+    // {
+    //     $attendance_request = AttendanceRequest::find($id);
+    //     $approved_line_parent = Employee::find($attendance_request->approved_line_parent);
 
+    //     // Header untuk cURL
+    //     $headers = [
+    //         'Key:KeyAbcKey',
+    //         'Nama:arul',
+    //         'Sandi:123###!!',
+    //     ];
 
-    public function approve($id)
-    {
-        $attendance_request = AttendanceRequest::find($id);
-        $approved_line_parent = Employee::find($attendance_request->approved_line_parent);
+    //     //isi pesan
+    //     $messages = "*Pengajuan Absensi: " . Carbon::parse($attendance_request->date)->translatedFormat('j F Y') . "* \n";
+    //     $messages .= "*" . $attendance_request->employee->fullname . "*\n\n";
+    //     $messages .= "Clock In   : " . ($attendance_request->clockin ?? "-") . "\n";
+    //     $messages .= "Clock Out  : " . ($attendance_request->clockout ?? "-") . "\n";
+    //     $messages .= "Keterangan : " . ($attendance_request->description ?? "-") . "\n";
+    //     $messages .= "\nTolong acc melalui website Smart HR atau melalui link berikut: \n\n";
+    //     $messages .= 'https://internal.livasya.com/attendances/attendance-requests/' . $attendance_request->id;
 
-        // Header untuk cURL
-        $headers = [
-            'Key:KeyAbcKey',
-            'Nama:arul',
-            'Sandi:123###!!',
-        ];
+    //     // dd($attendance_request);
+    //     if (auth()->user()->hasRole('super admin')) {
+    //         $is_approved = "Disetujui";
+    //     } else {
+    //         if ($attendance_request->approved_line_child !== null && $attendance_request->approved_line_parent == null) {
+    //             $is_approved = "Disetujui";
+    //         } else if (($attendance_request->approved_line_child !== null && $attendance_request->approved_line_parent !== null) && ($attendance_request->approved_line_child == request()->employee_id)) {
+    //             $is_approved = "Verifikasi";
 
-        //isi pesan
-        $messages = "*Pengajuan Absensi: " . Carbon::parse($attendance_request->date)->translatedFormat('j F Y') . "* \n";
-        $messages .= "*" . $attendance_request->employee->fullname . "*\n\n";
-        $messages .= "Clock In   : " . ($attendance_request->clockin ?? "-") . "\n";
-        $messages .= "Clock Out  : " . ($attendance_request->clockout ?? "-") . "\n";
-        $messages .= "Keterangan : " . ($attendance_request->description ?? "-") . "\n";
-        $messages .= "\nTolong acc melalui website Smart HR atau melalui link berikut: \n\n";
-        $messages .= 'https://internal.livasya.com/attendances/attendance-requests/' . $attendance_request->id;
+    //             $number = $approved_line_parent->mobile_phone;
 
-        // dd($attendance_request);
-        if (auth()->user()->hasRole('super admin')) {
-            $is_approved = "Disetujui";
-        } else {
-            if ($attendance_request->approved_line_child !== null && $attendance_request->approved_line_parent == null) {
-                $is_approved = "Disetujui";
-            } else if (($attendance_request->approved_line_child !== null && $attendance_request->approved_line_parent !== null) && ($attendance_request->approved_line_child == request()->employee_id)) {
-                $is_approved = "Verifikasi";
+    //             if (substr($number, 0, 1) === '0') {
+    //                 // Hapus karakter pertama ('0') dan tambahkan awalan '62'
+    //                 $formattedNumber = '62' . substr($number, 1);
+    //             } else {
+    //                 // Jika nomor telepon tidak dimulai dengan '0', gunakan nilai asli
+    //                 $formattedNumber = $number;
+    //             }
 
-                $number = $approved_line_parent->mobile_phone;
+    //             // Data untuk request HTTP
+    //             $httpData = [
+    //                 'number' => $formattedNumber,
+    //                 'message' => $messages,
+    //             ];
+    //             $filePath = 'img/pengajuan/absensi/' . $attendance_request->file;
+    //             if (isset($attendance_request->file)) {
+    //                 $httpData['file_dikirim'] = new \CURLFile(storage_path('app/public/' . $filePath));
+    //             }
 
-                if (substr($number, 0, 1) === '0') {
-                    // Hapus karakter pertama ('0') dan tambahkan awalan '62'
-                    $formattedNumber = '62' . substr($number, 1);
-                } else {
-                    // Jika nomor telepon tidak dimulai dengan '0', gunakan nilai asli
-                    $formattedNumber = $number;
-                }
+    //             // Mengirim request HTTP menggunakan cURL
+    //             $curl = curl_init();
+    //             curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+    //             curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+    //             curl_setopt($curl, CURLOPT_POST, 1);
+    //             curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    //             curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
+    //             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
-                // Data untuk request HTTP
-                $httpData = [
-                    'number' => $formattedNumber,
-                    'message' => $messages,
-                ];
-                $filePath = 'img/pengajuan/absensi/' . $attendance_request->file;
-                if (isset($attendance_request->file)) {
-                    $httpData['file_dikirim'] = new \CURLFile(storage_path('app/public/' . $filePath));
-                }
+    //             $response = curl_exec($curl);
+    //             $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    //             $curlError = curl_error($curl);
+    //             curl_close($curl);
 
-                // Mengirim request HTTP menggunakan cURL
-                $curl = curl_init();
-                curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
-                curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-                curl_setopt($curl, CURLOPT_POST, 1);
-                curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
-                curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-                $response = curl_exec($curl);
-                $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-                $curlError = curl_error($curl);
-                curl_close($curl);
-
-                $httpData = [
-                    'number' => '6281564705558',
-                    'message' => $messages,
-                ];
-                if (isset($attendance_request->file)) {
-                    $httpData['file_dikirim'] = new \CURLFile(storage_path('app/public/' . $filePath));
-                }
+    //             $httpData = [
+    //                 'number' => '6281564705558',
+    //                 'message' => $messages,
+    //             ];
+    //             if (isset($attendance_request->file)) {
+    //                 $httpData['file_dikirim'] = new \CURLFile(storage_path('app/public/' . $filePath));
+    //             }
 
 
-                // Mengirim request HTTP menggunakan cURL
-                $curl = curl_init();
-                curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
-                curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-                curl_setopt($curl, CURLOPT_POST, 1);
-                curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
-                curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+    //             // Mengirim request HTTP menggunakan cURL
+    //             $curl = curl_init();
+    //             curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+    //             curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+    //             curl_setopt($curl, CURLOPT_POST, 1);
+    //             curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    //             curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
+    //             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
-                $response = curl_exec($curl);
-                $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-                $curlError = curl_error($curl);
-                curl_close($curl);
-            } else if (($attendance_request->approved_line_child !== null && $attendance_request->approved_line_parent !== null) && ($attendance_request->approved_line_parent == request()->employee_id)) {
-                $is_approved = "Disetujui";
+    //             $response = curl_exec($curl);
+    //             $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    //             $curlError = curl_error($curl);
+    //             curl_close($curl);
+    //         } else if (($attendance_request->approved_line_child !== null && $attendance_request->approved_line_parent !== null) && ($attendance_request->approved_line_parent == request()->employee_id)) {
+    //             $is_approved = "Disetujui";
 
 
-                // DB::table('attendances')
-                //     ->where('id', $attendance_request->attendance_id)
-                //     ->where('employee_id', $attendance_request->employee_id)
-                //     ->update($updateData);
-            }
-        }
+    //             // DB::table('attendances')
+    //             //     ->where('id', $attendance_request->attendance_id)
+    //             //     ->where('employee_id', $attendance_request->employee_id)
+    //             //     ->update($updateData);
+    //         }
+    //     }
 
-        if ($is_approved == 'Disetujui') {
-            // Periksa apakah ada data clock_in dan clock_out yang dikirim
-            if ($attendance_request->clockin == null && $attendance_request->clockout != null) {
-                $updateData = ['clock_out' => $attendance_request->clockout];
-                $updateData['early_clock_out'] = null;
-            } else if ($attendance_request->clockout == null && $attendance_request->clockin != null) {
-                $updateData['clock_in'] = $attendance_request->clockin;
-                $updateData['late_clock_in'] = null;
-            } else if ($attendance_request->clockin != null && $attendance_request->clockout != null) {
-                $updateData['clock_in'] = $attendance_request->clockin;
-                $updateData['clock_out'] = $attendance_request->clockout;
-                $updateData['late_clock_in'] = null;
-                $updateData['early_clock_out'] = null;
-            }
-            $attendance = Attendance::where('id', $attendance_request->attendance_id)->first();
-            $attendance->update($updateData);
-        }
+    //     if ($is_approved == 'Disetujui') {
+    //         // Periksa apakah ada data clock_in dan clock_out yang dikirim
+    //         if ($attendance_request->clockin == null && $attendance_request->clockout != null) {
+    //             $updateData = ['clock_out' => $attendance_request->clockout];
+    //             $updateData['early_clock_out'] = null;
+    //         } else if ($attendance_request->clockout == null && $attendance_request->clockin != null) {
+    //             $updateData['clock_in'] = $attendance_request->clockin;
+    //             $updateData['late_clock_in'] = null;
+    //         } else if ($attendance_request->clockin != null && $attendance_request->clockout != null) {
+    //             $updateData['clock_in'] = $attendance_request->clockin;
+    //             $updateData['clock_out'] = $attendance_request->clockout;
+    //             $updateData['late_clock_in'] = null;
+    //             $updateData['early_clock_out'] = null;
+    //         }
+    //         $attendance = Attendance::where('id', $attendance_request->attendance_id)->first();
+    //         $attendance->update($updateData);
+    //     }
 
-        $attendance_request->update([
-            'is_approved' => $is_approved
-        ]);
+    //     $attendance_request->update([
+    //         'is_approved' => $is_approved
+    //     ]);
 
-        return response()->json(['message' => 'Status Pengajuan: ' . $is_approved]);
-    }
+    //     return response()->json(['message' => 'Status Pengajuan: ' . $is_approved]);
+    // }
 
-    public function reject($id)
-    {
+    // public function reject($id)
+    // {
 
-        $attendance_request = AttendanceRequest::find($id);
-        // dd($attendance_request);
-        // Hapus foto yang ada jika ada
-        if ($attendance_request->file) {
-            // Hapus foto yang ada dari penyimpanan
-            Storage::delete('public/img/pengajuan/absensi' . $attendance_request->file);
-        }
-        $attendance_request->update([
-            'is_approved' => 'Ditolak'
-        ]);
+    //     $attendance_request = AttendanceRequest::find($id);
+    //     // dd($attendance_request);
+    //     // Hapus foto yang ada jika ada
+    //     if ($attendance_request->file) {
+    //         // Hapus foto yang ada dari penyimpanan
+    //         Storage::delete('public/img/pengajuan/absensi' . $attendance_request->file);
+    //     }
+    //     $attendance_request->update([
+    //         'is_approved' => 'Ditolak'
+    //     ]);
 
-        return response()->json(['message' => 'Pengajuan Berhasil di Tolak!']);
-    }
+    //     return response()->json(['message' => 'Pengajuan Berhasil di Tolak!']);
+    // }
 
     public function destroy($id)
     {
@@ -521,9 +519,9 @@ class AttendanceRequestController extends Controller
             'employee_id_fix.*' => 'exists:employees,id', // Pastikan setiap employee_id valid
             'tanggal' => 'required|array',
             'tanggal.*' => 'date', // Validasi tanggal
-            'clockin' => 'required|array',
+            'clockin' => 'nullable|array',
             'clockin.*' => 'date_format:H:i', // Validasi format waktu
-            'clockout' => 'required|array',
+            'clockout' => 'nullable|array',
             'clockout.*' => 'date_format:H:i', // Validasi format waktu
             'lampiran' => 'required|file|mimes:pdf|max:2048',
         ]);
@@ -541,9 +539,10 @@ class AttendanceRequestController extends Controller
                 // Menyimpan file dengan nama yang unik dan path yang diinginkan
                 $lampiranPath = $lampiran->storeAs($file_path, 'lampiran_' . time() . '.' . $lampiran->getClientOriginalExtension(), 'public');
             }
-            
+
             $lamp = AttendanceRequestLamp::create([
                 'tanggal' => SupportCarbon::parse($request->tanggal[0]),
+                'organization_id' => auth()->user()->employee->organization_id,
                 'lampiran' => $lampiranPath,
             ]);
 
@@ -565,6 +564,14 @@ class AttendanceRequestController extends Controller
 
             // Mengembalikan response sukses
             return response()->json(['message' => 'Form berhasil disubmit!'], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Ambil error pertama dari semua pesan error
+            $firstError = collect($e->errors())->flatten()->first();
+
+            return response()->json([
+                'message' => $firstError ?? 'Validasi gagal.', // Ambil error pertama atau gunakan default
+                'errors' => $e->errors(), // Tetap kirimkan semua error untuk debugging jika diperlukan
+            ], 422);
         } catch (\Exception $e) {
             // Rollback transaksi jika terjadi error
             \DB::rollBack();
