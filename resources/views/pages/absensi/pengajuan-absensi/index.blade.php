@@ -17,7 +17,7 @@
                     </div>
                 @endcan
 
-                @can('create attendance request form')
+                @can('pengajuan pj')
                     <a href="{{route('attendance-requests.form')}}" class="btn btn-primary">
                         <span class="fal fa-plus-circle mr-1"></span>
                         Tambah Form Pengajuan

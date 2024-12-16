@@ -16,9 +16,9 @@
                                 <thead>
                                     <tr>
                                         <th style="white-space: nowrap">No</th>
-                                        <th style="white-space: nowrap">Nama</th>
+                                        <th style="white-space: nowrap">Tanggal Pengajuan</th>
                                         <th style="white-space: nowrap">Unit</th>
-                                        <th style="white-space: nowrap">Acc Pengajuan</th>
+                                        <th style="white-space: nowrap">Daftar Pegawai</th>
                                     </tr>
                                 </thead>
                                 <tbody>

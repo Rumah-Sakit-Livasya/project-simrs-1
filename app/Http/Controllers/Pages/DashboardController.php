@@ -8,6 +8,8 @@ use App\Models\Attendance;
 use App\Models\AttendanceCode;
 use App\Models\AttendanceOutsource;
 use App\Models\AttendanceRequest;
+use App\Models\AttendanceRequestLamp;
+use App\Models\AttendanceRequestLampDetail;
 use App\Models\Bank;
 use App\Models\BankEmployee;
 use App\Models\ChMessage;
@@ -1054,8 +1056,8 @@ class DashboardController extends Controller
 
     public function getSettingAttendances()
     {
-        $employees = Employee::where('is_active', 1)->get();
-        return view('pages.absensi.absensi.settings', compact('employees'));
+        $pengajuan = AttendanceRequestLamp::latest()->get();
+        return view('pages.absensi.absensi.settings', compact('pengajuan'));
     }
 
     public function updateStatusRequestAttendance(Request $request)
