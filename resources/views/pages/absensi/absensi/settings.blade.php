@@ -67,7 +67,7 @@
                                             <td style="white-space: nowrap">
                                                 @foreach ($row->attendance_request_lamp_details as $item)
                                                     <div
-                                                        class="wrapper-pegawai mt-2 w-100 d-flex justify-content-between align-items-start">
+                                                        class="wrapper-pegawai {{ $loop->first ? '' : 'mt-2' }}  w-100 d-flex justify-content-between align-items-start">
                                                         <div class="pegawai">{{ $item->employee->fullname }}</div>
                                                         <div class="custom-control custom-switch">
                                                             @if ($item->employee->user && $row->tanggal == now())
