@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignId('employee_id')
                 ->constrained('employees')
                 ->name('fk_employee'); // Berikan nama constraint yang lebih pendek
+            $table->date('tanggal');
             $table->time('clock_in')->nullable();
             $table->time('clock_out')->nullable();
             $table->timestamps();

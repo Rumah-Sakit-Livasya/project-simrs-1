@@ -35,10 +35,9 @@
                                                 <div class="form-group mb-3">
                                                     <label for="date">Tanggal</label>
                                                     <div class="input-group">
-                                                        <input type="text" name="tanggal[]"
+                                                        <input type="date" name="tanggal[]"
                                                             class="form-control @error('date') is-invalid @enderror"
-                                                            placeholder="Tanggal" id="date" value="{{ now() }}"
-                                                            readonly>
+                                                            placeholder="Tanggal" id="date" value="{{ now()->format('Y-m-d') }}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text fs-xl">
                                                                 <i class="fal fa-calendar-alt"></i>
@@ -113,8 +112,8 @@
                 $clone.find('input').each(function() {
                     if ($(this).attr('name') === 'tanggal[]') {
                         // Pastikan input tanggal tetap readonly, clone value, dan tipe text
-                        $(this).attr('type', 'text'); // Pastikan tipe tetap text
-                        $(this).val($(this).val()); // Pertahankan nilai
+                        $(this).attr('type', 'date'); // Pastikan tipe tetap text
+                        $(this).val("{{now()->format('Y-m-d')}}"); // Pertahankan nilai
                         return; // Skip iterasi untuk input tanggal
                     }
                     $(this).val(''); // Kosongkan nilai input lainnya

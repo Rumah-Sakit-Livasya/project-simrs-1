@@ -1168,32 +1168,7 @@ class DashboardController extends Controller
 
     public function attendanceRequestForm()
     {
-        $organizations = [];
-        $organizations[] = auth()->user()->employee->organization->id;
-        $organizations_parent = auth()->user()->employee->organization->child_structures;
-        foreach ($organizations_parent as $row) {
-            $organizations[] = $row->organization->id;
-            $child = $row->organization->child_structures;
-            if ($child->count() > 0) {
-                foreach ($child as $col) {
-                    $organizations[] = $col->organization->id;
-                    $parent = $col->organization->child_structures;
-                    if ($parent->count() > 0) {
-                        foreach ($parent as $coll) {
-                            $organizations[] = $coll->organization->id;
-                        }
-                    }
-                }
-            }
-        }
-
-        $employees = Employee::select('fullname')->where('is_active', 1)
-            ->where('company_id', auth()->user()->employee->company_id)
-            ->whereIn('organization_id', $organizations)
-            ->orderBy('id')
-            ->get();
-
-        return view('pages.absensi.pengajuan-absensi.pengajuan-absen', compact('employees'));
+        return view('pages.absensi.pengajuan-absensi.pengajuan-absen');
     }
 
     public function getDataLocations()

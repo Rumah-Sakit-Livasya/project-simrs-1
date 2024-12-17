@@ -8,6 +8,7 @@ use App\Models\AttendanceRequest;
 use App\Models\AttendanceRequestLamp;
 use App\Models\AttendanceRequestLampDetail;
 use App\Models\Employee;
+use App\Models\User;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
@@ -548,6 +549,9 @@ class AttendanceRequestController extends Controller
 
             // Proses data form dan simpan ke database
             foreach ($request->employee_id_fix as $index => $employee_id) {
+                $user = User::where('id', $employee_id)->first();
+                $user->update(['is_request_attendance' => 0]);
+
                 // Simpan data ke model AttendanceRequestLamp
                 AttendanceRequestLampDetail::create([
                     'attendance_request_lamp_id' => $lamp->id,
