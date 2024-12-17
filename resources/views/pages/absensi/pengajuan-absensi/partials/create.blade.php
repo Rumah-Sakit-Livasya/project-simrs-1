@@ -18,8 +18,8 @@
                                 <label for="date">Tanggal</label>
                                 <div class="input-group">
                                     <input type="text" name="date"
-                                        class="form-control @error('date') is-invalid @enderror" placeholder="Tanggal"
-                                        value="{{ $pengajuan ? \Carbon\Carbon::parse($pengajuan->created_at)->format('Y-m-d') : now()->format('Y-m-d') }}"
+                                        class="form-control @error('date') is-invalid @enderror" placeholder="Tanggal" readonly
+                                        value="{{ $pengajuan ? \Carbon\Carbon::parse($pengajuan->tanggal)->format('Y-m-d') : now()->format('Y-m-d') }}"
                                         id="date">
                                     <div class="input-group-append">
                                         <span class="input-group-text fs-xl">
