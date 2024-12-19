@@ -1178,7 +1178,7 @@
                             resolve(position);
                         }, (error) => {
                             toggleLoadingIndicator(false);
-                            alert('Gagal mendapatkan lokasi: ' + error.message);
+                            alert('Gagal mendapatkan lokasi, silahkan aktifkan gps dan buka google maps terlebih dahulu!');
                             reject(error);
                         });
                     } else {
@@ -1279,7 +1279,7 @@
                     await captureAndUploadImage();
                     $(pictureModal).modal('hide');
                 } else {
-                    alert('Pastikan lokasi berhasil diakses sebelum upload.');
+                    alert('Gagal mendapatkan lokasi, silahkan aktifkan gps dan buka google maps terlebih dahulu!');
                 }
             });
 
