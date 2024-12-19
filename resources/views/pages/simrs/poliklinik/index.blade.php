@@ -183,25 +183,35 @@
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                             aria-haspopup="true" aria-expanded="false">Perawat</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'pengkajian_perawat']) }}" role="tab">Pengkajian</a>
-                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'cppt_perawat']) }}">CPPT</a>
-                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'transfer_pasien_perawat']) }}">Transfer Pasien Antar Ruangan</a>
+                            <a class="dropdown-item"
+                                href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'pengkajian_perawat']) }}"
+                                role="tab">Pengkajian</a>
+                            <a class="dropdown-item"
+                                href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'cppt_perawat']) }}">CPPT</a>
+                            <a class="dropdown-item"
+                                href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'transfer_pasien_perawat']) }}">Transfer
+                                Pasien Antar Ruangan</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                             aria-haspopup="true" aria-expanded="false">Dokter</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'pengkajian_dokter']) }}">Pengkajian</a>
-                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'cppt_dokter']) }}">CPPT</a>
-                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'resume_medis_rajal']) }}">Transfer Pasien Antar Ruangan</a>
+                            <a class="dropdown-item"
+                                href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'pengkajian_dokter']) }}">Pengkajian</a>
+                            <a class="dropdown-item"
+                                href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'cppt_dokter']) }}">CPPT</a>
+                            <a class="dropdown-item"
+                                href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'resume_medis_rajal']) }}">Transfer
+                                Pasien Antar Ruangan</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                             aria-haspopup="true" aria-expanded="false">Gizi</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'pengkajian_gizi']) }}">Pengkajian</a>
+                            <a class="dropdown-item"
+                                href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'pengkajian_gizi']) }}">Pengkajian</a>
                             <a class="dropdown-item" href="#">CPPT</a>
                             <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
                         </div>
@@ -288,7 +298,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row my-3">
+                        <div class="row my-5">
                             <div class="col-lg-12">
                                 <div class="card-actionbar">
                                     <div class="card-actionbar-row-left">
@@ -312,8 +322,13 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>
-                        <div class="row mt-3">
+                        <hr style="border-color: #868686; margin-bottom: 50px;">
+                        <header class="text-primary text-center mt-5">
+                            <h2 class="font-weight-bold mt-5">PENGKAJIAN PERAWAT</h2>
+                        </header>
+                        <div class="row mt-5">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="tgl_masuk" class="control-label text-primary">Tanggal &amp; jam
@@ -331,7 +346,7 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="tgl_masuk" class="control-label text-primary">Tanggal &amp; jam
-                                        masuk</label>
+                                        dilayani</label>
                                     <div class="input-group">
                                         <input type="date" name="tgl_dilayani" class="form-control"
                                             placeholder="Tanggal" id="tgl_dilayani" value="">
@@ -1316,7 +1331,8 @@
                                 </div>
                             </div>
                             <div class="col-md-12 mt-3">
-                                <label for="pembelajaran_lainnya" class="control-label font-weight-bold margin-tb-10 text-primary">Kebutuhan
+                                <label for="pembelajaran_lainnya"
+                                    class="control-label font-weight-bold margin-tb-10 text-primary">Kebutuhan
                                     pembelajaran
                                     lainnya</label>
                             </div>
@@ -1443,8 +1459,7 @@
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input name="kognitif" class="custom-control-input" id="kognitif1"
                                                     value="Normal" data-skor="0" type="radio">
-                                                <label class="custom-control-label"
-                                                    for="kognitif1">Normal</label>
+                                                <label class="custom-control-label" for="kognitif1">Normal</label>
                                             </div>
                                         </td>
                                         <td>
