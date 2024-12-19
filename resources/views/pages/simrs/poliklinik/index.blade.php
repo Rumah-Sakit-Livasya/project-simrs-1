@@ -183,25 +183,25 @@
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                             aria-haspopup="true" aria-expanded="false">Perawat</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian</a>
-                            <a class="dropdown-item" href="#">CPPT</a>
-                            <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
+                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'pengkajian_perawat']) }}" role="tab">Pengkajian</a>
+                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'cppt_perawat']) }}">CPPT</a>
+                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'transfer_pasien_perawat']) }}">Transfer Pasien Antar Ruangan</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                             aria-haspopup="true" aria-expanded="false">Dokter</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian</a>
-                            <a class="dropdown-item" href="#">CPPT</a>
-                            <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
+                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'pengkajian_dokter']) }}">Pengkajian</a>
+                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'cppt_dokter']) }}">CPPT</a>
+                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'resume_medis_rajal']) }}">Transfer Pasien Antar Ruangan</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                             aria-haspopup="true" aria-expanded="false">Gizi</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian</a>
+                            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'pengkajian_gizi']) }}">Pengkajian</a>
                             <a class="dropdown-item" href="#">CPPT</a>
                             <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
                         </div>
@@ -909,6 +909,10 @@
                             <h4 class="mt-5 font-weight-bold">SKRINING RESIKO JATUH - GET UP & GO</h4>
                         </header>
                         <div class="row mt-3">
+                            <div class="col-md-12 mb-3">
+                                <label for="resiko_jatuh3" class="control-label text-primary margin-tb-10">A. Cara
+                                    Berjalan</label>
+                            </div>
                             <div class="col-md-6 mb-3">
                                 <div class="form-group">
                                     <div class="form-radio">
@@ -922,7 +926,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 mb-3">
                                 <div class="form-group">
                                     <div class="form-radio">
                                         <label class="custom-control custom-checkbox custom-control-inline">
@@ -936,29 +940,21 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row mt-3">
                             <div class="col-md-6 mb-3">
                                 <div class="form-group">
-                                    <label for="resiko_jatuh3" class="control-label text-primary margin-tb-10">B. Menopang
-                                        saat
-                                        duduk</label>
+                                    <label for="resiko_jatuh3" class="control-label mb-3 text-primary margin-tb-10">B.
+                                        Menopang saat duduk</label>
                                     <div class="form-radio">
                                         <label class="custom-control custom-checkbox custom-control-inline">
                                             <input onclick="resiko_jatuh()" name="resiko_jatuh3" id="resiko_jatuh3"
                                                 value="Pegang pinggiran meja/kursi/alat bantu untuk duduk" type="checkbox"
                                                 class="custom-control-input">
                                             <span class="custom-control-label text-primary">Pegang pinggiran
-                                                meja/kursi/alat
-                                                bantu
-                                                untuk
-                                                duduk</span>
+                                                meja/kursi/alat bantu untuk duduk</span>
                                         </label>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row mt-3">
                             <div class="col-md-6 mb-3">
                                 <div class="form-group">
                                     <span class="input-group-addon grey-text">Hasil : </span>
@@ -967,6 +963,614 @@
                                             type="text" readonly="">
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <header class="text-secondary">
+                            <h4 class="mt-5 font-weight-bold">RIWAYAT PSIKOSOSIAL, SPIRITUAL &amp; KEPERCAYAAN</h4>
+                        </header>
+                        <div class="row mt-3">
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="status_psikologis" class="control-label text-primary">Status
+                                        psikologis</label>
+                                    <select name="status_psikologis" id="status_psikologis" class="select2">
+                                        <option></option>
+                                        <option value="Tenang">Tenang</option>
+                                        <option value="Cemas">Cemas</option>
+                                        <option value="Takut">Takut</option>
+                                        <option value="Marah">Marah</option>
+                                        <option value="Sedih">Sedih</option>
+                                        <option value="Kecenderungan bunuh diri">Kecenderungan bunuh diri</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="status_spiritual" class="control-label text-primary">Status
+                                        spiritual</label>
+                                    <select name="status_spiritual" id="status_spiritual" class="select2">
+                                        <option></option>
+                                        <option value="Percaya Nilai-nilai dan kepercayaan">Percaya Nilai-nilai dan
+                                            kepercayaan
+                                        </option>
+                                        <option value="Tidak Percaya Nilai-nilai dan kepercayaan">Tidak Percaya Nilai-nilai
+                                            dan
+                                            kepercayaan</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="masalah_prilaku" class="control-label text-primary">Masalah prilaku(bila
+                                        ada)</label>
+                                    <input name="masalah_prilaku" id="masalah_prilaku" class="form-control"
+                                        type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="kekerasan_dialami" class="control-label text-primary">Kekerasan yg pernah
+                                        dialami</label>
+                                    <input name="kekerasan_dialami" id="kekerasan_dialami" class="form-control"
+                                        type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="hub_dengan_keluarga" class="control-label text-primary">Hubungan dengan
+                                        anggota
+                                        keluarga</label>
+                                    <input name="hub_dengan_keluarga" id="hub_dengan_keluarga" class="form-control"
+                                        type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="tempat_tinggal" class="control-label text-primary">Tempat tinggal
+                                        (rumah/panti/kos/dll)</label>
+                                    <input name="tempat_tinggal" id="tempat_tinggal" class="form-control"
+                                        type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="kerabat_dihub" class="control-label text-primary">Kerabat yang dapat
+                                        dihubungi</label>
+                                    <input name="kerabat_dihub" id="kerabat_dihub" class="form-control" type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="no_kontak_kerabat" class="control-label text-primary">Kontak kerabat yang
+                                        dapat
+                                        dihubungi</label>
+                                    <input name="no_kontak_kerabat" id="no_kontak_kerabat" class="form-control"
+                                        type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="status_perkawinan" class="control-label text-primary">Status
+                                        perkawinan</label>
+                                    <input name="status_perkawinan" id="status_perkawinan" class="form-control"
+                                        value="Belum Nikah" disabled="" type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="pekerjaan" class="control-label text-primary">Pekerjaan</label>
+                                    <input name="pekerjaan" id="pekerjaan" class="form-control" value=""
+                                        disabled="" type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="penghasilan" class="control-label text-primary">Penghasilan</label>
+                                    <select name="penghasilan" id="penghasilan" class="select2">
+                                        <option></option>
+                                        <option value="< 1 Juta">&lt; 1 Juta</option>
+                                        <option value="1 - 2,9 Juta">1 - 2,9 Juta</option>
+                                        <option value="3 - 4,9 Juta">3 - 4,9 Juta</option>
+                                        <option value="5 - 9,9 Juta">5 - 9,9 Juta</option>
+                                        <option value="10 - 14,9 Juta">10 - 14,9 Juta</option>
+                                        <option value="15 - 19.5 Juta">15 - 19.5 Juta</option>
+                                        <option value="> 20 Juta">&gt; 20 Juta</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="pendidikan" class="control-label text-primary">Pendidikan</label>
+                                    <input name="pendidikan" id="pendidikan" class="form-control" type="text"
+                                        value="Belum / Tidak tamat SD">
+                                </div>
+                            </div>
+                        </div>
+                        <header class="text-secondary">
+                            <h4 class="mt-5 font-weight-bold">KEBUTUHAN EDUKASI</h4>
+                            <label for="hambatan_belajar1"
+                                class="control-label font-weight-bold text-primary margin-tb-10">Hambatan
+                                dalam
+                                pembelajaran</label>
+                        </header>
+                        <div class="row mt-3">
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="hambatan_belajar1"
+                                                id="hambatan_belajar1" value="Pendengaran" type="checkbox">
+                                            <label for="hambatan_belajar1"
+                                                class="custom-control-label text-primary">Pendengaran</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="hambatan_belajar2"
+                                                id="hambatan_belajar2" value="Penglihatan" type="checkbox">
+                                            <label for="hambatan_belajar2"
+                                                class="custom-control-label text-primary">Penglihatan</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="hambatan_belajar3"
+                                                id="hambatan_belajar3" value="Kognitif" type="checkbox">
+                                            <label for="hambatan_belajar3"
+                                                class="custom-control-label text-primary">Kognitif</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="hambatan_belajar4"
+                                                id="hambatan_belajar4" value="Fisik" type="checkbox">
+                                            <label for="hambatan_belajar4"
+                                                class="custom-control-label text-primary">Fisik</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="hambatan_belajar5"
+                                                id="hambatan_belajar5" value="Budaya" type="checkbox">
+                                            <label for="hambatan_belajar5"
+                                                class="custom-control-label text-primary">Budaya</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="hambatan_belajar6"
+                                                id="hambatan_belajar6" value="Agama" type="checkbox">
+                                            <label for="hambatan_belajar6"
+                                                class="custom-control-label text-primary">Agama</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="hambatan_belajar7"
+                                                id="hambatan_belajar7" value="Emosi" type="checkbox">
+                                            <label for="hambatan_belajar7"
+                                                class="custom-control-label text-primary">Emosi</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="hambatan_belajar8"
+                                                id="hambatan_belajar8" value="Bahasa" type="checkbox">
+                                            <label for="hambatan_belajar8"
+                                                class="custom-control-label text-primary">Bahasa</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="hambatan_belajar9"
+                                                id="hambatan_belajar9" value="Tidak ada Hamabatan" type="checkbox">
+                                            <label for="hambatan_belajar9"
+                                                class="custom-control-label text-primary">Tidak ada
+                                                Hamabatan</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="form-group">
+                                    <label for="hambatan_lainnya" class="control-label text-primary">Hambatan
+                                        lainnya</label>
+                                    <input name="hambatan_lainnya" id="hambatan_lainnya" class="form-control"
+                                        type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="kebutuhan_penerjemah" class="control-label text-primary">Kebutuhan
+                                        penerjemah</label>
+                                    <input name="kebutuhan_penerjemah" id="kebutuhan_penerjemah" class="form-control"
+                                        type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="kebuthan_pembelajaran1"
+                                    class="control-label font-weight-bold margin-tb-10 text-primary mt-3">Kebutuhan
+                                    pembelajaran</label>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="kebuthan_pembelajaran1"
+                                                id="kebuthan_pembelajaran1" value="Diagnosa managemen"
+                                                type="checkbox">
+                                            <label for="kebuthan_pembelajaran1"
+                                                class="custom-control-label text-primary">Diagnosa managemen</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="kebuthan_pembelajaran2"
+                                                id="kebuthan_pembelajaran2" value="Obat-obatan" type="checkbox">
+                                            <label for="kebuthan_pembelajaran2"
+                                                class="custom-control-label text-primary">Obat-obatan</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="kebuthan_pembelajaran3"
+                                                id="kebuthan_pembelajaran3" value="Perawatan luka" type="checkbox">
+                                            <label for="kebuthan_pembelajaran3"
+                                                class="custom-control-label text-primary">Perawatan luka</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="kebuthan_pembelajaran4"
+                                                id="kebuthan_pembelajaran4" value="Rehabilitasi" type="checkbox">
+                                            <label for="kebuthan_pembelajaran4"
+                                                class="custom-control-label text-primary">Rehabilitasi</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="kebuthan_pembelajaran5"
+                                                id="kebuthan_pembelajaran5" value="Manajemen nyeri" type="checkbox">
+                                            <label for="kebuthan_pembelajaran5"
+                                                class="custom-control-label text-primary">Manajemen nyeri</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="kebuthan_pembelajaran6"
+                                                id="kebuthan_pembelajaran6" value="Diet &amp; nutrisi"
+                                                type="checkbox">
+                                            <label for="kebuthan_pembelajaran6"
+                                                class="custom-control-label text-primary">Diet
+                                                &amp; nutrisi</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="form-radio">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" name="kebuthan_pembelajaran7"
+                                                id="kebuthan_pembelajaran7" value="Tidak ada Hamabatan"
+                                                type="checkbox">
+                                            <label for="kebuthan_pembelajaran7"
+                                                class="custom-control-label text-primary">Tidak ada Hamabatan</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 mt-3">
+                                <label for="pembelajaran_lainnya" class="control-label font-weight-bold margin-tb-10 text-primary">Kebutuhan
+                                    pembelajaran
+                                    lainnya</label>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <input name="pembelajaran_lainnya" id="pembelajaran_lainnya" class="form-control"
+                                        type="text">
+                                </div>
+                            </div>
+                        </div>
+
+                        <header class="text-secondary">
+                            <h4 class="mt-5 font-weight-bold">Assesment Fungsional (Pengkajian Fungsi)</h4>
+                        </header>
+                        <header class="text-danger">
+                            <h4 class="mt-5 font-weight-bold">Sensorik</h4>
+                        </header>
+                        <div class="row mt-3">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td>Penglihatan</td>
+                                        <td>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="sensorik_penglihatan" id="sensorik_penglihatan1"
+                                                    value="Normal" data-skor="0" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label"
+                                                    for="sensorik_penglihatan1">Normal</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="sensorik_penglihatan" id="sensorik_penglihatan2"
+                                                    value="Kabur" data-skor="1" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label"
+                                                    for="sensorik_penglihatan2">Kabur</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="sensorik_penglihatan" id="sensorik_penglihatan3"
+                                                    value="Kaca Mata" data-skor="2" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label" for="sensorik_penglihatan3">Kaca
+                                                    Mata</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="sensorik_penglihatan" id="sensorik_penglihatan4"
+                                                    value="Lensa Kontak" data-skor="3" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label" for="sensorik_penglihatan4">Lensa
+                                                    Kontak</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Penciuman</td>
+                                        <td>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="sensorik_penciuman" id="sensorik_penciuman1"
+                                                    value="Normal" data-skor="0" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label"
+                                                    for="sensorik_penciuman1">Normal</label>
+                                            </div>
+                                        </td>
+                                        <td colspan="3">
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="sensorik_penciuman" id="sensorik_penciuman2"
+                                                    value="Tidak" data-skor="1" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label"
+                                                    for="sensorik_penciuman2">Tidak</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pendengaran</td>
+                                        <td>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="sensorik_pendengaran" id="sensorik_pendengaran1"
+                                                    value="Normal" data-skor="0" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label"
+                                                    for="sensorik_pendengaran1">Normal</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="sensorik_pendengaran" id="sensorik_pendengaran2"
+                                                    value="Tuli Ka / Ki" data-skor="1" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label" for="sensorik_pendengaran2">Tuli Ka
+                                                    /
+                                                    Ki</label>
+                                            </div>
+                                        </td>
+                                        <td colspan="2">
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="sensorik_pendengaran" id="sensorik_pendengaran3"
+                                                    value="Ada alat bantu dengar ka/ki" data-skor="2"
+                                                    class="custom-control-input" type="radio">
+                                                <label class="custom-control-label" for="sensorik_pendengaran3">Ada alat
+                                                    bantu dengar ka/ki</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <header class="text-danger">
+                            <h4 class="mt-5 font-weight-bold">Kognitif</h4>
+                        </header>
+                        <div class="row mt-3">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="kognitif" class="custom-control-input" id="kognitif1"
+                                                    value="Normal" data-skor="0" type="radio">
+                                                <label class="custom-control-label"
+                                                    for="kognitif1">Normal</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="kognitif" class="custom-control-input" id="kognitif2"
+                                                    value="Bingung" data-skor="1" type="radio">
+                                                <label class="custom-control-label" for="kognitif2">Bingung</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="kognitif" class="custom-control-input" id="kognitif3"
+                                                    value="Pelupa" data-skor="2" type="radio">
+                                                <label class="custom-control-label" for="kognitif3">Pelupa</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input name="kognitif" class="custom-control-input" id="kognitif4"
+                                                    value="Tidak Dapat dimengerti" data-skor="3" type="radio">
+                                                <label class="custom-control-label" for="kognitif4">Tidak Dapat
+                                                    dimengerti</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            &nbsp;
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <header class="text-danger">
+                            <h4 class="mt-5 font-weight-bold">Motorik</h4>
+                        </header>
+                        <div class="row mt-3">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td>Aktifitas Sehari - hari</td>
+                                        <td>
+                                            <div class="custom-control custom-radio">
+                                                <input name="motorik_aktifitas" id="motorik_aktifitas1"
+                                                    value="Mandiri" data-skor="0" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label text-primary"
+                                                    for="motorik_aktifitas1">Mandiri</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="custom-control custom-radio">
+                                                <input name="motorik_aktifitas" id="motorik_aktifitas2"
+                                                    value="Bantuan Minimal" data-skor="1"
+                                                    class="custom-control-input" type="radio">
+                                                <label class="custom-control-label text-primary"
+                                                    for="motorik_aktifitas2">Bantuan Minimal</label>
+                                            </div>
+                                        </td>
+                                        <td colspan="2">
+                                            <div class="custom-control custom-radio">
+                                                <input name="motorik_aktifitas" id="motorik_aktifitas3"
+                                                    value="Bantuan Ketergantungan Total" data-skor="2"
+                                                    class="custom-control-input" type="radio">
+                                                <label class="custom-control-label text-primary"
+                                                    for="motorik_aktifitas3">Bantuan Ketergantungan Total</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Berjalan</td>
+                                        <td>
+                                            <div class="custom-control custom-radio">
+                                                <input name="motorik_berjalan" id="motorik_berjalan1"
+                                                    value="Tidak Ada kesulitan" data-skor="0"
+                                                    class="custom-control-input" type="radio">
+                                                <label class="custom-control-label text-primary"
+                                                    for="motorik_berjalan1">Tidak Ada kesulitan</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="custom-control custom-radio">
+                                                <input name="motorik_berjalan" id="motorik_berjalan2"
+                                                    value="Perlu Bantuan" data-skor="1" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label text-primary"
+                                                    for="motorik_berjalan2">Perlu Bantuan</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="custom-control custom-radio">
+                                                <input name="motorik_berjalan" id="motorik_berjalan3"
+                                                    value="Sering Jatuh" data-skor="0" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label text-primary"
+                                                    for="motorik_berjalan3">Sering Jatuh</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="custom-control custom-radio">
+                                                <input name="motorik_berjalan" id="motorik_berjalan4"
+                                                    value="Kelumpuhan" data-skor="1" class="custom-control-input"
+                                                    type="radio">
+                                                <label class="custom-control-label text-primary"
+                                                    for="motorik_berjalan4">Kelumpuhan</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row mt-5">
+                            <div class="col-md-4 text-center">
+                                <span>Perawat,</span>
+                                <div id="tombol-1" class="mt-3">
+                                    <a class="btn btn-primary btn-sm text-white ttd" onclick="openSignaturePad(1)"
+                                        id="ttd_pegawai">Tanda tangan</a>
+                                </div>
+                                <div class="mt-3">
+                                    <img id="signature-display-1" src="" alt="Signature Image"
+                                        style="display:none; max-width:60%;">
+                                </div>
+                                <div class="mt-3">
+                                    <span>{{ auth()->user()->employee->fullname }}</span>
+                                </div>
+
                             </div>
                         </div>
                     </div>
