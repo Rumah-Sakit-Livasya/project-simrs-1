@@ -3,6 +3,7 @@
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row mb-5">
+        @if ($is_request)
             <div class="col-xl-12">
                 <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan" data-backdrop="static"
                     data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah User">
@@ -10,6 +11,11 @@
                     Ajukan Absensi
                 </button>
             </div>
+            @else
+            <div class="col-md-12">
+                <div class="alert alert-danger">Pengajuan hanya bisa 1 jam dari waktu absen.</div>
+            </div>
+            @endif
         </div>
 
         <div class="row">
