@@ -15,22 +15,25 @@ class PoliklinikController extends Controller
     {
         $menu = request()->menu;
         $noRegist = request()->registration;
-
-        if ($menu && $noRegist) {
-            $menuResponse = $this->poliklinikMenu($noRegist, $menu);
-            if ($menuResponse) {
-                return $menuResponse;
-            }
-        }
-    }
-
-    private function poliklinikMenu($noRegist, $menu)
-    {
-        Carbon::setLocale('id');
+        
         $departements = Departement::latest()->get();
         $hariIni = Carbon::now()->translatedFormat('l');
         $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
         $registration = Registration::where('registration_number', $noRegist)->first();
+
+        if ($menu && $noRegist) {
+            $menuResponse = $this->poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration);
+            if ($menuResponse) {
+                return $menuResponse;
+            }
+        } else {
+            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
+        }
+    }
+
+    private function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration)
+    {
+        Carbon::setLocale('id');
 
         // $doctors = Doctor::with('employee', 'departement')->get();
         // $groupedDoctors = [];
@@ -60,6 +63,8 @@ class PoliklinikController extends Controller
         }elseif ($menu == 'pengkajian_lanjutan') {
             return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));   
             
+        }elseif ($menu == 'tindakan_medis'){
+            return view('pages.simrs.poliklinik.dokter.cppt');
         }else {
             return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
         }

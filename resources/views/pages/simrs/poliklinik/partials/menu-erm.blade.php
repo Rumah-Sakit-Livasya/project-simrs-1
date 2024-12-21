@@ -54,22 +54,17 @@
                 Rekonsiliasi Obat</a>
         </div>
     </li>
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
-            aria-expanded="false">Pengkajian Lanjutan</a>
-        <div class="dropdown-menu">
-            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian</a>
-            <a class="dropdown-item" href="#">CPPT</a>
-            <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
-        </div>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'pengkajian_lanjutan']) }}">Pengkajian Lanjutan</a>
     </li>
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
             aria-expanded="false">Layanan</a>
         <div class="dropdown-menu">
-            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian</a>
-            <a class="dropdown-item" href="#">CPPT</a>
-            <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
+            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'tindakan_medis']) }}">Tindakan Medis</a>
+            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'pemakaian_alat']) }}">Pemakaian Alat</a>
+            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'patologi_klinik']) }}">Patologi Klinik</a>
+            <a class="dropdown-item" href="{{ route('poliklinik.daftar-pasien', ['registration' => 2412170001, 'menu' => 'radiologi']) }}">Radiologi</a>
         </div>
     </li>
     <li class="nav-item dropdown">
