@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\TindakanMedis;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -64,7 +65,9 @@ class PoliklinikController extends Controller
             return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));   
             
         }elseif ($menu == 'tindakan_medis'){
-            return view('pages.simrs.poliklinik.dokter.cppt');
+            $list_tindakan_medis = TindakanMedis::all();
+            
+            return view('pages.simrs.poliklinik.layanan.tindakan_medis', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis'));
         }else {
             return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
         }
