@@ -30,6 +30,7 @@ use App\Models\Structure;
 use App\Models\Target;
 use App\Models\UploadFile;
 use App\Models\User;
+use App\Models\TimeSchedule;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
@@ -41,11 +42,12 @@ use Illuminate\Support\Str;
 use Dompdf\Options;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
+use App\Http\Controllers\API\TimeScheduleController;
 
 class DashboardController extends Controller
 {
 
-    protected function getNotify()
+    public function getNotify()
     {
         $day_off_notify = DayOffRequest::where('approved_line_child', auth()->user()->employee->id)->orWhere('approved_line_parent', auth()->user()->employee->id)->latest()->get();
         $attendance_notify = AttendanceRequest::where('approved_line_child', auth()->user()->employee->id)->orWhere('approved_line_parent', auth()->user()->employee->id)->latest()->get();
@@ -1576,6 +1578,29 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function getDataTimeScheduleRapat()
+    {
+        // Tooltip
+        $controller = new \App\Http\Controllers\API\TimeScheduleController();
+
+        $tooltipNames = [
+            'direktur' => implode('; ', $controller->getDirekturWadir(9)->pluck('name')->toArray()),
+            'wakil_direktur' => implode('; ', $controller->getDirekturWadir(46)->pluck('name')->toArray()),
+            'kabag' => implode('; ', $controller->getKabagKabid(1, 19)->pluck('name')->toArray()),
+            'kabid' => implode('; ', $controller->getKabagKabid(2, 19)->pluck('name')->toArray()),
+            'kasubag' => implode('; ', $controller->getPjKaruKasiKasubag(1, 21)->pluck('name')->toArray()),
+            'kasi' => implode('; ', $controller->getPjKaruKasiKasubag(2, 20)->pluck('name')->toArray()),
+            'karu_pelayanan' => implode('; ', $controller->getPjKaruKasiKasubag(5, 25)->pluck('name')->toArray()),
+            'pj_penunjang' => implode('; ', $controller->getPjKaruKasiKasubag(6, 25)->pluck('name')->toArray()),
+            'pj_umum' => implode('; ', $controller->getPjKaruKasiKasubag(9, 25)->pluck('name')->toArray()),
+        ];
+
+
+        $timeSchedules = TimeSchedule::where('type', 'rapat')->get();
+        $employees = Employee::where('is_active', 1)->get();
+
+        return view('pages.time-schedule.index', compact('timeSchedules', 'employees', 'tooltipNames'));
+    }
 
     // Method untuk filter query berdasarkan bulan, tahun, dan status
     private function applyFilters($query, $bulan, $tahun, $status, $organization)

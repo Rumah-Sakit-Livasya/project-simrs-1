@@ -31,6 +31,7 @@ use App\Http\Controllers\Inventaris\MaintenanceBarangController;
 use App\Http\Controllers\Inventaris\RoomMaintenanceController;
 use App\Http\Controllers\Inventaris\TemplateBarangController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Middleware\CheckAuthorizationBot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -247,6 +248,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         Route::put('/update/{id}', [StructureController::class, 'update']);
         Route::get('/get/{id}', [StructureController::class, 'getStructure']);
         Route::get('/delete/{id}', [StructureController::class, 'destroy']);
+        Route::get('/hierarchy', [StructureController::class, 'getHierarchy']);
     });
     Route::prefix('targets')->group(function () {
         Route::post('/store', [TargetController::class, 'store']);
@@ -284,6 +286,16 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         Route::post('/store', [MenuController::class, 'store'])->name('master-data.menu.store');
         Route::post('/update/{id}', [MenuController::class, 'update'])->name('master-data.menu.update');
         Route::delete('/delete/{id}', [MenuController::class, 'destroy'])->middleware('check.api.credentials')->name('master-data.menu.delete');
+    });
+
+    Route::prefix('time-schedules')->group(function () {
+        Route::prefix('rapat')->group(function () {
+            Route::post("/store", [TimeScheduleController::class, 'store'])->name("time.schedule.rapat.store");
+            Route::get("/get-peserta/{rapatId}", [TimeScheduleController::class, 'getPeserta'])->name("time.schedule.rapat.get.peserta");
+            // Rute untuk upload file
+            Route::post('/time/schedule/rapat/upload', [TimeScheduleController::class, 'uploadFile'])->name('time.schedule.rapat.upload');
+            Route::get('/download/{id}/{type}', [TimeScheduleController::class, 'download'])->name('time.schedule.rapat.download');
+        });
     });
 });
 

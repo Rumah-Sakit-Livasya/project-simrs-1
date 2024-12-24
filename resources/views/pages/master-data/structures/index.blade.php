@@ -20,7 +20,7 @@
         </div>
 
         <div class="row">
-            <div class="col-xl-12">
+            <div class="col-xl-7">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
@@ -89,7 +89,22 @@
                     </div>
                 </div>
             </div>
+            <div class="col-xl-5">
+                <div id="panel-1" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            Peta Hirarki Organisasi
+                        </h2>
+                    </div>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div id="treeview"></div>
+                    </div>
+                </div>
+            </div>
         </div>
+
         @include('pages.master-data.structures.partials.create-data')
         @include('pages.master-data.structures.partials.update-data')
     </main>
@@ -97,6 +112,9 @@
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <!-- Menyertakan CDN Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-treeview@1.2.0/dist/bootstrap-treeview.min.js"></script>
     <script>
         /* demo scripts for change table color */
         /* change background */
@@ -233,7 +251,8 @@
             });
 
             $('#dt-basic-example').dataTable({
-                responsive: true
+                responsive: true,
+                paging: false
             });
 
             $('.js-thead-colors a').on('click', function() {
@@ -248,6 +267,55 @@
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
             });
 
+            // Fetch data dari API
+            $.ajax({
+                url: '/api/dashboard/structures/hierarchy', // Ganti dengan URL API Anda
+                method: 'GET',
+                success: function(response) {
+                    let formattedData = formatTree(response); // Format data dengan fungsi
+                    $('#treeview').treeview({
+                        data: formattedData, // Data yang sudah diformat
+                        levels: 5, // Tampilkan hingga 5 level
+                        showIcon: true, // Menampilkan ikon pada node
+                        showTags: true, // Menampilkan tags (jika ada)
+                        highlightSelected: true, // Sorot node yang dipilih
+                        // Jika Anda ingin ikon tercentang (misalnya untuk checkbox)
+                        checkedIcon: 'fas fa-check-circle mr-3', // Ikon untuk node yang tercentang
+                        uncheckedIcon: 'fas fa-circle mr-3', // Ikon untuk node yang tidak tercentang
+                        expandIcon: 'fas fa-plus-circle mr-3', // Ikon untuk men-expand node
+                        collapseIcon: 'fas fa-minus-circle mr-3', // Ikon untuk men-collapse node
+                    });
+
+                },
+                error: function(error) {
+                    console.error('Error loading hierarchy:', error);
+                }
+            });
+
+            function formatTree(data) {
+                return data.map(function(node) {
+                    // Tentukan ikon untuk setiap level atau jenis node
+                    let icon = 'fas fa-folder mr-3'; // Ikon folder default
+
+                    // Jika ada anak, set ikon folder
+                    if (node.children && node.children.length > 0) {
+                        icon = 'fas fa-folder mr-3';
+                    } else {
+                        icon = 'fas fa-file mr-3'; // Ikon file jika tidak ada anak
+                    }
+
+                    let children = Array.isArray(node.children) && node.children.length > 0 ?
+                        formatTree(node.children) // Panggil formatTree untuk children
+                        :
+                        null;
+
+                    return {
+                        text: node.name,
+                        icon: icon, // Menambahkan ikon pada setiap node
+                        nodes: children // Menambahkan children jika ada
+                    };
+                });
+            }
         });
     </script>
 @endsection

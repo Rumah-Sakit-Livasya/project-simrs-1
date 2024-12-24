@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
-class Target extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+class Target extends Model 
 {
     use HasFactory;
 

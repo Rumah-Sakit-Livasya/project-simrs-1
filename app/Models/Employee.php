@@ -34,6 +34,12 @@ class Employee extends Model
         return $this->belongsToMany(Location::class);
     }
 
+    public function timeSchedules()
+    {
+        return $this->belongsToMany(TimeSchedule::class, 'time_schedule_employees', 'employee_id', 'time_schedule_id')
+            ->withPivot('dokumentasi');
+    }
+
     public function bank_employee()
     {
         return $this->hasOne(BankEmployee::class);
@@ -73,6 +79,10 @@ class Employee extends Model
     public function attendance()
     {
         return $this->hasMany(Attendance::class);
+    }
+    public function timeSchedule()
+    {
+        return $this->hasMany(TimeSchedule::class);
     }
     public function day_off_requests()
     {
