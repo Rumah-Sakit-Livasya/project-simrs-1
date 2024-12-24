@@ -213,7 +213,7 @@ class TimeScheduleController extends Controller
             $timeSchedule->employees()->attach($uniquePeserta);
 
             // Send broadcast message to participants
-            // $this->broadcastMessageToParticipants($uniquePeserta, $timeSchedule->title, $timeSchedule->datetime, $request->is_online, $request->room_name);
+            $this->broadcastMessageToParticipants($uniquePeserta, $timeSchedule->title, $timeSchedule->datetime, $request->is_online, $request->room_name);
 
             return response()->json([
                 'message' => 'Agenda Rapat berhasil ditambahkan!',

@@ -234,7 +234,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: '/api/dashboard/time-schedules/rapat/store/',
+                    url: '/api/dashboard/time-schedules/rapat/store',
                     data: formData,
                     processData: false, // Jangan proses data karena kita mengirim FormData
                     contentType: false, // Jangan atur konten tipe agar boundary otomatis
