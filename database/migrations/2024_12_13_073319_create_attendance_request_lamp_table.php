@@ -11,18 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('barang', function (Blueprint $table) {
-            $table->string('harga_barang')->nullable()->after('bidding_year');
+        Schema::create('attendance_request_lamp', function (Blueprint $table) {
+            $table->id();
+            $table->date('tanggal');
+            $table->text('lampiran');
+            $table->timestamps();
         });
     }
-    
+
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table('barang', function (Blueprint $table) {
-            $table->dropColumn('harga_barang');
-        });
+        Schema::dropIfExists('attendance_request_lamp');
     }
 };

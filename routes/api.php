@@ -33,6 +33,7 @@ use App\Http\Controllers\Inventaris\TemplateBarangController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Middleware\CheckAuthorizationBot;
+use App\Models\AttendanceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -209,6 +210,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
     Route::prefix('attendances')->group(function () {
         Route::get('/report/employee/{employee_id}/{periode}/{tahun}', [ReportController::class, 'getReportAttendancesEmployee']);
         Route::post('/detail', [AttendanceController::class, 'getDetailAttendance']);
+        Route::post('/request/form', [AttendanceRequestController::class, 'submitFormReqAttendance'])->name('attendances.form.submit');
     });
 
     Route::prefix('day-off')->group(function () {
@@ -297,6 +299,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
             Route::get('/download/{id}/{type}', [TimeScheduleController::class, 'download'])->name('time.schedule.rapat.download');
         });
     });
+    Route::get('user/getByName', [UserController::class, 'getByName'])->name('user.getByName');
 });
 
 // Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');

@@ -8,6 +8,8 @@ use App\Models\Attendance;
 use App\Models\AttendanceCode;
 use App\Models\AttendanceOutsource;
 use App\Models\AttendanceRequest;
+use App\Models\AttendanceRequestLamp;
+use App\Models\AttendanceRequestLampDetail;
 use App\Models\Bank;
 use App\Models\BankEmployee;
 use App\Models\ChMessage;
@@ -1054,6 +1056,26 @@ class DashboardController extends Controller
         return view('pages.absensi.absensi.index', compact('selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
     }
 
+    public function getSettingAttendances()
+    {
+        $pengajuan = AttendanceRequestLamp::latest()->get();
+        return view('pages.absensi.absensi.settings', compact('pengajuan'));
+    }
+
+    public function updateStatusRequestAttendance(Request $request)
+    {
+        $user = User::find($request->userId);
+        if (!$user) {
+            return response()->json(['error' => 'User tidak ditemukan'], 404);
+        }
+
+        // Convert boolean to integer (1 or 0)
+        $user->is_request_attendance = $request->is_request_attendance ? 1 : 0;
+        $user->save();
+
+        return response()->json(['message' => 'Status berhasil diperbarui']);
+    }
+
     public function getAttendancesOutsourcing()
     {
         // Mendapatkan tanggal hari ini
@@ -1131,8 +1153,10 @@ class DashboardController extends Controller
     {
         $getNotify = $this->getNotify();
         $attendance_requests = AttendanceRequest::where('employee_id', auth()->user()->employee->id)->get();
-        return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify'));
+        $pengajuan = AttendanceRequestLampDetail::where('employee_id', auth()->user()->employee->id)->latest()->first();
+        return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify', 'pengajuan'));
     }
+
     public function getAttendanceRequest($id)
     {
         $getNotify = $this->getNotify();
@@ -1143,6 +1167,12 @@ class DashboardController extends Controller
             return redirect()->route('attendance-requests')->with('error', 'Tidak bisa mengakses halaman ini!');
         }
     }
+
+    public function attendanceRequestForm()
+    {
+        return view('pages.absensi.pengajuan-absensi.pengajuan-absen');
+    }
+
     public function getDataLocations()
     {
         $locations = Location::all();

@@ -2,13 +2,27 @@
 @section('title', 'Pengajuan Absensi')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        <div class="row mb-5">
+        <div class="row mb-4">
             <div class="col-xl-12">
-                <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan" data-backdrop="static"
-                    data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah User">
-                    <span class="fal fa-plus-circle mr-1"></span>
-                    Ajukan Absensi
-                </button>
+                @if (auth()->user()->is_request_attendance == 1)
+                    <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan" data-backdrop="static"
+                        data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah User">
+                        <span class="fal fa-plus-circle mr-1"></span>
+                        Pengajuan Absensi
+                    </button>
+                @else
+                    <div class="alert alert-danger">
+                        Mohon maaf akses pengajuan absensi belum diberikan. Silahkan
+                        menghubungi atasan masing-masing untuk dibukakan aksesnya!
+                    </div>
+                @endcan
+
+                @can('pengajuan pj')
+                    <a href="{{route('attendance-requests.form')}}" class="btn btn-primary">
+                        <span class="fal fa-plus-circle mr-1"></span>
+                        Tambah Form Pengajuan
+                    </a>
+                @endcan
             </div>
         </div>
 
@@ -68,7 +82,9 @@
             </div>
         </div>
     </main>
-    @include('pages.absensi.pengajuan-absensi.partials.create')
+    @if (auth()->user()->is_request_attendance == 1)
+        @include('pages.absensi.pengajuan-absensi.partials.create')
+    @endif
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>

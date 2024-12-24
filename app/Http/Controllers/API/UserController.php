@@ -27,6 +27,21 @@ class UserController extends Controller
         }
     }
 
+    public function getByName(Request $request)
+    {
+        try {
+            $employee = Employee::where('fullname', 'LIKE', '%' . $request->q . '%')->where('is_active', 1)->limit(5)->get();
+
+            if ($employee->isEmpty()) {
+                return response()->json(['message' => 'User not found'], 404);
+            }
+
+            return response()->json(['data' => $employee], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function store()
     {
         try {

@@ -247,6 +247,32 @@
                                 <label class="custom-control-label text-primary" for="alergi_obat2">Tidak</label>
                             </div>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="alergi_makanan" class="control-label text-primary margin-tb-10 d-block">Alergi
+                                    Makanan</label>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" class="custom-control-input" value="Ya"
+                                        name="alergi_makanan" id="alergi_makanan1">
+                                    <label class="custom-control-label text-primary" for="alergi_makanan1">Ya</label>
+                                </div>
+                                <input name="ket_alergi_makanan" id="ket_alergi_makanan"
+                                    style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
+                                    type="text">
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" class="custom-control-input" value="Tidak"
+                                        name="alergi_makanan" id="alergi_makanan2">
+                                    <label class="custom-control-label text-primary" for="alergi_makanan2">Tidak</label>
+                                </div>
+                            </div>
+                        </div>
+                            <div class="form-group">
+                                <label for="reaksi_alergi_makanan" class="control-label text-primary">Reaksi terhadap
+                                    alergi
+                                    makanan</label>
+                                <input name="reaksi_alergi_makanan" id="reaksi_alergi_makanan"
+                                    class="form-control alergi" type="text">
+                            </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
@@ -437,7 +463,6 @@
                         </div>
                     </div>
                 </div>
-
                 <header class="green-text">
                     <h4 class="mt-5">SKRINING GIZI</h4>
                 </header>
