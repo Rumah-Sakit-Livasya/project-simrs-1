@@ -16,7 +16,17 @@ class PoliklinikController extends Controller
         $departements = Departement::latest()->get();
         $hariIni = Carbon::now()->translatedFormat('l');
         $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
-        // dd($jadwal_dokter[0]->doctor->employee->fullname);
+        
+        $menu = request()->menu;
+
         return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
+    }
+    
+    function poliklinikMenu($menu) {
+        if($menu == 'pengkajian_perawat') {
+            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
+        } elseif ($menu == 'cppt_perawat') {
+            return view('pages.simrs.poliklinik.transfer_pasien_perawat');
+        }
     }
 }
