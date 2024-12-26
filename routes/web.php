@@ -6,6 +6,7 @@ use App\Http\Controllers\API\DayOffRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Pages\CompanyController;
 use App\Http\Controllers\API\CompanyController as ApiCompanyController;
+use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Pages\DashboardController;
 use App\Http\Controllers\Pages\UpdateProfileController;
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\ImpersonateUser;
 use Illuminate\Support\Facades\File;
+
+Route::get('/test', [TimeScheduleController::class, 'getEmployeesByOrganizationAndJobPosition']);
 
 Route::get('/', [AuthenticatedSessionController::class, 'create'])
     ->middleware('guest')
@@ -114,6 +117,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/update-profil/{id}', [UpdateProfileController::class, 'update'])->name('update.image');
     });
     /* END PEGAWAI ----------------------------------------------------------------------------*/
+
+    /*
+    |--------------------------------------------------------------------------
+    |  TIMESCHEDULE
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('time-schedules')->group(function () {
+        Route::prefix('rapat')->group(function () {
+            Route::get("/", [DashboardController::class, 'getDataTimeScheduleRapat'])->name("time.schedule.rapat");
+        });
+    });
+    /* END TIMESCHEDULE ----------------------------------------------------------------------------*/
 
     /*
     |--------------------------------------------------------------------------

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Imports\AttendanceImport;
 use App\Models\Attendance;
 use App\Models\AttendanceOutsource;
+use App\Models\DayOffRequest;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Models\Shift;
@@ -763,6 +764,7 @@ class AttendanceController extends Controller
     public function updateManagementShift()
     {
         try {
+            $day_off_request_id = [];
             // Loop melalui data yang dikirimkan melalui Ajax
             foreach (request()->attendances as $attendance) {
                 // Cari data berdasarkan tanggal dan lakukan pembaruan shift_id
@@ -774,6 +776,7 @@ class AttendanceController extends Controller
                     $perbedaanMenit_timein = null;
                     $perbedaanMenit_timeout = null;
 
+                    
                     //Jika libur
                     if ($shift->name == 'dayoff' || $shift->name == 'National Holiday') {
                         $clock_in = null;
@@ -798,13 +801,32 @@ class AttendanceController extends Controller
                         if ($absensi->clock_out) {
                             $perbedaanMenit_timeout = Carbon::parse($absensi->clock_out)->format('H:i') < $waktu_timeout ? Carbon::parse($absensi->clock_out)->diffInMinutes(Carbon::parse($waktu_timeout)) : null;
                         }
+
                         $absensi->update([
                             'shift_id' => $attendance['shift_id'],
                             'late_clock_in' => $perbedaanMenit_timein == 0 ? null : $perbedaanMenit_timein,
                             'early_clock_out' => $perbedaanMenit_timeout,
                             'is_day_off' => null,
                         ]);
+                        
+                        if($absensi->day_off) {
+                            $day_off_request_id[] = $absensi->day_off->id;
+                            $absensi->update([
+                                'is_day_off' => null,
+                                'day_off_request_id' => null,
+                                'attendance_code_id' => null,
+                            ]);
+                        }
+                        
                     }
+                }
+            }
+
+            $unique_day_off_request_id = array_unique($day_off_request_id);
+            if(count($unique_day_off_request_id) > 0) {
+                foreach ($unique_day_off_request_id as $key => $value) {
+                    $day_off = DayOffRequest::where('id', $value)->first();
+                    $day_off->delete();
                 }
             }
             // Response jika pembaruan berhasil

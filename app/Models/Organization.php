@@ -25,6 +25,10 @@ class Organization extends Model
     {
         return $this->hasMany(Employee::class);
     }
+    public function employees()
+    {
+        return $this->hasMany(Employee::class);
+    }
 
     public function targets()
     {

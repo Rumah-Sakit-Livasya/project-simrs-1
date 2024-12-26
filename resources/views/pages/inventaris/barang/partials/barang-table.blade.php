@@ -146,6 +146,7 @@
                         var biddingYear = response.bidding_year;
                         // Assuming the response contains the URL of the image
                         $('#modal-ubah #custom_name').val(response.custom_name);
+                        $('#modal-ubah #harga_barang').val(response.harga_barang);
                         $('#modal-ubah #barang_id').val(response.id);
                         $('#modal-ubah #item_code').val(response.item_code);
                         $('#modal-ubah #merk').val(response.merk);
@@ -438,7 +439,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/inventaris/barang/',
+                    url: '/api/inventaris/barang',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {

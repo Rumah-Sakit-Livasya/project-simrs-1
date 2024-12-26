@@ -32,6 +32,7 @@ use App\Models\Structure;
 use App\Models\Target;
 use App\Models\UploadFile;
 use App\Models\User;
+use App\Models\TimeSchedule;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
@@ -43,11 +44,12 @@ use Illuminate\Support\Str;
 use Dompdf\Options;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
+use App\Http\Controllers\API\TimeScheduleController;
 
 class DashboardController extends Controller
 {
 
-    protected function getNotify()
+    public function getNotify()
     {
         $day_off_notify = DayOffRequest::where('approved_line_child', auth()->user()->employee->id)->orWhere('approved_line_parent', auth()->user()->employee->id)->latest()->get();
         $attendance_notify = AttendanceRequest::where('approved_line_child', auth()->user()->employee->id)->orWhere('approved_line_parent', auth()->user()->employee->id)->latest()->get();
@@ -1149,10 +1151,30 @@ class DashboardController extends Controller
 
     public function attendanceRequest()
     {
+
+        // Set timezone ke Asia/Jakarta
+        date_default_timezone_set('Asia/Jakarta');
+
+        // Set locale ke Indonesia
+        Carbon::setLocale('id');
         $getNotify = $this->getNotify();
         $attendance_requests = AttendanceRequest::where('employee_id', auth()->user()->employee->id)->get();
+
         $pengajuan = AttendanceRequestLampDetail::where('employee_id', auth()->user()->employee->id)->latest()->first();
         return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify', 'pengajuan'));
+        $attendance = Attendance::where('date', Carbon::now()->format('Y-m-d'))->where('employee_id', auth()->user()->employee->id)->first();
+        $is_request = false;
+        if ($attendance) {
+            $current_time = Carbon::now();
+            $shift_time_in = Carbon::createFromFormat('H:i', $attendance->shift->time_in);
+
+            // Cek apakah shift time_in lebih dari 1 jam dari sekarang
+            $is_request = $shift_time_in->diffInHours($current_time, false) > 1;
+        }
+
+        $is_request = !$is_request;
+
+        return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify', 'is_request'));
     }
 
     public function getAttendanceRequest($id)
@@ -1606,6 +1628,29 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function getDataTimeScheduleRapat()
+    {
+        // Tooltip
+        $controller = new \App\Http\Controllers\API\TimeScheduleController();
+
+        $tooltipNames = [
+            'direktur' => implode('; ', $controller->getDirekturWadir(9)->pluck('name')->toArray()),
+            'wakil_direktur' => implode('; ', $controller->getDirekturWadir(46)->pluck('name')->toArray()),
+            'kabag' => implode('; ', $controller->getKabagKabid(1, 19)->pluck('name')->toArray()),
+            'kabid' => implode('; ', $controller->getKabagKabid(2, 19)->pluck('name')->toArray()),
+            'kasubag' => implode('; ', $controller->getPjKaruKasiKasubag(1, 21)->pluck('name')->toArray()),
+            'kasi' => implode('; ', $controller->getPjKaruKasiKasubag(2, 20)->pluck('name')->toArray()),
+            'karu_pelayanan' => implode('; ', $controller->getPjKaruKasiKasubag(5, 25)->pluck('name')->toArray()),
+            'pj_penunjang' => implode('; ', $controller->getPjKaruKasiKasubag(6, 25)->pluck('name')->toArray()),
+            'pj_umum' => implode('; ', $controller->getPjKaruKasiKasubag(9, 25)->pluck('name')->toArray()),
+        ];
+
+
+        $timeSchedules = TimeSchedule::where('type', 'rapat')->get();
+        $employees = Employee::where('is_active', 1)->get();
+
+        return view('pages.time-schedule.index', compact('timeSchedules', 'employees', 'tooltipNames'));
+    }
 
     // Method untuk filter query berdasarkan bulan, tahun, dan status
     private function applyFilters($query, $bulan, $tahun, $status, $organization)
