@@ -244,7 +244,7 @@ class TimeScheduleController extends Controller
         foreach ($roles as $role) {
             $broadcastMessage .= "- $role\n";
         }
-        $broadcastMessage .= "Mohon izin menyampaikan agenda Rapat Koordinasi PJ dan Karu Unit, yang akan dilaksanakan pada:\n\n";
+        $broadcastMessage .= "Mohon izin menyampaikan agenda $title, yang akan dilaksanakan pada:\n\n";
         $broadcastMessage .= "Hari/Tanggal: " . \Carbon\Carbon::parse($datetime)->translatedFormat('l, d F Y') . "\n";
         $broadcastMessage .= "Waktu: " . \Carbon\Carbon::parse($datetime)->format('H:i') . " WIB s/d selesai\n";
 
