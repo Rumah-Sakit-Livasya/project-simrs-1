@@ -242,7 +242,7 @@ class PayrollApiController extends Controller
                     $potonganIzinValue = $totalAllowance ?? 0;
                     $potonganIzinValue = $potonganIzinValue + $basicSalary;
 
-                    $potonganIzinValue = (($totalAllowance ?? 0) * $izin)  / 25;
+                    $potonganIzinValue = ($potonganIzinValue * $izin)  / 25;
                 }
                 $totalDeduction = $potonganKeterlambatanValue + $potonganIzinValue + $potonganSakitValue + $simpananPokok + $potonganKoperasiValue + $potonganAbsensiValue + $potonganBPJSKesehatanValue + $potonganBPJSKetenagakerjaanValue + $potonganPajakValue;
                 $takeHomePay = $basicSalary + $totalAllowance - $totalDeduction;
