@@ -62,7 +62,7 @@ class PendidikanPelatihanController extends Controller
 
             // Send broadcast message to participants
             // $roles = Employee::whereIn('id', $uniquePeserta)->pluck('fullname')->toArray(); // Ambil nama peserta untuk broadcast
-            $this->broadcastMessageToParticipants($uniquePeserta, $pendidikanPelatihan->judul, $pendidikanPelatihan->datetime, $pendidikanPelatihan->tempat);
+            $this->broadcastMessageToParticipants($uniquePeserta, $pendidikanPelatihan->judul, $pendidikanPelatihan->datetime, $pendidikanPelatihan->tempat, $pendidikanPelatihan->catatan);
 
             return response()->json([
                 'message' => 'Agenda Rapat berhasil ditambahkan!',
@@ -75,7 +75,7 @@ class PendidikanPelatihanController extends Controller
         }
     }
 
-    private function broadcastMessageToParticipants($participantIds, $judul, $datetime, $tempat)
+    private function broadcastMessageToParticipants($participantIds, $judul, $datetime, $tempat, $catatan)
     {
         $employees = Employee::whereIn('id', $participantIds)->get();
         $headers = [
@@ -89,7 +89,8 @@ class PendidikanPelatihanController extends Controller
         $broadcastMessage .= "Mohon izin menyampaikan agenda diklat \"$judul\", yang akan dilaksanakan pada:\n\n";
         $broadcastMessage .= "Hari/Tanggal: " . \Carbon\Carbon::parse($datetime)->translatedFormat('l, d F Y') . "\n";
         $broadcastMessage .= "Waktu: " . \Carbon\Carbon::parse($datetime)->format('H:i') . " WIB s/d selesai\n";
-        $broadcastMessage .= "Tempat: " . $tempat;
+        $broadcastMessage .= "Tempat: " . $tempat . "\n";
+        $broadcastMessage .= "Catatan: " . $catatan . "\n\n";
 
         $broadcastMessage .= "Mohon hadir tepat pada waktunya, terima kasih☺🙏🏻\n\n";
         $broadcastMessage .= "Ttd,\nHRD RS Livasya";
