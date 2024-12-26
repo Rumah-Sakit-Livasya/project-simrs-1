@@ -240,7 +240,7 @@ class PayrollApiController extends Controller
                 }
                 if ($izin) {
                     $potonganIzinValue = $totalAllowance ?? 0;
-                    $potonganIzinValue += $basicSalary;
+                    $potonganIzinValue = $potonganIzinValue + $basicSalary;
 
                     $potonganIzinValue = (($totalAllowance ?? 0) * $izin)  / 25;
                 }
