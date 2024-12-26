@@ -45,6 +45,7 @@ use Dompdf\Options;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use App\Http\Controllers\API\TimeScheduleController;
+use App\Models\PendidikanPelatihan;
 
 class DashboardController extends Controller
 {
@@ -1649,6 +1650,18 @@ class DashboardController extends Controller
         $employees = Employee::where('is_active', 1)->get();
 
         return view('pages.time-schedule.index', compact('timeSchedules', 'employees', 'tooltipNames'));
+    }
+
+    public function getDataPendidikanPelatihan()
+    {
+        // Tooltip
+        $controller = new \App\Http\Controllers\API\PendidikanPelatihanController();
+
+
+        $pendidikanPelatihans = PendidikanPelatihan::get();
+        $employees = Employee::where('is_active', 1)->get();
+
+        return view('pages.pendidikan-pelatihan.index', compact('pendidikanPelatihans', 'employees'));
     }
 
     // Method untuk filter query berdasarkan bulan, tahun, dan status

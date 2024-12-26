@@ -265,7 +265,7 @@
                 </div>
             </div>
 
-            {{-- <div class="col-lg-4 my-2">
+            {{-- <div class="col-lg-4">
                 <!--Default-->
                 <div id="panel-1" class="panel h-100">
                     <div class="panel-hdr">
@@ -281,7 +281,7 @@
                 </div>
             </div> --}}
 
-            <div class="col-lg-4 my-2">
+            <div class="col-lg-4">
                 <!--Default-->
                 <div id="panel-1" class="panel h-100">
                     <div class="panel-hdr">
@@ -408,7 +408,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 my-2">
+            <div class="col-lg-4">
                 <!--Default-->
                 <div id="panel-1" class="panel h-100">
                     <div class="panel-hdr">

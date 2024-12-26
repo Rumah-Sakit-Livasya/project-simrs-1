@@ -59,7 +59,7 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/update/{user_id}/request', [DashboardController::class, 'updateStatusRequestAttendance'])->name("acc.update");
         Route::get("/settings", [DashboardController::class, 'getSettingAttendances'])->name('attendances.settings');
-        
+
         Route::get("/day-off-requests", [DashboardController::class, 'dayOffRequest'])->name("day-off-requests");
         Route::get("/day-off-requests/{id}", [DashboardController::class, 'getDayOffRequest'])->name("day-off-requests.get");
 
@@ -129,6 +129,16 @@ Route::middleware('auth')->group(function () {
         });
     });
     /* END TIMESCHEDULE ----------------------------------------------------------------------------*/
+
+    /*
+    |--------------------------------------------------------------------------
+    |  PENDIDIKANPELATIHAN
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('pendidikan-pelatihan')->group(function () {
+        Route::get("/", [DashboardController::class, 'getDataPendidikanPelatihan'])->name("pendidikan.pelatihan");
+    });
+    /* END PENDIDIKANPELATIHAN ----------------------------------------------------------------------------*/
 
     /*
     |--------------------------------------------------------------------------

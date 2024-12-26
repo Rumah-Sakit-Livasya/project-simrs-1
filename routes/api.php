@@ -19,6 +19,7 @@ use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\LocationController;
 use App\Http\Controllers\API\MenuController;
 use App\Http\Controllers\API\PayrollApiController;
+use App\Http\Controllers\API\PendidikanPelatihanController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\SalaryController;
 use App\Http\Controllers\API\TargetController;
@@ -299,8 +300,13 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
             Route::get('/download/{id}/{type}', [TimeScheduleController::class, 'download'])->name('time.schedule.rapat.download');
         });
     });
+    Route::prefix('pendidikan-pelatihan')->group(function () {
+        Route::post("/store", [PendidikanPelatihanController::class, 'store'])->name("pendidikan.pelatihan.store");
+        Route::get("/get-peserta/{pendidikanPelatihanId}", [PendidikanPelatihanController::class, 'getPeserta'])->name("pendidikan.pelatihan.get.peserta");
+    });
     Route::get('user/getByName', [UserController::class, 'getByName'])->name('user.getByName');
 });
+
 
 Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');
 Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])->middleware(CheckAuthorizationBot::class);
