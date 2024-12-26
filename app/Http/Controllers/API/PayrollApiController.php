@@ -220,9 +220,9 @@ class PayrollApiController extends Controller
                     ->count();
 
                 // Jika ada catatan kehadiran yang memenuhi syarat, tambahkan potongan izin sebesar 99000
-                if ($izin) {
-                    $potonganIzinValue = ($employee->deduction->potongan_izin ?? 0) * $izin;
-                }
+                // if ($izin) {
+                //     $potonganIzinValue = ($employee->deduction->potongan_izin ?? 0) * $izin;
+                // }
 
                 // Cek apakah terdapat catatan kehadiran yang memenuhi syarat potongan izin
                 $sakit = Attendance::where('employee_id', $employee->id)
@@ -237,6 +237,9 @@ class PayrollApiController extends Controller
                 }
 
                 $totalAllowance = $tunjanganJabatan + $tunjanganProfesi + $tunjanganMakanDanTransport + $tunjanganMasaKerja + $guaranteeFee + $uangDuduk + $taxAllowance;
+                if ($izin) {
+                    $potonganIzinValue = ($totalAllowance ?? 0) * $izin;
+                }
                 $totalDeduction = $potonganKeterlambatanValue + $potonganIzinValue + $potonganSakitValue + $simpananPokok + $potonganKoperasiValue + $potonganAbsensiValue + $potonganBPJSKesehatanValue + $potonganBPJSKetenagakerjaanValue + $potonganPajakValue;
                 $takeHomePay = $basicSalary + $totalAllowance - $totalDeduction;
 

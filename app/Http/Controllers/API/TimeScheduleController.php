@@ -121,10 +121,12 @@ class TimeScheduleController extends Controller
             $timeSchedule->datetime = $request->datetime; // Ambil waktu dan tanggal dari request
 
             if ($request->is_online) {
+                $roomName = \Str::slug($request->room_name);
                 $timeSchedule->is_online = $request->is_online; // Anda dapat mengubah judul sesuai kebutuhan
-                $timeSchedule->room_name =  \Str::slug($request->room_name); // Anda dapat mengubah judul sesuai kebutuhan
+                $timeSchedule->room_name =  $roomName; // Anda dapat mengubah judul sesuai kebutuhan
                 $timeSchedule->link = "vcon.livasya.com/" . $timeSchedule->room_name; // Ambil waktu dan tanggal dari request
             } else {
+                $roomName = $request->room_name;
                 $timeSchedule->room_name = $request->room_name; // Ambil waktu dan tanggal dari request
             }
 
@@ -213,7 +215,8 @@ class TimeScheduleController extends Controller
             $timeSchedule->employees()->attach($uniquePeserta);
 
             // Send broadcast message to participants
-            $this->broadcastMessageToParticipants($uniquePeserta, $timeSchedule->title, $timeSchedule->datetime, $request->is_online, $request->room_name);
+            $roles = Employee::whereIn('id', $uniquePeserta)->pluck('fullname')->toArray(); // Ambil nama peserta untuk broadcast
+            $this->broadcastMessageToParticipants($uniquePeserta, $timeSchedule->title, $timeSchedule->datetime, $request->is_online, $roomName, $roles);
 
             return response()->json([
                 'message' => 'Agenda Rapat berhasil ditambahkan!',
@@ -226,7 +229,7 @@ class TimeScheduleController extends Controller
         }
     }
 
-    private function broadcastMessageToParticipants($participantIds, $title, $datetime, $isOnline, $roomName)
+    private function broadcastMessageToParticipants($participantIds, $title, $datetime, $isOnline, $roomName, $roles)
     {
         $employees = Employee::whereIn('id', $participantIds)->get();
         $headers = [
@@ -238,10 +241,9 @@ class TimeScheduleController extends Controller
         // Data untuk pesan broadcast
         $broadcastMessage = "Assalamualaikum\n";
         $broadcastMessage .= "Kepada yth,\n";
-        $broadcastMessage .= "- Kasubbag dan Kasie\n";
-        $broadcastMessage .= "- All Karu unit Pelayanan\n";
-        $broadcastMessage .= "- All PJ Unit Penunjang\n";
-        $broadcastMessage .= "- All PJ Unit Bagian umum\n\n";
+        foreach ($roles as $role) {
+            $broadcastMessage .= "- $role\n";
+        }
         $broadcastMessage .= "Mohon izin menyampaikan agenda Rapat Koordinasi PJ dan Karu Unit, yang akan dilaksanakan pada:\n\n";
         $broadcastMessage .= "Hari/Tanggal: " . \Carbon\Carbon::parse($datetime)->translatedFormat('l, d F Y') . "\n";
         $broadcastMessage .= "Waktu: " . \Carbon\Carbon::parse($datetime)->format('H:i') . " WIB s/d selesai\n";
