@@ -235,9 +235,13 @@ class PayrollApiController extends Controller
                 $totalAllowance = $tunjanganJabatan + $tunjanganProfesi + $tunjanganMakanDanTransport + $tunjanganMasaKerja + $guaranteeFee + $uangDuduk + $taxAllowance;
                 if ($absensi) {
                     $potonganAbsensiValue = $totalAllowance ?? 0;
+                    $potonganAbsensiValue = $potonganAbsensiValue + $basicSalary;
                     $potonganAbsensiValue = ($potonganAbsensiValue * $absensi) / 25;
                 }
                 if ($izin) {
+                    $potonganIzinValue = $totalAllowance ?? 0;
+                    $potonganIzinValue += $basicSalary;
+
                     $potonganIzinValue = (($totalAllowance ?? 0) * $izin)  / 25;
                 }
                 $totalDeduction = $potonganKeterlambatanValue + $potonganIzinValue + $potonganSakitValue + $simpananPokok + $potonganKoperasiValue + $potonganAbsensiValue + $potonganBPJSKesehatanValue + $potonganBPJSKetenagakerjaanValue + $potonganPajakValue;
