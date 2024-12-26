@@ -134,7 +134,7 @@ class BotMessageController extends Controller
                             $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
                             $query->where('company_id', 1); // Hanya untuk karyawan RS
                             $query->where('organization_id', '!=', 3);
-                            $query->whereNotIn('id', [1, 2]); // Mengecualikan employee dengan ID 1;
+                            $query->whereNotIn('id', [1, 2, 14, 222]); // Mengecualikan employee dengan ID;
                         })
                         ->where('date', Carbon::now()->format('Y-m-d'))
                         ->get();
