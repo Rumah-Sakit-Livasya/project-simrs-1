@@ -1151,10 +1151,30 @@ class DashboardController extends Controller
 
     public function attendanceRequest()
     {
+
+        // Set timezone ke Asia/Jakarta
+        date_default_timezone_set('Asia/Jakarta');
+
+        // Set locale ke Indonesia
+        Carbon::setLocale('id');
         $getNotify = $this->getNotify();
         $attendance_requests = AttendanceRequest::where('employee_id', auth()->user()->employee->id)->get();
+
         $pengajuan = AttendanceRequestLampDetail::where('employee_id', auth()->user()->employee->id)->latest()->first();
         return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify', 'pengajuan'));
+        $attendance = Attendance::where('date', Carbon::now()->format('Y-m-d'))->where('employee_id', auth()->user()->employee->id)->first();
+        $is_request = false;
+        if ($attendance) {
+            $current_time = Carbon::now();
+            $shift_time_in = Carbon::createFromFormat('H:i', $attendance->shift->time_in);
+
+            // Cek apakah shift time_in lebih dari 1 jam dari sekarang
+            $is_request = $shift_time_in->diffInHours($current_time, false) > 1;
+        }
+
+        $is_request = !$is_request;
+
+        return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify', 'is_request'));
     }
 
     public function getAttendanceRequest($id)
