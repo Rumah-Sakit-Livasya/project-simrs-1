@@ -87,9 +87,9 @@ class PendidikanPelatihanController extends Controller
         // Data untuk pesan broadcast
         $broadcastMessage = "Assalamualaikum\n";
         $broadcastMessage .= "Mohon izin menyampaikan agenda diklat \"$judul\", yang akan dilaksanakan pada:\n\n";
-        $broadcastMessage .= "Pembicara: " . $pembicara . "\n";
         $broadcastMessage .= "Hari/Tanggal: " . \Carbon\Carbon::parse($datetime)->translatedFormat('l, d F Y') . "\n";
         $broadcastMessage .= "Waktu: " . \Carbon\Carbon::parse($datetime)->format('H:i') . " WIB s/d selesai\n";
+        $broadcastMessage .= "Pembicara: " . $pembicara . "\n";
         $broadcastMessage .= "Tempat: " . $tempat . "\n";
         $broadcastMessage .= "Catatan: " . $catatan . "\n\n";
 
