@@ -197,10 +197,6 @@ class PayrollApiController extends Controller
                     ->count();
 
                 // Jika ada catatan kehadiran yang memenuhi syarat, tambahkan potongan absensi sebesar 99000
-                if ($absensi) {
-                    $potonganAbsensiValue = $employee->deduction->potongan_absensi ?? 0;
-                    $potonganAbsensiValue = $potonganAbsensiValue * $absensi;
-                }
 
                 // Query untuk mencari data absensi sesuai dengan periode yang diminta
                 $hariKerja = Attendance::where('employee_id', $employee->id)
@@ -237,8 +233,12 @@ class PayrollApiController extends Controller
                 }
 
                 $totalAllowance = $tunjanganJabatan + $tunjanganProfesi + $tunjanganMakanDanTransport + $tunjanganMasaKerja + $guaranteeFee + $uangDuduk + $taxAllowance;
+                if ($absensi) {
+                    $potonganAbsensiValue = $totalAllowance ?? 0;
+                    $potonganAbsensiValue = ($potonganAbsensiValue * $absensi) / 25;
+                }
                 if ($izin) {
-                    $potonganIzinValue = ($totalAllowance ?? 0) * $izin;
+                    $potonganIzinValue = (($totalAllowance ?? 0) * $izin)  / 25;
                 }
                 $totalDeduction = $potonganKeterlambatanValue + $potonganIzinValue + $potonganSakitValue + $simpananPokok + $potonganKoperasiValue + $potonganAbsensiValue + $potonganBPJSKesehatanValue + $potonganBPJSKetenagakerjaanValue + $potonganPajakValue;
                 $takeHomePay = $basicSalary + $totalAllowance - $totalDeduction;
