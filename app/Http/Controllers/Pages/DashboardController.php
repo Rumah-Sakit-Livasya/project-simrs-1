@@ -1170,9 +1170,7 @@ class DashboardController extends Controller
             // Cek apakah shift time_in lebih dari 1 jam dari sekarang
             $is_request = $shift_time_in->diffInHours($current_time, false) > 1;
         }
-
-
-        // $is_request = !$is_request;
+        $is_request = !$is_request;
 
         return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify', 'is_request', 'pengajuan'));
     }
