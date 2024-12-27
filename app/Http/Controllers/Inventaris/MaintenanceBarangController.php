@@ -94,7 +94,7 @@ class MaintenanceBarangController extends Controller
         $file->move($storagePath, $fileName);
 
         // Path relatif untuk database
-        $photoPath = $directory . '/' . $fileName;
+        $photoPath = $directory . $fileName;
 
         $validatedData['foto'] = $photoPath;
 
