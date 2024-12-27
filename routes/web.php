@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
         Route::get("/attendance-requests", [DashboardController::class, 'attendanceRequest'])->name("attendance-requests");
         Route::get("/attendance-requests/form", [DashboardController::class, 'attendanceRequestForm'])->name("attendance-requests.form");
         Route::get("/attendance-requests/{id}", [DashboardController::class, 'getAttendanceRequest'])->name("attendance-requests.get");
+        Route::get("/attendance-requests/download-lampiran", [DashboardController::class, 'attendanceRequestLamp'])->name("attendances-requests.download-lampiran");
 
         Route::post('/update/{user_id}/request', [DashboardController::class, 'updateStatusRequestAttendance'])->name("acc.update");
         Route::get("/settings", [DashboardController::class, 'getSettingAttendances'])->name('attendances.settings');

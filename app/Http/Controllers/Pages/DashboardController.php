@@ -1175,6 +1175,20 @@ class DashboardController extends Controller
         return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify', 'is_request', 'pengajuan'));
     }
 
+    public function attendanceRequestLamp()
+    {
+        // Path ke file
+        $filePath = storage_path('app/public/pengajuan_absensi.docx');
+
+        // Cek apakah file ada
+        if (!file_exists($filePath)) {
+            return abort(404, 'File not found.');
+        }
+
+        // Mengunduh file
+        return response()->download($filePath, 'pengajuan_absensi.docx');
+    }
+
     public function getAttendanceRequest($id)
     {
         $getNotify = $this->getNotify();

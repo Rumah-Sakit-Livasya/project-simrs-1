@@ -22,6 +22,11 @@
                         <span class="fal fa-plus-circle mr-1"></span>
                         Tambah Form Pengajuan
                     </a>
+                   
+                    <a href="{{ route('attendances-requests.download-lampiran') }}" class="btn btn-primary">
+                        <span class="fal fa-plus-circle mr-1"></span>
+                        Tambah Form Pengajuan
+                    </a> 
                 @endcan
             </div>
         </div>
