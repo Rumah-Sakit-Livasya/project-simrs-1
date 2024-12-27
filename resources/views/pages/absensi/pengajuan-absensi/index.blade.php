@@ -23,9 +23,9 @@
                         Tambah Form Pengajuan
                     </a>
                    
-                    <a href="{{ route('attendances-requests.download-lampiran') }}" class="btn btn-primary">
+                    <a href="{{ asset('pengajuan_absensi.docx') }}" class="btn btn-primary">
                         <span class="fal fa-plus-circle mr-1"></span>
-                        Tambah Form Pengajuan
+                        Download Form Pengajuan
                     </a> 
                 @endcan
             </div>

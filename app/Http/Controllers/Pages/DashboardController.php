@@ -1177,8 +1177,8 @@ class DashboardController extends Controller
 
     public function attendanceRequestLamp()
     {
-        // Path ke file
-        $filePath = storage_path('app/public/pengajuan_absensi.docx');
+        // Path ke file di folder public
+        $filePath = public_path('pengajuan_absensi.docx');
 
         // Cek apakah file ada
         if (!file_exists($filePath)) {
