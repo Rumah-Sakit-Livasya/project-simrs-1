@@ -547,6 +547,8 @@ class AttendanceRequestController extends Controller
 
                 // Pindahkan file ke folder tujuan
                 $lampiran->move($storagePath, $fileName);
+
+                $lampiranPath = $directory . '/' . $fileName;
             }
 
             $lamp = AttendanceRequestLamp::create([
