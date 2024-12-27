@@ -70,7 +70,7 @@
                                                         class="wrapper-pegawai {{ $loop->first ? '' : 'mt-2' }}  w-100 d-flex justify-content-between align-items-start">
                                                         <div class="pegawai">{{ $item->employee->fullname }}</div>
                                                         <div class="custom-control custom-switch">
-                                                            @if ($item->employee->user && $item->tanggal == now())
+                                                            @if ($item->employee->user && $item->tanggal == now()->format('Y-m-d'))
                                                                 <input type="checkbox" class="custom-control-input acc"
                                                                     id="aksi-{{ $i }}"
                                                                     data-id="{{ $item->employee->user->id }}"
