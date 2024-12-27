@@ -1664,6 +1664,14 @@ class DashboardController extends Controller
         return view('pages.pendidikan-pelatihan.index', compact('pendidikanPelatihans', 'employees'));
     }
 
+    public function getPendidikanPelatihan($id)
+    {
+        $diklat = PendidikanPelatihan::where('id', $id)->get();
+
+        $getNotify = $this->getNotify();
+        return view('pages.pendidikan-pelatihan.partials.show', compact('diklat', 'getNotify'));
+    }
+
     // Method untuk filter query berdasarkan bulan, tahun, dan status
     private function applyFilters($query, $bulan, $tahun, $status, $organization)
     {

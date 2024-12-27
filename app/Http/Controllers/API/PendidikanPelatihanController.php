@@ -62,7 +62,7 @@ class PendidikanPelatihanController extends Controller
 
             // Send broadcast message to participants
             // $roles = Employee::whereIn('id', $uniquePeserta)->pluck('fullname')->toArray(); // Ambil nama peserta untuk broadcast
-            $this->broadcastMessageToParticipants($uniquePeserta, $pendidikanPelatihan->judul, $pendidikanPelatihan->datetime, $pendidikanPelatihan->tempat, $pendidikanPelatihan->catatan, $pendidikanPelatihan->pembicara);
+            $this->broadcastMessageToParticipants($uniquePeserta, $pendidikanPelatihan->judul, $pendidikanPelatihan->datetime, $pendidikanPelatihan->tempat, $pendidikanPelatihan->catatan, $pendidikanPelatihan->pembicara, $pendidikanPelatihan->id);
 
             return response()->json([
                 'message' => 'Agenda Rapat berhasil ditambahkan!',
@@ -75,7 +75,7 @@ class PendidikanPelatihanController extends Controller
         }
     }
 
-    private function broadcastMessageToParticipants($participantIds, $judul, $datetime, $tempat, $catatan, $pembicara)
+    private function broadcastMessageToParticipants($participantIds, $judul, $datetime, $tempat, $catatan, $pembicara, $diklatId)
     {
         $employees = Employee::whereIn('id', $participantIds)->get();
         $headers = [
@@ -93,7 +93,8 @@ class PendidikanPelatihanController extends Controller
         $broadcastMessage .= "Tempat: " . $tempat . "\n";
         $broadcastMessage .= "Catatan: " . $catatan . "\n\n";
 
-        $broadcastMessage .= "Mohon hadir tepat pada waktunya, terima kasih☺🙏🏻\n\n";
+        $broadcastMessage .= "Tolong konfirmasi kehadiran melalui website Smart HR atau melalui link berikut:\n";
+        $broadcastMessage .= 'https://internal.livasya.com/pendidikan-pelatihan/confirm/' . $diklatId . "\n\n";
         $broadcastMessage .= "Ttd,\nHRD RS Livasya";
 
         if ($employees->count() > 0) {

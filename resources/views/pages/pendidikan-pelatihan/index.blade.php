@@ -246,6 +246,9 @@
                     data: formData,
                     processData: false, // Jangan proses data karena kita mengirim FormData
                     contentType: false, // Jangan atur konten tipe agar boundary otomatis
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     beforeSend: function() {
                         // Tampilkan indikator loading
                         $('#store-form').find('.ikon-tambah').hide();

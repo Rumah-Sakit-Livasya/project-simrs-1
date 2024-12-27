@@ -137,6 +137,7 @@ Route::middleware('auth')->group(function () {
     */
     Route::prefix('pendidikan-pelatihan')->group(function () {
         Route::get("/", [DashboardController::class, 'getDataPendidikanPelatihan'])->name("pendidikan.pelatihan");
+        Route::get("/confirm/{id}", [DashboardController::class, 'getPendidikanPelatihan'])->name("pendidikan.pelatihan.get");
     });
     /* END PENDIDIKANPELATIHAN ----------------------------------------------------------------------------*/
 
