@@ -3,34 +3,27 @@
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row mb-5">
-            {{-- @if ($is_request) --}}
-                <div class="col-xl-12">
-                    @if (auth()->user()->is_request_attendance == 1)
-                        <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
-                            data-backdrop="static" data-keyboard="false" data-toggle="modal" data-target="#tambah-data"
-                            title="Tambah User">
-                            <span class="fal fa-plus-circle mr-1"></span>
-                            Pengajuan Absensi
-                        </button>
-                    @else
-                        <div class="alert alert-danger">
-                            Mohon maaf akses pengajuan absensi belum diberikan. Silahkan
-                            menghubungi atasan masing-masing untuk dibukakan aksesnya!
-                        </div>
-                    @endif
+            <div class="col-xl-12">
+                @if (auth()->user()->is_request_attendance == 1)
+                    <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan" data-backdrop="static"
+                        data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah User">
+                        <span class="fal fa-plus-circle mr-1"></span>
+                        Pengajuan Absensi
+                    </button>
+                @else
+                    <div class="alert alert-danger">
+                        Mohon maaf akses pengajuan absensi belum diberikan. Silahkan
+                        menghubungi atasan masing-masing untuk dibukakan aksesnya!
+                    </div>
+                @endif
 
-                    @can('pengajuan pj')
-                        <a href="{{ route('attendance-requests.form') }}" class="btn btn-primary">
-                            <span class="fal fa-plus-circle mr-1"></span>
-                            Tambah Form Pengajuan
-                        </a>
-                    @endcan
-                </div>
-            {{-- @else
-                <div class="col-md-12">
-                    <div class="alert alert-danger">Pengajuan hanya bisa 1 jam dari waktu absen.</div>
-                </div>
-            @endif --}}
+                @can('pengajuan pj')
+                    <a href="{{ route('attendance-requests.form') }}" class="btn btn-primary">
+                        <span class="fal fa-plus-circle mr-1"></span>
+                        Tambah Form Pengajuan
+                    </a>
+                @endcan
+            </div>
         </div>
 
         <div class="row">
