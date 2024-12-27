@@ -3,7 +3,7 @@
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row mb-5">
-            @if ($is_request)
+            {{-- @if ($is_request) --}}
                 <div class="col-xl-12">
                     @if (auth()->user()->is_request_attendance == 1)
                         <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
@@ -26,11 +26,11 @@
                         </a>
                     @endcan
                 </div>
-            @else
+            {{-- @else
                 <div class="col-md-12">
                     <div class="alert alert-danger">Pengajuan hanya bisa 1 jam dari waktu absen.</div>
                 </div>
-            @endif
+            @endif --}}
         </div>
 
         <div class="row">
