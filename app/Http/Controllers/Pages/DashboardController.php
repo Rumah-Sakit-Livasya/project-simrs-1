@@ -1068,7 +1068,7 @@ class DashboardController extends Controller
         if (!$user) {
             return response()->json(['error' => 'User tidak ditemukan'], 404);
         }
-        $responseMessage = "Akses Pengajuan telah Dibuka! Kamu bisa langsung melakukan pengajuan absensi pada website: https://internal.livasya.com";
+        $responseMessage = "*Akses Pengajuan telah Dibuka!* \n\nKamu bisa langsung melakukan pengajuan absensi pada website: https://internal.livasya.com";
         // Convert boolean to integer (1 or 0)
         $user->is_request_attendance = $request->is_request_attendance ? 1 : 0;
 
