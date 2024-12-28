@@ -1068,9 +1068,36 @@ class DashboardController extends Controller
         if (!$user) {
             return response()->json(['error' => 'User tidak ditemukan'], 404);
         }
-
+        $responseMessage = "Akses Pengajuan telah Dibuka! Kamu bisa langsung melakukan pengajuan absensi pada website: https://internal.livasya.com";
         // Convert boolean to integer (1 or 0)
         $user->is_request_attendance = $request->is_request_attendance ? 1 : 0;
+
+        if($user->is_request_attendance == 1) {
+            $headers = [
+                'Key:KeyAbcKey',
+                'Nama:arul',
+                'Sandi:123###!!',
+            ];
+
+            $httpDataHRD = [
+                'number' => formatNomorIndo($user->employee->mobile_phone),
+                'message' => $responseMessage,
+            ];
+
+            // Mengirim request HTTP menggunakan cURL
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+            $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($curl);
+            curl_close($curl);
+        }
         $user->save();
 
         return response()->json(['message' => 'Status berhasil diperbarui']);
