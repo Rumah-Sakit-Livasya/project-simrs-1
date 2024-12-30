@@ -247,12 +247,12 @@
                                     @foreach ($todayBirthdays as $employee)
                                         <div
                                             class="daftar-pegawai d-flex align-items-center ml-1 mr-1 p-2 border rounded shadow-sm">
-                                            @if ($item->employees->foto != null && Storage::exists('employee/profile/' . $item->employees->foto))
-                                                <img src="{{ asset('storage/employee/profile/' . $item->employees->foto) }}"
+                                            @if ($employee->foto != null && Storage::exists('employee/profile/' . $employee->foto))
+                                                <img src="{{ asset('storage/employee/profile/' . $employee->foto) }}"
                                                     class="rounded-circle mr-2" alt=""
                                                     style="width: 60px; height: 60px; object-fit: cover; z-index: 100;">
                                             @else
-                                                <img src="{{ $item->employees->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
+                                                <img src="{{ $employee->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
                                                     class="rounded-circle mr-2" alt=""
                                                     style="width: 60px; z-index: 100;">
                                             @endif
