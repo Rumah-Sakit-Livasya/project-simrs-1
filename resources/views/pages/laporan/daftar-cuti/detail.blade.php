@@ -84,8 +84,8 @@
                                                 </th>
                                                 <th style="white-space: nowrap">
                                                     @if ($row->day_off->photo)
-                                                        <img src="{{ asset('storage/img/pengajuan/cuti' . $row->day_off->photo) }}"
-                                                            alt="Gambar Pengajuan">
+                                                        <img src="{{ asset('storage/img/pengajuan/cuti/' . $row->day_off->photo) }}"
+                                                            alt="Gambar Pengajuan" width="100%">
                                                     @else
                                                         -
                                                     @endif
