@@ -230,7 +230,21 @@
                                 <p class="text-center">Tidak ada pegawai yang ulang tahun hari ini.</p>
                             @else
                                 <div style="white-space: nowrap;">
-                                    @foreach ($birthdays as $employee)
+                                    @php
+                                        $todayBirthdays = $birthdays->filter(function ($employee) {
+                                            return \Carbon\Carbon::parse($employee->birthdate)->format('m-d') ==
+                                                now()->format('m-d');
+                                        });
+
+                                        $thisMonthBirthdays = $birthdays
+                                            ->filter(function ($employee) {
+                                                return \Carbon\Carbon::parse($employee->birthdate)->format('m') ==
+                                                    now()->format('m');
+                                            })
+                                            ->diff($todayBirthdays);
+                                    @endphp
+
+                                    @foreach ($todayBirthdays as $employee)
                                         <div
                                             class="daftar-pegawai d-flex align-items-center ml-1 mr-1 p-2 border rounded shadow-sm">
                                             @if ($employee->foto != null && Storage::exists('public/employee/profile/' . $employee->foto))
@@ -244,22 +258,47 @@
                                             <div class="flex-grow-1">
                                                 <div class="name font-weight-bold">
                                                     {{ $employee->fullname }}
-                                                    @if (\Carbon\Carbon::parse($employee->birthdate)->format('m-d') == now()->format('m-d'))
-                                                        <div class="badge badge-success ml-2">🎉 Ulang Tahun!</div>
-                                                    @endif
+                                                    <div class="badge badge-success ml-2">🎉 Ulang Tahun!</div>
                                                 </div>
                                                 <div class="organization text-muted">
                                                     {{ $employee->organization->name }}
                                                 </div>
                                                 <div class="birthday text-muted">
-                                                    {{ \Carbon\Carbon::parse($employee->birthdate)->format('d F') }}
+                                                    {{ formatTanggalBulan($employee->birthdate) }}
                                                 </div>
                                             </div>
-                                            @if (\Carbon\Carbon::parse($employee->birthdate)->format('m-d') == now()->format('m-d'))
-                                                <a href="https://wa.me/{{ preg_replace('/^08/', '628', $employee->mobile_phone) }}"
-                                                    class="badge badge-success p-2" target="_blank"><i
-                                                        class='bx bxl-whatsapp m-0'></i></a>
+                                            <a href="https://wa.me/{{ phone($employee->mobile_phone) }}"
+                                                class="badge badge-success p-2" target="_blank"><i
+                                                    class='bx bxl-whatsapp m-0'></i></a>
+                                        </div>
+                                    @endforeach
+
+                                    @if ($todayBirthdays->isNotEmpty() && $thisMonthBirthdays->isNotEmpty())
+                                        <h4 class="mt-4">Lainnya di Bulan Ini</h4>
+                                    @endif
+
+                                    @foreach ($thisMonthBirthdays as $employee)
+                                        <div
+                                            class="daftar-pegawai d-flex align-items-center ml-1 mr-1 p-2 border rounded shadow-sm">
+                                            @if ($employee->foto != null && Storage::exists('public/employee/profile/' . $employee->foto))
+                                                <img src="{{ asset('storage/employee/profile/' . $employee->foto) }}"
+                                                    class="rounded-circle mr-2" alt=""
+                                                    style="width: 60px; height: 60px; object-fit: cover;">
+                                            @else
+                                                <img src="{{ $employee->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
+                                                    class="rounded-circle mr-2" alt="" style="width: 60px;">
                                             @endif
+                                            <div class="flex-grow-1">
+                                                <div class="name font-weight-bold">
+                                                    {{ $employee->fullname }}
+                                                </div>
+                                                <div class="organization text-muted">
+                                                    {{ $employee->organization->name }}
+                                                </div>
+                                                <div class="birthday text-muted">
+                                                    {{ formatTanggalBulan($employee->birthdate) }}
+                                                </div>
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>

@@ -451,3 +451,30 @@ function waktuDefault($tanggalWaktu)
     // Format waktu menjadi 'H:i WIB' (contoh: 15:11 WIB)
     return $date->format('H:i') . ' WIB';
 }
+
+function formatTanggalBulan($tanggal)
+{
+    // Ubah string ISO 8601 menjadi objek DateTime
+    $date = new DateTime($tanggal);
+
+    // Format bulan menjadi nama bulan dalam bahasa Indonesia
+    $bulanIndonesia = [
+        'January' => 'Januari',
+        'February' => 'Februari',
+        'March' => 'Maret',
+        'April' => 'April',
+        'May' => 'Mei',
+        'June' => 'Juni',
+        'July' => 'Juli',
+        'August' => 'Agustus',
+        'September' => 'September',
+        'October' => 'Oktober',
+        'November' => 'November',
+        'December' => 'Desember',
+    ];
+
+    $tanggalFormat = $date->format('d');
+    $bulan = $bulanIndonesia[$date->format('F')];
+
+    return "{$tanggalFormat} {$bulan}";
+}
