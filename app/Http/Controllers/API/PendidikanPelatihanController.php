@@ -11,22 +11,49 @@ class PendidikanPelatihanController extends Controller
 {
     public function getPeserta($rapatId)
     {
-        $rapat = PendidikanPelatihan::find($rapatId);
+        try {
+            $rapat = PendidikanPelatihan::find($rapatId);
 
-        if (!$rapat) {
-            return response()->json(['error' => 'Rapat tidak ditemukan'], 404);
+            if (!$rapat) {
+                return response()->json(['error' => 'Rapat tidak ditemukan'], 404);
+            }
+
+            $peserta = [];
+            $peserta['peserta_rapat'] = $rapat->employees()
+                ->select('employees.id as employee_id', 'employees.fullname', 'organizations.name as organization_name')
+                ->join('organizations', 'employees.organization_id', '=', 'organizations.id')
+                ->get();
+
+            $peserta['pembicara'] = $rapat->pembicara;
+            $peserta['organisasi_pembicara'] = $rapat->pembicara;
+
+            return response()->json($peserta, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal mengambil data peserta.', 'message' => $e->getMessage()], 500);
         }
+    }
 
-        $peserta = [];
-        $peserta['peserta_rapat'] = $rapat->employees()
-            ->select('employees.id as employee_id', 'employees.fullname', 'organizations.name as organization_name')
-            ->join('organizations', 'employees.organization_id', '=', 'organizations.id')
-            ->get();
+    public function getKonfirmasiPeserta($diklatId)
+    {
+        try {
+            $diklat = PendidikanPelatihan::find($diklatId);
 
-        $peserta['pembicara'] = $rapat->pembicara;
-        $peserta['organisasi_pembicara'] = $rapat->pembicara;
+            if (!$diklat) {
+                return response()->json(['error' => 'Diklat tidak ditemukan'], 404);
+            }
 
-        return response()->json($peserta, 200);
+            $peserta = $diklat->employees()
+                ->select('employees.id as employee_id', 'employees.fullname', 'organizations.name as organization_name')
+                ->join('organizations', 'employees.organization_id', '=', 'organizations.id')
+                ->join('pendidikan_pelatihan_employee as ppe', 'employees.id', '=', 'ppe.employee_id')
+                ->where('ppe.status', 'konfirmasi')
+                ->where('ppe.pendidikan_pelatihan_id', $diklatId) // Added condition to filter by $diklatId
+                ->get();
+
+            return response()->json(['peserta' => $peserta], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal mengambil data peserta.', 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request)
@@ -118,6 +145,26 @@ class PendidikanPelatihanController extends Controller
                     curl_close($curl);
                 }
             }
+        }
+    }
+
+    public function confirmKehadiran(Request $request, $id)
+    {
+        try {
+            $diklat = PendidikanPelatihan::with('employees')->find($id);
+
+            if (!$diklat) {
+                return response()->json(['message' => 'Diklat not found'], 404);
+            }
+
+            $employeeId = $request->employee_id;
+
+            // Update the status in the pivot table pendidikan_pelatihan_employee
+            $diklat->employees()->updateExistingPivot($employeeId, ['status' => 'konfirmasi']);
+
+            return response()->json(['message' => 'Kehadiran berhasil dikonfirmasi'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
 }

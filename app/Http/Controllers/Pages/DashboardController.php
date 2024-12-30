@@ -263,6 +263,12 @@ class DashboardController extends Controller
 
             $lateCount[$employee->id] = $monthlyLateCount;
         }
+        $currentMonth = now()->month;
+        $birthdays = Employee::whereMonth('birthdate', $currentMonth)
+            ->where('is_active', 1)
+            ->orderByRaw('DAY(birthdate) ASC') // Order by day of the month
+            ->orderByRaw('MONTH(birthdate) ASC') // Order by month
+            ->get();
 
         return view('dashboard', [
             'lateCount' => $lateCount,
@@ -274,6 +280,7 @@ class DashboardController extends Controller
             'statusKepegawaian' => $statusKepegawaian,
             'day_off' => $day_off,
             'employees' => $employees,
+            'birthdays' => $birthdays,
             'getNotify' => $this->getNotify(),
         ]);
     }

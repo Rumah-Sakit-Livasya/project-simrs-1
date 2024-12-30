@@ -62,78 +62,19 @@
                                                     </td>
 
                                                     <td style="white-space: nowrap">{{ $row->judul }}</td>
-                                                    <td style="white-space: nowrap">{{ $row->type }}</td>
+                                                    <td style="white-space: nowrap">{{ ucfirst($row->type) }}</td>
                                                     <td style="white-space: nowrap">{{ $row->pembicara }}</td>
                                                     <td style="white-space: nowrap">{{ $row->tempat }}</td>
                                                     <td style="white-space: nowrap">{{ tgl_waktu($row->datetime) }}</td>
-                                                    <td style="white-space: nowrap">
-                                                        @if ($row->undangan)
-                                                            <!-- Cek apakah file undangan ada -->
-                                                            <a href="{{ route('time.schedule.rapat.download', ['id' => Crypt::encrypt($row->id), 'type' => 'undangan']) }}"
-                                                                class="badge mx-1 bg-primary p-2 border-0 text-white"
-                                                                title="Undangan">
-                                                                <span class="bx bxs-user-plus m-0 ikon-edit"></span>
-                                                            </a>
-                                                        @else
-                                                            <a href="#"
-                                                                class="badge mx-1 bg-danger p-2 border-0 text-white"
-                                                                data-toggle="modal" title="Upload Undangan"
-                                                                data-target="#uploadFileModal"
-                                                                onclick="setFileType('undangan', {{ $row->id }}); $('#uploadFileModal').modal('show');">
-                                                                <span class="bx bxs-user-plus m-0 ikon-edit"></span>
-                                                            </a>
-                                                        @endif
+                                                    <td style="white-space: nowrap; text-align: center;">
 
-                                                        @if ($row->materi)
-                                                            <!-- Cek apakah file materi ada -->
-                                                            <a href="{{ route('time.schedule.rapat.download', ['id' => Crypt::encrypt($row->id), 'type' => 'materi']) }}"
-                                                                class="badge mx-1 bg-primary p-2 border-0 text-white"
-                                                                title="Materi">
-                                                                <span class="bx bxs-book-bookmark m-0 ikon-edit"></span>
-                                                            </a>
-                                                        @else
-                                                            <a href="#"
-                                                                class="badge mx-1 bg-danger p-2 border-0 text-white"
-                                                                data-toggle="modal" title="Upload Materi"
-                                                                data-target="#uploadFileModal"
-                                                                onclick="setFileType('materi', {{ $row->id }}); $('#uploadFileModal').modal('show');">
-                                                                <span class="bx bxs-book-bookmark m-0 ikon-edit"></span>
-                                                            </a>
-                                                        @endif
-
-                                                        @if ($row->absensi)
-                                                            <!-- Cek apakah file absensi ada -->
-                                                            <a href="{{ route('time.schedule.rapat.download', ['id' => Crypt::encrypt($row->id), 'type' => 'absensi']) }}"
-                                                                class="badge mx-1 bg-primary p-2 border-0 text-white"
-                                                                data-toggle="tooltip" title="Absensi">
-                                                                <span class="bx bxs-user-detail m-0 ikon-edit"></span>
-                                                            </a>
-                                                        @else
-                                                            <a href="#"
-                                                                class="badge mx-1 bg-danger p-2 border-0 text-white"
-                                                                data-toggle="tooltip" title="Upload Absensi"
-                                                                data-target="#uploadFileModal"
-                                                                onclick="setFileType('absensi', {{ $row->id }}); $('#uploadFileModal').modal('show');">
-                                                                <span class="bx bxs-user-detail m-0 ikon-edit"></span>
-                                                            </a>
-                                                        @endif
-
-                                                        @if ($row->notulen)
-                                                            <!-- Cek apakah file notulen ada -->
-                                                            <a href="{{ route('time.schedule.rapat.download', ['id' => Crypt::encrypt($row->id), 'type' => 'notulen']) }}"
-                                                                class="badge mx-1 bg-primary p-2 border-0 text-white"
-                                                                data-toggle="tooltip" title="Notulen">
-                                                                <span class="bx bxs-file m-0 ikon-edit"></span>
-                                                            </a>
-                                                        @else
-                                                            <a href="#"
-                                                                class="badge mx-1 bg-danger p-2 border-0 text-white"
-                                                                data-toggle="tooltip" title="Upload Notulen"
-                                                                data-target="#uploadFileModal"
-                                                                onclick="setFileType('notulen', {{ $row->id }}); $('#uploadFileModal').modal('show');">
-                                                                <span class="bx bxs-file m-0 ikon-edit"></span>
-                                                            </a>
-                                                        @endif
+                                                        <a href="#"
+                                                            class="badge mx-1 bg-danger p-2 border-0 text-white btn-konfirmasi-peserta"
+                                                            data-toggle="modal" title="Konfirmasi Absensi"
+                                                            data-id="{{ $row->id }}"
+                                                            data-target="#modal-konfirmasi-peserta">
+                                                            <span class="bx bxs-user-detail m-0 ikon-edit"></span>
+                                                        </a>
 
                                                     </td>
                                                 </tr>
@@ -162,8 +103,9 @@
         </div>
     </main>
 
-    @include('pages.time-schedule.partials.create-data')
-    @include('pages.time-schedule.partials.list-peserta')
+    @include('pages.pendidikan-pelatihan.partials.create-data')
+    @include('pages.pendidikan-pelatihan.partials.list-peserta')
+    @include('pages.pendidikan-pelatihan.partials.konfirmasi-peserta')
 @endsection
 @section('plugin')
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
@@ -304,34 +246,48 @@
                 });
             });
 
-            $('.btn-hapus').click(function() {
-                let id = $(this).data('id')
-                let url = "{{ route('delete.survei.kebersihan-kamar', ':id') }}".replace(':id', id);
+            $('.btn-konfirmasi-peserta').click(function() {
+                $('#modal-konfirmasi-peserta').modal('show');
+                let diklatId = $(this).attr('data-id');
+                $.ajax({
+                    url: '/api/dashboard/pendidikan-pelatihan/get-konfirmasi-peserta/' + diklatId,
+                    type: 'GET',
+                    success: function(response) {
+                        // Menghapus data sebelumnya untuk menghindari duplikasi
+                        $('#list-konfirmasi-peserta').empty();
+                        $('#list-konfirmasi-peserta').append(
+                            '<li class="list-group-item list-group-item-info text-center font-weight-bold">Konfirmasi Absensi</li>'
+                        );
 
-                let confirmationMessage = 'Yakin ingin menghapus survei ini?';
+                        // Menampilkan data peserta diklat
+                        response.peserta.forEach(function(peserta) {
+                            $('#list-konfirmasi-peserta').append(
+                                '<li class="list-group-item d-flex justify-content-between align-items-center">' +
+                                '<div class="custom-control custom-checkbox">' +
+                                '<input type="checkbox" class="custom-control-input verifikasi" id="checkbox-' +
+                                peserta.employee_id + '" data-id="' +
+                                peserta.employee_id + '" />' +
+                                '<label class="custom-control-label" for="checkbox-' +
+                                peserta.employee_id + '">' + peserta.fullname +
+                                '</label>' +
+                                '</div>' +
+                                '<span class="badge badge-info">' + peserta
+                                .organization_name + '</span>' +
+                                '</li>'
+                            );
+                        });
 
-                if (confirm(confirmationMessage)) {
-                    $.ajax({
-                        url: url,
-                        type: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            showSuccessAlert(response.message);
-
-                            setTimeout(() => {
-                                console.log('Reloading the page now.');
-                                window.location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr, status, error) {
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                        }
-                    });
-                } else {
-                    console.log('Penghapusan dibatalkan oleh pengguna.');
-                }
+                        // Tambahkan tombol untuk verifikasi
+                        $('#list-konfirmasi-peserta').append(
+                            '<li class="list-group-item text-center">' +
+                            '<button class="btn btn-success btn-verifikasi mx-1">Verifikasi</button>' +
+                            '</li>'
+                        );
+                    },
+                    error: function(xhr, status, error) {
+                        showErrorAlert('Terjadi kesalahan: ' + error);
+                    }
+                });
             });
 
             $('#dt-basic-example').dataTable({

@@ -68,9 +68,10 @@
         .panel-heading {
             font-size: 0.875rem;
             padding-top: 15px;
-            padding-bottom: 5px;
+            padding-bottom: 15px;
             padding-left: 20px;
             font-weight: 500;
+            border-bottom: 1px solid rgba(0, 0, 0, .1);
         }
 
         .page-content .panel {
@@ -217,20 +218,140 @@
             </div>
         </div>
 
+        <div class="row g-5 d-flex chart" style="overflow-x: auto;">
+            <div class="col-lg-6 mt-0 mb-2">
+                <div id="panel-1" class="panel h-100">
+                    <div>
+                        <h2 class="panel-heading">Daftar Pegawai yang Ulang Tahun Hari Ini</h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content pt-3" style="overflow-y: auto; max-height: 300px; white-space: nowrap;">
+                            @if ($birthdays->isEmpty())
+                                <p class="text-center">Tidak ada pegawai yang ulang tahun hari ini.</p>
+                            @else
+                                <div style="white-space: nowrap;">
+                                    @foreach ($birthdays as $employee)
+                                        <div
+                                            class="daftar-pegawai d-flex align-items-center ml-1 mr-1 p-2 border rounded shadow-sm">
+                                            @if ($employee->foto != null && Storage::exists('public/employee/profile/' . $employee->foto))
+                                                <img src="{{ asset('storage/employee/profile/' . $employee->foto) }}"
+                                                    class="rounded-circle mr-2" alt=""
+                                                    style="width: 60px; height: 60px; object-fit: cover;">
+                                            @else
+                                                <img src="{{ $employee->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
+                                                    class="rounded-circle mr-2" alt="" style="width: 60px;">
+                                            @endif
+                                            <div class="flex-grow-1">
+                                                <div class="name font-weight-bold">
+                                                    {{ $employee->fullname }}
+                                                    @if (\Carbon\Carbon::parse($employee->birthdate)->format('m-d') == now()->format('m-d'))
+                                                        <div class="badge badge-success ml-2">🎉 Ulang Tahun!</div>
+                                                    @endif
+                                                </div>
+                                                <div class="organization text-muted">
+                                                    {{ $employee->organization->name }}
+                                                </div>
+                                                <div class="birthday text-muted">
+                                                    {{ \Carbon\Carbon::parse($employee->birthdate)->format('d F') }}
+                                                </div>
+                                            </div>
+                                            @if (\Carbon\Carbon::parse($employee->birthdate)->format('m-d') == now()->format('m-d'))
+                                                <a href="https://wa.me/{{ preg_replace('/^08/', '628', $employee->mobile_phone) }}"
+                                                    class="badge badge-success p-2" target="_blank"><i
+                                                        class='bx bxl-whatsapp m-0'></i></a>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mt-0 mb-2">
+                <div id="panel-2" class="panel h-100">
+                    <div>
+                        <h2 class="panel-heading">Organisasi</h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content pt-3" style="overflow-y: auto; max-height: 300px; white-space: nowrap;">
+                            @if ($employees->isEmpty())
+                                <p class="text-center">Tidak ada data karyawan.</p>
+                            @else
+                                <div style="white-space: nowrap;">
+                                    <div class="demography-report">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                @foreach ($employees->pluck('organization_id')->unique() as $organizationId)
+                                                    <div class="card" data-toggle="modal"
+                                                        data-target="#organizationModal{{ $organizationId }}">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">
+                                                                {{ $employees->firstWhere('organization_id', $organizationId)->organization->name }}
+                                                            </h5>
+                                                            <p class="card-text">
+                                                                {{ $employees->where('organization_id', $organizationId)->count() }}
+                                                                pegawai</p>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Modal -->
+                                                    <div class="modal fade" id="organizationModal{{ $organizationId }}"
+                                                        tabindex="-1" role="dialog"
+                                                        aria-labelledby="organizationModalLabel{{ $organizationId }}"
+                                                        aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title"
+                                                                        id="organizationModalLabel{{ $organizationId }}">
+                                                                        {{ $employees->firstWhere('organization_id', $organizationId)->organization->name }}
+                                                                    </h5>
+                                                                    <button type="button" class="close"
+                                                                        data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <ul>
+                                                                        @foreach ($employees->where('organization_id', $organizationId)->sortBy(function ($employee) {
+            return $employee->jobPosition->name == 'Penanggung Jawab' ? 0 : 1;
+        }) as $employee)
+                                                                            <li>{{ $employee->fullname }}</li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary"
+                                                                        data-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row g-5 d-flex chart">
             <div class="col-lg-4 mt-0 mb-2">
                 <!--Default-->
-                <div id="panel-1" class="panel h-100">
-                    <div class="panel-hdr">
-                        <h2>
+                <div id="panel-1" class="panel h-100" draggable="false">
+                    <div>
+                        <h2 class="panel-heading">
                             Status Kepegawaian
                         </h2>
                     </div>
                     <div class="panel-container show">
-                        <div class="panel-content">
+                        <div class="panel-content" draggable="false">
                             <div class="progress">
-                                <div class="progress-bar bg-info" role="progressbar" style="width: 65%" aria-valuenow="65"
-                                    aria-valuemin="0" aria-valuemax="100" title=""></div>
+                                <div class="progress-bar bg-info" role="progressbar" style="width: 65%"
+                                    aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" title=""></div>
 
                                 <div class="progress-bar bg-warning" role="progressbar" style="width: 35%"
                                     aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
@@ -252,13 +373,11 @@
                                     <span class="ml-auto">{{ $statusKepegawaian['jmlPermanen'] }}</span>
                                 </div>
 
-                                {{-- <div class="d-inline-block"> --}}
                                 <div class="d-flex justify-content-between my-3">
                                     <div class="label-circle bg-warning d-inline-block" style="width: 20px;">&nbsp;</div>
                                     <span class="ml-1">Kontrak</span>
                                     <span class="ml-auto">{{ $statusKepegawaian['jmlKontrak'] }}</span>
                                 </div>
-                                {{-- </div> --}}
                             </div>
                         </div>
                     </div>
@@ -268,8 +387,8 @@
             {{-- <div class="col-lg-4">
                 <!--Default-->
                 <div id="panel-1" class="panel h-100">
-                    <div class="panel-hdr">
-                        <h2>
+                    <div>
+                        <h2 class="panel-heading">
                             Masa jabatan
                         </h2>
                     </div>
@@ -284,8 +403,8 @@
             <div class="col-lg-4">
                 <!--Default-->
                 <div id="panel-1" class="panel h-100">
-                    <div class="panel-hdr">
-                        <h2>
+                    <div>
+                        <h2 class="panel-heading">
                             Status Kepegawaian
                         </h2>
                     </div>
@@ -411,8 +530,8 @@
             <div class="col-lg-4">
                 <!--Default-->
                 <div id="panel-1" class="panel h-100">
-                    <div class="panel-hdr">
-                        <h2>
+                    <div>
+                        <h2 class="panel-heading">
                             Jenis Kelamin
                         </h2>
                     </div>
@@ -454,8 +573,8 @@
         </div>
 
         {{-- <div id="panel-10" class="panel">
-            <div class="panel-hdr">
-                <h2>
+            <div>
+                <h2 class="panel-heading">
                     Combination <span class="fw-300"><i>Chart (Bar & Line)</i></span>
                 </h2>
             </div>
@@ -512,8 +631,8 @@
         </div> --}}
 
         {{-- <div id="panel-11" class="panel">
-            <div class="panel-hdr">
-                <h2>
+            <div>
+                <h2 class="panel-heading">
                     Daftar Pegawai <span class="fw-300"><i>yang sering telat</i></span>
                 </h2>
             </div>

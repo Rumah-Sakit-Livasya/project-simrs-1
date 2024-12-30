@@ -21,8 +21,8 @@
                             </div>
                             <div class="pb-3 pt-2 border-top-0 border-left-0 border-right-0 text-muted">
                                 <p>
-                                    Tanggal : <span class="text-danger">{{ $item->datetime }}</span> <br>
-                                    Waktu : <span class="text-danger">{{ $item->datetime }} </span>
+                                    Tanggal : <span class="text-danger">{{ tglDefault($item->datetime) }}</span> <br>
+                                    Waktu : <span class="text-danger">{{ waktuDefault($item->datetime) }} </span>
                                     <hr style="border-color: #dddddd">
                                 </p>
                                 <p>{{ $item->catatan }}</p>
@@ -71,7 +71,7 @@
 
                 $.ajax({
                     type: "PUT",
-                    url: '/pendidikan-pelatihan/confirm/' + id,
+                    url: '/api/dashboard/pendidikan-pelatihan/confirm/' + id,
                     data: formData,
                     beforeSend: function() {
                         $('#btn-accept').find('.ikon').hide();

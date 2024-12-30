@@ -303,6 +303,8 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
     Route::prefix('pendidikan-pelatihan')->group(function () {
         Route::post("/store", [PendidikanPelatihanController::class, 'store'])->name("pendidikan.pelatihan.store");
         Route::get("/get-peserta/{pendidikanPelatihanId}", [PendidikanPelatihanController::class, 'getPeserta'])->name("pendidikan.pelatihan.get.peserta");
+        Route::get("/get-konfirmasi-peserta/{pendidikanPelatihanId}", [PendidikanPelatihanController::class, 'getKonfirmasiPeserta'])->name("pendidikan.pelatihan.get.konfirmasi.peserta");
+        Route::put("/confirm/{id}", [PendidikanPelatihanController::class, 'confirmKehadiran'])->name("pendidikan.pelatihan.put");
     });
     Route::get('user/getByName', [UserController::class, 'getByName'])->name('user.getByName');
 });
