@@ -281,13 +281,14 @@
                                     @foreach ($thisMonthBirthdays as $employee)
                                         <div
                                             class="daftar-pegawai d-flex align-items-center ml-1 mr-1 p-2 border rounded shadow-sm">
-                                            @if ($employee->foto != null && Storage::exists('public/employee/profile/' . $employee->foto))
+                                            @if ($employee->foto != null && Storage::exists('employee/profile/' . $employee->foto))
                                                 <img src="{{ asset('storage/employee/profile/' . $employee->foto) }}"
                                                     class="rounded-circle mr-2" alt=""
-                                                    style="width: 60px; height: 60px; object-fit: cover;">
+                                                    style="width: 60px; height: 60px; object-fit: cover; z-index: 100;">
                                             @else
                                                 <img src="{{ $employee->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
-                                                    class="rounded-circle mr-2" alt="" style="width: 60px;">
+                                                    class="rounded-circle mr-2" alt=""
+                                                    style="width: 60px; z-index: 100;">
                                             @endif
                                             <div class="flex-grow-1">
                                                 <div class="name font-weight-bold">
