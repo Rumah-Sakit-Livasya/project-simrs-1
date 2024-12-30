@@ -981,37 +981,113 @@ class ReportController extends Controller
 
     public function dayOffReqReports(Request $request)
     {
+        date_default_timezone_set('Asia/Jakarta');
+
+        // Set locale ke Indonesia
+        Carbon::setLocale('id');
+
         $currentYear = $request->input('tahun', Carbon::now()->year) ?? Carbon::now()->year;
 
         // Tentukan startDate dan endDate berdasarkan tahun yang diberikan
         $startDate = Carbon::create($currentYear - 1, 12, 26);
         $endDate = Carbon::create($currentYear, 12, 25);
+        $employees = Employee::where('is_active', 1)->get();
+        $attendances = [];
 
+        foreach ($employees as $employee) {
 
-        // Query untuk mendapatkan data attendances berdasarkan range tanggal dan employee_id
-        $attendances = Attendance::where('employee_id', auth()->user()->employee->id)
-            ->whereBetween('date', [$startDate, $endDate])
-            ->get();
+            $total_izin = 0;
+            $total_cuti = 0;
+            $total_sakit = 0;
+            $absensi_pegawai = $employee->attendance->where('is_day_off', 1)->whereBetween('date', [$startDate->toDateString(), $endDate]);
 
-        $last_attendance = Attendance::where('employee_id', auth()->user()->employee->id)->where('date', Carbon::now()->format('Y-m-d'))->first();
-        $jumlah_hadir = Attendance::where('employee_id', auth()->user()->employee->id)->where('is_day_off', null)->where('clock_in', '!=', null)->whereBetween('date', [$startDate, $endDate])->count();
-        $day_off = Attendance::where('employee_id', auth()->user()->employee->id)->where('day_off_request_id', '!=', null)->whereBetween('date', [$startDate, $endDate])->get();
-        $jumlah_izin = 0;
-        $jumlah_sakit = 0;
-        $jumlah_cuti = 0;
-
-        foreach ($day_off as $row) {
-            $code = $row->day_off->attendance_code->code;
-            if ($code == "I") {
-                $jumlah_izin++;
-            } else if ($code == "S") {
-                $jumlah_sakit++;
-            } else {
-                $jumlah_cuti++;
+            foreach ($absensi_pegawai as $absensi) {
+                if ($absensi->attendance_code_id != null || $absensi->day_off_request_id != null) {
+                    if ($absensi->attendance_code_id == 1) {
+                        $total_izin += 1;
+                    } elseif ($absensi->attendance_code_id == 2) {
+                        $total_sakit += 1;
+                    } elseif ($absensi->attendance_code_id != 1 && $absensi->attendance_code_id != 2) {
+                        $total_cuti += 1;
+                    } elseif ($absensi->attendance_code_id == null || $absensi->attendance_code_id == "") {
+                        // Jika attendance_code_id di Attendance tidak ada, cek di DayOffRequest melalui relasi day_off
+                        if ($absensi->day_off) {
+                            // Cek apakah day_off_request memiliki attendance_code_id yang diinginkan
+                            if ($absensi->day_off->attendance_code_id == 1) {
+                                $total_izin += 1;
+                            } elseif ($absensi->day_off->attendance_code_id == 2) {
+                                $total_sakit += 1;
+                            } else {
+                                $total_cuti += 1;
+                            }
+                        }
+                    }
+                }
             }
+            // Push data ke dalam array attendances
+            $attendances[] = [
+                'employee_id' => $employee->id,
+                'employee_name' => $employee->fullname,
+                'organization_name' => $employee->organization->name,
+                'total_izin' => $total_izin,
+                'total_sakit' => $total_sakit,
+                'total_cuti' => $total_cuti,
+            ];
         }
 
+        // Query untuk mendapatkan data attendances berdasarkan range tanggal dan employee_id
+        // $attendances = Attendance::where('employee_id', auth()->user()->employee->id)
+        //     ->whereBetween('date', [$startDate, $endDate])
+        //     ->get();
 
-        return view('pages.laporan.daftar-cuti.index', compact('selectedTahun', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti'));
+        // $last_attendance = Attendance::where('employee_id', auth()->user()->employee->id)->where('date', Carbon::now()->format('Y-m-d'))->first();
+        // $jumlah_hadir = Attendance::where('employee_id', auth()->user()->employee->id)->where('is_day_off', null)->where('clock_in', '!=', null)->whereBetween('date', [$startDate, $endDate])->count();
+        // $day_off = Attendance::where('employee_id', auth()->user()->employee->id)->where('day_off_request_id', '!=', null)->whereBetween('date', [$startDate, $endDate])->get();
+        // $jumlah_izin = 0;
+        // $jumlah_sakit = 0;
+        // $jumlah_cuti = 0;
+
+        // foreach ($day_off as $row) {
+        //     $code = $row->day_off->attendance_code->code;
+        //     if ($code == "I") {
+        //         $jumlah_izin++;
+        //     } else if ($code == "S") {
+        //         $jumlah_sakit++;
+        //     } else {
+        //         $jumlah_cuti++;
+        //     }
+        // }
+
+
+        return view('pages.laporan.daftar-cuti.index', compact('currentYear', 'attendances'));
+    }
+
+    public function dayOffReqReportDetail(Request $request, $id, $tahun)
+    {
+
+        $currentYear = $tahun ?? Carbon::now()->year;
+        $startDate = Carbon::create($currentYear - 1, 12, 26);
+        $endDate = Carbon::create($currentYear, 12, 25);
+
+        // Query untuk mendapatkan data attendances berdasarkan range tanggal dan employee_id
+        // $attendances = Attendance::where('employee_id', $id)
+        //     ->whereBetween('date', [$startDate, $endDate])
+        //     ->get();
+        // $day_off = Attendance::where('employee_id', $id)->where('day_off_request_id', '!=', null)->whereBetween('date', [$startDate, $endDate])->get();
+        $day_off = Attendance::where('is_day_off', 1)
+            ->where('employee_id', $id)
+            ->where(function ($query) {
+                $query->where(function ($query) {
+                    $query->whereNotNull('day_off_request_id')
+                        ->whereHas('day_off'); // Tidak perlu titik koma di akhir
+                })->orWhere(function ($query) {
+                    $query->whereNotNull('attendance_code_id'); // Tetap cek kalau attendance_code_id tidak null
+                });
+            })
+            ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->get();
+
+
+        return view('pages.laporan.daftar-cuti.detail', compact('day_off', 'currentYear'));
     }
 }

@@ -49,50 +49,7 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Filter
-                        </h2>
-                    </div>
-                    <div class="panel-container show">
-                        <div class="panel-content">
-                            <form action="" method="get" class="mx-5">
-                                @method('POST')
-                                @csrf
-                                <div id="step-1">
-                                    <div class="form-group mb-3">
-                                        <label for="tahun">Tahun</label>
-                                        <!-- Mengubah input menjadi select2 -->
-                                        <select class="select2 form-control @error('tahun') is-invalid @enderror"
-                                            name="tahun" id="tahun">
-                                            <option value="2024" {{$currentYear == '2024' ? 'selected' : ''}}>2024</option>
-                                            <option value="2025" {{$currentYear == '2025' ? 'selected' : ''}}>2025</option>
-                                            <option value="2026" {{$currentYear == '2026' ? 'selected' : ''}}>2026</option>
-                                        </select>
-                                        @error('tahun')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                    <!-- Hanya menampilkan data payroll ketika periode telah diisi -->
-                                    <div class="btn-next mt-3 text-right">
-                                        <button type="submit" class="btn-next-step btn btn-primary btn-sm ml-2">
-                                            <div class="ikon-tambah">
-                                                <span class="fal fa-search mr-1"></span>Cari
-                                            </div>
-                                            <div class="span spinner-text d-none">
-                                                <span class="spinner-border spinner-border-sm" role="status"
-                                                    aria-hidden="true"></span>
-                                                Loading...
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div id="panel-1" class="panel">
-                    <div class="panel-hdr">
-                        <h2>
-                            Daftar Day Off / Time Off
+                            Daftar Day Off / Time Off <b class="text-primary"> &nbsp;( Tahun {{$currentYear ?? \Carbon\Carbon::now()->year}} )</b>
                         </h2>
                     </div>
                     <div class="panel-container show">
@@ -103,40 +60,35 @@
                                     <thead>
                                         <tr>
                                             <th style="white-space: nowrap">No</th>
-                                            <th style="white-space: nowrap">Nama</th>
-                                            <th style="white-space: nowrap">Unit</th>
-                                            <th style="white-space: nowrap">Izin (Hari)</th>
-                                            <th style="white-space: nowrap">Sakit (Hari)</th>
-                                            <th style="white-space: nowrap">Cuti (Hari)</th>
-                                            <th style="white-space: nowrap">Aksi</th>
+                                            <th style="white-space: nowrap">Tanggal</th>
+                                            <th style="white-space: nowrap">Status</th>
+                                            <th style="white-space: nowrap">Keterangan</th>
+                                            <th style="white-space: nowrap">File</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($attendances as $row)
+                                        @foreach ($day_off as $row)
                                             <tr>
 
                                                 <th style="white-space: nowrap">
                                                     {{ $loop->iteration }}
                                                 </th>
                                                 <th style="white-space: nowrap">
-                                                    {{$row['employee_name']}}
+                                                    {{ \Carbon\Carbon::parse($row->date)->format('d F Y') }}
                                                 </th>
                                                 <th style="white-space: nowrap">
-                                                    {{$row['organization_name']}}
+                                                    {{ $row->day_off ? $row->day_off->attendance_code->code : $row->attendance_code->code }}
                                                 </th>
                                                 <th style="white-space: nowrap">
-                                                    {{$row['total_izin']}}
+                                                    {{ $row->day_off->description ?? '-' }}
                                                 </th>
                                                 <th style="white-space: nowrap">
-                                                    {{$row['total_sakit']}}
-                                                </th>
-                                                <th style="white-space: nowrap">
-                                                    {{$row['total_cuti']}}
-                                                </th>
-                                                <th style="white-space: nowrap">
-                                                    <a href="{{route('reports.dayOffReq.detail', ['id' => $row['employee_id'], 'tahun' => $currentYear])}}" class="btn btn-primary">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
+                                                    @if ($row->day_off->photo)
+                                                        <img src="{{ asset('storage/img/pengajuan/cuti' . $row->day_off->photo) }}"
+                                                            alt="Gambar Pengajuan">
+                                                    @else
+                                                        -
+                                                    @endif
                                                 </th>
                                             </tr>
                                         @endforeach
@@ -144,12 +96,10 @@
                                     <tfoot>
                                         <tr>
                                             <th style="white-space: nowrap">No</th>
-                                            <th style="white-space: nowrap">Nama</th>
-                                            <th style="white-space: nowrap">Unit</th>
-                                            <th style="white-space: nowrap">Izin</th>
-                                            <th style="white-space: nowrap">Sakit</th>
-                                            <th style="white-space: nowrap">Cuti</th>
-                                            <th style="white-space: nowrap">Aksi</th>
+                                            <th style="white-space: nowrap">Tanggal</th>
+                                            <th style="white-space: nowrap">Status</th>
+                                            <th style="white-space: nowrap">Keterangan</th>
+                                            <th style="white-space: nowrap">File</th>
                                         </tr>
                                     </tfoot>
                                 </table>
