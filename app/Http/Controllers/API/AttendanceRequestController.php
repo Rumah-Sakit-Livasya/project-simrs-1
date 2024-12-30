@@ -521,9 +521,7 @@ class AttendanceRequestController extends Controller
             'tanggal' => 'required|array',
             'tanggal.*' => 'date', // Validasi tanggal
             'clockin' => 'nullable|array',
-            'clockin.*' => 'date_format:H:i', // Validasi format waktu
             'clockout' => 'nullable|array',
-            'clockout.*' => 'date_format:H:i', // Validasi format waktu
             'lampiran' => 'required|file|mimes:pdf|max:2048',
         ]);
 
