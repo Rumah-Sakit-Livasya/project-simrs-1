@@ -2,6 +2,10 @@
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
     <style>
+        main {
+            overflow-x: hidden;
+        }
+
         input[type="time"] {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -167,38 +171,63 @@
                     <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
                         @include('pages.simrs.poliklinik.partials.detail-pasien')
                         <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
+                        <header class="text-primary text-center font-weight-bold mb-4">
+                            <div id="alert-pengkajian"></div>
+                            <h2 class="font-weight-bold">TINDAKAN MEDIS</h4>
+                        </header>
+                        <hr style="border-color: #868686; margin-top: 30px; margin-bottom: 30px;">
                         <div class="row">
                             <div class="col-md-12">
-                                @dd($list_tindakan_medis)
                                 <!-- datatable start -->
-                            <div class="table-responsive">
-                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                    <thead>
-                                        <tr>
-                                            <th style="white-space: nowrap">Tanggal</th>
-                                            <th style="white-space: nowrap">Dokter</th>
-                                            <th style="white-space: nowrap">Tindakan</th>
-                                            <th style="white-space: nowrap">Kelas</th>
-                                            <th style="white-space: nowrap">QTY</th>
-                                            <th style="white-space: nowrap">F.O.C</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th style="white-space: nowrap">Tanggal</th>
-                                            <th style="white-space: nowrap">Dokter</th>
-                                            <th style="white-space: nowrap">Tindakan</th>
-                                            <th style="white-space: nowrap">Kelas</th>
-                                            <th style="white-space: nowrap">QTY</th>
-                                            <th style="white-space: nowrap">F.O.C</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                            <!-- datatable end -->
+                                <div class="table-responsive">
+                                    <table id="dt-basic-example"
+                                        class="table table-bordered table-hover table-striped w-100">
+                                        <thead>
+                                            <tr>
+                                                <th style="white-space: nowrap">Tanggal</th>
+                                                <th style="white-space: nowrap">Dokter</th>
+                                                <th style="white-space: nowrap">Tindakan</th>
+                                                <th style="white-space: nowrap">Kelas</th>
+                                                <th style="white-space: nowrap">QTY</th>
+                                                <th style="white-space: nowrap">F.O.C</th>
+                                                <th style="white-space: nowrap">User Entry</th>
+                                                <th style="white-space: nowrap">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($tindakan_medis_yang_dipakai as $row)
+                                                <tr>
+
+                                                    <td>{{ tgl_waktu($row->created_at) }}</td>
+                                                    <td>{{ $row->doctor_id }}</td>
+                                                    <td>{{ $row->tindakan_medis_id }}</td>
+                                                    <td>{{ $row->kelas_rawat_id }}</td>
+                                                    <td>{{ $row->qty }}</td>
+                                                    <td>{{ $row->total_harga }}</td>
+                                                    <td>{{ $row->user_entry }}</td>
+                                                    <td>
+                                                        <button class="btn btn-danger py-1 px-2">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th style="white-space: nowrap">Tanggal</th>
+                                                <th style="white-space: nowrap">Dokter</th>
+                                                <th style="white-space: nowrap">Tindakan</th>
+                                                <th style="white-space: nowrap">Kelas</th>
+                                                <th style="white-space: nowrap">QTY</th>
+                                                <th style="white-space: nowrap">F.O.C</th>
+                                                <th style="white-space: nowrap">User Entry</th>
+                                                <th style="white-space: nowrap">Aksi</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <!-- datatable end -->
                             </div>
                         </div>
                     </div>
@@ -208,6 +237,7 @@
     </main>
 @endsection
 @section('plugin')
+    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
@@ -217,6 +247,21 @@
             });
             $('#doctor_id').select2({
                 placeholder: 'Pilih Dokter',
+            });
+            $('#dt-basic-example').dataTable({
+                responsive: false,
+            });
+
+            $('.js-thead-colors a').on('click', function() {
+                var theadColor = $(this).attr("data-bg");
+                console.log(theadColor);
+                $('#dt-basic-example thead').removeClassPrefix('bg-').addClass(theadColor);
+            });
+
+            $('.js-tbody-colors a').on('click', function() {
+                var theadColor = $(this).attr("data-bg");
+                console.log(theadColor);
+                $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
             });
         });
     </script>
