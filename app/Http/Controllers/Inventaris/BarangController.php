@@ -21,7 +21,8 @@ class BarangController extends Controller
         $templateBarang = $request->input('template_barang_id');
         $kategoriBarang = $request->input('category_barang_id');
         $identitasBarang = $request->input('identitas_barang');
-        $identitasBarang = $request->input('harga_barang');
+        $hargaBarang = $request->input('harga_barang');
+        $ruanganId = $request->input('ruangan_id'); // Added request filter for room_id
         $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
         $barang = [];
 
@@ -36,10 +37,9 @@ class BarangController extends Controller
             $rooms = Auth::user()->employee->organization->room_maintenance;
             $organizationId = Auth::user()->employee->organization_id;
             $companies = Auth::user()->employee->company;
-            // return dd($companies);
 
             // Check if there are search parameters
-            if ($customName || $templateBarang || $kategoriBarang || $identitasBarang) {
+            if ($customName || $templateBarang || $kategoriBarang || $identitasBarang || $ruanganId) { // Added ruanganId to the condition
                 // Query for searching
                 $query = Barang::query();
 
@@ -55,6 +55,9 @@ class BarangController extends Controller
                 }
                 if ($kategoriBarang) {
                     $query->where('category_barang_id', $kategoriBarang);
+                }
+                if ($ruanganId) { // Added filter for ruangan_id
+                    $query->where('room_id', $ruanganId);
                 }
 
                 // Filter by organization through the room maintenance relationship
@@ -79,7 +82,8 @@ class BarangController extends Controller
             'categories' => CategoryBarang::orderBy('name', 'asc')->get(),
             'rooms' => $rooms,
             'allRoom' => $allRoom,
-            'jumlah' => count(Barang::all())
+            'jumlah' => count(Barang::all()),
+            'ruangan' => $rooms // Added $ruangan here
         ]);
     }
 

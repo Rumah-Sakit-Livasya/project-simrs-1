@@ -588,6 +588,7 @@
                 });
                 $('#barang_category_id').select2();
                 $('#template_barang_id').select2();
+                $('#ruangan_id').select2();
                 $('#tambahBarang').select2({
                     placeholder: 'Pilih Barang',
                 });

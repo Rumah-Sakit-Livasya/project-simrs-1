@@ -110,6 +110,8 @@
                                         <th style="white-space: nowrap">Jumlah Barang</th>
                                         <th style="white-space: nowrap">Lantai</th>
                                         <th style="white-space: nowrap">Status</th>
+                                        <th style="white-space: nowrap">Penanggung Jawab</th>
+                                        <!-- Added column for responsible unit -->
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </thead>
@@ -128,6 +130,12 @@
                                             </td>
                                             <td style="white-space: nowrap">{{ $row->floor }}</td>
                                             <td style="white-space: nowrap">{{ $row->status == 1 ? 'Aktif' : 'Nonaktif' }}
+                                            </td>
+                                            <td style="white-space: nowrap">
+                                                @foreach ($row->organizations as $organization)
+                                                    <!-- Displaying responsible organizations -->
+                                                    <span class="badge badge-info">{{ $organization->name }}</span>
+                                                @endforeach
                                             </td>
                                             <td style="white-space: nowrap">
                                                 <button type="button" data-backdrop="static" data-keyboard="false"
@@ -157,6 +165,8 @@
                                         <th style="white-space: nowrap">Jumlah Barang</th>
                                         <th style="white-space: nowrap">Lantai</th>
                                         <th style="white-space: nowrap">Status</th>
+                                        <th style="white-space: nowrap">Penanggung Jawab</th>
+                                        <!-- Added footer for responsible unit -->
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </tfoot>

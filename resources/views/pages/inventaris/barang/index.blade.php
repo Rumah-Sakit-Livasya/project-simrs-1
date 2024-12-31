@@ -14,116 +14,106 @@
                         <div class="panel-content">
                             <form action="{{ route('inventaris.barang.search') }}" method="post">
                                 @csrf
-                                <div class="row justify-content-center mt-5">
+                                <div class="row mt-5 justify-content-center">
                                     <div class="col-lg-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-lg-4" style="text-align: right">
-                                                    <label for="custom_name" class="form-label">Nama Barang</label>
-                                                </div>
-                                                <div class="col-lg">
-                                                    <input type="text" value="{{ request('custom_name') }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #FD61AA; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="custom_name" name="custom_name">
-                                                    @error('custom_name')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
+                                            <label for="custom_name" class="form-label">Nama Barang</label>
+                                            <input type="text" value="{{ request('custom_name') }}" class="form-control"
+                                                id="custom_name" name="custom_name">
+                                            @error('custom_name')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-lg-5" style="text-align: right">
-                                                    <label for="identitas_barang" class="form-label">Identitas
-                                                        Barang</label>
-                                                </div>
-                                                <div class="col-lg">
-                                                    <input type="text" value="{{ request('identitas_barang') }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #FD61AA; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="identitas_barang" name="identitas_barang">
-                                                    @error('identitas_barang')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
+                                            <label for="identitas_barang" class="form-label">Identitas Barang</label>
+                                            <input type="text" value="{{ request('identitas_barang') }}"
+                                                class="form-control" id="identitas_barang" name="identitas_barang">
+                                            @error('identitas_barang')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-5 justify-content-center">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label class="form-label" for="barang_category_id">Kategori Barang</label>
+                                            <select
+                                                class="form-control w-100 @error('barang_category_id') is-invalid @enderror"
+                                                id="barang_category_id" name="barang_category_id">
+                                                <option value=""> </option>
+                                                @foreach ($categories as $category)
+                                                    <option value="{{ $category->id }}"
+                                                        {{ request('barang_category_id') == $category->id ? 'selected' : '' }}>
+                                                        {{ strtoupper($category->name) }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('barang_category_id')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label class="form-label" for="template_barang_id">Template Barang</label>
+                                            <select
+                                                class="form-control w-100 @error('template_barang_id') is-invalid @enderror"
+                                                id="template_barang_id" name="template_barang_id">
+                                                <option value=""> </option>
+                                                @foreach ($templates as $template)
+                                                    <option value="{{ $template->id }}"
+                                                        {{ request('template_barang_id') == $template->id ? 'selected' : '' }}>
+                                                        {{ strtoupper($template->name) }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('template_barang_id')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-5 justify-content-center">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label class="form-label" for="ruangan_id">Ruangan</label>
+                                            <select class="form-control w-100 @error('ruangan_id') is-invalid @enderror"
+                                                id="ruangan_id" name="ruangan_id">
+                                                <option value=""> </option>
+                                                @foreach ($ruangan as $room)
+                                                    <option value="{{ $room->id }}"
+                                                        {{ request('ruangan_id') == $room->id ? 'selected' : '' }}>
+                                                        {{ strtoupper($room->name) }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('ruangan_id')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4" style="visibility: hidden; height: 0;">
+                                        <div class="form-group">
+                                            <label class="form-label" for="ruangan_id_fake">Ruangan (Fake)</label>
+                                            <select class="form-control w-100" id="ruangan_id_fake" name="ruangan_id_fake"
+                                                style="display: none;">
+                                                <option value=""> </option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="row justify-content-center mt-5">
-                                    <div class="col-lg-4" style="text-align: right">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-lg-4">
-                                                    <label class="form-label" for="barang_category_id">
-                                                        Kategori Barang
-                                                    </label>
-                                                </div>
-                                                <div class="col-lg">
-                                                    <select
-                                                        class="form-control w-100 @error('barang_category_id') is-invalid @enderror"
-                                                        id="barang_category_id" name="barang_category_id"
-                                                        style="border: 0; border-bottom: 1.9px solid #FD61AA; margin-top: -.5rem; border-radius: 0">
-                                                        <option value=""> </option>
-                                                        @foreach ($categories as $category)
-                                                            <option value="{{ $category->id }}"
-                                                                {{ request('barang_category_id') == $category->id ? 'selected' : '' }}>
-                                                                {{ strtoupper($category->name) }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('barang_category_id')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-lg-5" style="text-align: right">
-                                                    <label class="form-label" for="template_barang_id">
-                                                        Template Barang
-                                                    </label>
-                                                </div>
-                                                <div class="col-lg">
-                                                    <select
-                                                        class="form-control w-100 @error('template_barang_id') is-invalid @enderror"
-                                                        id="template_barang_id" name="template_barang_id"
-                                                        style="border: 0; border-bottom: 1.9px solid #FD61AA; margin-top: -.5rem; border-radius: 0">
-                                                        <option value=""> </option>
-                                                        @foreach ($templates as $template)
-                                                            <option value="{{ $template->id }}"
-                                                                {{ request('template_barang_id') == $template->id ? 'selected' : '' }}>
-                                                                {{ strtoupper($template->name) }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('template_barang_id')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row justify-content-end mt-5">
-                                    <div class="col-lg-8">
-                                        <div class="row justify-content-end">
-                                            <div class="col-lg-5">
-                                                <button type="submit"
-                                                    class="btn btn-outline-primary waves-effect waves-themed">
-                                                    <span class="fal fa-search mr-1"></span>
-                                                    Cari
-                                                </button>
-                                            </div>
-                                        </div>
+                                    <div class="col-lg-12 text-center">
+                                        <button type="submit" class="btn btn-outline-primary waves-effect waves-themed">
+                                            <span class="fal fa-search mr-1"></span>
+                                            Cari
+                                        </button>
                                     </div>
                                 </div>
                             </form>
-
                         </div>
                     </div>
                 </div>
@@ -275,28 +265,33 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <label class="form-label" for="company_id">
-                                                Perusahaan
-                                            </label>
-                                            <select class="form-control w-100 @error('company_id') is-invalid @enderror"
-                                                id="company_id" name="company_id">
-                                                <optgroup label="Perusahaan">
-                                                    @can('admin inventaris barang')
-                                                        @foreach ($companies as $row)
-                                                            <option value="{{ $row->id }}">{{ $row->name }}</option>
-                                                        @endforeach
-                                                    @else
-                                                        <option value="{{ $companies->id }}">{{ $companies->name }}</option>
-                                                    @endcan
-                                                </optgroup>
-                                            </select>
-                                            @error('company_id')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                    @if (Auth::user()->hasRole('super admin'))
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <label class="form-label" for="company_id">
+                                                    Perusahaan
+                                                </label>
+                                                <select
+                                                    class="form-control w-100 @error('company_id') is-invalid @enderror"
+                                                    id="company_id" name="company_id">
+                                                    <optgroup label="Perusahaan">
+                                                        @can('admin inventaris barang')
+                                                            @foreach ($companies as $row)
+                                                                <option value="{{ $row->id }}">{{ $row->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        @else
+                                                            <option value="{{ $companies->id }}">{{ $companies->name }}
+                                                            </option>
+                                                        @endcan
+                                                    </optgroup>
+                                                </select>
+                                                @error('company_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 </div>
                                 <div class="row mt-3">
                                     <div class="col">
