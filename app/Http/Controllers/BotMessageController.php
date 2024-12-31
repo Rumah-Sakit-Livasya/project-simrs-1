@@ -115,95 +115,92 @@ class BotMessageController extends Controller
             if (isset($data["shift"])) {
                 if ($data["shift"] == "pagi") {
 
-                    $absent_pagi_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
-                        ->whereHas('shift', function ($query) {
-                            $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
-                                ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
-                        })->whereHas('employees', function ($query) {
-                            $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                            $query->where('company_id', 2); // Hanya untuk karyawan PT
-                        })
-                        ->where('date', Carbon::now()->format('Y-m-d'))
-                        ->get();
+                    // $absent_pagi_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
+                    //     ->whereHas('shift', function ($query) {
+                    //         $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
+                    //             ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
+                    //     })->whereHas('employees', function ($query) {
+                    //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                    //         $query->where('company_id', 2); // Hanya untuk karyawan PT
+                    //     })
+                    //     ->where('date', Carbon::now()->format('Y-m-d'))
+                    //     ->get();
 
-                    $absent_pagi_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
-                        ->whereHas('shift', function ($query) {
-                            $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
-                                ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
-                        })->whereHas('employees', function ($query) {
-                            $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                            $query->where('company_id', 1); // Hanya untuk karyawan RS
-                            $query->where('organization_id', '!=', 3);
-                            $query->whereNotIn('id', [1, 2, 14, 222]); // Mengecualikan employee dengan ID;
-                        })
-                        ->where('date', Carbon::now()->format('Y-m-d'))
-                        ->get();
+                    // $absent_pagi_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
+                    //     ->whereHas('shift', function ($query) {
+                    //         $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
+                    //             ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
+                    //     })->whereHas('employees', function ($query) {
+                    //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                    //         $query->where('company_id', 1); // Hanya untuk karyawan RS
+                    //         $query->where('organization_id', '!=', 3);
+                    //         $query->whereNotIn('id', [1, 2, 14, 222]); // Mengecualikan employee dengan ID;
+                    //     })
+                    //     ->where('date', Carbon::now()->format('Y-m-d'))
+                    //     ->get();
 
-                    $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN PAGI ‼️ </b>\n\n";
-                    if (isset($absent_pagi_pt)) {
-                        $response .= "🔻 <b>Karyawan PT: </b>\n";
+                    // $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN PAGI ‼️ </b>\n\n";
+                    // if (isset($absent_pagi_pt)) {
+                    //     $response .= "🔻 <b>Karyawan PT: </b>\n";
 
-                        foreach ($absent_pagi_pt as $key => $row) {
-                            $response .= "⛔️ " . $row->employees->fullname . "\n";
-                        }
-                        $response .= "\n";
-                    }
+                    //     foreach ($absent_pagi_pt as $key => $row) {
+                    //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+                    //     }
+                    //     $response .= "\n";
+                    // }
 
-                    if (isset($absent_pagi_rs)) {
-                        $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
+                    // if (isset($absent_pagi_rs)) {
+                    //     $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
 
-                        foreach ($absent_pagi_rs as $key => $row) {
-                            $response .= "⛔️ " . $row->employees->fullname . "\n";
-                        }
-                        $response .= "\n";
-                    }
+                    //     foreach ($absent_pagi_rs as $key => $row) {
+                    //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+                    //     }
+                    //     $response .= "\n";
+                    // }
                 } else if ($data["shift"] == "siang") {
-                    $absent_siang_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
-                        ->whereHas('shift', function ($query) {
-                            $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
-                                ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
-                        })->whereHas('employees', function ($query) {
-                            $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                            $query->where('company_id', 2); // Hanya untuk karyawan PT
-                        })
-                        ->where('date', Carbon::now()->format('Y-m-d'))
-                        ->get();
+                    // $absent_siang_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
+                    //     ->whereHas('shift', function ($query) {
+                    //         $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
+                    //             ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
+                    //     })->whereHas('employees', function ($query) {
+                    //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                    //         $query->where('company_id', 2); // Hanya untuk karyawan PT
+                    //     })
+                    //     ->where('date', Carbon::now()->format('Y-m-d'))
+                    //     ->get();
 
-                    $absent_siang_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
-                        ->whereHas('shift', function ($query) {
-                            $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
-                                ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
-                        })->whereHas('employees', function ($query) {
-                            $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                            $query->where('company_id', 1); // Hanya untuk karyawan RS
-                        })
-                        ->where('date', Carbon::now()->format('Y-m-d'))
-                        ->get();
+                    // $absent_siang_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
+                    //     ->whereHas('shift', function ($query) {
+                    //         $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
+                    //             ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
+                    //     })->whereHas('employees', function ($query) {
+                    //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                    //         $query->where('company_id', 1); // Hanya untuk karyawan RS
+                    //     })
+                    //     ->where('date', Carbon::now()->format('Y-m-d'))
+                    //     ->get();
 
-                    $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN SIANG ‼️ </b>\n\n";
-                    if (isset($absent_siang_pt)) {
-                        $response .= "🔻 <b>Karyawan PT: </b>\n";
+                    // $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN SIANG ‼️ </b>\n\n";
+                    // if (isset($absent_siang_pt)) {
+                    //     $response .= "🔻 <b>Karyawan PT: </b>\n";
 
-                        foreach ($absent_siang_pt as $key => $row) {
-                            $response .= "⛔️ " . $row->employees->fullname . "\n";
-                        }
-                        $response .= "\n";
-                    }
+                    //     foreach ($absent_siang_pt as $key => $row) {
+                    //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+                    //     }
+                    //     $response .= "\n";
+                    // }
 
-                    if (isset($absent_siang_rs)) {
-                        $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
+                    // if (isset($absent_siang_rs)) {
+                    //     $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
 
-                        foreach ($absent_siang_rs as $key => $row) {
-                            $response .= "⛔️ " . $row->employees->fullname . "\n";
-                        }
-                        $response .= "\n";
-                    }
+                    //     foreach ($absent_siang_rs as $key => $row) {
+                    //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+                    //     }
+                    //     $response .= "\n";
+                    // }
                 } else if ($data["shift"] == "malam") {
                     $absent_malam_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
-                        ->whereHas('shift', function ($query) {
-                            $query->where('time_in', '>', '17:00:00') // Menambahkan kondisi time_in > 04:00:00
-                                ->where('time_in', '<', '20:00:00'); // Menambahkan kondisi time_in < 09:00:00
-                        })->whereHas('employees', function ($query) {
+                        ->whereHas('shift')->whereHas('employees', function ($query) {
                             $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
                             $query->where('company_id', 2); // Hanya untuk karyawan PT
                         })
@@ -211,17 +208,14 @@ class BotMessageController extends Controller
                         ->get();
 
                     $absent_malam_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
-                        ->whereHas('shift', function ($query) {
-                            $query->where('time_in', '>', '17:00:00') // Menambahkan kondisi time_in > 04:00:00
-                                ->where('time_in', '<', '20:00:00'); // Menambahkan kondisi time_in <b 09:00:00
-                        })->whereHas('employees', function ($query) {
+                        ->whereHas('shift')->whereHas('employees', function ($query) {
                             $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
                             $query->where('company_id', 1); // Hanya untuk karyawan RS
                         })
                         ->where('date', Carbon::now()->format('Y-m-d'))
                         ->get();
 
-                    $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN MALAM ‼️ </b>\n\n";
+                    $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN HARI INI ‼️ </b>\n\n";
                     if (isset($absent_malam_pt)) {
                         $response .= "🔻 <b>Karyawan PT: </b>\n";
 
