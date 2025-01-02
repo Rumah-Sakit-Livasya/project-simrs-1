@@ -523,12 +523,13 @@ class DashboardController extends Controller
     {
         $getNotify = $this->getNotify();
 
-        // Periksa apakah permintaan telah menyertakan parameter periode
-        if ($request->has('periode')) {
+        // Periksa apakah permintaan telah menyertakan parameter periode dan tahun
+        if ($request->has('periode') && $request->has('tahun')) {
             $periode = $request->periode;
+            $year = $request->tahun;
             list($startMonth, $endMonth) = explode(' - ', $periode);
-            $startPeriod = Carbon::createFromFormat('F Y', $startMonth)->startOfMonth()->addDays(25); // 26 April 2024
-            $endPeriod = Carbon::createFromFormat('F Y', $endMonth)->startOfMonth()->addDays(24);
+            $startPeriod = Carbon::createFromFormat('F Y', $startMonth . ' ' . $year)->startOfMonth()->addDays(25); // 26 April 2024
+            $endPeriod = Carbon::createFromFormat('F Y', $endMonth . ' ' . $year)->startOfMonth()->addDays(24);
         } else {
             // Jika tidak, tentukan periode bulan sekarang
             $today = Carbon::now();
