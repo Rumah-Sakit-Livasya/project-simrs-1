@@ -115,12 +115,13 @@ class ReportController extends Controller
         ]);
     }
 
-    public function attendanceReports()
+    public function attendanceReports(Request $request)
     {
 
         if (Auth::check() && !Auth::user()->hasRole('super admin')) {
             return redirect()->route('attendances')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
+
 
         $total_absent_this_month = 0;
         $total_ontime_this_month = 0;
@@ -129,6 +130,9 @@ class ReportController extends Controller
         $total_dayoff_this_month = 0;
         $total_timeoff_this_month = 0;
         $year = Carbon::now()->year;
+        if ($request->year) {
+            $year = $request->year;
+        }
         $attendancesAllMonths = [];
 
         // Mulai dari Januari hingga Desember
@@ -194,6 +198,8 @@ class ReportController extends Controller
                 'total_absent_all' => $total_absent_all,
             ];
         }
+
+        // dd($attendancesAllMonths);
 
         if (Carbon::now()->day >= 26) {
             $startDateReport = Carbon::create(

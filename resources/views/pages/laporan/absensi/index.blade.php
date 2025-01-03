@@ -75,6 +75,75 @@
             </div>
         </div>
         <div class="row mt-4">
+            <div class="col-xl-12">
+                <div id="panel-1" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            Filter
+                        </h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <form action="" method="GET">
+                                @method('GET')
+                                @csrf
+                                <div class="row" id="step-1">
+                                    <div class="col-md-10">
+                                        <div class="form-group mb-3">
+                                            <label for="year">Tahun</label>
+                                            <!-- Mengubah input menjadi select2 -->
+                                            <select class="select2 form-control @error('year') is-invalid @enderror"
+                                                name="year" id="year">
+                                                <option value="2024"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 2024 ? 'selected' : '' }}>
+                                                    2024</option>
+                                                <option value="2023"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 2023 ? 'selected' : '' }}>
+                                                    2023</option>
+                                                <option value="2025"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 2025 ? 'selected' : '' }}>
+                                                    2025</option>
+                                                <option value="2026"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 2026 ? 'selected' : '' }}>
+                                                    2026</option>
+                                                <option value="2027"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 2027 ? 'selected' : '' }}>
+                                                    2027</option>
+                                                <option value="2028"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 2028 ? 'selected' : '' }}>
+                                                    2028</option>
+                                                <option value="2029"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 2029 ? 'selected' : '' }}>
+                                                    2029</option>
+                                                <option value="2030"
+                                                    {{ isset($selectedTahun) && $selectedTahun == 2030 ? 'selected' : '' }}>
+                                                    2030</option>
+                                            </select>
+                                            @error('tahun')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-center">
+                                        <button type="submit" class="btn btn-primary btn-block w-100">
+                                            <div class="ikon-tambah">
+                                                <span class="fal fa-search mr-1"></span>Cari
+                                            </div>
+                                            <div class="span spinner-text d-none">
+                                                <span class="spinner-border spinner-border-sm" role="status"
+                                                    aria-hidden="true"></span>
+                                                Loading...
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-xl-6">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
