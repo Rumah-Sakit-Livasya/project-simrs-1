@@ -603,10 +603,12 @@
             let total_absent = [];
             let currentMonth = new Date().getMonth() + 1;
 
+            console.log(attendancesAllMonths);
+
             for (let nama_bulan in attendancesAllMonths) {
                 if (attendancesAllMonths.hasOwnProperty(nama_bulan) && convertMonthNameToNumber(nama_bulan) <=
                     currentMonth) {
-
+                    console.log(nama_bulan);
                     let total_all = 0;
                     total_all = total_all + attendancesAllMonths[nama_bulan]["total_ontime_all"] +
                         attendancesAllMonths[nama_bulan]["total_latein_all"] +
@@ -619,6 +621,8 @@
                     total_absent.push((attendancesAllMonths[nama_bulan]["total_absent_all"] / total_all) * 100);
                 }
             }
+
+            console.log(total_ontime, true);
 
             var barStackedData = {
                 labels: bulan,
@@ -734,8 +738,6 @@
                     absentValues.push(0);
                 }
             });
-
-            console.log(cutiValues, onTimeValues, lateInValues, absentValues);
 
             // Menyiapkan data untuk grafik
             var barStackedData = {
@@ -1080,13 +1082,11 @@
 
             $('.js-thead-colors a').on('click', function() {
                 var theadColor = $(this).attr("data-bg");
-                console.log(theadColor);
                 $('#dt-basic-example thead').removeClassPrefix('bg-').addClass(theadColor);
             });
 
             $('.js-tbody-colors a').on('click', function() {
                 var theadColor = $(this).attr("data-bg");
-                console.log(theadColor);
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
             });
 

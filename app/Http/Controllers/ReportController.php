@@ -199,7 +199,6 @@ class ReportController extends Controller
             ];
         }
 
-        // dd($attendancesAllMonths);
 
         if (Carbon::now()->day >= 26) {
             $startDateReport = Carbon::create(
