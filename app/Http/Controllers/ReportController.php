@@ -193,7 +193,7 @@ class ReportController extends Controller
 
             $attendancesAllMonths[$endDate->format('F')] = [
                 'start_date' => $startDate->format('d F Y'),
-                'end_date' => $endDate->format('d F'),
+                'end_date' => $endDate->format('d F Y'),
                 'total_ontime_all' => $total_ontime_all,
                 'total_latein_all' => $total_latein_all,
                 'total_time_off_all' => $total_time_off_all,
