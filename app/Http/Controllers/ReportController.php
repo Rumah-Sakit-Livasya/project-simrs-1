@@ -149,6 +149,8 @@ class ReportController extends Controller
                 ->orderBy('clock_in', 'ASC')
                 ->get();
 
+                dd($attendances);
+
             $total_ontime_all = Attendance::where('clock_in', '!=', null)
                 ->where('late_clock_in', null)
                 ->where('early_clock_out', null)->whereHas('employees', function ($query) {
