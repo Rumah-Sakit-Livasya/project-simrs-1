@@ -85,9 +85,9 @@
                                                 <a
                                                     href="{{ route('kpi.tbh.penilaian', $row->id) }}">{{ $row->nama_group }}</a>
                                             </td>
-                                            <td style="white-space: nowrap">{{ $row->employee_penilai->fullname }}</td>
+                                            <td style="white-space: nowrap">-</td>
                                             <td style="white-space: nowrap">
-                                                {{ $row->employee_pejabat_penilai->fullname }}
+                                                -
                                             </td>
                                             <td style="white-space: nowrap">
                                                 <a type="button" href="{{ route('kpi.edit.form-penilaian', $row->id) }}"

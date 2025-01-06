@@ -1338,26 +1338,10 @@ class DashboardController extends Controller
     {
         $group_penilaian = GroupPenilaian::find($id);
         $employees = Employee::where('is_active', 1)->get(['id', 'fullname']);
-        $penilai_parent = Employee::where('is_active', 1)->where('id', $group_penilaian->penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
-        $pejabat_penilai_parent = Employee::where('is_active', 1)->where('id', $group_penilaian->pejabat_penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
-
-        $penilai = [
-            'nama' => $penilai_parent->fullname,
-            'jabatan' => JobPosition::find($penilai_parent->job_position_id)->name,
-            'unit' => Organization::find($penilai_parent->organization_id)->name,
-            'nip' => $penilai_parent->employee_code
-        ];
-
-        $pejabat_penilai = [
-            'nama' => $pejabat_penilai_parent->fullname,
-            'jabatan' => JobPosition::find($pejabat_penilai_parent->job_position_id)->name,
-            'unit' => Organization::find($pejabat_penilai_parent->organization_id)->name,
-            'nip' => $pejabat_penilai_parent->employee_code
-        ];
 
         $rumus_penilaian = $group_penilaian->rumus_penilaian;
 
-        return view('pages.kpi.penilaian.index', compact('group_penilaian', 'employees', 'penilai', 'pejabat_penilai', 'rumus_penilaian'));
+        return view('pages.kpi.penilaian.index', compact('group_penilaian', 'employees', 'rumus_penilaian'));
     }
 
     public function showPenilaianBulanan($id_form, $id_pegawai, $periode, $tahun)
