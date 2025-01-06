@@ -174,20 +174,22 @@ class ReportController extends Controller
             if ($endDate->gt(Carbon::now())) {
                 $total_absent_all = 0;
             }
-            if (Carbon::now()->day >= 26) {
-                if ($startDate->format('F') == Carbon::now()->format('F')) {
-                    $total_absent_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
-                        $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-                    })->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDate, Carbon::now()])->count();
-                    $total_absent_this_month = $total_absent_all;
+            if($year = Carbon::now()->year) {
+                if (Carbon::now()->day >= 26) {
+                    if ($startDate->format('F') == Carbon::now()->format('F')) {
+                        $total_absent_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
+                            $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
+                        })->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDate, Carbon::now()])->count();
+                        $total_absent_this_month = $total_absent_all;
+                    }
                 }
-            }
-            if (Carbon::now()->day < 26) {
-                if ($endDate->format('F') == Carbon::now()->format('F')) {
-                    $total_absent_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
-                        $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-                    })->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDate, Carbon::now()])->count();
-                    $total_absent_this_month = $total_absent_all;
+                if (Carbon::now()->day < 26) {
+                    if ($endDate->format('F') == Carbon::now()->format('F')) {
+                        $total_absent_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
+                            $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
+                        })->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDate, Carbon::now()])->count();
+                        $total_absent_this_month = $total_absent_all;
+                    }
                 }
             }
 
@@ -200,8 +202,6 @@ class ReportController extends Controller
                 'total_absent_all' => $total_absent_all,
             ];
         }
-
-        dd($attendancesAllMonths['January']);
 
 
         if (Carbon::now()->day >= 26) {
