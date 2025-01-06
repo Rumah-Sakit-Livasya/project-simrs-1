@@ -95,28 +95,28 @@
                                             <select class="select2 form-control @error('year') is-invalid @enderror"
                                                 name="year" id="year">
                                                 <option value="2024"
-                                                    {{ isset($selectedTahun) && $selectedTahun == 2024 ? 'selected' : '' }}>
+                                                    {{ isset($selectedTahunGrafikAbsensi) && $selectedTahunGrafikAbsensi == 2024 ? 'selected' : '' }}>
                                                     2024</option>
                                                 <option value="2023"
-                                                    {{ isset($selectedTahun) && $selectedTahun == 2023 ? 'selected' : '' }}>
+                                                    {{ isset($selectedTahunGrafikAbsensi) && $selectedTahunGrafikAbsensi == 2023 ? 'selected' : '' }}>
                                                     2023</option>
                                                 <option value="2025"
-                                                    {{ isset($selectedTahun) && $selectedTahun == 2025 ? 'selected' : '' }}>
+                                                    {{ isset($selectedTahunGrafikAbsensi) && $selectedTahunGrafikAbsensi == 2025 ? 'selected' : '' }}>
                                                     2025</option>
                                                 <option value="2026"
-                                                    {{ isset($selectedTahun) && $selectedTahun == 2026 ? 'selected' : '' }}>
+                                                    {{ isset($selectedTahunGrafikAbsensi) && $selectedTahunGrafikAbsensi == 2026 ? 'selected' : '' }}>
                                                     2026</option>
                                                 <option value="2027"
-                                                    {{ isset($selectedTahun) && $selectedTahun == 2027 ? 'selected' : '' }}>
+                                                    {{ isset($selectedTahunGrafikAbsensi) && $selectedTahunGrafikAbsensi == 2027 ? 'selected' : '' }}>
                                                     2027</option>
                                                 <option value="2028"
-                                                    {{ isset($selectedTahun) && $selectedTahun == 2028 ? 'selected' : '' }}>
+                                                    {{ isset($selectedTahunGrafikAbsensi) && $selectedTahunGrafikAbsensi == 2028 ? 'selected' : '' }}>
                                                     2028</option>
                                                 <option value="2029"
-                                                    {{ isset($selectedTahun) && $selectedTahun == 2029 ? 'selected' : '' }}>
+                                                    {{ isset($selectedTahunGrafikAbsensi) && $selectedTahunGrafikAbsensi == 2029 ? 'selected' : '' }}>
                                                     2029</option>
                                                 <option value="2030"
-                                                    {{ isset($selectedTahun) && $selectedTahun == 2030 ? 'selected' : '' }}>
+                                                    {{ isset($selectedTahunGrafikAbsensi) && $selectedTahunGrafikAbsensi == 2030 ? 'selected' : '' }}>
                                                     2030</option>
                                             </select>
                                             @error('tahun')
@@ -148,7 +148,7 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Grafik Absensi Tahun {{ \Carbon\Carbon::now()->translatedFormat('Y') }}
+                            Grafik Absensi Tahun {{ $selectedTahunGrafikAbsensi }}
                         </h2>
                     </div>
                     <div class="panel-container show">
@@ -603,26 +603,31 @@
             let total_absent = [];
             let currentMonth = new Date().getMonth() + 1;
 
-            console.log(attendancesAllMonths);
-
             for (let nama_bulan in attendancesAllMonths) {
-                if (attendancesAllMonths.hasOwnProperty(nama_bulan) && convertMonthNameToNumber(nama_bulan) <=
-                    currentMonth) {
-                    console.log(nama_bulan);
-                    let total_all = 0;
-                    total_all = total_all + attendancesAllMonths[nama_bulan]["total_ontime_all"] +
+                if (attendancesAllMonths.hasOwnProperty(nama_bulan)) {
+                    console.log(`Memproses: ${nama_bulan}`);
+                    let total_all = attendancesAllMonths[nama_bulan]["total_ontime_all"] +
                         attendancesAllMonths[nama_bulan]["total_latein_all"] +
                         attendancesAllMonths[nama_bulan]["total_time_off_all"] +
                         attendancesAllMonths[nama_bulan]["total_absent_all"];
 
-                    total_ontime.push((attendancesAllMonths[nama_bulan]["total_ontime_all"] / total_all) * 100);
-                    total_latein.push((attendancesAllMonths[nama_bulan]["total_latein_all"] / total_all) * 100);
-                    total_timeoff.push((attendancesAllMonths[nama_bulan]["total_time_off_all"] / total_all) * 100);
-                    total_absent.push((attendancesAllMonths[nama_bulan]["total_absent_all"] / total_all) * 100);
+                    console.log(`Total keseluruhan untuk ${nama_bulan}:`, total_all);
+
+                    if (total_all > 0) {
+                        total_ontime.push((attendancesAllMonths[nama_bulan]["total_ontime_all"] / total_all) * 100);
+                        total_latein.push((attendancesAllMonths[nama_bulan]["total_latein_all"] / total_all) * 100);
+                        total_timeoff.push((attendancesAllMonths[nama_bulan]["total_time_off_all"] / total_all) * 100);
+                        total_absent.push((attendancesAllMonths[nama_bulan]["total_absent_all"] / total_all) * 100);
+                        console.log("Berhasil push data untuk:", nama_bulan);
+                    } else {
+                        total_ontime.push((attendancesAllMonths[nama_bulan]["total_ontime_all"] / total_all) * 100);
+                        total_latein.push((attendancesAllMonths[nama_bulan]["total_latein_all"] / total_all) * 100);
+                        total_timeoff.push((attendancesAllMonths[nama_bulan]["total_time_off_all"] / total_all) * 100);
+                        total_absent.push((attendancesAllMonths[nama_bulan]["total_absent_all"] / total_all) * 100);
+                        console.log(`Data kosong untuk ${nama_bulan}.`);
+                    }
                 }
             }
-
-            console.log(total_ontime, true);
 
             var barStackedData = {
                 labels: bulan,
@@ -836,8 +841,6 @@
             // Menggambar grafik menggunakan Chart.js
             new Chart($("#laporanPerKategori > canvas").get(0).getContext("2d"), config);
         };
-
-
 
         barStacked();
         LaporanPerKategori();

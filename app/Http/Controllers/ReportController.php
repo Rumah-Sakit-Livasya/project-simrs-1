@@ -334,28 +334,39 @@ class ReportController extends Controller
 
         $groupReport = [
             'PELMED' => [
-                'Unit Rawat Inap',
-                'Unit Rawat Jalan',
-                'Unit IGD',
-                'Unit OK',
-                'Unit Perinatologi'
+                'Rawat Inap 1',
+                'Rawat Inap 2',
+                'Rawat Jalan',
+                'IGD',
+                'Intensif Care',
+                'OK',
+                'VK & PONEK',
+                'Perinatologi'
             ],
             'PENMED' => [
-                'Unit Farmasi',
-                'Unit Radiologi'
+                'Farmasi',
+                'Farmasi Rajal',
+                'Farmasi Ranap',
+                'Gudang Farmasi',
+                'Penunjang Medis',
+                'Gizi',
+                'Laboratorium',
+                'Pendaftaran dan RM',
+                'CSSD',
+                'Radiologi'
             ],
             'KEU' => [
-                'Unit Keuangan'
+                'Keuangan'
             ],
             'HRD' => [
-                'Unit SDM'
+                'SDM'
             ],
             'UMUM' => [
-                'Unit Umum Security',
+                'Security',
                 'Sanitasi'
             ],
             'MARKETING' => [
-                'Unit Marketing'
+                'Marketing'
             ]
         ];
 
@@ -492,6 +503,7 @@ class ReportController extends Controller
             'bulan' => $bulan,
             'selectedBulan' => Carbon::now()->month,
             'selectedTahun' => Carbon::now()->year,
+            'selectedTahunGrafikAbsensi' => $year,
             'attendances' => $attendances,
             'employees' => $employees,
             'startDateReport' => $startDateReport,
