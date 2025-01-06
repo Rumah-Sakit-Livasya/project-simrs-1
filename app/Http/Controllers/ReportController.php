@@ -149,8 +149,6 @@ class ReportController extends Controller
                 ->orderBy('clock_in', 'ASC')
                 ->get();
 
-                // dd($attendances);
-
             $total_ontime_all = Attendance::where('clock_in', '!=', null)
                 ->where('late_clock_in', null)
                 ->where('early_clock_out', null)->whereHas('employees', function ($query) {
@@ -171,10 +169,11 @@ class ReportController extends Controller
             $total_absent_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
                 $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
             })->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDate, $endDate])->count();
-            if ($endDate->gt(Carbon::now())) {
-                $total_absent_all = 0;
-            }
-            if($year = Carbon::now()->year) {
+
+            if (Carbon::now()->month == $month && Carbon::now()->year == $year) {
+                if ($endDate->gt(Carbon::now())) {
+                    $total_absent_all = 0;
+                }
                 if (Carbon::now()->day >= 26) {
                     if ($startDate->format('F') == Carbon::now()->format('F')) {
                         $total_absent_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
@@ -194,8 +193,8 @@ class ReportController extends Controller
             }
 
             $attendancesAllMonths[$endDate->format('F')] = [
-                'start_date' => $startDate->format('d F Y'),
-                'end_date' => $endDate->format('d F Y'),
+                'start_date' => $startDate->format('d F'),
+                'end_date' => $endDate->format('d F'),
                 'total_ontime_all' => $total_ontime_all,
                 'total_latein_all' => $total_latein_all,
                 'total_time_off_all' => $total_time_off_all,
