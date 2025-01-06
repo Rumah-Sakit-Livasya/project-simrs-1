@@ -149,7 +149,7 @@ class ReportController extends Controller
                 ->orderBy('clock_in', 'ASC')
                 ->get();
 
-                dd($attendances);
+                // dd($attendances);
 
             $total_ontime_all = Attendance::where('clock_in', '!=', null)
                 ->where('late_clock_in', null)
@@ -200,6 +200,8 @@ class ReportController extends Controller
                 'total_absent_all' => $total_absent_all,
             ];
         }
+
+        dd($attendancesAllMonths['January']);
 
 
         if (Carbon::now()->day >= 26) {
