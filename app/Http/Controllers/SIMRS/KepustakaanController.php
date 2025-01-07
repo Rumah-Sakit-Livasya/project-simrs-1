@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\SIMRS\Kepustakaan;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
@@ -108,7 +109,7 @@ class KepustakaanController extends Controller
 
         if (request()->hasFile('file')) {
             $file = request()->file('file');
-            $fileName = $request->name . '.' . $file->getClientOriginalExtension();
+            $fileName = Carbon::now() . '_' . $request->name . '.' . $file->getClientOriginalExtension();
             $kategori = \Str::slug($request->kategori) ?? 'lainnya';
             $path = 'kepustakaan/' . $kategori . '/' . \Str::slug($organization->name);
             $pathFix = $file->storeAs($path, $fileName, 'private');
@@ -146,7 +147,7 @@ class KepustakaanController extends Controller
             }
 
             // Nama file baru dan path baru
-            $fileName = $request->name . '.' . pathinfo($file->file, PATHINFO_EXTENSION);
+            $fileName = Carbon::now() . '_' . $request->name . '.' . pathinfo($file->file, PATHINFO_EXTENSION);
             $kategori = \Str::slug($request->kategori) ?? 'lainnya';
             $newPath = 'kepustakaan/' . $kategori . '/' . \Str::slug($organization->name) . '/' . $fileName;
 
