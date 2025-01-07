@@ -205,7 +205,7 @@
                                             @endif
                                         </div>
                                         <div class="action-kepustakaan float-right">
-                                            @if ($item->type == 'folder')
+                                            @if ($item->type == 'folder' || $item->type == 'file')
                                                 @if (auth()->user()->can('edit kepustakaan') &&
                                                         ($item->organization_id == auth()->user()->employee->organization_id ||
                                                             (in_array($item->organization_id, [26, 27, 25]) &&
