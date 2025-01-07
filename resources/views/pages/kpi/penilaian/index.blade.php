@@ -158,13 +158,12 @@
                                                     <td width="1%">:</td>
                                                     <td width="29%">
                                                         <select
-                                                            class="select2 form-control w-100  @error('employee_id') is-invalid @enderror"
+                                                            class="select2 form-control w-100 employee-select @error('employee_id') is-invalid @enderror"
                                                             id="employee_id" name="employee_id">
                                                             <option value=""></option>
                                                             @foreach ($employees as $item)
                                                                 <option value="{{ $item->id }}">{{ $item->id }} -
-                                                                    {{ $item->fullname }}
-                                                                </option>
+                                                                    {{ $item->fullname }}</option>
                                                             @endforeach
                                                         </select>
                                                         @error('employee_id')
@@ -205,13 +204,12 @@
                                                     <td width="1%">:</td>
                                                     <td width="29%">
                                                         <select
-                                                            class="select2 form-control w-100  @error('penilai') is-invalid @enderror"
+                                                            class="select2 form-control w-100 employee-select @error('penilai') is-invalid @enderror"
                                                             id="penilai" name="penilai">
                                                             <option value=""></option>
                                                             @foreach ($employees as $item)
                                                                 <option value="{{ $item->id }}">{{ $item->id }} -
-                                                                    {{ $item->fullname }}
-                                                                </option>
+                                                                    {{ $item->fullname }}</option>
                                                             @endforeach
                                                         </select>
                                                         @error('penilai')
@@ -252,13 +250,12 @@
                                                     <td width="1%">:</td>
                                                     <td width="29%">
                                                         <select
-                                                            class="select2 form-control w-100  @error('pejabat_penilai') is-invalid @enderror"
+                                                            class="select2 form-control w-100 employee-select @error('pejabat_penilai') is-invalid @enderror"
                                                             id="pejabat_penilai" name="pejabat_penilai">
                                                             <option value=""></option>
                                                             @foreach ($employees as $item)
                                                                 <option value="{{ $item->id }}">{{ $item->id }} -
-                                                                    {{ $item->fullname }}
-                                                                </option>
+                                                                    {{ $item->fullname }}</option>
                                                             @endforeach
                                                         </select>
                                                         @error('pejabat_penilai')
@@ -523,14 +520,16 @@
                                                             <tr>
                                                                 <td colspan="10" class="border-right-0">
                                                                     <h3 class="my-2 font-weight-bold"
-                                                                        style="font-size: 12pt !important">Komentar Pejabat yang Menilai:</h3>
+                                                                        style="font-size: 12pt !important">Komentar Pejabat
+                                                                        yang Menilai:</h3>
                                                                     <textarea class="form-control mb-3" id="komentar_penilai" name="komentar_penilai" rows="5"></textarea>
                                                                 </td>
                                                             </tr>
                                                             <tr style="border: 0px">
                                                                 <td colspan="10" class="border-right-0">
                                                                     <h3 class="my-2 font-weight-bold"
-                                                                        style="font-size: 12pt !important">Komentar Atasan Pejabat yang Menilai :
+                                                                        style="font-size: 12pt !important">Komentar Atasan
+                                                                        Pejabat yang Menilai :
                                                                     </h3>
                                                                     <textarea class="form-control mb-3" id="komentar_pejabat_penilai" name="komentar_pejabat_penilai" rows="5"></textarea>
                                                                 </td>
@@ -560,7 +559,7 @@
                                                                         src="" alt="Signature Image"
                                                                         style="display:none; max-width:60%;"><br>
 
-                                                                    
+
 
                                                                 </td>
                                                                 <td width="33%">
@@ -576,7 +575,7 @@
                                                                     <img id="signature-display-{{ $group_penilaian->penilai }}"
                                                                         src="" alt="Signature Image"
                                                                         style="display:none; max-width:60%;"><br>
-                                                                    
+
 
                                                                 </td>
                                                                 <td width="33%" class="border-right-0">
@@ -592,7 +591,7 @@
                                                                     <img id="signature-display-{{ $group_penilaian->penilai }}"
                                                                         src="" alt="Signature Image"
                                                                         style="display:none; max-width:60%;"><br>
-                                                                    
+
 
                                                                 </td>
                                                                 {{-- <td width="33%" class="border-right-0" valign="top">
@@ -673,10 +672,10 @@
             });
 
             async function fetchAttendanceReport(employeeId, tahun) {
-                
+
                 try {
                     const response = await fetch(
-                        `/api/dashboard/attendances/report/employee/${employeeId}/${periodeFix}/${tahun}`, {
+                        `/api/dashboard/attendances/report/employee/penilaian/${employeeId}/${tahun}`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -738,7 +737,56 @@
                 });
 
                 fetchAttendanceReport(employeeId, tahun);
-            })
+            });
+
+            $('.employee-select').on('change', function(e) {
+                e.preventDefault();
+
+                let employeeId = $(this).val();
+                let targetId = $(this).attr('id'); // Ambil ID elemen yang memicu event
+                let tahun = $('#tahun').val(); // Jika dibutuhkan dalam fetchAttendanceReport
+
+                if (employeeId) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/dashboard/kpi/employee/" + employeeId + "/get",
+                        success: function(response) {
+                            // Update data sesuai target ID
+                            if (targetId === 'employee_id') {
+                                $('span#nama_pegawai_ttd').text(response.nama);
+                                $('span#unit_pegawai').text(response.unit);
+                                $('span#unit_pegawai_ttd').text(response.unit);
+                                $('span#jabatan_pegawai').text(response.jabatan);
+                                $('span#jabatan_pegawai_ttd').text(response.jabatan);
+                                $('span#nip_pegawai').text(response.nip || '-');
+                            } else if (targetId === 'penilai') {
+                                // Sesuaikan element tujuan penilai
+                                $('span#nama_penilai').text(response.nama);
+                                $('span#unit_penilai').text(response.unit);
+                                $('span#jabatan_penilai').text(response.jabatan);
+                                $('span#nip_penilai').text(response.nip || '-');
+                            } else if (targetId === 'pejabat_penilai') {
+                                // Sesuaikan element tujuan pejabat penilai
+                                $('span#nama_pejabat_penilai').text(response.nama);
+                                $('span#unit_pejabat_penilai').text(response.unit);
+                                $('span#jabatan_pejabat_penilai').text(response.jabatan);
+                                $('span#nip_pejabat_penilai').text(response.nip || '-');
+                            }
+
+                            $('#tombol-pegawai a').attr('onclick', 'openSignaturePad(null)');
+                            $('#tombol-pegawai a').text('Tanda Tangan');
+                        },
+                        error: function(xhr) {
+                            showErrorAlert(xhr.responseJSON.error);
+                        }
+                    });
+
+                    // Jika diperlukan, panggil fungsi fetchAttendanceReport
+                    if (targetId === 'employee_id') {
+                        fetchAttendanceReport(employeeId, tahun);
+                    }
+                }
+            });
 
             function updateTotal(nama) {
                 const namaDariInput = nama;
