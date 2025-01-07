@@ -109,7 +109,7 @@ class KepustakaanController extends Controller
 
         if (request()->hasFile('file')) {
             $file = request()->file('file');
-            $fileName = Carbon::now() . '_' . $request->name . '.' . $file->getClientOriginalExtension();
+            $fileName = Carbon::now()->timestamp . '_' . $request->name . '.' . $file->getClientOriginalExtension();
             $kategori = \Str::slug($request->kategori) ?? 'lainnya';
             $path = 'kepustakaan/' . $kategori . '/' . \Str::slug($organization->name);
             $pathFix = $file->storeAs($path, $fileName, 'private');
@@ -147,7 +147,7 @@ class KepustakaanController extends Controller
             }
 
             // Nama file baru dan path baru
-            $fileName = Carbon::now() . '_' . $request->name . '.' . pathinfo($file->file, PATHINFO_EXTENSION);
+            $fileName = Carbon::now()->timestamp . '_' . $request->name . '.' . pathinfo($file->file, PATHINFO_EXTENSION);
             $kategori = \Str::slug($request->kategori) ?? 'lainnya';
             $newPath = 'kepustakaan/' . $kategori . '/' . \Str::slug($organization->name) . '/' . $fileName;
 
