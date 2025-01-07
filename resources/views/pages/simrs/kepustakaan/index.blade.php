@@ -216,14 +216,14 @@
                                                 {{-- @endif --}}
                                             {{-- @endif --}}
 
-                                            @if (auth()->user()->can('delete kepustakaan') &&
+                                            {{-- @if (auth()->user()->can('delete kepustakaan') &&
                                                     ($item->organization_id == auth()->user()->employee->organization_id ||
                                                         (in_array($item->organization_id, [26, 27, 25]) &&
-                                                            in_array(auth()->user()->employee->organization_id, [26, 27, 25]))))
+                                                            in_array(auth()->user()->employee->organization_id, [26, 27, 25])))) --}}
                                                 <i class="btn-action btn-delete fas fa-trash text-danger fs-xl mr-2"
                                                     data-url="{{ route('kepustakaan.delete', Crypt::encrypt($item->id)) }}"
                                                     data-type="{{ $item->type }}"></i>
-                                            @endif
+                                            {{-- @endif --}}
 
                                         </div>
                                     </div>

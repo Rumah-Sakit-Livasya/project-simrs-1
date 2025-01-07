@@ -262,7 +262,7 @@ class KepustakaanController extends Controller
         foreach ($children as $child) {
             if ($child->type == 'file') {
                 // Hapus file dari storage
-                $filePath = 'kepustakaan/' . \Str::slug($child->kategori) . '/' . $child->file;
+                $filePath = $child->file;
                 if (Storage::disk('private')->exists($filePath)) {
                     Storage::disk('private')->delete($filePath);
                 }
