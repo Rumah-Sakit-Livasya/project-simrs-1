@@ -128,39 +128,38 @@ class KepustakaanController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required',
-            'organization_id' => 'nullable',
-            'name' => 'required',
-            'file' => 'nullable',
         ]);
 
         try {
 
             $id = Crypt::decrypt($encryptedId);
             $file = Kepustakaan::where('id', $id)->firstOrFail();
-            $organization = Organization::where('id', $request->organization_id)->first();
+            $file->name = $request->name;
+            $file->save();
+            // $organization = Organization::where('id', $request->organization_id)->first();
 
-            $oldPath = "/kepustakaan/" . \Str::slug($file->kategori) . "/" . $file->file;
+            // $oldPath = "/kepustakaan/" . \Str::slug($file->kategori) . "/" . $file->file;
 
-            // Pastikan file lama ada
-            if (!Storage::disk('private')->exists($oldPath)) {
-                abort(404, 'File not found');
-            }
+            // // Pastikan file lama ada
+            // if (!Storage::disk('private')->exists($oldPath)) {
+            //     abort(404, 'File not found');
+            // }
 
-            // Nama file baru dan path baru
-            $fileName = Carbon::now()->timestamp . '_' . $request->name . '.' . pathinfo($file->file, PATHINFO_EXTENSION);
-            $kategori = \Str::slug($request->kategori) ?? 'lainnya';
-            $newPath = 'kepustakaan/' . $kategori . '/' . \Str::slug($organization->name) . '/' . $fileName;
+            // // Nama file baru dan path baru
+            // $fileName = Carbon::now()->timestamp . '_' . $request->name . '.' . pathinfo($file->file, PATHINFO_EXTENSION);
+            // $kategori = \Str::slug($request->kategori) ?? 'lainnya';
+            // $newPath = 'kepustakaan/' . $kategori . '/' . \Str::slug($organization->name) . '/' . $fileName;
 
-            // Pindahkan file ke lokasi baru
-            if (Storage::disk('private')->move($oldPath, $newPath)) {
-                // Update path di database
-                $file->file = $newPath;
-                $file->kategori = $request->kategori;
-                $file->save();
-                return response()->json(['message' => ' Folder berhasil diupdate!'], 200);
-            } else {
-                abort(500, 'Failed to move file');
-            }
+            // // Pindahkan file ke lokasi baru
+            // if (Storage::disk('private')->move($oldPath, $newPath)) {
+            //     // Update path di database
+            //     $file->file = $newPath;
+            //     $file->kategori = $request->kategori;
+            //     $file->save();
+            //     return response()->json(['message' => ' Folder berhasil diupdate!'], 200);
+            // } else {
+            //     abort(500, 'Failed to move file');
+            // }
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
