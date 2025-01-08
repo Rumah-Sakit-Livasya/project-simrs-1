@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\Organization;
 use App\Models\TimeSchedule;
+use App\Models\TimeScheduleEmployee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
@@ -215,7 +216,7 @@ class TimeScheduleController extends Controller
             $timeSchedule->employees()->attach($uniquePeserta);
 
             // Send broadcast message to participants
-            $roles = Employee::whereIn('id', $uniquePeserta)->pluck('fullname')->toArray(); // Ambil nama peserta untuk broadcast
+            $roles = Employee::whereIn('id', $uniquePeserta)->pluck('fullname')->toArray(); // Ambil nama peserta
             $this->broadcastMessageToParticipants($uniquePeserta, $timeSchedule->title, $timeSchedule->datetime, $request->is_online, $roomName, $roles);
 
             return response()->json([
@@ -249,7 +250,8 @@ class TimeScheduleController extends Controller
         $broadcastMessage .= "Waktu: " . \Carbon\Carbon::parse($datetime)->format('H:i') . " WIB s/d selesai\n";
 
         if ($isOnline) {
-            $broadcastMessage .= "Link: vcon.livasya.com/\n";
+            $sluggedRoomName = \Str::slug($roomName);
+            $broadcastMessage .= "Link: vcon.livasya.com/$sluggedRoomName\n";
         } else {
             $broadcastMessage .= "Tempat: " . $roomName . "\n";
         }
@@ -361,5 +363,29 @@ class TimeScheduleController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh file.');
         }
+    }
+    public function verifikasiKehadiran(Request $request)
+    {
+        $request->validate([
+            'rapat_id' => 'required|exists:time_schedules,id',
+            'hadir_ids' => 'required|array',
+            'hadir_ids.*' => 'exists:employees,id',
+        ]);
+
+        $rapat = TimeSchedule::findOrFail($request->rapat_id);
+        $pesertaHadir = $request->hadir_ids;
+
+        // Logika untuk memverifikasi kehadiran peserta
+        foreach ($pesertaHadir as $pesertaId) {
+            // Simpan kehadiran peserta ke dalam database atau lakukan tindakan lain yang diperlukan
+            // Misalnya, Anda bisa menggunakan model Attendance untuk menyimpan data kehadiran
+            TimeScheduleEmployee::create([
+                'time_schedule_id' => $rapat->id,
+                'employee_id' => $pesertaId,
+                'dokumentasi' => 'hadir',
+            ]);
+        }
+
+        return response()->json(['message' => 'Kehadiran berhasil diverifikasi.']);
     }
 }

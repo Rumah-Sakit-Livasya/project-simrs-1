@@ -157,11 +157,6 @@
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
-        function toggleRoomName() {
-            const isOnlineCheckbox = document.getElementById('is_online');
-            const roomNameInput = document.getElementById('room_name');
-            roomNameInput.readOnly = !isOnlineCheckbox.checked;
-        }
         // Fungsi untuk mengisi nilai type pada input hidden
         function setFileType(fileType, id) {
             // Set nilai type pada input hidden sesuai dengan file yang dipilih
@@ -281,12 +276,50 @@
 
                         // Menampilkan data peserta rapat
                         response.peserta_rapat.forEach(function(peserta) {
-                            $('#list-peserta').append('<li class="list-group-item">' +
+                            $('#list-peserta').append(
+                                '<li class="list-group-item d-flex align-items-center">' +
+                                '<input type="checkbox" class="peserta-checkbox mr-2" value="' +
+                                peserta.id + '">' +
                                 peserta.fullname + '<span class="float-right">' +
                                 peserta.organization_name + '</span></li>');
                         });
 
-                        // Menampilkan data yang mengundang
+                        // Tambahkan tombol verifikasi dengan styling Bootstrap
+                        $('#list-peserta').append(
+                            '<div class="text-center mt-3">' +
+                            '<button id="btn-verifikasi" class="btn btn-primary">Verifikasi Kehadiran</button>' +
+                            '</div>'
+                        );
+
+                        // Event listener untuk tombol verifikasi
+                        $('#btn-verifikasi').click(function() {
+                            let hadirIds = $('.peserta-checkbox:checked').map(
+                                function() {
+                                    return $(this).val();
+                                }).get();
+
+                            if (hadirIds.length > 0) {
+                                $.ajax({
+                                    url: '/api/dashboard/time-schedules/rapat/verifikasi',
+                                    type: 'POST',
+                                    data: {
+                                        rapat_id: rapatId,
+                                        hadir_ids: hadirIds
+                                    },
+                                    success: function(response) {
+                                        showSuccessAlert(response.message);
+                                        $('#modal-peserta').modal('hide');
+                                    },
+                                    error: function(xhr, status, error) {
+                                        showErrorAlert(
+                                            'Terjadi kesalahan: ' +
+                                            error);
+                                    }
+                                });
+                            } else {
+                                showErrorAlert('Silakan pilih peserta yang hadir.');
+                            }
+                        });
                     },
                     error: function(xhr, status, error) {
                         showErrorAlert('Terjadi kesalahan: ' + error);

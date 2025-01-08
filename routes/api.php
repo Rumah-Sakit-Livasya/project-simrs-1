@@ -298,6 +298,8 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
             // Rute untuk upload file
             Route::post('/time/schedule/rapat/upload', [TimeScheduleController::class, 'uploadFile'])->name('time.schedule.rapat.upload');
             Route::get('/download/{id}/{type}', [TimeScheduleController::class, 'download'])->name('time.schedule.rapat.download');
+            // Rute untuk verifikasi kehadiran peserta
+            Route::post('/verifikasi', [TimeScheduleController::class, 'verifikasiKehadiran'])->name('time.schedule.rapat.verifikasi');
         });
     });
     Route::prefix('pendidikan-pelatihan')->group(function () {

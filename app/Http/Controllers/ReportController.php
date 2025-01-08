@@ -32,35 +32,51 @@ class ReportController extends Controller
         ];
     }
 
-    public function attendances()
+    public function attendances(Request $request)
     {
-        $total_employee = Employee::where('is_active', 1)->get()->count();
-        $total_ontime = Attendance::where('clock_in', '!=', null)->whereHas('employees', function ($query) {
-            $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-        })->where('date', Carbon::now())->where('late_clock_in', '==', null)->where('early_clock_out', '==', null)->count();
-        $total_latein = Attendance::where('clock_in', '!=', null)->whereHas('employees', function ($query) {
-            $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-        })->where('date', Carbon::now())->where('late_clock_in', '!=', null)->count();
-        $total_no_check_in = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
-            $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-        })->where('date', Carbon::now())->count();
-        //buat yng cuti
-        $total_time_off = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
-            $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-        })->where('is_day_off', 1)->where('day_off_request_id', '!=', null)->where('date', Carbon::now())->count();
-        // buat hari libur (minggu, hari nasional, lepas libur)
-        $total_day_off = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
-            $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-        })->where('is_day_off', 1)->where('date', Carbon::now())->count();
-
-
-        // Inisialisasi tahun
-        $year = Carbon::now()->year;
+        $year = $request->input('tahun-filter', Carbon::now()->year); // Ambil tahun dari request, default ke tahun sekarang
+        $total_employee = Employee::where('is_active', 1)->count();
+        $total_ontime = Attendance::where('clock_in', '!=', null)
+            ->whereHas('employees', function ($query) {
+                $query->where('is_active', 1);
+            })
+            ->where('date', Carbon::now())
+            ->where('late_clock_in', null)
+            ->where('early_clock_out', null)
+            ->count();
+        $total_latein = Attendance::where('clock_in', '!=', null)
+            ->whereHas('employees', function ($query) {
+                $query->where('is_active', 1);
+            })
+            ->where('date', Carbon::now())
+            ->where('late_clock_in', '!=', null)
+            ->count();
+        $total_no_check_in = Attendance::where('clock_in', null)
+            ->whereHas('employees', function ($query) {
+                $query->where('is_active', 1);
+            })
+            ->where('date', Carbon::now())
+            ->count();
+        $total_time_off = Attendance::where('clock_in', null)
+            ->whereHas('employees', function ($query) {
+                $query->where('is_active', 1);
+            })
+            ->where('is_day_off', 1)
+            ->where('day_off_request_id', '!=', null)
+            ->where('date', Carbon::now())
+            ->count();
+        $total_day_off = Attendance::where('clock_in', null)
+            ->whereHas('employees', function ($query) {
+                $query->where('is_active', 1);
+            })
+            ->where('is_day_off', 1)
+            ->where('date', Carbon::now())
+            ->count();
 
         // Inisialisasi array untuk menyimpan semua data attendances
         $attendancesAllMonths = [];
 
-        // Looping melalui setiap bulan dalam tahun tersebut
+        // Looping melalui setiap bulan dalam tahun yang diminta
         for ($month = 1; $month <= 12; $month++) {
             // Menghitung tanggal awal untuk bulan sebelumnya (tanggal 26 bulan sebelumnya)
             $previousMonthStartDate = Carbon::create($year, $month - 1, 26);
@@ -68,30 +84,36 @@ class ReportController extends Controller
             // Menghitung tanggal akhir untuk bulan ini (tanggal 25 bulan sekarang)
             $currentMonthEndDate = Carbon::create($year, $month, 25);
 
-            // Query untuk mendapatkan data attendances berdasarkan range tanggal dan employee_id
-            // $attendances = Attendance::where('employee_id', auth()->user()->employee->id)
-            //     ->whereBetween('date', [$previousMonthStartDate, $currentMonthEndDate])
-            //     ->get();
-
             $total_ontime_all = Attendance::where('clock_in', '!=', null)
                 ->where('late_clock_in', null)
-                ->where('early_clock_out', null)->whereHas('employees', function ($query) {
-                    $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
+                ->where('early_clock_out', null)
+                ->whereHas('employees', function ($query) {
+                    $query->where('is_active', 1);
                 })
                 ->whereBetween('date', [$previousMonthStartDate, $currentMonthEndDate])
                 ->count();
-            $total_latein_all = Attendance::where('clock_in', '!=', null)->whereHas('employees', function ($query) {
-                $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-            })->where('late_clock_in', '!=', null)->whereBetween('date', [$previousMonthStartDate, $currentMonthEndDate])->count();
-            // $total_no_check_in_all = Attendance::where('clock_in', null)->whereBetween('date', [$previousMonthStartDate, $currentMonthEndDate])->count();
-            //buat yng cuti
-            $total_time_off_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
-                $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-            })->where('is_day_off', 1)->where('day_off_request_id', '!=', null)->whereBetween('date', [$previousMonthStartDate, $currentMonthEndDate])->count();
-            // buat hari libur (minggu, hari nasional, lepas libur)
-            $total_day_off_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
-                $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-            })->where('is_day_off', 1)->whereBetween('date', [$previousMonthStartDate, $currentMonthEndDate])->count();
+            $total_latein_all = Attendance::where('clock_in', '!=', null)
+                ->whereHas('employees', function ($query) {
+                    $query->where('is_active', 1);
+                })
+                ->where('late_clock_in', '!=', null)
+                ->whereBetween('date', [$previousMonthStartDate, $currentMonthEndDate])
+                ->count();
+            $total_time_off_all = Attendance::where('clock_in', null)
+                ->whereHas('employees', function ($query) {
+                    $query->where('is_active', 1);
+                })
+                ->where('is_day_off', 1)
+                ->where('day_off_request_id', '!=', null)
+                ->whereBetween('date', [$previousMonthStartDate, $currentMonthEndDate])
+                ->count();
+            $total_day_off_all = Attendance::where('clock_in', null)
+                ->whereHas('employees', function ($query) {
+                    $query->where('is_active', 1);
+                })
+                ->where('is_day_off', 1)
+                ->whereBetween('date', [$previousMonthStartDate, $currentMonthEndDate])
+                ->count();
 
             // Menyimpan data attendances ke dalam array untuk bulan ini
             $attendancesAllMonths[$currentMonthEndDate->format('F')] = [
@@ -101,7 +123,6 @@ class ReportController extends Controller
                 'total_day_off_all' => $total_day_off_all,
             ];
         }
-        // dd($attendancesAllMonths);
 
         return view('pages.laporan.absensi.index', [
             'getNotify' => $this->getNotify(),
@@ -111,7 +132,8 @@ class ReportController extends Controller
             'total_no_check_in' => $total_no_check_in,
             'total_day_off' => $total_day_off,
             'total_time_off' => $total_time_off,
-            'attendancesAllMonths' => $attendancesAllMonths
+            'attendancesAllMonths' => $attendancesAllMonths,
+            'selectedTahun' => $year // Menyimpan tahun yang dipilih untuk tampilan
         ]);
     }
 

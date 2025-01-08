@@ -74,12 +74,65 @@
                 </div>
             </div>
         </div>
+
+        <div class="row mt-5">
+            <div class="col-xl-12">
+                <div id="panel-1" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            Filter
+                        </h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <form method="get">
+                                @method('POST')
+                                @csrf
+                                <div class="row" id="step-1">
+                                    <div class="col-md-10">
+                                        <div class="form-group mb-3">
+                                            <label for="tahun-filter">Tahun</label>
+                                            <!-- Mengubah input menjadi select2 -->
+                                            <select class="select2 form-control @error('tahun-filter') is-invalid @enderror"
+                                                name="tahun-filter" id="tahun-filter">
+                                                <option value="{{ \Carbon\Carbon::now()->year }}"
+                                                    {{ isset($selectedTahun) && $selectedTahun == \Carbon\Carbon::now()->year ? 'selected' : '' }}>
+                                                    {{ \Carbon\Carbon::now()->year }}</option>
+                                                <option value="{{ \Carbon\Carbon::now()->subYear()->year }}"
+                                                    {{ isset($selectedTahun) && $selectedTahun == \Carbon\Carbon::now()->subYear()->year ? 'selected' : '' }}>
+                                                    {{ \Carbon\Carbon::now()->subYear()->year }}</option>
+                                            </select>
+                                            @error('tahun-filter')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-center">
+                                        <button type="submit" class="btn btn-primary btn-block w-100">
+                                            <div class="ikon-tambah">
+                                                <span class="fal fa-search mr-1"></span>Cari
+                                            </div>
+                                            <div class="span spinner-text d-none">
+                                                <span class="spinner-border spinner-border-sm" role="status"
+                                                    aria-hidden="true"></span>
+                                                Loading...
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row mt-4">
             <div class="col-xl-6">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Grafik Absensi Tahun {{ \Carbon\Carbon::now()->translatedFormat('Y') }}
+                            Grafik Absensi Tahun {{ request('tahun', \Carbon\Carbon::now()->year) }}
                         </h2>
                     </div>
                     <div class="panel-container show">
@@ -123,14 +176,6 @@
                         <h2>
                             On Time Rank
                         </h2>
-                        {{-- <div class="panel-toolbar">
-                            <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip"
-                                data-offset="0,10" data-original-title="Collapse"></button>
-                            <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip"
-                                data-offset="0,10" data-original-title="Fullscreen"></button>
-                            <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10"
-                                data-original-title="Close"></button>
-                        </div> --}}
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
@@ -138,15 +183,12 @@
                                 Top 5 Pegawai On Time Sepanjang Waktu
                             </div>
                             <div id="pieChart" style="width:100%; height:300px;"></div>
-                            <div class="text-right mb-2">
-                                {{-- <button id="pieChartUnload" onclick="pieChartUnload();"
-                                    class="btn btn-sm btn-dark ml-auto">Unload Data</button> --}}
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="row">
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
