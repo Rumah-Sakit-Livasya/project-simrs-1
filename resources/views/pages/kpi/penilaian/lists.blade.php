@@ -128,7 +128,7 @@
                                             <td style="white-space: nowrap">{{ $loop->iteration }}</td>
                                             <td style="white-space: nowrap">
                                                 <a
-                                                    href="{{ route('kpi.show.penilaian.bulanan', [$row->group_penilaian_id, $row->employee_id, $row->periode, $row->tahun]) }}">
+                                                    href="{{ route('kpi.show.penilaian.bulanan', [$row->group_penilaian_id, $row->employee_id, $row->tahun]) }}">
                                                     {{ \Str::limit($row->employee->fullname, 25) }}
                                                 </a>
                                             </td>

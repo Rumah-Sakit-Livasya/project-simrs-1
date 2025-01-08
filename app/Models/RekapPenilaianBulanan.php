@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class RekapPenilaianBulanan extends Model
 {
     use HasFactory;
-
-    protected $fillable = ['employee_id', 'group_penilaian_id', 'periode', 'tahun', 'total_nilai', 'keterangan', 'catatan','komentar_pegawai', 'komentar_penilai', 'komentar_pejabat_penilai'];
+    protected $table = 'rekap_penilaian';
+    protected $fillable = ['employee_id', 'group_penilaian_id', 'tahun', 'total_nilai', 'keterangan', 'catatan', 'komentar_pegawai', 'komentar_penilai', 'komentar_pejabat_penilai'];
 
     public function employee()
     {

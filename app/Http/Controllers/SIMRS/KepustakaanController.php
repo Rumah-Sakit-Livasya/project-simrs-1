@@ -112,8 +112,21 @@ class KepustakaanController extends Controller
             $fileName = Carbon::now()->timestamp . '_' . $request->name . '.' . $file->getClientOriginalExtension();
             $kategori = \Str::slug($request->kategori) ?? 'lainnya';
             $path = 'kepustakaan/' . $kategori . '/' . \Str::slug($organization->name);
-            $pathFix = $file->storeAs($path, $fileName, 'private');
-            $validatedData['file'] = $pathFix;
+            // $pathFix = $file->storeAs($path, $fileName, 'private');
+            // $validatedData['file'] = $pathFix;
+
+            
+                // Simpan file secara manual ke storage
+                $storagePath = storage_path('app/private/' . $path);
+                if (!file_exists($storagePath)) {
+                    mkdir($storagePath, 0755, true); // Buat folder jika belum ada
+                }
+
+                // Pindahkan file ke folder tujuan
+                $file->move($storagePath, $fileName);
+
+                // Path relatif untuk database
+                $validatedData['file'] = $path . '/' . $fileName;
         }
 
         try {

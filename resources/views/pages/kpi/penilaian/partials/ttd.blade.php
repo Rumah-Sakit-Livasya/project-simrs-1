@@ -18,7 +18,7 @@
                 <div class="mt-2 text-center">
                     <button class="btn btn-primary" onclick="undo()">Undo</button>
                     <button class="btn btn-secondary" onclick="clearCanvas()">Clear</button>
-                    <button class="btn btn-success" onclick="saveSignature()">Save</button>
+                    <button class="btn btn-success" onclick="saveSignature()" id="btn_save_ttd">Save</button>
                 </div>
             </div>
         </div>

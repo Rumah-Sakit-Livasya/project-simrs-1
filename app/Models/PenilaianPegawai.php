@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PenilaianPegawai extends Model
 {
     use HasFactory;
-    protected $fillable = ['employee_id', 'group_penilaian_id', 'indikator_penilaian_id', 'nilai', 'tahun', 'periode', 'file'];
+    protected $fillable = ['employee_id', 'group_penilaian_id', 'indikator_penilaian_id','pejabat_penilai', 'penilai', 'nilai', 'tahun', 'file'];
 
     public function group_penilaian()
     {

@@ -88,7 +88,9 @@ class KPIController extends Controller
         if ($employee) {
             $employee->ttd = $imageName;
             $employee->save();
-            return response()->json(['path' => Storage::url($path)]);
+            return response()->json([
+                'path' => url('/api/dashboard/kpi/private-signature/' . $imageName), // URL ke file private
+            ]);
         }
     }
 
@@ -156,6 +158,8 @@ class KPIController extends Controller
                         'group_penilaian_id' => $id_form,
                         'periode' => $request->periode,
                         'tahun' => $request->tahun,
+                        'pejabat_penilai' => $request->pejabat_penilai,
+                        'penilai' => $request->penilai,
                         'indikator_penilaian_id' => $col->id,
                         'nilai' => $request->input($result)[$key],
                     ]);
@@ -178,7 +182,6 @@ class KPIController extends Controller
             RekapPenilaianBulanan::create([
                 'group_penilaian_id' => $id_form,
                 'employee_id' => $id_pegawai,
-                'periode' => $request->periode,
                 'tahun' => $request->tahun,
                 'total_nilai' => $total_nilai_fix,
                 'keterangan' => $keterangan,

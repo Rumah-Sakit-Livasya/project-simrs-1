@@ -147,6 +147,19 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         // Route::put('/update/{id}', [OrganizationController::class, 'update']);
         // Route::get('/get/{id}', [OrganizationController::class, 'getOrganization']);
         // Route::get('/delete/{id}', [OrganizationController::class, 'destroy']);
+        Route::get('private-signature/{filename}', function ($filename) {
+            $path = storage_path('app/private/employee/ttd/' . $filename);
+        
+            if (!file_exists($path)) {
+                abort(404); // Jika file tidak ditemukan, tampilkan error 404
+            }
+            
+            if (!auth()->check()) {
+                abort(403); // Forbidden
+            }
+        
+            return response()->file($path); // Mengembalikan file sebagai respons
+        })->where('filename', '.*');
     });
 
     Route::prefix('permissions')->group(function () {

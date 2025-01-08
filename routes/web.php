@@ -144,7 +144,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports', [DashboardController::class, 'rekapPenilaianBulanan'])->name('kpi.rekap.penilaian.bulanan');
         Route::get('/form-penilaian/tambah', [DashboardController::class, 'tbhGroupPenilaian'])->name('kpi.tbh.form-penilaian');
         Route::get('/form-penilaian/tambah/{id}', [DashboardController::class, 'tbhPenilaian'])->name('kpi.tbh.penilaian');
-        Route::get('/form-penilaian/{id_form}/{id_pegawai}/{periode}/{tahun}/show', [DashboardController::class, 'showPenilaianBulanan'])->name('kpi.show.penilaian.bulanan');
+        Route::get('/form-penilaian/{id_form}/{id_pegawai}/{tahun}/show', [DashboardController::class, 'showPenilaianBulanan'])->name('kpi.show.penilaian.bulanan');
         Route::get('/aspek-penilaian', [DashboardController::class, 'getAspekPenilaian'])->name('kpi.get.aspek-penilaian');
         Route::get('/aspek-penilaian/tambah', [DashboardController::class, 'tbhAspekPenilaian'])->name('kpi.tbh.aspek-penilaian');
         Route::get('/indikator-penilaian', [DashboardController::class, 'getIndikatorPenilaian'])->name('kpi.get.indikator-penilaian');
