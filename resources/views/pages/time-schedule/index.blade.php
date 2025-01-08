@@ -267,6 +267,7 @@
                     url: '/api/dashboard/time-schedules/rapat/get-peserta/' + rapatId,
                     type: 'GET',
                     success: function(response) {
+
                         // Menghapus data sebelumnya untuk menghindari duplikasi
                         $('#list-peserta').empty();
                         $('#list-peserta').append(
@@ -275,12 +276,16 @@
                             response.organisasi_yang_mengundang + '</span></li>');
 
                         // Menampilkan data peserta rapat
-                        response.peserta_rapat.forEach(function(peserta) {
+                        response.peserta_rapat.forEach(function(peserta, index) {
                             $('#list-peserta').append(
                                 '<li class="list-group-item d-flex align-items-center">' +
-                                '<input type="checkbox" class="peserta-checkbox mr-2" value="' +
-                                peserta.id + '">' +
-                                peserta.fullname + '<span class="float-right">' +
+                                '<input type="checkbox" class="peserta-checkbox mr-2" id="peserta-' +
+                                index + '" value="' +
+                                peserta.employee_id + '">' +
+                                '<label for="peserta-' + index +
+                                '" class="mr-auto">' + peserta
+                                .fullname +
+                                '</label><span class="ml-auto">' +
                                 peserta.organization_name + '</span></li>');
                         });
 
@@ -295,8 +300,8 @@
                         $('#btn-verifikasi').click(function() {
                             let hadirIds = $('.peserta-checkbox:checked').map(
                                 function() {
-                                    return $(this).val();
-                                }).get();
+                                    return $(this).val(); // Ambil id pegawai
+                                }).get(); // Tidak perlu filter falsy values
 
                             if (hadirIds.length > 0) {
                                 $.ajax({

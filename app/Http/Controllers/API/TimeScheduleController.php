@@ -98,8 +98,10 @@ class TimeScheduleController extends Controller
 
         $peserta = [];
         $peserta['peserta_rapat'] = $rapat->employees()
-            ->select('employees.id as employee_id', 'employees.fullname', 'organizations.name as organization_name')
+            ->select('employees.id as employee_id', 'employees.fullname', 'organizations.name as organization_name', 'time_schedule_employees.status')
             ->join('organizations', 'employees.organization_id', '=', 'organizations.id')
+            ->join('time_schedule_employees as tse', 'employees.id', '=', 'tse.employee_id')
+            ->where('tse.time_schedule_id', $rapat->id)
             ->get();
 
         $employee = Employee::where('id', $rapat->employee_id)->first();
@@ -250,8 +252,7 @@ class TimeScheduleController extends Controller
         $broadcastMessage .= "Waktu: " . \Carbon\Carbon::parse($datetime)->format('H:i') . " WIB s/d selesai\n";
 
         if ($isOnline) {
-            $sluggedRoomName = \Str::slug($roomName);
-            $broadcastMessage .= "Link: vcon.livasya.com/$sluggedRoomName\n";
+            $broadcastMessage .= "Link: vcon.livasya.com/$roomName\n";
         } else {
             $broadcastMessage .= "Tempat: " . $roomName . "\n";
         }
@@ -382,7 +383,7 @@ class TimeScheduleController extends Controller
             TimeScheduleEmployee::create([
                 'time_schedule_id' => $rapat->id,
                 'employee_id' => $pesertaId,
-                'dokumentasi' => 'hadir',
+                'status' => 'hadir',
             ]);
         }
 
