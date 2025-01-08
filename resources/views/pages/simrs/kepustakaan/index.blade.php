@@ -201,11 +201,11 @@
                                             @else
                                                 <i class="fas fa-file text-primary fs-xl mr-2"></i>
                                                 <a href="{{ route('kepustakaan.download', Crypt::encrypt($item->id)) }}"
-                                                    class="card-title {{ $dateLimit == true ? 'text-danger' : '' }}">{{ $item->file }}</a>
+                                                    class="card-title {{ $dateLimit == true ? 'text-danger' : '' }}">{{ $item->name .'.'. pathinfo($item->file, PATHINFO_EXTENSION) }}</a>
                                             @endif
                                         </div>
                                         <div class="action-kepustakaan float-right">
-                                            @if ($item->type == 'folder')
+                                            @if ($item->type == 'folder' || $item->type == 'file')
                                                 @if (auth()->user()->can('edit kepustakaan') &&
                                                         ($item->organization_id == auth()->user()->employee->organization_id ||
                                                             (in_array($item->organization_id, [26, 27, 25]) &&

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\SIMRS\Kepustakaan;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +22,7 @@ class KepustakaanController extends Controller
 
         $organizations = Organization::all();
         $breadcrumbs = collect();
+
         return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'organizations'));
     }
 
@@ -82,8 +84,8 @@ class KepustakaanController extends Controller
         $id = Crypt::decrypt($encryptedId);
         $file = Kepustakaan::where('id', $id)->firstOrFail();
 
-        $path = "/kepustakaan" . "/" . \Str::slug($file->kategori) . "/" . $file->file;
-
+        $path = $file->file;
+        // dd($path);
         if (!Storage::disk('private')->exists($path)) {
             abort(404, 'File not found');
         }
@@ -103,12 +105,15 @@ class KepustakaanController extends Controller
             'file' => 'nullable',
         ]);
 
+        $organization = Organization::where('id', $request->organization_id)->first();
+
         if (request()->hasFile('file')) {
             $file = request()->file('file');
-            $fileName = $request->name . '.' . $file->getClientOriginalExtension();
-            $path = 'kepustakaan/' . \Str::slug($request->kategori);
+            $fileName = Carbon::now()->timestamp . '_' . $request->name . '.' . $file->getClientOriginalExtension();
+            $kategori = \Str::slug($request->kategori) ?? 'lainnya';
+            $path = 'kepustakaan/' . $kategori . '/' . \Str::slug($organization->name);
             $pathFix = $file->storeAs($path, $fileName, 'private');
-            $validatedData['file'] = $fileName;
+            $validatedData['file'] = $pathFix;
         }
 
         try {
@@ -129,9 +134,33 @@ class KepustakaanController extends Controller
 
             $id = Crypt::decrypt($encryptedId);
             $file = Kepustakaan::where('id', $id)->firstOrFail();
+            $file->name = $request->name;
+            $file->save();
+            // $organization = Organization::where('id', $request->organization_id)->first();
 
-            $file->update($validatedData);
-            return response()->json(['message' => ' Folder berhasil diupdate!'], 200);
+            // $oldPath = "/kepustakaan/" . \Str::slug($file->kategori) . "/" . $file->file;
+
+            // // Pastikan file lama ada
+            // if (!Storage::disk('private')->exists($oldPath)) {
+            //     abort(404, 'File not found');
+            // }
+
+            // // Nama file baru dan path baru
+            // $fileName = Carbon::now()->timestamp . '_' . $request->name . '.' . pathinfo($file->file, PATHINFO_EXTENSION);
+            // $kategori = \Str::slug($request->kategori) ?? 'lainnya';
+            // $newPath = 'kepustakaan/' . $kategori . '/' . \Str::slug($organization->name) . '/' . $fileName;
+
+            // // Pindahkan file ke lokasi baru
+            // if (Storage::disk('private')->move($oldPath, $newPath)) {
+            //     // Update path di database
+            //     $file->file = $newPath;
+            //     $file->kategori = $request->kategori;
+            //     $file->save();
+            //     return response()->json(['message' => ' Folder berhasil diupdate!'], 200);
+            // } else {
+            //     abort(500, 'Failed to move file');
+            // }
+
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -232,7 +261,7 @@ class KepustakaanController extends Controller
         foreach ($children as $child) {
             if ($child->type == 'file') {
                 // Hapus file dari storage
-                $filePath = 'kepustakaan/' . \Str::slug($child->kategori) . '/' . $child->file;
+                $filePath = $child->file;
                 if (Storage::disk('private')->exists($filePath)) {
                     Storage::disk('private')->delete($filePath);
                 }

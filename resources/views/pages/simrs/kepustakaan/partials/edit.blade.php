@@ -23,6 +23,10 @@
                                             class="text-danger fw-bold">*</span></label>
                                     <input type="text" class="form-control" id="name" name="name"
                                         placeholder="Masukan nama file/folder...">
+                                        
+                                    <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
+                                    
+                                    <input type="hidden" name="organization_id" value="{{ $folder->organization_id ?? '' }}">
                                 </div>
                             </div>
                         </div>

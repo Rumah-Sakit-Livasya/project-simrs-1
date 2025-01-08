@@ -126,18 +126,7 @@
                                 @csrf
                                 @method('POST')
                                 <div class="row">
-                                    <div class="col-md-6">
-                                        <label for="periode" class="font-weight-bold">Periode</label>
-                                        <select
-                                            class="select2 form-control mb-3 w-100  @error('periode') is-invalid @enderror"
-                                            id="periode" name="periode">
-                                            <option value="Januari - Maret">Januari - Maret</option>
-                                            <option value="April - Juni">April - Juni</option>
-                                            <option value="Juli - September">Juli - September</option>
-                                            <option value="Oktober - Desember">Oktober - Desember</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-12">
                                         <label for="tahun" class="font-weight-bold">Tahun</label>
                                         <select
                                             class="select2 form-control mb-3 w-100  @error('tahun') is-invalid @enderror"
@@ -169,13 +158,12 @@
                                                     <td width="1%">:</td>
                                                     <td width="29%">
                                                         <select
-                                                            class="select2 form-control w-100  @error('employee_id') is-invalid @enderror"
+                                                            class="select2 form-control w-100 employee-select @error('employee_id') is-invalid @enderror"
                                                             id="employee_id" name="employee_id">
                                                             <option value=""></option>
                                                             @foreach ($employees as $item)
                                                                 <option value="{{ $item->id }}">{{ $item->id }} -
-                                                                    {{ $item->fullname }}
-                                                                </option>
+                                                                    {{ $item->fullname }}</option>
                                                             @endforeach
                                                         </select>
                                                         @error('employee_id')
@@ -215,28 +203,39 @@
                                                     <td width="20%">Nama</td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        {{ $penilai['nama'] }}
+                                                        <select
+                                                            class="select2 form-control w-100 employee-select @error('penilai') is-invalid @enderror"
+                                                            id="penilai" name="penilai">
+                                                            <option value=""></option>
+                                                            @foreach ($employees as $item)
+                                                                <option value="{{ $item->id }}">{{ $item->id }} -
+                                                                    {{ $item->fullname }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        @error('penilai')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
                                                     </td>
                                                     <td width="20%">
                                                         Unit Kerja
                                                     </td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        {{ $penilai['unit'] }}
+                                                        -
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td width="20%">Jabatan</td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        {{ $penilai['jabatan'] }}
+                                                        -
                                                     </td>
                                                     <td width="20%">
                                                         NIP
                                                     </td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        {{ $penilai['nip'] }}
+                                                        -
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -250,34 +249,45 @@
                                                     <td width="20%">Nama</td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        {{ $pejabat_penilai['nama'] }}
+                                                        <select
+                                                            class="select2 form-control w-100 employee-select @error('pejabat_penilai') is-invalid @enderror"
+                                                            id="pejabat_penilai" name="pejabat_penilai">
+                                                            <option value=""></option>
+                                                            @foreach ($employees as $item)
+                                                                <option value="{{ $item->id }}">{{ $item->id }} -
+                                                                    {{ $item->fullname }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        @error('pejabat_penilai')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
                                                     </td>
                                                     <td width="20%">
                                                         Unit Kerja
                                                     </td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        {{ $pejabat_penilai['unit'] }}
+                                                        -
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td width="20%">Jabatan</td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        {{ $pejabat_penilai['jabatan'] }}
+                                                        -
                                                     </td>
                                                     <td width="20%">
                                                         NIP
                                                     </td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        {{ $pejabat_penilai['nip'] }}
+                                                        -
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td colspan="6" class="text-white"
                                                         style="background-color: rgb(138, 196, 248); font-size: 11pt; font-weight: bold; padding: 8px;">
-                                                        ABSENSI DAN KETERLAMBATAN DALAM 3 BULAN
+                                                        ABSENSI DAN KETERLAMBATAN DALAM 1 TAHUN
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -510,18 +520,16 @@
                                                             <tr>
                                                                 <td colspan="10" class="border-right-0">
                                                                     <h3 class="my-2 font-weight-bold"
-                                                                        style="font-size: 12pt !important">Komentar
-                                                                        {{ $penilai['jabatan'] }}
-                                                                        {{ $penilai['unit'] }}:</h3>
+                                                                        style="font-size: 12pt !important">Komentar Pejabat
+                                                                        yang Menilai:</h3>
                                                                     <textarea class="form-control mb-3" id="komentar_penilai" name="komentar_penilai" rows="5"></textarea>
                                                                 </td>
                                                             </tr>
                                                             <tr style="border: 0px">
                                                                 <td colspan="10" class="border-right-0">
                                                                     <h3 class="my-2 font-weight-bold"
-                                                                        style="font-size: 12pt !important">Komentar
-                                                                        {{ $pejabat_penilai['jabatan'] }}
-                                                                        {{ $pejabat_penilai['jabatan'] != 'Direktur' ? $pejabat_penilai['unit'] : ' RS Livasya' }}:
+                                                                        style="font-size: 12pt !important">Komentar Atasan
+                                                                        Pejabat yang Menilai :
                                                                     </h3>
                                                                     <textarea class="form-control mb-3" id="komentar_pejabat_penilai" name="komentar_pejabat_penilai" rows="5"></textarea>
                                                                 </td>
@@ -536,8 +544,7 @@
                                                             <tr style="border: 0px">
                                                                 <td width="33%">
                                                                     <b>
-                                                                        {{ $pejabat_penilai['jabatan'] }}
-                                                                        {{ $pejabat_penilai['jabatan'] != 'Direktur' ? $pejabat_penilai['unit'] : ' RS Livasya' }}:
+                                                                        PEJABAT PENILAI
                                                                     </b><br><br>
                                                                     <div
                                                                         id="tombol-{{ $group_penilaian->pejabat_penilai }}">
@@ -552,13 +559,12 @@
                                                                         src="" alt="Signature Image"
                                                                         style="display:none; max-width:60%;"><br>
 
-                                                                    {{ $pejabat_penilai['nama'] }}
+
 
                                                                 </td>
                                                                 <td width="33%">
-                                                                    <b>
-                                                                        {{ $penilai['jabatan'] }}
-                                                                        {{ $penilai['unit'] }}</b><br><br>
+                                                                    <b>PENILAI
+                                                                    </b><br><br>
 
                                                                     <div id="tombol-{{ $group_penilaian->penilai }}">
                                                                         <a class="btn btn-primary btn-sm text-white"
@@ -569,10 +575,26 @@
                                                                     <img id="signature-display-{{ $group_penilaian->penilai }}"
                                                                         src="" alt="Signature Image"
                                                                         style="display:none; max-width:60%;"><br>
-                                                                    {{ $penilai['nama'] }}
+
 
                                                                 </td>
-                                                                <td width="33%" class="border-right-0" valign="top">
+                                                                <td width="33%" class="border-right-0">
+                                                                    <b>PEGAWAI YANG DINILAI
+                                                                    </b><br><br>
+
+                                                                    <div id="tombol-{{ $group_penilaian->penilai }}">
+                                                                        <a class="btn btn-primary btn-sm text-white"
+                                                                            onclick="openSignaturePad({{ $group_penilaian->penilai }})">Tanda
+                                                                            tangan</a>
+                                                                        <br>
+                                                                    </div>
+                                                                    <img id="signature-display-{{ $group_penilaian->penilai }}"
+                                                                        src="" alt="Signature Image"
+                                                                        style="display:none; max-width:60%;"><br>
+
+
+                                                                </td>
+                                                                {{-- <td width="33%" class="border-right-0" valign="top">
                                                                     <span id="jabatan_pegawai_ttd"
                                                                         style="font-weight: bold;"></span> <span
                                                                         id="unit_pegawai_ttd"
@@ -589,7 +611,7 @@
                                                                         style="display:none; max-width:60%;"><br>
                                                                     <span id="nama_pegawai_ttd"></span>
 
-                                                                </td>
+                                                                </td> --}}
                                                             </tr>
                                                         </table>
                                                     </td>
@@ -637,26 +659,11 @@
             // Dapatkan bulan saat ini
             let currentMonth = new Date().getMonth(); // Januari adalah 0, Desember adalah 11
 
-            // Tentukan periode berdasarkan bulan saat ini
-            let periode;
-            if (currentMonth >= 0 && currentMonth <= 2) {
-                periode = "Januari - Maret";
-            } else if (currentMonth >= 3 && currentMonth <= 5) {
-                periode = "April - Juni";
-            } else if (currentMonth >= 6 && currentMonth <= 8) {
-                periode = "Juli - September";
-            } else if (currentMonth >= 9 && currentMonth <= 11) {
-                periode = "Oktober - Desember";
-            }
-
             // Dapatkan tahun saat ini
             var currentYear = new Date().getFullYear();
 
             // Pilih option yang sesuai dengan tahun
             $('#tahun').val(currentYear);
-
-            // Pilih option yang sesuai dengan periode
-            $('#periode').val(periode);
 
             $(function() {
                 $('.select2').select2({
@@ -664,32 +671,11 @@
                 });
             });
 
-            async function fetchAttendanceReport(employeeId, periode, tahun) {
-                // Mapping bulan ke angka
-                const months = {
-                    'Januari': 1,
-                    'Februari': 2,
-                    'Maret': 3,
-                    'April': 4,
-                    'Mei': 5,
-                    'Juni': 6,
-                    'Juli': 7,
-                    'Agustus': 8,
-                    'September': 9,
-                    'Oktober': 10,
-                    'November': 11,
-                    'Desember': 12
-                };
+            async function fetchAttendanceReport(employeeId, tahun) {
 
-                let parts = periode.split(' - ');
-
-                let startMonthName = parts[0];
-                let endMonthName = parts[1];
-
-                let periodeFix = months[startMonthName] + " - " + months[endMonthName];
                 try {
                     const response = await fetch(
-                        `/api/dashboard/attendances/report/employee/${employeeId}/${periodeFix}/${tahun}`, {
+                        `/api/dashboard/attendances/report/employee/penilaian/${employeeId}/${tahun}`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -750,8 +736,57 @@
                     }
                 });
 
-                fetchAttendanceReport(employeeId, periodeOnChange, tahun);
-            })
+                fetchAttendanceReport(employeeId, tahun);
+            });
+
+            $('.employee-select').on('change', function(e) {
+                e.preventDefault();
+
+                let employeeId = $(this).val();
+                let targetId = $(this).attr('id'); // Ambil ID elemen yang memicu event
+                let tahun = $('#tahun').val(); // Jika dibutuhkan dalam fetchAttendanceReport
+
+                if (employeeId) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/dashboard/kpi/employee/" + employeeId + "/get",
+                        success: function(response) {
+                            // Update data sesuai target ID
+                            if (targetId === 'employee_id') {
+                                $('span#nama_pegawai_ttd').text(response.nama);
+                                $('span#unit_pegawai').text(response.unit);
+                                $('span#unit_pegawai_ttd').text(response.unit);
+                                $('span#jabatan_pegawai').text(response.jabatan);
+                                $('span#jabatan_pegawai_ttd').text(response.jabatan);
+                                $('span#nip_pegawai').text(response.nip || '-');
+                            } else if (targetId === 'penilai') {
+                                // Sesuaikan element tujuan penilai
+                                $('span#nama_penilai').text(response.nama);
+                                $('span#unit_penilai').text(response.unit);
+                                $('span#jabatan_penilai').text(response.jabatan);
+                                $('span#nip_penilai').text(response.nip || '-');
+                            } else if (targetId === 'pejabat_penilai') {
+                                // Sesuaikan element tujuan pejabat penilai
+                                $('span#nama_pejabat_penilai').text(response.nama);
+                                $('span#unit_pejabat_penilai').text(response.unit);
+                                $('span#jabatan_pejabat_penilai').text(response.jabatan);
+                                $('span#nip_pejabat_penilai').text(response.nip || '-');
+                            }
+
+                            $('#tombol-pegawai a').attr('onclick', 'openSignaturePad(null)');
+                            $('#tombol-pegawai a').text('Tanda Tangan');
+                        },
+                        error: function(xhr) {
+                            showErrorAlert(xhr.responseJSON.error);
+                        }
+                    });
+
+                    // Jika diperlukan, panggil fungsi fetchAttendanceReport
+                    if (targetId === 'employee_id') {
+                        fetchAttendanceReport(employeeId, tahun);
+                    }
+                }
+            });
 
             function updateTotal(nama) {
                 const namaDariInput = nama;

@@ -137,12 +137,13 @@ class ReportController extends Controller
         ]);
     }
 
-    public function attendanceReports()
+    public function attendanceReports(Request $request)
     {
 
         if (Auth::check() && !Auth::user()->hasRole('super admin')) {
             return redirect()->route('attendances')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
+
 
         $total_absent_this_month = 0;
         $total_ontime_this_month = 0;
@@ -151,6 +152,9 @@ class ReportController extends Controller
         $total_dayoff_this_month = 0;
         $total_timeoff_this_month = 0;
         $year = Carbon::now()->year;
+        if ($request->year) {
+            $year = $request->year;
+        }
         $attendancesAllMonths = [];
 
         // Mulai dari Januari hingga Desember
@@ -187,23 +191,26 @@ class ReportController extends Controller
             $total_absent_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
                 $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
             })->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDate, $endDate])->count();
-            if ($endDate->gt(Carbon::now())) {
-                $total_absent_all = 0;
-            }
-            if (Carbon::now()->day >= 26) {
-                if ($startDate->format('F') == Carbon::now()->format('F')) {
-                    $total_absent_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
-                        $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-                    })->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDate, Carbon::now()])->count();
-                    $total_absent_this_month = $total_absent_all;
+
+            if (Carbon::now()->month == $month && Carbon::now()->year == $year) {
+                if ($endDate->gt(Carbon::now())) {
+                    $total_absent_all = 0;
                 }
-            }
-            if (Carbon::now()->day < 26) {
-                if ($endDate->format('F') == Carbon::now()->format('F')) {
-                    $total_absent_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
-                        $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
-                    })->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDate, Carbon::now()])->count();
-                    $total_absent_this_month = $total_absent_all;
+                if (Carbon::now()->day >= 26) {
+                    if ($startDate->format('F') == Carbon::now()->format('F')) {
+                        $total_absent_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
+                            $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
+                        })->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDate, Carbon::now()])->count();
+                        $total_absent_this_month = $total_absent_all;
+                    }
+                }
+                if (Carbon::now()->day < 26) {
+                    if ($endDate->format('F') == Carbon::now()->format('F')) {
+                        $total_absent_all = Attendance::where('clock_in', null)->whereHas('employees', function ($query) {
+                            $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
+                        })->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDate, Carbon::now()])->count();
+                        $total_absent_this_month = $total_absent_all;
+                    }
                 }
             }
 
@@ -216,6 +223,7 @@ class ReportController extends Controller
                 'total_absent_all' => $total_absent_all,
             ];
         }
+
 
         if (Carbon::now()->day >= 26) {
             $startDateReport = Carbon::create(
@@ -351,28 +359,39 @@ class ReportController extends Controller
 
         $groupReport = [
             'PELMED' => [
-                'Unit Rawat Inap',
-                'Unit Rawat Jalan',
-                'Unit IGD',
-                'Unit OK',
-                'Unit Perinatologi'
+                'Rawat Inap 1',
+                'Rawat Inap 2',
+                'Rawat Jalan',
+                'IGD',
+                'Intensif Care',
+                'OK',
+                'VK & PONEK',
+                'Perinatologi'
             ],
             'PENMED' => [
-                'Unit Farmasi',
-                'Unit Radiologi'
+                'Farmasi',
+                'Farmasi Rajal',
+                'Farmasi Ranap',
+                'Gudang Farmasi',
+                'Penunjang Medis',
+                'Gizi',
+                'Laboratorium',
+                'Pendaftaran dan RM',
+                'CSSD',
+                'Radiologi'
             ],
             'KEU' => [
-                'Unit Keuangan'
+                'Keuangan'
             ],
             'HRD' => [
-                'Unit SDM'
+                'SDM'
             ],
             'UMUM' => [
-                'Unit Umum Security',
+                'Security',
                 'Sanitasi'
             ],
             'MARKETING' => [
-                'Unit Marketing'
+                'Marketing'
             ]
         ];
 
@@ -509,6 +528,7 @@ class ReportController extends Controller
             'bulan' => $bulan,
             'selectedBulan' => Carbon::now()->month,
             'selectedTahun' => Carbon::now()->year,
+            'selectedTahunGrafikAbsensi' => $year,
             'attendances' => $attendances,
             'employees' => $employees,
             'startDateReport' => $startDateReport,
@@ -913,182 +933,30 @@ class ReportController extends Controller
         ]);
     }
 
-    // public function filterAttendanceReportPerUnit()
-    // {
-    //     try {
-    //         $groupReport = [
-    //             'PELMED' => [
-    //                 'Unit Rawat Inap',
-    //                 'Unit Rawat Jalan',
-    //                 'Unit IGD',
-    //                 'Unit OK',
-    //                 'Unit Perinatologi'
-    //             ],
-    //             'PENMED' => [
-    //                 'Unit Farmasi',
-    //                 'Unit Radiologi'
-    //             ],
-    //             'KEU' => [
-    //                 'Unit Keuangan'
-    //             ],
-    //             'HRD' => [
-    //                 'Unit SDM'
-    //             ],
-    //             'UMUM' => [
-    //                 'Unit Umum Security',
-    //                 'Sanitasi'
-    //             ],
-    //             'MARKETING' => [
-    //                 'Unit Marketing'
-    //             ]
-    //         ];
-
-    //         $grafik_laporan = [];
-
-    //         $groupName = request()->kategori;
-    //         $startDateReport = Carbon::create(
-    //             request()->tahun,
-    //             request()->bulan,
-    //             26
-    //         )->subMonth();
-
-
-    //         $endDateReport = Carbon::create(
-    //             request()->tahun,
-    //             request()->bulan,
-    //             25
-    //         );
-
-    //         if (request()->bulan == Carbon::now()->month && request()->tahun == Carbon::now()->year) {
-    //             if (Carbon::now()->day != 26) {
-    //                 $endDateReport = Carbon::now();
-    //             }
-    //         }
-
-    //         if (array_key_exists($groupName, $groupReport)) {
-    //             $units = $groupReport[$groupName];
-
-    //             // Query untuk mengambil attendances dengan tambahan filter tanggal
-    //             $attendances = Attendance::whereHas('employeess', function ($query) use ($units) {
-    //                 $query->whereHas('organization', function ($query) use ($units) {
-    //                     $query->whereIn('name', $units);
-    //                 });
-    //             })
-    //                 ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
-    //                 ->get();
-
-    //             // Query untuk menghitung jumlah izin
-    //             $izinCount = Attendance::where('clock_in', null)
-    //                 ->whereHas('employees', function ($query) use ($units) {
-    //                     $query->whereHas('organization', function ($query) use ($units) {
-    //                         $query->whereIn('name', $units);
-    //                     });
-    //                 })
-    //                 ->where(function ($query) {
-    //                     $query->whereHas('day_off', function ($query) {
-    //                         $query->where('attendance_code_id', 1);
-    //                     })->orWhere('attendance_code_id', 1);
-    //                 })
-    //                 ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
-    //                 ->count();
-
-    //             $sakitCount = Attendance::where('clock_in', null)
-    //                 ->whereHas('employees', function ($query) use ($units) {
-    //                     $query->whereHas('organization', function ($query) use ($units) {
-    //                         $query->whereIn('name', $units);
-    //                     });
-    //                 })
-    //                 ->where(function ($query) {
-    //                     $query->whereHas('day_off', function ($query) {
-    //                         $query->where('attendance_code_id', 2);
-    //                     })->orWhere('attendance_code_id', 2);
-    //                 })
-    //                 ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
-    //                 ->count();
-
-    //             $cutiCount = Attendance::where('is_day_off', 1)
-    //                 ->whereHas('employees', function ($query) use ($units) {
-    //                     $query->whereHas('organization', function ($query) use ($units) {
-    //                         $query->whereIn('name', $units);
-    //                     });
-    //                 })
-    //                 ->where(function ($query) {
-    //                     $query->where(function ($query) {
-    //                         $query->whereNotNull('day_off_request_id')
-    //                             ->whereHas('day_off', function ($query) {
-    //                                 $query->where('attendance_code_id', '!=', 1)
-    //                                     ->where('attendance_code_id', '!=', 2);
-    //                             });
-    //                     })->orWhere(function ($query) {
-    //                         $query->whereNotNull('attendance_code_id')
-    //                             ->where('attendance_code_id', '!=', 1)
-    //                             ->where('attendance_code_id', '!=', 2);
-    //                     });
-    //                 })
-    //                 ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
-    //                 ->count();
-
-    //             $lateInCount = Attendance::where('clock_in', '!=', null)->where('late_clock_in', '!=', null)
-    //                 ->whereHas('employees', function ($query) use ($units) {
-    //                     $query->whereHas('organization', function ($query) use ($units) {
-    //                         $query->whereIn('name', $units);
-    //                     });
-    //                 })->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
-    //                 ->count();
-
-    //             $onTimeCount = Attendance::where('clock_in', '!=', null)
-    //                 ->where('late_clock_in', null)
-    //                 ->where('early_clock_out', null)->whereHas('employees', function ($query) use ($units) {
-    //                     $query->whereHas('organization', function ($query) use ($units) {
-    //                         $query->whereIn('name', $units);
-    //                     });
-    //                 })->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
-    //                 ->count();
-
-
-    //             // Tambahkan hasil ke dalam grafik laporan
-    //             $grafik_laporan["Izin"] = $izinCount;
-    //             $grafik_laporan["Sakit"] = $sakitCount;
-    //             $grafik_laporan["Cuti"] = $cutiCount;
-    //             $grafik_laporan["LateIn"] = $lateInCount;
-    //             $grafik_laporan["OnTime"] = $onTimeCount;
-
-    //             $grafik_laporan["Hadir"] = $attendances->where('clock_in', '!=', null)->where('is_day_off', null)->count();
-    //             $grafik_laporan["Absent"] = $attendances->where('clock_in', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->count();
-    //             $grafik_laporan["DayOff"] = $attendances->where('clock_in', null)->where('attendance_code_id', '!=', null)->where('day_off_request_id', '!=', null)->count();
-    //             $grafik_laporan["Libur"] = $attendances->where('clock_in', null)->where('is_day_off', 1)->where('attendance_code_id',  null)->where('day_off_request_id',  null)->count();
-    //             dd($grafik_laporan);
-    //         } else {
-    //             throw new \Exception('Group name tidak ditemukan!');
-    //         }
-    //     } catch (\Exception $e) {
-    //         // Tangkap error dan lakukan sesuatu, misalnya log atau kirim respons error
-    //         $errorMessage = $e->getMessage();
-    //         // Contoh penanganan error dengan log
-    //         \Log::error('Error fetching attendances: ' . $errorMessage);
-    //         // Contoh penanganan error dengan respons JSON
-    //         return response()->json(['error' => $errorMessage], 500);
-    //     }
-    // }
-
-    public function getReportAttendancesEmployee($employee_id, $periode, $tahun)
+    public function getReportAttendancesEmployee($employee_id, $periode = null, $tahun = null)
     {
-        $parts = explode(" - ", $periode);
-
-        $startMonth = $parts[0];
-        $endMonth = $parts[1];
-
-        $startDateReport = Carbon::create(
-            $tahun,
-            $startMonth,
-            26
-        );
-
-        $endDateReport = Carbon::create(
-            $tahun,
-            $endMonth,
-            25
-        );
+        if ($tahun == null) {
+            $startDateReport = Carbon::create($periode, 1, 26)->subMonth();
+            $endDateReport = Carbon::create($periode, 12, 25);
+        } else {
+            $parts = explode(" - ", $periode);
+    
+            $startMonth = $parts[0];
+            $endMonth = $parts[1];
+    
+            $startDateReport = Carbon::create(
+                $tahun,
+                $startMonth,
+                26
+            );
+    
+            $endDateReport = Carbon::create(
+                $tahun,
+                $endMonth,
+                25
+            );
+        }
+        
 
         try {
             $employee = Employee::find($employee_id);
@@ -1157,5 +1025,117 @@ class ReportController extends Controller
                 'error' => $e->getMessage()
             ], 404);
         }
+    }
+
+    public function dayOffReqReports(Request $request)
+    {
+        date_default_timezone_set('Asia/Jakarta');
+
+        // Set locale ke Indonesia
+        Carbon::setLocale('id');
+
+        $currentYear = $request->input('tahun', Carbon::now()->year) ?? Carbon::now()->year;
+
+        // Tentukan startDate dan endDate berdasarkan tahun yang diberikan
+        $startDate = Carbon::create($currentYear - 1, 12, 26);
+        $endDate = Carbon::create($currentYear, 12, 25);
+        $employees = Employee::where('is_active', 1)->get();
+        $attendances = [];
+
+        foreach ($employees as $employee) {
+
+            $total_izin = 0;
+            $total_cuti = 0;
+            $total_sakit = 0;
+            $absensi_pegawai = $employee->attendance->where('is_day_off', 1)->whereBetween('date', [$startDate->toDateString(), $endDate]);
+
+            foreach ($absensi_pegawai as $absensi) {
+                if ($absensi->attendance_code_id != null || $absensi->day_off_request_id != null) {
+                    if ($absensi->attendance_code_id == 1) {
+                        $total_izin += 1;
+                    } elseif ($absensi->attendance_code_id == 2) {
+                        $total_sakit += 1;
+                    } elseif ($absensi->attendance_code_id != 1 && $absensi->attendance_code_id != 2) {
+                        $total_cuti += 1;
+                    } elseif ($absensi->attendance_code_id == null || $absensi->attendance_code_id == "") {
+                        // Jika attendance_code_id di Attendance tidak ada, cek di DayOffRequest melalui relasi day_off
+                        if ($absensi->day_off) {
+                            // Cek apakah day_off_request memiliki attendance_code_id yang diinginkan
+                            if ($absensi->day_off->attendance_code_id == 1) {
+                                $total_izin += 1;
+                            } elseif ($absensi->day_off->attendance_code_id == 2) {
+                                $total_sakit += 1;
+                            } else {
+                                $total_cuti += 1;
+                            }
+                        }
+                    }
+                }
+            }
+            // Push data ke dalam array attendances
+            $attendances[] = [
+                'employee_id' => $employee->id,
+                'employee_name' => $employee->fullname,
+                'organization_name' => $employee->organization->name,
+                'total_izin' => $total_izin,
+                'total_sakit' => $total_sakit,
+                'total_cuti' => $total_cuti,
+            ];
+        }
+
+        // Query untuk mendapatkan data attendances berdasarkan range tanggal dan employee_id
+        // $attendances = Attendance::where('employee_id', auth()->user()->employee->id)
+        //     ->whereBetween('date', [$startDate, $endDate])
+        //     ->get();
+
+        // $last_attendance = Attendance::where('employee_id', auth()->user()->employee->id)->where('date', Carbon::now()->format('Y-m-d'))->first();
+        // $jumlah_hadir = Attendance::where('employee_id', auth()->user()->employee->id)->where('is_day_off', null)->where('clock_in', '!=', null)->whereBetween('date', [$startDate, $endDate])->count();
+        // $day_off = Attendance::where('employee_id', auth()->user()->employee->id)->where('day_off_request_id', '!=', null)->whereBetween('date', [$startDate, $endDate])->get();
+        // $jumlah_izin = 0;
+        // $jumlah_sakit = 0;
+        // $jumlah_cuti = 0;
+
+        // foreach ($day_off as $row) {
+        //     $code = $row->day_off->attendance_code->code;
+        //     if ($code == "I") {
+        //         $jumlah_izin++;
+        //     } else if ($code == "S") {
+        //         $jumlah_sakit++;
+        //     } else {
+        //         $jumlah_cuti++;
+        //     }
+        // }
+
+
+        return view('pages.laporan.daftar-cuti.index', compact('currentYear', 'attendances'));
+    }
+
+    public function dayOffReqReportDetail(Request $request, $id, $tahun)
+    {
+
+        $currentYear = $tahun ?? Carbon::now()->year;
+        $startDate = Carbon::create($currentYear - 1, 12, 26);
+        $endDate = Carbon::create($currentYear, 12, 25);
+
+        // Query untuk mendapatkan data attendances berdasarkan range tanggal dan employee_id
+        // $attendances = Attendance::where('employee_id', $id)
+        //     ->whereBetween('date', [$startDate, $endDate])
+        //     ->get();
+        // $day_off = Attendance::where('employee_id', $id)->where('day_off_request_id', '!=', null)->whereBetween('date', [$startDate, $endDate])->get();
+        $day_off = Attendance::where('is_day_off', 1)
+            ->where('employee_id', $id)
+            ->where(function ($query) {
+                $query->where(function ($query) {
+                    $query->whereNotNull('day_off_request_id')
+                        ->whereHas('day_off'); // Tidak perlu titik koma di akhir
+                })->orWhere(function ($query) {
+                    $query->whereNotNull('attendance_code_id'); // Tetap cek kalau attendance_code_id tidak null
+                });
+            })
+            ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->get();
+
+
+        return view('pages.laporan.daftar-cuti.detail', compact('day_off', 'currentYear'));
     }
 }

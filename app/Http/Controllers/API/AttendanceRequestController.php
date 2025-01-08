@@ -521,9 +521,7 @@ class AttendanceRequestController extends Controller
             'tanggal' => 'required|array',
             'tanggal.*' => 'date', // Validasi tanggal
             'clockin' => 'nullable|array',
-            'clockin.*' => 'date_format:H:i', // Validasi format waktu
             'clockout' => 'nullable|array',
-            'clockout.*' => 'date_format:H:i', // Validasi format waktu
             'lampiran' => 'required|file|mimes:pdf|max:2048',
         ]);
 
@@ -535,10 +533,20 @@ class AttendanceRequestController extends Controller
             if ($request->hasFile('lampiran')) {
                 // Menyimpan file PDF ke storage
                 $lampiran = $request->file('lampiran');
-                // Membuat path berdasarkan tanggal sekarang
-                $file_path = 'lampiran/' . now()->format('Y-m-d') . '/'; // Menggunakan titik untuk concatenation
-                // Menyimpan file dengan nama yang unik dan path yang diinginkan
-                $lampiranPath = $lampiran->storeAs($file_path, 'lampiran_' . time() . '.' . $lampiran->getClientOriginalExtension(), 'public');
+
+                $fileName = 'lampiran-' . uniqid() . '.' . $lampiran->getClientOriginalExtension();
+                $directory = 'lampiran/' . now()->format('Y-m-d') . '/';
+
+                // Simpan file secara manual ke storage
+                $storagePath = storage_path('app/public/' . $directory);
+                if (!file_exists($storagePath)) {
+                    mkdir($storagePath, 0755, true); // Buat folder jika belum ada
+                }
+
+                // Pindahkan file ke folder tujuan
+                $lampiran->move($storagePath, $fileName);
+
+                $lampiranPath = $directory . '/' . $fileName;
             }
 
             $lamp = AttendanceRequestLamp::create([

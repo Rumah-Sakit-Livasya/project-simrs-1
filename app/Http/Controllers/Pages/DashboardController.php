@@ -1077,9 +1077,36 @@ class DashboardController extends Controller
         if (!$user) {
             return response()->json(['error' => 'User tidak ditemukan'], 404);
         }
-
+        $responseMessage = "*Akses Pengajuan telah Dibuka!* \n\nKamu bisa langsung melakukan pengajuan absensi pada website: https://internal.livasya.com";
         // Convert boolean to integer (1 or 0)
         $user->is_request_attendance = $request->is_request_attendance ? 1 : 0;
+
+        if($user->is_request_attendance == 1) {
+            $headers = [
+                'Key:KeyAbcKey',
+                'Nama:arul',
+                'Sandi:123###!!',
+            ];
+
+            $httpDataHRD = [
+                'number' => formatNomorIndo($user->employee->mobile_phone),
+                'message' => $responseMessage,
+            ];
+
+            // Mengirim request HTTP menggunakan cURL
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+            $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($curl);
+            curl_close($curl);
+        }
         $user->save();
 
         return response()->json(['message' => 'Status berhasil diperbarui']);
@@ -1179,10 +1206,23 @@ class DashboardController extends Controller
             // Cek apakah shift time_in lebih dari 1 jam dari sekarang
             $is_request = $shift_time_in->diffInHours($current_time, false) > 1;
         }
-
-        // $is_request = !$is_request;
+        $is_request = !$is_request;
 
         return view('pages.absensi.pengajuan-absensi.index', compact('attendance_requests', 'getNotify', 'is_request', 'pengajuan'));
+    }
+
+    public function attendanceRequestLamp()
+    {
+        // Path ke file di folder public
+        $filePath = public_path('pengajuan_absensi.docx');
+
+        // Cek apakah file ada
+        if (!file_exists($filePath)) {
+            return abort(404, 'File not found.');
+        }
+
+        // Mengunduh file
+        return response()->download($filePath, 'pengajuan_absensi.docx');
     }
 
     public function getAttendanceRequest($id)
@@ -1307,26 +1347,10 @@ class DashboardController extends Controller
     {
         $group_penilaian = GroupPenilaian::find($id);
         $employees = Employee::where('is_active', 1)->get(['id', 'fullname']);
-        $penilai_parent = Employee::where('is_active', 1)->where('id', $group_penilaian->penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
-        $pejabat_penilai_parent = Employee::where('is_active', 1)->where('id', $group_penilaian->pejabat_penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
-
-        $penilai = [
-            'nama' => $penilai_parent->fullname,
-            'jabatan' => JobPosition::find($penilai_parent->job_position_id)->name,
-            'unit' => Organization::find($penilai_parent->organization_id)->name,
-            'nip' => $penilai_parent->employee_code
-        ];
-
-        $pejabat_penilai = [
-            'nama' => $pejabat_penilai_parent->fullname,
-            'jabatan' => JobPosition::find($pejabat_penilai_parent->job_position_id)->name,
-            'unit' => Organization::find($pejabat_penilai_parent->organization_id)->name,
-            'nip' => $pejabat_penilai_parent->employee_code
-        ];
 
         $rumus_penilaian = $group_penilaian->rumus_penilaian;
 
-        return view('pages.kpi.penilaian.index', compact('group_penilaian', 'employees', 'penilai', 'pejabat_penilai', 'rumus_penilaian'));
+        return view('pages.kpi.penilaian.index', compact('group_penilaian', 'employees', 'rumus_penilaian'));
     }
 
     public function showPenilaianBulanan($id_form, $id_pegawai, $periode, $tahun)

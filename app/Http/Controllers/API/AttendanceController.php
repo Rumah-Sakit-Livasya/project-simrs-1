@@ -123,6 +123,14 @@ class AttendanceController extends Controller
                         $request['late_clock_in'] = ($perbedaanMenit == '0') ? null : $perbedaanMenit;
                         $attendance->update($request->only(['clock_in', 'foto_clock_in', 'location', 'late_clock_in']));
                     }
+                } else {
+                    $waktu_absen = $attendance->shift->time_in;
+                    $perbedaanMenit = $request['clock_in']->greaterThan($waktu_absen)
+                        ? Carbon::parse($waktu_absen)->seconds(0)->diffInMinutes(Carbon::parse($request['clock_in'])->seconds(0))
+                        : null;
+
+                    $request['late_clock_in'] = ($perbedaanMenit == '0') ? null : $perbedaanMenit;
+                    $attendance->update($request->only(['clock_in', 'foto_clock_in', 'location', 'late_clock_in']));
                 }
 
                 return response()->json(['message' => 'Berhasil Clock In!']);
@@ -776,7 +784,7 @@ class AttendanceController extends Controller
                     $perbedaanMenit_timein = null;
                     $perbedaanMenit_timeout = null;
 
-                    
+
                     //Jika libur
                     if ($shift->name == 'dayoff' || $shift->name == 'National Holiday') {
                         $clock_in = null;
@@ -808,8 +816,8 @@ class AttendanceController extends Controller
                             'early_clock_out' => $perbedaanMenit_timeout,
                             'is_day_off' => null,
                         ]);
-                        
-                        if($absensi->day_off) {
+
+                        if ($absensi->day_off) {
                             $day_off_request_id[] = $absensi->day_off->id;
                             $absensi->update([
                                 'is_day_off' => null,
@@ -817,13 +825,12 @@ class AttendanceController extends Controller
                                 'attendance_code_id' => null,
                             ]);
                         }
-                        
                     }
                 }
             }
 
             $unique_day_off_request_id = array_unique($day_off_request_id);
-            if(count($unique_day_off_request_id) > 0) {
+            if (count($unique_day_off_request_id) > 0) {
                 foreach ($unique_day_off_request_id as $key => $value) {
                     $day_off = DayOffRequest::where('id', $value)->first();
                     $day_off->delete();

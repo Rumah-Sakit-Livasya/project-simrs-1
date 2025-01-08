@@ -74,13 +74,12 @@
                                                 </select>
                                             </div>
                                         </div>
-                                    @else
-                                        <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
                                     @endif
                                 @endif
                                 <div class="col-md-12 mt-3">
                                     <label for="name">Nama (File/Folder) <span
                                             class="text-danger fw-bold">*</span></label>
+                                    <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
                                     <input type="text" class="form-control" id="name" name="name"
                                         placeholder="Masukan nama file/folder...">
                                 </div>

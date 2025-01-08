@@ -209,6 +209,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
     });
 
     Route::prefix('attendances')->group(function () {
+        Route::get('/report/employee/penilaian/{employee_id}/{tahun}', [ReportController::class, 'getReportAttendancesEmployee']);
         Route::get('/report/employee/{employee_id}/{periode}/{tahun}', [ReportController::class, 'getReportAttendancesEmployee']);
         Route::post('/detail', [AttendanceController::class, 'getDetailAttendance']);
         Route::post('/request/form', [AttendanceRequestController::class, 'submitFormReqAttendance'])->name('attendances.form.submit');
