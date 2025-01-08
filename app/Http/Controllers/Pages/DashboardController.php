@@ -1367,6 +1367,8 @@ class DashboardController extends Controller
                     $index++;
                 }
             }
+
+            // dd()
             $nilai_kalkulasi = ($nilai / 40) * ($aspek->bobot / 100);
             $total_nilai = $nilai_kalkulasi * 100;
             $total_akhir += round($total_nilai);
@@ -1378,7 +1380,7 @@ class DashboardController extends Controller
         }
 
         dd($total_akhir, $total_nilai_all);
-        
+
         $penilai = [
             'nama' => $penilai_parent->fullname,
             'jabatan' => JobPosition::find($penilai_parent->job_position_id)->name,
