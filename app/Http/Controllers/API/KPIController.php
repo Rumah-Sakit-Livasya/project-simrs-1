@@ -135,6 +135,15 @@ class KPIController extends Controller
                 'employee_id' => 'required',
             ]);
 
+            $check_rekap_penilaian = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
+            $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
+
+            if(isset($check_penilaian_pegawai) > 0 || isset($check_rekap_penilaian) > 0) {
+                return response()->json([
+                    'error' => 'Pegawai sudah diberikan penilaian!'
+                ], 500);
+            }
+
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
