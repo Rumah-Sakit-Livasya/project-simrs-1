@@ -166,7 +166,6 @@ class KPIController extends Controller
                 }
             }
 
-
             if ($total_nilai_fix > 95) {
                 $keterangan = "Sangat Baik";
             } else if ($total_nilai_fix > 85 && $total_nilai_fix < 96) {

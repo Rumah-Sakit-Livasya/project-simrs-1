@@ -1358,7 +1358,10 @@ class DashboardController extends Controller
         $nilai = null;
         $index = 0;
         $total_akhir = null;
+
+        $total_input = 0;
         foreach ($group_penilaian->aspek_penilaians as $aspek) {
+            $total_input = $aspek->indikator_penilaians->count();
             $nilai = 0;
             foreach ($aspek->indikator_penilaians->sortBy('id') as $indikator) {
                 // foreach($penilaian_pegawai)
@@ -1368,18 +1371,15 @@ class DashboardController extends Controller
                 }
             }
 
-            // dd()
-            $nilai_kalkulasi = ($nilai / 40) * ($aspek->bobot / 100);
+            $nilai_kalkulasi = ($nilai / ($total_input * 5)) * ($aspek->bobot / 100);
             $total_nilai = $nilai_kalkulasi * 100;
-            $total_akhir += round($total_nilai);
+            $total_akhir += number_format($total_nilai, 2, '.', '');
             $total_nilai_all[] = [
                 'nilai' => $nilai,
                 'nilai_kalkulasi' => floor($nilai_kalkulasi * 1000) / 1000,
-                'total_nilai' => round($total_nilai),
+                'total_nilai' => number_format($total_nilai, 2, '.', '')
             ];
         }
-
-        dd($total_akhir, $total_nilai_all);
 
         $penilai = [
             'nama' => $penilai_parent->fullname,
