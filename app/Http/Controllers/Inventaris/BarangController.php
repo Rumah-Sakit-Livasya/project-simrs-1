@@ -39,6 +39,7 @@ class BarangController extends Controller
             $organizationId = Auth::user()->employee->organization_id;
             $companies = Auth::user()->employee->company;
 
+
             // Check if there are search parameters
             if ($customName || $templateBarang || $kategoriBarang || $identitasBarang || $ruanganId || $companyId) { // Added ruanganId to the condition
                 // Query for searching
@@ -60,7 +61,7 @@ class BarangController extends Controller
                 if ($ruanganId) { // Added filter for ruangan_id
                     $query->where('room_id', $ruanganId);
                 }
-                if ($companyId) { // Added filter for ruangan_id
+                if ($companyId) { // Added filter for company_id
                     $query->where('company_id', $companyId);
                 }
 
@@ -71,11 +72,36 @@ class BarangController extends Controller
 
                 // Get the search results
                 $barang = $query->orderBy('custom_name', 'asc')->get();
+                $barangCount = count($barang);
+
+                $filterInfo = '';
+                if ($customName) {
+                    $filterInfo .= 'Nama Barang: ' . $customName . ', ';
+                }
+                if ($identitasBarang) {
+                    $filterInfo .= 'Identitas Barang: ' . $identitasBarang . ', ';
+                }
+                if ($templateBarang) {
+                    $filterInfo .= 'Template Barang: ' . TemplateBarang::find($templateBarang)->name . ', ';
+                }
+                if ($kategoriBarang) {
+                    $filterInfo .= 'Kategori Barang: ' . CategoryBarang::find($kategoriBarang)->name . ', ';
+                }
+                if ($ruanganId) {
+                    $filterInfo .= 'Ruangan: ' . RoomMaintenance::find($ruanganId)->name . ', ';
+                }
+                if ($companyId) {
+                    $filterInfo .= 'Perusahaan: ' . Company::find($companyId)->name . ', ';
+                }
+
+                $filterInfo = rtrim($filterInfo, ', ');
+                $alertMessage = 'Filter information: ' . $filterInfo . '. ' . $barangCount . ' items found.';
             } else {
                 // If no search parameters, get items related to the user's organization
                 $barang = Barang::whereHas('room.organizations', function ($q) use ($organizationId) {
                     $q->where('organization_id', $organizationId);
                 })->orderBy('id', 'desc')->limit(100)->get();
+                $alertMessage = '';
             }
         }
 
@@ -87,7 +113,8 @@ class BarangController extends Controller
             'rooms' => $rooms,
             'allRoom' => $allRoom,
             'jumlah' => count(Barang::all()),
-            'ruangan' => $rooms // Added $ruangan here
+            'ruangan' => $rooms, // Added $ruangan here
+            'alertMessage' => $alertMessage ?? ''
         ]);
     }
 
