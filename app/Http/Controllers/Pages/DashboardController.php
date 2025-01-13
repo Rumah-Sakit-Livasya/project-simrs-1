@@ -46,6 +46,7 @@ use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use App\Http\Controllers\API\TimeScheduleController;
 use App\Models\PendidikanPelatihan;
+use App\Models\TimeScheduleEmployee;
 
 class DashboardController extends Controller
 {
@@ -1081,7 +1082,7 @@ class DashboardController extends Controller
         // Convert boolean to integer (1 or 0)
         $user->is_request_attendance = $request->is_request_attendance ? 1 : 0;
 
-        if($user->is_request_attendance == 1) {
+        if ($user->is_request_attendance == 1) {
             $headers = [
                 'Key:KeyAbcKey',
                 'Nama:arul',
@@ -1682,6 +1683,85 @@ class DashboardController extends Controller
         $employees = Employee::where('is_active', 1)->get();
 
         return view('pages.time-schedule.index', compact('timeSchedules', 'employees', 'tooltipNames'));
+    }
+
+    public function getDataTimeScheduleReportRapat()
+    {
+        $timeSchedules = TimeSchedule::all();
+        $totalMeetings = $timeSchedules->count();
+        $onlineMeetings = $timeSchedules->where('is_online', true)->count();
+        $offlineMeetings = $totalMeetings - $onlineMeetings;
+
+        $activities = TimeSchedule::where('type', 'kegiatan')->get(); // Mengambil kegiatan dari TimeSchedule
+        $totalActivities = $activities->count();
+        $onlineActivities = $activities->where('is_online', true)->count();
+        $offlineActivities = $totalActivities - $onlineActivities;
+
+        // Rincian peserta untuk setiap rapat
+        $meetingDetails = $timeSchedules->map(function ($meeting) {
+            $participants = TimeScheduleEmployee::where('time_schedule_id', $meeting->id)->get();
+            $participantsCount = $participants->count();
+            $participantsPresent = $participants->where('status', 'hadir')->count();
+            $participantsAbsent = $participantsCount - $participantsPresent;
+
+            // Mendapatkan nama employee yang tidak hadir
+            $absentEmployeeNames = Employee::whereIn('id', function ($query) use ($participants) {
+                $query->select('employee_id')
+                    ->from('time_schedule_employees')
+                    ->where('time_schedule_id', $participants->first()->time_schedule_id)
+                    ->where('status', '!=', 'hadir');
+            })->pluck('fullname')->toArray();
+
+            // Ensure absent employee names are correctly fetched
+            $absentEmployeeNames = Employee::whereIn('id', $participants->where('status', '!=', 'hadir')->pluck('employee_id'))
+                ->pluck('fullname')->toArray();
+
+            return [
+                'meeting_id' => $meeting->id,
+                'title' => $meeting->title,
+                'total_participants' => $participantsCount,
+                'participants_present' => $participantsPresent,
+                'participants_absent' => $participantsAbsent,
+                'absent_employee_names' => $absentEmployeeNames, // Directly return the names of absent employees
+            ];
+        });
+
+        // Statistik pegawai yang selalu hadir dan tidak hadir
+        $alwaysPresentEmployees = Employee::whereIn('id', function ($query) {
+            $query->select('employee_id')
+                ->from('time_schedule_employees')
+                ->groupBy('employee_id')
+                ->havingRaw('COUNT(CASE WHEN status = "hadir" THEN 1 END) = COUNT(*)');
+        })->pluck('fullname')->toArray();
+
+        $alwaysAbsentEmployees = Employee::whereIn('id', function ($query) {
+            $query->select('employee_id')
+                ->from('time_schedule_employees')
+                ->groupBy('employee_id')
+                ->havingRaw('COUNT(CASE WHEN status != "hadir" THEN 1 END) = COUNT(*)');
+        })->pluck('fullname')->toArray();
+
+        $statistics = [
+            'total_meetings' => $totalMeetings,
+            'online_meetings' => $onlineMeetings,
+            'offline_meetings' => $offlineMeetings,
+            'total_activities' => $totalActivities,
+            'online_activities' => $onlineActivities,
+            'offline_activities' => $offlineActivities,
+            'meeting_details' => $meetingDetails, // Adding meeting details to statistics
+            'participants_present' => $meetingDetails->sum('participants_present'), // Adding participants_present to statistics
+            'participants_absent' => $meetingDetails->sum('participants_absent'), // Adding participants_absent to statistics
+            'absent_employee_names' => $meetingDetails->flatMap(function ($detail) {
+                return $detail['absent_employee_names'];
+            })->filter()->unique()->values(), // Ensure unique absent employee names and reset keys
+            'always_present_employees' => $alwaysPresentEmployees, // Employees who always attend meetings
+            'always_absent_employees' => $alwaysAbsentEmployees, // Employees who never attend meetings
+        ];
+
+        return view('pages.time-schedule.partials.report', [
+            'statistics' => $statistics, // Sending statistics data to the view
+            'timeSchedules' => $timeSchedules,
+        ]);
     }
 
     public function getDataPendidikanPelatihan()

@@ -83,8 +83,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [ReportController::class, 'attendanceReports'])->name('attendances.reports');
             Route::post('/', [ReportController::class, 'filterAttendanceReports'])->name('attendances.reports.filter');
             Route::post('/unit', [ReportController::class, 'filterAttendanceReportPerUnit'])->name('attendances.reports.filter.per-unit');
-            Route::get('/daftar-dayoff-timeoff', [ReportController ::class, 'dayOffReqReports'])->name('reports.dayOffReq');
-            Route::get('/daftar-dayoff-timeoff/{id}/{tahun}/get', [ReportController ::class, 'dayOffReqReportDetail'])->name('reports.dayOffReq.detail');
+            Route::get('/daftar-dayoff-timeoff', [ReportController::class, 'dayOffReqReports'])->name('reports.dayOffReq');
+            Route::get('/daftar-dayoff-timeoff/{id}/{tahun}/get', [ReportController::class, 'dayOffReqReportDetail'])->name('reports.dayOffReq.detail');
         });
     });
     /* END ABSENSI ----------------------------------------------------------------------------*/
@@ -129,6 +129,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('time-schedules')->group(function () {
         Route::prefix('rapat')->group(function () {
             Route::get("/", [DashboardController::class, 'getDataTimeScheduleRapat'])->name("time.schedule.rapat");
+            Route::get("/report", [DashboardController::class, 'getDataTimeScheduleReportRapat'])->name("time.schedule.report.rapat");
         });
     });
     /* END TIMESCHEDULE ----------------------------------------------------------------------------*/

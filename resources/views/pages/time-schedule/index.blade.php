@@ -277,14 +277,18 @@
 
                         // Menampilkan data peserta rapat
                         response.peserta_rapat.forEach(function(peserta, index) {
+                            let checked = peserta.status === 'hadir' ? 'checked' : '';
+                            let icon = peserta.status === 'hadir' ?
+                                '<i class="fas fa-check text-success mr-2"></i>' : '';
                             $('#list-peserta').append(
-                                '<li class="list-group-item d-flex align-items-center">' +
+                                '<li class="list-group-item d-flex align-items-center justify-content-center">' +
                                 '<input type="checkbox" class="peserta-checkbox mr-2" id="peserta-' +
                                 index + '" value="' +
-                                peserta.employee_id + '">' +
+                                peserta.employee_id + '" ' + checked + '>' +
                                 '<label for="peserta-' + index +
-                                '" class="mr-auto">' + peserta
-                                .fullname +
+                                '" class="d-flex align-items-center justify-content-center">' +
+                                icon + ' ' +
+                                peserta.fullname +
                                 '</label><span class="ml-auto">' +
                                 peserta.organization_name + '</span></li>');
                         });

@@ -102,6 +102,7 @@ class TimeScheduleController extends Controller
             ->join('organizations', 'employees.organization_id', '=', 'organizations.id')
             ->join('time_schedule_employees as tse', 'employees.id', '=', 'tse.employee_id')
             ->where('tse.time_schedule_id', $rapat->id)
+            ->distinct() // Ensure no duplicate records
             ->get();
 
         $employee = Employee::where('id', $rapat->employee_id)->first();
@@ -122,6 +123,7 @@ class TimeScheduleController extends Controller
             $timeSchedule->perihal = $request->perihal; // Ambil perihal dari request
             $timeSchedule->type = $request->type; // Atau ambil dari request jika ada pilihan
             $timeSchedule->datetime = $request->datetime; // Ambil waktu dan tanggal dari request
+            $timeSchedule->created_at = now(); // Menambahkan created_at dengan waktu sekarang
 
             if ($request->is_online) {
                 $roomName = \Str::slug($request->room_name);
@@ -376,15 +378,18 @@ class TimeScheduleController extends Controller
         $rapat = TimeSchedule::findOrFail($request->rapat_id);
         $pesertaHadir = $request->hadir_ids;
 
-        // Logika untuk memverifikasi kehadiran peserta
+        // Logika untuk memverifikasi kehadiran peserta tanpa menambahkan data baru
         foreach ($pesertaHadir as $pesertaId) {
-            // Simpan kehadiran peserta ke dalam database atau lakukan tindakan lain yang diperlukan
-            // Misalnya, Anda bisa menggunakan model Attendance untuk menyimpan data kehadiran
-            TimeScheduleEmployee::create([
-                'time_schedule_id' => $rapat->id,
-                'employee_id' => $pesertaId,
-                'status' => 'hadir',
-            ]);
+            // Cek apakah kehadiran peserta sudah ada
+            $existingAttendance = TimeScheduleEmployee::where('time_schedule_id', $rapat->id)
+                ->where('employee_id', $pesertaId)
+                ->first();
+
+            if ($existingAttendance) {
+                // Jika sudah ada, Anda bisa memperbarui status atau melakukan tindakan lain jika diperlukan
+                $existingAttendance->status = 'hadir'; // Misalnya, memperbarui status
+                $existingAttendance->save();
+            }
         }
 
         return response()->json(['message' => 'Kehadiran berhasil diverifikasi.']);

@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Target::factory()->count(100)->create();
+        // Target::factory()->count(100)->create();
         // $this->call(RolePermissionSeeder::class);
         // $this->call(MenusTableSeeder::class);
         // $this->call(BankSeeder::class);
@@ -28,5 +28,10 @@ class DatabaseSeeder extends Seeder
         // $this->call(EthnicSeeder::class);
         // $this->call(GroupPenjaminSeeder::class);
         // $this->call(PenjaminSeeder::class);
+        $this->call([
+            TimeScheduleSeeder::class,
+            TimeScheduleEmployeeSeeder::class,
+            // Seeder lainnya jika ada
+        ]);
     }
 }
