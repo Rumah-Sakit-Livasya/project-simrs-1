@@ -120,11 +120,15 @@
                                                           <optgroup label="Perusahaan">
                                                               @can('admin inventaris barang')
                                                                   @foreach ($companies as $row)
-                                                                      <option value="{{ $row->id }}">{{ $row->name }}
+                                                                      <option value="{{ $row->id }}"
+                                                                          {{ old('company_id') == $row->id ? 'selected' : '' }}>
+                                                                          {{ $row->name }}
                                                                       </option>
                                                                   @endforeach
                                                               @else
-                                                                  <option value="{{ $companies->id }}">{{ $companies->name }}
+                                                                  <option value="{{ $companies->id }}"
+                                                                      {{ old('company_id') == $companies->id ? 'selected' : '' }}>
+                                                                      {{ $companies->name }}
                                                                   </option>
                                                               @endcan
                                                           </optgroup>
