@@ -12,6 +12,19 @@
                           </div>
                           <div class="panel-container show">
                               <div class="panel-content">
+                                  @if (isset($filterMessage))
+                                      <div class="row justify-content-center">
+                                          <div class="col-lg-8">
+                                              <div class="alert alert-info alert-dismissible fade show mb-3" role="alert">
+                                                  {{ $filterMessage }}
+                                                  <button type="button" class="close" data-dismiss="alert"
+                                                      aria-label="Close">
+                                                      <span aria-hidden="true">&times;</span>
+                                                  </button>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  @endif
                                   <form action="{{ route('inventaris.barang.search') }}" method="post" id="filter-form">
                                       @csrf
                                       <div class="row mt-5 justify-content-center">
@@ -143,11 +156,6 @@
                                           </div>
                                       </div>
                                   </form>
-                                  @if (isset($alertMessage))
-                                      <div class="alert alert-info" role="alert">
-                                          {{ $alertMessage }}
-                                      </div>
-                                  @endif
                               </div>
                           </div>
                       </div>

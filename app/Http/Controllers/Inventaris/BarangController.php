@@ -21,88 +21,82 @@ class BarangController extends Controller
         $templateBarang = $request->input('template_barang_id');
         $kategoriBarang = $request->input('category_barang_id');
         $identitasBarang = $request->input('identitas_barang');
-        $hargaBarang = $request->input('harga_barang');
-        $ruanganId = $request->input('ruangan_id'); // Added request filter for room_id
-        $companyId = $request->input('company_id'); // Added request filter for room_id
+        $ruanganId = $request->input('ruangan_id');
+        $companyId = $request->input('company_id');
         $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
         $barang = [];
 
+        // Get the organization of the authenticated user
+        $rooms = Auth::user()->employee->organization->room_maintenance;
+        $organizationId = Auth::user()->employee->organization_id;
+        $companies = Auth::user()->employee->company;
+
+        // Query for searching
+        $query = Barang::query();
+
+        // Apply filters based on input
+        if ($customName) {
+            $query->where('custom_name', 'like', '%' . $customName . '%');
+        }
+        if ($identitasBarang) {
+            $query->where('item_code', 'like', '%' . $identitasBarang . '%');
+        }
+        if ($templateBarang) {
+            $query->where('template_barang_id', $templateBarang);
+        }
+        if ($kategoriBarang) {
+            $query->where('category_barang_id', $kategoriBarang);
+        }
+        if ($ruanganId) {
+            $query->where('room_id', $ruanganId);
+        }
+        if ($companyId) {
+            $query->where('company_id', $companyId);
+        }
+
         // Check if the user has admin permissions
         if (Auth::user()->can('admin inventaris barang')) {
-            // If the user is an admin, retrieve all items
-            $barang = Barang::orderBy('id', 'desc')->get();
+            // If the user is an admin, retrieve all items with filters applied
+            $barang = $query->orderBy('id', 'desc')->get();
             $rooms = RoomMaintenance::orderBy('name', 'asc')->get();
             $companies = Company::all();
         } else {
-            // Get the organization of the authenticated user
-            $rooms = Auth::user()->employee->organization->room_maintenance;
-            $organizationId = Auth::user()->employee->organization_id;
-            $companies = Auth::user()->employee->company;
+            // Filter by organization through the room maintenance relationship
+            $query->whereHas('room.organizations', function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            });
+            // If no admin access, get items related to the user's organization
+            $barang = $query->orderBy('id', 'desc')->limit(100)->get();
+        }
 
+        // Prepare alert message only if there are filters applied
+        $jumlahBarang = $barang->count();
+        $filterMessage = "Jumlah barang yang terget: $jumlahBarang. Filter yang digunakan: ";
+        $filterParts = [];
 
-            // Check if there are search parameters
-            if ($customName || $templateBarang || $kategoriBarang || $identitasBarang || $ruanganId || $companyId) { // Added ruanganId to the condition
-                // Query for searching
-                $query = Barang::query();
+        if ($customName) {
+            $filterParts[] = "Nama Barang: $customName";
+        }
+        if ($templateBarang) {
+            $filterParts[] = "Template: " . TemplateBarang::find($templateBarang)->name;
+        }
+        if ($kategoriBarang) {
+            $filterParts[] = "Kategori: " . CategoryBarang::find($kategoriBarang)->name;
+        }
+        if ($identitasBarang) {
+            $filterParts[] = "Identitas Barang: $identitasBarang";
+        }
+        if ($ruanganId) {
+            $filterParts[] = "Ruangan: " . RoomMaintenance::find($ruanganId)->name;
+        }
+        if ($companyId) {
+            $filterParts[] = "Company: " . Company::find($companyId)->name;
+        }
 
-                // Apply filters based on input
-                if ($customName) {
-                    $query->where('custom_name', 'like', '%' . $customName . '%');
-                }
-                if ($identitasBarang) {
-                    $query->where('item_code', 'like', '%' . $identitasBarang . '%');
-                }
-                if ($templateBarang) {
-                    $query->where('template_barang_id', $templateBarang);
-                }
-                if ($kategoriBarang) {
-                    $query->where('category_barang_id', $kategoriBarang);
-                }
-                if ($ruanganId) { // Added filter for ruangan_id
-                    $query->where('room_id', $ruanganId);
-                }
-                if ($companyId) { // Added filter for company_id
-                    $query->where('company_id', $companyId);
-                }
-
-                // Filter by organization through the room maintenance relationship
-                $query->whereHas('room.organizations', function ($q) use ($organizationId) {
-                    $q->where('organization_id', $organizationId);
-                });
-
-                // Get the search results
-                $barang = $query->orderBy('custom_name', 'asc')->get();
-                $barangCount = count($barang);
-
-                $filterInfo = '';
-                if ($customName) {
-                    $filterInfo .= 'Nama Barang: ' . $customName . ', ';
-                }
-                if ($identitasBarang) {
-                    $filterInfo .= 'Identitas Barang: ' . $identitasBarang . ', ';
-                }
-                if ($templateBarang) {
-                    $filterInfo .= 'Template Barang: ' . TemplateBarang::find($templateBarang)->name . ', ';
-                }
-                if ($kategoriBarang) {
-                    $filterInfo .= 'Kategori Barang: ' . CategoryBarang::find($kategoriBarang)->name . ', ';
-                }
-                if ($ruanganId) {
-                    $filterInfo .= 'Ruangan: ' . RoomMaintenance::find($ruanganId)->name . ', ';
-                }
-                if ($companyId) {
-                    $filterInfo .= 'Perusahaan: ' . Company::find($companyId)->name . ', ';
-                }
-
-                $filterInfo = rtrim($filterInfo, ', ');
-                $alertMessage = 'Filter information: ' . $filterInfo . '. ' . $barangCount . ' items found.';
-            } else {
-                // If no search parameters, get items related to the user's organization
-                $barang = Barang::whereHas('room.organizations', function ($q) use ($organizationId) {
-                    $q->where('organization_id', $organizationId);
-                })->orderBy('id', 'desc')->limit(100)->get();
-                $alertMessage = '';
-            }
+        if (!empty($filterParts)) {
+            $filterMessage .= implode(", ", $filterParts) . ".";
+        } else {
+            $filterMessage = null; // Do not display the message if no filters are applied
         }
 
         return view('pages.inventaris.barang.index', [
@@ -112,9 +106,9 @@ class BarangController extends Controller
             'categories' => CategoryBarang::orderBy('name', 'asc')->get(),
             'rooms' => $rooms,
             'allRoom' => $allRoom,
-            'jumlah' => count(Barang::all()),
-            'ruangan' => $rooms, // Added $ruangan here
-            'alertMessage' => $alertMessage ?? ''
+            'jumlah' => $jumlahBarang,
+            'ruangan' => $rooms,
+            'filterMessage' => $filterMessage // Send the alert message to the view
         ]);
     }
 
