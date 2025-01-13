@@ -23,6 +23,7 @@ class BarangController extends Controller
         $identitasBarang = $request->input('identitas_barang');
         $hargaBarang = $request->input('harga_barang');
         $ruanganId = $request->input('ruangan_id'); // Added request filter for room_id
+        $companyId = $request->input('company_id'); // Added request filter for room_id
         $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
         $barang = [];
 
@@ -39,7 +40,7 @@ class BarangController extends Controller
             $companies = Auth::user()->employee->company;
 
             // Check if there are search parameters
-            if ($customName || $templateBarang || $kategoriBarang || $identitasBarang || $ruanganId) { // Added ruanganId to the condition
+            if ($customName || $templateBarang || $kategoriBarang || $identitasBarang || $ruanganId || $companyId) { // Added ruanganId to the condition
                 // Query for searching
                 $query = Barang::query();
 
@@ -58,6 +59,9 @@ class BarangController extends Controller
                 }
                 if ($ruanganId) { // Added filter for ruangan_id
                     $query->where('room_id', $ruanganId);
+                }
+                if ($companyId) { // Added filter for ruangan_id
+                    $query->where('company_id', $companyId);
                 }
 
                 // Filter by organization through the room maintenance relationship

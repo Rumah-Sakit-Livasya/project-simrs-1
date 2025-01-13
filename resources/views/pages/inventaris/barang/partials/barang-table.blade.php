@@ -14,6 +14,7 @@
             <th style="white-space: nowrap">Ruangan</th>
             <th style="white-space: nowrap">Tanggal Input</th>
             <th style="white-space: nowrap">Harga Barang</th>
+            <th style="white-space: nowrap">Perusahaan</th>
             <th style="white-space: nowrap" class="no-export">Aksi</th>
         </tr>
     </thead>
@@ -55,10 +56,11 @@
                         </td>
                     @endif
                 @endif
-                <td style="white-space: normal">{{ $row->created_at }}</td>
+                <td style="white-space: normal">{{ tgl_waktu($row->created_at) }}</td>
                 <td style="white-space: normal">
                     {{ $row->harga_barang == null ? '*belum disetting' : 'Rp. ' . rp2($row->harga_barang) }}
                 </td>
+                <td style="white-space: normal">{{ $row->company->name }}</td>
                 <td style="white-space: nowrap" class="no-export">
                     <button class="badge mx-1 badge-primary p-2 border-0 text-white btn-edit"
                         data-id="{{ $row->id }}">
@@ -109,6 +111,7 @@
             <th>Kode Barang</th>
             <th>Ruangan</th>
             <th>Tanggal Input</th>
+            <th>Perusahaan</th>
             <th class="no-export" style="white-space: nowrap">Aksi</th>
         </tr>
     </tfoot>
@@ -585,6 +588,9 @@
                     placeholder: 'Pilih Perusahaan',
                 });
                 $('#store-form #company_id').select2({
+                    placeholder: 'Pilih Perusahaan',
+                });
+                $('#filter-form #company_id').select2({
                     placeholder: 'Pilih Perusahaan',
                 });
                 $('#barang_category_id').select2();

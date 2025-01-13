@@ -12,7 +12,7 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form action="{{ route('inventaris.barang.search') }}" method="post">
+                            <form action="{{ route('inventaris.barang.search') }}" method="post" id="filter-form">
                                 @csrf
                                 <div class="row mt-5 justify-content-center">
                                     <div class="col-lg-4">
@@ -94,7 +94,33 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <div class="col-lg-4" style="visibility: hidden; height: 0;">
+                                    @if (Auth::user()->hasRole('super admin'))
+                                        <div class="col-lg-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="company_id">
+                                                    Perusahaan
+                                                </label>
+                                                <select class="form-control w-100 @error('company_id') is-invalid @enderror"
+                                                    id="company_id" name="company_id">
+                                                    <optgroup label="Perusahaan">
+                                                        @can('admin inventaris barang')
+                                                            @foreach ($companies as $row)
+                                                                <option value="{{ $row->id }}">{{ $row->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        @else
+                                                            <option value="{{ $companies->id }}">{{ $companies->name }}
+                                                            </option>
+                                                        @endcan
+                                                    </optgroup>
+                                                </select>
+                                                @error('company_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <div class="col-lg-4 d-none" style="visibility: hidden; height: 0;">
                                         <div class="form-group">
                                             <label class="form-label" for="ruangan_id_fake">Ruangan (Fake)</label>
                                             <select class="form-control w-100" id="ruangan_id_fake" name="ruangan_id_fake"
