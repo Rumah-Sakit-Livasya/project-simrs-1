@@ -112,6 +112,7 @@
             <th>Ruangan</th>
             <th>Tanggal Input</th>
             <th>Perusahaan</th>
+            <th>Harga Barang</th>
             <th class="no-export" style="white-space: nowrap">Aksi</th>
         </tr>
     </tfoot>
