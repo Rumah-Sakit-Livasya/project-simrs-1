@@ -99,7 +99,7 @@ class TimeScheduleController extends Controller
 
             $peserta = [];
             $peserta['peserta_rapat'] = $rapat->employees()
-                ->select('employees.id as employee_id', 'employees.fullname', 'organizations.name as organization_name', 'time_schedule_employees.status')
+                ->select('employees.id as employee_id', 'employees.fullname', 'organizations.name as organization_name')
                 ->join('organizations', 'employees.organization_id', '=', 'organizations.id')
                 ->join('time_schedule_employees as tse', 'employees.id', '=', 'tse.employee_id')
                 ->where('tse.time_schedule_id', $rapat->id)
