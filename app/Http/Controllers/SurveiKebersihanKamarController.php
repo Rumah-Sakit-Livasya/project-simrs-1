@@ -16,9 +16,9 @@ class SurveiKebersihanKamarController extends Controller
 {
     public function index()
     {
-        dd(SurveiKebersihanKamar::all());
+        $survei = SurveiKebersihanKamar::latest()->get();
         return view('pages.survei.kebersihan_kamar', [
-            'survei' => SurveiKebersihanKamar::all(),
+            'survei' => $survei,
         ]);
     }
 
