@@ -1,6 +1,8 @@
 @extends('inc.layout')
 @section('title', 'Survei Kebersihan Kamar')
 @section('content')
+
+@dd($survei)
     <main id="js-page-content" role="main" class="page-content">
         <div class="row mb-5">
             <div class="col-xl-12">
