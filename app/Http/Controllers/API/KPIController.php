@@ -137,6 +137,7 @@ class KPIController extends Controller
 
             $check_rekap_penilaian = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
             $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
+            $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
 
             if(isset($check_penilaian_pegawai) > 0 || isset($check_rekap_penilaian) > 0) {
                 return response()->json([
