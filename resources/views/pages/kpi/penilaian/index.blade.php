@@ -131,6 +131,7 @@
                                         <select
                                             class="select2 form-control mb-3 w-100  @error('tahun') is-invalid @enderror"
                                             id="tahun" name="tahun">
+                                            <option value=""></option>
                                             <option value="2023">2023</option>
                                             <option value="2024">2024</option>
                                             <option value="2025">2025</option>
@@ -221,21 +222,21 @@
                                                     </td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        -
+                                                        <span id="unit_penilai"></span>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td width="20%">Jabatan</td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        -
+                                                        <span id="jabatan_penilai"></span>
                                                     </td>
                                                     <td width="20%">
                                                         NIP
                                                     </td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        -
+                                                        <span id="nip_penilai"></span>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -267,21 +268,21 @@
                                                     </td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        -
+                                                        <span id="unit_pejabat_penilai"></span>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td width="20%">Jabatan</td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        -
+                                                        <span id="jabatan_pejabat_penilai"></span>
                                                     </td>
                                                     <td width="20%">
                                                         NIP
                                                     </td>
                                                     <td width="1%">:</td>
                                                     <td width="29%">
-                                                        -
+                                                        <span id="nip_pejabat_penilai"></span>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -549,50 +550,48 @@
                                                                     <div
                                                                         id="tombol-{{ $group_penilaian->pejabat_penilai }}">
                                                                         <a class="btn btn-primary btn-sm text-white ttd"
-                                                                            onclick="openSignaturePad({{ $group_penilaian->pejabat_penilai }})"
-                                                                            id="ttd_pegawai">Tanda
+                                                                            id="btn_ttd_pejabat_penilai"
+                                                                            data-tipe = "pejabat_penilai">Tanda
                                                                             tangan</a>
                                                                         <br>
                                                                     </div>
 
-                                                                    <img id="signature-display-{{ $group_penilaian->pejabat_penilai }}"
-                                                                        src="" alt="Signature Image"
-                                                                        style="display:none; max-width:60%;"><br>
-
-
-
+                                                                    <img id="ttd_pejabat_penilai" src=""
+                                                                        alt="Signature Image"
+                                                                        style="display:none; max-width:60%; margin-top: -3px;"><br>
+                                                                    <span id="ttd_nama_pejabat_penilai"></span>
                                                                 </td>
                                                                 <td width="33%">
                                                                     <b>PENILAI
                                                                     </b><br><br>
 
-                                                                    <div id="tombol-{{ $group_penilaian->penilai }}">
-                                                                        <a class="btn btn-primary btn-sm text-white"
-                                                                            onclick="openSignaturePad({{ $group_penilaian->penilai }})">Tanda
-                                                                            tangan</a>
+                                                                    <div>
+                                                                        <a class="btn btn-primary btn-sm text-white ttd"
+                                                                            id="btn_ttd_penilai"
+                                                                            data-tipe = "penilai">Tanda tangan</a>
                                                                         <br>
                                                                     </div>
-                                                                    <img id="signature-display-{{ $group_penilaian->penilai }}"
-                                                                        src="" alt="Signature Image"
-                                                                        style="display:none; max-width:60%;"><br>
+                                                                    <img id="ttd_penilai" src=""
+                                                                        alt="Signature Image"
+                                                                        style="display:none; max-width:60%; margin-top: -3px;"><br>
 
-
+                                                                    <span id="ttd_nama_penilai"></span>
                                                                 </td>
                                                                 <td width="33%" class="border-right-0">
                                                                     <b>PEGAWAI YANG DINILAI
                                                                     </b><br><br>
 
-                                                                    <div id="tombol-{{ $group_penilaian->penilai }}">
-                                                                        <a class="btn btn-primary btn-sm text-white"
-                                                                            onclick="openSignaturePad({{ $group_penilaian->penilai }})">Tanda
+                                                                    <div>
+                                                                        <a class="btn btn-primary btn-sm text-white ttd"
+                                                                            id="btn_ttd_pegawai" data-tipe="pegawai">Tanda
                                                                             tangan</a>
                                                                         <br>
                                                                     </div>
-                                                                    <img id="signature-display-{{ $group_penilaian->penilai }}"
-                                                                        src="" alt="Signature Image"
-                                                                        style="display:none; max-width:60%;"><br>
+                                                                    <img id="ttd_pegawai" src=""
+                                                                        alt="Signature Image"
+                                                                        style="display:none; max-width:60%; margin-top: -3px;"><br>
 
-
+                                                                    <span id="ttd_nama_pegawai"></span>
                                                                 </td>
                                                                 {{-- <td width="33%" class="border-right-0" valign="top">
                                                                     <span id="jabatan_pegawai_ttd"
@@ -659,12 +658,6 @@
             // Dapatkan bulan saat ini
             let currentMonth = new Date().getMonth(); // Januari adalah 0, Desember adalah 11
 
-            // Dapatkan tahun saat ini
-            var currentYear = new Date().getFullYear();
-
-            // Pilih option yang sesuai dengan tahun
-            $('#tahun').val(currentYear);
-
             $(function() {
                 $('.select2').select2({
                     placeholder: 'Pilih Data Berikut',
@@ -712,31 +705,37 @@
                 let periodeOnChange = $('#periode').val();
                 let tahun = $('#tahun').val();
 
-                $.ajax({
-                    type: "GET",
-                    url: "/api/dashboard/kpi/employee/" + $(this).val() + "/get",
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        $('span#nama_pegawai_ttd').text(response.nama);
-                        $('span#unit_pegawai').text(response.unit);
-                        $('span#unit_pegawai_ttd').text(response.unit);
-                        $('span#jabatan_pegawai').text(response.jabatan);
-                        $('span#jabatan_pegawai_ttd').text(response.jabatan);
+                if (!tahun) {
+                    alert("mohon pilih tahun terlebih dahulu!");
+                    $('#employee_id').val('');
+                } else {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/dashboard/kpi/employee/" + $(this).val() + "/get",
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            $('span#ttd_nama_pegawai').text(response.nama);
+                            $('span#unit_pegawai').text(response.unit);
+                            $('span#unit_pegawai_ttd').text(response.unit);
+                            $('span#jabatan_pegawai').text(response.jabatan);
+                            $('span#jabatan_pegawai_ttd').text(response.jabatan);
 
-                        $('span#nip_pegawai').text(response.nip || '-');
+                            $('span#nip_pegawai').text(response.nip || '-');
 
-                        $('#tombol-pegawai a').attr('onclick', 'openSignaturePad(null)');
-                        $('#tombol-pegawai a').text('Tanda Tangan');
+                            $('#tombol-pegawai a').attr('onclick', 'openSignaturePad(null)');
+                            $('#tombol-pegawai a').text('Tanda Tangan');
 
-                    },
-                    error: function(xhr) {
-                        // $('#create-attendance-form').modal('hide');
-                        showErrorAlert(xhr.responseJSON.error);
-                    }
-                });
+                        },
+                        error: function(xhr) {
+                            // $('#create-attendance-form').modal('hide');
+                            showErrorAlert(xhr.responseJSON.error);
+                        }
+                    });
 
-                fetchAttendanceReport(employeeId, tahun);
+                    fetchAttendanceReport(employeeId, tahun);
+                }
+
             });
 
             $('.employee-select').on('change', function(e) {
@@ -751,40 +750,24 @@
                         type: "GET",
                         url: "/api/dashboard/kpi/employee/" + employeeId + "/get",
                         success: function(response) {
-                            // Update data sesuai target ID
-                            if (targetId === 'employee_id') {
-                                $('span#nama_pegawai_ttd').text(response.nama);
-                                $('span#unit_pegawai').text(response.unit);
-                                $('span#unit_pegawai_ttd').text(response.unit);
-                                $('span#jabatan_pegawai').text(response.jabatan);
-                                $('span#jabatan_pegawai_ttd').text(response.jabatan);
-                                $('span#nip_pegawai').text(response.nip || '-');
-                            } else if (targetId === 'penilai') {
+                            if (targetId === 'penilai') {
                                 // Sesuaikan element tujuan penilai
-                                $('span#nama_penilai').text(response.nama);
+                                $('span#ttd_nama_penilai').text(response.nama);
                                 $('span#unit_penilai').text(response.unit);
                                 $('span#jabatan_penilai').text(response.jabatan);
                                 $('span#nip_penilai').text(response.nip || '-');
                             } else if (targetId === 'pejabat_penilai') {
                                 // Sesuaikan element tujuan pejabat penilai
-                                $('span#nama_pejabat_penilai').text(response.nama);
+                                $('span#ttd_nama_pejabat_penilai').text(response.nama);
                                 $('span#unit_pejabat_penilai').text(response.unit);
                                 $('span#jabatan_pejabat_penilai').text(response.jabatan);
                                 $('span#nip_pejabat_penilai').text(response.nip || '-');
                             }
-
-                            $('#tombol-pegawai a').attr('onclick', 'openSignaturePad(null)');
-                            $('#tombol-pegawai a').text('Tanda Tangan');
                         },
                         error: function(xhr) {
                             showErrorAlert(xhr.responseJSON.error);
                         }
                     });
-
-                    // Jika diperlukan, panggil fungsi fetchAttendanceReport
-                    if (targetId === 'employee_id') {
-                        fetchAttendanceReport(employeeId, tahun);
-                    }
                 }
             });
 
@@ -870,60 +853,90 @@
             });
 
             $('#penilaian-form').on('submit', function(e) {
-                e.preventDefault();
-                const id_form = $(this).attr('data-form');
-                const id_pegawai = $('#employee_id').val();
-                let formData = new FormData(this);
 
-                if (id_pegawai == null || id_pegawai == "") {
-                    showErrorAlertNoRefresh("Pegawai Wajib dipilih!")
+                let isValid = true; // Flag untuk validasi
+
+                // Loop melalui semua input di dalam form kecuali textarea
+                $(this).find('input, select').not('textarea').each(function() {
+                    if ($(this).val().trim() === '') {
+                        isValid = false; // Jika ada input yang kosong, set flag ke false
+                        $(this).addClass(
+                        'is-invalid'); // Tambahkan class untuk error styling (opsional)
+                        alert('Field ' + $(this).attr('name') + ' harus diisi!');
+                    } else {
+                        $(this).removeClass('is-invalid'); // Hapus class error jika sudah terisi
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault(); // Hentikan submit jika ada input kosong
                 } else {
-                    $.ajax({
-                        type: "POST",
-                        url: '/api/dashboard/kpi/' + id_form + "/" + id_pegawai +
-                            "/store",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        beforeSend: function() {
-                            $('#penilaian-form').find('.ikon-tambah').hide();
-                            $('#penilaian-form').find('.spinner-text').removeClass(
-                                'd-none');
-                        },
-                        success: function(response) {
-                            $('#penilaian-form').find('.ikon-edit').show();
-                            $('#penilaian-form').find('.spinner-text').addClass(
-                                'd-none');
-                            showSuccessAlert(response.message)
-                            setTimeout(function() {
-                                window.location.href =
-                                    '/kpi/master-data/group-penilaian/rekap/bulanan';
-                            }, 1000);
-                        },
-                        error: function(xhr) {
-                            // $('#create-attendance-form').modal('hide');
-                            showErrorAlertNoRefresh(xhr.responseJSON.error);
-                        }
-                    });
+                    e.preventDefault();
+                    const id_form = $(this).attr('data-form');
+                    const id_pegawai = $('#employee_id').val();
+                    let formData = new FormData(this);
+    
+                    if (id_pegawai == null || id_pegawai == "") {
+                        showErrorAlertNoRefresh("Pegawai Wajib dipilih!")
+                    } else {
+                        $.ajax({
+                            type: "POST",
+                            url: '/api/dashboard/kpi/' + id_form + "/" + id_pegawai +
+                                "/store",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            beforeSend: function() {
+                                $('#penilaian-form').find('.ikon-tambah').hide();
+                                $('#penilaian-form').find('.spinner-text').removeClass(
+                                    'd-none');
+                            },
+                            success: function(response) {
+                                $('#penilaian-form').find('.ikon-edit').show();
+                                $('#penilaian-form').find('.spinner-text').addClass(
+                                    'd-none');
+                                showSuccessAlert(response.message)
+                                setTimeout(function() {
+                                    window.location.href =
+                                        '/penilaian/daftar-form';
+                                }, 1000);
+                            },
+                            error: function(xhr) {
+                                // $('#create-attendance-form').modal('hide');
+                                showErrorAlertNoRefresh(xhr.responseJSON.error);
+                                console.log(xhr);
+                            }
+                        });
+                    }
                 }
             });
 
-            function openSignaturePad() {
-                idSignature = $(this).attr('data-id');
-                $('#signatureModal').modal('show'); // Example using Bootstrap modal
-            }
+            $('.ttd').click(function(e) {
+                e.preventDefault();
+                let idTtd = null;
+                let tipeTtd = $(this).attr('data-tipe');
 
-            // $('#ttd_pegawai').click(function(e) {
-            //     e.preventDefault();
-            //     var url = "{{ route('ttd') }}";
-            //     // Ukuran dan posisi popup baru
-            //     var width = screen.width;
-            //     var height = screen.height;
-            //     var left = 0;
-            //     var top = 0;
-            //     window.open(url, 'popupWindow',
-            //         `width=${width},height=${height},top=${top},left=${left}`);
-            // })
+                if (tipeTtd == 'pejabat_penilai') {
+                    idTtd = $('#pejabat_penilai').val();
+                    $('#btn_save_ttd').attr('data-target', 'ttd_pejabat_penilai');
+                    $('#btn_save_ttd').attr('data-id', idTtd);
+                } else if (tipeTtd == 'penilai') {
+                    idTtd = $('#penilai').val();
+                    $('#btn_save_ttd').attr('data-target', 'ttd_penilai');
+                    $('#btn_save_ttd').attr('data-id', idTtd);
+                } else {
+                    idTtd = $('#employee_id').val();
+                    $('#btn_save_ttd').attr('data-target', 'ttd_pegawai');
+                    $('#btn_save_ttd').attr('data-id', idTtd);
+                }
+
+                if (!idTtd) {
+                    alert(tipeTtd + ' belum dipilih!');
+                } else {
+                    $('#signatureModal').modal('show');
+                }
+
+            });
 
         });
     </script>
@@ -977,6 +990,8 @@
 
         function saveSignature() {
             const dataURL = canvas.toDataURL('image/png');
+            idSignature = $('#btn_save_ttd').attr('data-id');
+            let tipe = $('#btn_save_ttd').attr('data-target');
             $.ajax({
                 url: '/api/dashboard/kpi/save-signature/' + idSignature,
                 type: 'POST',
@@ -986,8 +1001,8 @@
                 },
                 success: function(response) {
                     // Update the signature display
-                    $('#tombol-' + idSignature).hide();
-                    $('#signature-display-' + idSignature).attr('src', response.path).show();
+                    $('#btn_' + tipe).parent().hide();
+                    $('#' + tipe).attr('src', response.path).show();
                     $('#signatureModal').modal('hide'); // Hide the modal
                     clearCanvas();
                 },
@@ -995,18 +1010,6 @@
                     console.error(xhr.responseText);
                 }
             });
-        }
-
-        function openSignaturePad(id) {
-            if (id == null) {
-                $('#tombol-pegawai').attr('id', 'tombol-' + idSignature);
-                $('#signature-display').attr('id', 'signature-display-' + idSignature);
-            } else {
-                idSignature = id;
-            }
-
-
-            $('#signatureModal').modal('show');
         }
 
         canvas.addEventListener('mousedown', startPosition);

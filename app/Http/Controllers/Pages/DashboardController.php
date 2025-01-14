@@ -1354,13 +1354,13 @@ class DashboardController extends Controller
         return view('pages.kpi.penilaian.index', compact('group_penilaian', 'employees', 'rumus_penilaian'));
     }
 
-    public function showPenilaianBulanan($id_form, $id_pegawai, $periode, $tahun)
+    public function showPenilaianBulanan($id_form, $id_pegawai, $tahun)
     {
         $group_penilaian = GroupPenilaian::find($id_form);
-        $penilaian_pegawai = PenilaianPegawai::where('group_penilaian_id', $id_form)->where('employee_id', $id_pegawai)->where('periode', $periode)->where('tahun', $tahun)->orderBy('indikator_penilaian_id', 'asc')->get();
-        $penilai_parent = Employee::where('is_active', 1)->where('id', $group_penilaian->penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
-        $pejabat_penilai_parent = Employee::where('is_active', 1)->where('id', $group_penilaian->pejabat_penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
-        $catatan = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('periode', $periode)->first();
+        $penilaian_pegawai = PenilaianPegawai::where('group_penilaian_id', $id_form)->where('employee_id', $id_pegawai)->where('tahun', $tahun)->orderBy('indikator_penilaian_id', 'asc')->get();
+        $penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
+        $pejabat_penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->pejabat_penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
+        $catatan = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->first();
 
         $total_nilai_all = [];
         $nilai_kalkulasi = null;
@@ -1368,7 +1368,10 @@ class DashboardController extends Controller
         $nilai = null;
         $index = 0;
         $total_akhir = null;
+
+        $total_input = 0;
         foreach ($group_penilaian->aspek_penilaians as $aspek) {
+            $total_input = $aspek->indikator_penilaians->count();
             $nilai = 0;
             foreach ($aspek->indikator_penilaians->sortBy('id') as $indikator) {
                 // foreach($penilaian_pegawai)
@@ -1377,13 +1380,14 @@ class DashboardController extends Controller
                     $index++;
                 }
             }
-            $nilai_kalkulasi = ($nilai / 40) * ($aspek->bobot / 100);
+
+            $nilai_kalkulasi = ($nilai / ($total_input * 5)) * ($aspek->bobot / 100);
             $total_nilai = $nilai_kalkulasi * 100;
-            $total_akhir += round($total_nilai);
+            $total_akhir += number_format($total_nilai, 2, '.', '');
             $total_nilai_all[] = [
                 'nilai' => $nilai,
                 'nilai_kalkulasi' => floor($nilai_kalkulasi * 1000) / 1000,
-                'total_nilai' => round($total_nilai),
+                'total_nilai' => number_format($total_nilai, 2, '.', '')
             ];
         }
 
@@ -1402,50 +1406,15 @@ class DashboardController extends Controller
         ];
         // $data = ['title' => 'Welcome to Laravel PDF!'];
         $pdf = Pdf::loadView('pages.kpi.penilaian.show', compact('pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir'));
-        $nama = $catatan->employee->fullname . " " . $periode . " " . $tahun . ".pdf";
+        $nama = $catatan->employee->fullname  . "-" . $tahun . ".pdf";
         $namaFile = str_replace(' ', '_', $nama);
-        // return $pdf->download($namaFile);
 
-        $bulan = explode(" - ", $periode);
-
-        // Mendapatkan bulan awal dan bulan akhir
-        $bulanAwal = trim($bulan[0]);
-        $bulanAkhir = trim($bulan[1]);
-
-        // Pemetaan bulan dari bahasa Indonesia ke bahasa Inggris
-        $bulanMapping = [
-            'Januari' => 1,
-            'Februari' => 2,
-            'Maret' => 3,
-            'April' => 4,
-            'Mei' => 5,
-            'Juni' => 6,
-            'Juli' => 7,
-            'Agustus' => 8,
-            'September' => 9,
-            'Oktober' => 10,
-            'November' => 11,
-            'Desember' => 12
-        ];
-
-        // Mengonversi bulan ke bahasa Inggris
-        $bulanFixStart = $bulanMapping[$bulanAwal];
-        $bulanFixEnd = $bulanMapping[$bulanAkhir];
 
         $employee = Employee::find($id_pegawai);
 
-        $startDateReport = Carbon::create(
-            $tahun,
-            $bulanFixStart,
-            26
-        );
-
-        $endDateReport = Carbon::create(
-            $tahun,
-            $bulanFixEnd,
-            25
-        );
-
+        $startDateReport = Carbon::create($tahun, 1, 26)->subMonth();
+        // Tanggal akhir: 25 bulan sekarang
+        $endDateReport = Carbon::create($tahun, 12, 25);
         $attendances = [];
 
         if (!$employee) {

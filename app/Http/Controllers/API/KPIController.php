@@ -88,7 +88,9 @@ class KPIController extends Controller
         if ($employee) {
             $employee->ttd = $imageName;
             $employee->save();
-            return response()->json(['path' => Storage::url($path)]);
+            return response()->json([
+                'path' => url('/api/dashboard/kpi/private-signature/' . $imageName), // URL ke file private
+            ]);
         }
     }
 
@@ -133,6 +135,16 @@ class KPIController extends Controller
                 'employee_id' => 'required',
             ]);
 
+            $check_rekap_penilaian = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
+            $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
+            $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
+
+            if(isset($check_penilaian_pegawai) > 0 || isset($check_rekap_penilaian) > 0) {
+                return response()->json([
+                    'error' => 'Pegawai sudah diberikan penilaian!'
+                ], 500);
+            }
+
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
@@ -156,12 +168,13 @@ class KPIController extends Controller
                         'group_penilaian_id' => $id_form,
                         'periode' => $request->periode,
                         'tahun' => $request->tahun,
+                        'pejabat_penilai' => $request->pejabat_penilai,
+                        'penilai' => $request->penilai,
                         'indikator_penilaian_id' => $col->id,
                         'nilai' => $request->input($result)[$key],
                     ]);
                 }
             }
-
 
             if ($total_nilai_fix > 95) {
                 $keterangan = "Sangat Baik";
@@ -178,7 +191,6 @@ class KPIController extends Controller
             RekapPenilaianBulanan::create([
                 'group_penilaian_id' => $id_form,
                 'employee_id' => $id_pegawai,
-                'periode' => $request->periode,
                 'tahun' => $request->tahun,
                 'total_nilai' => $total_nilai_fix,
                 'keterangan' => $keterangan,
