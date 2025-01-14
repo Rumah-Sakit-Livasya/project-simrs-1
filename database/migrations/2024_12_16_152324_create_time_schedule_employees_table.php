@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('time_schedule_id')->constrained('time_schedules');
             $table->foreignId('employee_id')->constrained('employees');
-            $table->string('dokumentasi')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
