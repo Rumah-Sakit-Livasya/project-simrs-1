@@ -24,4 +24,13 @@ class PenilaianPegawai extends Model
     {
         return $this->belongsTo(IndikatorPenilaian::class, 'employee_id');
     }
+
+    public function employee_penilai()
+    {
+        return $this->belongsTo(Employee::class, 'penilai');
+    }
+    public function employee_pejabat_penilai()
+    {
+        return $this->belongsTo(Employee::class, 'pejabat_penilai');
+    }
 }
