@@ -90,27 +90,31 @@ class TimeScheduleController extends Controller
 
     public function getPeserta($rapatId)
     {
-        $rapat = TimeSchedule::find($rapatId);
+        try {
+            $rapat = TimeSchedule::find($rapatId);
 
-        if (!$rapat) {
-            return response()->json(['error' => 'Rapat tidak ditemukan'], 404);
+            if (!$rapat) {
+                return response()->json(['error' => 'Rapat tidak ditemukan'], 404);
+            }
+
+            $peserta = [];
+            $peserta['peserta_rapat'] = $rapat->employees()
+                ->select('employees.id as employee_id', 'employees.fullname', 'organizations.name as organization_name', 'time_schedule_employees.status')
+                ->join('organizations', 'employees.organization_id', '=', 'organizations.id')
+                ->join('time_schedule_employees as tse', 'employees.id', '=', 'tse.employee_id')
+                ->where('tse.time_schedule_id', $rapat->id)
+                ->distinct() // Ensure no duplicate records
+                ->get();
+
+            $employee = Employee::where('id', $rapat->employee_id)->first();
+
+            $peserta['yang_mengundang'] = $employee->fullname;
+            $peserta['organisasi_yang_mengundang'] = $employee->organization->name;
+
+            return response()->json($peserta, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
-
-        $peserta = [];
-        $peserta['peserta_rapat'] = $rapat->employees()
-            ->select('employees.id as employee_id', 'employees.fullname', 'organizations.name as organization_name', 'time_schedule_employees.status')
-            ->join('organizations', 'employees.organization_id', '=', 'organizations.id')
-            ->join('time_schedule_employees as tse', 'employees.id', '=', 'tse.employee_id')
-            ->where('tse.time_schedule_id', $rapat->id)
-            ->distinct() // Ensure no duplicate records
-            ->get();
-
-        $employee = Employee::where('id', $rapat->employee_id)->first();
-
-        $peserta['yang_mengundang'] = $employee->fullname;
-        $peserta['organisasi_yang_mengundang'] = $employee->organization->name;
-
-        return response()->json($peserta, 200);
     }
 
     public function store(Request $request)
