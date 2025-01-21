@@ -2,6 +2,10 @@
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
     <style>
+        main {
+            overflow-x: hidden;
+        }
+        
         input[type="time"] {
             -webkit-appearance: none;
             -moz-appearance: none;

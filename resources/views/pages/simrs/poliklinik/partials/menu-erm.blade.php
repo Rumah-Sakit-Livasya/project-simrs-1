@@ -68,10 +68,9 @@
         </div>
     </li>
     <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
-            aria-expanded="false">Lain-lain</a>
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button">Lain-lain</a>
         <div class="dropdown-menu">
-            <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian</a>
+            <a class="dropdown-item">Pengkajian</a>
             <a class="dropdown-item" href="#">CPPT</a>
             <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
         </div>
