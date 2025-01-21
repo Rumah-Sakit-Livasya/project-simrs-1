@@ -137,9 +137,9 @@ class KPIController extends Controller
 
             $check_rekap_penilaian = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
             $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
-            $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
+            // $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
 
-            if(isset($check_penilaian_pegawai) > 0 || isset($check_rekap_penilaian) > 0) {
+            if (isset($check_penilaian_pegawai) > 0 || isset($check_rekap_penilaian) > 0) {
                 return response()->json([
                     'error' => 'Pegawai sudah diberikan penilaian!'
                 ], 500);
@@ -175,6 +175,58 @@ class KPIController extends Controller
                     ]);
                 }
             }
+
+            // $penilai = Employee::where('id', $request->penilai)->first();
+            // $pejabat_penilai = Employee::where('id', $request->pejabat_penilai)->first();
+
+            // $responseMessage = `
+            // Penilaian untuk pegawai {$check_penilaian_pegawai->employee->fullname} unit {$check_penilaian_pegawai->employee->organization->name} telah diberikan. Dimohon untuk berikan revisi (jika ada), tanggapan & tanda tangan terkait penilaian tersebut 😊. 
+            // \n\nSilahkan akses melalui link berikut: 
+            // `;
+
+            // $phone_numbers = [
+            //     $penilai->mobile_phone,
+            //     $pejabat_penilai->mobile_phone,
+            //     $check_rekap_penilaian->employee->mobile_phone
+            // ];
+
+            // $headers = [
+            //     'Key:KeyAbcKey',
+            //     'Nama:arul',
+            //     'Sandi:123###!!',
+            // ];
+
+            // foreach ($phone_numbers as $phone_number) {
+            //     // Pastikan nomor sudah diformat dengan benar
+            //     $formattedNumber = formatNomorIndo($phone_number);
+
+            //     $httpDataHRD = [
+            //         'number' => $formattedNumber,
+            //         'message' => $responseMessage,
+            //     ];
+
+            //     // Mengirim request HTTP menggunakan cURL
+            //     $curl = curl_init();
+            //     curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+            //     curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+            //     curl_setopt($curl, CURLOPT_POST, 1);
+            //     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            //     curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
+            //     curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+            //     $response = curl_exec($curl);
+            //     $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            //     $curlError = curl_error($curl);
+            //     curl_close($curl);
+
+            //     // Menampilkan hasil untuk setiap nomor
+            //     // if ($httpCode === 200) {
+            //     //     echo "Pesan berhasil dikirim ke $formattedNumber: $response\n";
+            //     // } else {
+            //     //     echo "Gagal mengirim pesan ke $formattedNumber. Error: $curlError\n";
+            //     // }
+            // }
+
 
             if ($total_nilai_fix > 95) {
                 $keterangan = "Sangat Baik";
