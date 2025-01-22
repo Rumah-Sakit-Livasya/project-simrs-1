@@ -23,7 +23,7 @@
                                             class="text-danger fw-bold">*</span></label>
                                     <select class="select2 form-control w-100" id="parent_id_pindah"
                                         name="parent_id">
-                                        @if($childrenFolder->count() > 0)
+                                        @if(count($childrenFolder) > 0)
                                         @foreach ($childrenFolder as $item)
                                             <option value="{{ $item->id }}">
                                                 {{ $item->name }}
