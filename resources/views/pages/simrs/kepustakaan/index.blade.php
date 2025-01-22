@@ -201,7 +201,7 @@
                                             @else
                                                 <i class="fas fa-file text-primary fs-xl mr-2"></i>
                                                 <a href="{{ route('kepustakaan.download', Crypt::encrypt($item->id)) }}"
-                                                    class="card-title {{ $dateLimit == true ? 'text-danger' : '' }}">{{ $item->name .'.'. pathinfo($item->file, PATHINFO_EXTENSION) }}</a>
+                                                    class="card-title {{ $dateLimit == true ? 'text-danger' : '' }}">{{ $item->name . '.' . pathinfo($item->file, PATHINFO_EXTENSION) }}</a>
                                             @endif
                                         </div>
                                         <div class="action-kepustakaan float-right">
@@ -213,8 +213,14 @@
                                                     <i class="btn-action btn-edit fas fa-pencil text-warning fs-xl mr-2"
                                                         data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
                                                         data-id="{{ Crypt::encrypt($item->id) }}"></i>
+                                                    @if ($item->type == 'file')
+                                                        <i class="btn-action btn-cut fas fa-cut text-success fs-xl mr-2"
+                                                            data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
+                                                            data-id="{{ Crypt::encrypt($item->id) }}"></i>
+                                                    @endif
                                                 @endif
                                             @endif
+
 
                                             @if (auth()->user()->can('delete kepustakaan') &&
                                                     ($item->organization_id == auth()->user()->employee->organization_id ||
@@ -250,6 +256,7 @@
     @else --}}
     @include('pages.simrs.kepustakaan.partials.create-for-employee')
     @include('pages.simrs.kepustakaan.partials.edit')
+    @include('pages.simrs.kepustakaan.partials.pindah-file')
     {{-- @endif --}}
     {{-- @include('pages.simrs.master-data.kepustakaan.partials.edit') --}}
 @endsection
@@ -306,10 +313,32 @@
                     type: 'GET',
                     success: function(response) {
                         $('#modal-edit-kepustakaan').modal('show');
-                        $('#modal-edit-kepustakaan #name').val(response);
+                        $('#modal-edit-kepustakaan #name').val(response.name);
                     },
                     error: function(xhr, status, error) {
                         $('#modal-edit-kepustakaan').modal('hide');
+                        showErrorAlert('Terjadi kesalahan: ' + error);
+                    }
+                });
+
+            });
+
+            $('.btn-cut').click(function() {
+
+                let url = $(this).data('url');
+                kepustakaanId = $(this).data('id');
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#modal-pindah-file-kepustakaan').modal('show');
+                        $('#modal-pindah-file-kepustakaan .select2').select2({
+                            dropdownParent: $('#modal-pindah-file-kepustakaan')
+                        });
+                        $('#modal-pindah-file-kepustakaan #name').val(response.name);
+                    },
+                    error: function(xhr, status, error) {
+                        $('#modal-pindah-file-kepustakaan').modal('hide');
                         showErrorAlert('Terjadi kesalahan: ' + error);
                     }
                 });
@@ -381,6 +410,53 @@
                     },
                     success: function(response) {
                         $('#modal-edit-kepustakaan').modal('hide');
+                        showSuccessAlert(response.message);
+
+                        setTimeout(() => {
+                            console.log('Reloading the page now.');
+                            window.location.reload();
+                        }, 1000);
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status === 422) {
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessages = '';
+
+                            $.each(errors, function(key, value) {
+                                errorMessages += value +
+                                    '\n';
+                            });
+
+                            $('#modal-edit-kepustakaan').modal('hide');
+                            showErrorAlert('Terjadi kesalahan:\n' +
+                                errorMessages);
+                        } else {
+                            $('#modal-edit-kepustakaan').modal('hide');
+                            showErrorAlert('Terjadi kesalahan: ' + error);
+                            console.log(error);
+                        }
+                    }
+                });
+            });
+
+            $('#pindah-form').on('submit', function(e) {
+                e.preventDefault();
+
+                let updateUrl =
+                    "{{ route('kepustakaan.update', ':id') }}";
+                updateUrl = updateUrl.replace(':id', kepustakaanId);
+                let formData = $(this).serialize();
+                $.ajax({
+                    url: updateUrl,
+                    type: 'PATCH',
+                    data: formData,
+                    beforeSend: function() {
+                        $('#update-form').find('.ikon-edit').hide();
+                        $('#update-form').find('.spinner-text').removeClass(
+                            'd-none');
+                    },
+                    success: function(response) {
+                        $('#modal-pindah-file-kepustakaan').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {

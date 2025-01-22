@@ -29,7 +29,7 @@ class PoliklinikController extends Controller
                 return $menuResponse;
             }
         } else {
-            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
+        return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
         }
     }
 

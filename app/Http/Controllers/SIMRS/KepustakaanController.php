@@ -20,10 +20,12 @@ class KepustakaanController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
+        $childrenFolder = [];
+
         $organizations = Organization::all();
         $breadcrumbs = collect();
 
-        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'organizations'));
+        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'organizations', 'childrenFolder'));
     }
 
     public function showFolder($encryptedId)
@@ -33,6 +35,8 @@ class KepustakaanController extends Controller
         $folder = Kepustakaan::where('id', $id)
             ->where('type', 'folder') // Memastikan hanya folder
             ->firstOrFail();
+
+        $childrenFolder = $folder->allChildren;
 
         if ($folder->kategori == 'Perizinan' && !auth()->user()->can('master kepustakaan')) {
             return redirect()->back()->with('error', 'Anda tidak punya akses ini!');
@@ -62,7 +66,7 @@ class KepustakaanController extends Controller
             $organizations = Organization::where('id', auth()->user()->employee->organization_id)->first();
         }
 
-        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'folder', 'organizations'));
+        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'folder', 'organizations', 'childrenFolder'));
     }
 
     public function getKepustakaan($encryptedId)
@@ -70,8 +74,7 @@ class KepustakaanController extends Controller
         $id = Crypt::decrypt($encryptedId);
         $folder = Kepustakaan::where('id', $id)
             ->firstOrFail();
-
-        return response()->json($folder->name, 200);
+        return response()->json($folder, 200);
     }
 
     public function downloadFile($encryptedId)
@@ -115,18 +118,18 @@ class KepustakaanController extends Controller
             // $pathFix = $file->storeAs($path, $fileName, 'private');
             // $validatedData['file'] = $pathFix;
 
-            
-                // Simpan file secara manual ke storage
-                $storagePath = storage_path('app/private/' . $path);
-                if (!file_exists($storagePath)) {
-                    mkdir($storagePath, 0755, true); // Buat folder jika belum ada
-                }
 
-                // Pindahkan file ke folder tujuan
-                $file->move($storagePath, $fileName);
+            // Simpan file secara manual ke storage
+            $storagePath = storage_path('app/private/' . $path);
+            if (!file_exists($storagePath)) {
+                mkdir($storagePath, 0755, true); // Buat folder jika belum ada
+            }
 
-                // Path relatif untuk database
-                $validatedData['file'] = $path . '/' . $fileName;
+            // Pindahkan file ke folder tujuan
+            $file->move($storagePath, $fileName);
+
+            // Path relatif untuk database
+            $validatedData['file'] = $path . '/' . $fileName;
         }
 
         try {
@@ -140,14 +143,19 @@ class KepustakaanController extends Controller
     public function update(Request $request, $encryptedId)
     {
         $validatedData = $request->validate([
-            'name' => 'required',
+            'name' => 'nullable',
         ]);
 
         try {
-
             $id = Crypt::decrypt($encryptedId);
             $file = Kepustakaan::where('id', $id)->firstOrFail();
-            $file->name = $request->name;
+
+            if($request->has('parent_id')) {
+                $file->parent_id = $request->parent_id;
+            } else {
+                $file->name = $request->name;
+            }
+
             $file->save();
             // $organization = Organization::where('id', $request->organization_id)->first();
 
