@@ -185,6 +185,8 @@ class PayrollApiController extends Controller
                 }
                 $potonganKeterlambatanValue = intval($potonganKeterlambatanValue);
 
+                dd($potonganKeterlambatanValue);
+
                 // Query untuk mencari data absensi sesuai dengan periode yang diminta
                 $endPeriodHariKerja = Carbon::createFromFormat('F Y', $endMonth)->endOfMonth()->subMonth()->addDays(24);
                 $absensi = Attendance::where('employee_id', $employee->id)
