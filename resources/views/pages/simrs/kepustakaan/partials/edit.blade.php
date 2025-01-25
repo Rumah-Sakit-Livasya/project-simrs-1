@@ -28,6 +28,16 @@
                                     
                                     <input type="hidden" name="organization_id" value="{{ $folder->organization_id ?? '' }}">
                                 </div>
+                                <div class="col-md-12 mt-3">
+                                    <label for="name">Path (Folder) <span
+                                            class="text-danger fw-bold">*</span></label>
+                                    <input type="text" class="form-control" id="name" name="name" value="{{}}"
+                                        placeholder="Masukan nama file/folder...">
+                                        
+                                    <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
+                                    
+                                    <input type="hidden" name="organization_id" value="{{ $folder->organization_id ?? '' }}">
+                                </div>
                             </div>
                         </div>
                     </div>
