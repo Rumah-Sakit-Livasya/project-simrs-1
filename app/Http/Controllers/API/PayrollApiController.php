@@ -165,23 +165,23 @@ class PayrollApiController extends Controller
 
                 // Logika potongan gaji berdasarkan total keterlambatan masuk
                 if ($totalLateInMinutes > 480) {
-                    $potonganKeterlambatanValue = $basicSalary / (173 * 2) * 9;
+                    $potonganKeterlambatanValue = $basicSalary / 346 * 9;
                 } elseif ($totalLateInMinutes > 420) {
-                    $potonganKeterlambatanValue = $basicSalary / (173 * 2) * 8;
+                    $potonganKeterlambatanValue = $basicSalary / 346 * 8;
                 } elseif ($totalLateInMinutes > 360) {
-                    $potonganKeterlambatanValue = $basicSalary / (173 * 2) * 7;
+                    $potonganKeterlambatanValue = $basicSalary / 346 * 7;
                 } elseif ($totalLateInMinutes > 300) {
-                    $potonganKeterlambatanValue = $basicSalary / (173 * 2) * 6;
+                    $potonganKeterlambatanValue = $basicSalary / 346 * 6;
                 } elseif ($totalLateInMinutes > 240) {
-                    $potonganKeterlambatanValue = $basicSalary / (173 * 2) * 5;
+                    $potonganKeterlambatanValue = $basicSalary / 346 * 5;
                 } elseif ($totalLateInMinutes > 180) {
-                    $potonganKeterlambatanValue = $basicSalary / (173 * 2) * 4;
+                    $potonganKeterlambatanValue = $basicSalary / 346 * 4;
                 } elseif ($totalLateInMinutes > 120) {
-                    $potonganKeterlambatanValue = $basicSalary / (173 * 2) * 3;
+                    $potonganKeterlambatanValue = $basicSalary / 346 * 3;
                 } elseif ($totalLateInMinutes > 60) {
-                    $potonganKeterlambatanValue = $basicSalary / (173 * 2) * 2;
+                    $potonganKeterlambatanValue = $basicSalary / 346 * 2;
                 } elseif ($totalLateInMinutes > 30) {
-                    $potonganKeterlambatanValue = $basicSalary / (173 * 2) * 1;
+                    $potonganKeterlambatanValue = $basicSalary / 346 * 1;
                 }
                 $potonganKeterlambatanValue = intval($potonganKeterlambatanValue);
 
