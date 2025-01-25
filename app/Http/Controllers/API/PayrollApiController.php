@@ -165,27 +165,26 @@ class PayrollApiController extends Controller
 
                 // Logika potongan gaji berdasarkan total keterlambatan masuk
                 if ($totalLateInMinutes > 480) {
-                    $potonganKeterlambatanValue = $basicSalary / 346 * 9;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 9) * 2;
                 } elseif ($totalLateInMinutes > 420) {
-                    $potonganKeterlambatanValue = $basicSalary / 346 * 8;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 8) * 2;
                 } elseif ($totalLateInMinutes > 360) {
-                    $potonganKeterlambatanValue = $basicSalary / 346 * 7;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 7) * 2;
                 } elseif ($totalLateInMinutes > 300) {
-                    $potonganKeterlambatanValue = $basicSalary / 346 * 6;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 6) * 2;
                 } elseif ($totalLateInMinutes > 240) {
-                    $potonganKeterlambatanValue = $basicSalary / 346 * 5;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 5) * 2;
                 } elseif ($totalLateInMinutes > 180) {
-                    $potonganKeterlambatanValue = $basicSalary / 346 * 4;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 4) * 2;
                 } elseif ($totalLateInMinutes > 120) {
-                    $potonganKeterlambatanValue = $basicSalary / 346 * 3;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 3) * 2;
                 } elseif ($totalLateInMinutes > 60) {
-                    $potonganKeterlambatanValue = $basicSalary / 346 * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 2) * 2;
                 } elseif ($totalLateInMinutes > 30) {
-                    $potonganKeterlambatanValue = $basicSalary / 346 * 1;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 1) * 2;
                 }
                 $potonganKeterlambatanValue = intval($potonganKeterlambatanValue);
 
-                dd($potonganKeterlambatanValue);
 
                 // Query untuk mencari data absensi sesuai dengan periode yang diminta
                 $endPeriodHariKerja = Carbon::createFromFormat('F Y', $endMonth)->endOfMonth()->subMonth()->addDays(24);
