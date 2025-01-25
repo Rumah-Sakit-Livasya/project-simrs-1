@@ -120,6 +120,7 @@
                                         <th style="white-space: nowrap">Tahun</th>
                                         <th style="white-space: nowrap">Total Nilai</th>
                                         <th style="white-space: nowrap">Keterangan</th>
+                                        <th style="white-space: nowrap">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -127,8 +128,11 @@
                                         <tr>
                                             <td style="white-space: nowrap">{{ $loop->iteration }}</td>
                                             <td style="white-space: nowrap">
+                                                @php
+                                                    $encryptTahunDanEmployeeId = base64_encode("$row->employee_id-$row->tahun");
+                                                @endphp
                                                 <a
-                                                    href="{{ route('kpi.show.penilaian.bulanan', [$row->group_penilaian_id, $row->employee_id, $row->tahun]) }}">
+                                                    href="{{ route('kpi.show.form-penilaian.done', [$row->group_penilaian_id, $encryptTahunDanEmployeeId]) }}">
                                                     {{ \Str::limit($row->employee->fullname, 25) }}
                                                 </a>
                                             </td>
@@ -138,6 +142,7 @@
                                             <td style="white-space: nowrap">{{ $row->tahun }}</td>
                                             <td style="white-space: nowrap">{{ $row->total_nilai }}</td>
                                             <td style="white-space: nowrap">{{ $row->keterangan }}</td>
+                                            <td style="white-space: nowrap">{{ $row->status_penilaian }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -150,6 +155,7 @@
                                         <th style="white-space: nowrap">Tahun</th>
                                         <th style="white-space: nowrap">Total Nilai</th>
                                         <th style="white-space: nowrap">Keterangan</th>
+                                        <th style="white-space: nowrap">Status</th>
                                     </tr>
                                 </tfoot>
                             </table>

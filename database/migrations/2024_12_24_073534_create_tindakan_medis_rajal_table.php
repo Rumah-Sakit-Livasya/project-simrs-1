@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('tindakan_medis_rajal', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('registration_id');
-            $table->unsignedBigInteger('doctor_id');
-            $table->unsignedBigInteger('tindakan_medis_id');
-            $table->unsignedBigInteger('kelas_rawat_id');
+            $table->foreignId('registration_id')->constrained('registrations')->onDelete('cascade');
+            $table->foreignId('doctor_id')->constrained('doctors')->onDelete('cascade');
+            $table->foreignId('tindakan_medis_id')->constrained('tindakan_medis')->onDelete('cascade');
+            $table->foreignId('kelas_rawat_id')->constrained('kelas_rawat')->onDelete('cascade');
             $table->integer('qty');
             $table->bigInteger('total_harga')->nullable();
+            $table->string('user_entry');
             $table->timestamps();
         });
     }

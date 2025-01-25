@@ -24,4 +24,9 @@ class Kepustakaan extends Model implements \OwenIt\Auditing\Contracts\Auditable
     {
         return $this->hasMany(Kepustakaan::class, 'parent_id');
     }
+
+    public function allChildren()
+    {
+        return $this->children()->with('allChildren')->where('type', 'folder');
+    }
 }

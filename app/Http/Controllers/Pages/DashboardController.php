@@ -808,13 +808,13 @@ class DashboardController extends Controller
             $startDateReport = Carbon::create(
                 now()->year,
                 1,
-                26
-            )->subMonth();
+                1
+            );
 
             $endDateReport = Carbon::create(
                 now()->year,
                 12,
-                25
+                31
             );
 
             $day_off = [];
@@ -1474,6 +1474,131 @@ class DashboardController extends Controller
         ];
 
         return view('pages.kpi.penilaian.show', compact('pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir', 'attendances'));
+    }
+
+    public function showPenilaian($id_form, $encrypt)
+    {
+        $decoded = base64_decode($encrypt);
+        list($id_pegawai, $tahun) = explode('-', $decoded);
+
+        $group_penilaian = GroupPenilaian::find($id_form);
+        $penilaian_pegawai = PenilaianPegawai::where('group_penilaian_id', $id_form)->where('employee_id', $id_pegawai)->where('tahun', $tahun)->orderBy('indikator_penilaian_id', 'asc')->get();
+        $penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
+        $pejabat_penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->pejabat_penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
+        $catatan = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->first();
+
+        $total_nilai_all = [];
+        $nilai_kalkulasi = null;
+        $total_nilai = null;
+        $nilai = null;
+        $index = 0;
+        $total_akhir = null;
+
+        $total_input = 0;
+        foreach ($group_penilaian->aspek_penilaians as $aspek) {
+            $total_input = $aspek->indikator_penilaians->count();
+            $nilai = 0;
+            foreach ($aspek->indikator_penilaians->sortBy('id') as $indikator) {
+                // foreach($penilaian_pegawai)
+                if ($indikator->id == $penilaian_pegawai[$index]->indikator_penilaian_id) {
+                    $nilai += $penilaian_pegawai[$index]->nilai;
+                    $index++;
+                }
+            }
+
+            $nilai_kalkulasi = ($nilai / ($total_input * 5)) * ($aspek->bobot / 100);
+            $total_nilai = $nilai_kalkulasi * 100;
+            $total_akhir += number_format($total_nilai, 2, '.', '');
+            $total_nilai_all[] = [
+                'nilai' => $nilai,
+                'nilai_kalkulasi' => floor($nilai_kalkulasi * 1000) / 1000,
+                'total_nilai' => number_format($total_nilai, 2, '.', '')
+            ];
+        }
+
+        $penilai = [
+            'nama' => $penilai_parent->fullname,
+            'jabatan' => JobPosition::find($penilai_parent->job_position_id)->name,
+            'unit' => Organization::find($penilai_parent->organization_id)->name,
+            'nip' => $penilai_parent->employee_code
+        ];
+
+        $pejabat_penilai = [
+            'nama' => $pejabat_penilai_parent->fullname,
+            'jabatan' => JobPosition::find($pejabat_penilai_parent->job_position_id)->name,
+            'unit' => Organization::find($pejabat_penilai_parent->organization_id)->name,
+            'nip' => $pejabat_penilai_parent->employee_code
+        ];
+        // $data = ['title' => 'Welcome to Laravel PDF!'];
+        $pdf = Pdf::loadView('pages.kpi.penilaian.show', compact('pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir'));
+        $nama = $catatan->employee->fullname  . "-" . $tahun . ".pdf";
+        $namaFile = str_replace(' ', '_', $nama);
+
+
+        $employee = Employee::find($id_pegawai);
+
+        $startDateReport = Carbon::create($tahun, 1, 26)->subMonth();
+        // Tanggal akhir: 25 bulan sekarang
+        $endDateReport = Carbon::create($tahun, 12, 25);
+        $attendances = [];
+
+        if (!$employee) {
+            return response()->json([
+                'error' => 'Employee not found'
+            ], 404);
+        }
+        $total_late_in = 0;
+        $total_hadir = $employee->attendance->where('clock_in', '!=', null)->where('is_day_off', null)
+            ->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+            ->count();
+        $total_hari = Attendance::where('employee_id', $id_pegawai)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+            ->count();
+        $total_libur = Attendance::where('employee_id', $id_pegawai)->where('is_day_off', 1)->where('day_off_request_id', null)->where('attendance_code_id', null)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])
+            ->count();
+        $total_izin = 0;
+        $total_absent = $employee->attendance->where('clock_in', null)->where('clock_out', null)->where('is_day_off', null)->where('attendance_code_id', null)->where('day_off_request_id', null)->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()])->count();
+        $total_cuti = 0;
+        $total_sakit = 0;
+        $absensi_pegawai = $employee->attendance->whereBetween('date', [$startDateReport->toDateString(), $endDateReport->toDateString()]);
+
+        foreach ($absensi_pegawai as $absensi) {
+            if ($absensi->attendance_code_id != null || $absensi->day_off_request_id != null) {
+                if ($absensi->attendance_code_id == 1) {
+                    $total_izin += 1;
+                } elseif ($absensi->attendance_code_id == 2) {
+                    $total_sakit += 1;
+                } elseif ($absensi->attendance_code_id != 1 && $absensi->attendance_code_id != 2) {
+                    $total_cuti += 1;
+                } elseif ($absensi->attendance_code_id == null || $absensi->attendance_code_id == "") {
+                    // Jika attendance_code_id di Attendance tidak ada, cek di DayOffRequest melalui relasi day_off
+                    if ($absensi->day_off) {
+                        // Cek apakah day_off_request memiliki attendance_code_id yang diinginkan
+                        if ($absensi->day_off->attendance_code_id == 1) {
+                            $total_izin += 1;
+                        } elseif ($absensi->day_off->attendance_code_id == 2) {
+                            $total_sakit += 1;
+                        } else {
+                            $total_cuti += 1;
+                        }
+                    }
+                }
+            }
+
+            $total_late_in += $absensi->late_clock_in;
+        }
+        // Push data ke dalam array attendances
+        $attendances = [
+            'total_hari' => $total_hari,
+            'total_hadir' => $total_hadir,
+            'total_telat' => $total_late_in,
+            'total_izin' => $total_izin,
+            'total_sakit' => $total_sakit,
+            'total_absent' => $total_absent,
+            'total_cuti' => $total_cuti,
+            'total_libur' => $total_libur,
+        ];
+
+        return view('pages.kpi.penilaian.show-penilaian', compact('pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir', 'attendances'));
     }
 
     public function rekapPenilaianBulanan()

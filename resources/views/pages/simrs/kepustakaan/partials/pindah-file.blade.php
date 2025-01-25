@@ -1,7 +1,7 @@
-<div class="modal fade" id="modal-edit-kepustakaan" tabindex="-1" role="dialog">
+<div class="modal fade" id="modal-pindah-file-kepustakaan" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" role="document"> <!-- Menggunakan kelas modal-xl untuk ukuran ekstra besar -->
         <div class="modal-content">
-            <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="update-form"
+            <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="pindah-form"
                 enctype="multipart/form-data">
                 @method('post')
                 @csrf
@@ -19,24 +19,20 @@
                         <div class="col-md-12 mb-3">
                             <div class="row">
                                 <div class="col-md-12 mt-3">
-                                    <label for="name">Nama (Folder) <span
+                                    <label for="name">Pindahkan ke Folder <span
                                             class="text-danger fw-bold">*</span></label>
-                                    <input type="text" class="form-control" id="name" name="name"
-                                        placeholder="Masukan nama file/folder...">
-                                        
-                                    <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
-                                    
-                                    <input type="hidden" name="organization_id" value="{{ $folder->organization_id ?? '' }}">
-                                </div>
-                                <div class="col-md-12 mt-3">
-                                    <label for="name">Path (Folder) <span
-                                            class="text-danger fw-bold">*</span></label>
-                                    <input type="text" class="form-control" id="name" name="name" value="{{}}"
-                                        placeholder="Masukan nama file/folder...">
-                                        
-                                    <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
-                                    
-                                    <input type="hidden" name="organization_id" value="{{ $folder->organization_id ?? '' }}">
+                                    <select class="select2 form-control w-100" id="parent_id_pindah"
+                                        name="parent_id">
+                                        @if(count($childrenFolder) > 0)
+                                        @foreach ($childrenFolder as $item)
+                                            <option value="{{ $item->id }}">
+                                                {{ $item->name }}
+                                            </option>
+                                        @endforeach
+                                        @else
+                                        <option value="" disabled aria-readonly="true">Silahkan Buat Folder Terlebih Dahulu!</option>
+                                        @endif
+                                    </select>
                                 </div>
                             </div>
                         </div>

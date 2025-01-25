@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SIMRS\Poliklinik;
 
 use App\Http\Controllers\Controller;
 use App\Models\SIMRS\Departement;
+use App\Models\SIMRS\ERM\TindakanMedisRajal;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TindakanMedis;
@@ -28,7 +29,7 @@ class PoliklinikController extends Controller
                 return $menuResponse;
             }
         } else {
-            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
+        return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
         }
     }
 
@@ -66,8 +67,8 @@ class PoliklinikController extends Controller
             
         }elseif ($menu == 'tindakan_medis'){
             $list_tindakan_medis = TindakanMedis::all();
-            
-            return view('pages.simrs.poliklinik.layanan.tindakan_medis', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis'));
+            $tindakan_medis_yang_dipakai = TindakanMedisRajal::where('registration_id', $registration->id)->get();
+            return view('pages.simrs.poliklinik.layanan.tindakan_medis', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis', 'tindakan_medis_yang_dipakai'));
         }else {
             return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
         }
