@@ -15,6 +15,8 @@ return new class extends Migration
             $table->integer('is_verified_penilai')->after('status_penilaian')->default(0);
             $table->integer('is_verified_pejabat_penilai')->after('status_penilaian')->default(0);
             $table->integer('is_verified_pegawai')->after('status_penilaian')->default(0);
+            $table->integer('is_verified_hrd')->after('status_penilaian')->default(0);
+            $table->integer('is_verified_direktur')->after('status_penilaian')->default(0);
         });
     }
 
@@ -27,6 +29,8 @@ return new class extends Migration
             $table->dropColumn('is_verified_penilai');
             $table->dropColumn('is_verified_pejabat_penilai');
             $table->dropColumn('is_verified_pegawai');
+            $table->dropColumn('is_verified_hrd');
+            $table->dropColumn('is_verified_direktur');
         });
     }
 };

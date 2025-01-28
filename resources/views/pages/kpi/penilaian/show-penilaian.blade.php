@@ -524,50 +524,126 @@
                                                         </h3>
                                                     </td>
                                                 </tr>
+                                                <tr style="border: 0px; border-top: 1px solid black !important;">
+                                                    <td colspan="10" style="border-right: 0px;">
+                                                        <h3 class="font-weight-bold my-1 text-center"
+                                                            style="font-size: 12pt">PENILAIAN AKHIR</h3>
+                                                    </td>
+                                                </tr>
+                                                <tr style="border: 0px; border-top: 1px solid black !important;">
+                                                    <td colspan="10" style="border-right: 0px;">
+                                                        <p class="my-1">Bedasarkan hasil penilaian
+                                                            keseluruhan disimpulkan bahwa:</p>
+                                                    </td>
+                                                </tr>
+                                                <tr style="border: 0px; border-top: 1px solid black !important;">
+                                                    <td colspan="10"
+                                                        style="border-right: 0px; padding-top: 0px; padding-bottom: 0px;">
+                                                        <table width="100%" cellspacing="0" cellpadding="0">
+                                                            <tr style="border: 0px; height: 50px">
+                                                                <td style="width: 50%; padding: 5px 0px;">
+                                                                    <h3 class="font-weight-bold text-center mb-0">
+                                                                        YA</h3>
+                                                                </td>
+                                                                <td
+                                                                    style="width: 50%; padding: 5px 0px; border-right: 0px;">
+                                                                    <h3 class="font-weight-bold text-center mb-0">
+                                                                        TIDAK</h3>
+                                                                </td>
+                                                            </tr>
+
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                                <tr style="border: 0px; border-top: 1px solid black !important;">
+                                                    <td colspan="10"
+                                                        style="border-right: 0px; padding-top: 0px; padding-bottom: 0px;">
+                                                        <table width="100%" cellspacing="0" cellpadding="0">
+                                                            <tr style="border: 0px; height: 50px">
+                                                                <td style="width: 50%; padding: 5px 8px 5px 0px;">
+                                                                    <h3 id="ya"
+                                                                        style="font-size: 10pt !important; text-align: center; margin-top: 10px !important">
+                                                                        {{ $catatan->keterangan_ya }}</h3>
+                                                                </td>
+                                                                <td
+                                                                    style="width: 50%; padding: 5px 0px 5px 8px; border-right: 0px;">
+                                                                    <h3 id="ya"
+                                                                        style="font-size: 10pt !important; text-align: center; margin-top: 10px !important;">
+                                                                        {{ $catatan->keterangan_tidak }}</h3>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <table width="100%"
+                                                style="text-align: center; border: 1px solid black; margin-top: 30px">
                                                 <tr>
-                                                    <td colspan="10" valign="top" style="height: 115px;">
-                                                        <h3 class="font-weight-bold text-tanggapan"> Tanggapan dari Pegawai
-                                                            yang dinilai : </h3>
-                                                        <p id="catatan_tambahan">
-                                                            {{ $catatan->komentar_pegawai ?? '-' }}</p>
+                                                    <td class="kuning-muda" colspan="2"
+                                                        style="text-align: left; padding: 8px; border-bottom: 1px solid black;">
+                                                        <b>Majalengka, {{ now()->format('d F Y') }}</b>
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td colspan="10" valign="top" style="height: 115px;">
-                                                        <h3 class="font-weight-bold text-tanggapan"> Komentar
-                                                            {{ $penilai['jabatan'] }}
-                                                            {{ $penilai['unit'] }}:
-                                                        </h3>
-                                                        <p id="catatan_tambahan">
-                                                            {{ $catatan->komentar_penilai ?? '-' }}</p>
+                                                    <td width="50%" style="padding-top: 15px; padding-bottom: 15px;">
+                                                        <b>Karyawan yang Dinilai
+                                                        </b><br><br>
+
+                                                        <div>
+                                                            <a class="btn btn-primary btn-sm text-white ttd"
+                                                                id="btn_ttd_pegawai" data-tipe="pegawai">Tanda
+                                                                tangan</a>
+                                                            <br>
+                                                        </div>
+                                                        <img id="ttd_pegawai" src="" alt="Signature Image"
+                                                            style="display:none; max-width:60%; margin-top: -3px;"><br>
+
+                                                        <span id="ttd_nama_pegawai"></span>
+                                                    </td>
+                                                    <td width="50%" style="border-left: 1px solid black">
+                                                        <b>Yang Menilai
+                                                        </b><br><br>
+
+                                                        <div>
+                                                            <a class="btn btn-primary btn-sm text-white ttd"
+                                                                id="btn_ttd_penilai" data-tipe = "penilai">Tanda
+                                                                tangan</a>
+                                                            <br>
+                                                        </div>
+                                                        <img id="ttd_penilai" src="" alt="Signature Image"
+                                                            style="display:none; max-width:60%; margin-top: -3px;"><br>
+
+                                                        <span id="ttd_nama_penilai"></span>
                                                     </td>
                                                 </tr>
-                                                <tr>
-                                                    <td colspan="10" valign="top" style="height: 115px;">
-                                                        <h3 class="my-2 font-weight-bold text-tanggapan">
-                                                            Komentar
-                                                            {{ $pejabat_penilai['jabatan'] }}
-                                                            {{ $pejabat_penilai['jabatan'] != 'Direktur' ? $pejabat_penilai['unit'] : ' RS Livasya' }}:
-                                                        </h3>
-                                                        <p id="catatan_tambahan">
-                                                            {{ $catatan->komentar_pejabat_penilai ?? '-' }}</p>
+                                                <tr style="border: 0px; border-top: 1px solid black;">
+                                                    <td width="50%" style="padding-top: 15px; padding-bottom: 15px;">
+                                                        <b>
+                                                            Mengetahui,
+                                                        </b><br><br>
+                                                        <div id="tombol-{{ $group_penilaian->pejabat_penilai }}">
+                                                            <a class="btn btn-primary btn-sm text-white ttd"
+                                                                id="btn_ttd_pejabat_penilai"
+                                                                data-tipe = "pejabat_penilai">Tanda
+                                                                tangan</a>
+                                                            <br>
+                                                        </div>
+
+                                                        <img id="ttd_pejabat_penilai" src=""
+                                                            alt="Signature Image"
+                                                            style="display:none; max-width:60%; margin-top: -3px;"><br>
+                                                        <span id="ttd_nama_pejabat_penilai"></span>
                                                     </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="10" style="padding: 0px;">
-                                                        <table width="100%"
-                                                            style="text-align: center; margin-top: 15px; margin-bottom: 15px;">
-                                                            <tr style="border: 0px">
-                                                                <td width="33%">
-                                                                    <b>
-                                                                        PEJABAT PENILAI
-                                                                    </b><br><br>
+                                                    <td width="50%" style="border-left: 1px solid black">
+                                                        <b>menyetujui,</b>
+                                                        <table width="100%">
+                                                            <tr>
+                                                                <td width="50%">
                                                                     <div
                                                                         id="tombol-{{ $group_penilaian->pejabat_penilai }}">
                                                                         <a class="btn btn-primary btn-sm text-white ttd"
                                                                             id="btn_ttd_pejabat_penilai"
-                                                                            data-tipe = "pejabat_penilai"
-                                                                            data-id-pejabat_penilai = "{{ $penilaian_pegawai[0]->pejabat_penilai }}">Tanda
+                                                                            data-tipe = "pejabat_penilai">Tanda
                                                                             tangan</a>
                                                                         <br>
                                                                     </div>
@@ -575,60 +651,26 @@
                                                                     <img id="ttd_pejabat_penilai" src=""
                                                                         alt="Signature Image"
                                                                         style="display:none; max-width:60%; margin-top: -3px;"><br>
-                                                                    <span id="ttd_nama_pejabat_penilai">{{$pejabat_penilai['nama']}}</span>
+                                                                    <span id="ttd_nama_pejabat_penilai">HRD</span>
                                                                 </td>
-                                                                <td width="33%">
-                                                                    <b>PENILAI
-                                                                    </b><br><br>
-
-                                                                    <div>
+                                                                <td width="50%">
+                                                                    <div
+                                                                        id="tombol-{{ $group_penilaian->pejabat_penilai }}">
                                                                         <a class="btn btn-primary btn-sm text-white ttd"
-                                                                            id="btn_ttd_penilai"
-                                                                            data-id-penilai = "{{ $penilaian_pegawai[0]->penilai }}"
-                                                                            data-tipe = "penilai">Tanda tangan</a>
-                                                                        <br>
-                                                                    </div>
-                                                                    <img id="ttd_penilai" src=""
-                                                                        alt="Signature Image"
-                                                                        style="display:none; max-width:60%; margin-top: -3px;"><br>
-
-                                                                    <span id="ttd_nama_penilai">{{$penilai['nama']}}</span>
-                                                                </td>
-                                                                <td width="33%" class="border-right-0">
-                                                                    <b>PEGAWAI YANG DINILAI
-                                                                    </b><br><br>
-                                                                    <div>
-                                                                        <a class="btn btn-primary btn-sm text-white ttd"
-                                                                            id="btn_ttd_pegawai" data-tipe="pegawai"
-                                                                            data-id-pegawai = "{{ $penilaian_pegawai[0]->employee_id }}">Tanda
+                                                                            id="btn_ttd_pejabat_penilai"
+                                                                            data-tipe = "pejabat_penilai">Tanda
                                                                             tangan</a>
                                                                         <br>
                                                                     </div>
-                                                                    <img id="ttd_pegawai" src=""
+
+                                                                    <img id="ttd_pejabat_penilai" src=""
                                                                         alt="Signature Image"
                                                                         style="display:none; max-width:60%; margin-top: -3px;"><br>
-                                                                    <span id="ttd_nama_pegawai">{{$penilaian_pegawai[0]->employee->fullname}}</span>
+                                                                    <span id="ttd_nama_pejabat_penilai">Direktur</span>
                                                                 </td>
-                                                                {{-- <td width="33%" class="border-right-0" valign="top">
-                                                                    <span id="jabatan_pegawai_ttd"
-                                                                        style="font-weight: bold;"></span> <span
-                                                                        id="unit_pegawai_ttd"
-                                                                        style="font-weight: bold;"></span><br><br>
-
-                                                                    <div id="tombol-pegawai">
-                                                                        <a class="btn btn-primary btn-sm text-white"
-                                                                            data-id="{{ $group_penilaian->penilai }}">Pilih
-                                                                            Pegawai Dahulu</a>
-                                                                        <br>
-                                                                    </div>
-                                                                    <img id="signature-display" src=""
-                                                                        alt="Signature Image"
-                                                                        style="display:none; max-width:60%;"><br>
-                                                                    <span id="nama_pegawai_ttd"></span>
-
-                                                                </td> --}}
                                                             </tr>
                                                         </table>
+
                                                     </td>
                                                 </tr>
                                             </table>

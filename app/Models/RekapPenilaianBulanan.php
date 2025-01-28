@@ -9,7 +9,7 @@ class RekapPenilaianBulanan extends Model
 {
     use HasFactory;
     protected $table = 'rekap_penilaian';
-    protected $fillable = ['employee_id', 'group_penilaian_id', 'tahun', 'total_nilai', 'keterangan', 'catatan', 'komentar_pegawai', 'komentar_penilai', 'komentar_pejabat_penilai'];
+    protected $fillable = ['employee_id', 'group_penilaian_id', 'tahun', 'total_nilai', 'keterangan_ya', 'keterangan_tidak', 'is_ya', 'is_tidak', 'keterangan', 'is_verified_penilai', 'is_verified_pejabat_penilai', 'is_verified_pegawai', 'is_verified_hrd', 'is_verified_direktur'];
 
     public function employee()
     {

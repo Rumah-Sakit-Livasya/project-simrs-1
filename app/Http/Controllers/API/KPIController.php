@@ -11,6 +11,7 @@ use App\Models\PenilaianPegawai;
 use App\Models\RekapPenilaianBulanan;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -129,39 +130,43 @@ class KPIController extends Controller
 
     public function storePenilaianPegawai(Request $request, $id_form, $id_pegawai)
     {
-        try {
 
+        // dd(request());
+        DB::beginTransaction();
+
+        try {
             $validator = Validator::make(request()->all(), [
                 'employee_id' => 'required',
             ]);
-
-            $check_rekap_penilaian = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
-            $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
-            // $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->where('tahun', $request->tahun)->first();
-
-            if (isset($check_penilaian_pegawai) > 0 || isset($check_rekap_penilaian) > 0) {
-                return response()->json([
-                    'error' => 'Pegawai sudah diberikan penilaian!'
-                ], 500);
-            }
 
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
 
+            $check_rekap_penilaian = RekapPenilaianBulanan::where('employee_id', $id_pegawai)
+                ->where('group_penilaian_id', $id_form)
+                ->where('tahun', $request->tahun)
+                ->first();
+
+            $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)
+                ->where('group_penilaian_id', $id_form)
+                ->where('tahun', $request->tahun)
+                ->first();
+
+            if (isset($check_penilaian_pegawai) || isset($check_rekap_penilaian)) {
+                return response()->json([
+                    'error' => 'Pegawai sudah diberikan penilaian!'
+                ], 500);
+            }
+
             $total_nilai_fix = 0;
-
             $group_penilaian = GroupPenilaian::find($id_form);
-            foreach ($group_penilaian->aspek_penilaians as $index => $row) {
-                $aspek_penilaian_id = $row->id;
-                $aspek_penilaian = $row->nama;
 
-                // Ubah ke lowercase dan ganti spasi dengan underscore
-                $formatted_string = Str::slug($aspek_penilaian, '_'); // Underscore sebagai separator
-
-                // Tambahkan prefiks
+            foreach ($group_penilaian->aspek_penilaians as $row) {
+                $formatted_string = Str::slug($row->nama, '_');
                 $result = 'nilai_' . $formatted_string;
                 $total_nilai_fix += $request->input('total_akhir_' . $formatted_string);
+
                 foreach ($row->indikator_penilaians as $key => $col) {
                     PenilaianPegawai::create([
                         'employee_id' => $id_pegawai,
@@ -176,87 +181,44 @@ class KPIController extends Controller
                 }
             }
 
-            // $penilai = Employee::where('id', $request->penilai)->first();
-            // $pejabat_penilai = Employee::where('id', $request->pejabat_penilai)->first();
+            $keterangan = match (true) {
+                $total_nilai_fix > 95 => "Sangat Baik",
+                $total_nilai_fix > 85 => "Baik",
+                $total_nilai_fix > 65 => "Cukup",
+                $total_nilai_fix > 50 => "Kurang",
+                default => "Sangat Kurang",
+            };
 
-            // $responseMessage = `
-            // Penilaian untuk pegawai {$check_penilaian_pegawai->employee->fullname} unit {$check_penilaian_pegawai->employee->organization->name} telah diberikan. Dimohon untuk berikan revisi (jika ada), tanggapan & tanda tangan terkait penilaian tersebut 😊. 
-            // \n\nSilahkan akses melalui link berikut: 
-            // `;
+            $request['is_ya'] = $request->keterangan_ya ? 1 : 0;
+            $request['is_tidak'] = $request->keterangan_ya ? 0 : 1;
 
-            // $phone_numbers = [
-            //     $penilai->mobile_phone,
-            //     $pejabat_penilai->mobile_phone,
-            //     $check_rekap_penilaian->employee->mobile_phone
-            // ];
-
-            // $headers = [
-            //     'Key:KeyAbcKey',
-            //     'Nama:arul',
-            //     'Sandi:123###!!',
-            // ];
-
-            // foreach ($phone_numbers as $phone_number) {
-            //     // Pastikan nomor sudah diformat dengan benar
-            //     $formattedNumber = formatNomorIndo($phone_number);
-
-            //     $httpDataHRD = [
-            //         'number' => $formattedNumber,
-            //         'message' => $responseMessage,
-            //     ];
-
-            //     // Mengirim request HTTP menggunakan cURL
-            //     $curl = curl_init();
-            //     curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
-            //     curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-            //     curl_setopt($curl, CURLOPT_POST, 1);
-            //     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-            //     curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
-            //     curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-            //     $response = curl_exec($curl);
-            //     $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            //     $curlError = curl_error($curl);
-            //     curl_close($curl);
-
-            //     // Menampilkan hasil untuk setiap nomor
-            //     // if ($httpCode === 200) {
-            //     //     echo "Pesan berhasil dikirim ke $formattedNumber: $response\n";
-            //     // } else {
-            //     //     echo "Gagal mengirim pesan ke $formattedNumber. Error: $curlError\n";
-            //     // }
-            // }
-
-
-            if ($total_nilai_fix > 95) {
-                $keterangan = "Sangat Baik";
-            } else if ($total_nilai_fix > 85 && $total_nilai_fix < 96) {
-                $keterangan = "Baik";
-            } else if ($total_nilai_fix > 65 && $total_nilai_fix < 86) {
-                $keterangan = "Cukup";
-            } else if ($total_nilai_fix > 50 && $total_nilai_fix < 66) {
-                $keterangan = "Kurang";
-            } else if ($total_nilai_fix <= 50) {
-                $keterangan = "Sangat Kurang";
-            }
-            // dd($request->catatan);
             RekapPenilaianBulanan::create([
                 'group_penilaian_id' => $id_form,
                 'employee_id' => $id_pegawai,
                 'tahun' => $request->tahun,
                 'total_nilai' => $total_nilai_fix,
                 'keterangan' => $keterangan,
-                'catatan' => $request->catatan,
-                'komentar_pegawai' => $request->komentar_pegawai,
-                'komentar_penilai' => $request->komentar_penilai,
-                'komentar_pejabat_penilai' => $request->komentar_pejabat_penilai,
+                'keterangan_ya' => $request->keterangan_ya,
+                'keterangan_tidak' => $request->keterangan_tidak,
+                'is_ya' => $request->is_ya,
+                'is_tidak' => $request->is_tidak
             ]);
 
-            return response()->json(['message' => 'Penilaian Berhasil di Tambahkan!']);
+            // Commit jika semua berhasil
+            DB::commit();
+
+            return response()->json(['success' => 'Penilaian berhasil disimpan']);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 404);
+            // Rollback semua perubahan jika terjadi error
+            DB::rollBack();
+
+            // Hapus data PenilaianPegawai dengan employee_id terkait
+            PenilaianPegawai::where('employee_id', $id_pegawai)
+                ->where('group_penilaian_id', $id_form)
+                ->where('tahun', $request->tahun)
+                ->delete();
+
+            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
 

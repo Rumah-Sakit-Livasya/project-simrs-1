@@ -46,6 +46,8 @@
                                                     <select
                                                         class="select2 form-control @error('periode') is-invalid @enderror"
                                                         name="periode" id="periode">
+                                                        <option value="December 2024 - January 2025">December 2024 - January
+                                                            2025</option>
                                                         @php
                                                             $currentYear = date('Y');
                                                             $nextYear = $currentYear + 1;

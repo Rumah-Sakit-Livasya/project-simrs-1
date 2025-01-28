@@ -581,11 +581,11 @@
                                                                         <tr style="border: 0px; height: 50px">
                                                                             <td
                                                                                 style="width: 50%; padding: 5px 8px 5px 0px;">
-                                                                                <textarea class="form-control" id="komentar_penilai" name="komentar_penilai" rows="5"></textarea>
+                                                                                <textarea class="form-control" id="keterangan_ya" name="keterangan_ya" rows="5"></textarea>
                                                                             </td>
                                                                             <td
                                                                                 style="width: 50%; padding: 5px 0px 5px 8px; border-right: 0px;">
-                                                                                <textarea class="form-control" id="komentar_penilai" name="komentar_penilai" rows="5"></textarea>
+                                                                                <textarea class="form-control" id="keterangan_tidak" name="keterangan_tidak" rows="5"></textarea>
                                                                             </td>
                                                                         </tr>
                                                                     </table>
