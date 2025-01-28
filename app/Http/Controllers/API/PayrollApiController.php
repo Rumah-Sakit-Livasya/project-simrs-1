@@ -165,11 +165,11 @@ class PayrollApiController extends Controller
 
                 // Logika potongan gaji berdasarkan total keterlambatan masuk
                 if ($totalLateInMinutes > 480) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 9) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 9);
                 } elseif ($totalLateInMinutes > 420) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 8) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 8);
                 } elseif ($totalLateInMinutes > 360) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 7) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 7);
                 } elseif ($totalLateInMinutes > 300) {
                     $potonganKeterlambatanValue = ($basicSalary / 173 * 6);
                 } elseif ($totalLateInMinutes > 240) {

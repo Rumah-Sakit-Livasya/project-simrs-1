@@ -192,7 +192,7 @@ class KPIController extends Controller
             $request['is_ya'] = $request->keterangan_ya ? 1 : 0;
             $request['is_tidak'] = $request->keterangan_ya ? 0 : 1;
 
-            RekapPenilaianBulanan::create([
+            $rekap = RekapPenilaianBulanan::create([
                 'group_penilaian_id' => $id_form,
                 'employee_id' => $id_pegawai,
                 'tahun' => $request->tahun,
@@ -206,6 +206,34 @@ class KPIController extends Controller
 
             // Commit jika semua berhasil
             DB::commit();
+
+            $message = `Penilaian atas nama {$rekap->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: `;
+
+            $headers = [
+                'Key:KeyAbcKey',
+                'Nama:arul',
+                'Sandi:123###!!',
+            ];
+    
+            // Data untuk request HTTP
+            $httpData = [
+                'number' => $rekap->employee->mobile_phone,
+                'message' => $request->message,
+            ];
+
+            // Mengirim request HTTP menggunakan cURL
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+            $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($curl);
+            curl_close($curl);
 
             return response()->json(['success' => 'Penilaian berhasil disimpan']);
         } catch (\Exception $e) {
