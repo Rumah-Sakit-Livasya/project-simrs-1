@@ -1,4 +1,4 @@
-@extends('inc.layout-no-side')
+    @extends('inc.layout-no-side')
 @section('title', 'Monitoring Dashboard')
 @section('extended-css')
     <style>
@@ -66,6 +66,7 @@
                                         <!-- Mengubah input menjadi select2 -->
                                         <select class="select2 form-control @error('periode') is-invalid @enderror"
                                             name="periode" id="periode">
+                                            <option value="Desember 2024 - January 2025">Desember 2024 - January 2025</option>
                                             @php
                                                 $currentYear = date('Y');
                                                 $nextYear = $currentYear + 1;
