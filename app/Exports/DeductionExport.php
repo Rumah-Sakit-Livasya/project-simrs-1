@@ -39,16 +39,15 @@ class DeductionExport implements FromQuery, WithHeadings, ShouldAutoSize, WithEv
             'deductions.potongan_bpjs_ketenagakerjaan',
             'deductions.potongan_pajak'
         )->leftJoin('organizations', 'employees.organization_id', '=', 'organizations.id')
-            ->leftJoin('deductions', 'employees.id', '=', 'deductions.employee_id');
+            ->leftJoin('deductions', 'employees.id', '=', 'deductions.employee_id')
+            ->where('employees.is_active', 1);
 
         if ($this->organizationId) {
-            $query->where('employees.organization_id', $this->organizationId)
-            ->where('employees.is_active', 1);
+            $query->where('employees.organization_id', $this->organizationId);
         }
 
         if ($this->employeeId) {
-            $query->where('employees.id', $this->employeeId)
-            ->where('employees.is_active', 1);
+            $query->where('employees.id', $this->employeeId);
         }
 
         return $query;
