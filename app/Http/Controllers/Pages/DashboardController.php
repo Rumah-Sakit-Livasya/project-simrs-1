@@ -1240,6 +1240,24 @@ class DashboardController extends Controller
 
     public function getDataRequests()
     {
+        $currentYear = request()->tahun ?? Carbon::now()->year;
+        $currentMonth = request()->bulan ?? Carbon::now()->month;
+        $currentDay = request()->bulan ?? Carbon::now()->day;
+        
+        if (request()->tahun != null && request()->bulan != null) {
+            $startDate = Carbon::create(request()->tahun, request()->bulan, 26)->subMonth();
+            $endDate = Carbon::create(request()->tahun, request()->bulan, 25);
+        } else {
+            if ($currentDay > 25) {
+                $startDate = Carbon::create($currentYear, $currentMonth, 26);
+                $endDate = Carbon::create($currentYear, $currentMonth, 25)->addMonth();
+                $currentMonth = $request->bulan ?? Carbon::now()->month + 1;
+            } else {
+                $startDate = Carbon::create($currentYear, $currentMonth, 26)->subMonth();
+                $endDate = Carbon::create($currentYear, $currentMonth, 25);
+            }
+        }
+
         //list organisasi berdasarkan jabatan
         $organizations = [];
         $organizations[] = auth()->user()->employee->organization->id;
@@ -1269,20 +1287,39 @@ class DashboardController extends Controller
                 $query->select('id')
                     ->from('employees')
                     ->whereIn('organization_id', $organizations);
-            })->get();
+            })
+                ->where(function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                        ->orWhereBetween('end_date', [$startDate, $endDate])
+                        ->orWhere(function ($query) use ($startDate, $endDate) {
+                            $query->where('start_date', '<=', $startDate)
+                                ->where('end_date', '>=', $endDate);
+                        });
+                })
+                ->get();
             $attendance_requests = AttendanceRequest::whereIn('employee_id', function ($query) use ($organizations) {
                 $query->select('id')
                     ->from('employees')
                     ->whereIn('organization_id', $organizations);
-            })->get();
+            })
+                ->whereBetween('date', [$startDate, $endDate])
+                ->get();
 
             $total_pending = $day_off_requests->where('is_approved', 'Pending')->count() + $attendance_requests->where('is_approved', 'Pending')->count();
             $total_verifikasi = $day_off_requests->where('is_approved', 'Verifikasi')->count() + $attendance_requests->where('is_approved', 'Verifikasi')->count();
             $total_ditolak = $day_off_requests->where('is_approved', 'Ditolak')->count() + $attendance_requests->where('is_approved', 'Ditolak')->count();
             $total_disetujui = $day_off_requests->where('is_approved', 'Disetujui')->count() + $attendance_requests->where('is_approved', 'Disetujui')->count();
         } else {
-            $day_off_requests = DayOffRequest::all();
-            $attendance_requests = AttendanceRequest::all();
+            $day_off_requests = DayOffRequest::where(function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('start_date', [$startDate, $endDate])
+                    ->orWhereBetween('end_date', [$startDate, $endDate])
+                    ->orWhere(function ($query) use ($startDate, $endDate) {
+                        $query->where('start_date', '<=', $startDate)
+                            ->where('end_date', '>=', $endDate);
+                    });
+            })
+                ->get();
+            $attendance_requests = AttendanceRequest::whereBetween('date', [$startDate, $endDate])->get();
             $total_disetujui = $day_off_requests->where('is_approved', 'Disetujui')->count() + $attendance_requests->where('is_approved', 'Disetujui')->count();
             $total_pending = $day_off_requests->where('is_approved', 'Pending')->count() + $attendance_requests->where('is_approved', 'Pending')->count();
             $total_verifikasi = $day_off_requests->where('is_approved', 'Verifikasi')->count() + $attendance_requests->where('is_approved', 'Verifikasi')->count();
@@ -1307,7 +1344,7 @@ class DashboardController extends Controller
 
         $day_off['cl'] = 12;
 
-        return view('pages.monitoring.daftar-pengajuan.index', compact('day_off_requests', 'attendance_requests', 'total_disetujui', 'total_pending', 'total_verifikasi', 'total_ditolak', 'attendance_codes', 'employees', 'day_off'));
+        return view('pages.monitoring.daftar-pengajuan.index', compact('day_off_requests', 'attendance_requests', 'total_disetujui', 'total_pending', 'total_verifikasi', 'total_ditolak', 'attendance_codes', 'employees', 'day_off', 'currentMonth', 'currentYear'));
     }
 
     public function getGroupPenilaian()
@@ -1466,16 +1503,16 @@ class DashboardController extends Controller
         return view('pages.kpi.penilaian.show', compact('pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir', 'attendances'));
     }
 
-    public function showPenilaian($id_form, $encrypt)
+    public function showPenilaian($id_form, $periode, $encrypt)
     {
         $decoded = base64_decode($encrypt);
         list($id_pegawai, $tahun) = explode('-', $decoded);
 
         $group_penilaian = GroupPenilaian::find($id_form);
-        $penilaian_pegawai = PenilaianPegawai::where('group_penilaian_id', $id_form)->where('employee_id', $id_pegawai)->where('tahun', $tahun)->orderBy('indikator_penilaian_id', 'asc')->get();
+        $penilaian_pegawai = PenilaianPegawai::where('group_penilaian_id', $id_form)->where('employee_id', $id_pegawai)->where('periode', $periode)->where('tahun', $tahun)->orderBy('indikator_penilaian_id', 'asc')->get();
         $penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
         $pejabat_penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->pejabat_penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
-        $catatan = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->first();
+        $catatan = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('periode', $periode)->where('tahun', $tahun)->where('group_penilaian_id', $id_form)->first();
 
         $total_nilai_all = [];
         $nilai_kalkulasi = null;

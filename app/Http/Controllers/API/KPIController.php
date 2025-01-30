@@ -191,11 +191,12 @@ class KPIController extends Controller
 
             $request['is_ya'] = $request->keterangan_ya ? 1 : 0;
             $request['is_tidak'] = $request->keterangan_ya ? 0 : 1;
-
+            
             $rekap = RekapPenilaianBulanan::create([
                 'group_penilaian_id' => $id_form,
                 'employee_id' => $id_pegawai,
                 'tahun' => $request->tahun,
+                'periode' => $request->periode,
                 'total_nilai' => $total_nilai_fix,
                 'keterangan' => $keterangan,
                 'keterangan_ya' => $request->keterangan_ya,
@@ -207,7 +208,8 @@ class KPIController extends Controller
             // Commit jika semua berhasil
             DB::commit();
 
-            $message = `Penilaian atas nama {$rekap->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: `;
+            $message = `Penilaian atas nama {$rekap->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n`;
+            $message += route('kpi.show.form-penilaian.done', []);
 
             $headers = [
                 'Key:KeyAbcKey',
