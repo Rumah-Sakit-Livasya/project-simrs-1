@@ -209,7 +209,7 @@ class KPIController extends Controller
 
             // Commit jika semua berhasil
             DB::commit();
-            
+            // dd($rekap->employee->mobile_phone);
             $encryptTahunDanEmployeeId = base64_encode("$id_pegawai-$request->tahun");
             $message = `Penilaian atas nama {$rekap->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n`;
             $message .= route('kpi.show.form-penilaian.done', [$id_form, $request->periode, $encryptTahunDanEmployeeId]);
@@ -223,7 +223,7 @@ class KPIController extends Controller
             // Data untuk request HTTP
             $httpData = [
                 'number' => $rekap->employee->mobile_phone,
-                'message' => $request->message,
+                'message' => $message,
             ];
 
             // Mengirim request HTTP menggunakan cURL
