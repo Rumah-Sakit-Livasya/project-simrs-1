@@ -96,11 +96,11 @@
         </div>
         <div class="row mt-4">
             {{-- Daftar yang libur dan Cuti/Izin/Sakit  --}}
-            @if (auth()->user()->hasRole('super admin'))
+            {{-- @if (auth()->user()->hasRole('super admin'))
                 <div class="col-xl-12 mb-3">
                     <button id="tambah_pengajuan_cuti" class="btn btn-primary">Tambah Pengajuan Cuti/Izin Sakit</button>
                 </div>
-            @endif
+            @endif --}}
             <div class="col-md-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">

@@ -911,30 +911,26 @@ class ReportController extends Controller
         ]);
     }
 
-    public function getReportAttendancesEmployee($employee_id, $periode = null, $tahun = null)
+    public function getReportAttendancesEmployee($employee_id, $tahun = null)
     {
-        if ($tahun == null) {
-            $startDateReport = Carbon::create($periode, 1, 26)->subMonth();
-            $endDateReport = Carbon::create($periode, 12, 25);
-        } else {
-            $parts = explode(" - ", $periode);
-    
-            $startMonth = $parts[0];
-            $endMonth = $parts[1];
-    
-            $startDateReport = Carbon::create(
-                $tahun,
-                $startMonth,
-                26
-            );
-    
-            $endDateReport = Carbon::create(
-                $tahun,
-                $endMonth,
-                25
-            );
-        }
-        
+
+        $parts = explode("-", request()->periode);
+
+        $startMonth = $parts[0];
+        $endMonth = $parts[1];
+
+        $startDateReport = Carbon::create(
+            $tahun,
+            $startMonth,
+            26
+        )->subMonth();
+
+        $endDateReport = Carbon::create(
+            $tahun,
+            $endMonth,
+            25
+        );
+
 
         try {
             $employee = Employee::find($employee_id);

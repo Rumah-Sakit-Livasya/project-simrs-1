@@ -339,7 +339,7 @@
                                                 <tr>
                                                     <td colspan="6" class="text-white"
                                                         style="background-color: rgb(138, 196, 248); font-size: 11pt; font-weight: bold; padding: 8px;">
-                                                        ABSENSI DAN KETERLAMBATAN DALAM 1 TAHUN
+                                                        ABSENSI DAN KETERLAMBATAN DALAM PERIODE BULAN <span id="periode_text"></span>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -792,16 +792,18 @@
                 });
             });
 
-            async function fetchAttendanceReport(employeeId, tahun) {
+            $('#periode_text').text($('#periode').val())
 
+            async function fetchAttendanceReport(employeeId, tahun, periode) {
                 try {
                     const response = await fetch(
-                        `/api/dashboard/attendances/report/employee/penilaian/${employeeId}/${tahun}`, {
+                        `/api/dashboard/attendances/report/employee/penilaian/${employeeId}/${tahun}?periode=${periode}`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json'
                             }
-                        });
+                        }
+                    );
 
                     if (!response.ok) {
                         const errorData = await response.json();
@@ -824,7 +826,6 @@
                 }
             }
 
-
             $('#employee_id').on('change', function(e) {
                 e.preventDefault();
 
@@ -832,6 +833,8 @@
                 idSignature = employeeId;
                 let periodeOnChange = $('#periode').val();
                 let tahun = $('#tahun').val();
+                let periode = $('#periode').val();
+                $('#periode_text').text(periode);
 
                 if (!tahun) {
                     alert("mohon pilih tahun terlebih dahulu!");
@@ -861,7 +864,7 @@
                         }
                     });
 
-                    fetchAttendanceReport(employeeId, tahun);
+                    fetchAttendanceReport(employeeId, tahun, periode);
                 }
 
             });

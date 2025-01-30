@@ -146,11 +146,13 @@ class KPIController extends Controller
             $check_rekap_penilaian = RekapPenilaianBulanan::where('employee_id', $id_pegawai)
                 ->where('group_penilaian_id', $id_form)
                 ->where('tahun', $request->tahun)
+                ->where('periode', $request->periode)
                 ->first();
 
             $check_penilaian_pegawai = PenilaianPegawai::where('employee_id', $id_pegawai)
                 ->where('group_penilaian_id', $id_form)
                 ->where('tahun', $request->tahun)
+                ->where('periode', $request->periode)
                 ->first();
 
             if (isset($check_penilaian_pegawai) || isset($check_rekap_penilaian)) {
@@ -207,9 +209,10 @@ class KPIController extends Controller
 
             // Commit jika semua berhasil
             DB::commit();
-
+            
+            $encryptTahunDanEmployeeId = base64_encode("$id_pegawai-$request->tahun");
             $message = `Penilaian atas nama {$rekap->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n`;
-            $message += route('kpi.show.form-penilaian.done', []);
+            $message .= route('kpi.show.form-penilaian.done', [$id_form, $request->periode, $encryptTahunDanEmployeeId]);
 
             $headers = [
                 'Key:KeyAbcKey',

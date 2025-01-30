@@ -132,7 +132,7 @@
                                                     $encryptTahunDanEmployeeId = base64_encode("$row->employee_id-$row->tahun");
                                                 @endphp
                                                 <a
-                                                    href="{{ route('kpi.show.form-penilaian.done', [$row->group_penilaian_id, $encryptTahunDanEmployeeId]) }}">
+                                                    href="{{ route('kpi.show.form-penilaian.done', [$row->group_penilaian_id, $row->periode, $encryptTahunDanEmployeeId]) }}">
                                                     {{ \Str::limit($row->employee->fullname, 25) }}
                                                 </a>
                                             </td>
