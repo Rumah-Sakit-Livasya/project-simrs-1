@@ -590,83 +590,104 @@
                                                         </b><br><br>
 
                                                         <div>
-                                                            <a class="btn btn-primary btn-sm text-white ttd"
-                                                                id="btn_ttd_pegawai" data-tipe="pegawai">Tanda
-                                                                tangan</a>
+                                                            @if (auth()->user()->id == $penilaian_pegawai[0]->employee->user->id)
+                                                                <a class="btn btn-primary btn-sm text-white ttd"
+                                                                    id="btn_ttd_pegawai"
+                                                                    data-id= "{{ $penilaian_pegawai[0]->employee_id ?? null }}"
+                                                                    data-tipe="pegawai">Tanda
+                                                                    tangan</a>
+                                                            @endif
                                                             <br>
                                                         </div>
                                                         <img id="ttd_pegawai" src="" alt="Signature Image"
                                                             style="display:none; max-width:60%; margin-top: -3px;"><br>
 
-                                                        <span id="ttd_nama_pegawai"></span>
+                                                        <span
+                                                            id="ttd_nama_pegawai">{{ $penilaian_pegawai[0]->employee->fullname }}</span>
                                                     </td>
                                                     <td width="50%" style="border-left: 1px solid black">
                                                         <b>Yang Menilai
                                                         </b><br><br>
 
                                                         <div>
-                                                            <a class="btn btn-primary btn-sm text-white ttd"
-                                                                id="btn_ttd_penilai" data-tipe = "penilai">Tanda
-                                                                tangan</a>
+                                                            @if (auth()->user()->id == $penilaian_pegawai[0]->employee_penilai->user->id)
+                                                                <a class="btn btn-primary btn-sm text-white ttd"
+                                                                    id="btn_ttd_penilai"
+                                                                    data-id="{{ $penilaian_pegawai[0]->penilai }}"
+                                                                    data-tipe = "penilai">Tanda
+                                                                    tangan</a>
+                                                            @endif
                                                             <br>
                                                         </div>
                                                         <img id="ttd_penilai" src="" alt="Signature Image"
                                                             style="display:none; max-width:60%; margin-top: -3px;"><br>
 
-                                                        <span id="ttd_nama_penilai"></span>
+                                                        <span
+                                                            id="ttd_nama_penilai">{{ $penilaian_pegawai[0]->employee_penilai->fullname }}</span>
                                                     </td>
                                                 </tr>
                                                 <tr style="border: 0px; border-top: 1px solid black;">
                                                     <td width="50%" style="padding-top: 15px; padding-bottom: 15px;">
                                                         <b>
-                                                            Mengetahui,
+                                                            Mengetahui, <br>
+                                                            {{ $penilaian_pegawai[0]->employee_pejabat_penilai->jobPosition->name . ' ' . $penilaian_pegawai[0]->employee_pejabat_penilai->organization->name }}
                                                         </b><br><br>
                                                         <div id="tombol-{{ $group_penilaian->pejabat_penilai }}">
-                                                            <a class="btn btn-primary btn-sm text-white ttd"
-                                                                id="btn_ttd_pejabat_penilai"
-                                                                data-tipe = "pejabat_penilai">Tanda
-                                                                tangan</a>
+                                                            @if (auth()->user()->id == $penilaian_pegawai[0]->employee_pejabat_penilai->user->id)
+                                                                <a class="btn btn-primary btn-sm text-white ttd"
+                                                                    id="btn_ttd_pejabat_penilai"
+                                                                    data-id="{{ $penilaian_pegawai[0]->pejabat_penilai }}"
+                                                                    data-tipe = "pejabat_penilai">Tanda
+                                                                    tangan</a>
+                                                            @endif
                                                             <br>
                                                         </div>
 
                                                         <img id="ttd_pejabat_penilai" src=""
                                                             alt="Signature Image"
                                                             style="display:none; max-width:60%; margin-top: -3px;"><br>
-                                                        <span id="ttd_nama_pejabat_penilai"></span>
+                                                        <span
+                                                            id="ttd_nama_pejabat_penilai">{{ $penilaian_pegawai[0]->employee_pejabat_penilai->fullname }}</span>
                                                     </td>
                                                     <td width="50%" style="border-left: 1px solid black">
                                                         <b>menyetujui,</b>
                                                         <table width="100%">
                                                             <tr>
                                                                 <td width="50%">
-                                                                    <div
-                                                                        id="tombol-{{ $group_penilaian->pejabat_penilai }}">
-                                                                        <a class="btn btn-primary btn-sm text-white ttd"
-                                                                            id="btn_ttd_pejabat_penilai"
-                                                                            data-tipe = "pejabat_penilai">Tanda
-                                                                            tangan</a>
+                                                                    <b>HRD</b> <br><br>
+                                                                    <div id="tombol-104">
+                                                                        @if (auth()->user()->employee_id == $hrd->id)
+                                                                            <a class="btn btn-primary btn-sm text-white ttd"
+                                                                                id="btn_ttd_hrd" data-tipe = "hrd"
+                                                                                data-id="{{ $hrd->id }}">Tanda
+                                                                                tangan</a>
+                                                                        @endif
                                                                         <br>
                                                                     </div>
 
-                                                                    <img id="ttd_pejabat_penilai" src=""
+                                                                    <img id="ttd_hrd" src=""
                                                                         alt="Signature Image"
                                                                         style="display:none; max-width:60%; margin-top: -3px;"><br>
-                                                                    <span id="ttd_nama_pejabat_penilai">HRD</span>
+                                                                    <span id="ttd_nama_hrd">{{ $hrd->fullname }}</span>
                                                                 </td>
                                                                 <td width="50%">
-                                                                    <div
-                                                                        id="tombol-{{ $group_penilaian->pejabat_penilai }}">
-                                                                        <a class="btn btn-primary btn-sm text-white ttd"
-                                                                            id="btn_ttd_pejabat_penilai"
-                                                                            data-tipe = "pejabat_penilai">Tanda
-                                                                            tangan</a>
+                                                                    <b>Direktur</b> <br><br>
+                                                                    <div id="tombol-228">
+                                                                        @if (auth()->user()->employee_id == $direktur->id)
+                                                                            <a class="btn btn-primary btn-sm text-white ttd"
+                                                                                id="btn_ttd_direktur"
+                                                                                data-id = "{{ $direktur->id }}"
+                                                                                data-tipe = "direktur">Tanda
+                                                                                tangan</a>
+                                                                        @endif
                                                                         <br>
                                                                     </div>
 
-                                                                    <img id="ttd_pejabat_penilai" src=""
+                                                                    <img id="ttd_direktur" src=""
                                                                         alt="Signature Image"
                                                                         style="display:none; max-width:60%; margin-top: -3px;"><br>
-                                                                    <span id="ttd_nama_pejabat_penilai">Direktur</span>
+                                                                    <span
+                                                                        id="ttd_nama_direktur">{{ $direktur->fullname }}</span>
                                                                 </td>
                                                             </tr>
                                                         </table>
@@ -700,17 +721,30 @@
                 let tipeTtd = $(this).attr('data-tipe');
 
                 if (tipeTtd == 'pejabat_penilai') {
-                    idTtd = $(this).attr('data-id-pejabat_penilai');
+                    idTtd = $(this).attr('data-id');
                     $('#btn_save_ttd').attr('data-target', 'ttd_pejabat_penilai');
                     $('#btn_save_ttd').attr('data-id', idTtd);
+                    $('#btn_save_ttd').attr('data-id-rekap', "{{ $catatan->id }}");
                 } else if (tipeTtd == 'penilai') {
-                    idTtd = $(this).attr('data-id-penilai');
+                    idTtd = $(this).attr('data-id');
                     $('#btn_save_ttd').attr('data-target', 'ttd_penilai');
                     $('#btn_save_ttd').attr('data-id', idTtd);
-                } else {
-                    idTtd = $(this).attr('data-id-pegawai');
+                    $('#btn_save_ttd').attr('data-id-rekap', "{{ $catatan->id }}");
+                } else if (tipeTtd == 'pegawai') {
+                    idTtd = $(this).attr('data-id');
                     $('#btn_save_ttd').attr('data-target', 'ttd_pegawai');
                     $('#btn_save_ttd').attr('data-id', idTtd);
+                    $('#btn_save_ttd').attr('data-id-rekap', "{{ $catatan->id }}");
+                } else if (tipeTtd == 'hrd') {
+                    idTtd = $(this).attr('data-id');
+                    $('#btn_save_ttd').attr('data-target', 'ttd_hrd');
+                    $('#btn_save_ttd').attr('data-id', idTtd);
+                    $('#btn_save_ttd').attr('data-id-rekap', "{{ $catatan->id }}");
+                } else if (tipeTtd == 'direktur') {
+                    idTtd = $(this).attr('data-id');
+                    $('#btn_save_ttd').attr('data-target', 'ttd_direktur');
+                    $('#btn_save_ttd').attr('data-id', idTtd);
+                    $('#btn_save_ttd').attr('data-id-rekap', "{{ $catatan->id }}");
                 }
 
                 if (!idTtd) {
@@ -771,28 +805,51 @@
         }
 
         function saveSignature() {
+            const btn = $('#btn_save_ttd'); // Ambil tombol
+            btn.prop('disabled', true).text('Saving...'); // Nonaktifkan tombol & ubah teks
+
             const dataURL = canvas.toDataURL('image/png');
-            idSignature = $('#btn_save_ttd').attr('data-id');
-            let tipe = $('#btn_save_ttd').attr('data-target');
+            let idSignature = btn.attr('data-id');
+            let tipe = btn.attr('data-target');
+            let idRekap = btn.attr('data-id-rekap');
+            let idPegawai = "{{ $penilaian_pegawai[0]->employee->id ?? '-' }}";
+            let idForm = "{{ $group_penilaian->id }}";
+            let periode = "{{ $penilaian_pegawai[0]->periode }}";
+            let tahun = "{{ $penilaian_pegawai[0]->tahun }}";
+            let pejabat_penilai = "{{ $penilaian_pegawai[0]->pejabat_penilai }}";
+            let direktur = "{{ $direktur->id }}";
+
             $.ajax({
                 url: '/api/dashboard/kpi/save-signature/' + idSignature,
                 type: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    signature_image: dataURL
+                    signature_image: dataURL,
+                    idRekap: idRekap,
+                    tipe: tipe,
+                    idPegawai: idPegawai,
+                    idForm: idForm,
+                    periode: periode,
+                    tahun: tahun,
+                    pejabat_penilai: pejabat_penilai,
+                    direktur: direktur,
                 },
                 success: function(response) {
-                    // Update the signature display
+                    // Update tampilan tanda tangan
                     $('#btn_' + tipe).parent().hide();
                     $('#' + tipe).attr('src', response.path).show();
-                    $('#signatureModal').modal('hide'); // Hide the modal
+                    $('#signatureModal').modal('hide'); // Tutup modal
                     clearCanvas();
                 },
                 error: function(xhr, status, error) {
                     console.error(xhr.responseText);
+                },
+                complete: function() {
+                    btn.prop('disabled', false).text('Save'); // Aktifkan kembali tombol
                 }
             });
         }
+
 
         canvas.addEventListener('mousedown', startPosition);
         canvas.addEventListener('mouseup', endPosition);

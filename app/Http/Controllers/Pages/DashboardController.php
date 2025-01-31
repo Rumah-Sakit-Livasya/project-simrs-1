@@ -1513,6 +1513,8 @@ class DashboardController extends Controller
         $penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
         $pejabat_penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->pejabat_penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
         $catatan = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('periode', $periode)->where('tahun', $tahun)->where('group_penilaian_id', $id_form)->first();
+        $hrd = Employee::where('id', 104)->first();
+        $direktur = Employee::where('id', 228)->first();
 
         $total_nilai_all = [];
         $nilai_kalkulasi = null;
@@ -1625,7 +1627,7 @@ class DashboardController extends Controller
             'total_libur' => $total_libur,
         ];
 
-        return view('pages.kpi.penilaian.show-penilaian', compact('pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir', 'attendances'));
+        return view('pages.kpi.penilaian.show-penilaian', compact('hrd', 'direktur','pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir', 'attendances'));
     }
 
     public function rekapPenilaianBulanan()

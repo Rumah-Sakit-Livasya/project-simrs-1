@@ -86,6 +86,75 @@ class KPIController extends Controller
         Storage::disk('private')->put($path, base64_decode($image));
 
         $employee = Employee::find($id);
+
+        $pegawai = Employee::findOrFail($request->idPegawai);
+        $pejabat_penilai = Employee::findOrFail($request->pejabat_penilai);
+        $direktur = Employee::findOrFail($request->direktur);
+
+        $encryptTahunDanEmployeeId = rtrim(strtr(base64_encode("$request->idPegawai-$request->tahun"), '+/', '-_'), '=');
+        $message = "Penilaian atas nama {$pegawai->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n";
+        $message .= route('kpi.show.form-penilaian.done', [$request->idForm, $request->periode, $encryptTahunDanEmployeeId]);
+
+        $headers = [
+            'Key:KeyAbcKey',
+            'Nama:arul',
+            'Sandi:123###!!',
+        ];
+
+
+        if ($request->idRekap != null || $request->idRekap != "") {
+            $rekap = RekapPenilaianBulanan::findOrFail($request->idRekap);
+            if ($request->tipe == 'ttd_pegawai') {
+                $rekap->update(['is_verified_pegawai' => 1]);
+            } elseif ($request->tipe == 'ttd_penilai') {
+                $rekap->update(['is_verified_penilai' => 1]);
+
+                $httpData = [
+                    'number'  => $pejabat_penilai->mobile_phone,
+                    'message' => $message,
+                ];
+
+                // Kirim request HTTP menggunakan cURL
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+                curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+                curl_setopt($curl, CURLOPT_POST, 1);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
+                curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+                $response = curl_exec($curl);
+                $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($curl);
+                curl_close($curl);
+            } elseif ($request->tipe == 'ttd_pejabat_penilai') {
+                $rekap->update(['is_verified_pejabat_penilai' => 1]);
+
+                $httpData = [
+                    'number'  => $direktur->mobile_phone,
+                    'message' => $message,
+                ];
+
+                // Kirim request HTTP menggunakan cURL
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+                curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+                curl_setopt($curl, CURLOPT_POST, 1);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
+                curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+                $response = curl_exec($curl);
+                $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($curl);
+                curl_close($curl);
+            } elseif ($request->tipe == 'ttd_hrd') {
+                $rekap->update(['is_verified_hrd' => 1]);
+            } elseif ($request->tipe == 'ttd_direktur') {
+                $rekap->update(['is_verified_direktur' => 1]);
+            }
+        }
+
         if ($employee) {
             $employee->ttd = $imageName;
             $employee->save();
@@ -211,8 +280,10 @@ class KPIController extends Controller
             // Commit jika semua berhasil
             DB::commit();
             // dd($rekap->employee->mobile_phone);
+
+            $penilai = Employee::findOrFail($request->penilai);
             $encryptTahunDanEmployeeId = rtrim(strtr(base64_encode("$id_pegawai-$request->tahun"), '+/', '-_'), '=');
-            $message .= "Penilaian atas nama {$rekap->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n";
+            $message = "Penilaian atas nama {$rekap->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n";
             $message .= route('kpi.show.form-penilaian.done', [$id_form, $request->periode, $encryptTahunDanEmployeeId]);
 
             $headers = [
@@ -221,25 +292,38 @@ class KPIController extends Controller
                 'Sandi:123###!!',
             ];
 
-            // Data untuk request HTTP
-            $httpData = [
-                'number' => $rekap->employee->mobile_phone,
-                'message' => $message,
+            // Daftar nomor tujuan
+            $numbers = [
+                $rekap->employee->mobile_phone,
+                $penilai->mobile_phone
             ];
 
-            // Mengirim request HTTP menggunakan cURL
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
-            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-            curl_setopt($curl, CURLOPT_POST, 1);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+            foreach ($numbers as $number) {
+                $httpData = [
+                    'number'  => $number,
+                    'message' => $message,
+                ];
 
-            $response = curl_exec($curl);
-            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            $curlError = curl_error($curl);
-            curl_close($curl);
+                // Kirim request HTTP menggunakan cURL
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+                curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+                curl_setopt($curl, CURLOPT_POST, 1);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
+                curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+                $response = curl_exec($curl);
+                $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($curl);
+                curl_close($curl);
+
+                // Cek jika ada error
+                if ($httpCode != 200) {
+                    error_log("Gagal mengirim pesan ke {$number}: " . $curlError);
+                }
+            }
+
 
             return response()->json(['success' => 'Penilaian berhasil disimpan']);
         } catch (\Exception $e) {
