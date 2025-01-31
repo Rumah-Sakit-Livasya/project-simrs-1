@@ -194,7 +194,7 @@ class KPIController extends Controller
 
             $request['is_ya'] = $request->keterangan_ya ? 1 : 0;
             $request['is_tidak'] = $request->keterangan_ya ? 0 : 1;
-            
+
             $rekap = RekapPenilaianBulanan::create([
                 'group_penilaian_id' => $id_form,
                 'employee_id' => $id_pegawai,
@@ -211,8 +211,8 @@ class KPIController extends Controller
             // Commit jika semua berhasil
             DB::commit();
             // dd($rekap->employee->mobile_phone);
-            $encryptTahunDanEmployeeId = base64_encode("$id_pegawai-$request->tahun");
-            $message .= `Penilaian atas nama {$rekap->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n`;
+            $encryptTahunDanEmployeeId = rtrim(strtr(base64_encode("$id_pegawai-$request->tahun"), '+/', '-_'), '=');
+            $message .= "Penilaian atas nama {$rekap->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n";
             $message .= route('kpi.show.form-penilaian.done', [$id_form, $request->periode, $encryptTahunDanEmployeeId]);
 
             $headers = [
@@ -220,7 +220,7 @@ class KPIController extends Controller
                 'Nama:arul',
                 'Sandi:123###!!',
             ];
-    
+
             // Data untuk request HTTP
             $httpData = [
                 'number' => $rekap->employee->mobile_phone,

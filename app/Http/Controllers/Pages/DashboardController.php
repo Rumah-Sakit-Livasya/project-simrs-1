@@ -1505,7 +1505,7 @@ class DashboardController extends Controller
 
     public function showPenilaian($id_form, $periode, $encrypt)
     {
-        $decoded = base64_decode($encrypt);
+        $decoded = base64_decode(strtr($encrypt, '-_', '+/'));
         list($id_pegawai, $tahun) = explode('-', $decoded);
 
         $group_penilaian = GroupPenilaian::find($id_form);
