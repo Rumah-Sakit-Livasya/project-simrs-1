@@ -131,6 +131,7 @@ class KPIController extends Controller
     public function storePenilaianPegawai(Request $request, $id_form, $id_pegawai)
     {
 
+        $message = '';
         // dd(request());
         DB::beginTransaction();
 
@@ -211,7 +212,7 @@ class KPIController extends Controller
             DB::commit();
             // dd($rekap->employee->mobile_phone);
             $encryptTahunDanEmployeeId = base64_encode("$id_pegawai-$request->tahun");
-            $message = `Penilaian atas nama {$rekap->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n`;
+            $message .= `Penilaian atas nama {$rekap->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n`;
             $message .= route('kpi.show.form-penilaian.done', [$id_form, $request->periode, $encryptTahunDanEmployeeId]);
 
             $headers = [
