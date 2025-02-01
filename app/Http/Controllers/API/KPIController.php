@@ -92,7 +92,7 @@ class KPIController extends Controller
         $direktur = Employee::findOrFail($request->direktur);
 
         $encryptTahunDanEmployeeId = rtrim(strtr(base64_encode("$request->idPegawai-$request->tahun"), '+/', '-_'), '=');
-        $message = "Penilaian atas nama {$pegawai->employee->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n";
+        $message = "Penilaian atas nama {$pegawai->fullname} telah selesai dibuat. Silakan periksa dan tandatangani dokumen penilaian tersebut melalui link berikut: \n";
         $message .= route('kpi.show.form-penilaian.done', [$request->idForm, $request->periode, $encryptTahunDanEmployeeId]);
 
         $headers = [

@@ -818,7 +818,7 @@
             let tahun = "{{ $penilaian_pegawai[0]->tahun }}";
             let pejabat_penilai = "{{ $penilaian_pegawai[0]->pejabat_penilai }}";
             let direktur = "{{ $direktur->id }}";
-
+            console.log(idPegawai);
             $.ajax({
                 url: '/api/dashboard/kpi/save-signature/' + idSignature,
                 type: 'POST',

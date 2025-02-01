@@ -25,7 +25,7 @@ class DeductionExport implements FromQuery, WithHeadings, ShouldAutoSize, WithEv
 
     public function query()
     {
-        $query = Employee::where('employees.is_active', 1)->query()->select(
+        $query = Employee::where('employees.is_active', 1)->select(
             'employees.id',
             'employees.fullname',
             'organizations.name as organization_name',
