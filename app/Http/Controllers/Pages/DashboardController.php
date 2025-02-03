@@ -1243,7 +1243,7 @@ class DashboardController extends Controller
         $currentYear = request()->tahun ?? Carbon::now()->year;
         $currentMonth = request()->bulan ?? Carbon::now()->month;
         $currentDay = request()->bulan ?? Carbon::now()->day;
-        
+
         if (request()->tahun != null && request()->bulan != null) {
             $startDate = Carbon::create(request()->tahun, request()->bulan, 26)->subMonth();
             $endDate = Carbon::create(request()->tahun, request()->bulan, 25);
@@ -1388,6 +1388,20 @@ class DashboardController extends Controller
         $penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
         $pejabat_penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->pejabat_penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
         $catatan = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->first();
+
+        $allowedEmployees = [
+            $request->penilaian_pegawai[0]->penilai ?? null,
+            $request->penilaian_pegawai[0]->pejabat_penilai ?? null,
+            104,
+            228,
+        ];
+
+        if (!in_array(auth()->user()->employee_id, $allowedEmployees)) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Lanjutkan jika lolos pengecekan
+        return response()->json(['message' => 'Access granted']);
 
         $total_nilai_all = [];
         $nilai_kalkulasi = null;
@@ -1627,7 +1641,7 @@ class DashboardController extends Controller
             'total_libur' => $total_libur,
         ];
 
-        return view('pages.kpi.penilaian.show-penilaian', compact('hrd', 'direktur','pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir', 'attendances'));
+        return view('pages.kpi.penilaian.show-penilaian', compact('hrd', 'direktur', 'pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir', 'attendances'));
     }
 
     public function rekapPenilaianBulanan()
