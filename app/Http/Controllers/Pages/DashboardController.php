@@ -1530,6 +1530,20 @@ class DashboardController extends Controller
         $hrd = Employee::where('id', 104)->first();
         $direktur = Employee::where('id', 228)->first();
 
+        $allowedEmployees = [
+            $request->penilaian_pegawai[0]->penilai ?? null,
+            $request->penilaian_pegawai[0]->pejabat_penilai ?? null,
+            104,
+            228,
+        ];
+
+        if (!in_array(auth()->user()->employee_id, $allowedEmployees)) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Lanjutkan jika lolos pengecekan
+        return response()->json(['message' => 'Access granted']);
+
         $total_nilai_all = [];
         $nilai_kalkulasi = null;
         $total_nilai = null;
