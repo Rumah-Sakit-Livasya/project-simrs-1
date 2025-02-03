@@ -1390,18 +1390,17 @@ class DashboardController extends Controller
         $catatan = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->first();
 
         $allowedEmployees = [
-            $request->penilaian_pegawai[0]->penilai ?? null,
-            $request->penilaian_pegawai[0]->pejabat_penilai ?? null,
+            $id_pegawai,
+            $penilaian_pegawai[0]->penilai,
+            $penilaian_pegawai[0]->pejabat_penilai,
             104,
             228,
         ];
 
         if (!in_array(auth()->user()->employee_id, $allowedEmployees)) {
             abort(403, 'Unauthorized');
+            return redirect()->route('dashboard')->with('error', 'Mohon akses dengan link yang benar!');
         }
-
-        // Lanjutkan jika lolos pengecekan
-        return response()->json(['message' => 'Access granted']);
 
         $total_nilai_all = [];
         $nilai_kalkulasi = null;
@@ -1531,18 +1530,19 @@ class DashboardController extends Controller
         $direktur = Employee::where('id', 228)->first();
 
         $allowedEmployees = [
-            $request->penilaian_pegawai[0]->penilai ?? null,
-            $request->penilaian_pegawai[0]->pejabat_penilai ?? null,
+            $id_pegawai,
+            $penilaian_pegawai[0]->penilai,
+            $penilaian_pegawai[0]->pejabat_penilai,
             104,
             228,
         ];
 
         if (!in_array(auth()->user()->employee_id, $allowedEmployees)) {
             abort(403, 'Unauthorized');
+            // Lanjutkan jika lolos pengecekan
+            return redirect()->route('dashboard')->with('error', 'Mohon akses dengan link yang benar!');
         }
 
-        // Lanjutkan jika lolos pengecekan
-        return response()->json(['message' => 'Access granted']);
 
         $total_nilai_all = [];
         $nilai_kalkulasi = null;
