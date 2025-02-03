@@ -587,9 +587,10 @@
                                                 <tr>
                                                     <td width="50%" style="padding-top: 15px; padding-bottom: 15px;">
                                                         <b>Karyawan yang Dinilai
-                                                        </b><br><br>
+                                                        </b><br>
 
-                                                        <div>
+                                                        <div
+                                                            class="{{ $catatan->is_verified_pegawai == 1 ? 'd-none' : '' }}">
                                                             @if (auth()->user()->id == $penilaian_pegawai[0]->employee->user->id)
                                                                 <a class="btn btn-primary btn-sm text-white ttd"
                                                                     id="btn_ttd_pegawai"
@@ -599,17 +600,25 @@
                                                             @endif
                                                             <br>
                                                         </div>
-                                                        <img id="ttd_pegawai" src="" alt="Signature Image"
-                                                            style="display:none; max-width:60%; margin-top: -3px;"><br>
+                                                        @if ($catatan->is_verified_pegawai == 1)
+                                                            <img id="ttd_pegawai"
+                                                                src="{{ route('get.ttd', $penilaian_pegawai[0]->employee->ttd) }}"
+                                                                alt="Signature Image"
+                                                                style="max-width:50%; margin-top: -1px;"><br>
+                                                        @else
+                                                            <img id="ttd_pegawai" src="" alt="Signature Image"
+                                                                style="display:none; max-width:60%; margin-top: -1px;"><br>
+                                                        @endif
 
                                                         <span
                                                             id="ttd_nama_pegawai">{{ $penilaian_pegawai[0]->employee->fullname }}</span>
                                                     </td>
                                                     <td width="50%" style="border-left: 1px solid black">
                                                         <b>Yang Menilai
-                                                        </b><br><br>
+                                                        </b><br>
 
-                                                        <div>
+                                                        <div
+                                                            class="{{ $catatan->is_verified_penilai == 1 ? 'd-none' : '' }}">
                                                             @if (auth()->user()->id == $penilaian_pegawai[0]->employee_penilai->user->id)
                                                                 <a class="btn btn-primary btn-sm text-white ttd"
                                                                     id="btn_ttd_penilai"
@@ -619,9 +628,15 @@
                                                             @endif
                                                             <br>
                                                         </div>
-                                                        <img id="ttd_penilai" src="" alt="Signature Image"
-                                                            style="display:none; max-width:60%; margin-top: -3px;"><br>
-
+                                                        @if ($catatan->is_verified_pegawai == 1)
+                                                            <img id="ttd_penilai"
+                                                                src="{{ route('get.ttd', $penilaian_pegawai[0]->employee_penilai->ttd) }}"
+                                                                alt="Signature Image"
+                                                                style="max-width:50%; margin-top: -1px;"><br>
+                                                        @else
+                                                            <img id="ttd_penilai" src="" alt="Signature Image"
+                                                                style="display:none; max-width:50%; margin-top: -3px;"><br>
+                                                        @endif
                                                         <span
                                                             id="ttd_nama_penilai">{{ $penilaian_pegawai[0]->employee_penilai->fullname }}</span>
                                                     </td>
@@ -632,7 +647,8 @@
                                                             Mengetahui, <br>
                                                             {{ $penilaian_pegawai[0]->employee_pejabat_penilai->jobPosition->name . ' ' . $penilaian_pegawai[0]->employee_pejabat_penilai->organization->name }}
                                                         </b><br><br>
-                                                        <div id="tombol-{{ $group_penilaian->pejabat_penilai }}">
+                                                        <div id="tombol-{{ $group_penilaian->pejabat_penilai }}"
+                                                            class="{{ $catatan->is_verified_pejabat_penilai == 1 ? 'd-none' : '' }}">
                                                             @if (auth()->user()->id == $penilaian_pegawai[0]->employee_pejabat_penilai->user->id)
                                                                 <a class="btn btn-primary btn-sm text-white ttd"
                                                                     id="btn_ttd_pejabat_penilai"
@@ -642,10 +658,16 @@
                                                             @endif
                                                             <br>
                                                         </div>
-
-                                                        <img id="ttd_pejabat_penilai" src=""
-                                                            alt="Signature Image"
-                                                            style="display:none; max-width:60%; margin-top: -3px;"><br>
+                                                        @if ($catatan->is_verified_pejabat_penilai == 1)
+                                                            <img id="ttd_pejabat_penilai"
+                                                                src="{{ route('get.ttd', $penilaian_pegawai[0]->employee_pejabat_penilai->ttd) }}"
+                                                                alt="Signature Image"
+                                                                style="max-width:50%; margin-top: -1px;"><br>
+                                                        @else
+                                                            <img id="ttd_pejabat_penilai" src=""
+                                                                alt="Signature Image"
+                                                                style="display:none; max-width:60%; margin-top: -3px;"><br>
+                                                        @endif
                                                         <span
                                                             id="ttd_nama_pejabat_penilai">{{ $penilaian_pegawai[0]->employee_pejabat_penilai->fullname }}</span>
                                                     </td>
@@ -654,8 +676,9 @@
                                                         <table width="100%">
                                                             <tr>
                                                                 <td width="50%">
-                                                                    <b>HRD</b> <br><br>
-                                                                    <div id="tombol-104">
+                                                                    <b>HRD</b> <br>
+                                                                    <div id="tombol-104"
+                                                                        class="{{ $catatan->is_verified_hrd == 1 ? 'd-none' : '' }}">
                                                                         @if (auth()->user()->employee_id == $hrd->id)
                                                                             <a class="btn btn-primary btn-sm text-white ttd"
                                                                                 id="btn_ttd_hrd" data-tipe = "hrd"
@@ -665,14 +688,22 @@
                                                                         <br>
                                                                     </div>
 
-                                                                    <img id="ttd_hrd" src=""
-                                                                        alt="Signature Image"
-                                                                        style="display:none; max-width:60%; margin-top: -3px;"><br>
+                                                                    @if ($catatan->is_verified_hrd == 1)
+                                                                        <img id="ttd_hrd"
+                                                                            src="{{ route('get.ttd', $hrd->ttd) }}"
+                                                                            alt="Signature Image"
+                                                                            style="max-width:80%; margin-top: -1px;"><br>
+                                                                    @else
+                                                                        <img id="ttd_hrd" src=""
+                                                                            alt="Signature Image"
+                                                                            style="display:none; max-width:80%; margin-top: -3px;"><br>
+                                                                    @endif
                                                                     <span id="ttd_nama_hrd">{{ $hrd->fullname }}</span>
                                                                 </td>
                                                                 <td width="50%">
                                                                     <b>Direktur</b> <br><br>
-                                                                    <div id="tombol-228">
+                                                                    <div id="tombol-228"
+                                                                        class="{{ $catatan->is_verified_direktur == 1 ? 'd-none' : '' }}">
                                                                         @if (auth()->user()->employee_id == $direktur->id)
                                                                             <a class="btn btn-primary btn-sm text-white ttd"
                                                                                 id="btn_ttd_direktur"
@@ -682,16 +713,21 @@
                                                                         @endif
                                                                         <br>
                                                                     </div>
-
-                                                                    <img id="ttd_direktur" src=""
-                                                                        alt="Signature Image"
-                                                                        style="display:none; max-width:60%; margin-top: -3px;"><br>
+                                                                    @if ($catatan->is_verified_direktur == 1)
+                                                                        <img id="ttd_direktur"
+                                                                            src="{{ route('get.ttd', $direktur->ttd) }}"
+                                                                            alt="Signature Image"
+                                                                            style="max-width:80%; margin-top: -1px;"><br>
+                                                                    @else
+                                                                        <img id="ttd_direktur" src=""
+                                                                            alt="Signature Image"
+                                                                            style="display:none; max-width:80%; margin-top: -1px;"><br>
+                                                                    @endif
                                                                     <span
                                                                         id="ttd_nama_direktur">{{ $direktur->fullname }}</span>
                                                                 </td>
                                                             </tr>
                                                         </table>
-
                                                     </td>
                                                 </tr>
                                             </table>

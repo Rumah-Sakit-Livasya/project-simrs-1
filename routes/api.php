@@ -159,7 +159,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
             }
         
             return response()->file($path); // Mengembalikan file sebagai respons
-        })->where('filename', '.*');
+        })->where('filename', '.*')->name('get.ttd');
     });
 
     Route::prefix('permissions')->group(function () {
