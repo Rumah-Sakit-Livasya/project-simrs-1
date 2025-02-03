@@ -628,7 +628,7 @@
                                                             @endif
                                                             <br>
                                                         </div>
-                                                        @if ($catatan->is_verified_pegawai == 1)
+                                                        @if ($catatan->is_verified_penilai == 1)
                                                             <img id="ttd_penilai"
                                                                 src="{{ route('get.ttd', $penilaian_pegawai[0]->employee_penilai->ttd) }}"
                                                                 alt="Signature Image"
