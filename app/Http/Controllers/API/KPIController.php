@@ -22,8 +22,8 @@ class KPIController extends Controller
         try {
             $validator = Validator::make(request()->all(), [
                 'nama_group' => 'required',
-                'penilai' => 'required',
-                'pejabat_penilai' => 'required',
+                'status_penilaian' => 'required',
+                'rumus_penilaian' => 'required',
             ]);
 
             if ($validator->fails()) {
@@ -40,8 +40,9 @@ class KPIController extends Controller
 
             $group_penilaian = GroupPenilaian::create([
                 'nama_group' => request()->nama_group,
-                'penilai' => request()->penilai,
-                'pejabat_penilai' => request()->pejabat_penilai,
+                'status_penilaian' => request()->penilai,
+                'rumus_penilaian' => request()->pejabat_penilai,
+                'is_active' => 1,
             ]);
             foreach (request()->aspek_penilaian as $index => $row) {
 

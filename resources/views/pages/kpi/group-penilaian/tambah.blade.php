@@ -77,7 +77,7 @@
                                         </h5>
                                         <hr style="border-color: #fd3995">
                                     </div>
-                                    <div class="col-lg-3">
+                                    <div class="col-lg-4">
                                         <div class="form-group mb-3">
                                             <label for="nama_group">Nama Group</label>
                                             <div class="input-group">
@@ -90,49 +90,31 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <div class="col-lg-3">
+                                    <div class="col-lg-4">
                                         <div class="form-group mb-3">
-                                            <label for="penilai">Penilai</label>
+                                            <label for="status_penilaian">Status Penilaian</label>
                                             <div class="input-group">
                                                 <select
                                                     class="select2 form-control mb-3 w-100  @error('periode') is-invalid @enderror"
-                                                    id="penilai" name="penilai">
-                                                    @foreach ($employee as $row)
-                                                        <option value="{{ $row->id }}">{{ $row->fullname }}</option>
-                                                    @endforeach
+                                                    id="status_penilaian" name="status_penilaian">
+                                                    <option value="karyawan">Karyawan</option>
+                                                    <option value="orientasi">Orientasi</option>
                                                 </select>
                                             </div>
-                                            @error('penilai')
+                                            @error('status_penilaian')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
-                                    <div class="col-lg-3">
-                                        <div class="form-group mb-3">
-                                            <label for="pejabat_penilai">Pejabat Penilai</label>
-                                            <div class="input-group">
-                                                <select
-                                                    class="select2 form-control mb-3 w-100  @error('periode') is-invalid @enderror"
-                                                    id="pejabat_penilai" name="pejabat_penilai">
-                                                    @foreach ($employee as $row)
-                                                        <option value="{{ $row->id }}">{{ $row->fullname }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            @error('pejabat_penilai')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-3">
+                                    <div class="col-lg-4">
                                         <div class="form-group mb-3">
                                             <label for="rumus_penilaian">Rumus Penilaian</label>
                                             <div class="input-group">
                                                 <select
                                                     class="select2 form-control mb-3 w-100  @error('periode') is-invalid @enderror"
                                                     id="rumus_penilaian" name="rumus_penilaian">
-                                                        <option value="rata-rata">Rata-rata</option>
-                                                        <option value="kostum">Kostum</option>
+                                                    <option value="rata-rata">Rata-rata</option>
+                                                    <option value="kostum" disabled>Kostum (Belum Tersedia)</option>
                                                 </select>
                                             </div>
                                             @error('rumus_penilaian')
