@@ -987,6 +987,18 @@ class DashboardController extends Controller
         $jumlah_izin = 0;
         $jumlah_sakit = 0;
         $jumlah_cuti = 0;
+        $check_date = null;
+
+        $attendance_kemarin = Attendance::where('employee_id', auth()->user()->employee_id)->where('date', Carbon::now()->subDay()->format('Y-m-d'))->first();
+        if(isset($attendance_kemarin) || $attendance_kemarin != null) {
+            if($attendance_kemarin->shift->time_in > '20.00' && $attendance_kemarin->shift->time_out < '08.00') { //jika absen kemarin shift malam
+                if (($attendance_kemarin->clock_in == null && $attendance_kemarin->clock_out == null) && $attendance_kemarin->is_day_off != 1) {
+                    $check_date = 'today';
+                } else if ($attendance_kemarin->clock_in != null && $attendance_kemarin->clock_out == null && $attendance_kemarin->is_day_off != 1) {
+                    $check_date = 'yesterday';
+                }
+            }
+        }
 
         foreach ($day_off as $row) {
             $code = $row->day_off->attendance_code->code;
@@ -1002,7 +1014,7 @@ class DashboardController extends Controller
         $selectedBulan = Carbon::now()->month;
         $selectedTahun = Carbon::now()->year;
 
-        return view('pages.absensi.absensi.index', compact('selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
+        return view('pages.absensi.absensi.index', compact('check_date','selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
     }
 
     public function getAttendancesFilter()
