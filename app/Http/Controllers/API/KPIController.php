@@ -40,8 +40,8 @@ class KPIController extends Controller
 
             $group_penilaian = GroupPenilaian::create([
                 'nama_group' => request()->nama_group,
-                'status_penilaian' => request()->penilai,
-                'rumus_penilaian' => request()->pejabat_penilai,
+                'status_penilaian' => request()->status_penilaian,
+                'rumus_penilaian' => request()->rumus_penilaian,
                 'is_active' => 1,
             ]);
             foreach (request()->aspek_penilaian as $index => $row) {
