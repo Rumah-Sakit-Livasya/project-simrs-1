@@ -117,6 +117,7 @@ class AttendanceController extends Controller
                             ? Carbon::parse($waktu_absen)->seconds(0)->diffInMinutes(Carbon::parse($request['clock_in'])->seconds(0))
                             : null;
 
+                        $request['late_clock_in'] = ($perbedaanMenit == '0') ? null : $perbedaanMenit;
                         $attendance->update($request->only(['clock_in', 'foto_clock_in', 'location', 'late_clock_in']));
                     } else {
                         $waktu_absen = $attendance->shift->time_in;
@@ -264,7 +265,7 @@ class AttendanceController extends Controller
                                 'clock_out' => $tanggal_sekarang,
                                 'early_clock_out' => $perbedaanMenit,
                                 'foto_clock_out' => $photoPath // Store the photo path
-                            ]); 
+                            ]);
                         }
                     }
                 }
