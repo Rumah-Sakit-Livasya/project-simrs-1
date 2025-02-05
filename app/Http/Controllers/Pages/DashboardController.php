@@ -1098,7 +1098,7 @@ class DashboardController extends Controller
 
             // Mengirim request HTTP menggunakan cURL
             $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+            curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.100:3001/send-message');
             curl_setopt($curl, CURLOPT_TIMEOUT, 30);
             curl_setopt($curl, CURLOPT_POST, 1);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -1694,6 +1694,7 @@ class DashboardController extends Controller
         usort($nilai_pegawai, function ($a, $b) {
             return $b[1] - $a[1];
         });
+        
 
         // Mengambil 5 pegawai dengan total nilai terbanyak
         $top_5_pegawai = array_slice($nilai_pegawai, 0, 5);
@@ -1703,6 +1704,7 @@ class DashboardController extends Controller
         $cukup = $rekap_penilaian->where('tahun', Carbon::now()->format('Y'))->where('total_nilai', '>', 65)->where('total_nilai', '<', 86);
         $kurang = $rekap_penilaian->where('tahun', Carbon::now()->format('Y'))->where('total_nilai', '>', 50)->where('total_nilai', '<', 66);
         $sangat_kurang = $rekap_penilaian->where('tahun', Carbon::now()->format('Y'))->where('total_nilai', '<=', 50);
+        
         return view('pages.kpi.penilaian.lists', compact('rekap_penilaian', 'sangat_baik', 'baik', 'cukup', 'kurang', 'sangat_kurang', 'top_5_pegawai'));
     }
 

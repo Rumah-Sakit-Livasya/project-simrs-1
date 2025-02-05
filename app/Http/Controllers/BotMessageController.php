@@ -365,7 +365,7 @@ class BotMessageController extends Controller
 
                     // Mengirim request HTTP menggunakan cURL
                     $curl = curl_init();
-                    curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+                    curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.100:3001/send-message');
                     curl_setopt($curl, CURLOPT_TIMEOUT, 30);
                     curl_setopt($curl, CURLOPT_POST, 1);
                     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -394,7 +394,7 @@ class BotMessageController extends Controller
 
                 // Mengirim request HTTP menggunakan cURL
                 $curl = curl_init();
-                curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+                curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.100:3001/send-message');
                 curl_setopt($curl, CURLOPT_TIMEOUT, 30);
                 curl_setopt($curl, CURLOPT_POST, 1);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
