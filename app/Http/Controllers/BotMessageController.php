@@ -101,7 +101,10 @@ class BotMessageController extends Controller
 
 
             $response .= "\n🟥 <b>DAFTAR PEGAWAI YANG TELAT:</b> \n\n";
-            $pegawai_telat = Attendance::whereNotNull('clock_in')->whereNotNull('late_clock_in')->where('date', Carbon::now()->format('Y-m-d'))->orderBy('late_clock_in')->get();
+            $pegawai_telat = Attendance::whereNotNull('clock_in')->whereNotNull('late_clock_in')->whereHas('employees', function ($query) {
+                $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                $query->whereNotIn('id', [1, 2, 14, 222]);
+            })->where('date', Carbon::now()->format('Y-m-d'))->orderBy('late_clock_in')->get();
             foreach ($pegawai_telat as $key => $row) {
                 if ($row->late_clock_in > 5 && $row->late_clock_in < 70) {
                     $response .= "🔸" . Str::limit($row->employees->fullname, $limit = 16) . " ( " . $row->late_clock_in . " menit )\n";
