@@ -63,9 +63,9 @@ class PatientController extends Controller
 
     public function pendaftaran_pasien_baru()
     {
-        $response = Http::get('https://dev.farizdotid.com/api/daerahindonesia/provinsi');
+        // $response = Http::get('https://dev.farizdotid.com/api/daerahindonesia/provinsi');
         $dataPenjamin = Penjamin::all();
-        $provinces = $response->json()['provinsi'];
+        $provinces = [];
         return view('pages.simrs.pendaftaran.pendaftaran-pasien-baru', [
             'penjamins' => $dataPenjamin,
             'provinces' => $provinces,
