@@ -10,6 +10,7 @@ use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TindakanMedis;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Reader\Xls\Color\BIFF5;
 
 class PoliklinikController extends Controller
 {
@@ -17,7 +18,7 @@ class PoliklinikController extends Controller
     {
         $menu = request()->menu;
         $noRegist = request()->registration;
-        
+
         $departements = Departement::latest()->get();
         $hariIni = Carbon::now()->translatedFormat('l');
         $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
@@ -29,7 +30,7 @@ class PoliklinikController extends Controller
                 return $menuResponse;
             }
         } else {
-        return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
+            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
         }
     }
 
@@ -54,25 +55,40 @@ class PoliklinikController extends Controller
         } elseif ($menu == 'cppt_dokter') {
             return view('pages.simrs.poliklinik.dokter.cppt', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_gizi') {
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));   
-        }elseif ($menu == 'cppt_farmasi') {
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));
+        } elseif ($menu == 'cppt_farmasi') {
             return view('pages.simrs.poliklinik.farmasi.cppt', compact('registration', 'departements', 'jadwal_dokter'));
-        }elseif ($menu == 'pengkajian_resep') {
+        } elseif ($menu == 'pengkajian_resep') {
             return view('pages.simrs.poliklinik.farmasi.pengkajian_resep', compact('registration', 'departements', 'jadwal_dokter'));
-            
-        }elseif ($menu == 'rekonsiliasi_obat') {
+        } elseif ($menu == 'rekonsiliasi_obat') {
             return view('pages.simrs.poliklinik.farmasi.rekonsiliasi_obat', compact('registration', 'departements', 'jadwal_dokter'));
-        }elseif ($menu == 'pengkajian_lanjutan') {
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));   
-            
-        }elseif ($menu == 'tindakan_medis'){
+        } elseif ($menu == 'pengkajian_lanjutan') {
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));
+        } elseif ($menu == 'tindakan_medis') {
             $list_tindakan_medis = TindakanMedis::all();
             $tindakan_medis_yang_dipakai = TindakanMedisRajal::where('registration_id', $registration->id)->get();
             return view('pages.simrs.poliklinik.layanan.tindakan_medis', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis', 'tindakan_medis_yang_dipakai'));
-        }else {
+        } else {
             return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
         }
 
         return null; // Jika menu tidak cocok
+    }
+
+    public function filterPasien(Request $request)
+    {
+        $query = Registration::where('date', now()->format('Y-m-d'));
+
+        $query->when($request->departement_id, function ($q) use ($request) {
+            return $q->where('departement_id', $request->departement_id);
+        });
+
+        $query->when($request->doctor_id, function ($q) use ($request) {
+            return $q->where('doctor_id', $request->doctor_id);
+        });
+
+        $registrations = $query->get();
+
+        dd($registrations);
     }
 }

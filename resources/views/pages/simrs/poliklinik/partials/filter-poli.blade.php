@@ -1,9 +1,9 @@
 <div id="js-slide-left"
     class="flex-wrap flex-shrink-0 position-relative slide-on-mobile slide-on-mobile-left bg-primary-200 pattern-0 p-3">
-    <form action="#" method="POST" id="filter_poliklinik">
+    <form action="#" method="POST" id="                                                                                                                                                                                                                                                                                     ">
         @csrf
         <div class="form-group mb-2">
-            <select class="select2 form-control @error('departement_id') is-invalid @enderror" name="departement_id"
+            <select class="select2 form-control @error('departement_id') is-invalid @enderror filter-poli" name="departement_id"
                 id="departement_id">
                 <option value=""></option>
                 @foreach ($departements as $departement)
@@ -15,7 +15,7 @@
             @enderror
         </div>
         <div class="form-group mb-2">
-            <select class="select2 form-control @error('doctor_id') is-invalid @enderror" name="doctor_id"
+            <select class="select2 form-control @error('doctor_id') is-invalid @enderror filter-poli" name="doctor_id"
                 id="doctor_id">
                 <option value=""></option>
                 @foreach ($jadwal_dokter as $jadwal)
@@ -27,7 +27,7 @@
             @enderror
         </div>
         <div class="form-group mb-2">
-            <input type="text" id="nama_pasien" name="nama_pasien" class="form-control" placeholder="Nama Pasien">
+            <input type="text" id="nama_pasien" name="nama_pasien" class="form-control filter-poli" placeholder="Nama Pasien">
         </div>
         <div class="form-group">
             <button type="submit" class="btn btn-primary w-100">Submit</button>
