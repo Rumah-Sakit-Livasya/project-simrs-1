@@ -9,7 +9,7 @@
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}", // Tambahkan token CSRF
-                    departement_id: $('#filter_poliklinik #departement_id').val()
+                    departement_id: $('#filter_poliklinik #departement_id').val(),
                     doctor_id: $('#filter_poliklinik #doctor_id').val()
                 },
                 dataType: "json",

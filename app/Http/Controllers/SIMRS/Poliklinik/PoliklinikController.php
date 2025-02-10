@@ -77,18 +77,30 @@ class PoliklinikController extends Controller
 
     public function filterPasien(Request $request)
     {
-        $query = Registration::where('date', now()->format('Y-m-d'));
-
-        $query->when($request->departement_id, function ($q) use ($request) {
-            return $q->where('departement_id', $request->departement_id);
-        });
-
-        $query->when($request->doctor_id, function ($q) use ($request) {
-            return $q->where('doctor_id', $request->doctor_id);
-        });
-
-        $registrations = $query->get();
-
-        dd($registrations);
+        try {
+            $query = Registration::where('date', now()->format('Y-m-d'));
+        
+            $query->when($request->departement_id, function ($q) use ($request) {
+                return $q->where('departement_id', $request->departement_id);
+            });
+        
+            $query->when($request->doctor_id, function ($q) use ($request) {
+                return $q->where('doctor_id', $request->doctor_id);
+            });
+        
+            $registrations = $query->get();
+        
+            return response()->json([
+                'success' => true,
+                'message' => 'Data retrieved successfully',
+                'data' => $registrations
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve data',
+                'error' => $e->getMessage()
+            ], 500);
+        }        
     }
 }
