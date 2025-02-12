@@ -4,6 +4,7 @@ namespace App\Models\SIMRS;
 
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
+use App\Models\SIMRS\Keuangan\Kasir;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 use App\Models\SIMRS\Pengkajian\TransferPasienAntarRuangan;
@@ -27,7 +28,12 @@ class Registration extends Model implements AuditableContract
         return $this->belongsTo(Patient::class);
     }
 
-    // Define the relationship to PengkajianNurseRajal
+    // Define the relationship to TagihanPasien
+    public function tagihan_pasien()
+    {
+        return $this->hasOne(TagihanPasien::class, 'registration_id');
+    }
+
     public function pengkajian_nurse_rajal()
     {
         return $this->hasOne(PengkajianNurseRajal::class, 'registration_id');

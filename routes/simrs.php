@@ -32,8 +32,10 @@ use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
 use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
 use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
+use App\Http\Controllers\SIMRS\TagihanPasienController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\TagihanPasien;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -191,7 +193,10 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
         Route::prefix('kasir')->group(function () {
-            // Route::get('/tagihan-pasien', [Kasi::class, 'index'])->name('kasir.index');
+            Route::get('/tagihan-pasien', [TagihanPasienController::class, 'index'])->name('tagihan.pasien.index');
+            Route::get('/tagihan-pasien/{id}', [TagihanPasienController::class, 'detailTagihan'])->name('tagihan.pasien.detail');
+            Route::get('/tagihan-pasien/data/{id}', [TagihanPasienController::class, 'getData'])->name('tagihan.pasien.data');
+            Route::put('/tagihan-pasien/update/{id}', [TagihanPasienController::class, 'updateTagihan'])->name('tagihan.pasien.update');
         });
     });
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');
