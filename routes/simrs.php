@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BilinganController;
 use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\BedController;
@@ -48,6 +49,7 @@ use App\Http\Controllers\SIMRS\Radiologi\RadiologiController;
 use App\Http\Controllers\SIMRS\Setup\BiayaAdministrasiRawatInapController;
 use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
+use App\Http\Controllers\SIMRS\TagihanPasienController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Http\Controllers\SIMRS\Warehouse\DistribusiBarangController;
 use App\Http\Controllers\SIMRS\Warehouse\MasterDataWarehouseController;
@@ -59,6 +61,7 @@ use App\Http\Controllers\SIMRS\Warehouse\StockRequestController;
 use App\Http\Controllers\SIMRS\Warehouse\UnitCostController;
 use App\Http\Controllers\SIMRS\Warehouse\WarehouseController;
 use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\TagihanPasien;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -448,6 +451,16 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/list', [KepustakaanController::class, 'index'])->name('kepustakaan.index');
             Route::get('/{id}', [KepustakaanController::class, 'showFolder'])->name('kepustakaan.folder');
             Route::get('/download/{id}', [KepustakaanController::class, 'downloadFile'])->name('kepustakaan.download');
+        });
+
+
+        Route::prefix('kasir')->group(function () {
+            Route::get('/tagihan-pasien', [TagihanPasienController::class, 'index'])->name('tagihan.pasien.index');
+            Route::get('/tagihan-pasien/{id}', [TagihanPasienController::class, 'detailTagihan'])->name('tagihan.pasien.detail');
+            Route::get('/tagihan-pasien/data/{id}', [TagihanPasienController::class, 'getData'])->name('tagihan.pasien.data');
+            Route::put('/tagihan-pasien/update/{id}', [TagihanPasienController::class, 'updateTagihan'])->name('tagihan.pasien.update');
+            Route::get('/bilingan/data/{id}', [BilinganController::class, 'getData'])->name('bilingan.pasien.data');
+            Route::get('/down-payment/data/{id}', [BilinganController::class, 'getDownPaymentData'])->name('down.payment.data');
         });
     });
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');

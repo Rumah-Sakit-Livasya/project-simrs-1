@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/update/{user_id}/request', [DashboardController::class, 'updateStatusRequestAttendance'])->name("acc.update");
         Route::get("/settings", [DashboardController::class, 'getSettingAttendances'])->name('attendances.settings');
-        
+
         Route::get("/day-off-requests", [DashboardController::class, 'dayOffRequest'])->name("day-off-requests");
         Route::get("/day-off-requests/{id}", [DashboardController::class, 'getDayOffRequest'])->name("day-off-requests.get");
 
@@ -83,8 +83,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [ReportController::class, 'attendanceReports'])->name('attendances.reports');
             Route::post('/', [ReportController::class, 'filterAttendanceReports'])->name('attendances.reports.filter');
             Route::post('/unit', [ReportController::class, 'filterAttendanceReportPerUnit'])->name('attendances.reports.filter.per-unit');
-            Route::get('/daftar-dayoff-timeoff', [ReportController ::class, 'dayOffReqReports'])->name('reports.dayOffReq');
-            Route::get('/daftar-dayoff-timeoff/{id}/{tahun}/get', [ReportController ::class, 'dayOffReqReportDetail'])->name('reports.dayOffReq.detail');
+            Route::get('/daftar-dayoff-timeoff', [ReportController::class, 'dayOffReqReports'])->name('reports.dayOffReq');
+            Route::get('/daftar-dayoff-timeoff/{id}/{tahun}/get', [ReportController::class, 'dayOffReqReportDetail'])->name('reports.dayOffReq.detail');
         });
     });
     /* END ABSENSI ----------------------------------------------------------------------------*/
@@ -129,9 +129,21 @@ Route::middleware('auth')->group(function () {
     Route::prefix('time-schedules')->group(function () {
         Route::prefix('rapat')->group(function () {
             Route::get("/", [DashboardController::class, 'getDataTimeScheduleRapat'])->name("time.schedule.rapat");
+            Route::get("/report", [DashboardController::class, 'getDataTimeScheduleReportRapat'])->name("time.schedule.report.rapat");
         });
     });
     /* END TIMESCHEDULE ----------------------------------------------------------------------------*/
+
+    /*
+    |--------------------------------------------------------------------------
+    |  PENDIDIKANPELATIHAN
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('pendidikan-pelatihan')->group(function () {
+        Route::get("/", [DashboardController::class, 'getDataPendidikanPelatihan'])->name("pendidikan.pelatihan");
+        Route::get("/confirm/{id}", [DashboardController::class, 'getPendidikanPelatihan'])->name("pendidikan.pelatihan.get");
+    });
+    /* END PENDIDIKANPELATIHAN ----------------------------------------------------------------------------*/
 
     /*
     |--------------------------------------------------------------------------

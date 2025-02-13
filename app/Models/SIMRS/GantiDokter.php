@@ -12,7 +12,7 @@ class GantiDokter extends Model
     use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
-    protected $table = 'ganti_dokter';
+    protected $table = 'ganti_dokters';
 
     public function registration()
     {

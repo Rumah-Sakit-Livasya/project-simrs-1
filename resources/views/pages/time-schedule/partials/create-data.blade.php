@@ -153,12 +153,6 @@
                                             data-toggle="tooltip" data-placement="right" title=""
                                             data-original-title="{!! $tooltipNames['pj_umum'] !!}"></i></label>
                                 </div>
-
-                                <div class="custom-control custom-switch mb-3">
-                                    <input type="checkbox" class="custom-control-input" id="customSwitch8checkbox"
-                                        name="all_staff">
-                                    <label class="custom-control-label" for="customSwitch8checkbox">All Staff</label>
-                                </div>
                             </div>
                         </div>
 
@@ -198,12 +192,12 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="room_name" class="font-weight-normal">Nama Ruangan Rapat<i
+                            <label for="room_name" class="font-weight-normal">Tempat / Nama Ruangan Rapat<i
                                     class="text-danger">*</i>
                             </label>
                             <input type="text" value="{{ old('room_name') }}"
                                 class="form-control @error('room_name') is-invalid @enderror" id="room_name"
-                                name="room_name" placeholder="Masukan Nama Ruangan" readonly>
+                                name="room_name" placeholder="Masukan Nama Ruangan">
                             @error('room_name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @include('components.notification.error')

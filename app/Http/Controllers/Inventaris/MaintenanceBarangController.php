@@ -79,7 +79,24 @@ class MaintenanceBarangController extends Controller
         ]);
 
         $validatedData['user_id'] = $request->user_id;
-        $validatedData['foto'] = $request->file('foto')->store('maintenance', 'public');
+
+        $file = $request->file('foto');
+        $fileName = 'maintenance-' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $directory = 'maintenance/';
+
+        // Simpan file secara manual ke storage
+        $storagePath = storage_path('app/public/' . $directory);
+        if (!file_exists($storagePath)) {
+            mkdir($storagePath, 0755, true); // Buat folder jika belum ada
+        }
+
+        // Pindahkan file ke folder tujuan
+        $file->move($storagePath, $fileName);
+
+        // Path relatif untuk database
+        $photoPath = $directory . $fileName;
+
+        $validatedData['foto'] = $photoPath;
 
         try {
             $store = MaintenanceBarang::create($validatedData);

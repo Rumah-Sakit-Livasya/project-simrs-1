@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Inventaris;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\Inventaris\Barang;
 use App\Models\Inventaris\CategoryBarang;
 use App\Models\Inventaris\RoomMaintenance;
 use App\Models\Inventaris\TemplateBarang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TemplateBarangController extends Controller
 {
@@ -93,8 +95,18 @@ class TemplateBarangController extends Controller
         $barang = Barang::where("template_barang_id", $templateBarang->id)->orderBy('urutan_barang')->get();
         $allRoom = RoomMaintenance::orderBy('name', 'asc')->get();
 
+        // Check if the user has admin permissions
+        if (Auth::user()->can('admin inventaris barang')) {
+            // If the user is an admin, retrieve all items
+            $companies = Company::all();
+        } else {
+            // Get the organization of the authenticated user
+            $companies = Auth::user()->employee->company;
+        }
+
         return view('pages.inventaris.template-barang.show', [
             'barang' => $barang,
+            'companies' => $companies,
             'templates' => TemplateBarang::orderBy('name')->get(),
             'nama_template' => $templateBarang,
             'categories' => CategoryBarang::orderBy('name')->get(),

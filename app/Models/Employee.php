@@ -36,6 +36,11 @@ class Employee extends Model
 
     public function timeSchedules()
     {
+        return $this->belongsToMany(TimeSchedule::class, 'time_schedule_employees', 'employee_id', 'time_schedule_id');
+    }
+
+    public function pendidikanPelatihan()
+    {
         return $this->belongsToMany(TimeSchedule::class, 'time_schedule_employees', 'employee_id', 'time_schedule_id')
             ->withPivot('dokumentasi');
     }

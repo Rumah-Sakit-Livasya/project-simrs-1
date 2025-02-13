@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Inventaris\MaintenanceBarang;
 use App\Models\Inventaris\ReportBarang;
+use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -106,5 +107,9 @@ class User extends Authenticatable implements Auditable
     public function order_tindakan_medis()
     {
         return $this->hasMany(OrderTindakanMedis::class);
+    }
+    public function bilingan()
+    {
+        return $this->hasMany(Bilingan::class);
     }
 }
