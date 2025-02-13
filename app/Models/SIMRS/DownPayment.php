@@ -2,21 +2,26 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class TagihanPasien extends Model implements AuditableContract
+class DownPayment extends Model implements AuditableContract
 {
     use HasFactory, SoftDeletes, Auditable;
 
     protected $guarded = ['id'];
-    protected $table = 'tagihan_pasien';
+    protected $table = 'down_payment';
 
     public function bilingan()
     {
-        return $this->belongsToMany(Bilingan::class, 'bilingan_tagihan_pasien', 'tagihan_pasien_id', 'bilingan_id');
+        return $this->belongsTo(Bilingan::class, 'registration_id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

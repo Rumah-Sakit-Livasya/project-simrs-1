@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\TagihanPasien;
 use Illuminate\Http\Request;
 
@@ -10,9 +11,8 @@ class TagihanPasienController extends Controller
 {
     public function index()
     {
-        // dd(today());
-        // dd(TagihanPasien::whereDate('date', today())->get());
-        $tagihan_pasien = TagihanPasien::whereDate('date', today())->get();
+        // dd(Bilingan::with('tagihan_pasien')->get());
+        $tagihan_pasien = Bilingan::whereDate('created_at', today())->get();
         return view('pages.simrs.keuangan.kasir.index', compact('tagihan_pasien'));
     }
 
@@ -20,8 +20,8 @@ class TagihanPasienController extends Controller
     {
         // dd($id);
         // dd(TagihanPasien::where('id', $id)->first());
-        $tagihan_pasien = TagihanPasien::where('id', $id)->first();
-        return view('pages.simrs.keuangan.kasir.detail', compact('tagihan_pasien'));
+        $bilingan = Bilingan::where('id', $id)->first();
+        return view('pages.simrs.keuangan.kasir.detail', compact('bilingan'));
     }
 
     public function getData()

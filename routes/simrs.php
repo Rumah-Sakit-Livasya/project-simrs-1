@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BilinganController;
 use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\BedController;
@@ -197,6 +198,8 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/tagihan-pasien/{id}', [TagihanPasienController::class, 'detailTagihan'])->name('tagihan.pasien.detail');
             Route::get('/tagihan-pasien/data/{id}', [TagihanPasienController::class, 'getData'])->name('tagihan.pasien.data');
             Route::put('/tagihan-pasien/update/{id}', [TagihanPasienController::class, 'updateTagihan'])->name('tagihan.pasien.update');
+            Route::get('/bilingan/data/{id}', [BilinganController::class, 'getData'])->name('bilingan.pasien.data');
+            Route::get('/down-payment/data/{id}', [BilinganController::class, 'getDownPaymentData'])->name('down.payment.data');
         });
     });
     // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');

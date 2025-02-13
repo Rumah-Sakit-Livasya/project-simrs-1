@@ -10,7 +10,7 @@
         <div class="row">
             <div class="col-xl-12">
 
-                <div id="panel-5" class="panel" style="height: 100vh;">
+                <div id="panel-5" class="panel" style="height: 88vh;">
                     <div class="panel-container show" style="height: 100%;">
                         <div class="panel-content" style="height: calc(100% - 50px);">
                             <ul class="nav nav-tabs" role="tablist">
@@ -33,30 +33,29 @@
                                         <div class="col">
                                             <label>No Registrasi:</label>
                                             <input type="text" class="form-control"
-                                                value="{{ $tagihan_pasien->registration->registration_number ?? 'N/A' }}"
+                                                value="{{ $bilingan->registration->registration_number ?? 'N/A' }}"
                                                 readonly>
                                         </div>
                                         <div class="col">
                                             <label>Tgl:</label>
                                             <input type="text" class="form-control"
-                                                value="{{ $tagihan_pasien->date ?? 'N/A' }}" readonly>
+                                                value="{{ $bilingan->created_at ?? 'N/A' }}" readonly>
                                         </div>
                                         <div class="col">
                                             <label>Tipe Kunjungan:</label>
                                             <input type="text" class="form-control"
-                                                value="{{ ucwords(str_replace('-', ' ', $tagihan_pasien->registration->registration_type ?? 'N/A')) }}"
+                                                value="{{ ucwords(str_replace('-', ' ', $bilingan->registration->registration_type ?? 'N/A')) }}"
                                                 readonly>
                                         </div>
                                         <div class="col">
                                             <label>Nama Pasien:</label>
                                             <input type="text" class="form-control"
-                                                value="{{ $tagihan_pasien->registration->patient->name ?? 'N/A' }}"
-                                                readonly>
+                                                value="{{ $bilingan->registration->patient->name ?? 'N/A' }}" readonly>
                                         </div>
                                         <div class="col">
                                             <label>RM:</label>
                                             <input type="text" class="form-control"
-                                                value="{{ $tagihan_pasien->registration->patient->medical_record_number ?? 'N/A' }}"
+                                                value="{{ $bilingan->registration->patient->medical_record_number ?? 'N/A' }}"
                                                 readonly>
                                         </div>
                                     </div>
@@ -95,259 +94,394 @@
                                         <div class="col">
                                             <label>No Registrasi:</label>
                                             <input type="text" class="form-control"
-                                                value="{{ $tagihan_pasien->registration->registration_number ?? 'N/A' }}"
+                                                value="{{ $bilingan->registration->registration_number ?? 'N/A' }}"
                                                 readonly>
                                         </div>
                                         <div class="col">
                                             <label>Tgl:</label>
                                             <input type="text" class="form-control"
-                                                value="{{ $tagihan_pasien->date ?? 'N/A' }}" readonly>
+                                                value="{{ $bilingan->created_at ?? 'N/A' }}" readonly>
                                         </div>
                                         <div class="col">
                                             <label>Tipe Kunjungan:</label>
                                             <input type="text" class="form-control"
-                                                value="{{ ucwords(str_replace('-', ' ', $tagihan_pasien->registration->registration_type ?? 'N/A')) }}"
+                                                value="{{ ucwords(str_replace('-', ' ', $bilingan->registration->registration_type ?? 'N/A')) }}"
                                                 readonly>
                                         </div>
                                         <div class="col">
                                             <label>Nama Pasien:</label>
                                             <input type="text" class="form-control"
-                                                value="{{ $tagihan_pasien->registration->patient->name ?? 'N/A' }}"
-                                                readonly>
+                                                value="{{ $bilingan->registration->patient->name ?? 'N/A' }}" readonly>
                                         </div>
                                         <div class="col">
                                             <label>RM:</label>
                                             <input type="text" class="form-control"
-                                                value="{{ $tagihan_pasien->registration->patient->medical_record_number ?? 'N/A' }}"
+                                                value="{{ $bilingan->registration->patient->medical_record_number ?? 'N/A' }}"
                                                 readonly>
                                         </div>
                                     </div>
 
-                                    <div class="row">
-                                        <div class="col">
-                                            <div class="card border mb-4 mb-xl-0">
-                                                <div
-                                                    class="card-header bg-trans-gradient py-2 pr-2 d-flex align-items-center flex-wrap">
-                                                    <div class="card-title text-white">Wajib Bayar</div>
-                                                </div>
-                                                <div class="card-body">
-                                                    <input type="number" class="form-control"
-                                                        placeholder="Masukkan Wajib Bayar" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="card border mb-4 mb-xl-0">
-                                                <div
-                                                    class="card-header bg-trans-gradient py-2 pr-2 d-flex align-items-center flex-wrap">
-                                                    <div class="card-title text-white">DP Pasien</div>
-                                                </div>
-                                                <div class="card-body">
-                                                    <input type="number" class="form-control"
-                                                        placeholder="Masukkan DP Pasien" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="card border mb-4 mb-xl-0">
-                                                <div
-                                                    class="card-header bg-trans-gradient py-2 pr-2 d-flex align-items-center flex-wrap">
-                                                    <div class="card-title text-white">Sisa Tagihan</div>
-                                                </div>
-                                                <div class="card-body">
-                                                    <input type="number" class="form-control"
-                                                        placeholder="Masukkan Sisa Tagihan" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mt-3">
-                                        <div class="col">
-                                            <div class="card border mb-4 mb-xl-0">
-                                                <div
-                                                    class="card-header bg-success py-2 pr-2 d-flex align-items-center flex-wrap">
-                                                    <div class="card-title text-white">Tunai</div>
-                                                </div>
-                                                <div class="card-body">
-                                                    <input type="number" class="form-control"
-                                                        placeholder="Masukkan Tunai" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="card border mb-4 mb-xl-0">
-                                                <div
-                                                    class="card-header bg-success py-2 pr-2 d-flex align-items-center flex-wrap">
-                                                    <div class="card-title text-white">Total Bayar</div>
-                                                </div>
-                                                <div class="card-body">
-                                                    <input type="number" class="form-control"
-                                                        placeholder="Masukkan Total Bayar" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="card border mb-4 mb-xl-0">
-                                                <div
-                                                    class="card-header bg-success py-2 pr-2 d-flex align-items-center flex-wrap">
-                                                    <div class="card-title text-white">Kembalian</div>
-                                                </div>
-                                                <div class="card-body">
-                                                    <input type="number" class="form-control"
-                                                        placeholder="Masukkan Kembalian" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mt-3">
-                                        <div class="col">
-                                            <div class="card border mb-4 mb-xl-0">
-                                                <div class="card-header bg-warning py-2 pr-2 d-flex align-items-center1 flex-wrap"
-                                                    data-toggle="collapse" data-target="#paymentMethods"
-                                                    aria-expanded="false" aria-controls="paymentMethods">
-                                                    <div class="card-title text-white text-center">Pembayaran Metode
-                                                        Lainnya</div>
-                                                </div>
-                                                <div class="collapse" id="paymentMethods">
+                                    @if ($bilingan->status == 'final' && !$bilingan->is_paid)
+                                        <div class="row">
+                                            <div class="col">
+                                                <div class="card border mb-4 mb-xl-0">
+                                                    <div
+                                                        class="card-header bg-trans-gradient py-2 pr-2 d-flex align-items-center flex-wrap">
+                                                        <div class="card-title text-white">Wajib Bayar</div>
+                                                    </div>
                                                     <div class="card-body">
-                                                        <div class="section-title mt-3">Credit Card</div>
-                                                        <table class="table table-bordered">
-                                                            <thead class="table-header">
-                                                                <tr>
-                                                                    <th>Mesin EDC</th>
-                                                                    <th>Type</th>
-                                                                    <th>CC Number</th>
-                                                                    <th>Auth Number</th>
-                                                                    <th>Batch</th>
-                                                                    <th>Nominal</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td>
-                                                                        <select class="form-select select2">
-                                                                            <option>MANDIRI</option>
-                                                                            <option>BCA</option>
-                                                                            <option>BNI</option>
-                                                                        </select>
-                                                                    </td>
-                                                                    <td>
-                                                                        <select class="form-select select2">
-                                                                            <option>Debit Card</option>
-                                                                            <option>Credit Card</option>
-                                                                        </select>
-                                                                    </td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td><select class="form-select select2">
-                                                                            <option>BCA</option>
-                                                                        </select></td>
-                                                                    <td><select class="form-select select2">
-                                                                            <option>Credit Card</option>
-                                                                        </select></td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td><select class="form-select select2">
-                                                                            <option>BNI</option>
-                                                                        </select></td>
-                                                                    <td><select class="form-select select2">
-                                                                            <option>Credit Card</option>
-                                                                        </select></td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                    <td><input type="text" class="form-control"></td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
+                                                        <input type="number" class="form-control"
+                                                            placeholder="Masukkan Wajib Bayar" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="card border mb-4 mb-xl-0">
+                                                    <div
+                                                        class="card-header bg-trans-gradient py-2 pr-2 d-flex align-items-center flex-wrap">
+                                                        <div class="card-title text-white">DP Pasien</div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <input type="number" class="form-control"
+                                                            placeholder="Masukkan DP Pasien" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="card border mb-4 mb-xl-0">
+                                                    <div
+                                                        class="card-header bg-trans-gradient py-2 pr-2 d-flex align-items-center flex-wrap">
+                                                        <div class="card-title text-white">Sisa Tagihan</div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <input type="number" class="form-control"
+                                                            placeholder="Masukkan Sisa Tagihan" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                                        <div class="section-title">Via Transfer Bank</div>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Bank RS</label>
-                                                                <select class="form-select select2">
-                                                                    <option>Bank RS A</option>
-                                                                    <option>Bank RS B</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Bank Pengirim</label>
-                                                                <input type="text" class="form-control">
-                                                            </div>
-                                                            <div class="col-md-6 mt-2">
-                                                                <label class="form-label">Nominal Transfer</label>
-                                                                <input type="text" class="form-control">
-                                                            </div>
-                                                            <div class="col-md-6 mt-2">
-                                                                <label class="form-label">No. Rek Pengirim</label>
-                                                                <input type="text" class="form-control">
-                                                            </div>
-                                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col">
+                                                <div class="card border mb-4 mb-xl-0">
+                                                    <div
+                                                        class="card-header bg-success py-2 pr-2 d-flex align-items-center flex-wrap">
+                                                        <div class="card-title text-white">Tunai</div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <input type="number" class="form-control"
+                                                            placeholder="Masukkan Tunai" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="card border mb-4 mb-xl-0">
+                                                    <div
+                                                        class="card-header bg-success py-2 pr-2 d-flex align-items-center flex-wrap">
+                                                        <div class="card-title text-white">Total Bayar</div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <input type="number" class="form-control"
+                                                            placeholder="Masukkan Total Bayar" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="card border mb-4 mb-xl-0">
+                                                    <div
+                                                        class="card-header bg-success py-2 pr-2 d-flex align-items-center flex-wrap">
+                                                        <div class="card-title text-white">Kembalian</div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <input type="number" class="form-control"
+                                                            placeholder="Masukkan Kembalian" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                                        <div class="section-title">Ditanggung Dokter</div>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Nama Dokter</label>
-                                                                <select class="form-select select2">
-                                                                    <option>Dr. A</option>
-                                                                    <option>Dr. B</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Nominal Dijamin Dokter</label>
-                                                                <input type="text" class="form-control">
-                                                            </div>
-                                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col">
+                                                <div class="card border mb-4 mb-xl-0">
+                                                    <div class="card-header bg-warning py-2 pr-2 d-flex align-items-center1 flex-wrap"
+                                                        data-toggle="collapse" data-target="#paymentMethods"
+                                                        aria-expanded="false" aria-controls="paymentMethods">
+                                                        <div class="card-title text-white text-center">Pembayaran Metode
+                                                            Lainnya</div>
+                                                    </div>
+                                                    <div class="collapse" id="paymentMethods">
+                                                        <div class="card-body">
+                                                            <div class="section-title mt-3">Credit Card</div>
+                                                            <table class="table table-bordered">
+                                                                <thead class="table-header">
+                                                                    <tr>
+                                                                        <th>Mesin EDC</th>
+                                                                        <th>Type</th>
+                                                                        <th>CC Number</th>
+                                                                        <th>Auth Number</th>
+                                                                        <th>Batch</th>
+                                                                        <th>Nominal</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td>
+                                                                            <select class="form-select select2">
+                                                                                <option>MANDIRI</option>
+                                                                                <option>BCA</option>
+                                                                                <option>BNI</option>
+                                                                            </select>
+                                                                        </td>
+                                                                        <td>
+                                                                            <select class="form-select select2">
+                                                                                <option>Debit Card</option>
+                                                                                <option>Credit Card</option>
+                                                                            </select>
+                                                                        </td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><select class="form-select select2">
+                                                                                <option>BCA</option>
+                                                                            </select></td>
+                                                                        <td><select class="form-select select2">
+                                                                                <option>Credit Card</option>
+                                                                            </select></td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><select class="form-select select2">
+                                                                                <option>BNI</option>
+                                                                            </select></td>
+                                                                        <td><select class="form-select select2">
+                                                                                <option>Credit Card</option>
+                                                                            </select></td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                        <td><input type="text" class="form-control">
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
 
-                                                        <div class="section-title">Ditanggung Karyawan</div>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Nama Karyawan</label>
-                                                                <select class="form-select select2">
-                                                                    <option>Karyawan A</option>
-                                                                    <option>Karyawan B</option>
-                                                                </select>
+                                                            <div class="section-title">Via Transfer Bank</div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Bank RS</label>
+                                                                    <select class="form-select select2">
+                                                                        <option>Bank RS A</option>
+                                                                        <option>Bank RS B</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Bank Pengirim</label>
+                                                                    <input type="text" class="form-control">
+                                                                </div>
+                                                                <div class="col-md-6 mt-2">
+                                                                    <label class="form-label">Nominal Transfer</label>
+                                                                    <input type="text" class="form-control">
+                                                                </div>
+                                                                <div class="col-md-6 mt-2">
+                                                                    <label class="form-label">No. Rek Pengirim</label>
+                                                                    <input type="text" class="form-control">
+                                                                </div>
                                                             </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Nominal Dijamin Karyawan</label>
-                                                                <input type="text" class="form-control">
+
+                                                            <div class="section-title">Ditanggung Dokter</div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Nama Dokter</label>
+                                                                    <select class="form-select select2">
+                                                                        <option>Dr. A</option>
+                                                                        <option>Dr. B</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Nominal Dijamin
+                                                                        Dokter</label>
+                                                                    <input type="text" class="form-control">
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="section-title">Ditanggung Karyawan</div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Nama Karyawan</label>
+                                                                    <select class="form-select select2">
+                                                                        <option>Karyawan A</option>
+                                                                        <option>Karyawan B</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Nominal Dijamin
+                                                                        Karyawan</label>
+                                                                    <input type="text" class="form-control">
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+
+                                        <div class="row">
+                                            <div class="col mt-3">
+                                                <label class="form-label">Keterangan / Agunan</label>
+                                                <textarea class="form-control" rows="4"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col">
+                                                <button type="button" class="btn btn-secondary">
+                                                    <i class="fas fa-arrow-left"></i> Kembali
+                                                </button>
+                                            </div>
+                                            <div class="col text-right">
+                                                <button type="button" class="btn btn-primary ms-2">
+                                                    <i class="fas fa-money-bill-alt"></i> Bayar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="row">
+                                            <div class="col">
+                                                <h4>List Billing Pasien</h4>
+                                                <table class="table table-striped table-bordered" id="bilinganTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Tanggal</th>
+                                                            <th>Total Tagihan</th>
+                                                            <th>Jaminan</th>
+                                                            <th>Tagihan Pasien</th>
+                                                            <th>Jumlah Terbayar</th>
+                                                            <th>Sisa Tagihan</th>
+                                                            <th>Kembalian</th>
+                                                            <th>Print</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    @endif
 
                                 </div>
                                 <div class="tab-pane fade" id="dp_pasien" role="tabpanel">
-                                    Etsy mixtape wayfarers, ethical wes anderson tofu before they sold out
-                                    mcsweeney's
-                                    organic lomo retro fanny pack lo-fi farm-to-table readymade. Messenger
-                                    bag gentrify
-                                    pitchfork tattooed craft beer, iphone skateboard locavore carles etsy
-                                    salvia banksy
-                                    hoodie helvetica. DIY synth PBR banksy irony. Leggings gentrify squid
-                                    8-bit cred
-                                    pitchfork.
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <label>Nama Pasien:</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ $bilingan->registration->patient->name ?? 'N/A' }}" readonly>
+                                        </div>
+                                        <div class="col">
+                                            <label>RM:</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ $bilingan->registration->patient->medical_record_number ?? 'N/A' }}"
+                                                readonly>
+                                        </div>
+                                        <div class="col">
+                                            <label>No Registrasi:</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ $bilingan->registration->registration_number ?? 'N/A' }}"
+                                                readonly>
+                                        </div>
+                                        <div class="col">
+                                            <label>Tipe Kunjungan:</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ ucwords(str_replace('-', ' ', $bilingan->registration->registration_type ?? 'N/A')) }}"
+                                                readonly>
+                                        </div>
+                                    </div>
+                                    <form id="downPaymentForm">
+                                        <div class="row mb-3">
+                                            <div class="col">
+                                                <label>Metode Pembayaran:</label>
+                                                <select class="form-control select2" name="metode_pembayaran">
+                                                    <option value="cash">Cash</option>
+                                                    <option value="credit_card">Credit Card</option>
+                                                    <option value="debit_card">Debit Card</option>
+                                                    <option value="transfer">Transfer</option>
+                                                </select>
+                                            </div>
+                                            <div class="col">
+                                                <label>Nominal:</label>
+                                                <input type="text" class="form-control" name="nominal"
+                                                    placeholder="Masukkan Nominal">
+                                            </div>
+                                            <div class="col">
+                                                <label>Keterangan:</label>
+                                                <input type="text" class="form-control" name="keterangan"
+                                                    placeholder="Masukkan Keterangan">
+                                            </div>
+                                            <div class="col">
+                                                <label>Total DP:</label>
+                                                <input type="text" class="form-control" name="total_dp"
+                                                    value="{{ $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') - $bilingan->down_payment->where('tipe', 'DP Refund')->sum('nominal') }}"
+                                                    readonly>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col text-left">
+                                                <button type="reset" class="btn btn-secondary">
+                                                    <i class="fal fa-undo"></i> Reset
+                                                </button>
+                                            </div>
+                                            <div class="col text-right">
+                                                <button type="submit" class="btn btn-success">
+                                                    <i class="fal fa-save"></i> Simpan
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    {{-- DataTable for List DP Pasien --}}
+                                    <div class="row mt-3">
+                                        <div class="col">
+                                            <h4>List DP Pasien</h4>
+                                            <table class="table table-striped table-bordered" id="DownPaymentTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Tanggal</th>
+                                                        <th>Metode Pembayaran</th>
+                                                        <th>Nominal</th>
+                                                        <th>Tipe</th>
+                                                        <th>User Input</th>
+                                                        <th>Keterangan</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {{-- Data will be populated here using DataTable --}}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
+
         </div>
+
+
 
     </main>
 @endsection
@@ -384,10 +518,15 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: '/simrs/kasir/tagihan-pasien/data/{{ $tagihan_pasien->id }}',
+                    url: '/simrs/kasir/tagihan-pasien/data/{{ $bilingan->id }}',
                     type: 'GET',
                     dataSrc: function(json) {
                         if (json && json.data) {
+                            // Filter out data if bilingan status is 'final'
+                            if ('{{ $bilingan->status }}' === 'final') {
+                                console.warn('Bilingan status is final, no data to display.');
+                                return [];
+                            }
                             console.log('Query Results:', json.data);
                             return json.data;
                         } else {
@@ -570,6 +709,147 @@
                 });
             });
 
+            // Bilingan Table
+            $('#bilinganTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: '/simrs/kasir/bilingan/data/{{ $bilingan->id }}',
+                    type: 'GET',
+                    dataSrc: function(json) {
+                        console.log('Query Results:', json); // Display the entire JSON response
+                        return json && json.data ? json.data : [];
+                    }
+                },
+                columns: [{
+                        data: 'tanggal',
+                        name: 'tanggal',
+                        className: 'tanggal',
+                        render: function(data, type, row) {
+                            return '<input type="text" class="form-control edit-input" value="' +
+                                data + '" data-column="tanggal" data-id="' + row.id +
+                                '" style="width: auto; max-width: 100%; white-space: nowrap;">';
+                        }
+                    },
+                    {
+                        data: 'total_tagihan',
+                        name: 'total_tagihan',
+                        className: 'total-tagihan',
+                        render: function(data, type, row) {
+                            return '<input type="text" class="form-control edit-input format-currency" value="' +
+                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
+                                '" data-column="total_tagihan" data-id="' + row.id + '">';
+                        }
+                    },
+                    {
+                        data: 'jaminan',
+                        name: 'jaminan',
+                        className: 'jaminan',
+                        render: function(data, type, row) {
+                            return '<input type="text" class="form-control edit-input format-currency" value="' +
+                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
+                                '" data-column="jaminan" data-id="' + row.id + '">';
+                        }
+                    },
+                    {
+                        data: 'tagihan_pasien',
+                        name: 'tagihan_pasien',
+                        className: 'tagihan-pasien',
+                        render: function(data, type, row) {
+                            return '<input type="text" class="form-control edit-input format-currency" value="' +
+                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
+                                '" data-column="tagihan_pasien" data-id="' + row.id + '">';
+                        }
+                    },
+                    {
+                        data: 'jumlah_terbayar',
+                        name: 'jumlah_terbayar',
+                        className: 'jumlah-terbayar',
+                        render: function(data, type, row) {
+                            return '<input type="text" class="form-control edit-input format-currency" value="' +
+                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
+                                '" data-column="jumlah_terbayar" data-id="' + row.id + '">';
+                        }
+                    },
+                    {
+                        data: 'sisa_tagihan',
+                        name: 'sisa_tagihan',
+                        className: 'sisa-tagihan',
+                        render: function(data, type, row) {
+                            return '<input type="text" class="form-control edit-input format-currency" value="' +
+                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
+                                '" data-column="sisa_tagihan" data-id="' + row.id + '">';
+                        }
+                    },
+                    {
+                        data: 'kembalian',
+                        name: 'kembalian',
+                        className: 'kembalian',
+                        render: function(data, type, row) {
+                            return '<input type="text" class="form-control edit-input format-currency" value="' +
+                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
+                                '" data-column="kembalian" data-id="' + row.id + '">';
+                        }
+                    },
+                ],
+                language: {
+                    emptyTable: "Tidak ada data yang tersedia"
+                },
+                autoWidth: false,
+                responsive: true,
+                pagingType: "simple",
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: 5,
+                className: 'smaller-table'
+            });
+
+            $('#DownPaymentTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: '/simrs/kasir/down-payment/data/{{ $bilingan->id }}', // Update with the correct URL
+                    type: 'GET',
+                    dataSrc: function(json) {
+                        console.log('Down Payment Data:', json); // Display the entire JSON response
+                        return json && json.data ? json.data : [];
+                    }
+                },
+                columns: [{
+                        data: 'tanggal',
+                        name: 'tanggal'
+                    },
+                    {
+                        data: 'metode_pembayaran',
+                        name: 'metode_pembayaran'
+                    },
+                    {
+                        data: 'nominal',
+                        name: 'nominal'
+                    },
+                    {
+                        data: 'tipe',
+                        name: 'tipe'
+                    },
+                    {
+                        data: 'user_input', // Updated to show user input's full name
+                        name: 'user_input'
+                    },
+                    {
+                        data: 'keterangan',
+                        name: 'keterangan'
+                    },
+                ],
+                language: {
+                    emptyTable: "Tidak ada data yang tersedia"
+                },
+                autoWidth: false,
+                responsive: true,
+                pagingType: "simple",
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: 5,
+            });
+
+
             // Datepciker
             runDatePicker();
 
@@ -662,7 +942,7 @@
 
             $('#save-final').on('click', function() {
                 $.ajax({
-                    url: '/simrs/kasir/tagihan-pasien/update-status/{{ $tagihan_pasien->id }}',
+                    url: '/simrs/kasir/tagihan-pasien/update-status/{{ $bilingan->id }}',
                     type: 'PUT',
                     data: {
                         status: 'final',
@@ -694,7 +974,7 @@
 
             $('#save-draft').on('click', function() {
                 $.ajax({
-                    url: '/simrs/kasir/tagihan-pasien/update-status/{{ $tagihan_pasien->id }}',
+                    url: '/simrs/kasir/tagihan-pasien/update-status/{{ $bilingan->id }}',
                     type: 'PUT',
                     data: {
                         status: 'draft',
@@ -726,7 +1006,7 @@
 
             $('#save-partial').on('click', function() {
                 $.ajax({
-                    url: '/simrs/kasir/tagihan-pasien/update-status/{{ $tagihan_pasien->id }}',
+                    url: '/simrs/kasir/tagihan-pasien/update-status/{{ $bilingan->id }}',
                     type: 'PUT',
                     data: {
                         status: 'partial',

@@ -8,15 +8,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class TagihanPasien extends Model implements AuditableContract
+class BilinganTagihanPasien extends Model implements AuditableContract
 {
     use HasFactory, SoftDeletes, Auditable;
 
-    protected $guarded = ['id'];
-    protected $table = 'tagihan_pasien';
-
-    public function bilingan()
-    {
-        return $this->belongsToMany(Bilingan::class, 'bilingan_tagihan_pasien', 'tagihan_pasien_id', 'bilingan_id');
-    }
+    protected $table = 'bilingan_tagihan_pasien';
+    protected $fillable = ['bilingan_id', 'tagihan_pasien_id'];
 }

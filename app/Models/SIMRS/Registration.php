@@ -28,10 +28,10 @@ class Registration extends Model implements AuditableContract
         return $this->belongsTo(Patient::class);
     }
 
-    // Define the relationship to TagihanPasien
-    public function tagihan_pasien()
+    // Define the relationship to Bilingan
+    public function bilingan()
     {
-        return $this->hasOne(TagihanPasien::class, 'registration_id');
+        return $this->hasOne(Bilingan::class, 'registration_id');
     }
 
     public function pengkajian_nurse_rajal()
