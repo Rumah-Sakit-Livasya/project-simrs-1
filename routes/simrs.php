@@ -269,17 +269,17 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('dokter')->group(function() {
             Route::get('/daftar-pasien', [DokterController::class, 'index'])->name('dokter.daftar-pasien');
-            Route::get('/template-soap', [DokterController::class, 'templateSOAP'])->name('dokter.daftar-pasien');
+            Route::get('/template-soap', [DokterController::class, 'templateSOAP'])->name('dokter.template-soap');
         });
 
         Route::prefix('gizi')->group(function() {
             Route::prefix('daftar-pasien')->group(function() {
                 Route::get('list-pasien', [GiziController::class, 'index'])->name('gizi.daftar-pasien.list-pasien');
-                Route::get('list-order-gizi', [GiziController::class, 'listOrderGizi'])->name('gizi.daftar-pasien.list-pasien');
+                Route::get('list-order-gizi', [GiziController::class, 'listOrderGizi'])->name('gizi.daftar-pasien.list-order-gizi');
             });
 
             Route::prefix('reports')->group(function() {
-                Route::get('/', GiziController::class, 'reports')->name('gizi.reports');
+                Route::get('/', [GiziController::class, 'reports'])->name('gizi.reports');
             });
 
             Route::prefix('master-data')->group(function() {
@@ -408,9 +408,9 @@ Route::group(['middleware' => ['auth']], function () {
             });
             
             Route::prefix('approval-po')->group(function() {
-                Route::get('farmasi', [ApprovalPOController::class, 'farmasi'])->name('procurement.purchase-order.farmasi');
-                Route::get('non-farmasi', [ApprovalPOController::class, 'nonFarmasi'])->name('procurement.purchase-order.non-farmasi');
-                Route::get('ceo', [ApprovalPOController::class, 'ceo'])->name('procurement.purchase-order.ceo');
+                Route::get('farmasi', [ApprovalPOController::class, 'farmasi'])->name('procurement.approval-po.farmasi');
+                Route::get('non-farmasi', [ApprovalPOController::class, 'nonFarmasi'])->name('procurement.approval-po.non-farmasi');
+                Route::get('ceo', [ApprovalPOController::class, 'ceo'])->name('procurement.approval-po.ceo');
             });
             
             Route::prefix('pengajuan-cash-advance')->group(function() {
@@ -435,17 +435,17 @@ Route::group(['middleware' => ['auth']], function () {
             });
         });
 
-        Route::prefix('kasir')->group(function() {
-            Route::get('tagihan-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
-            Route::get('transaksi-non-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
-            Route::get('setoran-kasir', [KasirController::class, 'index'])->name('laboratorium.list-order');
-            Route::prefix('reports')->group(function() {
-            Route::get('penerimaan-kasir', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
-            Route::get('rekap-penerimaan-kasir', [KasirController::class, 'pasienPerPemeriksaan'])->name('laboratorium.psdirn-per-permintaan');
-            Route::get('laboratorium', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
-            });
-            Route::get('simulasi-harga', [IGDController::class, 'simulasiHarga'])->name('laboratorium.simulasi-harga');
-        });
+        // Route::prefix('kasir')->group(function() {
+        //     Route::get('tagihan-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
+        //     Route::get('transaksi-non-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
+        //     Route::get('setoran-kasir', [KasirController::class, 'index'])->name('laboratorium.list-order');
+        //     Route::prefix('reports')->group(function() {
+        //     Route::get('penerimaan-kasir', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
+        //     Route::get('rekap-penerimaan-kasir', [KasirController::class, 'pasienPerPemeriksaan'])->name('laboratorium.psdirn-per-permintaan');
+        //     Route::get('laboratorium', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
+        //     });
+        //     Route::get('simulasi-harga', [IGDController::class, 'simulasiHarga'])->name('laboratorium.simulasi-harga');
+        // });
 
         Route::prefix('kepustakaan')->group(function () {
             Route::get('/list', [KepustakaanController::class, 'index'])->name('kepustakaan.index');
