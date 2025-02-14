@@ -25,12 +25,27 @@ class PoliklinikController extends Controller
         $registration = Registration::where('registration_number', $noRegist)->first();
 
         if ($menu && $noRegist) {
+            $query = Registration::where('date', now()->format('Y-m-d'));
+
+            $query->when($registration->departement_id, function ($q) use ($registration) {
+                return $q->where('departement_id', $registration->departement_id);
+            });
+
+            $query->when($registration->doctor_id, function ($q) use ($registration) {
+                return $q->where('doctor_id', $registration->doctor_id);
+            });
+
+            $registrations = $query->get();
+
+            // Render partial view sebagai HTML
+            $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
+
             $menuResponse = $this->poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration);
             if ($menuResponse) {
                 return $menuResponse;
             }
         } else {
-            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
+            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration'));
         }
     }
 
@@ -79,21 +94,24 @@ class PoliklinikController extends Controller
     {
         try {
             $query = Registration::where('date', now()->format('Y-m-d'));
-        
+
             $query->when($request->departement_id, function ($q) use ($request) {
                 return $q->where('departement_id', $request->departement_id);
             });
-        
+
             $query->when($request->doctor_id, function ($q) use ($request) {
                 return $q->where('doctor_id', $request->doctor_id);
             });
-        
+
             $registrations = $query->get();
-        
+
+            // Render partial view sebagai HTML
+            $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data retrieved successfully',
-                'data' => $registrations
+                'html' => $html
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -101,6 +119,6 @@ class PoliklinikController extends Controller
                 'message' => 'Failed to retrieve data',
                 'error' => $e->getMessage()
             ], 500);
-        }        
+        }
     }
 }

@@ -14,11 +14,18 @@
                 },
                 dataType: "json",
                 beforeSend: function() {
-                    // Bisa ditambahkan loader atau efek loading di sini
+                    $('#daftar-pasien-poli .col-12').html(
+                    '<p>Sedang memuat...</p>'); // Tambahkan loading
                 },
                 success: function(response) {
                     console.log(response);
-                    $('#hasil_filter').html(response.html);
+
+                    if (response.success) {
+                        $('#daftar-pasien-poli .col-12').html(response.html);
+                    } else {
+                        $('#daftar-pasien-poli .col-12').html(
+                            '<p>Tidak ada data pasien.</p>');
+                    }
                 },
                 error: function(xhr, status, error) {
                     console.log(xhr.responseText);

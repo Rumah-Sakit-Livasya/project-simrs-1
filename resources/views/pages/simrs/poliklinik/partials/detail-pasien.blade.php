@@ -6,13 +6,14 @@
             </div>
             <div class="col-lg-9">
                 <a href="#">
-                    <h5 class="text-danger text-decoration-underline">KIRANA HANNAH ADZKIYA
+                    <h5 class="text-danger text-decoration-underline">{{$registration->patient->name}}
                     </h5>
                 </a>
-                <p class="text-small text-secondary mb-1">13 Jun 2019 (5thn 5bln 9hr)</p>
-                <p class="text-small text-secondary mb-1">RM 05-76-94</p>
-                <p class="text-small text-secondary mb-1">BPJS KESEHATAN</p>
-                <p class="text-small text-secondary mb-1">Info Billing: 30.000</p>
+                <p class="text-small text-secondary mb-1">{{\Carbon\Carbon::parse($registration->patient->birth_of_date)->format('d M Y')}} ({{ \Carbon\Carbon::parse($registration->patient->date_of_birth)->diff(\Carbon\Carbon::now())->format('%y tahun %m bulan %d hari') }}
+                    )</p>
+                <p class="text-small text-secondary mb-1">RM {{$registration->patient->medical_record_number}}</p>
+                <p class="text-small text-secondary mb-1">{{$registration->penjamin->nama_perusahaan}}</p>
+                <p class="text-small text-secondary mb-1">Info Billing: <span class="text-success">30.000</span></p>
                 <p class="text-small text-secondary mb-1">Tidak ada alergi</p>
             </div>
         </div>
@@ -24,12 +25,12 @@
             </div>
             <div class="col-lg-9">
                 <a href="#">
-                    <h5 class="text-danger text-decoration-underline">dr. Ratih Eka Pujasari Sp.A
+                    <h5 class="text-danger text-decoration-underline">{{$registration->doctor->employee->fullname}}
                     </h5>
                 </a>
-                <p class="text-small text-secondary mb-1">KLINIK ANAK</p>
-                <p class="text-small text-secondary mb-1">Reg 2411220092 (22 Nov 2024)</p>
-                <p class="text-small text-secondary mb-1">Rawat Jalan</p>
+                <p class="text-small text-secondary mb-1">{{$registration->departement->name}}</p>
+                <p class="text-small text-secondary mb-1">Reg {{$registration->registration_number}} ({{\Carbon\Carbon::parse($registration->date)->format('d M Y')}})</p>
+                <p class="text-small text-secondary mb-1">{{$registration->registration_type}}</p>
             </div>
         </div>
     </div>
