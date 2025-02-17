@@ -308,12 +308,12 @@ class BotMessageController extends Controller
             $response = 'terima kasih ' . $nama . ' sudah mengisi Absensi 😍 ';
             $response .= chr(10) . 'pada tanggal ' . date("d M Y", $data['date']) . ' jam ' . date("H:i:s", $data['date']);;
         } else {
-            $idTelegram = isset($data['id']) ? $data['id'] : null;
-            $usernameTelegram = $data['username'] ?? null;
-            $nama = $data['first_name'] ?? null;
+            // $idTelegram = isset($data['id']) ? $data['id'] : null;
+            // $usernameTelegram = $data['username'] ?? null;
+            // $nama = $data['first_name'] ?? null;
 
-            $error = true;
-            $response = 'else';
+            // $error = true;
+            // $response = 'else';
             $response .= 'Test Else';
         }
 
