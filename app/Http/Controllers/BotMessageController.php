@@ -317,10 +317,9 @@ class BotMessageController extends Controller
 
             // $error = true;
             // $response = 'else';
-            $response  = "Halo *$nama* \r\n\r\n";
+            $response  = "Halo *$nama* , \r\n";
             $response .= "Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka* \r\n\r\n";
-            $response .= "*Jam Operasional* \r\n";
-            $response .= "IGD 24 Jam \r\n\r\n";
+            $response .= "*Jam Operasional IGD 24 Jam* \r\n";
             $response .= "Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini: \r\n";
         }
 
