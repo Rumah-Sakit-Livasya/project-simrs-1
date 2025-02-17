@@ -40,7 +40,7 @@ class BotMessageController extends Controller
         $data = $content['data'] ?? [];
         $response = '';
         if($msg == '/test-kirim') {
-            $response .=  'halo' . $data;
+            $response .=  'halo' . json_encode($data);
         } else if ($msg == '/rekapabsen') {
             // $total_pegawai_rs = Employee::where('is_active', 1)->where('company_id', 1)->count();
             // $total_pegawai_pt = Employee::where('is_active', 1)->where('company_id', 2)->count();
