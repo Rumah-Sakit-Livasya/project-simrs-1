@@ -317,11 +317,11 @@ class BotMessageController extends Controller
 
             // $error = true;
             // $response = 'else';
-            $response .= 'Halo ' . $nama . '\n\n';
-            $response .= 'Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka* \n\n';
-            $response .= '*Jam Operasional* \n';
-            $response .= 'IGD 24 Jam \n\n';
-            $response .= 'Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini:\n';
+            $response .= 'Halo ' . $nama . ' \n\n';
+            $response .= 'Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka* \n\n ';
+            $response .= '*Jam Operasional* \n ';
+            $response .= 'IGD 24 Jam \n\n ';
+            $response .= 'Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini: \n ';
         }
 
         return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
