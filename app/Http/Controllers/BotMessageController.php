@@ -114,7 +114,7 @@ class BotMessageController extends Controller
 
             // $response .= "\n";
             // $response .= "<b>Rekap tersebut diambil berdasarkan tanggal " . Carbon::now()->translatedFormat('d F Y h:i A') . "</b>";
-            $response .= $data;
+            $response .= 'halo';
         } else if ($msg == '/tidakabsen') {
             $response = "";
             if (isset($data["shift"])) {
