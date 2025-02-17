@@ -40,9 +40,9 @@ class BotMessageController extends Controller
         $msg = $content['message'] ?? '';
         $data = $content['data'] ?? [];
         $nama = $data[1]['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
-        $nomor = 
+        $nomor =
 
-        $response = '';
+            $response = '';
         if ($msg == '/test-kirim') {
             $response .= 'Halo ' . $nama;
         } else if ($msg == '/rekapabsen') {
@@ -317,11 +317,11 @@ class BotMessageController extends Controller
 
             // $error = true;
             // $response = 'else';
-            $response .= 'Halo ' . $nama . ' \n\n';
-            $response .= 'Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka* \n\n ';
-            $response .= '*Jam Operasional* \n ';
-            $response .= 'IGD 24 Jam \n\n ';
-            $response .= 'Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini: \n ';
+            $response  = "Halo *$nama* \r\n\r\n";
+            $response .= "Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka* \r\n\r\n";
+            $response .= "*Jam Operasional* \r\n";
+            $response .= "IGD 24 Jam \r\n\r\n";
+            $response .= "Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini: \r\n";
         }
 
         return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
