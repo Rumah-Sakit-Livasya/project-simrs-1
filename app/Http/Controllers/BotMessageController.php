@@ -38,10 +38,10 @@ class BotMessageController extends Controller
         // Logika bisnis
         $msg = $content['message'] ?? '';
         $data = $content['data'] ?? [];
+        $nama = $data[1]['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
         $response = '';
         if ($msg == '/test-kirim') {
-            $nama = $data[1]['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
-            $response .= 'Halo' . $nama;
+            $response .= 'Halo ' . $nama;
         } else if ($msg == '/rekapabsen') {
             $total_pegawai_rs = Employee::where('is_active', 1)->where('company_id', 1)->count();
             $total_pegawai_pt = Employee::where('is_active', 1)->where('company_id', 2)->count();
@@ -314,6 +314,7 @@ class BotMessageController extends Controller
 
             $error = true;
             $response = 'else';
+            $response .= 'Test Else';
         }
 
         return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
