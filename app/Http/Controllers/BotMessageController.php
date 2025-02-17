@@ -41,8 +41,7 @@ class BotMessageController extends Controller
         $response = '';
         if($msg == '/test-kirim') {
             'halo' . $data;
-        }
-        if ($msg == '/rekapabsen') {
+        } else if ($msg == '/rekapabsen') {
             $total_pegawai_rs = Employee::where('is_active', 1)->where('company_id', 1)->count();
             $total_pegawai_pt = Employee::where('is_active', 1)->where('company_id', 2)->count();
             $total_clockin = Attendance::whereNotNull('clock_in')
