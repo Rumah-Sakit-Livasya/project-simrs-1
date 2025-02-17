@@ -5,7 +5,7 @@
         main {
             overflow-x: hidden;
         }
-        
+
         input[type="time"] {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -137,6 +137,36 @@
                         @include('pages.simrs.poliklinik.partials.detail-pasien')
                         <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
                         <div class="row">
+                            <div class="col-12">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 20%;" valign="middle">
+                                                <label class="mt-2">Nama Pasien</label>
+                                            </td>
+                                            <td style="width: 3%;" valign="middle">
+                                                <label class="mt-2">:</label>
+                                            </td>
+                                            <td style="width: 50%;">
+                                                <select
+                                                    class="select2 form-control @error('departement_id') is-invalid @enderror filter-poli"
+                                                    name="departement_id" id="departement_id_pengkajian_lanjutan">
+                                                    <option value=""></option>
+                                                    @foreach ($departements as $departement)
+                                                        <option value="{{ $departement->id }}"
+                                                            {{ ($registration->departement_id ?? '') == $departement->id ? 'selected' : '' }}>
+                                                            {{ $departement->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td style="width: 20%;">
+                                                <button class="btn btn-primary">Tambah</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -150,6 +180,9 @@
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');
+            $('.select2').select2({
+                placeholder: 'Pilih Item',
+            });
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });

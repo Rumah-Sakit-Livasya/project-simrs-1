@@ -134,11 +134,12 @@
                     <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
                         @include('pages.simrs.poliklinik.partials.detail-pasien')
                         <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
-                        <div class="row">
+                        <header class="text-primary text-center font-weight-bold mb-4">
+                            <div id="alert-pengkajian"></div>
+                            <h2 class="font-weight-bold">FORMULIR REKONSILIASI OBAT</h4>
+                        </header>
+                        <div class="row mt-5">
                             <div class="col-md-12">
-                                <header class="green-text">
-                                    <h4>FORMULIR REKONSILIASI OBAT</h4>
-                                </header>
 
                                 <div class="row">
                                     <div class="col-md-6">
@@ -1507,7 +1508,7 @@
 @endsection
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-
+    @include('pages.simrs.poliklinik.partials.js-filter')
     <script>
         $(document).ready(function() {
 

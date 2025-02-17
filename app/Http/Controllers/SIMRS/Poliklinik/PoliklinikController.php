@@ -69,6 +69,8 @@ class PoliklinikController extends Controller
             return view('pages.simrs.poliklinik.dokter.pengkajian', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'cppt_dokter') {
             return view('pages.simrs.poliklinik.dokter.cppt', compact('registration', 'departements', 'jadwal_dokter'));
+        } elseif ($menu == 'resume_medis_rajal') {
+            return view('pages.simrs.poliklinik.dokter.resume_medis', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_gizi') {
             return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'cppt_farmasi') {
@@ -83,6 +85,12 @@ class PoliklinikController extends Controller
             $list_tindakan_medis = TindakanMedis::all();
             $tindakan_medis_yang_dipakai = TindakanMedisRajal::where('registration_id', $registration->id)->get();
             return view('pages.simrs.poliklinik.layanan.tindakan_medis', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis', 'tindakan_medis_yang_dipakai'));
+        } elseif ($menu == 'pemakaian_alat') {
+            $list_tindakan_medis = TindakanMedis::all();
+            $tindakan_medis_yang_dipakai = TindakanMedisRajal::where('registration_id', $registration->id)->get();
+            return view('pages.simrs.poliklinik.layanan.pemakaian_alat', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis', 'tindakan_medis_yang_dipakai'));
+        } else if ($menu == 'patologi_klinik') {
+            return view('pages.simrs.poliklinik.layanan.pemakaian_alat', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis', 'tindakan_medis_yang_dipakai'));
         } else {
             return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
         }

@@ -608,7 +608,7 @@
 @endsection
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-
+    @include('pages.simrs.poliklinik.partials.js-filter')
     <script>
         $(document).ready(function() {
 
