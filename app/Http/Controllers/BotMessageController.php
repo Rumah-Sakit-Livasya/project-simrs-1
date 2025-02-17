@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\Employee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class BotMessageController extends Controller
@@ -39,6 +40,8 @@ class BotMessageController extends Controller
         $msg = $content['message'] ?? '';
         $data = $content['data'] ?? [];
         $nama = $data[1]['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
+        $nomor = 
+
         $response = '';
         if ($msg == '/test-kirim') {
             $response .= 'Halo ' . $nama;
@@ -314,7 +317,11 @@ class BotMessageController extends Controller
 
             // $error = true;
             // $response = 'else';
-            $response .= 'Test Else';
+            $response .= 'Halo ' . $nama . '\n\n';
+            $response .= 'Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka* \n\n';
+            $response .= '*Jam Operasional* \n';
+            $response .= 'IGD 24 Jam \n\n';
+            $response .= 'Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini:\n';
         }
 
         return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
@@ -426,4 +433,50 @@ class BotMessageController extends Controller
             return response()->json(['results' => $responses]);
         }
     }
+
+    // function sendInteractiveMessage($recipient)
+    // {
+    //     $whatsappApiUrl = "https://graph.facebook.com/v19.0/{phone_number_id}/messages";
+    //     $accessToken = "{your_access_token}";
+
+    //     $payload = [
+    //         "messaging_product" => "whatsapp",
+    //         "recipient_type" => "individual",
+    //         "to" => $recipient, // Nomor WhatsApp penerima
+    //         "type" => "interactive",
+    //         "interactive" => [
+    //             "type" => "list",
+    //             "body" => [
+    //                 "text" => "Silakan pilih layanan yang Anda butuhkan:"
+    //             ],
+    //             "action" => [
+    //                 "button" => "Pilih",
+    //                 "sections" => [
+    //                     [
+    //                         "title" => "Layanan Kami",
+    //                         "rows" => [
+    //                             [
+    //                                 "id" => "/jadwal_praktek",
+    //                                 "title" => "Jadwal Praktek Dokter"
+    //                             ],
+    //                             [
+    //                                 "id" => "/info_rawat_inap",
+    //                                 "title" => "Info Rawat Inap"
+    //                             ],
+    //                             [
+    //                                 "id" => "/info_poli",
+    //                                 "title" => "Pendaftaran Poliklinik"
+    //                             ]
+    //                         ]
+    //                     ]
+    //                 ]
+    //             ]
+    //         ]
+    //     ];
+
+    //     $response = Http::withToken($accessToken)
+    //         ->post($whatsappApiUrl, $payload);
+
+    //     return $response->json();
+    // }
 }
