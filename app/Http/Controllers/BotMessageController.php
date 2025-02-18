@@ -351,11 +351,11 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $response = [
+        $response = 
             [
                 'message_type' => 'string',
                 'data' => 'isi string'
-            ],
+            ];
             // [
             //     'message_type' => 'array',
             //     'title' => 'Judul Tombol',
@@ -366,7 +366,7 @@ class BotMessageController extends Controller
             //         ]
             //     ]
             // ]
-        ];
+        // ];
         
         return response()->json($response);
         
