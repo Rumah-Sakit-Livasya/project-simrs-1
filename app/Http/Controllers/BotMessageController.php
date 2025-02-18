@@ -351,9 +351,27 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $response = 'Halo';
+        $response = [
+            [
+                'message_type' => 'string',
+                'data' => 'isi string'
+            ],
+            [
+                'message_type' => 'array',
+                'title' => 'Judul Tombol',
+                'data' => [
+                    [
+                        'id' => "/jadwal_praktek",
+                        'title' => "Jadwal Praktek Dokter"
+                    ]
+                ]
+            ]
+        ];
+        
+        return response()->json($response);
+        
 
-        return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
+        // return response()->json(['error' => ($error ? "1" : "0"), $response]);
     }
 
     public function notifyExpiryContract(Request $request)
