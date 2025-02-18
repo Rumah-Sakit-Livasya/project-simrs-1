@@ -359,6 +359,7 @@ class BotMessageController extends Controller
             [
                 'message_type' => 'array',
                 'title' => 'Judul Tombol',
+                'body' => 'Isi Body',
                 'data' => [
                     [
                         'id' => "/jadwal_praktek",
