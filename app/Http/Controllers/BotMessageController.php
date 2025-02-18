@@ -356,16 +356,16 @@ class BotMessageController extends Controller
                 'message_type' => 'string',
                 'data' => 'isi string'
             ],
-            [
-                'message_type' => 'array',
-                'title' => 'Judul Tombol',
-                'data' => [
-                    [
-                        'id' => "/jadwal_praktek",
-                        'title' => "Jadwal Praktek Dokter"
-                    ]
-                ]
-            ]
+            // [
+            //     'message_type' => 'array',
+            //     'title' => 'Judul Tombol',
+            //     'data' => [
+            //         [
+            //             'id' => "/jadwal_praktek",
+            //             'title' => "Jadwal Praktek Dokter"
+            //         ]
+            //     ]
+            // ]
         ];
         
         return response()->json($response);
