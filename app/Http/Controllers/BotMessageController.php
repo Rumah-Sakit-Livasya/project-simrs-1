@@ -325,7 +325,7 @@ class BotMessageController extends Controller
 
         return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
     }
-    
+
     public function livasyaMessage(Request $request)
     {
         // Cek apakah metode POST
@@ -351,25 +351,33 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $response = 
-            [
-                'message_type' => 'string',
-                'data' => 'isi string'
-            ];
+        $response =
             // [
             //     'message_type' => 'array',
-            //     'title' => 'Judul Tombol',
-            //     'data' => [
-            //         [
-            //             'id' => "/jadwal_praktek",
-            //             'title' => "Jadwal Praktek Dokter"
-            //         ]
-            //     ]
-            // ]
+            //     'data' => 'isi string'
+            // ];
+            [
+                'message_type' => 'array',
+                'title' => 'Judul Tombol',
+                'data' => [
+                    [
+                        'id' => "/jadwal_praktek",
+                        'title' => "Jadwal Praktek Dokter"
+                    ],
+                    [
+                        'id' => "/info_ranap",
+                        'title' => "Informasi Rawat Inap"
+                    ],
+                    [
+                        'id' => "/pendaftaran",
+                        'title' => "Informasi Pendaftaran"
+                    ],
+                ]
+            ];
         // ];
-        
+
         return response()->json($response);
-        
+
 
         // return response()->json(['error' => ($error ? "1" : "0"), $response]);
     }
