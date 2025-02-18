@@ -6,13 +6,15 @@
             </div>
             <div class="col-lg-9">
                 <a href="#">
-                    <h5 class="text-danger text-decoration-underline">{{$registration->patient->name}}
+                    <h5 class="text-danger text-decoration-underline">{{ $registration->patient->name }}
                     </h5>
                 </a>
-                <p class="text-small text-secondary mb-1">{{\Carbon\Carbon::parse($registration->patient->birth_of_date)->format('d M Y')}} ({{ \Carbon\Carbon::parse($registration->patient->date_of_birth)->diff(\Carbon\Carbon::now())->format('%y tahun %m bulan %d hari') }}
+                <p class="text-small text-secondary mb-1">
+                    {{ \Carbon\Carbon::parse($registration->patient->birth_of_date)->format('d M Y') }}
+                    ({{ \Carbon\Carbon::parse($registration->patient->date_of_birth)->diff(\Carbon\Carbon::now())->format('%y tahun %m bulan %d hari') }}
                     )</p>
-                <p class="text-small text-secondary mb-1">RM {{$registration->patient->medical_record_number}}</p>
-                <p class="text-small text-secondary mb-1">{{$registration->penjamin->nama_perusahaan}}</p>
+                <p class="text-small text-secondary mb-1">RM {{ $registration->patient->medical_record_number }}</p>
+                <p class="text-small text-secondary mb-1">{{ $registration->penjamin->nama_perusahaan }}</p>
                 <p class="text-small text-secondary mb-1">Info Billing: <span class="text-success">30.000</span></p>
                 <p class="text-small text-secondary mb-1">Tidak ada alergi</p>
             </div>
@@ -25,12 +27,13 @@
             </div>
             <div class="col-lg-9">
                 <a href="#">
-                    <h5 class="text-danger text-decoration-underline">{{$registration->doctor->employee->fullname}}
+                    <h5 class="text-danger text-decoration-underline">{{ $registration->doctor->employee->fullname }}
                     </h5>
                 </a>
-                <p class="text-small text-secondary mb-1">{{$registration->departement->name}}</p>
-                <p class="text-small text-secondary mb-1">Reg {{$registration->registration_number}} ({{\Carbon\Carbon::parse($registration->date)->format('d M Y')}})</p>
-                <p class="text-small text-secondary mb-1">{{$registration->registration_type}}</p>
+                <p class="text-small text-secondary mb-1">{{ $registration->departement->name }}</p>
+                <p class="text-small text-secondary mb-1">Reg {{ $registration->registration_number }}
+                    ({{ \Carbon\Carbon::parse($registration->date)->format('d M Y') }})</p>
+                <p class="text-small text-secondary mb-1">{{ $registration->registration_type }}</p>
             </div>
         </div>
     </div>
@@ -40,9 +43,9 @@
         <div class="card-actionbar">
             <div class="card-actionbar-row-left">
                 <button type="button" class="btn btn-outline-primary waves-effect waves-light margin-left-xl"
-                    id="panggil" onclick="panggil()"><span
-                        class="glyphicon glyphicon-music "></span>&nbsp;&nbsp;Panggil
+                    id="panggil"><span class="glyphicon glyphicon-music "></span>&nbsp;&nbsp;Panggil
                     Antrian</button>
+                <audio id="tts-audio"></audio>
                 <button class="btn btn-warning text-white"
                     onclick="popupFull('http://192.168.1.253/real/antrol_bpjs/update_waktu_antrean_vclaim/2411055632','p_card', 900,600,'no'); return false;">
                     <i class="mdi mdi-update"></i> Antrol BPJS
