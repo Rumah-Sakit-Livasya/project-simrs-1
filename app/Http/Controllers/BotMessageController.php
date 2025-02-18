@@ -351,11 +351,6 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        // Logika bisnis
-        $msg = $content['message'] ?? '';
-        $data = $content['data'] ?? [];
-        $nama = $data[1]['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
-
         $response = 'Halo';
 
         return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
