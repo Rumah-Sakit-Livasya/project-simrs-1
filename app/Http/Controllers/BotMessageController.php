@@ -356,7 +356,7 @@ class BotMessageController extends Controller
             //     'message_type' => 'array',
             //     'data' => 'isi string'
             // ];
-            [
+            $data = [
                 'message_type' => 'array',
                 'title' => 'Ini adalah judul tombol',
                 'body' => 'Isi Body',
@@ -391,6 +391,9 @@ class BotMessageController extends Controller
                     ]
                 ]
             ];
+            
+            header('Content-Type: application/json');
+            
         // ];
 
         return response()->json($response);
