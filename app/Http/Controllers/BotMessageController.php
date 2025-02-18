@@ -358,21 +358,37 @@ class BotMessageController extends Controller
             // ];
             [
                 'message_type' => 'array',
-                'title' => 'Judul Tombol',
+                'title' => 'Ini adalah judul tombol',
                 'body' => 'Isi Body',
                 'data' => [
                     [
-                        'id' => "/jadwal_praktek",
-                        'title' => "Jadwal Praktek Dokter"
+                        "id" => "/jadwal_praktek",
+                        "title" => "Jadwal Praktek Dokter"
                     ],
                     [
-                        'id' => "/info_ranap",
-                        'title' => "Informasi Rawat Inap"
+                        "id" => "/persyaratan_poliklinik_bpjs",
+                        "title" => "Persyaratan Pasien Poliklinik BPJS"
                     ],
                     [
-                        'id' => "/pendaftaran",
-                        'title' => "Informasi Pendaftaran"
+                        "id" => "/info_ranap",
+                        "title" => "Info Rawat Inap"
                     ],
+                    [
+                        "id" => "/info_rajal",
+                        "title" => "Info Rawat Jalan"
+                    ],
+                    [
+                        "id" => "/daftar_poli_rajal",
+                        "title" => "Pendaftaran Poliklinik"
+                    ],
+                    [
+                        "id" => "/info_medical",
+                        "title" => "Medical Check Up"
+                    ],
+                    [
+                        "id" => "/info_cs",
+                        "title" => "Customer Service"
+                    ]
                 ]
             ];
         // ];
