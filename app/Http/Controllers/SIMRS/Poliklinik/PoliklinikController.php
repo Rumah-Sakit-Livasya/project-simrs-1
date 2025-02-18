@@ -90,7 +90,7 @@ class PoliklinikController extends Controller
             $tindakan_medis_yang_dipakai = TindakanMedisRajal::where('registration_id', $registration->id)->get();
             return view('pages.simrs.poliklinik.layanan.pemakaian_alat', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis', 'tindakan_medis_yang_dipakai'));
         } else if ($menu == 'patologi_klinik') {
-            return view('pages.simrs.poliklinik.layanan.pemakaian_alat', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis', 'tindakan_medis_yang_dipakai'));
+            return view('pages.simrs.poliklinik.layanan.patologi_klinik', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis', 'tindakan_medis_yang_dipakai'));
         } else {
             return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
         }
