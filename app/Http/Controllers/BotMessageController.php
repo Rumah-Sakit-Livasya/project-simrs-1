@@ -352,45 +352,45 @@ class BotMessageController extends Controller
         }
 
         $response =
-            // [
-            //     'message_type' => 'array',
-            //     'data' => 'isi string'
-            // ];
-            $data = [
-                'message_type' => 'array',
-                'title' => 'Ini adalah judul tombol',
-                'body' => json_decode($request),
-                'data' => [
-                    [
-                        "id" => "/jadwal_praktek",
-                        "title" => "Jadwal Praktek Dokter"
-                    ],
-                    [
-                        "id" => "/persyaratan_poliklinik_bpjs",
-                        "title" => "Persyaratan Pasien Poliklinik BPJS"
-                    ],
-                    [
-                        "id" => "/info_ranap",
-                        "title" => "Info Rawat Inap"
-                    ],
-                    [
-                        "id" => "/info_rajal",
-                        "title" => "Info Rawat Jalan"
-                    ],
-                    [
-                        "id" => "/daftar_poli_rajal",
-                        "title" => "Pendaftaran Poliklinik"
-                    ],
-                    [
-                        "id" => "/info_medical",
-                        "title" => "Medical Check Up"
-                    ],
-                    [
-                        "id" => "/info_cs",
-                        "title" => "Customer Service"
-                    ]
-                ]
+            [
+                'message_type' => 'string',
+                'data' => $request
             ];
+            // $data = [
+            //     'message_type' => 'array',
+            //     'title' => 'Pilih Layanan',
+            //     'body' => json_decode($request),
+            //     'data' => [
+            //         [
+            //             "id" => "/jadwal_praktek",
+            //             "title" => "Jadwal Praktek Dokter"
+            //         ],
+            //         [
+            //             "id" => "/persyaratan_poliklinik_bpjs",
+            //             "title" => "Persyaratan Pasien Poliklinik BPJS"
+            //         ],
+            //         [
+            //             "id" => "/info_ranap",
+            //             "title" => "Info Rawat Inap"
+            //         ],
+            //         [
+            //             "id" => "/info_rajal",
+            //             "title" => "Info Rawat Jalan"
+            //         ],
+            //         [
+            //             "id" => "/daftar_poli_rajal",
+            //             "title" => "Pendaftaran Poliklinik"
+            //         ],
+            //         [
+            //             "id" => "/info_medical",
+            //             "title" => "Medical Check Up"
+            //         ],
+            //         [
+            //             "id" => "/info_cs",
+            //             "title" => "Customer Service"
+            //         ]
+            //     ]
+            // ];
             
             header('Content-Type: application/json');
             
