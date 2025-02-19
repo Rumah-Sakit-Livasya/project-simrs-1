@@ -359,7 +359,7 @@ class BotMessageController extends Controller
             $data = [
                 'message_type' => 'array',
                 'title' => 'Ini adalah judul tombol',
-                'body' => 'Isi Body',
+                'body' => json_decode($request),
                 'data' => [
                     [
                         "id" => "/jadwal_praktek",
