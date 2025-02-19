@@ -354,7 +354,7 @@ class BotMessageController extends Controller
         $response =
             [
                 'message_type' => 'string',
-                'data' => $request
+                'data' => json_decode($request)
             ];
             // $data = [
             //     'message_type' => 'array',
