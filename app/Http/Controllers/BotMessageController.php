@@ -40,9 +40,8 @@ class BotMessageController extends Controller
         $msg = $content['message'] ?? '';
         $data = $content['data'] ?? [];
         $nama = $data[1]['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
-        $nomor =
 
-            $response = '';
+        $response = '';
         if ($msg == '/test-kirim') {
             $response .= 'Halo ' . $nama;
         } else if ($msg == '/rekapabsen') {
@@ -351,49 +350,49 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $response =
-            [
-                'message_type' => 'string',
-                'data' => 'Ini adalah tipe string'
-            ];
-            // $data = [
-            //     'message_type' => 'array',
-            //     'title' => 'Pilih Layanan',
-            //     'body' => json_decode($request),
-            //     'data' => [
-            //         [
-            //             "id" => "/jadwal_praktek",
-            //             "title" => "Jadwal Praktek Dokter"
-            //         ],
-            //         [
-            //             "id" => "/persyaratan_poliklinik_bpjs",
-            //             "title" => "Persyaratan Pasien Poliklinik BPJS"
-            //         ],
-            //         [
-            //             "id" => "/info_ranap",
-            //             "title" => "Info Rawat Inap"
-            //         ],
-            //         [
-            //             "id" => "/info_rajal",
-            //             "title" => "Info Rawat Jalan"
-            //         ],
-            //         [
-            //             "id" => "/daftar_poli_rajal",
-            //             "title" => "Pendaftaran Poliklinik"
-            //         ],
-            //         [
-            //             "id" => "/info_medical",
-            //             "title" => "Medical Check Up"
-            //         ],
-            //         [
-            //             "id" => "/info_cs",
-            //             "title" => "Customer Service"
-            //         ]
-            //     ]
+        $response ='';
+            // [
+            //     'message_type' => 'string',
+            //     'data' => 'Ini adalah tipe string'
             // ];
-            
-            // header('Content-Type: application/json');
-            
+        // $data = [
+        //     'message_type' => 'array',
+        //     'title' => 'Pilih Layanan',
+        //     'body' => json_decode($request),
+        //     'data' => [
+        //         [
+        //             "id" => "/jadwal_praktek",
+        //             "title" => "Jadwal Praktek Dokter"
+        //         ],
+        //         [
+        //             "id" => "/persyaratan_poliklinik_bpjs",
+        //             "title" => "Persyaratan Pasien Poliklinik BPJS"
+        //         ],
+        //         [
+        //             "id" => "/info_ranap",
+        //             "title" => "Info Rawat Inap"
+        //         ],
+        //         [
+        //             "id" => "/info_rajal",
+        //             "title" => "Info Rawat Jalan"
+        //         ],
+        //         [
+        //             "id" => "/daftar_poli_rajal",
+        //             "title" => "Pendaftaran Poliklinik"
+        //         ],
+        //         [
+        //             "id" => "/info_medical",
+        //             "title" => "Medical Check Up"
+        //         ],
+        //         [
+        //             "id" => "/info_cs",
+        //             "title" => "Customer Service"
+        //         ]
+        //     ]
+        // ];
+
+        // header('Content-Type: application/json');
+
         // ];
 
         return response()->json($response);
