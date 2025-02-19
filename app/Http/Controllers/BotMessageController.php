@@ -354,7 +354,7 @@ class BotMessageController extends Controller
         $response =
             [
                 'message_type' => 'string',
-                'data' => json_decode($request)
+                'data' => 'Ini adalah tipe string'
             ];
             // $data = [
             //     'message_type' => 'array',
@@ -392,7 +392,7 @@ class BotMessageController extends Controller
             //     ]
             // ];
             
-            header('Content-Type: application/json');
+            // header('Content-Type: application/json');
             
         // ];
 
