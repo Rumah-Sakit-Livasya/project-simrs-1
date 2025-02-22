@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\Employee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -356,9 +357,9 @@ class BotMessageController extends Controller
         Log::info('Data Content: ', $content);
 
         if (isset($content['entry'][0]['changes'][0]['value']['messages'][0])) {
-            $message = $content['entry'][0]['changes'][0]['value']['messages'][0];
+            $message = Arr::get($content, 'entry.0.changes.0.value.messages.0.type', 'Tidak ada type');
             Log::info('Message Data: ', $message);
-            $type = $message['type'] ?? 'Tidak ada type';
+            $type = $message ?? 'Tidak ada type';
         } else {
             $type = 'Tidak ada message';
         }
