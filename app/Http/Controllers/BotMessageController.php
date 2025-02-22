@@ -352,7 +352,7 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $responseText = json_encode($request, JSON_PRETTY_PRINT);
+        $responseText = json_encode($request->json()->all());
 
         $response = [
             'message_type' => 'string',
