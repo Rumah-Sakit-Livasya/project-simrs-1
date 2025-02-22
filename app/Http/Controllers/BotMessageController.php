@@ -353,7 +353,7 @@ class BotMessageController extends Controller
         }
 
         $responseText = json_encode($content, JSON_PRETTY_PRINT);
-        $responseArray = json_encode($responseText);
+        $responseArray = json_decode($responseText);
         $type = $responseArray['entry'][0]['changes'][0]['value']['messages'][0]['type'];
 
         $response = [
