@@ -352,7 +352,7 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $message = $content['entry'][0]['changes'][0]['value']['messages'][0];
+        $message = $content['entry'][0]['changes'][0]['value']['messages'][0]['type'];
 
         // if($message['type'] === 'interactive') {
 
@@ -361,7 +361,7 @@ class BotMessageController extends Controller
         // $responseText = json_encode($content, JSON_PRETTY_PRINT);
         $response = [
             'message_type' => 'string',
-            'data' => json_encode($message, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+            'data' => $message
         ];
 
         return response()->json($response);
