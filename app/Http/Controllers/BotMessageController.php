@@ -352,7 +352,11 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $response = 'halo ini fizar';
+        $responseText = json_encode($content, JSON_PRETTY_PRINT);
+        $response = [
+            'message_type' => 'string',
+            'data' => $responseText
+        ];
 
         return response()->json($response);
 
