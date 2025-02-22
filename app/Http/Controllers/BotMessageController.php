@@ -7,6 +7,7 @@ use App\Models\Employee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BotMessageController extends Controller
@@ -352,15 +353,30 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
+        Log::info('Data Content: ', $content);
+
+        if (isset($content['entry'][0]['changes'][0]['value']['messages'][0])) {
+            $message = $content['entry'][0]['changes'][0]['value']['messages'][0];
+            Log::info('Message Data: ', $message);
+            $type = $message['type'] ?? 'Tidak ada type';
+        } else {
+            $type = 'Tidak ada message';
+        }
+
+        return response()->json([
+            'message_type' => 'string',
+            'data' => $type
+        ]);
+
         // $message = $content['entry'][0]['changes'][0]['value']['messages'][0]['type'];
 
-        $responseText = json_encode($content, JSON_PRETTY_PRINT);
-        $response = [
-            'message_type' => 'string',
-            'data' => $responseText
-        ];
+        // $responseText = json_encode($content, JSON_PRETTY_PRINT);
+        // $response = [
+        //     'message_type' => 'string',
+        //     'data' => $responseText
+        // ];
 
-        return response()->json($response);
+        // return response()->json($response);
 
 
         // return response()->json(['error' => ($error ? "1" : "0"), $response]);
