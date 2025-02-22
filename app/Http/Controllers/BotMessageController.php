@@ -337,6 +337,7 @@ class BotMessageController extends Controller
         // Ambil data dari header dan JSON
         $headers = $request->headers->all();
         $content = $request->json()->all();
+        $msg = $content['message'] ?? '';
 
         // Validasi header
         $key = $headers['key'][0] ?? '';
@@ -352,12 +353,45 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $responseText = json_encode($content, JSON_PRETTY_PRINT);
-
-        $response = [
-            'message_type' => 'string',
-            'data' => $responseText
-        ];
+        if($msg == 'test_string') {
+            $response = [
+                'message_type' => 'string',
+                'data' => 'Halo String'
+            ];
+        } else if ($msg == 'test_array') {
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'judul tombol nya',
+                'body' => 'isi text nya',
+                'data' => [
+                    [
+                        'id' => '/jadwal_praktek',
+                        'title' => 'Jadwal Praktek Dokter'
+                    ],
+                    [
+                        'id' => '/info_ranap',
+                        'title' => 'Info Rawat Inap'
+                    ],
+                    [
+                        'id' => '/info_rajal',
+                        'title' => 'Info Rawat Jalan'
+                    ],
+                    [
+                        'id' => '/daftar_poli_rajal',
+                        'title' => 'Pendaftaran Poliklinik'
+                    ],
+                    [
+                        'id' => '/info_medical',
+                        'title' => 'Medical Check Up'
+                    ],
+                    [
+                        'id' => '/info_cs',
+                        'title' => 'Customer Service'
+                    ]
+                ]
+            ];
+            
+        }
 
         return response()->json($response);
 
