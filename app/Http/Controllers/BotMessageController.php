@@ -336,7 +336,7 @@ class BotMessageController extends Controller
 
         // Ambil data dari header dan JSON
         $headers = $request->headers->all();
-        $content = json_decode(json_encode($request->json()->all()));
+        $content = $request->json()->all();
 
         // Validasi header
         $key = $headers['key'][0] ?? '';
@@ -352,11 +352,11 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $type = $content;
+        $responseText = json_encode($request, JSON_PRETTY_PRINT);
 
         $response = [
             'message_type' => 'string',
-            'data' => $type
+            'data' => $responseText
         ];
 
         return response()->json($response);
