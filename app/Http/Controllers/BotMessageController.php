@@ -352,7 +352,7 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $type = $content->entry[0]->changes[0]->messages[0]->type;
+        $type = $content;
 
         $response = [
             'message_type' => 'string',
