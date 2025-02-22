@@ -356,13 +356,9 @@ class BotMessageController extends Controller
 
         Log::info('Data Content: ', $content);
 
-        if (isset($content['entry'][0]['changes'][0]['value']['messages'][0])) {
-            $message = Arr::get($content, 'entry.0.changes.0.value.messages.0.type', 'Tidak ada type');
-            Log::info('Message Data: ', $message);
-            $type = $message ?? 'Tidak ada type';
-        } else {
-            $type = 'Tidak ada message';
-        }
+        $message = Arr::get($content, 'entry.0.changes.0.value.messages.0.type', 'Tidak ada type');
+        Log::info('Message Data: ', $message);
+        $type = $message ?? 'Tidak ada type';
 
         return response()->json([
             'message_type' => 'string',
