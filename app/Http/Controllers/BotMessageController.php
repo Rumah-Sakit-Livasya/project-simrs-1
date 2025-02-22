@@ -353,11 +353,8 @@ class BotMessageController extends Controller
         }
 
         // $message = $content['entry'][0]['changes'][0]['value']['messages'][0]['type'];
-            
-            $responseText = 'bukan interactive';
-        
 
-        // $responseText = json_encode($content, JSON_PRETTY_PRINT);
+        $responseText = json_encode($content, JSON_PRETTY_PRINT);
         $response = [
             'message_type' => 'string',
             'data' => $responseText
