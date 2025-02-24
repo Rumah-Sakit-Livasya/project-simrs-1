@@ -41,6 +41,7 @@ class PengkajianController extends Controller
 
     public function storeOrUpdatePengkajianRajal(Request $request)
     {
+        // dd($request);
         // Validate the incoming request data
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',

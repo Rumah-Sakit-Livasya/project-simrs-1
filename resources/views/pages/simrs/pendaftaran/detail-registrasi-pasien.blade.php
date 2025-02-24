@@ -14,7 +14,6 @@
             justify-items: center;
         }
 
-
         .card-head .header-pasien {
             display: grid;
             padding: 15px 24px;
@@ -117,7 +116,6 @@
                                 </div>
 
                                 <div class="col-md-10 col-bg-10">
-
                                     <ul class="nav nav-tabs nav-tabs-clean" role="tablist">
                                         <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#biodata"
                                                 role="tab">Biodata</a></li>
@@ -505,6 +503,7 @@
                     dropdownParent: $('#tutup-kunjungan'),
                     placeholder: "Pilih Alasan Keluar"
                 });
+                
                 $('#tutup-kunjungan #proses_keluar').select2({
                     dropdownCssClass: "move-up",
                     dropdownParent: $('#tutup-kunjungan'),
