@@ -408,7 +408,11 @@ class BotMessageController extends Controller
                     ],
                 ]
             ];
-        }
+        }else if($msg == '/info_ranap') {
+            $response = [
+                'message_type' => 'string',
+                'data' => 'Testtt'
+            ];
 
         return response()->json($response);
 
