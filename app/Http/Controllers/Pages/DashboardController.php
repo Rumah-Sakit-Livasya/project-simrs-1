@@ -999,8 +999,8 @@ class DashboardController extends Controller
         $check_date = null;
 
         $attendance_kemarin = Attendance::where('employee_id', auth()->user()->employee_id)->where('date', Carbon::now()->subDay()->format('Y-m-d'))->first();
-        if(isset($attendance_kemarin) || $attendance_kemarin != null) {
-            if($attendance_kemarin->shift->time_in > '20.00' && $attendance_kemarin->shift->time_out < '08.00') { //jika absen kemarin shift malam
+        if (isset($attendance_kemarin) || $attendance_kemarin != null) {
+            if ($attendance_kemarin->shift->time_in > '20.00' && $attendance_kemarin->shift->time_out < '08.00') { //jika absen kemarin shift malam
                 if (($attendance_kemarin->clock_in == null && $attendance_kemarin->clock_out == null) && $attendance_kemarin->is_day_off != 1) {
                     $check_date = 'today';
                 } else if ($attendance_kemarin->clock_in != null && $attendance_kemarin->clock_out == null && $attendance_kemarin->is_day_off != 1) {
@@ -1023,7 +1023,7 @@ class DashboardController extends Controller
         $selectedBulan = Carbon::now()->month;
         $selectedTahun = Carbon::now()->year;
 
-        return view('pages.absensi.absensi.index', compact('check_date','selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
+        return view('pages.absensi.absensi.index', compact('check_date', 'selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
     }
 
     public function getAttendancesFilter()
@@ -1265,19 +1265,8 @@ class DashboardController extends Controller
         $currentMonth = request()->bulan ?? Carbon::now()->month;
         $currentDay = request()->bulan ?? Carbon::now()->day;
 
-        if (request()->tahun != null && request()->bulan != null) {
-            $startDate = Carbon::create(request()->tahun, request()->bulan, 26)->subMonth();
-            $endDate = Carbon::create(request()->tahun, request()->bulan, 25);
-        } else {
-            if ($currentDay > 25) {
-                $startDate = Carbon::create($currentYear, $currentMonth, 26);
-                $endDate = Carbon::create($currentYear, $currentMonth, 25)->addMonth();
-                $currentMonth = $request->bulan ?? Carbon::now()->month + 1;
-            } else {
-                $startDate = Carbon::create($currentYear, $currentMonth, 26)->subMonth();
-                $endDate = Carbon::create($currentYear, $currentMonth, 25);
-            }
-        }
+        $startDate = Carbon::create($currentYear, $currentMonth, 1)->startOfMonth();
+        $endDate = Carbon::create($currentYear, $currentMonth, 1)->endOfMonth();
 
         //list organisasi berdasarkan jabatan
         $organizations = [];
@@ -1340,6 +1329,7 @@ class DashboardController extends Controller
                     });
             })
                 ->get();
+
             $attendance_requests = AttendanceRequest::whereBetween('date', [$startDate, $endDate])->get();
             $total_disetujui = $day_off_requests->where('is_approved', 'Disetujui')->count() + $attendance_requests->where('is_approved', 'Disetujui')->count();
             $total_pending = $day_off_requests->where('is_approved', 'Pending')->count() + $attendance_requests->where('is_approved', 'Pending')->count();
@@ -1703,7 +1693,7 @@ class DashboardController extends Controller
         usort($nilai_pegawai, function ($a, $b) {
             return $b[1] - $a[1];
         });
-        
+
 
         // Mengambil 5 pegawai dengan total nilai terbanyak
         $top_5_pegawai = array_slice($nilai_pegawai, 0, 5);
@@ -1713,7 +1703,7 @@ class DashboardController extends Controller
         $cukup = $rekap_penilaian->where('tahun', Carbon::now()->format('Y'))->where('total_nilai', '>', 65)->where('total_nilai', '<', 86);
         $kurang = $rekap_penilaian->where('tahun', Carbon::now()->format('Y'))->where('total_nilai', '>', 50)->where('total_nilai', '<', 66);
         $sangat_kurang = $rekap_penilaian->where('tahun', Carbon::now()->format('Y'))->where('total_nilai', '<=', 50);
-        
+
         return view('pages.kpi.penilaian.lists', compact('rekap_penilaian', 'sangat_baik', 'baik', 'cukup', 'kurang', 'sangat_kurang', 'top_5_pegawai'));
     }
 
