@@ -165,9 +165,10 @@
                                             <div class="form-group mb-3">
                                                 <div class="input-group">
                                                     <input type="date" name="tgl_masuk" class="form-control "
-                                                        placeholder="Tanggal" id="tgl_masuk" value="">
+                                                        placeholder="Tanggal" id="tgl_masuk"
+                                                        value="{{ $pengkajian?->tgl_masuk?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
                                                     <input type="time" name="jam_masuk" class="form-control "
-                                                        placeholder="Jam" id="jam_masuk" value="">
+                                                        placeholder="Jam" id="jam_masuk" value="{{ $pengkajian?->jam_masuk ?? '' }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -1479,15 +1480,24 @@
                                 <div class="row mt-5">
                                     <div class="col-md-12 px-3">
                                         <div class="card-actionbar">
-                                            <div class="card-actionbar-row d-flex justify-content-between align-items-center">
-                                                <button type="button" class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center" data-dismiss="modal" data-status="0">
+                                            <div
+                                                class="card-actionbar-row d-flex justify-content-between align-items-center">
+                                                <button type="button"
+                                                    class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                                    data-dismiss="modal" data-status="0">
                                                     <span class="mdi mdi-printer mr-2"></span> Print
                                                 </button>
                                                 <div style="width: 40%" class="d-flex justify-content-end">
-                                                    <button type="button" class="btn mr-2 btn-warning waves-effect text-white waves-light save-form d-flex align-items-center" data-dismiss="modal" data-status="0" id="sd-pengkajian-nurse-rajal">
+                                                    <button type="button"
+                                                        class="btn mr-2 btn-warning waves-effect text-white waves-light save-form d-flex align-items-center"
+                                                        data-dismiss="modal" data-status="0"
+                                                        id="sd-pengkajian-nurse-rajal">
                                                         <span class="mdi mdi-content-save mr-2"></span> Simpan (draft)
                                                     </button>
-                                                    <button type="button" class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center" data-dismiss="modal" data-status="1" id="sf-pengkajian-nurse-rajal">
+                                                    <button type="button"
+                                                        class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                                        data-dismiss="modal" data-status="1"
+                                                        id="sf-pengkajian-nurse-rajal">
                                                         <span class="mdi mdi-content-save mr-2"></span> Simpan (final)
                                                     </button>
                                                 </div>
