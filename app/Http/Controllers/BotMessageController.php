@@ -386,10 +386,6 @@ class BotMessageController extends Controller
                         'title' => 'Medical Check Up'
                     ],
                     [
-                        'id' => '/info_cs',
-                        'title' => 'Customer Service'
-                    ],
-                    [
                         'id' => '/info_persalinan',
                         'title' => 'Biaya Persalinan'
                     ]
