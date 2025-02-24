@@ -13,6 +13,7 @@ class BotMessageController extends Controller
 {
     public function processMessage(Request $request)
     {
+        
         // Cek apakah metode POST
         if ($request->getMethod() !== 'POST') {
             return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
@@ -391,6 +392,22 @@ class BotMessageController extends Controller
                 ]
             ];
             
+        } else if ($msg == 'Jadwal Praktek Dokter') {
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Jadwal Praktek',
+                'body' => 'Berikut adalah jadwal praktek dokter di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/klinik_obgyn',
+                        'title' => 'Klinik Obgyn'
+                    ],
+                    [
+                        'id' => '/klinik_tht',
+                        'title' => 'Klinik THT'
+                    ],
+                ]
+            ];
         }
 
         return response()->json($response);
