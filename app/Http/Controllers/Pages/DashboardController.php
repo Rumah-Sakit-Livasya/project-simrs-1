@@ -1322,15 +1322,16 @@ class DashboardController extends Controller
             $total_ditolak = $day_off_requests->where('is_approved', 'Ditolak')->count() + $attendance_requests->where('is_approved', 'Ditolak')->count();
             $total_disetujui = $day_off_requests->where('is_approved', 'Disetujui')->count() + $attendance_requests->where('is_approved', 'Disetujui')->count();
         } else {
-            $day_off_requests = DayOffRequest::where(function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('start_date', [$startDate, $endDate])
-                    ->orWhereBetween('end_date', [$startDate, $endDate])
-                    ->orWhere(function ($query) use ($startDate, $endDate) {
-                        $query->where('start_date', '=', $startDate)
-                            ->where('end_date', '=', $endDate);
-                    });
-            })
-                ->get();
+            // $day_off_requests = DayOffRequest::where(function ($query) use ($startDate, $endDate) {
+            //     $query->whereBetween('start_date', [$startDate, $endDate])
+            //         ->orWhereBetween('end_date', [$startDate, $endDate])
+            //         ->orWhere(function ($query) use ($startDate, $endDate) {
+            //             $query->where('start_date', '<=', $startDate)
+            //                 ->where('end_date', '>=', $endDate);
+            //         });
+            // })
+            //     ->get();
+            $day_off_requests = DayOffRequest::all();
             $attendance_requests = AttendanceRequest::whereBetween('date', [$startDate, $endDate])->get();
             $total_disetujui = $day_off_requests->where('is_approved', 'Disetujui')->count() + $attendance_requests->where('is_approved', 'Disetujui')->count();
             $total_pending = $day_off_requests->where('is_approved', 'Pending')->count() + $attendance_requests->where('is_approved', 'Pending')->count();
