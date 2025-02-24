@@ -43,9 +43,10 @@
         <div class="card-actionbar">
             <div class="card-actionbar-row-left">
                 <button type="button" class="btn btn-outline-primary waves-effect waves-light margin-left-xl"
-                    id="panggil"><span class="glyphicon glyphicon-music "></span>&nbsp;&nbsp;Panggil
-                    Antrian</button>
-                <audio id="tts-audio"></audio>
+                    id="panggil" data-no-urut="{{ $registration?->no_urut }}"
+                    data-poliklinik="{{ $registration?->departement?->name }}">
+                    <span class="glyphicon glyphicon-music"></span>&nbsp;&nbsp;Panggil Antrian
+                </button>
                 <button class="btn btn-warning text-white"
                     onclick="popupFull('http://192.168.1.253/real/antrol_bpjs/update_waktu_antrean_vclaim/2411055632','p_card', 900,600,'no'); return false;">
                     <i class="mdi mdi-update"></i> Antrol BPJS
@@ -62,3 +63,18 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('panggil').addEventListener('click', function() {
+            const noUrut = this.getAttribute('data-no-urut');
+            const poliklinik = this.getAttribute('data-poliklinik').toLowerCase();
+            const text = `Antrian... ${noUrut} , ${poliklinik}`;
+            const ttsUrl = `/api/tts?text=${encodeURIComponent(text)}`;
+
+            const audio = new Audio(ttsUrl);
+            audio.playbackRate = 0.7;
+            audio.play().catch(error => console.error('Gagal memutar audio:', error));
+        });
+    });
+</script>
