@@ -392,7 +392,7 @@ class BotMessageController extends Controller
                 ]
             ];
             
-        } else if ($msg == 'Jadwal Praktek Dokter') {
+        } else if ($msg == '/jadwal_praktek') {
             $response =  [
                 'message_type' => 'array',
                 'title' => 'Jadwal Praktek',
