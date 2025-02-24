@@ -413,6 +413,7 @@ class BotMessageController extends Controller
                 'message_type' => 'string',
                 'data' => 'Testtt'
             ];
+        }
 
         return response()->json($response);
 
