@@ -392,7 +392,7 @@ class BotMessageController extends Controller
                 ]
             ];
             
-        } else if ($msg == '/jadwal_praktek') {
+        } else if ($msg == '/jadwal_poli') {
             $response =  [
                 'message_type' => 'array',
                 'title' => 'Jadwal Poli',
