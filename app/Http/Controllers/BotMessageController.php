@@ -367,7 +367,7 @@ class BotMessageController extends Controller
                 'data' => [
                     [
                         'id' => '/jadwal_praktek',
-                        'title' => 'Jadwal Praktek Dokter'
+                        'title' => 'Jadwal Poli'
                     ],
                     [
                         'id' => '/info_ranap',
@@ -386,8 +386,8 @@ class BotMessageController extends Controller
                         'title' => 'Medical Check Up'
                     ],
                     [
-                        'id' => '/info_cs',
-                        'title' => 'Customer Service'
+                        'id' => '/info_persalinan',
+                        'title' => 'Biaya Persalinan'
                     ]
                 ]
             ];
@@ -396,21 +396,93 @@ class BotMessageController extends Controller
 
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Jadwal Praktek',
-                'body' => 'Berikut adalah jadwal praktek dokter di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'title' => 'Jadwal Poli',
+                'body' => 'Berikut adalah jadwal Poliklinik di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
                         'id' => '/klinik_obgyn',
-                        'title' => 'Klinik Obgyn'
+                        'title' => 'Poli Obgyn'
+                    ],
+                    [
+                        'id' => '/klinik_anak',
+                        'title' => 'Poli Anak'
                     ],
                     [
                         'id' => '/klinik_tht',
-                        'title' => 'Klinik THT'
+                        'title' => 'Poli THT'
+                    ],
+                    [
+                        'id' => '/klinik_dalam',
+                        'title' => 'Poli Penyakit Dalam'
+                    ],
+                    [
+                        'id' => '/klinik_bedah',
+                        'title' => 'Poli Bedah'
+                    ],
+                    [
+                        'id' => '/klinik_paru',
+                        'title' => 'Poli Paru'
+                    ],
+                    [
+                        'id' => '/klinik_jiwa',
+                        'title' => 'Poli Jiwa'
+                    ],
+                    [
+                        'id' => '/klinik_gigi',
+                        'title' => 'Poli Gigi'
+                    ],
+                    [
+                        'id' => '/klinik_jantung',
+                        'title' => 'Poli Jantung'
                     ],
                 ]
             ];
+        } else if($msg == '/klinik_obgyn') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Jadwal praktek poliklinik Obgyn*\n\n*dr Dindaadi kusuma Sp.OG*\nSenin-kamis : 08.30-13.00\nJumat-sabtu : 13.00-15.00\n\n*dr H Mohammad Taufiq Sp.OG*\nJumat dan sabtu : 8.30-10.30\nSenin- sabtu : 16.00-18.00\nNote : hari libur/tanggal merah tidak ada praktek"
+            ];
+        } else if($msg == '/klinik_anak') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*JADWAL POLI ANAK*\n\n- Pasien umum\n\n*Dr. Tina Restu Sp.A*\nSenin-sabtu Pukul : 07.00-09.00\n\n*Dr. Ratih Sp.A*\nSenin, Rabu Pukul : 14.30 - Selesai\nSelasa,kamis Jumat Pukul :15.30 - Selesai\n- Pasien BPJS dengan Rujukan faskes 1\n\n*Dr. Tina Restu Sp.A*\nSenin - Jumat  Pukul : 13.00 - Selesai\n\n*Dr. Ratih Sp.A*\nSenin,Rabu  Pukul : 14.30 - Selesai\nSelasa , kamis dan jumat  Pukul : 15.30-Selesai\n\nHari libur/tanggal merah tidak praktek"
+            ];
+        } else if($msg == '/klinik_tht') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*JADWAL POLIKLINIK THT*\n\nPasien umum,Asuransi,BPJS\n\n*dr. H.M.Nuruddin Zainudin, Sp.THT-KL*\n\nSelasa & Kamis\nPukul : 12.00-Selesai"
+            ];
+        } else if($msg == '/klinik_dalam') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*JADWAL POLIKLINIK PENYAKIT DALAM*\n\n Pasien umum,asuransi,BPJS\n\n*dr. Zikry Aulia Hidayat, Sp.PD*\n\nSenin,rabu,Jumat\nPukul 16.00-Selesai\n\n*dr. Jansen budiono Sp.PD*\n\nSelasa dan Kamis\nPukul 15.00-Selesai"
+            ];
+        } else if($msg == '/klinik_bedah') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Jadwal Poliklinik Bedah Umum*\n\n*dr. Rizky Baihaqi Sp.B*\n\nSenin-Sabtu\nPukul 08.00-12.00\n\nJumat\nPukul 08.00-11.00\n\nMelayani peserta JKN/BPJS,Umum dan Asuransi Swasta"
+            ];
+        } else if($msg == '/klinik_paru') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Jadwal Poliklinik spesialis Paru*\n\n*dr Tania libristina ambun Sp.P*\n\nSelasa, Rabu, Kamis\nPkl 15.00-17.00\n\nBerlaku dengan reservasi H-1"
+            ];
+        } else if($msg == '/klinik_jiwa') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Jadwal Poliklinik Spesialis Kedokteran Jiwa*\n\n*dr Agri Mohammad iqbal Sp.KJ*\n\nSenin,Rabu,Jumat\nPkl. 08.00-10.00\n\nBerlaku dengan reservasi H-1"
+            ];
+        } else if($msg == '/klinik_gigi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Jadwal Poliklinik Gigi*\n\n*drg. Viki Dwi prananda*\n\nSenin-Jumat\nPkl . 08.00-15.00\n\nSabtu\nPkl 08.00-12.00"
+            ];
+        } else if($msg == '/klinik_jantung') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Jadwal belum ada"
+            ];
         }
-
         return response()->json($response);
 
 
