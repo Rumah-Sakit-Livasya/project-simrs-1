@@ -366,7 +366,7 @@ class BotMessageController extends Controller
                 'body' => 'isi text nya',
                 'data' => [
                     [
-                        'id' => '/jadwal_poli'
+                        'id' => '/jadwal_praktek',
                         'title' => 'Jadwal Poliklinik'
                     ],
                     [
@@ -392,10 +392,10 @@ class BotMessageController extends Controller
                 ]
             ];
             
-        } else if ($msg == '/jadwal_poli') {
+        } else if ($msg == '/jadwal_praktek') {
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Jadwal Poli',
+                'title' => 'Jadwal Poliklinik',
                 'body' => 'Berikut adalah jadwal Poliklinik di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
