@@ -413,10 +413,10 @@ class BotMessageController extends Controller
                 'message_type' => 'string',
                 'data' => 'Testtt'
             ];
-        }else if($msg == '/info_persalinan') {
+        } else if ($msg == '/info_persalinan') {
             $response = [
                 'message_type' => 'string',
-                'data' => '*Biaya Persalinan Normal* /nSuperior : Mulai dari 6.5jt /nDeluxe 2 : Mulai dari 7jt /nDeluxe 1 : 8.5jt /nVIP : Mulai dari 9jt /n/n *Biaya Persalinan Caesar* /nSuperior : Mulai dari 12jt /nDeluxe 2 : Mulai dari 14jt /nDeluxe 1 : Mulai dari 16jt /nVIP : Mulai dari 18jt /n/n *Fasilitas yang diberikan* : Vaksin Hb + Polio, Foto Baby setelah melahirkan, dan bingkisan. /n*Fasilitas Tambahan* : Foto Maternity dan Partus Moment (Video persalinan khusus VIP), namun harus booking terlebih dahulu min. 1bulan sebelum HPL' 
+                'data' => '*Biaya Persalinan Normal* \nSuperior: Mulai dari 6.5jt \nDeluxe 2: Mulai dari 7jt \nDeluxe 1: 8.5jt \nVIP: Mulai dari 9jt \n\n *Biaya Persalinan Caesar* \nSuperior: Mulai dari 12jt \nDeluxe 2: Mulai dari 14jt \nDeluxe 1: Mulai dari 16jt \nVIP: Mulai dari 18jt \n\n *Fasilitas yang diberikan*: Vaksin Hb + Polio, Foto Baby setelah melahirkan, dan bingkisan. \n*Fasilitas Tambahan*: Foto Maternity dan Partus Moment (Video persalinan khusus VIP), namun harus booking terlebih dahulu min. 1 bulan sebelum HPL.'
             ];
         }
 
