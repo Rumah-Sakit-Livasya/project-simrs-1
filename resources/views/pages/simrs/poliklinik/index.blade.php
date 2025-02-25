@@ -179,9 +179,9 @@
                                                 dilayani</label>
                                             <div class="input-group">
                                                 <input type="date" name="tgl_dilayani" class="form-control"
-                                                    placeholder="Tanggal" id="tgl_dilayani" value="">
+                                                    placeholder="Tanggal" id="tgl_dilayani" value="{{ $pengkajian?->tgl_dilayani?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
                                                 <input type="time" name="jam_dilayani" class="form-control"
-                                                    placeholder="Jam" id="jam_dilayani" value="">
+                                                    placeholder="Jam" id="jam_dilayani" value="{{ $pengkajian?->jam_dilayani ?? '' }}">
                                             </div>
                                         </div>
                                     </div>
@@ -190,7 +190,7 @@
                                             <label for="keluhan_utama" class="control-label text-primary">Keluhan utama
                                                 *</label>
                                             <textarea class="form-control" id="keluhan_utama" name="keluhan_utama" rows="3" required=""
-                                                data-label="Keluhan utama"></textarea>
+                                                data-label="Keluhan utama">{{$pengkajian?->keluhan_utama}}</textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -204,7 +204,7 @@
                                             <div class="input-group">
                                                 <div class="input-group">
                                                     <input id="pr" type="text" name="pr"
-                                                        class="form-control">
+                                                        class="form-control" value="{{$pengkajian?->pr}}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">x/menit</span>
                                                     </div>
@@ -217,7 +217,7 @@
                                             <label for="rr" class="text-primary">Respirasi (RR)</label>
                                             <div class="input-group">
                                                 <input class="form-control numeric" id="rr" name="rr"
-                                                    type="text">
+                                                    type="text" value="{{$pengkajian?->rr}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">x/menit</span>
                                                 </div>
@@ -229,7 +229,7 @@
                                             <label for="bp" class="text-primary">Tensi (BP)</label>
                                             <div class="input-group">
                                                 <input class="form-control numeric" id="bp" name="bp"
-                                                    type="text">
+                                                    type="text" value="{{$pengkajian?->bp}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">mmHg</span>
                                                 </div>
@@ -241,7 +241,7 @@
                                             <label for="temperatur" class="text-primary">Suhu (T)</label>
                                             <div class="input-group">
                                                 <input class="form-control numeric" id="temperatur" name="temperatur"
-                                                    type="text">
+                                                    type="text" value="{{$pengkajian?->temperatur}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">C°</span>
                                                 </div>
@@ -253,7 +253,7 @@
                                             <label for="height" class="text-primary">Tinggi Badan</label>
                                             <div class="input-group">
                                                 <input class="form-control numeric calc-bmi" id="body_height"
-                                                    name="body_height" type="text">
+                                                    name="body_height" type="text" value="{{$pengkajian?->body_height}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">Cm</span>
                                                 </div>
@@ -265,7 +265,7 @@
                                             <label for="weight" class="text-primary">Berat Badan</label>
                                             <div class="input-group">
                                                 <input class="form-control numeric calc-bmi" id="body_weight"
-                                                    name="body_weight" type="text">
+                                                    name="body_weight" type="text" value="{{$pengkajian?->body_weight}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">Kg</span>
                                                 </div>
@@ -277,7 +277,7 @@
                                             <label for="bmi" class="text-primary">Index Massa Tubuh</label>
                                             <div class="input-group">
                                                 <input class="form-control numeric" id="bmi" name="bmi"
-                                                    readonly="readonly" type="text">
+                                                    readonly="readonly" type="text" value="{{$pengkajian?->bmi}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">Kg/m²</span>
                                                 </div>
@@ -289,7 +289,7 @@
                                             <label for="kat_bmi" class="text-primary">Kategori IMT</label>
                                             <div class="input-group">
                                                 <input class="form-control" id="kat_bmi" name="kat_bmi"
-                                                    readonly="readonly" type="text">
+                                                    readonly="readonly" type="text" value="{{$pengkajian?->kat_bmi}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text"></span>
                                                 </div>
@@ -301,7 +301,7 @@
                                             <label for="sp02" class="text-primary">SP 02</label>
                                             <div class="input-group">
                                                 <input class="form-control" id="sp02" name="sp02"
-                                                    type="text">
+                                                    type="text" value="{{$pengkajian?->sp02}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
@@ -313,7 +313,7 @@
                                             <label for="lingkar_kepala" class="text-primary">Lingkar Kepala</label>
                                             <div class="input-group">
                                                 <input class="form-control" id="lingkar_kepala" name="lingkar_kepala"
-                                                    type="text">
+                                                    type="text" value="{{$pengkajian?->lingkar_kepala}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">Cm</span>
                                                 </div>

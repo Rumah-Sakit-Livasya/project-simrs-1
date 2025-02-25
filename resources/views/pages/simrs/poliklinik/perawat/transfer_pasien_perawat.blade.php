@@ -132,7 +132,8 @@
                 {{-- content start --}}
                 <div class="tab-content p-3">
                     <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
-                        @include('pages.simrs.poliklinik.partials.detail-pasien')
+                        <form action="">
+                            @include('pages.simrs.poliklinik.partials.detail-pasien')
                         <hr style="border-color: #868686; margin-bottom: 50px;">
                         <header class="text-primary text-center mt-5">
                             <h2 class="font-weight-bold mt-5">TRANSFER PASIEN ANTAR RUANGAN</h2>
@@ -1268,6 +1269,34 @@
 
                             </div>
                         </div>
+
+                            <div class="row mt-5">
+                                <div class="col-md-12 px-3">
+                                    <div class="card-actionbar">
+                                        <div class="card-actionbar-row d-flex justify-content-between align-items-center">
+                                            <button type="button"
+                                                class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                                data-dismiss="modal" data-status="0">
+                                                <span class="mdi mdi-printer mr-2"></span> Print
+                                            </button>
+                                            <div style="width: 33%" class="d-flex justify-content-between">
+                                                <button type="button"
+                                                    class="btn btn-warning waves-effect text-white waves-light save-form d-flex align-items-center"
+                                                    data-dismiss="modal" data-status="0" id="sd-transfer-pasien-antar-ruangan">
+                                                    <span class="mdi mdi-content-save mr-2"></span> Simpan (draft)
+                                                </button>
+                                                <button type="button"
+                                                    class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                                    data-dismiss="modal" data-status="1" id="sf-transfer-pasien-antar-ruangan">
+                                                    <span class="mdi mdi-content-save mr-2"></span> Simpan (final)
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
                     </div>
                 </div>
             </div>
@@ -1279,6 +1308,68 @@
     @include('pages.simrs.poliklinik.partials.js-filter')
     <script>
         $(document).ready(function() {
+
+            let actionType = '';
+
+        // Saat tombol Save Draft diklik
+        $('#sd-transfer-pasien-antar-ruangan').on('click', function() {
+            actionType = 'draft';
+            submitForm(actionType); // Panggil fungsi submitForm dengan parameter draft
+        });
+
+        // Saat tombol Save Final diklik
+        $('#sf-transfer-pasien-antar-ruangan').on('click', function() {
+            actionType = 'final';
+            console.log('clicked');
+            submitForm(actionType); // Panggil fungsi submitForm dengan parameter final
+        });
+
+        function submitForm(actionType) {
+            const form = $('#transfer-pasien-antar-ruangan-form'); // Ambil form
+            const url =
+                "{{ route('pengkajian.transfer-pasien-antar-ruangan.store') }}" // Ambil URL dari action form
+            let formData = form.serialize(); // Ambil data dari form
+
+            // Tambahkan tipe aksi (draft atau final) ke data form
+            formData += '&action_type=' + actionType;
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: formData,
+                success: function(response) {
+                    if (actionType === 'draft') {
+                        showSuccessAlert('Data berhasil disimpan sebagai draft!');
+                    } else {
+                        showSuccessAlert('Data berhasil disimpan sebagai final!');
+                    }
+                    setTimeout(() => {
+                        console.log('Reloading the page now.');
+                        window.location.reload();
+                    }, 1000);
+                },
+                error: function(xhr, status, error) {
+                    if (xhr.status === 422) {
+                        var errors = xhr.responseJSON.errors;
+                        var errorMessages = '';
+
+                        $.each(errors, function(key, value) {
+                            errorMessages += value +
+                                '\n';
+                        });
+
+                        // $('#modal-tambah-grup-tindakan').modal('hide');
+                        showErrorAlert('Terjadi kesalahan:\n' +
+                            errorMessages);
+                    } else {
+                        // $('#modal-tambah-grup-tindakan').modal('hide');
+                        showErrorAlert('Terjadi kesalahan: ' + error);
+                        console.log(error);
+                    }
+                }
+            });
+        }
+
             $('body').addClass('layout-composed');
 
             $('.select2').select2({
@@ -1308,6 +1399,7 @@
                 $(this).removeClass('show');
             });
         });
+
     </script>
     @include('pages.simrs.poliklinik.partials.js-filter')
 @endsection

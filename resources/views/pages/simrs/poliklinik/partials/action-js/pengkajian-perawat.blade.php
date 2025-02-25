@@ -27,7 +27,7 @@
         let formData = form.serialize(); // Ambil data dari form
 
         // Tambahkan tipe aksi (draft atau final) ke data form
-        formData += '&action_type=' + actionType + '&registration_id=' + "{{ $registration->id }}";
+        formData += '&action_type=' + actionType + '&registration_id=' + "{{ $registration?->id }}";
         formData += '&user_id=' +  "{{ auth()->user()->id }}";
 
         $.ajax({

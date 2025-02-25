@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS\Poliklinik;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\ERM\TindakanMedisRajal;
 use App\Models\SIMRS\JadwalDokter;
@@ -64,7 +65,10 @@ class PoliklinikController extends Controller
             $pengkajian = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
             return view('pages.simrs.poliklinik.index', compact('registration', 'departements', 'jadwal_dokter', 'pengkajian'));
         } elseif ($menu == 'cppt_perawat') {
-            return view('pages.simrs.poliklinik.perawat.cppt', compact('registration', 'departements', 'jadwal_dokter'));
+            $perawat = Employee::whereHas('organization', function ($query) {
+                $query->where('name', 'Rawat Jalan');
+            })->get();
+            return view('pages.simrs.poliklinik.perawat.cppt', compact('registration', 'departements', 'jadwal_dokter', 'perawat'));
         } elseif ($menu == 'transfer_pasien_perawat') {
             return view('pages.simrs.poliklinik.perawat.transfer_pasien_perawat', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_dokter') {

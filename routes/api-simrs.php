@@ -63,15 +63,25 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
 
     Route::prefix('pengkajian')->group(function () {
-        Route::prefix('nurse-rajal')->group(function () {
-            Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
+        Route::prefix('rawat-jalan')->group(function() {
+            Route::prefix('perawat')->group(function(){
+                Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
+                Route::prefix('dokter')->group(function () {
+                    Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
+                });
+            });
         });
-        Route::prefix('transfer-pasien-antar-ruangan')->group(function () {
-            Route::post('/store', [PengkajianController::class, 'storeOrUpdateTransferPasienAntarRuangan'])->name('pengkajian.transfer-pasien-antar-ruangan.store');
-        });
+    });
+    
+    Route::prefix('transfer-pasien-antar-ruangan')->group(function () {
+        Route::post('/store', [PengkajianController::class, 'storeOrUpdateTransferPasienAntarRuangan'])->name('transfer-pasien-antar-ruangan.store');
+    });
 
-        Route::prefix('dokter-rajal')->group(function () {
-            Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
+    Route::prefix('cppt')->group(function() {
+        Route::prefix('rawat-jalan')->group(function() {
+            Route::prefix('perawat')->group(function() {
+                Route::post('/store', [CPPTController::class, 'store'])->name('cppt.rajal.perawat.store');
+            });
         });
     });
 
