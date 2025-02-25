@@ -21,7 +21,6 @@ class TimeSchedule extends Model implements Auditable
 
     public function employees()
     {
-        return $this->belongsToMany(Employee::class, 'time_schedule_employees', 'time_schedule_id', 'employee_id')
-            ->withPivot('dokumentasi');
+        return $this->belongsToMany(Employee::class, 'time_schedule_employees', 'time_schedule_id', 'employee_id');
     }
 }

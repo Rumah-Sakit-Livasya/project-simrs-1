@@ -19,6 +19,7 @@ use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\LocationController;
 use App\Http\Controllers\API\MenuController;
 use App\Http\Controllers\API\PayrollApiController;
+use App\Http\Controllers\API\PendidikanPelatihanController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\SalaryController;
 use App\Http\Controllers\API\TargetController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\Inventaris\RoomMaintenanceController;
 use App\Http\Controllers\Inventaris\TemplateBarangController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\API\TimeScheduleController;
+use App\Http\Controllers\SIMRS\TextToSpeech\TextToSpeechController;
 use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\AttendanceRequest;
 use Illuminate\Http\Request;
@@ -311,11 +313,21 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
             // Rute untuk upload file
             Route::post('/time/schedule/rapat/upload', [TimeScheduleController::class, 'uploadFile'])->name('time.schedule.rapat.upload');
             Route::get('/download/{id}/{type}', [TimeScheduleController::class, 'download'])->name('time.schedule.rapat.download');
+            // Rute untuk verifikasi kehadiran peserta
+            Route::post('/verifikasi', [TimeScheduleController::class, 'verifikasiKehadiran'])->name('time.schedule.rapat.verifikasi');
         });
+    });
+    Route::prefix('pendidikan-pelatihan')->group(function () {
+        Route::post("/store", [PendidikanPelatihanController::class, 'store'])->name("pendidikan.pelatihan.store");
+        Route::get("/get-peserta/{pendidikanPelatihanId}", [PendidikanPelatihanController::class, 'getPeserta'])->name("pendidikan.pelatihan.get.peserta");
+        Route::get("/get-konfirmasi-peserta/{pendidikanPelatihanId}", [PendidikanPelatihanController::class, 'getKonfirmasiPeserta'])->name("pendidikan.pelatihan.get.konfirmasi.peserta");
+        Route::put("/confirm/{id}", [PendidikanPelatihanController::class, 'confirmKehadiran'])->name("pendidikan.pelatihan.put");
     });
     Route::get('user/getByName', [UserController::class, 'getByName'])->name('user.getByName');
 });
 
+
+Route::get('/tts', [TextToSpeechController::class, 'tts'])->name('tts');
 Route::post('livasya-message', [BotMessageController::class, 'livasyaMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.verified');
 Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');
 Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])->middleware(CheckAuthorizationBot::class);

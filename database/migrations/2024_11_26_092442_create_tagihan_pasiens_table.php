@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('registration_id')->constrained('registrations')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('tindakan_medis_id')->constrained('tindakan_medis')->onUpdate('cascade')->onDelete('cascade');
             $table->string('date');
             $table->string('tagihan');
             $table->string('quantity');
@@ -26,6 +25,7 @@ return new class extends Migration
             $table->string('jamin');
             $table->string('jaminan');
             $table->string('wajib_bayar');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

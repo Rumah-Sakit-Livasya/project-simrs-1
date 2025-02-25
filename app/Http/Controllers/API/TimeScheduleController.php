@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\Organization;
 use App\Models\TimeSchedule;
+use App\Models\TimeScheduleEmployee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
@@ -89,24 +90,31 @@ class TimeScheduleController extends Controller
 
     public function getPeserta($rapatId)
     {
-        $rapat = TimeSchedule::find($rapatId);
+        try {
+            $rapat = TimeSchedule::find($rapatId);
 
-        if (!$rapat) {
-            return response()->json(['error' => 'Rapat tidak ditemukan'], 404);
+            if (!$rapat) {
+                return response()->json(['error' => 'Rapat tidak ditemukan'], 404);
+            }
+
+            $peserta = [];
+            $peserta['peserta_rapat'] = $rapat->employees()
+                ->select('employees.id as employee_id', 'employees.fullname', 'organizations.name as organization_name', 'time_schedule_employees.status')
+                ->join('organizations', 'employees.organization_id', '=', 'organizations.id')
+                ->join('time_schedule_employees as tse', 'employees.id', '=', 'tse.employee_id')
+                ->where('tse.time_schedule_id', $rapat->id)
+                ->distinct() // Ensure no duplicate records
+                ->get();
+
+            $employee = Employee::where('id', $rapat->employee_id)->first();
+
+            $peserta['yang_mengundang'] = $employee->fullname;
+            $peserta['organisasi_yang_mengundang'] = $employee->organization->name;
+
+            return response()->json($peserta, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
-
-        $peserta = [];
-        $peserta['peserta_rapat'] = $rapat->employees()
-            ->select('employees.id as employee_id', 'employees.fullname', 'organizations.name as organization_name')
-            ->join('organizations', 'employees.organization_id', '=', 'organizations.id')
-            ->get();
-
-        $employee = Employee::where('id', $rapat->employee_id)->first();
-
-        $peserta['yang_mengundang'] = $employee->fullname;
-        $peserta['organisasi_yang_mengundang'] = $employee->organization->name;
-
-        return response()->json($peserta, 200);
     }
 
     public function store(Request $request)
@@ -119,6 +127,7 @@ class TimeScheduleController extends Controller
             $timeSchedule->perihal = $request->perihal; // Ambil perihal dari request
             $timeSchedule->type = $request->type; // Atau ambil dari request jika ada pilihan
             $timeSchedule->datetime = $request->datetime; // Ambil waktu dan tanggal dari request
+            $timeSchedule->created_at = now(); // Menambahkan created_at dengan waktu sekarang
 
             if ($request->is_online) {
                 $roomName = \Str::slug($request->room_name);
@@ -215,7 +224,7 @@ class TimeScheduleController extends Controller
             $timeSchedule->employees()->attach($uniquePeserta);
 
             // Send broadcast message to participants
-            $roles = Employee::whereIn('id', $uniquePeserta)->pluck('fullname')->toArray(); // Ambil nama peserta untuk broadcast
+            $roles = Employee::whereIn('id', $uniquePeserta)->pluck('fullname')->toArray(); // Ambil nama peserta
             $this->broadcastMessageToParticipants($uniquePeserta, $timeSchedule->title, $timeSchedule->datetime, $request->is_online, $roomName, $roles);
 
             return response()->json([
@@ -244,12 +253,12 @@ class TimeScheduleController extends Controller
         foreach ($roles as $role) {
             $broadcastMessage .= "- $role\n";
         }
-        $broadcastMessage .= "Mohon izin menyampaikan agenda $title, yang akan dilaksanakan pada:\n\n";
+        $broadcastMessage .= "Mohon izin menyampaikan agenda " . $title . ", yang akan dilaksanakan pada:\n\n";
         $broadcastMessage .= "Hari/Tanggal: " . \Carbon\Carbon::parse($datetime)->translatedFormat('l, d F Y') . "\n";
         $broadcastMessage .= "Waktu: " . \Carbon\Carbon::parse($datetime)->format('H:i') . " WIB s/d selesai\n";
 
         if ($isOnline) {
-            $broadcastMessage .= "Link: vcon.livasya.com/\n";
+            $broadcastMessage .= "Link: vcon.livasya.com/$roomName\n";
         } else {
             $broadcastMessage .= "Tempat: " . $roomName . "\n";
         }
@@ -360,6 +369,37 @@ class TimeScheduleController extends Controller
             return Storage::download($filePath);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh file.');
+        }
+    }
+    public function verifikasiKehadiran(Request $request)
+    {
+        try {
+            $request->validate([
+                'rapat_id' => 'required|exists:time_schedules,id',
+                'hadir_ids' => 'required|array',
+                'hadir_ids.*' => 'exists:employees,id',
+            ]);
+
+            $rapat = TimeSchedule::findOrFail($request->rapat_id);
+            $pesertaHadir = $request->hadir_ids;
+
+            // Logika untuk memverifikasi kehadiran peserta tanpa menambahkan data baru
+            foreach ($pesertaHadir as $pesertaId) {
+                // Cek apakah kehadiran peserta sudah ada
+                $existingAttendance = TimeScheduleEmployee::where('time_schedule_id', $rapat->id)
+                    ->where('employee_id', $pesertaId)
+                    ->first();
+
+                if ($existingAttendance) {
+                    // Jika sudah ada, Anda bisa memperbarui status atau melakukan tindakan lain jika diperlukan
+                    $existingAttendance->status = 'hadir'; // Misalnya, memperbarui status
+                    $existingAttendance->save();
+                }
+            }
+
+            return response()->json(['message' => 'Kehadiran berhasil diverifikasi.']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
 }

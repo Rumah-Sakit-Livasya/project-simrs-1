@@ -12,7 +12,7 @@ class TimeScheduleEmployee extends Model implements Auditable
     use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable;
 
     protected $guarded = ['id'];
-    protected $table = 'time_shedule_employees';
+    protected $table = 'time_schedule_employees';
 
     public function time_shedules()
     {

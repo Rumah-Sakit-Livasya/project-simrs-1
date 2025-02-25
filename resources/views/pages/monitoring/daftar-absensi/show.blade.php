@@ -152,13 +152,14 @@
                                         <button type="submit" class="btn-next-step btn btn-primary btn-sm ml-2">
                                             <div class="ikon-tambah">
                                                 <span class="fal fa-search mr-1"></span>Cari
-                                            </div>
-                                            <div class="span spinner-text d-none">
-                                                <span class="spinner-border spinner-border-sm" role="status"
-                                                    aria-hidden="true"></span>
-                                                Loading...
-                                            </div>
-                                        </button>
+                                                </div>
+                                                <div class="span spinner-text d-none">
+                                                    <span class="spinner-border spinner-border-sm" role="status"
+                                                        aria-hidden="true"></span>
+                                                    Loading...
+                                                </div>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </form>

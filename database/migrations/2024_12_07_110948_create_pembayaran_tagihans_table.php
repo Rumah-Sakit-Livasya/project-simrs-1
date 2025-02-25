@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pembayaran_tagihan', function (Blueprint $table) {
             $table->id(); // Kolom id sebagai primary key
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade'); // Kolom user_id
-            $table->foreignId('tagihan_pasien_id')->constrained('tagihan_pasien')->onUpdate('cascade')->onDelete('cascade'); // Kolom tagihan_pasien_id
+            $table->foreignId('bilingan_id')->constrained('bilingan')->onUpdate('cascade')->onDelete('cascade'); // Kolom tagihan_pasien_id
             $table->integer('total_tagihan'); // Kolom total_tagihan
             $table->integer('jaminan'); // Kolom jaminan
             $table->integer('tagihan_pasien'); // Kolom tagihan_pasien

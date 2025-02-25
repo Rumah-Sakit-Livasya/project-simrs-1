@@ -124,25 +124,27 @@
                         </div>
                     </div>
                     <div class="row mt-3">
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <label class="form-label" for="company_id">
-                                    Perusahaan
-                                </label>
-                                <select class="form-control w-100 @error('company_id') is-invalid @enderror"
-                                    id="company_id" name="company_id">
-                                    <optgroup label="Perusahaan">
-                                        @foreach ($companies as $row)
-                                            <option value="{{ $row->id }}">{{ $row->name }}
-                                            </option>
-                                        @endforeach
-                                    </optgroup>
-                                </select>
-                                @error('company_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                        @if (Auth::user()->hasRole('super admin'))
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="company_id">
+                                        Perusahaan
+                                    </label>
+                                    <select class="form-control w-100 @error('company_id') is-invalid @enderror"
+                                        id="company_id" name="company_id">
+                                        <optgroup label="Perusahaan">
+                                            @foreach ($companies as $row)
+                                                <option value="{{ $row->id }}">{{ $row->name }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    </select>
+                                    @error('company_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
-                        </div>
+                        @endif
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <label class="form-label" for="harga_barang">Harga Barang</label>

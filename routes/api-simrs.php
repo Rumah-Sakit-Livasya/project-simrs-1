@@ -32,6 +32,7 @@ use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
+use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\ResumeMedisRajal\ResumeMedisRajalController;
@@ -62,16 +63,31 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
 
     Route::prefix('pengkajian')->group(function () {
-        Route::prefix('nurse-rajal')->group(function () {
-            Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
+        Route::prefix('rawat-jalan')->group(function() {
+            Route::prefix('perawat')->group(function(){
+                Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
+                Route::prefix('dokter')->group(function () {
+                    Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
+                });
+            });
         });
-        Route::prefix('transfer-pasien-antar-ruangan')->group(function () {
-            Route::post('/store', [PengkajianController::class, 'storeOrUpdateTransferPasienAntarRuangan'])->name('pengkajian.transfer-pasien-antar-ruangan.store');
-        });
+    });
+    
+    Route::prefix('transfer-pasien-antar-ruangan')->group(function () {
+        Route::post('/store', [PengkajianController::class, 'storeOrUpdateTransferPasienAntarRuangan'])->name('transfer-pasien-antar-ruangan.store');
+    });
 
-        Route::prefix('dokter-rajal')->group(function () {
-            Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
+    Route::prefix('cppt')->group(function() {
+        Route::prefix('rawat-jalan')->group(function() {
+            Route::prefix('perawat')->group(function() {
+                Route::post('/store', [CPPTController::class, 'store'])->name('cppt.rajal.perawat.store');
+            });
         });
+    });
+
+
+    Route::prefix('poliklinik')->group(function() {
+        Route::post('/filter-pasien', [PoliklinikController::class, 'filterPasien'])->name('poliklinik.filter-pasien');
     });
 
     Route::prefix('erm')->group(function () {

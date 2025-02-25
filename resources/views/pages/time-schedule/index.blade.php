@@ -157,11 +157,6 @@
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
-        function toggleRoomName() {
-            const isOnlineCheckbox = document.getElementById('is_online');
-            const roomNameInput = document.getElementById('room_name');
-            roomNameInput.readOnly = !isOnlineCheckbox.checked;
-        }
         // Fungsi untuk mengisi nilai type pada input hidden
         function setFileType(fileType, id) {
             // Set nilai type pada input hidden sesuai dengan file yang dipilih
@@ -272,6 +267,7 @@
                     url: '/api/dashboard/time-schedules/rapat/get-peserta/' + rapatId,
                     type: 'GET',
                     success: function(response) {
+
                         // Menghapus data sebelumnya untuk menghindari duplikasi
                         $('#list-peserta').empty();
                         $('#list-peserta').append(
@@ -280,13 +276,59 @@
                             response.organisasi_yang_mengundang + '</span></li>');
 
                         // Menampilkan data peserta rapat
-                        response.peserta_rapat.forEach(function(peserta) {
-                            $('#list-peserta').append('<li class="list-group-item">' +
-                                peserta.fullname + '<span class="float-right">' +
+                        response.peserta_rapat.forEach(function(peserta, index) {
+                            let checked = peserta.status === 'hadir' ? 'checked' : '';
+                            let icon = peserta.status === 'hadir' ?
+                                '<i class="fas fa-check text-success mr-2"></i>' : '';
+                            $('#list-peserta').append(
+                                '<li class="list-group-item d-flex align-items-center justify-content-center">' +
+                                '<input type="checkbox" class="peserta-checkbox mr-2" id="peserta-' +
+                                index + '" value="' +
+                                peserta.employee_id + '" ' + checked + '>' +
+                                '<label for="peserta-' + index +
+                                '" class="d-flex align-items-center justify-content-center">' +
+                                icon + ' ' +
+                                peserta.fullname +
+                                '</label><span class="ml-auto">' +
                                 peserta.organization_name + '</span></li>');
                         });
 
-                        // Menampilkan data yang mengundang
+                        // Tambahkan tombol verifikasi dengan styling Bootstrap
+                        $('#list-peserta').append(
+                            '<div class="text-center mt-3">' +
+                            '<button id="btn-verifikasi" class="btn btn-primary">Verifikasi Kehadiran</button>' +
+                            '</div>'
+                        );
+
+                        // Event listener untuk tombol verifikasi
+                        $('#btn-verifikasi').click(function() {
+                            let hadirIds = $('.peserta-checkbox:checked').map(
+                                function() {
+                                    return $(this).val(); // Ambil id pegawai
+                                }).get(); // Tidak perlu filter falsy values
+
+                            if (hadirIds.length > 0) {
+                                $.ajax({
+                                    url: '/api/dashboard/time-schedules/rapat/verifikasi',
+                                    type: 'POST',
+                                    data: {
+                                        rapat_id: rapatId,
+                                        hadir_ids: hadirIds
+                                    },
+                                    success: function(response) {
+                                        showSuccessAlert(response.message);
+                                        $('#modal-peserta').modal('hide');
+                                    },
+                                    error: function(xhr, status, error) {
+                                        showErrorAlert(
+                                            'Terjadi kesalahan: ' +
+                                            error);
+                                    }
+                                });
+                            } else {
+                                showErrorAlert('Silakan pilih peserta yang hadir.');
+                            }
+                        });
                     },
                     error: function(xhr, status, error) {
                         showErrorAlert('Terjadi kesalahan: ' + error);

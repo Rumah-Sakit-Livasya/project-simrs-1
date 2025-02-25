@@ -5,7 +5,7 @@
         main {
             overflow-x: hidden;
         }
-        
+
         input[type="time"] {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -124,43 +124,8 @@
         <!-- notice the utilities added to the wrapper below -->
         <div class="d-flex flex-grow-1 p-0 shadow-1 layout-composed">
             <!-- left slider panel : must have unique ID-->
-            <div id="js-slide-left"
-                class="flex-wrap flex-shrink-0 position-relative slide-on-mobile slide-on-mobile-left bg-primary-200 pattern-0 p-3">
-                <form action="javascript:void(0)" method="POST">
-                    @csrf
-                    <div class="form-group mb-2">
-                        <select class="select2 form-control @error('departement_id') is-invalid @enderror"
-                            name="departement_id" id="departement_id">
-                            <option value=""></option>
-                            @foreach ($departements as $departement)
-                                <option value="{{ $departement->id }}">{{ $departement->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('departement_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="form-group mb-2">
-                        <select class="select2 form-control @error('doctor_id') is-invalid @enderror" name="doctor_id"
-                            id="doctor_id">
-                            <option value=""></option>
-                            @foreach ($jadwal_dokter as $jadwal)
-                                <option value="{{ $jadwal->doctor_id }}">{{ $jadwal->doctor->employee->fullname }}</option>
-                            @endforeach
-                        </select>
-                        @error('doctor_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="form-group mb-2">
-                        <input type="text" id="nama_pasien" name="nama_pasien" class="form-control"
-                            placeholder="Nama Pasien">
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary w-100">Submit</button>
-                    </div>
-                </form>
-            </div>
+            @include('pages.simrs.poliklinik.partials.filter-poli')
+
             <!-- middle content area -->
             <div class="d-flex flex-column flex-grow-1 bg-white">
 
@@ -172,6 +137,36 @@
                         @include('pages.simrs.poliklinik.partials.detail-pasien')
                         <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
                         <div class="row">
+                            <div class="col-12">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 20%;" valign="middle">
+                                                <label class="mt-2">Nama Pasien</label>
+                                            </td>
+                                            <td style="width: 3%;" valign="middle">
+                                                <label class="mt-2">:</label>
+                                            </td>
+                                            <td style="width: 50%;">
+                                                <select
+                                                    class="select2 form-control @error('departement_id') is-invalid @enderror filter-poli"
+                                                    name="departement_id" id="departement_id_pengkajian_lanjutan">
+                                                    <option value=""></option>
+                                                    @foreach ($departements as $departement)
+                                                        <option value="{{ $departement->id }}"
+                                                            {{ ($registration->departement_id ?? '') == $departement->id ? 'selected' : '' }}>
+                                                            {{ $departement->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td style="width: 20%;">
+                                                <button class="btn btn-primary">Tambah</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -181,9 +176,13 @@
 @endsection
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
+    @include('pages.simrs.poliklinik.partials.js-filter')
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');
+            $('.select2').select2({
+                placeholder: 'Pilih Item',
+            });
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });

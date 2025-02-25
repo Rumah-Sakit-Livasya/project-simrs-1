@@ -14,6 +14,7 @@
             <th style="white-space: nowrap">Ruangan</th>
             <th style="white-space: nowrap">Tanggal Input</th>
             <th style="white-space: nowrap">Harga Barang</th>
+            <th style="white-space: nowrap">Perusahaan</th>
             <th style="white-space: nowrap" class="no-export">Aksi</th>
         </tr>
     </thead>
@@ -55,10 +56,11 @@
                         </td>
                     @endif
                 @endif
-                <td style="white-space: normal">{{ $row->created_at }}</td>
+                <td style="white-space: normal">{{ tgl_waktu($row->created_at) }}</td>
                 <td style="white-space: normal">
                     {{ $row->harga_barang == null ? '*belum disetting' : 'Rp. ' . rp2($row->harga_barang) }}
                 </td>
+                <td style="white-space: normal">{{ $row->company->name }}</td>
                 <td style="white-space: nowrap" class="no-export">
                     <button class="badge mx-1 badge-primary p-2 border-0 text-white btn-edit"
                         data-id="{{ $row->id }}">
@@ -109,6 +111,8 @@
             <th>Kode Barang</th>
             <th>Ruangan</th>
             <th>Tanggal Input</th>
+            <th>Harga Barang</th>
+            <th>Perusahaan</th>
             <th class="no-export" style="white-space: nowrap">Aksi</th>
         </tr>
     </tfoot>
@@ -122,6 +126,7 @@
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datatable/jszip.min.js"></script>
+    <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
@@ -586,8 +591,12 @@
                 $('#store-form #company_id').select2({
                     placeholder: 'Pilih Perusahaan',
                 });
+                $('#filter-form #company_id').select2({
+                    placeholder: 'Pilih Perusahaan',
+                });
                 $('#barang_category_id').select2();
                 $('#template_barang_id').select2();
+                $('#ruangan_id').select2();
                 $('#tambahBarang').select2({
                     placeholder: 'Pilih Barang',
                 });
@@ -599,48 +608,49 @@
                 });
             });
 
-            $('#dt-basic-example').dataTable({
-                responsive: true,
-                dom: 'Bfrtip',
+            $('#dt-basic-example').DataTable({
+                // responsive: true,
+                // scrollY: 400,
+                // scrollX: true,
+                // scrollCollapse: true,
+                // paging: true,
+                pageLength: 200,
+                //fixedColumns: true,
+                fixedColumns: {
+                    leftColumns: 2,
+                },
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 buttons: [{
-                        extend: 'print',
-                        text: 'Print',
-                        className: 'float-right btn btn-primary',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        text: 'Download as Excel',
-                        className: 'float-right btn btn-success',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                    {
                         extend: 'colvis',
-                        text: 'Column Visibility',
+                        text: '<i class="fas fa-eye"></i> Visibility',
                         titleAttr: 'Col visibility',
-                        className: 'float-right mb-3 btn btn-warning',
+                        className: 'btn-primary'
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print"></i> Print',
+                        titleAttr: 'Print Table',
+                        className: 'btn-primary',
                         exportOptions: {
-                            columns: ':not(.no-export)'
+                            columns: ':visible' // Menggunakan kolom yang terlihat sesuai pengaturan ColVis
                         },
-                        postfixButtons: [{
-                                extend: 'print',
-                                text: 'Print',
-                                exportOptions: {
-                                    columns: ':visible:not(.no-export)'
-                                }
-                            },
-                            {
-                                extend: 'excel',
-                                text: 'Download as Excel',
-                                exportOptions: {
-                                    columns: ':visible:not(.no-export)'
-                                }
-                            }
-                        ]
+                        customize: function(win) {
+                            $(win.document.body).find('table').addClass('display').css('font-size',
+                                '12px'); // Menambahkan kelas dan menyesuaikan ukuran font
+                            $(win.document.body).find('thead').addClass(
+                                'thead-light'); // Menambahkan kelas untuk style header
+                        }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        titleAttr: 'Export to Excel',
+                        className: 'btn-primary',
+                        exportOptions: {
+                            columns: ':visible' // Menggunakan kolom yang terlihat sesuai pengaturan ColVis
+                        }
                     }
                 ]
             });
@@ -650,7 +660,6 @@
                 console.log(theadColor);
                 $('#dt-basic-example thead').removeClassPrefix('bg-').addClass(theadColor);
             });
-
             $('.js-tbody-colors a').on('click', function() {
                 var theadColor = $(this).attr("data-bg");
                 console.log(theadColor);

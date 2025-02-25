@@ -414,3 +414,67 @@ function formatTanggalDetail($tanggal)
 
     return $tanggalFormat . ' (' . $umurString . ')';
 }
+
+function tglDefault($tanggal)
+{
+    // Ubah string ISO 8601 menjadi objek DateTime
+    $date = new DateTime($tanggal);
+
+    // Format tanggal menjadi 'd F Y' (contoh: 27 Desember 2024)
+    $bulanIndonesia = [
+        'January' => 'Januari',
+        'February' => 'Februari',
+        'March' => 'Maret',
+        'April' => 'April',
+        'May' => 'Mei',
+        'June' => 'Juni',
+        'July' => 'Juli',
+        'August' => 'Agustus',
+        'September' => 'September',
+        'October' => 'Oktober',
+        'November' => 'November',
+        'December' => 'Desember',
+    ];
+
+    $tanggalFormat = $date->format('d');
+    $bulan = $bulanIndonesia[$date->format('F')];
+    $tahun = $date->format('Y');
+
+    return "{$tanggalFormat} {$bulan} {$tahun}";
+}
+
+function waktuDefault($tanggalWaktu)
+{
+    // Ubah string ISO 8601 menjadi objek DateTime
+    $date = new DateTime($tanggalWaktu);
+
+    // Format waktu menjadi 'H:i WIB' (contoh: 15:11 WIB)
+    return $date->format('H:i') . ' WIB';
+}
+
+function formatTanggalBulan($tanggal)
+{
+    // Ubah string ISO 8601 menjadi objek DateTime
+    $date = new DateTime($tanggal);
+
+    // Format bulan menjadi nama bulan dalam bahasa Indonesia
+    $bulanIndonesia = [
+        'January' => 'Januari',
+        'February' => 'Februari',
+        'March' => 'Maret',
+        'April' => 'April',
+        'May' => 'Mei',
+        'June' => 'Juni',
+        'July' => 'Juli',
+        'August' => 'Agustus',
+        'September' => 'September',
+        'October' => 'Oktober',
+        'November' => 'November',
+        'December' => 'Desember',
+    ];
+
+    $tanggalFormat = $date->format('d');
+    $bulan = $bulanIndonesia[$date->format('F')];
+
+    return "{$tanggalFormat} {$bulan}";
+}

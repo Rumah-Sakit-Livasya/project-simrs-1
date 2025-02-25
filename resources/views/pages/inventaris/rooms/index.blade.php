@@ -110,6 +110,8 @@
                                         <th style="white-space: nowrap">Jumlah Barang</th>
                                         <th style="white-space: nowrap">Lantai</th>
                                         <th style="white-space: nowrap">Status</th>
+                                        <th style="white-space: nowrap">Penanggung Jawab</th>
+                                        <!-- Added column for responsible unit -->
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </thead>
@@ -128,6 +130,12 @@
                                             </td>
                                             <td style="white-space: nowrap">{{ $row->floor }}</td>
                                             <td style="white-space: nowrap">{{ $row->status == 1 ? 'Aktif' : 'Nonaktif' }}
+                                            </td>
+                                            <td style="white-space: nowrap">
+                                                @foreach ($row->organizations as $organization)
+                                                    <!-- Displaying responsible organizations -->
+                                                    <span class="badge badge-info">{{ $organization->name }}</span>
+                                                @endforeach
                                             </td>
                                             <td style="white-space: nowrap">
                                                 <button type="button" data-backdrop="static" data-keyboard="false"
@@ -157,6 +165,8 @@
                                         <th style="white-space: nowrap">Jumlah Barang</th>
                                         <th style="white-space: nowrap">Lantai</th>
                                         <th style="white-space: nowrap">Status</th>
+                                        <th style="white-space: nowrap">Penanggung Jawab</th>
+                                        <!-- Added footer for responsible unit -->
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </tfoot>
@@ -173,6 +183,7 @@
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/datatable/jszip.min.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
@@ -295,48 +306,49 @@
                 });
             });
 
-            $('#dt-basic-example').dataTable({
-                responsive: true,
-                dom: 'Bfrtip',
+            $('#dt-basic-example').DataTable({
+                // responsive: true,
+                // scrollY: 400,
+                // scrollX: true,
+                // scrollCollapse: true,
+                // paging: true,
+                pageLength: 200,
+                //fixedColumns: true,
+                fixedColumns: {
+                    leftColumns: 2,
+                },
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 buttons: [{
-                        extend: 'print',
-                        text: 'Print',
-                        className: 'float-right btn btn-primary',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                    {
-                        extend: 'excel',
-                        text: 'Download as Excel',
-                        className: 'float-right btn btn-success',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                    {
                         extend: 'colvis',
-                        text: 'Column Visibility',
+                        text: '<i class="fas fa-eye"></i> Visibility',
                         titleAttr: 'Col visibility',
-                        className: 'float-right mb-3 btn btn-warning',
+                        className: 'btn-primary'
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print"></i> Print',
+                        titleAttr: 'Print Table',
+                        className: 'btn-primary',
                         exportOptions: {
-                            columns: ':not(.no-export)'
+                            columns: ':visible' // Menggunakan kolom yang terlihat sesuai pengaturan ColVis
                         },
-                        postfixButtons: [{
-                                extend: 'print',
-                                text: 'Print',
-                                exportOptions: {
-                                    columns: ':visible:not(.no-export)'
-                                }
-                            },
-                            {
-                                extend: 'excel',
-                                text: 'Download as Excel',
-                                exportOptions: {
-                                    columns: ':visible:not(.no-export)'
-                                }
-                            }
-                        ]
+                        customize: function(win) {
+                            $(win.document.body).find('table').addClass('display').css('font-size',
+                                '12px'); // Menambahkan kelas dan menyesuaikan ukuran font
+                            $(win.document.body).find('thead').addClass(
+                                'thead-light'); // Menambahkan kelas untuk style header
+                        }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        titleAttr: 'Export to Excel',
+                        className: 'btn-primary',
+                        exportOptions: {
+                            columns: ':visible' // Menggunakan kolom yang terlihat sesuai pengaturan ColVis
+                        }
                     }
                 ]
             });
