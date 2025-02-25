@@ -403,23 +403,85 @@ class BotMessageController extends Controller
                         'title' => 'Klinik Obgyn'
                     ],
                     [
+                        'id' => '/klinik_anak',
+                        'title' => 'Klinik Anak'
+                    ],
+                    [
                         'id' => '/klinik_tht',
                         'title' => 'Klinik THT'
                     ],
+                    [
+                        'id' => '/klinik_dalam',
+                        'title' => 'Klinik Penyakit Dalam'
+                    ],
+                    [
+                        'id' => '/klinik_bedah',
+                        'title' => 'Klinik Bedah'
+                    ],
+                    [
+                        'id' => '/klinik_paru',
+                        'title' => 'Klinik Paru'
+                    ],
+                    [
+                        'id' => '/klinik_jiwa',
+                        'title' => 'Klinik Jiwa'
+                    ],
+                    [
+                        'id' => '/klinik_gigi',
+                        'title' => 'Klinik Gigi'
+                    ],
+                    [
+                        'id' => '/klinik_jantung',
+                        'title' => 'Klinik Jantung'
+                    ],
                 ]
             ];
-        }else if($msg == '/info_ranap') {
+        }else if($msg == '/klink_obgyn') {
             $response = [
                 'message_type' => 'string',
-                'data' => 'Testtt'
+                'data' => '*Jadwal praktek poliklinik Obgyn* /n/n *dr Dindaadi kusuma Sp.OG* /n Senin-kamis : 08.30-13.00 /n Jumat-sabtu : 13.00-15.00 /n/n *dr H Mohammad Taufiq Sp.OG* /n Jumat dan sabtu : 8.30-10.30 /n Senin- sabtu : 16.00-18.00 /n Note : hari libur/tanggal merah tidak ada praktek'
             ];
-        } else if ($msg == '/info_persalinan') {
+        }else if($msg == '/klink_anak') {
             $response = [
                 'message_type' => 'string',
-                'data' => '*Biaya Persalinan Normal* \nSuperior: Mulai dari 6.5jt \nDeluxe 2: Mulai dari 7jt \nDeluxe 1: 8.5jt \nVIP: Mulai dari 9jt \n\n *Biaya Persalinan Caesar* \nSuperior: Mulai dari 12jt \nDeluxe 2: Mulai dari 14jt \nDeluxe 1: Mulai dari 16jt \nVIP: Mulai dari 18jt \n\n *Fasilitas yang diberikan*: Vaksin Hb + Polio, Foto Baby setelah melahirkan, dan bingkisan. \n*Fasilitas Tambahan*: Foto Maternity dan Partus Moment (Video persalinan khusus VIP), namun harus booking terlebih dahulu min. 1 bulan sebelum HPL.'
+                'data' => '*JADWAL POLI ANAK* /n/n - Pasien umum /n/n *Dr. Tina Restu Sp.A* /n Senin-sabtu Pukul : 07.00-09.00 /n/n *Dr. Ratih Sp.A* /n Senin, Rabu Pukul : 14.30 - Selesai /n Selasa,kamis Jumat Pukul :15.30 - Selesai /n - Pasien BPJS dengan Rujukan faskes 1 /n/n *Dr. Tina Restu Sp.A* /n Senin - Jumat  Pukul : 13.00 - Selesai /n/n *Dr. Ratih Sp.A* /n Senin,Rabu  Pukul : 14.30 - Selesai /n Selasa , kamis dan jumat  Pukul : 15.30-Selesai /n/n Hari libur/ tanggal merah tidak praktek'
+            ];
+        }else if($msg == '/klink_tht') {
+            $response = [
+                'message_type' => 'string',
+                'data' => '*JADWAL POLIKLINIK THT* /n/n Pasien umum,Asuransi,BPJS /n/n *dr. H.M.Nuruddin Zainudin, Sp.THT-KL* /n/n Selasa & Kamis /n Pukul : 12.00-Selesai'
+            ];
+        }else if($msg == '/klink_dalam') {
+            $response = [
+                'message_type' => 'string',
+                'data' => '*JADWAL POLIKLINIK PENYAKIT DALAM* /n/n Pasien umum,asuransi,BPJS /n/n *dr. Zikry Aulia Hidayat, Sp.PD* /n/n Senin,rabu,Jumat /n Pukul 16.00-Selesai /n/n *dr. Jansen budiono Sp.PD* /n/n Selasa dan Kamis /n Pukul 15.00-Selesai'
+            ];
+        }else if($msg == '/klink_bedah') {
+            $response = [
+                'message_type' => 'string',
+                'data' => '*Jadwal Poliklinik Bedah Umum* /n/n *dr. Rizky Baihaqi Sp.B* /n/n Senin-Sabtu /n Pukul 08.00-12.00 /n/n Jumat /n Pukul 08.00-11.00 /n/n Melayani peserta JKN/BPJS,Umum dan Asuransi Swasta'
+            ];
+        }else if($msg == '/klink_paru') {
+            $response = [
+                'message_type' => 'string',
+                'data' => '*Jadwal Poliklinik spesialis Paru* /n/n *dr Tania libristina ambun Sp.P* /n/n Selasa, Rabu, Kamis /n Pkl 15.00-17.00 /n/n Berlaku dengan reservasi H-1'
+            ];
+        }else if($msg == '/klink_jiwa') {
+            $response = [
+                'message_type' => 'string',
+                'data' => '*Jadwal Poliklinik Spesialis Kedokteran Jiwa* /n/n *dr Agri Mohammad iqbal Sp.KJ* /n/n Senin,Rabu,Jumat /n Pkl. 08.00-10.00 /n/n Berlaku dengan reservasi H-1'
+            ];
+        }else if($msg == '/klink_gigi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => '*JADWAL POLIKLINIK THT* /n Pasien umum,Asuransi,BPJS /n/n dr. H.M.Nuruddin Zainudin, Sp.THT-KL /n/n Selasa & Kamis /n Pukul : 12.00-Selesai'
+            ];
+        }else if($msg == '/klink_jantung') {
+            $response = [
+                'message_type' => 'string',
+                'data' => 'Jadwal belum ada'
             ];
         }
-
         return response()->json($response);
 
 
