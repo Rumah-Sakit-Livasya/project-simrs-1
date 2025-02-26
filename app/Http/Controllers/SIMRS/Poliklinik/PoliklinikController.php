@@ -77,6 +77,8 @@ class PoliklinikController extends Controller
             return view('pages.simrs.poliklinik.dokter.cppt', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'resume_medis_rajal') {
             return view('pages.simrs.poliklinik.dokter.resume_medis', compact('registration', 'departements', 'jadwal_dokter'));
+        } else if ($menu == 'profil_ringkas_rajal') {
+            return view('pages.simrs.poliklinik.dokter.resume_medis', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_gizi') {
             return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'cppt_farmasi') {

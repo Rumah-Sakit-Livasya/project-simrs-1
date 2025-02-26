@@ -1,6 +1,7 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
+@include('pages.simrs.poliklinik.partials.css-sidebar-custom')
     <style>
         main {
             overflow-x: hidden;

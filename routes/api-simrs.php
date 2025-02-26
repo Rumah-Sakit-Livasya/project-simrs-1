@@ -66,9 +66,9 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::prefix('rawat-jalan')->group(function() {
             Route::prefix('perawat')->group(function(){
                 Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
-                Route::prefix('dokter')->group(function () {
-                    Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
-                });
+            });
+            Route::prefix('dokter')->group(function () {
+                Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
             });
         });
     });

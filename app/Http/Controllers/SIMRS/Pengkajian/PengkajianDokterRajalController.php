@@ -19,8 +19,6 @@ class PengkajianDokterRajalController extends Controller
             'body_weight' => 'required',
             'body_height' => 'required',
             'temperatur' => 'required',
-            'height_badan' => 'required',
-            'weight_badan' => 'required',
             'bmi' => 'required',
             'kat_bmi' => 'required',
             'sp02' => 'required',
