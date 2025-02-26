@@ -370,8 +370,8 @@ class BotMessageController extends Controller
                         'title' => 'Jadwal Poli'
                     ],
                     [
-                        'id' => '/info_ranap',
-                        'title' => 'Info Rawat Inap'
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasilitas Unggulan'
                     ],
                     [
                         'id' => '/info_rajal',
@@ -434,7 +434,36 @@ class BotMessageController extends Controller
                     [
                         'id' => '/klinik_jantung',
                         'title' => 'Poli Jantung'
+                    ]
+                ]
+            ];
+        } else if ($msg == '/info_fasilitas') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Fasilitas Unggulan',
+                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/foto_bayi',
+                        'title' => 'Baby Newborn Photo'
                     ],
+                    [
+                        'id' => '/baby_spa',
+                        'title' => 'Baby Spa Swimming'
+                    ],
+                    [
+                        'id' => '/maternity',
+                        'title' => 'Maternity'
+                    ],
+                    [
+                        'id' => '/partus_moment',
+                        'title' => 'Partus Moment'
+                    ],
+                    [
+                        'id' => '/senam_hamil',
+                        'title' => 'Senam Hamil'
+                    ]
                 ]
             ];
         } else if($msg == '/klinik_obgyn') {
@@ -482,7 +511,13 @@ class BotMessageController extends Controller
                 'message_type' => 'string',
                 'data' => "Jadwal belum ada"
             ];
+        } else if($msg == '/foto_bayi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "salah satu fasilitas rs"
+            ];
         }
+        
         return response()->json($response);
 
 
