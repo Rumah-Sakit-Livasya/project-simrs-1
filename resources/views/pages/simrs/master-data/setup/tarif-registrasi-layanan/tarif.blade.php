@@ -33,6 +33,8 @@
                                 </select>
                             </div>
                             <form id="store-form">
+                                @csrf
+                                @method('POST')
                                 <table>
                                     <tr>
                                         <td>Biaya Administrasi</td>
