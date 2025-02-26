@@ -122,7 +122,7 @@ class RegistrationController extends Controller
         }
 
         return view('pages.simrs.pendaftaran.daftar-registrasi-pasien', [
-            'registrations' => $registrations->where('status', 'online'),
+            'registrations' => $registrations->where('status', 'aktif'),
             'departements' => Departement::orderBy('name')->get(),
         ]);
     }

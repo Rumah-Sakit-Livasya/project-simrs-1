@@ -19,12 +19,12 @@ return new class extends Migration
             $table->string('tagihan');
             $table->string('quantity');
             $table->string('nominal');
-            $table->string('tipe_diskon');
-            $table->string('disc');
-            $table->string('diskon');
-            $table->string('jamin');
-            $table->string('jaminan');
-            $table->string('wajib_bayar');
+            $table->string('tipe_diskon')->nullable();
+            $table->string('disc')->nullable();
+            $table->string('diskon')->nullable();
+            $table->string('jamin')->nullable();
+            $table->string('jaminan')->nullable();
+            $table->string('wajib_bayar')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

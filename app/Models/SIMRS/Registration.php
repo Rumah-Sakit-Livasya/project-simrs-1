@@ -28,6 +28,11 @@ class Registration extends Model implements AuditableContract
         return $this->belongsTo(Patient::class);
     }
 
+    public function kelas_rawat()
+    {
+        return $this->belongsTo(KelasRawat::class);
+    }
+
     // Define the relationship to Bilingan
     public function bilingan()
     {
