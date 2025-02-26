@@ -379,10 +379,8 @@
                                                         <option value="" disabled selected></option>
                                                         @foreach ($provinces as $province)
                                                             <option
-                                                                value="{{ $province['id'] }} 
-                                                        {{ old('province') == $province['id'] ? 'selected' : '' }}">
-                                                                {{ $province['nama'] }}
-                                                                {{ $province['id'] }}
+                                                                value="{{ $province['id'] }}  {{ old('province') == $province['id'] ? 'selected' : '' }}">
+                                                                {{ $province['name'] }}
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -399,7 +397,7 @@
                                                         *</label>
                                                 </div>
                                                 <div class="col-sm-8">
-                                                    <select
+                                                    <select disabled
                                                         class="@error('regency') is-invalid @enderror form-control w-100"
                                                         id="regency" name="regency">
                                                         <option value="" disabled selected></option>
@@ -416,7 +414,7 @@
                                                     <label class="form-label" for="subdistrict">Kecamatan *</label>
                                                 </div>
                                                 <div class="col-sm-8">
-                                                    <select
+                                                    <select disabled
                                                         class="@error('subdistrict') is-invalid @enderror form-control w-100"
                                                         id="subdistrict" name="subdistrict">
                                                         <option value="" disabled selected></option>
@@ -433,7 +431,8 @@
                                                     <label class="form-label" for="ward">Kelurahan *</label>
                                                 </div>
                                                 <div class="col-sm-8">
-                                                    <select class="@error('ward') is-invalid @enderror form-control w-100"
+                                                    <select disabled
+                                                        class="@error('ward') is-invalid @enderror form-control w-100"
                                                         id="ward" name="ward">
                                                         <option value="" disabled selected></option>
                                                     </select>
@@ -993,115 +992,108 @@
                 'placeholder': 'Pilih Hubungan Keluarga',
             });
         });
+
+        $(document).ready(function() {
+            function resetDropdown(element, placeholder) {
+                element.prop('disabled', true);
+                element.html(`<option value="">${placeholder}</option>`);
+            }
+
+
+            $('#province').change(function() {
+                var provinceId = $(this).val();
+                var regency = $('#regency');
+                var district = $('#subdistrict');
+                var village = $('#ward');
+
+                if (provinceId) {
+                    regency.prop('disabled', true);
+                    regency.html('<option value="">Loading...</option>');
+
+                    $.ajax({
+                        url: "{{ route('getKabupaten') }}",
+                        type: 'GET',
+                        data: {
+                            provinsi_id: provinceId
+                        },
+                        success: function(data) {
+                            regency.prop('disabled', false);
+                            regency.empty();
+                            regency.append('<option value="">Pilih Kabupaten/Kota</option>');
+                            $.each(data, function(id, name) {
+                                regency.append(new Option(name, id));
+                            });
+
+                            resetDropdown(district, 'Pilih Kecamatan');
+                            resetDropdown(village, 'Pilih Kelurahan');
+                        }
+                    });
+                } else {
+                    resetDropdown(regency, 'Pilih Kabupaten/Kota');
+                    resetDropdown(district, 'Pilih Kecamatan');
+                    resetDropdown(village, 'Pilih Kelurahan');
+                }
+            });
+
+            $('#regency').change(function() {
+                var regencyId = $(this).val();
+                var district = $('#subdistrict');
+                var village = $('#ward');
+
+                if (regencyId) {
+                    district.prop('disabled', true);
+                    district.html('<option value="">Loading...</option>');
+
+                    $.ajax({
+                        url: "{{ route('getKecamatan') }}",
+                        type: 'GET',
+                        data: {
+                            kabupaten_id: regencyId
+                        },
+                        success: function(data) {
+                            district.prop('disabled', false);
+                            district.empty();
+                            district.append('<option value="">Pilih Kecamatan</option>');
+                            $.each(data, function(id, name) {
+                                district.append(new Option(name, id));
+                            });
+
+                            resetDropdown(village, 'Pilih Kelurahan');
+                        }
+                    });
+                } else {
+                    resetDropdown(district, 'Pilih Kecamatan');
+                    resetDropdown(village, 'Pilih Kelurahan');
+                }
+            });
+
+            $('#subdistrict').change(function() {
+                var districtId = $(this).val();
+                var village = $('#ward');
+
+                if (districtId) {
+                    village.prop('disabled', true);
+                    village.html('<option value="">Loading...</option>');
+
+                    $.ajax({
+                        url: "{{ route('getKelurahan') }}",
+                        type: 'GET',
+                        data: {
+                            kecamatan_id: districtId
+                        },
+                        success: function(data) {
+                            village.prop('disabled', false);
+                            village.empty();
+                            village.append('<option value="">Pilih Kelurahan</option>');
+                            $.each(data, function(id, name) {
+                                village.append(new Option(name, id));
+                            });
+                        }
+                    });
+                } else {
+                    resetDropdown(village, 'Pilih Kelurahan');
+                }
+            });
+        });
     </script>
 @endsection
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#province').change(function() {
-            var provinceId = $(this).val();
-            if (provinceId) {
-                $('#regency').prop('disabled', true);
-                $('#regency').html('<option value="">Loading...</option>');
-
-                $.ajax({
-                    url: 'https://dev.farizdotid.com/api/daerahindonesia/kota?id_provinsi=' +
-                        provinceId,
-                    type: 'GET',
-                    success: function(response) {
-                        if (response.kota_kabupaten && response.kota_kabupaten.length > 0) {
-                            $('#regency').prop('disabled', false);
-                            var options = '<option value="">Pilih Kota/Kabupaten</option>';
-                            response.kota_kabupaten.forEach(function(city) {
-                                options += '<option value="' + city.id + '">' + city
-                                    .nama + '</option>';
-                            });
-                            $('#regency').html(options);
-                            $('#subdistrict').html(
-                                '<option value="">Pilih Kecamatan</option>');
-                            $('#subdistrict').html(
-                                '<option value="">Pilih Kelurahan</option>');
-                        } else {
-                            $('#regency').html('<option value="">No cities found</option>');
-                            $('#subdistrict').html(
-                                '<option value="">Pilih Kecamatan</option>');
-                            $('#ward').html('<option value="">Pilih Kelurahan</option>');
-                        }
-                    }
-                });
-            } else {
-                $('#regency').prop('disabled', true);
-                $('#regency').html('<option value="">Pilih Kota/Kabupaten</option>');
-                $('#subdistrict').html('<option value="">Pilih Kecamatan</option>');
-                $('#ward').html('<option value="">Pilih Kelurahan</option>');
-            }
-        });
-
-        $('#regency').change(function() {
-            var cityId = $(this).val();
-            if (cityId) {
-                console.log(cityId);
-                $('#subdistrict').prop('disabled', true);
-                $('#subdistrict').html('<option value="">Loading...</option>');
-
-                $.ajax({
-                    url: 'https://dev.farizdotid.com/api/daerahindonesia/kecamatan?id_kota=' +
-                        cityId,
-                    type: 'GET',
-                    success: function(response) {
-                        if (response.kecamatan && response.kecamatan.length > 0) {
-                            $('#subdistrict').prop('disabled', false);
-                            var options = '<option value="">Pilih Kota/Kabupaten</option>';
-                            response.kecamatan.forEach(function(subdistrict) {
-                                options += '<option value="' + subdistrict.id +
-                                    '">' + subdistrict.nama + '</option>';
-                            });
-                            $('#subdistrict').html(options);
-                            $('#ward').html('<option value="">Pilih Kecamatan</option>');
-                            $('#ward').html('<option value="">Pilih Kelurahan</option>');
-                        } else {
-                            $('#subdistrict').html(
-                                '<option value="">No districts found</option>');
-                            $('#ward').html('<option value="">Pilih Kelurahan</option>');
-                        }
-                    }
-                });
-            } else {
-                $('#subdistrict').prop('disabled', true);
-                $('#subdistrict').html('<option value="">Pilih Kecamatan</option>');
-                $('#ward').html('<option value="">Pilih Kelurahan</option>');
-            }
-        });
-
-        $('#subdistrict').change(function() {
-            var subDistrictId = $(this).val();
-            console.log(subDistrictId);
-            if (subDistrictId) {
-                $('#ward').prop('disabled', true);
-                $('#ward').html('<option value="">Loading...</option>');
-
-                $.ajax({
-                    url: 'https://dev.farizdotid.com/api/daerahindonesia/kelurahan?id_kecamatan=' +
-                        subDistrictId,
-                    type: 'GET',
-                    success: function(response) {
-                        if (response.kelurahan && response.kelurahan.length > 0) {
-                            $('#ward').prop('disabled', false);
-                            var options = '<option value="">Pilih Kelurahan</option>';
-                            response.kelurahan.forEach(function(ward) {
-                                options += '<option value="' + ward.id + '">' + ward
-                                    .nama + '</option>';
-                            });
-                            $('#ward').html(options);
-                        } else {
-                            $('#ward').html('<option value="">No wards found</option>');
-                        }
-                    }
-                });
-            } else {
-                $('#ward').prop('disabled', true);
-                $('#ward').html('<option value="">Pilih Kelurahan</option>');
-            }
-        });
-    });
-</script>

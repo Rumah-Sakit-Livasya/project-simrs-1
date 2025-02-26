@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\TarifTindakanMedis;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,5 +22,18 @@ class TindakanMedis extends Model
     public function grup_tindakan_medis()
     {
         return $this->belongsTo(GrupTindakanMedis::class);
+    }
+    public function tarifTindakanMedis($groupPenjaminId, $kelasRawatId)
+    {
+        return TarifTindakanMedis::where('tindakan_medis_id', $this->id)
+            ->where('group_penjamin_id', $groupPenjaminId)
+            ->where('kelas_rawat_id', $kelasRawatId)
+            ->first();
+    }
+
+    public function getTotalTarif($groupPenjaminId, $kelasRawatId)
+    {
+        $tarif = $this->tarifTindakanMedis($groupPenjaminId, $kelasRawatId);
+        return $tarif ? $tarif->total : 0;
     }
 }

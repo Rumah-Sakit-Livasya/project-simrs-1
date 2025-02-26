@@ -17,6 +17,6 @@ class TagihanPasien extends Model implements AuditableContract
 
     public function bilingan()
     {
-        return $this->belongsToMany(Bilingan::class, 'bilingan_tagihan_pasien', 'tagihan_pasien_id', 'bilingan_id');
+        return $this->belongsToMany(Bilingan::class, 'bilingan_tagihan_pasien');
     }
 }

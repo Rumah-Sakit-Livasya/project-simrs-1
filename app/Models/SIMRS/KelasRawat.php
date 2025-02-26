@@ -78,4 +78,9 @@ class KelasRawat extends Model
     {
         return $this->hasMany(MarginHargaJual::class, 'kelas_rawat_id');
     }
+
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class, 'kelas_rawat_id', 'id');
+    }
 }

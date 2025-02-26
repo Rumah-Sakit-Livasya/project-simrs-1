@@ -9,10 +9,33 @@ use Illuminate\Http\Request;
 
 class TagihanPasienController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // dd(Bilingan::with('tagihan_pasien')->get());
-        $tagihan_pasien = Bilingan::whereDate('created_at', today())->get();
+        $query = Bilingan::query();
+
+        // return $request->registration_date;
+        if ($request->filled('registration_date')) {
+            $dates = explode(' - ', $request->registration_date);
+            $start_date = date('Y-m-d 00:00:00', strtotime(trim($dates[0])));
+            $end_date = date('Y-m-d 23:59:59', strtotime(trim($dates[1])));
+            $query->whereBetween('created_at', [$start_date, $end_date]);
+        } else {
+            $query->whereDate('created_at', today());
+        }
+
+        if ($request->filled('medical_record_number')) {
+            $query->whereHas('registration.patient', function ($q) use ($request) {
+                $q->where('medical_record_number', $request->medical_record_number);
+            });
+        }
+
+        if ($request->filled('name')) {
+            $query->whereHas('registration.patient', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%');
+            });
+        }
+
+        $tagihan_pasien = $query->get();
         return view('pages.simrs.keuangan.kasir.index', compact('tagihan_pasien'));
     }
 
@@ -33,6 +56,14 @@ class TagihanPasienController extends Controller
             // Add a 'del' column for delete actions
             $data = $data->map(function ($item) {
                 $item->del = '<button class="btn btn-danger delete" data-id="' . $item->id . '"><i class="fas fa-trash"></i></button>'; // Icon trash button
+
+                // If value is 0, display it as is
+                $item->nominal = $item->nominal == 0 ? '0' : $item->nominal;
+                $item->diskon_rp = $item->diskon_rp == 0 ? '0' : $item->diskon_rp;
+                $item->disc = $item->disc == 0 ? '0' : $item->disc;
+                $item->jaminan_rp = $item->jaminan_rp == 0 ? '0' : $item->jaminan_rp;
+                $item->jamin = $item->jamin == 0 ? '0' : $item->jamin;
+
                 return $item;
             });
 

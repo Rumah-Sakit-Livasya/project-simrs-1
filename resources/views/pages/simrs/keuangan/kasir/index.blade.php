@@ -18,7 +18,7 @@
                     <div class="panel-container show">
                         <div class="panel-content">
 
-                            <form action="/simrs/kasir/tagihan-pasien" method="get">
+                            <form action="" method="post">
                                 @csrf
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
@@ -31,7 +31,7 @@
                                                 <div class="col-xl">
                                                     <input type="text" class="form-control" id="datepicker-1"
                                                         placeholder="Select date" name="registration_date"
-                                                        value="01/01/2018 - 01/15/2018">
+                                                        value="{{ old('registration_date', '01/01/2018 - 01/15/2018') }}">
                                                     @error('registration_date')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -46,7 +46,7 @@
                                                     <label class="form-label" for="medical_record_number">No. RM</label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ request('medical_record_number') }}"
+                                                    <input type="text" value="{{ old('medical_record_number') }}"
                                                         class="form-control" id="medical_record_number"
                                                         name="medical_record_number" onkeyup="formatAngka(this)">
                                                     @error('medical_record_number')
@@ -63,7 +63,7 @@
                                                     <label class="form-label" for="registration_name">Nama Pasien</label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ request('name') }}" class="form-control"
+                                                    <input type="text" value="{{ old('name') }}" class="form-control"
                                                         id="name" name="name">
                                                     @error('name')
                                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -85,8 +85,12 @@
                                                     <select class="form-control w-100 select2" id="registration_type"
                                                         name="registration_type">
                                                         <option value=""></option>
-                                                        <option value="rawat-inap">Rawat Inap</option>
-                                                        <option value="rawat-jalan">Rawat Jalan</option>
+                                                        <option value="rawat-inap"
+                                                            {{ old('registration_type') == 'rawat-inap' ? 'selected' : '' }}>
+                                                            Rawat Inap</option>
+                                                        <option value="rawat-jalan"
+                                                            {{ old('registration_type') == 'rawat-jalan' ? 'selected' : '' }}>
+                                                            Rawat Jalan</option>
                                                     </select>
                                                     @error('registration_type')
                                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -102,8 +106,8 @@
                                                     <label class="form-label" for="address">No Registrasi</label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ request('address') }}"
-                                                        class="form-control" id="address" name="address">
+                                                    <input type="text" value="{{ old('address') }}" class="form-control"
+                                                        id="address" name="address">
                                                     @error('address')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -121,8 +125,12 @@
                                                     <select class="select2 form-control w-100" id="departement_id"
                                                         name="departement_id">
                                                         <option value=""></option>
-                                                        <option value="Rawat Inap">Rawat Inap</option>
-                                                        <option value="Rawat Jalan">Rawat Jalan</option>
+                                                        <option value="Rawat Inap"
+                                                            {{ old('departement_id') == 'Rawat Inap' ? 'selected' : '' }}>
+                                                            Rawat Inap</option>
+                                                        <option value="Rawat Jalan"
+                                                            {{ old('departement_id') == 'Rawat Jalan' ? 'selected' : '' }}>
+                                                            Rawat Jalan</option>
                                                     </select>
                                                     @error('departement_id')
                                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -180,7 +188,7 @@
                                             <td>{{ $loop->iteration }}</td>
                                             <td>
                                                 <a href="{{ route('tagihan.pasien.detail', $tagihan->id) }}">
-                                                    {{ $tagihan->date }}
+                                                    {{ tgl_waktu($tagihan->created_at) }}
                                                 </a>
                                             </td>
                                             <td>
@@ -267,7 +275,8 @@
             $('#date_of_birth').datepicker({
                 todayHighlight: true,
                 orientation: "bottom left",
-                templates: controls
+                templates: controls,
+                defaultDate: "{{ old('date_of_birth', date('Y-m-d')) }}"
             });
 
         }
@@ -290,32 +299,32 @@
                     searchField.insertBefore(searchField.prev());
                 });
             });
-
-            /// Get the current date and time
-            var today = new Date();
-
-            // Format it as "YYYY-MM-DD"
-            var formattedToday = today.getFullYear() + '-' +
-                ('0' + (today.getMonth() + 1)).slice(-2) + '-' +
-                ('0' + today.getDate()).slice(-2) + ' ' +
-                ('0' + today.getHours()).slice(-2) + ':' +
-                ('0' + today.getMinutes()).slice(-2) + ':' +
-                ('0' + today.getSeconds()).slice(-2);
-
             // Set the default date for the datepicker
             $('#datepicker-1').daterangepicker({
                 opens: 'left',
-                startDate: moment(today).format('YYYY-MM-DD'),
-                endDate: moment(today).format('YYYY-MM-DD'),
-                // timePicker: true, // Enable time selection
-                // timePicker24Hour: true, // 24-hour format
-                // timePickerSeconds: true, // Include seconds in time selection
+                startDate: moment(
+                    "{{ (old('registration_date') ? explode(' - ', old('registration_date'))[0] : request('registration_date')) ? explode(' - ', request('registration_date'))[0] : now()->format('Y-m-d') }}",
+                    'YYYY-MM-DD'),
+                endDate: moment(
+                    "{{ (old('registration_date') ? explode(' - ', old('registration_date'))[1] : request('registration_date')) ? explode(' - ', request('registration_date'))[1] : now()->format('Y-m-d') }}",
+                    'YYYY-MM-DD'),
                 locale: {
-                    format: 'YYYY-MM-DD' // Display format for the picker
+                    format: 'YYYY-MM-DD',
+                    separator: ' - ',
+                    applyLabel: 'Pilih',
+                    cancelLabel: 'Batal',
+                    fromLabel: 'Dari',
+                    toLabel: 'Sampai',
+                    customRangeLabel: 'Custom',
+                    weekLabel: 'W',
+                    daysOfWeek: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                    monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus',
+                        'September', 'Oktober', 'November', 'Desember'
+                    ]
                 }
             }, function(start, end, label) {
-                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') +
-                    ' to ' + end.format('YYYY-MM-DD'));
+                console.log("Tanggal dipilih: " + start.format('YYYY-MM-DD') + ' sampai ' + end.format(
+                    'YYYY-MM-DD'));
             });
 
 

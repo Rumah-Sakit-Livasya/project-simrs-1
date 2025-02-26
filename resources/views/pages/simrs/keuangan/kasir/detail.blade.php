@@ -130,8 +130,9 @@
                                                         <div class="card-title text-white">Wajib Bayar</div>
                                                     </div>
                                                     <div class="card-body">
-                                                        <input type="number" class="form-control"
-                                                            placeholder="Masukkan Wajib Bayar" />
+                                                        <input type="text" class="form-control"
+                                                            value="{{ number_format($bilingan->tagihan_pasien->sum('nominal') ?? 0, 0, ',', '.') }}"
+                                                            placeholder="Total Tagihan Pasien" readonly />
                                                     </div>
                                                 </div>
                                             </div>
@@ -142,8 +143,9 @@
                                                         <div class="card-title text-white">DP Pasien</div>
                                                     </div>
                                                     <div class="card-body">
-                                                        <input type="number" class="form-control"
-                                                            placeholder="Masukkan DP Pasien" />
+                                                        <input type="text" class="form-control"
+                                                            value="{{ number_format($bilingan->down_payment ? ($bilingan->down_payment->isNotEmpty() ? $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') : 0) : 0, 0, ',', '.') }}"
+                                                            placeholder="Masukkan DP Pasien" readonly />
                                                     </div>
                                                 </div>
                                             </div>
@@ -154,8 +156,9 @@
                                                         <div class="card-title text-white">Sisa Tagihan</div>
                                                     </div>
                                                     <div class="card-body">
-                                                        <input type="number" class="form-control"
-                                                            placeholder="Masukkan Sisa Tagihan" />
+                                                        <input type="text" class="form-control"
+                                                            value="{{ number_format(($bilingan->tagihan_pasien->sum('nominal') ?? 0) - ($bilingan->down_payment ? ($bilingan->down_payment->isNotEmpty() ? $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') : 0) : 0), 0, ',', '.') }}"
+                                                            placeholder="Masukkan Sisa Tagihan" readonly />
                                                     </div>
                                                 </div>
                                             </div>
@@ -169,8 +172,9 @@
                                                         <div class="card-title text-white">Tunai</div>
                                                     </div>
                                                     <div class="card-body">
-                                                        <input type="number" class="form-control"
-                                                            placeholder="Masukkan Tunai" />
+                                                        <input type="text" class="form-control" id="tunai"
+                                                            placeholder="Masukkan Tunai"
+                                                            onkeyup="updateTotalBayarAndKembalian(this)" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -181,8 +185,9 @@
                                                         <div class="card-title text-white">Total Bayar</div>
                                                     </div>
                                                     <div class="card-body">
-                                                        <input type="number" class="form-control"
-                                                            placeholder="Masukkan Total Bayar" />
+                                                        <input type="text" class="form-control" id="totalBayar"
+                                                            placeholder="Masukkan Total Bayar"
+                                                            onkeyup="updateKembalian()" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -193,8 +198,8 @@
                                                         <div class="card-title text-white">Kembalian</div>
                                                     </div>
                                                     <div class="card-body">
-                                                        <input type="number" class="form-control"
-                                                            placeholder="Masukkan Kembalian" />
+                                                        <input type="text" class="form-control" id="kembalian"
+                                                            placeholder="Masukkan Kembalian" readonly />
                                                     </div>
                                                 </div>
                                             </div>
@@ -211,129 +216,192 @@
                                                     </div>
                                                     <div class="collapse" id="paymentMethods">
                                                         <div class="card-body">
-                                                            <div class="section-title mt-3">Credit Card</div>
-                                                            <table class="table table-bordered">
-                                                                <thead class="table-header">
-                                                                    <tr>
-                                                                        <th>Mesin EDC</th>
-                                                                        <th>Type</th>
-                                                                        <th>CC Number</th>
-                                                                        <th>Auth Number</th>
-                                                                        <th>Batch</th>
-                                                                        <th>Nominal</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <td>
-                                                                            <select class="form-select select2">
-                                                                                <option>MANDIRI</option>
-                                                                                <option>BCA</option>
-                                                                                <option>BNI</option>
-                                                                            </select>
-                                                                        </td>
-                                                                        <td>
-                                                                            <select class="form-select select2">
-                                                                                <option>Debit Card</option>
-                                                                                <option>Credit Card</option>
-                                                                            </select>
-                                                                        </td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td><select class="form-select select2">
-                                                                                <option>BCA</option>
-                                                                            </select></td>
-                                                                        <td><select class="form-select select2">
-                                                                                <option>Credit Card</option>
-                                                                            </select></td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td><select class="form-select select2">
-                                                                                <option>BNI</option>
-                                                                            </select></td>
-                                                                        <td><select class="form-select select2">
-                                                                                <option>Credit Card</option>
-                                                                            </select></td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                        <td><input type="text" class="form-control">
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-
-                                                            <div class="section-title">Via Transfer Bank</div>
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label class="form-label">Bank RS</label>
-                                                                    <select class="form-select select2">
-                                                                        <option>Bank RS A</option>
-                                                                        <option>Bank RS B</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <label class="form-label">Bank Pengirim</label>
-                                                                    <input type="text" class="form-control">
-                                                                </div>
-                                                                <div class="col-md-6 mt-2">
-                                                                    <label class="form-label">Nominal Transfer</label>
-                                                                    <input type="text" class="form-control">
-                                                                </div>
-                                                                <div class="col-md-6 mt-2">
-                                                                    <label class="form-label">No. Rek Pengirim</label>
-                                                                    <input type="text" class="form-control">
+                                                            <div class="card mb-3">
+                                                                <div class="card-header">Credit Card</div>
+                                                                <div class="card-body">
+                                                                    <table class="table table-bordered">
+                                                                        <thead class="table-header">
+                                                                            <tr>
+                                                                                <th>Mesin EDC</th>
+                                                                                <th>Type</th>
+                                                                                <th>CC Number</th>
+                                                                                <th>Auth Number</th>
+                                                                                <th>Batch</th>
+                                                                                <th>Nominal</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <select class="form-select select2"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                        <option></option>
+                                                                                        <option>MANDIRI</option>
+                                                                                        <option>BCA</option>
+                                                                                        <option>BNI</option>
+                                                                                    </select>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <select class="form-select select2"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                        <option></option>
+                                                                                        <option>Debit Card</option>
+                                                                                        <option>Credit Card</option>
+                                                                                    </select>
+                                                                                </td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td><select class="form-select select2"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                        <option></option>
+                                                                                        <option>MANDIRI</option>
+                                                                                        <option>BCA</option>
+                                                                                        <option>BNI</option>
+                                                                                    </select></td>
+                                                                                <td><select class="form-select select2"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                        <option></option>
+                                                                                        <option>Debit Card</option>
+                                                                                        <option>Credit Card</option>
+                                                                                    </select></td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td><select class="form-select select2"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                        <option></option>
+                                                                                        <option>MANDIRI</option>
+                                                                                        <option>BCA</option>
+                                                                                        <option>BNI</option>
+                                                                                    </select></td>
+                                                                                <td><select class="form-select select2"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                        <option></option>
+                                                                                        <option>Debit Card</option>
+                                                                                        <option>Credit Card</option>
+                                                                                    </select></td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                                <td><input type="text"
+                                                                                        class="form-control"
+                                                                                        onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
                                                                 </div>
                                                             </div>
 
-                                                            <div class="section-title">Ditanggung Dokter</div>
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label class="form-label">Nama Dokter</label>
-                                                                    <select class="form-select select2">
-                                                                        <option>Dr. A</option>
-                                                                        <option>Dr. B</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <label class="form-label">Nominal Dijamin
-                                                                        Dokter</label>
-                                                                    <input type="text" class="form-control">
+                                                            <div class="card mb-3">
+                                                                <div class="card-header">Via Transfer Bank</div>
+                                                                <div class="card-body">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label">Bank RS</label>
+                                                                            <select class="form-select select2">
+                                                                                <option>Bank RS A</option>
+                                                                                <option>Bank RS B</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label">Bank Pengirim</label>
+                                                                            <input type="text" class="form-control">
+                                                                        </div>
+                                                                        <div class="col-md-6 mt-2">
+                                                                            <label class="form-label">Nominal
+                                                                                Transfer</label>
+                                                                            <input type="text" class="form-control"
+                                                                                onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                        </div>
+                                                                        <div class="col-md-6 mt-2">
+                                                                            <label class="form-label">No. Rek
+                                                                                Pengirim</label>
+                                                                            <input type="text" class="form-control">
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
 
-                                                            <div class="section-title">Ditanggung Karyawan</div>
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label class="form-label">Nama Karyawan</label>
-                                                                    <select class="form-select select2">
-                                                                        <option>Karyawan A</option>
-                                                                        <option>Karyawan B</option>
-                                                                    </select>
+                                                            <div class="card mb-3">
+                                                                <div class="card-header">Ditanggung Dokter</div>
+                                                                <div class="card-body">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label">Nama Dokter</label>
+                                                                            <select class="form-select select2">
+                                                                                <option>Dr. A</option>
+                                                                                <option>Dr. B</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label">Nominal Dijamin
+                                                                                Dokter</label>
+                                                                            <input type="text" class="form-control"
+                                                                                onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <div class="col-md-6">
-                                                                    <label class="form-label">Nominal Dijamin
-                                                                        Karyawan</label>
-                                                                    <input type="text" class="form-control">
+                                                            </div>
+
+                                                            <div class="card mb-3">
+                                                                <div class="card-header">Ditanggung Karyawan</div>
+                                                                <div class="card-body">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label">Nama Karyawan</label>
+                                                                            <select class="form-select select2">
+                                                                                <option>Karyawan A</option>
+                                                                                <option>Karyawan B</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label">Nominal Dijamin
+                                                                                Karyawan</label>
+                                                                            <input type="text" class="form-control"
+                                                                                onkeyup="updateTotalBayarAndKembalian(this)">
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -434,22 +502,20 @@
                                             <div class="col">
                                                 <label>Total DP:</label>
                                                 <input type="text" class="form-control" name="total_dp"
-                                                    value="{{ $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') - $bilingan->down_payment->where('tipe', 'DP Refund')->sum('nominal') }}"
+                                                    value="{{ $bilingan->down_payment ? ($bilingan->down_payment->isNotEmpty() ? $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') - $bilingan->down_payment->where('tipe', 'DP Refund')->sum('nominal') : '0') : '0' }}"
                                                     readonly>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col text-left">
-                                                <button type="reset" class="btn btn-secondary">
-                                                    <i class="fal fa-undo"></i> Reset
-                                                </button>
-                                            </div>
-                                            <div class="col text-right">
-                                                <button type="submit" class="btn btn-success">
-                                                    <i class="fal fa-save"></i> Simpan
-                                                </button>
-                                            </div>
-                                        </div>
+                                                <div class="row mb-3">
+                                                    <div class="col text-left">
+                                                        <button type="reset" class="btn btn-secondary">
+                                                            <i class="fal fa-undo"></i> Reset
+                                                        </button>
+                                                    </div>
+                                                    <div class="col text-right">
+                                                        <button type="submit" class="btn btn-success">
+                                                            <i class="fal fa-save"></i> Simpan
+                                                        </button>
+                                                    </div>
+                                                </div>
                                     </form>
                                     {{-- DataTable for List DP Pasien --}}
                                     <div class="row mt-3">
@@ -478,11 +544,7 @@
                     </div>
                 </div>
             </div>
-
         </div>
-
-
-
     </main>
 @endsection
 @section('plugin')
@@ -497,6 +559,26 @@
     <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 
     <script>
+        function formatRupiah(angka) {
+            return angka < 0 ? '-' + Math.abs(angka).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/[^0-9.]/g,
+                '') : angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/[^0-9.]/g, '');
+        }
+
+        function updateTotalBayarAndKembalian(nominal) {
+            const tunai = parseFloat(nominal.value.replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
+            document.getElementById('totalBayar').value = formatRupiah(tunai);
+            updateKembalian();
+        }
+
+        function updateKembalian() {
+            const totalBayar = parseFloat(document.getElementById('totalBayar').value.replace(/\./g, '').replace(/[^0-9]/g,
+                '')) || 0;
+            const sisaTagihan = parseFloat(document.querySelector('input[placeholder="Masukkan Sisa Tagihan"]').value
+                .replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
+            const kembalian = totalBayar - sisaTagihan;
+            document.getElementById('kembalian').value = formatRupiah(kembalian);
+        }
+
         var controls = {
             leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
             rightArrow: '<i class="fal fa-angle-right" style="font-size: 1.25rem"></i>'
