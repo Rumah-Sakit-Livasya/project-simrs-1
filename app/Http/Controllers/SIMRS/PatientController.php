@@ -9,6 +9,7 @@ use App\Models\SIMRS\Ethnic;
 use App\Models\SIMRS\Family;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
+use App\Models\SIMRS\Provinsi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
@@ -65,7 +66,7 @@ class PatientController extends Controller
     {
         // $response = Http::get('https://dev.farizdotid.com/api/daerahindonesia/provinsi');
         $dataPenjamin = Penjamin::all();
-        $provinces = [];
+        $provinces = Provinsi::all();
         return view('pages.simrs.pendaftaran.pendaftaran-pasien-baru', [
             'penjamins' => $dataPenjamin,
             'provinces' => $provinces,

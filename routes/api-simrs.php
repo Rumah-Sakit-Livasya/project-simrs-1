@@ -42,6 +42,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Http\Controllers\SIMRS\LocationController;
 use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Support\Facades\Storage;
 
@@ -63,8 +64,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
 
     Route::prefix('pengkajian')->group(function () {
-        Route::prefix('rawat-jalan')->group(function() {
-            Route::prefix('perawat')->group(function(){
+        Route::prefix('rawat-jalan')->group(function () {
+            Route::prefix('perawat')->group(function () {
                 Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
                 Route::prefix('dokter')->group(function () {
                     Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
@@ -72,21 +73,21 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             });
         });
     });
-    
+
     Route::prefix('transfer-pasien-antar-ruangan')->group(function () {
         Route::post('/store', [PengkajianController::class, 'storeOrUpdateTransferPasienAntarRuangan'])->name('transfer-pasien-antar-ruangan.store');
     });
 
-    Route::prefix('cppt')->group(function() {
-        Route::prefix('rawat-jalan')->group(function() {
-            Route::prefix('perawat')->group(function() {
+    Route::prefix('cppt')->group(function () {
+        Route::prefix('rawat-jalan')->group(function () {
+            Route::prefix('perawat')->group(function () {
                 Route::post('/store', [CPPTController::class, 'store'])->name('cppt.rajal.perawat.store');
             });
         });
     });
 
 
-    Route::prefix('poliklinik')->group(function() {
+    Route::prefix('poliklinik')->group(function () {
         Route::post('/filter-pasien', [PoliklinikController::class, 'filterPasien'])->name('poliklinik.filter-pasien');
     });
 
@@ -321,4 +322,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::patch('/update/{encryptedId}', [KepustakaanController::class, 'update'])->name('kepustakaan.update');
         Route::delete('/delete/{encryptedId}', [KepustakaanController::class, 'delete'])->name('kepustakaan.delete');
     });
+
+    Route::get('/getKabupaten', [LocationController::class, 'getKabupaten'])->name('getKabupaten');
+    Route::get('/getKecamatan', [LocationController::class, 'getKecamatan'])->name('getKecamatan');
+    Route::get('/getKelurahan', [LocationController::class, 'getKelurahan'])->name('getKelurahan');
 });

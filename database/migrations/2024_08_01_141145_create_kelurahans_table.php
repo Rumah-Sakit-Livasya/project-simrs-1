@@ -15,7 +15,7 @@ class CreateKelurahansTable extends Migration
     {
         Schema::create('kelurahan', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('kecamatan_id');
+            $table->foreignId('kecamatan_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->softDeletes();
             $table->timestamps();
