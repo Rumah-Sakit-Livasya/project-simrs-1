@@ -1198,7 +1198,8 @@
                         }, (error) => {
                             toggleLoadingIndicator(false);
                             alert(
-                                'Gagal mendapatkan lokasi, silahkan aktifkan gps dan buka google maps terlebih dahulu!');
+                                'Gagal mendapatkan lokasi, silahkan aktifkan gps dan buka google maps terlebih dahulu!'
+                                );
                             reject(error);
                         });
                     } else {
@@ -1235,6 +1236,7 @@
                 formData.append('photo', file);
                 formData.append('latitude', latitude);
                 formData.append('longitude', longitude);
+                formData.append('check_date', "{{ $check_date }}");
                 formData.append('employee_id', '{{ auth()->user()->employee->id }}');
 
                 const apiUrl = actionType === 'clock_in' ? '/api/dashboard/clock-in' :
@@ -1303,7 +1305,8 @@
                     $(pictureModal).modal('hide');
                 } else {
                     alert(
-                        'Gagal mendapatkan lokasi, silahkan aktifkan gps dan buka google maps terlebih dahulu!');
+                        'Gagal mendapatkan lokasi, silahkan aktifkan gps dan buka google maps terlebih dahulu!'
+                        );
                 }
             });
 

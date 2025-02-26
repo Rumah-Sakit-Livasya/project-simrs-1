@@ -14,6 +14,10 @@ class PengkajianNurseRajal extends Model implements \OwenIt\Auditing\Contracts\A
 
     protected $guarded = ['id'];
     protected $table = 'pengkajian_nurse_rajal';
+    protected $casts = [
+        'tgl_masuk' => 'date',
+        'tgl_dilayani' => 'date',
+    ];
 
     // Define the inverse relationship to Registration
     public function registration()

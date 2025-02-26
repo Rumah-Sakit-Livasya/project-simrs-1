@@ -25,7 +25,7 @@ class DeductionExport implements FromQuery, WithHeadings, ShouldAutoSize, WithEv
 
     public function query()
     {
-        $query = Employee::query()->select(
+        $query = Employee::where('employees.is_active', 1)->select(
             'employees.id',
             'employees.fullname',
             'organizations.name as organization_name',
@@ -39,7 +39,8 @@ class DeductionExport implements FromQuery, WithHeadings, ShouldAutoSize, WithEv
             'deductions.potongan_bpjs_ketenagakerjaan',
             'deductions.potongan_pajak'
         )->leftJoin('organizations', 'employees.organization_id', '=', 'organizations.id')
-            ->leftJoin('deductions', 'employees.id', '=', 'deductions.employee_id');
+            ->leftJoin('deductions', 'employees.id', '=', 'deductions.employee_id')
+            ->where('employees.is_active', 1);
 
         if ($this->organizationId) {
             $query->where('employees.organization_id', $this->organizationId);

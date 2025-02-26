@@ -126,7 +126,7 @@
                                 @csrf
                                 @method('POST')
                                 <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="col-md-6 mb-2">
                                         <label for="tahun" class="font-weight-bold">Tahun</label>
                                         <select
                                             class="select2 form-control mb-3 w-100  @error('tahun') is-invalid @enderror"
@@ -141,6 +141,57 @@
                                             <option value="2029">2029</option>
                                             <option value="2030">2030</option>
                                         </select>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="tahun" class="font-weight-bold">Periode</label>
+                                        @if ($group_penilaian->status_penilaian == 'karyawan')
+                                            <select
+                                                class="select2 form-control mb-3 w-100  @error('periode') is-invalid @enderror"
+                                                id="periode" name="periode">
+                                                <option value="1-6">Januari - Juni</option>
+                                                <option value="7-12">Juli - Desember</option>
+                                            </select>
+                                        @else
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <select
+                                                        class="select2 form-control mb-3 w-100  @error('periode1') is-invalid @enderror"
+                                                        id="periode1" name="periode1">
+                                                        <option value="1">Januari</option>
+                                                        <option value="2">Februari</option>
+                                                        <option value="3">Maret</option>
+                                                        <option value="4">April</option>
+                                                        <option value="5">Mei</option>
+                                                        <option value="6">Juni</option>
+                                                        <option value="7">Juli</option>
+                                                        <option value="8">Agustus</option>
+                                                        <option value="9">September</option>
+                                                        <option value="10">Oktober</option>
+                                                        <option value="11">November</option>
+                                                        <option value="12">Desember</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-6">
+                                                    <select
+                                                        class="select2 form-control mb-3 w-100  @error('periode2') is-invalid @enderror"
+                                                        id="periode2" name="periode2">
+                                                        <option value="1">Januari</option>
+                                                        <option value="2">Februari</option>
+                                                        <option value="3">Maret</option>
+                                                        <option value="4">April</option>
+                                                        <option value="5">Mei</option>
+                                                        <option value="6">Juni</option>
+                                                        <option value="7">Juli</option>
+                                                        <option value="8">Agustus</option>
+                                                        <option value="9">September</option>
+                                                        <option value="10">Oktober</option>
+                                                        <option value="11">November</option>
+                                                        <option value="12">Desember</option>
+                                                    </select>
+                                                    <input type="hidden" name="periode" id="periode">
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                     <div class="col-md-12 form-wrapper">
                                         <div class="bungkus">
@@ -288,7 +339,7 @@
                                                 <tr>
                                                     <td colspan="6" class="text-white"
                                                         style="background-color: rgb(138, 196, 248); font-size: 11pt; font-weight: bold; padding: 8px;">
-                                                        ABSENSI DAN KETERLAMBATAN DALAM 1 TAHUN
+                                                        ABSENSI DAN KETERLAMBATAN DALAM PERIODE BULAN <span id="periode_text"></span>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -581,11 +632,11 @@
                                                                         <tr style="border: 0px; height: 50px">
                                                                             <td
                                                                                 style="width: 50%; padding: 5px 8px 5px 0px;">
-                                                                                <textarea class="form-control" id="komentar_penilai" name="komentar_penilai" rows="5"></textarea>
+                                                                                <textarea class="form-control" id="keterangan_ya" name="keterangan_ya" rows="5"></textarea>
                                                                             </td>
                                                                             <td
                                                                                 style="width: 50%; padding: 5px 0px 5px 8px; border-right: 0px;">
-                                                                                <textarea class="form-control" id="komentar_penilai" name="komentar_penilai" rows="5"></textarea>
+                                                                                <textarea class="form-control" id="keterangan_tidak" name="keterangan_tidak" rows="5"></textarea>
                                                                             </td>
                                                                         </tr>
                                                                     </table>
@@ -595,10 +646,12 @@
                                                     </td>
                                                 </tr>
                                             </table>
-                                            <table width="100%" style="text-align: center; border: 1px solid black; margin-top: 30px">
+                                            {{-- <table width="100%"
+                                                style="text-align: center; border: 1px solid black; margin-top: 30px">
                                                 <tr>
-                                                    <td class="kuning-muda" colspan="2" style="text-align: left; padding: 8px; border-bottom: 1px solid black;">
-                                                        <b>Majalengka, {{now()->format('d F Y')}}</b>
+                                                    <td class="kuning-muda" colspan="2"
+                                                        style="text-align: left; padding: 8px; border-bottom: 1px solid black;">
+                                                        <b>Majalengka, {{ now()->format('d F Y') }}</b>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -656,28 +709,30 @@
                                                         <table width="100%">
                                                             <tr>
                                                                 <td width="50%">
-                                                                    <div id="tombol-{{ $group_penilaian->pejabat_penilai }}">
+                                                                    <div
+                                                                        id="tombol-{{ $group_penilaian->pejabat_penilai }}">
                                                                         <a class="btn btn-primary btn-sm text-white ttd"
                                                                             id="btn_ttd_pejabat_penilai"
                                                                             data-tipe = "pejabat_penilai">Tanda
                                                                             tangan</a>
                                                                         <br>
                                                                     </div>
-            
+
                                                                     <img id="ttd_pejabat_penilai" src=""
                                                                         alt="Signature Image"
                                                                         style="display:none; max-width:60%; margin-top: -3px;"><br>
                                                                     <span id="ttd_nama_pejabat_penilai">HRD</span>
                                                                 </td>
                                                                 <td width="50%">
-                                                                    <div id="tombol-{{ $group_penilaian->pejabat_penilai }}">
+                                                                    <div
+                                                                        id="tombol-{{ $group_penilaian->pejabat_penilai }}">
                                                                         <a class="btn btn-primary btn-sm text-white ttd"
                                                                             id="btn_ttd_pejabat_penilai"
                                                                             data-tipe = "pejabat_penilai">Tanda
                                                                             tangan</a>
                                                                         <br>
                                                                     </div>
-            
+
                                                                     <img id="ttd_pejabat_penilai" src=""
                                                                         alt="Signature Image"
                                                                         style="display:none; max-width:60%; margin-top: -3px;"><br>
@@ -685,10 +740,10 @@
                                                                 </td>
                                                             </tr>
                                                         </table>
-                                                        
+
                                                     </td>
                                                 </tr>
-                                            </table>
+                                            </table> --}}
                                         </div>
                                     </div>
                                 </div>
@@ -737,16 +792,18 @@
                 });
             });
 
-            async function fetchAttendanceReport(employeeId, tahun) {
+            $('#periode_text').text($('#periode').val())
 
+            async function fetchAttendanceReport(employeeId, tahun, periode) {
                 try {
                     const response = await fetch(
-                        `/api/dashboard/attendances/report/employee/penilaian/${employeeId}/${tahun}`, {
+                        `/api/dashboard/attendances/report/employee/penilaian/${employeeId}/${tahun}?periode=${periode}`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json'
                             }
-                        });
+                        }
+                    );
 
                     if (!response.ok) {
                         const errorData = await response.json();
@@ -769,7 +826,6 @@
                 }
             }
 
-
             $('#employee_id').on('change', function(e) {
                 e.preventDefault();
 
@@ -777,6 +833,8 @@
                 idSignature = employeeId;
                 let periodeOnChange = $('#periode').val();
                 let tahun = $('#tahun').val();
+                let periode = $('#periode').val();
+                $('#periode_text').text(periode);
 
                 if (!tahun) {
                     alert("mohon pilih tahun terlebih dahulu!");
@@ -806,7 +864,7 @@
                         }
                     });
 
-                    fetchAttendanceReport(employeeId, tahun);
+                    fetchAttendanceReport(employeeId, tahun, periode);
                 }
 
             });
@@ -923,6 +981,15 @@
             $('.total_semuanya').on('change', function() {
                 hitungTotal();
 
+            });
+
+            $('#periode1').on('change', function() {
+                let periode = $('#periode1').val() + '-' + $('#periode2').val();
+                $('#periode').val(periode);
+            });
+            $('#periode2').on('change', function() {
+                let periode = $('#periode1').val() + '-' + $('#periode2').val();
+                $('#periode').val(periode);
             });
 
             $('#penilaian-form').on('submit', function(e) {

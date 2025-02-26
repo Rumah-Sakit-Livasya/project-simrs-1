@@ -33,6 +33,7 @@ use App\Http\Controllers\Inventaris\RoomMaintenanceController;
 use App\Http\Controllers\Inventaris\TemplateBarangController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\API\TimeScheduleController;
+use App\Http\Controllers\SIMRS\TextToSpeech\TextToSpeechController;
 use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\AttendanceRequest;
 use Illuminate\Http\Request;
@@ -160,7 +161,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
             }
         
             return response()->file($path); // Mengembalikan file sebagai respons
-        })->where('filename', '.*');
+        })->where('filename', '.*')->name('get.ttd');
     });
 
     Route::prefix('permissions')->group(function () {
@@ -326,6 +327,8 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
 });
 
 
+Route::get('/tts', [TextToSpeechController::class, 'tts'])->name('tts');
+Route::post('livasya-message', [BotMessageController::class, 'livasyaMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.verified');
 Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');
 Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])->middleware(CheckAuthorizationBot::class);
 // Route::get('notify-contract', [BotMessageController::class, 'notifyExpiryContract']);

@@ -524,13 +524,12 @@ class DashboardController extends Controller
     {
         $getNotify = $this->getNotify();
 
-        // Periksa apakah permintaan telah menyertakan parameter periode dan tahun
-        if ($request->has('periode') && $request->has('tahun')) {
+        // Periksa apakah permintaan telah menyertakan parameter periode
+        if ($request->has('periode')) {
             $periode = $request->periode;
-            $year = $request->tahun;
             list($startMonth, $endMonth) = explode(' - ', $periode);
-            $startPeriod = Carbon::createFromFormat('F Y', $startMonth . ' ' . $year)->startOfMonth()->addDays(25); // 26 April 2024
-            $endPeriod = Carbon::createFromFormat('F Y', $endMonth . ' ' . $year)->startOfMonth()->addDays(24);
+            $startPeriod = Carbon::createFromFormat('F Y', $startMonth)->startOfMonth()->addDays(25); // 26 April 2024
+            $endPeriod = Carbon::createFromFormat('F Y', $endMonth)->startOfMonth()->addDays(24);
         } else {
             // Jika tidak, tentukan periode bulan sekarang
             $today = Carbon::now();
@@ -997,6 +996,18 @@ class DashboardController extends Controller
         $jumlah_izin = 0;
         $jumlah_sakit = 0;
         $jumlah_cuti = 0;
+        $check_date = null;
+
+        $attendance_kemarin = Attendance::where('employee_id', auth()->user()->employee_id)->where('date', Carbon::now()->subDay()->format('Y-m-d'))->first();
+        if (isset($attendance_kemarin) || $attendance_kemarin != null) {
+            if ($attendance_kemarin->shift->time_in > '20.00' && $attendance_kemarin->shift->time_out < '08.00') { //jika absen kemarin shift malam
+                if (($attendance_kemarin->clock_in == null && $attendance_kemarin->clock_out == null) && $attendance_kemarin->is_day_off != 1) {
+                    $check_date = 'today';
+                } else if ($attendance_kemarin->clock_in != null && $attendance_kemarin->clock_out == null && $attendance_kemarin->is_day_off != 1) {
+                    $check_date = 'yesterday';
+                }
+            }
+        }
 
         foreach ($day_off as $row) {
             $code = $row->day_off->attendance_code->code;
@@ -1012,7 +1023,7 @@ class DashboardController extends Controller
         $selectedBulan = Carbon::now()->month;
         $selectedTahun = Carbon::now()->year;
 
-        return view('pages.absensi.absensi.index', compact('selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
+        return view('pages.absensi.absensi.index', compact('check_date', 'selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
     }
 
     public function getAttendancesFilter()
@@ -1096,7 +1107,7 @@ class DashboardController extends Controller
 
             // Mengirim request HTTP menggunakan cURL
             $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, 'http://192.168.3.111:3001/send-message');
+            curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.100:3001/send-message');
             curl_setopt($curl, CURLOPT_TIMEOUT, 30);
             curl_setopt($curl, CURLOPT_POST, 1);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -1250,6 +1261,13 @@ class DashboardController extends Controller
 
     public function getDataRequests()
     {
+        $currentYear = request()->tahun ?? Carbon::now()->year;
+        $currentMonth = request()->bulan ?? Carbon::now()->month;
+        $currentDay = request()->bulan ?? Carbon::now()->day;
+
+        $startDate = Carbon::create($currentYear, $currentMonth, 1)->startOfMonth();
+        $endDate = Carbon::create($currentYear, $currentMonth, 1)->endOfMonth();
+
         //list organisasi berdasarkan jabatan
         $organizations = [];
         $organizations[] = auth()->user()->employee->organization->id;
@@ -1279,20 +1297,40 @@ class DashboardController extends Controller
                 $query->select('id')
                     ->from('employees')
                     ->whereIn('organization_id', $organizations);
-            })->get();
+            })
+                ->where(function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                        ->orWhereBetween('end_date', [$startDate, $endDate])
+                        ->orWhere(function ($query) use ($startDate, $endDate) {
+                            $query->where('start_date', '<=', $startDate)
+                                ->where('end_date', '>=', $endDate);
+                        });
+                })
+                ->get();
             $attendance_requests = AttendanceRequest::whereIn('employee_id', function ($query) use ($organizations) {
                 $query->select('id')
                     ->from('employees')
                     ->whereIn('organization_id', $organizations);
-            })->get();
+            })
+                ->whereBetween('date', [$startDate, $endDate])
+                ->get();
 
             $total_pending = $day_off_requests->where('is_approved', 'Pending')->count() + $attendance_requests->where('is_approved', 'Pending')->count();
             $total_verifikasi = $day_off_requests->where('is_approved', 'Verifikasi')->count() + $attendance_requests->where('is_approved', 'Verifikasi')->count();
             $total_ditolak = $day_off_requests->where('is_approved', 'Ditolak')->count() + $attendance_requests->where('is_approved', 'Ditolak')->count();
             $total_disetujui = $day_off_requests->where('is_approved', 'Disetujui')->count() + $attendance_requests->where('is_approved', 'Disetujui')->count();
         } else {
-            $day_off_requests = DayOffRequest::all();
-            $attendance_requests = AttendanceRequest::all();
+            $day_off_requests = DayOffRequest::where(function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('start_date', [$startDate, $endDate])
+                    ->orWhereBetween('end_date', [$startDate, $endDate])
+                    ->orWhere(function ($query) use ($startDate, $endDate) {
+                        $query->where('start_date', '<=', $startDate)
+                            ->where('end_date', '>=', $endDate);
+                    });
+            })
+                ->get();
+
+            $attendance_requests = AttendanceRequest::whereBetween('date', [$startDate, $endDate])->get();
             $total_disetujui = $day_off_requests->where('is_approved', 'Disetujui')->count() + $attendance_requests->where('is_approved', 'Disetujui')->count();
             $total_pending = $day_off_requests->where('is_approved', 'Pending')->count() + $attendance_requests->where('is_approved', 'Pending')->count();
             $total_verifikasi = $day_off_requests->where('is_approved', 'Verifikasi')->count() + $attendance_requests->where('is_approved', 'Verifikasi')->count();
@@ -1317,7 +1355,7 @@ class DashboardController extends Controller
 
         $day_off['cl'] = 12;
 
-        return view('pages.monitoring.daftar-pengajuan.index', compact('day_off_requests', 'attendance_requests', 'total_disetujui', 'total_pending', 'total_verifikasi', 'total_ditolak', 'attendance_codes', 'employees', 'day_off'));
+        return view('pages.monitoring.daftar-pengajuan.index', compact('day_off_requests', 'attendance_requests', 'total_disetujui', 'total_pending', 'total_verifikasi', 'total_ditolak', 'attendance_codes', 'employees', 'day_off', 'currentMonth', 'currentYear'));
     }
 
     public function getGroupPenilaian()
@@ -1361,6 +1399,19 @@ class DashboardController extends Controller
         $penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
         $pejabat_penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->pejabat_penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
         $catatan = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->first();
+
+        $allowedEmployees = [
+            $id_pegawai,
+            $penilaian_pegawai[0]->penilai,
+            $penilaian_pegawai[0]->pejabat_penilai,
+            104,
+            228,
+        ];
+
+        if (!in_array(auth()->user()->employee_id, $allowedEmployees)) {
+            abort(403, 'Unauthorized');
+            return redirect()->route('dashboard')->with('error', 'Mohon akses dengan link yang benar!');
+        }
 
         $total_nilai_all = [];
         $nilai_kalkulasi = null;
@@ -1476,16 +1527,33 @@ class DashboardController extends Controller
         return view('pages.kpi.penilaian.show', compact('pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir', 'attendances'));
     }
 
-    public function showPenilaian($id_form, $encrypt)
+    public function showPenilaian($id_form, $periode, $encrypt)
     {
-        $decoded = base64_decode($encrypt);
+        $decoded = base64_decode(strtr($encrypt, '-_', '+/'));
         list($id_pegawai, $tahun) = explode('-', $decoded);
 
         $group_penilaian = GroupPenilaian::find($id_form);
-        $penilaian_pegawai = PenilaianPegawai::where('group_penilaian_id', $id_form)->where('employee_id', $id_pegawai)->where('tahun', $tahun)->orderBy('indikator_penilaian_id', 'asc')->get();
+        $penilaian_pegawai = PenilaianPegawai::where('group_penilaian_id', $id_form)->where('employee_id', $id_pegawai)->where('periode', $periode)->where('tahun', $tahun)->orderBy('indikator_penilaian_id', 'asc')->get();
         $penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
         $pejabat_penilai_parent = Employee::where('is_active', 1)->where('id', $penilaian_pegawai[0]->pejabat_penilai)->firstOrFail(['fullname', 'employee_code', 'job_position_id', 'organization_id']);
-        $catatan = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('group_penilaian_id', $id_form)->first();
+        $catatan = RekapPenilaianBulanan::where('employee_id', $id_pegawai)->where('periode', $periode)->where('tahun', $tahun)->where('group_penilaian_id', $id_form)->first();
+        $hrd = Employee::where('id', 104)->first();
+        $direktur = Employee::where('id', 228)->first();
+
+        $allowedEmployees = [
+            $id_pegawai,
+            $penilaian_pegawai[0]->penilai,
+            $penilaian_pegawai[0]->pejabat_penilai,
+            104,
+            228,
+        ];
+
+        if (!in_array(auth()->user()->employee_id, $allowedEmployees)) {
+            abort(403, 'Unauthorized');
+            // Lanjutkan jika lolos pengecekan
+            return redirect()->route('dashboard')->with('error', 'Mohon akses dengan link yang benar!');
+        }
+
 
         $total_nilai_all = [];
         $nilai_kalkulasi = null;
@@ -1598,7 +1666,7 @@ class DashboardController extends Controller
             'total_libur' => $total_libur,
         ];
 
-        return view('pages.kpi.penilaian.show-penilaian', compact('pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir', 'attendances'));
+        return view('pages.kpi.penilaian.show-penilaian', compact('hrd', 'direktur', 'pejabat_penilai', 'penilai', 'penilaian_pegawai', 'group_penilaian', 'catatan', 'total_nilai_all', 'total_akhir', 'attendances'));
     }
 
     public function rekapPenilaianBulanan()
@@ -1626,6 +1694,7 @@ class DashboardController extends Controller
             return $b[1] - $a[1];
         });
 
+
         // Mengambil 5 pegawai dengan total nilai terbanyak
         $top_5_pegawai = array_slice($nilai_pegawai, 0, 5);
 
@@ -1634,6 +1703,7 @@ class DashboardController extends Controller
         $cukup = $rekap_penilaian->where('tahun', Carbon::now()->format('Y'))->where('total_nilai', '>', 65)->where('total_nilai', '<', 86);
         $kurang = $rekap_penilaian->where('tahun', Carbon::now()->format('Y'))->where('total_nilai', '>', 50)->where('total_nilai', '<', 66);
         $sangat_kurang = $rekap_penilaian->where('tahun', Carbon::now()->format('Y'))->where('total_nilai', '<=', 50);
+
         return view('pages.kpi.penilaian.lists', compact('rekap_penilaian', 'sangat_baik', 'baik', 'cukup', 'kurang', 'sangat_kurang', 'top_5_pegawai'));
     }
 

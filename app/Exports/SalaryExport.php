@@ -25,7 +25,7 @@ class SalaryExport implements FromQuery, WithHeadings, ShouldAutoSize, WithEvent
 
     public function query()
     {
-        $query = Employee::query()->select(
+        $query = Employee::select(
             'employees.id',
             'employees.fullname',
             'organizations.name as organization_name',
@@ -37,16 +37,21 @@ class SalaryExport implements FromQuery, WithHeadings, ShouldAutoSize, WithEvent
             'salaries.guarantee_fee',
             'salaries.uang_duduk',
             'salaries.tax_allowance'
-        )->leftJoin('organizations', 'employees.organization_id', '=', 'organizations.id')
-            ->leftJoin('salaries', 'employees.id', '=', 'salaries.employee_id');
+        )
+            ->leftJoin('organizations', 'employees.organization_id', '=', 'organizations.id')
+            ->leftJoin('salaries', 'employees.id', '=', 'salaries.employee_id')
+            ->where('employees.is_active', 1); // Kondisi umum untuk semua query
 
-        if ($this->organizationId) {
+        // Filter berdasarkan organizationId jika ada
+        if (!empty($this->organizationId)) {
             $query->where('employees.organization_id', $this->organizationId);
         }
 
-        if ($this->employeeId) {
+        // Filter berdasarkan employeeId jika ada
+        if (!empty($this->employeeId)) {
             $query->where('employees.id', $this->employeeId);
         }
+
 
         return $query;
     }

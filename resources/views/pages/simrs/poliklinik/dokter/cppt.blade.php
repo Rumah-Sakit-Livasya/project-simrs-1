@@ -124,43 +124,8 @@
         <!-- notice the utilities added to the wrapper below -->
         <div class="d-flex flex-grow-1 p-0 shadow-1 layout-composed">
             <!-- left slider panel : must have unique ID-->
-            <div id="js-slide-left"
-                class="flex-wrap flex-shrink-0 position-relative slide-on-mobile slide-on-mobile-left bg-primary-200 pattern-0 p-3">
-                <form action="javascript:void(0)" method="POST">
-                    @csrf
-                    <div class="form-group mb-2">
-                        <select class="select2 form-control @error('departement_id') is-invalid @enderror"
-                            name="departement_id" id="departement_id">
-                            <option value=""></option>
-                            @foreach ($departements as $departement)
-                                <option value="{{ $departement->id }}">{{ $departement->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('departement_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="form-group mb-2">
-                        <select class="select2 form-control @error('doctor_id') is-invalid @enderror" name="doctor_id"
-                            id="doctor_id">
-                            <option value=""></option>
-                            @foreach ($jadwal_dokter as $jadwal)
-                                <option value="{{ $jadwal->doctor_id }}">{{ $jadwal->doctor->employee->fullname }}</option>
-                            @endforeach
-                        </select>
-                        @error('doctor_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="form-group mb-2">
-                        <input type="text" id="nama_pasien" name="nama_pasien" class="form-control"
-                            placeholder="Nama Pasien">
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary w-100">Submit</button>
-                    </div>
-                </form>
-            </div>
+            @include('pages.simrs.poliklinik.partials.filter-poli')
+
             <!-- middle content area -->
             <div class="d-flex flex-column flex-grow-1 bg-white">
                 @include('pages.simrs.poliklinik.partials.menu-erm')
@@ -643,7 +608,7 @@
 @endsection
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-
+    @include('pages.simrs.poliklinik.partials.js-filter')
     <script>
         $(document).ready(function() {
 
@@ -788,4 +753,6 @@
             });
         });
     </script>
+
+    @include('pages.simrs.poliklinik.partials.js-filter')
 @endsection

@@ -101,79 +101,57 @@
                                 @method('POST')
                                 @csrf
                                 <div id="step-1">
-                                    <div class="row">
-                                        <div class="col-lg-6">
-                                            <div class="form-group mb-3">
-                                                <label for="tahun">Tahun</label>
-                                                <select class="select2 form-control" name="tahun" id="tahun">
-                                                    @php
-                                                        $currentYear = date('Y');
-                                                    @endphp
-                                                    <option value="{{ $currentYear }}" selected>
-                                                        {{ $currentYear }}
-                                                    </option>
-                                                    <option value="{{ $currentYear - 1 }}">
-                                                        {{ $currentYear - 1 }}
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <div class="form-group mb-3">
-                                                <label for="periode">Periode</label>
-                                                <select class="select2 form-control @error('periode') is-invalid @enderror"
-                                                    name="periode" id="periode">
-                                                    @php
-                                                        $months = [
-                                                            'January',
-                                                            'February',
-                                                            'March',
-                                                            'April',
-                                                            'May',
-                                                            'June',
-                                                            'July',
-                                                            'August',
-                                                            'September',
-                                                            'October',
-                                                            'November',
-                                                            'December',
-                                                        ];
-                                                        $monthsIndo = [
-                                                            'Januari',
-                                                            'Februari',
-                                                            'Maret',
-                                                            'April',
-                                                            'Mei',
-                                                            'Juni',
-                                                            'Juli',
-                                                            'Agustus',
-                                                            'September',
-                                                            'Oktober',
-                                                            'November',
-                                                            'Desember',
-                                                        ];
-                                                        $lastSearchPeriod = $request->periode ?? ''; // Mendapatkan periode terakhir yang dicari
+                                    <div class="form-group mb-3">
+                                        <label for="periode">Periode</label>
+                                        <!-- Mengubah input menjadi select2 -->
+                                        <select class="select2 form-control @error('periode') is-invalid @enderror"
+                                            name="periode" id="periode">
+                                            @php
+                                                $currentYear = date('Y');
+                                                $previousYear = $currentYear - 1; // Tahun sebelumnya (2024)
+                                                $years = [$previousYear, $currentYear]; // Ambil tahun 2024 dan 2025
+                                                $months = [
+                                                    'January',
+                                                    'February',
+                                                    'March',
+                                                    'April',
+                                                    'May',
+                                                    'June',
+                                                    'July',
+                                                    'August',
+                                                    'September',
+                                                    'October',
+                                                    'November',
+                                                    'December',
+                                                ];
+                                                $lastSearchPeriod = request()->get('periode', ''); // Ambil dari request jika ada
 
-                                                        foreach ($months as $index => $month) {
-                                                            $nextIndex = ($index + 1) % 12; // Menyesuaikan indeks bulan berikutnya
-                                                            $nextMonth = $months[$nextIndex];
+                                                foreach ($years as $year) {
+                                                    foreach ($months as $index => $month) {
+                                                        $nextIndex = ($index + 1) % 12; // Menentukan bulan berikutnya
+                                                        $nextMonth = $months[$nextIndex];
 
-                                                            $period = "{$month} - {$nextMonth}";
-                                                            $selected = $period == $lastSearchPeriod ? 'selected' : ''; // Menandai opsi yang sesuai
+                                                        // Jika bulan berikutnya adalah Januari, berarti tahun bertambah
+                                                        $nextYear = $nextIndex == 0 ? $year + 1 : $year;
 
-                                                            echo "<option value=\"{$period}\" {$selected}>{$monthsIndo[$index]} - {$monthsIndo[$nextIndex]}</option>";
-                                                        }
-                                                    @endphp
-                                                </select>
-                                                @error('periode')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        <div class="btn-next mt-3 text-right">
-                                            <button type="submit" class="btn-next-step btn btn-primary btn-sm ml-2">
-                                                <div class="ikon-tambah">
-                                                    <span class="fal fa-search mr-1"></span>Cari
+                                                        $period = "{$month} {$year} - {$nextMonth} {$nextYear}";
+                                                        $selected = $period == $lastSearchPeriod ? 'selected' : '';
+
+                                                        echo "<option value=\"{$period}\" {$selected}>{$period}</option>";
+                                                    }
+                                                }
+                                            @endphp
+                                        </select>
+                                        @error('periode')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+
+                                    </div>
+                                    <!-- Hanya menampilkan data payroll ketika periode telah diisi -->
+                                    <div class="btn-next mt-3 text-right">
+                                        <button type="submit" class="btn-next-step btn btn-primary btn-sm ml-2">
+                                            <div class="ikon-tambah">
+                                                <span class="fal fa-search mr-1"></span>Cari
                                                 </div>
                                                 <div class="span spinner-text d-none">
                                                     <span class="spinner-border spinner-border-sm" role="status"

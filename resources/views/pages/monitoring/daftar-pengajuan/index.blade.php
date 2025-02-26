@@ -96,11 +96,80 @@
         </div>
         <div class="row mt-4">
             {{-- Daftar yang libur dan Cuti/Izin/Sakit  --}}
-            @if (auth()->user()->hasRole('super admin'))
+            {{-- @if (auth()->user()->hasRole('super admin'))
                 <div class="col-xl-12 mb-3">
                     <button id="tambah_pengajuan_cuti" class="btn btn-primary">Tambah Pengajuan Cuti/Izin Sakit</button>
                 </div>
-            @endif
+            @endif --}}
+            <div class="col-md-12">
+                <div id="panel-1" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            Filter
+                        </h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <form action="" method="get">
+                                @method('POST')
+                                @csrf
+                                <div id="step-1">
+                                    <div class="form-group mb-3">
+                                        <label for="bulan">Bulan</label>
+                                        <!-- Mengubah input menjadi select2 -->
+                                        <select class="select2 form-control @error('bulan') is-invalid @enderror"
+                                            name="bulan" id="bulan">
+                                            <option value="1" {{ $currentMonth == '1' ? 'selected' : '' }}>Januari
+                                            </option>
+                                            <option value="2" {{ $currentMonth == '2' ? 'selected' : '' }}>Februari</option>
+                                            <option value="3" {{ $currentMonth == '3' ? 'selected' : '' }}>Maret</option>
+                                            <option value="4" {{ $currentMonth == '4' ? 'selected' : '' }}>April</option>
+                                            <option value="5" {{ $currentMonth == '5' ? 'selected' : '' }}>Mei</option>
+                                            <option value="6" {{ $currentMonth == '6' ? 'selected' : '' }}>Juni</option>
+                                            <option value="7" {{ $currentMonth == '7' ? 'selected' : '' }}>Juli</option>
+                                            <option value="8" {{ $currentMonth == '8' ? 'selected' : '' }}>Agustus</option>
+                                            <option value="9" {{ $currentMonth == '9' ? 'selected' : '' }}>September</option>
+                                            <option value="10" {{ $currentMonth == '10' ? 'selected' : '' }}>Oktober</option>
+                                            <option value="11" {{ $currentMonth == '11' ? 'selected' : '' }}>November</option>
+                                            <option value="12" {{ $currentMonth == '12' ? 'selected' : '' }}>Desember</option>
+                                        </select>
+                                        @error('periode')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="tahun">Tahun</label>
+                                        <!-- Mengubah input menjadi select2 -->
+                                        <select class="select2 form-control @error('tahun') is-invalid @enderror"
+                                            name="tahun" id="tahun">
+                                            <option value="2024" {{ $currentYear == '2024' ? 'selected' : '' }}>2024</option>
+                                            <option value="2025" {{ $currentYear == '2025' ? 'selected' : '' }}>2025</option>
+                                            <option value="2026" {{ $currentYear == '2026' ? 'selected' : '' }}>2026</option>
+                                            <option value="2027" {{ $currentYear == '2027' ? 'selected' : '' }}>2027</option>
+                                        </select>
+                                        @error('periode')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <!-- Hanya menampilkan data payroll ketika periode telah diisi -->
+                                    <div class="btn-next mt-3 text-right">
+                                        <button type="submit" class="btn-next-step btn btn-primary btn-sm ml-2">
+                                            <div class="ikon-tambah">
+                                                <span class="fal fa-search mr-1"></span>Cari
+                                            </div>
+                                            <div class="span spinner-text d-none">
+                                                <span class="spinner-border spinner-border-sm" role="status"
+                                                    aria-hidden="true"></span>
+                                                Loading...
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
@@ -572,7 +641,7 @@
         }
 
         $(document).ready(function() {
-
+            $('.select2').select2();
             $('#update-day-off-req-form').on('submit', function(e) {
                 e.preventDefault();
                 const formData = new FormData(this);

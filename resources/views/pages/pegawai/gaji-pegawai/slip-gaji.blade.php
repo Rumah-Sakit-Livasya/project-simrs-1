@@ -139,12 +139,12 @@
                                             <div id="step-1">
                                                 <div class="form-group mb-3">
                                                     <label for="periode">Periode</label>
-                                                    <!-- Mengubah input menjadi select2 -->
                                                     <select
                                                         class="select2 form-control @error('periode') is-invalid @enderror"
                                                         name="periode" id="periode">
                                                         @php
                                                             $currentYear = date('Y');
+                                                            $previousYear = $currentYear - 1;
                                                             $nextYear = $currentYear + 1;
                                                             $months = [
                                                                 'Januari',
@@ -160,18 +160,25 @@
                                                                 'November',
                                                                 'Desember',
                                                             ];
-                                                            $lastSearchPeriod = $request->periode ?? ''; // Mendapatkan periode terakhir yang dicari
+                                                            $lastSearchPeriod = request()->periode ?? ''; // Ambil periode terakhir yang dicari
 
-                                                            foreach ($months as $index => $month) {
-                                                                $nextIndex = ($index + 1) % 12; // Menyesuaikan indeks bulan berikutnya
-                                                                $nextMonth = $months[$nextIndex];
-                                                                $year = $index < 11 ? $currentYear : $nextYear; // Menentukan tahun
+                                                            // Loop untuk tahun sebelumnya, tahun ini, dan tahun depan
+                                                            foreach (
+                                                                [$previousYear, $currentYear, $nextYear]
+                                                                as $year
+                                                            ) {
+                                                                foreach ($months as $index => $month) {
+                                                                    $nextIndex = ($index + 1) % 12; // Indeks bulan berikutnya
+                                                                    $nextMonth = $months[$nextIndex];
+                                                                    $nextYearForPeriod =
+                                                                        $index < 11 ? $year : $year + 1; // Menentukan tahun
 
-                                                                $period = "{$month} {$currentYear} - {$nextMonth} {$year}";
-                                                                $selected =
-                                                                    $period == $lastSearchPeriod ? 'selected' : ''; // Menandai opsi yang sesuai
+                                                                    $period = "{$month} {$year} - {$nextMonth} {$nextYearForPeriod}";
+                                                                    $selected =
+                                                                        $period == $lastSearchPeriod ? 'selected' : ''; // Tandai yang terakhir dicari
 
-                                                                echo "<option value=\"{$period}\" {$selected}>{$period}</option>";
+                                                                    echo "<option value=\"{$period}\" {$selected}>{$period}</option>";
+                                                                }
                                                             }
                                                         @endphp
                                                     </select>
@@ -179,6 +186,7 @@
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
+
                                                 <!-- Hanya menampilkan data payroll ketika periode telah diisi -->
                                                 <div class="btn-next mt-3 text-right">
                                                     <button type="submit"

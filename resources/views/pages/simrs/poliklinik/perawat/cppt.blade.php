@@ -5,7 +5,7 @@
         main {
             overflow-x: hidden;
         }
-        
+
         input[type="time"] {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -124,43 +124,8 @@
         <!-- notice the utilities added to the wrapper below -->
         <div class="d-flex flex-grow-1 p-0 shadow-1 layout-composed">
             <!-- left slider panel : must have unique ID-->
-            <div id="js-slide-left"
-                class="flex-wrap flex-shrink-0 position-relative slide-on-mobile slide-on-mobile-left bg-primary-200 pattern-0 p-3">
-                <form action="javascript:void(0)" method="POST">
-                    @csrf
-                    <div class="form-group mb-2">
-                        <select class="select2 form-control @error('departement_id') is-invalid @enderror"
-                            name="departement_id" id="departement_id">
-                            <option value=""></option>
-                            @foreach ($departements as $departement)
-                                <option value="{{ $departement->id }}">{{ $departement->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('departement_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="form-group mb-2">
-                        <select class="select2 form-control @error('doctor_id') is-invalid @enderror" name="doctor_id"
-                            id="doctor_id">
-                            <option value=""></option>
-                            @foreach ($jadwal_dokter as $jadwal)
-                                <option value="{{ $jadwal->doctor_id }}">{{ $jadwal->doctor->employee->fullname }}</option>
-                            @endforeach
-                        </select>
-                        @error('doctor_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="form-group mb-2">
-                        <input type="text" id="nama_pasien" name="nama_pasien" class="form-control"
-                            placeholder="Nama Pasien">
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary w-100">Submit</button>
-                    </div>
-                </form>
-            </div>
+            @include('pages.simrs.poliklinik.partials.filter-poli')
+
             <!-- middle content area -->
             <div class="d-flex flex-column flex-grow-1 bg-white">
 
@@ -172,8 +137,8 @@
                         @include('pages.simrs.poliklinik.partials.detail-pasien')
                         <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
                         <div class="row">
-                            <form action="javascript:void(0)" class="w-100" data-tipe-cppt="dokter"
-                                data-tipe-cppt="rawat-jalan" id="cppt-dokter-rajal-form">
+                            <form action="javascript:void(0)" class="w-100" data-tipe-cppt="perawat"
+                                data-tipe-rawat="rawat-jalan" id="cppt-perawat-rajal-form">
                                 @csrf
                                 @method('POST')
                                 <div class="col-md-12">
@@ -199,36 +164,26 @@
                                             </div>
                                         </div>
                                         <div id="add_soap" class="panel-content collapse in" aria-expanded="true">
-                                            <form method="post" class="form-horizontal" id="fsSOAP"
-                                                autocomplete="off">
+                                            <form method="post" class="form-horizontal" id="fsSOAP" autocomplete="off">
                                                 <input type="hidden" name="registration_id"
                                                     value="{{ $registration->id }}" />
+                                                <input type="hidden" name="tipe_rawat"
+                                                    value="rawat-jalan" />
+                                                <input type="hidden" name="tipe_cppt"
+                                                    value="perawat" />
                                                 <input type="hidden" name="medical_record_number" id="noRM_cppt"
                                                     value="{{ $registration->patient->medical_record_number }}" />
 
                                                 <!-- Perawat -->
                                                 <div class="row">
                                                     <div class="col-md-6 mt-3">
-                                                        <label for="pid_dokter" class="form-label">Dokter</label>
+                                                        <label for="pid_dokter" class="form-label">Perawat</label>
                                                         <select
-                                                            class="select2 form-control @error('doctor_id') is-invalid @enderror"
-                                                            name="doctor_id" id="doctor_id">
+                                                            class="select2 form-control @error('perawat_id') is-invalid @enderror"
+                                                            name="perawat_id" id="perawat_id">
                                                             <option value=""></option>
-                                                            @foreach ($jadwal_dokter as $jadwal)
-                                                                <option value="{{ $jadwal->doctor_id }}">
-                                                                    {{ $jadwal->doctor->employee->fullname }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6 mt-3">
-                                                        <label for="konsulkan_ke" class="form-label">Konsulkan Ke</label>
-                                                        <select
-                                                            class="select2 form-control @error('doctor_id') is-invalid @enderror"
-                                                            name="konsulkan_ke" id="konsulkan_ke">
-                                                            <option value=""></option>
-                                                            @foreach ($jadwal_dokter as $jadwal)
-                                                                <option value="{{ $jadwal->doctor_id }}">
-                                                                    {{ $jadwal->doctor->employee->fullname }}</option>
+                                                            @foreach ($perawat as $item)
+                                                                <option value="{{$item->user->id}}">{{$item->fullname}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -245,19 +200,19 @@
                                                             <div class="card-body p-0">
                                                                 <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="4"
                                                                     placeholder="Keluhan Utama">Alergi obat : 
-                    Reaksi alergi obat : 
-                    Keluhan Utama : KONSULTASI
-                    PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-                    DI PUSKESMAS JATITUJUH 
-                    Riwayat Penyakit Sekarang : KONSULTASI
-                    PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-                    DI PUSKESMAS JATITUJUH 
-                    Riwayat Penyakit Dahulu : TIDAK ADA
-                    Riwayat Penyakit Keluarga : TIDAK ADA
-                    Alergi makan : 
-                    Reaksi alergi makan : 
-                    Alergi lainya : 
-                    Reaksi alergi lainya : </textarea>
+Reaksi alergi obat : 
+Keluhan Utama : KONSULTASI
+PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
+DI PUSKESMAS JATITUJUH 
+Riwayat Penyakit Sekarang : KONSULTASI
+PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
+DI PUSKESMAS JATITUJUH 
+Riwayat Penyakit Dahulu : TIDAK ADA
+Riwayat Penyakit Keluarga : TIDAK ADA
+Alergi makan : 
+Reaksi alergi makan : 
+Alergi lainya : 
+Reaksi alergi lainya : </textarea>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -270,12 +225,12 @@
                                                             </div>
                                                             <div class="card-body p-0">
                                                                 <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">Nadi (PR): 
-                    Respirasi (RR): 
-                    Tensi (BP): 
-                    Suhu (T): 
-                    Tinggi Badan: 
-                    Berat Badan: 
-                    Skrining Nyeri:
+Respirasi (RR): 
+Tensi (BP): 
+Suhu (T): 
+Tinggi Badan: 
+Berat Badan: 
+Skrining Nyeri:
                                                             </textarea>
                                                             </div>
                                                         </div>
@@ -634,17 +589,18 @@
                                     </div><!--end .table-responsive -->
                                 </div>
                             </div>
-
+                            
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-@endsection
-@section('plugin')
+    @endsection
+    @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-
+    @include('pages.simrs.poliklinik.partials.js-filter')
+    
     <script>
         $(document).ready(function() {
 
@@ -665,62 +621,62 @@
                 submitFormCPPT(); // Panggil fungsi submitForm dengan parameter final
             });
 
-            function loadCPPTData() {
-                $.ajax({
-                    // url: '{{-- route('cppt.get') --}}', // Mengambil route Laravel
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(response) {
-                        // Bersihkan tabel
-                        $('#list_soap').empty();
+            // function loadCPPTData() {
+            //     $.ajax({
+            //         // url: '{{-- route('cppt.get') --}}', // Mengambil route Laravel
+            //         type: 'GET',
+            //         dataType: 'json',
+            //         success: function(response) {
+            //             // Bersihkan tabel
+            //             $('#list_soap').empty();
 
-                        // Iterasi setiap data dan tambahkan ke dalam tabel
-                        $.each(response, function(index, data) {
-                            var row = `
-                            <tr>
-                                <td class="text-center">
-                                    <div class="deep-purple-text">${data.created_at}<br>
-                                        <span class="green-text" style="font-weight:400;">${data.tipe_rawat}</span><br>
-                                        <b style="font-weight: 400;">Dokter ID: ${data.doctor_id}</b><br>
-                                        <div class="input-oleh deep-orange-text">Input oleh: ${data.user_id}</div>
-                                        <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
-                                        <div>
-                                            <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <table width="100%" class="table-soap nurse">
-                                        <tbody>
-                                            <tr><td colspan="3" class="soap-text title">CPPT</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center" width="8%">S</td><td>${data.subjective.replace(/\n/g, "<br>")}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">O</td><td>${data.objective.replace(/\n/g, "<br>")}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">A</td><td>${data.assesment}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">P</td><td>${data.planning}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">I</td><td>${data.instruksi}</td></tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                                <td>
-                                    <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap" data-id="${data.id}" title="Copy"></i>
-                                    <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap" data-id="${data.id}" title="Hapus"></i>
-                                    <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap" data-id="${data.id}" title="Edit SOAP & Resep Elektronik"></i>
-                                    <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print Antrian Resep"></i>
-                                </td>
-                            </tr>
-                        `;
-                            // Tambahkan ke dalam tabel
-                            $('#list_soap').append(row);
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
-                    }
-                });
-            }
+            //             // Iterasi setiap data dan tambahkan ke dalam tabel
+            //             $.each(response, function(index, data) {
+            //                 var row = `
+            //                 <tr>
+            //                     <td class="text-center">
+            //                         <div class="deep-purple-text">${data.created_at}<br>
+            //                             <span class="green-text" style="font-weight:400;">${data.tipe_rawat}</span><br>
+            //                             <b style="font-weight: 400;">Dokter ID: ${data.doctor_id}</b><br>
+            //                             <div class="input-oleh deep-orange-text">Input oleh: ${data.user_id}</div>
+            //                             <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
+            //                             <div>
+            //                                 <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">
+            //                             </div>
+            //                         </div>
+            //                     </td>
+            //                     <td>
+            //                         <table width="100%" class="table-soap nurse">
+            //                             <tbody>
+            //                                 <tr><td colspan="3" class="soap-text title">CPPT</td></tr>
+            //                                 <tr><td class="soap-text deep-purple-text text-center" width="8%">S</td><td>${data.subjective.replace(/\n/g, "<br>")}</td></tr>
+            //                                 <tr><td class="soap-text deep-purple-text text-center">O</td><td>${data.objective.replace(/\n/g, "<br>")}</td></tr>
+            //                                 <tr><td class="soap-text deep-purple-text text-center">A</td><td>${data.assesment}</td></tr>
+            //                                 <tr><td class="soap-text deep-purple-text text-center">P</td><td>${data.planning}</td></tr>
+            //                                 <tr><td class="soap-text deep-purple-text text-center">I</td><td>${data.instruksi}</td></tr>
+            //                             </tbody>
+            //                         </table>
+            //                     </td>
+            //                     <td>
+            //                         <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap" data-id="${data.id}" title="Copy"></i>
+            //                         <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap" data-id="${data.id}" title="Hapus"></i>
+            //                         <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap" data-id="${data.id}" title="Edit SOAP & Resep Elektronik"></i>
+            //                         <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print Antrian Resep"></i>
+            //                     </td>
+            //                 </tr>
+            //             `;
+            //                 // Tambahkan ke dalam tabel
+            //                 $('#list_soap').append(row);
+            //             });
+            //         },
+            //         error: function(xhr, status, error) {
+            //             console.error(xhr.responseText);
+            //         }
+            //     });
+            // }
 
             function submitFormCPPT(actionType) {
-                const form = $('#cppt-dokter-rajal-form');
+                const form = $('#cppt-perawat-rajal-form');
                 const registrationNumber = "{{ $registration->registration_number }}";
 
                 const url =

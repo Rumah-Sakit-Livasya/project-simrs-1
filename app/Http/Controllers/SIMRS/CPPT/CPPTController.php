@@ -27,6 +27,7 @@ class CPPTController extends Controller
 
     public function store(Request $request, $type, $registration_number)
     {
+        dd($request, $type, $registration_number);
         $validatedData = $request->validate([
             'registration_id' => 'required',
             'doctor_id' => 'required',

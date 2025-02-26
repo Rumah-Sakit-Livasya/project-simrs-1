@@ -6,13 +6,16 @@
             </div>
             <div class="col-lg-9">
                 <a href="#">
-                    <h5 class="text-danger text-decoration-underline">KIRANA HANNAH ADZKIYA
+                    <h5 class="text-danger text-decoration-underline">{{ $registration->patient->name }}
                     </h5>
                 </a>
-                <p class="text-small text-secondary mb-1">13 Jun 2019 (5thn 5bln 9hr)</p>
-                <p class="text-small text-secondary mb-1">RM 05-76-94</p>
-                <p class="text-small text-secondary mb-1">BPJS KESEHATAN</p>
-                <p class="text-small text-secondary mb-1">Info Billing: 30.000</p>
+                <p class="text-small text-secondary mb-1">
+                    {{ \Carbon\Carbon::parse($registration->patient->birth_of_date)->format('d M Y') }}
+                    ({{ \Carbon\Carbon::parse($registration->patient->date_of_birth)->diff(\Carbon\Carbon::now())->format('%y tahun %m bulan %d hari') }}
+                    )</p>
+                <p class="text-small text-secondary mb-1">RM {{ $registration->patient->medical_record_number }}</p>
+                <p class="text-small text-secondary mb-1">{{ $registration->penjamin->nama_perusahaan }}</p>
+                <p class="text-small text-secondary mb-1">Info Billing: <span class="text-success">30.000</span></p>
                 <p class="text-small text-secondary mb-1">Tidak ada alergi</p>
             </div>
         </div>
@@ -24,12 +27,13 @@
             </div>
             <div class="col-lg-9">
                 <a href="#">
-                    <h5 class="text-danger text-decoration-underline">dr. Ratih Eka Pujasari Sp.A
+                    <h5 class="text-danger text-decoration-underline">{{ $registration->doctor->employee->fullname }}
                     </h5>
                 </a>
-                <p class="text-small text-secondary mb-1">KLINIK ANAK</p>
-                <p class="text-small text-secondary mb-1">Reg 2411220092 (22 Nov 2024)</p>
-                <p class="text-small text-secondary mb-1">Rawat Jalan</p>
+                <p class="text-small text-secondary mb-1">{{ $registration->departement->name }}</p>
+                <p class="text-small text-secondary mb-1">Reg {{ $registration->registration_number }}
+                    ({{ \Carbon\Carbon::parse($registration->date)->format('d M Y') }})</p>
+                <p class="text-small text-secondary mb-1">{{ $registration->registration_type }}</p>
             </div>
         </div>
     </div>
@@ -39,9 +43,10 @@
         <div class="card-actionbar">
             <div class="card-actionbar-row-left">
                 <button type="button" class="btn btn-outline-primary waves-effect waves-light margin-left-xl"
-                    id="panggil" onclick="panggil()"><span
-                        class="glyphicon glyphicon-music "></span>&nbsp;&nbsp;Panggil
-                    Antrian</button>
+                    id="panggil" data-no-urut="{{ $registration?->no_urut }}"
+                    data-poliklinik="{{ $registration?->departement?->name }}">
+                    <span class="glyphicon glyphicon-music"></span>&nbsp;&nbsp;Panggil Antrian
+                </button>
                 <button class="btn btn-warning text-white"
                     onclick="popupFull('http://192.168.1.253/real/antrol_bpjs/update_waktu_antrean_vclaim/2411055632','p_card', 900,600,'no'); return false;">
                     <i class="mdi mdi-update"></i> Antrol BPJS
@@ -58,3 +63,18 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('panggil').addEventListener('click', function() {
+            const noUrut = this.getAttribute('data-no-urut');
+            const poliklinik = this.getAttribute('data-poliklinik').toLowerCase();
+            const text = `Antrian... ${noUrut} , ${poliklinik}`;
+            const ttsUrl = `/api/tts?text=${encodeURIComponent(text)}`;
+
+            const audio = new Audio(ttsUrl);
+            audio.playbackRate = 0.7;
+            audio.play().catch(error => console.error('Gagal memutar audio:', error));
+        });
+    });
+</script>

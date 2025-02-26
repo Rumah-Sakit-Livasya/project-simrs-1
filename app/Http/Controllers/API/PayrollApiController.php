@@ -165,23 +165,23 @@ class PayrollApiController extends Controller
 
                 // Logika potongan gaji berdasarkan total keterlambatan masuk
                 if ($totalLateInMinutes > 480) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 9) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 9);
                 } elseif ($totalLateInMinutes > 420) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 8) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 8);
                 } elseif ($totalLateInMinutes > 360) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 7) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 7);
                 } elseif ($totalLateInMinutes > 300) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 6) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 6);
                 } elseif ($totalLateInMinutes > 240) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 5) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 5);
                 } elseif ($totalLateInMinutes > 180) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 4) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 4);
                 } elseif ($totalLateInMinutes > 120) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 3) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 3);
                 } elseif ($totalLateInMinutes > 60) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 2) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 2);
                 } elseif ($totalLateInMinutes > 30) {
-                    $potonganKeterlambatanValue = ($basicSalary / 173 * 1) * 2;
+                    $potonganKeterlambatanValue = ($basicSalary / 173 * 1);
                 }
                 $potonganKeterlambatanValue = intval($potonganKeterlambatanValue);
 

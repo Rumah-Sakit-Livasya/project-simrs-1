@@ -524,109 +524,208 @@
                                                         </h3>
                                                     </td>
                                                 </tr>
+                                                <tr style="border: 0px; border-top: 1px solid black !important;">
+                                                    <td colspan="10" style="border-right: 0px;">
+                                                        <h3 class="font-weight-bold my-1 text-center"
+                                                            style="font-size: 12pt">PENILAIAN AKHIR</h3>
+                                                    </td>
+                                                </tr>
+                                                <tr style="border: 0px; border-top: 1px solid black !important;">
+                                                    <td colspan="10" style="border-right: 0px;">
+                                                        <p class="my-1">Bedasarkan hasil penilaian
+                                                            keseluruhan disimpulkan bahwa:</p>
+                                                    </td>
+                                                </tr>
+                                                <tr style="border: 0px; border-top: 1px solid black !important;">
+                                                    <td colspan="10"
+                                                        style="border-right: 0px; padding-top: 0px; padding-bottom: 0px;">
+                                                        <table width="100%" cellspacing="0" cellpadding="0">
+                                                            <tr style="border: 0px; height: 50px">
+                                                                <td style="width: 50%; padding: 5px 0px;">
+                                                                    <h3 class="font-weight-bold text-center mb-0">
+                                                                        YA</h3>
+                                                                </td>
+                                                                <td
+                                                                    style="width: 50%; padding: 5px 0px; border-right: 0px;">
+                                                                    <h3 class="font-weight-bold text-center mb-0">
+                                                                        TIDAK</h3>
+                                                                </td>
+                                                            </tr>
+
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                                <tr style="border: 0px; border-top: 1px solid black !important;">
+                                                    <td colspan="10"
+                                                        style="border-right: 0px; padding-top: 0px; padding-bottom: 0px;">
+                                                        <table width="100%" cellspacing="0" cellpadding="0">
+                                                            <tr style="border: 0px; height: 50px">
+                                                                <td style="width: 50%; padding: 5px 8px 5px 0px;">
+                                                                    <h3 id="ya"
+                                                                        style="font-size: 10pt !important; text-align: center; margin-top: 10px !important">
+                                                                        {{ $catatan->keterangan_ya }}</h3>
+                                                                </td>
+                                                                <td
+                                                                    style="width: 50%; padding: 5px 0px 5px 8px; border-right: 0px;">
+                                                                    <h3 id="ya"
+                                                                        style="font-size: 10pt !important; text-align: center; margin-top: 10px !important;">
+                                                                        {{ $catatan->keterangan_tidak }}</h3>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <table width="100%"
+                                                style="text-align: center; border: 1px solid black; margin-top: 30px">
                                                 <tr>
-                                                    <td colspan="10" valign="top" style="height: 115px;">
-                                                        <h3 class="font-weight-bold text-tanggapan"> Tanggapan dari Pegawai
-                                                            yang dinilai : </h3>
-                                                        <p id="catatan_tambahan">
-                                                            {{ $catatan->komentar_pegawai ?? '-' }}</p>
+                                                    <td class="kuning-muda" colspan="2"
+                                                        style="text-align: left; padding: 8px; border-bottom: 1px solid black;">
+                                                        <b>Majalengka, {{ now()->format('d F Y') }}</b>
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td colspan="10" valign="top" style="height: 115px;">
-                                                        <h3 class="font-weight-bold text-tanggapan"> Komentar
-                                                            {{ $penilai['jabatan'] }}
-                                                            {{ $penilai['unit'] }}:
-                                                        </h3>
-                                                        <p id="catatan_tambahan">
-                                                            {{ $catatan->komentar_penilai ?? '-' }}</p>
+                                                    <td width="50%" style="padding-top: 15px; padding-bottom: 15px;">
+                                                        <b>Karyawan yang Dinilai
+                                                        </b><br>
+
+                                                        <div
+                                                            class="{{ $catatan->is_verified_pegawai == 1 ? 'd-none' : '' }}">
+                                                            @if (auth()->user()->id == $penilaian_pegawai[0]->employee->user->id)
+                                                                <a class="btn btn-primary btn-sm text-white ttd"
+                                                                    id="btn_ttd_pegawai"
+                                                                    data-id= "{{ $penilaian_pegawai[0]->employee_id ?? null }}"
+                                                                    data-tipe="pegawai">Tanda
+                                                                    tangan</a>
+                                                            @endif
+                                                            <br>
+                                                        </div>
+                                                        @if ($catatan->is_verified_pegawai == 1)
+                                                            <img id="ttd_pegawai"
+                                                                src="{{ route('get.ttd', $penilaian_pegawai[0]->employee->ttd) }}"
+                                                                alt="Signature Image"
+                                                                style="max-width:50%; margin-top: -1px;"><br>
+                                                        @else
+                                                            <img id="ttd_pegawai" src="" alt="Signature Image"
+                                                                style="display:none; max-width:60%; margin-top: -1px;"><br>
+                                                        @endif
+
+                                                        <span
+                                                            id="ttd_nama_pegawai">{{ $penilaian_pegawai[0]->employee->fullname }}</span>
+                                                    </td>
+                                                    <td width="50%" style="border-left: 1px solid black">
+                                                        <b>Yang Menilai
+                                                        </b><br>
+
+                                                        <div
+                                                            class="{{ $catatan->is_verified_penilai == 1 ? 'd-none' : '' }}">
+                                                            @if (auth()->user()->id == $penilaian_pegawai[0]->employee_penilai->user->id)
+                                                                <a class="btn btn-primary btn-sm text-white ttd"
+                                                                    id="btn_ttd_penilai"
+                                                                    data-id="{{ $penilaian_pegawai[0]->penilai }}"
+                                                                    data-tipe = "penilai">Tanda
+                                                                    tangan</a>
+                                                            @endif
+                                                            <br>
+                                                        </div>
+                                                        @if ($catatan->is_verified_penilai == 1)
+                                                            <img id="ttd_penilai"
+                                                                src="{{ route('get.ttd', $penilaian_pegawai[0]->employee_penilai->ttd) }}"
+                                                                alt="Signature Image"
+                                                                style="max-width:50%; margin-top: -1px;"><br>
+                                                        @else
+                                                            <img id="ttd_penilai" src="" alt="Signature Image"
+                                                                style="display:none; max-width:50%; margin-top: -3px;"><br>
+                                                        @endif
+                                                        <span
+                                                            id="ttd_nama_penilai">{{ $penilaian_pegawai[0]->employee_penilai->fullname }}</span>
                                                     </td>
                                                 </tr>
-                                                <tr>
-                                                    <td colspan="10" valign="top" style="height: 115px;">
-                                                        <h3 class="my-2 font-weight-bold text-tanggapan">
-                                                            Komentar
-                                                            {{ $pejabat_penilai['jabatan'] }}
-                                                            {{ $pejabat_penilai['jabatan'] != 'Direktur' ? $pejabat_penilai['unit'] : ' RS Livasya' }}:
-                                                        </h3>
-                                                        <p id="catatan_tambahan">
-                                                            {{ $catatan->komentar_pejabat_penilai ?? '-' }}</p>
+                                                <tr style="border: 0px; border-top: 1px solid black;">
+                                                    <td width="50%" style="padding-top: 15px; padding-bottom: 15px;">
+                                                        <b>
+                                                            Mengetahui, <br>
+                                                            {{ $penilaian_pegawai[0]->employee_pejabat_penilai->jobPosition->name . ' ' . $penilaian_pegawai[0]->employee_pejabat_penilai->organization->name }}
+                                                        </b><br><br>
+                                                        <div id="tombol-{{ $group_penilaian->pejabat_penilai }}"
+                                                            class="{{ $catatan->is_verified_pejabat_penilai == 1 ? 'd-none' : '' }}">
+                                                            @if (auth()->user()->id == $penilaian_pegawai[0]->employee_pejabat_penilai->user->id)
+                                                                <a class="btn btn-primary btn-sm text-white ttd"
+                                                                    id="btn_ttd_pejabat_penilai"
+                                                                    data-id="{{ $penilaian_pegawai[0]->pejabat_penilai }}"
+                                                                    data-tipe = "pejabat_penilai">Tanda
+                                                                    tangan</a>
+                                                            @endif
+                                                            <br>
+                                                        </div>
+                                                        @if ($catatan->is_verified_pejabat_penilai == 1)
+                                                            <img id="ttd_pejabat_penilai"
+                                                                src="{{ route('get.ttd', $penilaian_pegawai[0]->employee_pejabat_penilai->ttd) }}"
+                                                                alt="Signature Image"
+                                                                style="max-width:50%; margin-top: -1px;"><br>
+                                                        @else
+                                                            <img id="ttd_pejabat_penilai" src=""
+                                                                alt="Signature Image"
+                                                                style="display:none; max-width:60%; margin-top: -3px;"><br>
+                                                        @endif
+                                                        <span
+                                                            id="ttd_nama_pejabat_penilai">{{ $penilaian_pegawai[0]->employee_pejabat_penilai->fullname }}</span>
                                                     </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="10" style="padding: 0px;">
-                                                        <table width="100%"
-                                                            style="text-align: center; margin-top: 15px; margin-bottom: 15px;">
-                                                            <tr style="border: 0px">
-                                                                <td width="33%">
-                                                                    <b>
-                                                                        PEJABAT PENILAI
-                                                                    </b><br><br>
-                                                                    <div
-                                                                        id="tombol-{{ $group_penilaian->pejabat_penilai }}">
-                                                                        <a class="btn btn-primary btn-sm text-white ttd"
-                                                                            id="btn_ttd_pejabat_penilai"
-                                                                            data-tipe = "pejabat_penilai"
-                                                                            data-id-pejabat_penilai = "{{ $penilaian_pegawai[0]->pejabat_penilai }}">Tanda
-                                                                            tangan</a>
+                                                    <td width="50%" style="border-left: 1px solid black">
+                                                        <b>menyetujui,</b>
+                                                        <table width="100%">
+                                                            <tr>
+                                                                <td width="50%">
+                                                                    <b>HRD</b> <br>
+                                                                    <div id="tombol-104"
+                                                                        class="{{ $catatan->is_verified_hrd == 1 ? 'd-none' : '' }}">
+                                                                        @if (auth()->user()->employee_id == $hrd->id)
+                                                                            <a class="btn btn-primary btn-sm text-white ttd"
+                                                                                id="btn_ttd_hrd" data-tipe = "hrd"
+                                                                                data-id="{{ $hrd->id }}">Tanda
+                                                                                tangan</a>
+                                                                        @endif
                                                                         <br>
                                                                     </div>
 
-                                                                    <img id="ttd_pejabat_penilai" src=""
-                                                                        alt="Signature Image"
-                                                                        style="display:none; max-width:60%; margin-top: -3px;"><br>
-                                                                    <span id="ttd_nama_pejabat_penilai">{{$pejabat_penilai['nama']}}</span>
+                                                                    @if ($catatan->is_verified_hrd == 1)
+                                                                        <img id="ttd_hrd"
+                                                                            src="{{ route('get.ttd', $hrd->ttd) }}"
+                                                                            alt="Signature Image"
+                                                                            style="max-width:80%; margin-top: -1px;"><br>
+                                                                    @else
+                                                                        <img id="ttd_hrd" src=""
+                                                                            alt="Signature Image"
+                                                                            style="display:none; max-width:80%; margin-top: -3px;"><br>
+                                                                    @endif
+                                                                    <span id="ttd_nama_hrd">{{ $hrd->fullname }}</span>
                                                                 </td>
-                                                                <td width="33%">
-                                                                    <b>PENILAI
-                                                                    </b><br><br>
-
-                                                                    <div>
-                                                                        <a class="btn btn-primary btn-sm text-white ttd"
-                                                                            id="btn_ttd_penilai"
-                                                                            data-id-penilai = "{{ $penilaian_pegawai[0]->penilai }}"
-                                                                            data-tipe = "penilai">Tanda tangan</a>
+                                                                <td width="50%">
+                                                                    <b>Direktur</b> <br><br>
+                                                                    <div id="tombol-228"
+                                                                        class="{{ $catatan->is_verified_direktur == 1 ? 'd-none' : '' }}">
+                                                                        @if (auth()->user()->employee_id == $direktur->id)
+                                                                            <a class="btn btn-primary btn-sm text-white ttd"
+                                                                                id="btn_ttd_direktur"
+                                                                                data-id = "{{ $direktur->id }}"
+                                                                                data-tipe = "direktur">Tanda
+                                                                                tangan</a>
+                                                                        @endif
                                                                         <br>
                                                                     </div>
-                                                                    <img id="ttd_penilai" src=""
-                                                                        alt="Signature Image"
-                                                                        style="display:none; max-width:60%; margin-top: -3px;"><br>
-
-                                                                    <span id="ttd_nama_penilai">{{$penilai['nama']}}</span>
+                                                                    @if ($catatan->is_verified_direktur == 1)
+                                                                        <img id="ttd_direktur"
+                                                                            src="{{ route('get.ttd', $direktur->ttd) }}"
+                                                                            alt="Signature Image"
+                                                                            style="max-width:80%; margin-top: -1px;"><br>
+                                                                    @else
+                                                                        <img id="ttd_direktur" src=""
+                                                                            alt="Signature Image"
+                                                                            style="display:none; max-width:80%; margin-top: -1px;"><br>
+                                                                    @endif
+                                                                    <span
+                                                                        id="ttd_nama_direktur">{{ $direktur->fullname }}</span>
                                                                 </td>
-                                                                <td width="33%" class="border-right-0">
-                                                                    <b>PEGAWAI YANG DINILAI
-                                                                    </b><br><br>
-                                                                    <div>
-                                                                        <a class="btn btn-primary btn-sm text-white ttd"
-                                                                            id="btn_ttd_pegawai" data-tipe="pegawai"
-                                                                            data-id-pegawai = "{{ $penilaian_pegawai[0]->employee_id }}">Tanda
-                                                                            tangan</a>
-                                                                        <br>
-                                                                    </div>
-                                                                    <img id="ttd_pegawai" src=""
-                                                                        alt="Signature Image"
-                                                                        style="display:none; max-width:60%; margin-top: -3px;"><br>
-                                                                    <span id="ttd_nama_pegawai">{{$penilaian_pegawai[0]->employee->fullname}}</span>
-                                                                </td>
-                                                                {{-- <td width="33%" class="border-right-0" valign="top">
-                                                                    <span id="jabatan_pegawai_ttd"
-                                                                        style="font-weight: bold;"></span> <span
-                                                                        id="unit_pegawai_ttd"
-                                                                        style="font-weight: bold;"></span><br><br>
-
-                                                                    <div id="tombol-pegawai">
-                                                                        <a class="btn btn-primary btn-sm text-white"
-                                                                            data-id="{{ $group_penilaian->penilai }}">Pilih
-                                                                            Pegawai Dahulu</a>
-                                                                        <br>
-                                                                    </div>
-                                                                    <img id="signature-display" src=""
-                                                                        alt="Signature Image"
-                                                                        style="display:none; max-width:60%;"><br>
-                                                                    <span id="nama_pegawai_ttd"></span>
-
-                                                                </td> --}}
                                                             </tr>
                                                         </table>
                                                     </td>
@@ -658,17 +757,30 @@
                 let tipeTtd = $(this).attr('data-tipe');
 
                 if (tipeTtd == 'pejabat_penilai') {
-                    idTtd = $(this).attr('data-id-pejabat_penilai');
+                    idTtd = $(this).attr('data-id');
                     $('#btn_save_ttd').attr('data-target', 'ttd_pejabat_penilai');
                     $('#btn_save_ttd').attr('data-id', idTtd);
+                    $('#btn_save_ttd').attr('data-id-rekap', "{{ $catatan->id }}");
                 } else if (tipeTtd == 'penilai') {
-                    idTtd = $(this).attr('data-id-penilai');
+                    idTtd = $(this).attr('data-id');
                     $('#btn_save_ttd').attr('data-target', 'ttd_penilai');
                     $('#btn_save_ttd').attr('data-id', idTtd);
-                } else {
-                    idTtd = $(this).attr('data-id-pegawai');
+                    $('#btn_save_ttd').attr('data-id-rekap', "{{ $catatan->id }}");
+                } else if (tipeTtd == 'pegawai') {
+                    idTtd = $(this).attr('data-id');
                     $('#btn_save_ttd').attr('data-target', 'ttd_pegawai');
                     $('#btn_save_ttd').attr('data-id', idTtd);
+                    $('#btn_save_ttd').attr('data-id-rekap', "{{ $catatan->id }}");
+                } else if (tipeTtd == 'hrd') {
+                    idTtd = $(this).attr('data-id');
+                    $('#btn_save_ttd').attr('data-target', 'ttd_hrd');
+                    $('#btn_save_ttd').attr('data-id', idTtd);
+                    $('#btn_save_ttd').attr('data-id-rekap', "{{ $catatan->id }}");
+                } else if (tipeTtd == 'direktur') {
+                    idTtd = $(this).attr('data-id');
+                    $('#btn_save_ttd').attr('data-target', 'ttd_direktur');
+                    $('#btn_save_ttd').attr('data-id', idTtd);
+                    $('#btn_save_ttd').attr('data-id-rekap', "{{ $catatan->id }}");
                 }
 
                 if (!idTtd) {
@@ -729,28 +841,51 @@
         }
 
         function saveSignature() {
+            const btn = $('#btn_save_ttd'); // Ambil tombol
+            btn.prop('disabled', true).text('Saving...'); // Nonaktifkan tombol & ubah teks
+
             const dataURL = canvas.toDataURL('image/png');
-            idSignature = $('#btn_save_ttd').attr('data-id');
-            let tipe = $('#btn_save_ttd').attr('data-target');
+            let idSignature = btn.attr('data-id');
+            let tipe = btn.attr('data-target');
+            let idRekap = btn.attr('data-id-rekap');
+            let idPegawai = "{{ $penilaian_pegawai[0]->employee->id ?? '-' }}";
+            let idForm = "{{ $group_penilaian->id }}";
+            let periode = "{{ $penilaian_pegawai[0]->periode }}";
+            let tahun = "{{ $penilaian_pegawai[0]->tahun }}";
+            let pejabat_penilai = "{{ $penilaian_pegawai[0]->pejabat_penilai }}";
+            let direktur = "{{ $direktur->id }}";
+            console.log(idPegawai);
             $.ajax({
                 url: '/api/dashboard/kpi/save-signature/' + idSignature,
                 type: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    signature_image: dataURL
+                    signature_image: dataURL,
+                    idRekap: idRekap,
+                    tipe: tipe,
+                    idPegawai: idPegawai,
+                    idForm: idForm,
+                    periode: periode,
+                    tahun: tahun,
+                    pejabat_penilai: pejabat_penilai,
+                    direktur: direktur,
                 },
                 success: function(response) {
-                    // Update the signature display
+                    // Update tampilan tanda tangan
                     $('#btn_' + tipe).parent().hide();
                     $('#' + tipe).attr('src', response.path).show();
-                    $('#signatureModal').modal('hide'); // Hide the modal
+                    $('#signatureModal').modal('hide'); // Tutup modal
                     clearCanvas();
                 },
                 error: function(xhr, status, error) {
                     console.error(xhr.responseText);
+                },
+                complete: function() {
+                    btn.prop('disabled', false).text('Save'); // Aktifkan kembali tombol
                 }
             });
         }
+
 
         canvas.addEventListener('mousedown', startPosition);
         canvas.addEventListener('mouseup', endPosition);
