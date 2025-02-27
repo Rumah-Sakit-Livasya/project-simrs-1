@@ -1,12 +1,12 @@
 <script>
     $(document).ready(function() {
 
-        $('.datepicker-input').datepicker({
-            format: 'dd/mm/yyyy', // Format tampilan tanggal
-            autoclose: true, // Menutup datepicker otomatis setelah memilih tanggal
-            todayHighlight: true, // Menyoroti tanggal hari ini
-            language: 'id', // Locale Indonesia untuk hari dan bulan
-        });
+        // $('.datepicker-input').datepicker({
+        //     format: 'dd/mm/yyyy', // Format tampilan tanggal
+        //     autoclose: true, // Menutup datepicker otomatis setelah memilih tanggal
+        //     todayHighlight: true, // Menyoroti tanggal hari ini
+        //     language: 'id', // Locale Indonesia untuk hari dan bulan
+        // });
 
 
         $('.bsd-resume-medis-rajal').on('click', function() {
@@ -56,7 +56,14 @@
                     }, 1000);
                 },
                 error: function(response) {
-                    showErrorAlert('Gagal Disimpan!');
+                    if(response.status == 422) {
+                        showErrorAlert("Kolom yang wajib diisi belum ter isi!");
+                        // console.log(response);
+                    }else {
+                        showErrorAlert(response.responseJSON.error);
+                        // console.log(response.responseJSON.error);
+
+                    }
                 }
             });
         }

@@ -450,7 +450,7 @@
                                                         data-dismiss="modal" data-status="0">
                                                         <span class="mdi mdi-printer"></span> Cetak
                                                     </button>
-                                                    <div style="width: 33%" class="d-flex justify-content-between"
+                                                    <div style="width: 40%" class="d-flex justify-content-between"
                                                         id="rmj-button-wrapper">
                                                         <button type="button"
                                                             class="btn bsd-resume-medis-rajal btn-warning waves-effect text-white waves-light save-form d-flex align-items-center"
@@ -508,4 +508,5 @@
             });
         });
     </script>
+    @include('pages.simrs.poliklinik.partials.action-js.resume-medis-rajal')
 @endsection
