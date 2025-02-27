@@ -272,6 +272,7 @@ class RegistrationController extends Controller
 
         // Set registration date and status
         $validatedData['registration_date'] = Carbon::now();
+        $validatedData['date'] = Carbon::now();
         $validatedData['status'] = 'online';
 
         // Set department based on registration type
