@@ -1,6 +1,7 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
+    @include('pages.simrs.poliklinik.partials.css-sidebar-custom')
     <style>
         main {
             overflow-x: hidden;
@@ -144,7 +145,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <!-- datatable start -->
-                                <div class="table-responsive">
+                                {{-- <div class="table-responsive">
                                     <table id="dt-basic-example"
                                         class="table table-bordered table-hover table-striped w-100">
                                         <thead>
@@ -191,7 +192,55 @@
                                             </tr>
                                         </tfoot>
                                     </table>
-                                </div>
+                                </div> --}}
+
+                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                                    <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
+                                    <thead class="bg-primary-600">
+                                        <tr>
+                                            <th style="white-space: nowrap">Tanggal</th>
+                                            <th style="white-space: nowrap">Dokter</th>
+                                            <th style="white-space: nowrap">Tindakan</th>
+                                            <th style="white-space: nowrap">Kelas</th>
+                                            <th style="white-space: nowrap">QTY</th>
+                                            <th style="white-space: nowrap">F.O.C</th>
+                                            <th style="white-space: nowrap">User Entry</th>
+                                            <th style="white-space: nowrap">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($tindakan_medis_yang_dipakai as $row)
+                                            <tr>
+
+                                                <td>{{ tgl_waktu($row->created_at) }}</td>
+                                                <td>{{ $row->doctor_id }}</td>
+                                                <td>{{ $row->tindakan_medis_id }}</td>
+                                                <td>{{ $row->kelas_rawat_id }}</td>
+                                                <td>{{ $row->qty }}</td>
+                                                <td>{{ $row->total_harga }}</td>
+                                                <td>{{ $row->user_entry }}</td>
+                                                <td>
+                                                    <button class="btn btn-danger py-1 px-2">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="8" class="text-center">
+                                                <button type="button"
+                                                    class="btn btn-outline-primary waves-effect waves-themed"
+                                                    id="btn-tambah-tindakan" data-toggle="modal"
+                                                    data-target="#modal-tambah-tindakan" data-action="tambah">
+                                                    <span class="fal fa-plus-circle"></span>
+                                                    Tambah Tindakan
+                                                </button>
+                                            </th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
                                 <!-- datatable end -->
                             </div>
                         </div>
@@ -200,21 +249,28 @@
             </div>
         </div>
     </main>
+
+    @include('pages.simrs.pendaftaran.partials.modal-tindakan-medis')
+
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    @include('pages.simrs.poliklinik.partials.action-js.tindakan-medis')
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');
+
+            $('#btn-tambah-tindakan').click(function() {
+                $('#modal-tambah-tindakan').modal('show');
+            });
+
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
             $('#doctor_id').select2({
                 placeholder: 'Pilih Dokter',
-            });
-            $('#dt-basic-example').dataTable({
-                responsive: false,
             });
 
             $('.js-thead-colors a').on('click', function() {
@@ -227,6 +283,50 @@
                 var theadColor = $(this).attr("data-bg");
                 console.log(theadColor);
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
+            });
+
+            $('#dt-basic-example').DataTable({
+                "drawCallback": function(settings) {
+                    // Menyembunyikan preloader setelah data berhasil dimuat
+                    $('#loading-spinner').hide();
+                },
+                responsive: false, // Responsif diaktifkan
+                scrollX: true, // Tambahkan scroll horizontal
+                lengthChange: false,
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end buttons-container'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [{
+                        extend: 'pdfHtml5',
+                        text: 'PDF',
+                        titleAttr: 'Generate PDF',
+                        className: 'btn-outline-danger btn-sm mr-1 custom-margin'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        titleAttr: 'Generate Excel',
+                        className: 'btn-outline-success btn-sm mr-1 custom-margin'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        text: 'CSV',
+                        titleAttr: 'Generate CSV',
+                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
+                    },
+                    {
+                        extend: 'copyHtml5',
+                        text: 'Copy',
+                        titleAttr: 'Copy to clipboard',
+                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        titleAttr: 'Print Table',
+                        className: 'btn-outline-primary btn-sm custom-margin'
+                    }
+                ]
             });
         });
     </script>
