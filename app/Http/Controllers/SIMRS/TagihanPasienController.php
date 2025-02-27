@@ -47,10 +47,11 @@ class TagihanPasienController extends Controller
         return view('pages.simrs.keuangan.kasir.detail', compact('bilingan'));
     }
 
-    public function getData()
+    public function getData($id)
     {
         try {
             $data = TagihanPasien::select(['id', 'date as tanggal', 'tagihan as detail_tagihan', 'quantity', 'nominal', 'tipe_diskon', 'disc', 'diskon as diskon_rp', 'jamin', 'jaminan as jaminan_rp', 'wajib_bayar'])
+                ->where('bilingan_id', $id)
                 ->get(); // Ambil data yang diperlukan
 
             // Add a 'del' column for delete actions

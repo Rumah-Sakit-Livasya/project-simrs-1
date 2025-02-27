@@ -19,6 +19,7 @@ use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\KepustakaanController;
 use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TarifParameterLaboratoriumController;
+use App\Http\Controllers\SIMRS\LocationController;
 use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
@@ -161,6 +162,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
                 Route::get('/{tarifRegistId}/tarif/{grupPenjaminId}', [TarifRegistrasiController::class, 'getTarif'])->name('master-data.setup.tarif-registrasi.tarif.get');
                 Route::post('/{tarifRegistId}/tarif/{grupPenjaminId}', [TarifRegistrasiController::class, 'storeTarif'])->name('master-data.setup.tarif-registrasi.tarif.store');
+                Route::post('/{tarifRegistId}/departments', [TarifRegistrasiController::class, 'storeDepartments'])
+                    ->name('master-data.setup.tarif-registrasi.departements.store');
             });
 
             Route::prefix('biaya-administrasi-ranap')->group(function () {
@@ -321,4 +324,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::patch('/update/{encryptedId}', [KepustakaanController::class, 'update'])->name('kepustakaan.update');
         Route::delete('/delete/{encryptedId}', [KepustakaanController::class, 'delete'])->name('kepustakaan.delete');
     });
+
+    Route::get('/getKabupaten', [LocationController::class, 'getKabupaten'])->name('getKabupaten');
+    Route::get('/getKecamatan', [LocationController::class, 'getKecamatan'])->name('getKecamatan');
+    Route::get('/getKelurahan', [LocationController::class, 'getKelurahan'])->name('getKelurahan');
 });

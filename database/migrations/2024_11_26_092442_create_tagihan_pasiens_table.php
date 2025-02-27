@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('tagihan_pasien', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('bilingan_id')->constrained('bilingan')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('registration_id')->constrained('registrations')->onUpdate('cascade')->onDelete('cascade');
             $table->string('date');
             $table->string('tagihan');

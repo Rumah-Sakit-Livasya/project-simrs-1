@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SIMRS;
 use App\Http\Controllers\Controller;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\SIMRS\Bed;
+use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
@@ -14,6 +15,7 @@ use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
 use App\Models\SIMRS\TutupKunjungan;
 use App\Models\User;
@@ -255,8 +257,6 @@ class RegistrationController extends Controller
             'employee_id' => 'nullable',
             'doctor_id' => 'nullable',
             'registration_type' => 'nullable',
-            'registration_date' => 'nullable',
-            'doctor_id' => 'nullable',
             'poliklinik' => 'nullable|string',
             'penjamin_id' => 'nullable',
             'rujukan' => 'required|string',
@@ -270,37 +270,80 @@ class RegistrationController extends Controller
             'diagnosa_awal' => 'nullable|string',
         ]);
 
+        // Set registration date and status
         $validatedData['registration_date'] = Carbon::now();
         $validatedData['status'] = 'online';
 
-        if ($validatedData['registration_type'] == 'rawat-jalan' || $validatedData['registration_type'] == 'igd') {
-            $validatedData['departement_id'] = Doctor::where('id', $validatedData['doctor_id'])->first()->department_from_doctors->id;
-        } else if ($validatedData['registration_type'] == 'odc') {
-            $departement_id = Departement::where('kode', 'ODC')->first('id')->id;
-            $validatedData['departement_id'] = $departement_id;
-        } else if ($validatedData['registration_type'] == 'rawat-inap') {
-            $departement_id = Departement::where('kode', 'RAWAT INAP')->first('id')->id;
-            $validatedData['departement_id'] = $departement_id;
-        }
+        // Set department based on registration type
+        $validatedData['departement_id'] = $this->getDepartmentId($validatedData);
 
+        // Update bed if rawat inap
         if ($validatedData['registration_type'] == 'rawat-inap') {
-            $bed = Bed::findOrFail($request->bed_id);
-            $bed->patient_id = $request->patient_id;
-            $bed->update();
+            Bed::findOrFail($request->bed_id)->update(['patient_id' => $request->patient_id]);
         }
 
-        // Generate No Registration
-        $registrationNumber = generate_registration_number();
+        // Generate registration numbers
+        $validatedData['registration_number'] = generate_registration_number();
+        $validatedData['no_urut'] = generateDoctorSequenceNumber($request->doctor_id, $request->registration_date);
 
-        // Generate the sequence number for the doctor
-        $doctorSequenceNumber = generateDoctorSequenceNumber($request->doctor_id, $request->registration_date);
+        // Create registration
+        $registration = Registration::create($validatedData);
 
-        $validatedData['registration_number'] = $registrationNumber;
-        $validatedData['no_urut'] = $doctorSequenceNumber;
+        // Create billing
+        $billing = Bilingan::create([
+            'registration_id' => $registration->id,
+            'patient_id' => $request->patient_id,
+            'status' => 'belum final'
+        ]);
 
-        // return dd($validatedData);
-        $store = Registration::create($validatedData);
-        return redirect("/daftar-registrasi-pasien/$store->id")->with('success', 'Registrasi berhasil ditambahkan!');
+        // Add registration fee for outpatient visits
+        if ($validatedData['registration_type'] == 'rawat-jalan') {
+            $department = Departement::find($validatedData['departement_id']);
+
+            // Get registration fees associated with this department
+            $registrationFees = $department->tarif_registrasi()
+                ->with(['harga_tarif' => function ($query) use ($request) {
+                    $query->where('group_penjamin_id', $request->penjamin_id);
+                }])
+                ->get();
+
+            // Add registration fee to billing details
+            foreach ($registrationFees as $fee) {
+                if ($fee->harga_tarif->isNotEmpty()) {
+                    $harga = $fee->harga_tarif->first()->harga;
+                    TagihanPasien::create([
+                        'user_id' => auth()->user()->id,
+                        'bilingan_id' => $billing->id,
+                        'registration_id' => $registration->id,
+                        'date' => Carbon::now(),
+                        'tagihan' => "[Biaya Administrasi] Rawat Jalan",
+                        'detail_tagihan' => $fee->nama_tarif,
+                        'nominal' => $harga,
+                        'quantity' => 1,
+                        'harga' => $harga,
+                        'total' => $harga
+                    ]);
+                }
+            }
+        }
+
+        return redirect("/daftar-registrasi-pasien/$registration->id")
+            ->with('success', 'Registrasi berhasil ditambahkan!');
+    }
+
+    private function getDepartmentId($data)
+    {
+        switch ($data['registration_type']) {
+            case 'rawat-jalan':
+            case 'igd':
+                return Doctor::where('id', $data['doctor_id'])->first()->department_from_doctors->id;
+            case 'odc':
+                return Departement::where('kode', 'ODC')->first()->id;
+            case 'rawat-inap':
+                return Departement::where('kode', 'RAWAT INAP')->first()->id;
+            default:
+                return null;
+        }
     }
 
     public function show($id)
