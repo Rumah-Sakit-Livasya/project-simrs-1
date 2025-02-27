@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS\Setup;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\Setup\HargaTarifRegistrasi;
 use App\Models\SIMRS\Setup\TarifRegistrasi;
@@ -22,6 +23,29 @@ class TarifRegistrasiController extends Controller
         $grup_penjamin = GroupPenjamin::all();
         $harga = $tarif_registrasi->harga_tarif->where('group_penjamin_id', 1)->first();
         return view('pages.simrs.master-data.setup.tarif-registrasi-layanan.tarif', compact('tarif_registrasi', 'grup_penjamin', 'harga'));
+    }
+
+    public function setDepartement($id)
+    {
+        $tarif_registrasi = TarifRegistrasi::find($id);
+        $departement = Departement::all();
+        $harga = $tarif_registrasi->harga_tarif->where('group_penjamin_id', 1)->first();
+        return view('pages.simrs.master-data.setup.tarif-registrasi-layanan.departement', compact('tarif_registrasi', 'departement', 'harga'));
+    }
+
+    public function storeDepartments(Request $request, $tarifRegistId)
+    {
+        try {
+            $tarif_registrasi = TarifRegistrasi::findOrFail($tarifRegistId);
+            $departments = $request->input('departments', []);
+
+            // Sync the departments (this will remove existing associations and add new ones)
+            $tarif_registrasi->departements()->sync($departments);
+
+            return response()->json(['message' => 'Departemen berhasil diperbarui!']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function getTarif($tarifRegistId, $grupPenjaminId)

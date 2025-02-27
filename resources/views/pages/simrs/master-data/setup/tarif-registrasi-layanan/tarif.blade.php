@@ -33,6 +33,7 @@
                                 </select>
                             </div>
                             <form id="store-form">
+                                @csrf
                                 <table>
                                     <tr>
                                         <td>Biaya Administrasi</td>

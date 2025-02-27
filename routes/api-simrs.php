@@ -162,6 +162,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
                 Route::get('/{tarifRegistId}/tarif/{grupPenjaminId}', [TarifRegistrasiController::class, 'getTarif'])->name('master-data.setup.tarif-registrasi.tarif.get');
                 Route::post('/{tarifRegistId}/tarif/{grupPenjaminId}', [TarifRegistrasiController::class, 'storeTarif'])->name('master-data.setup.tarif-registrasi.tarif.store');
+                Route::post('/{tarifRegistId}/departments', [TarifRegistrasiController::class, 'storeDepartments'])
+                    ->name('master-data.setup.tarif-registrasi.departements.store');
             });
 
             Route::prefix('biaya-administrasi-ranap')->group(function () {

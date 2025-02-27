@@ -119,6 +119,10 @@
                                                 <td>Rawat Jalan</td>
                                                 <td>{{ $row->ruangan ?? '-' }}</td>
                                                 <td>
+                                                    <button class="btn btn-sm btn-primary px-2 py-1 btn-departement"
+                                                        data-id="{{ $row->id }}">
+                                                        <i class="fas fa-home"></i>
+                                                    </button>
                                                     <button class="btn btn-sm btn-primary px-2 py-1 btn-tarif"
                                                         data-id="{{ $row->id }}">
                                                         <i class="fas fa-credit-card"></i>
@@ -179,6 +183,23 @@
             $('.btn-tarif').click(function() {
                 const id_param = $(this).attr('data-id');
                 const url = `{{ route('master-data.setup.tarif-registrasi.set-tarif', ':id') }}`
+                    .replace(':id', id_param);
+                const popupWidth = 850;
+                const popupHeight = 600;
+                const left = (screen.width - popupWidth) / 2;
+                const top = (screen.height - popupHeight) / 2;
+
+                window.open(
+                    url,
+                    "popupWindow",
+                    "width=" + popupWidth + ",height=" + popupHeight + ",top=" + top + ",left=" + left +
+                    ",scrollbars=yes,resizable=yes"
+                );
+            });
+
+            $('.btn-departement').click(function() {
+                const id_param = $(this).attr('data-id');
+                const url = `{{ route('master-data.setup.tarif-registrasi.set-departement', ':id') }}`
                     .replace(':id', id_param);
                 const popupWidth = 850;
                 const popupHeight = 600;

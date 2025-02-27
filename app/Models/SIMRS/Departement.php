@@ -3,6 +3,7 @@
 namespace App\Models\SIMRS;
 
 use App\Models\Employee;
+use App\Models\SIMRS\Setup\TarifRegistrasi;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -51,5 +52,10 @@ class Departement extends Model
     public function grup_tindakan_medis()
     {
         return $this->hasMany(GrupTindakanMedis::class);
+    }
+
+    public function tarif_registrasi()
+    {
+        return $this->belongsToMany(TarifRegistrasi::class, 'tarif_registrasi_departements');
     }
 }

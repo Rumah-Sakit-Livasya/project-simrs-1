@@ -14,22 +14,19 @@ class BilinganController extends Controller
     public function getData($id)
     {
         try {
-            $data = Bilingan::with('pembayaran_tagihan')
-                ->where('id', $id) // Filter berdasarkan ID yang diterima
-                ->get() // Ambil data yang diperlukan
-                ->map(function ($item) {
-                    // Add a 'del' column for delete actions
-                    $item->del = '<button class="btn btn-danger delete" data-id="' . $item->id . '"><i class="fas fa-trash"></i></button>'; // Icon trash button
-                    // Add additional fields to the item
-                    $item->tanggal = $item->created_at ? $item->created_at->format('Y-m-d') : null; // Format date to yyyy-mm-dd
-                    $item->total_tagihan = $item->pembayaran_tagihan->total_tagihan ?? null;
-                    $item->jaminan = $item->pembayaran_tagihan->jaminan ?? null;
-                    $item->tagihan_pasien = $item->pembayaran_tagihan->tagihan_pasien ?? null;
-                    $item->jumlah_terbayar = $item->pembayaran_tagihan->jumlah_terbayar ?? null;
-                    $item->sisa_tagihan = $item->pembayaran_tagihan->sisa_tagihan ?? null;
-                    $item->kembalian = $item->pembayaran_tagihan->kembalian ?? null;
-                    return $item;
-                });
+            $data = Bilingan::where('id', $id)->first()->tagihan_pasien->map(function ($item) {
+                // Add a 'del' column for delete actions
+                $item->del = '<button class="btn btn-danger delete" data-id="' . $item->id . '"><i class="fas fa-trash"></i></button>'; // Icon trash button
+                // Add additional fields to the item
+                $item->tanggal = $item->created_at ? $item->created_at->format('Y-m-d') : null; // Format date to yyyy-mm-dd
+                $item->total_tagihan = $item->pembayaran_tagihan->total_tagihan ?? null;
+                $item->jaminan = $item->pembayaran_tagihan->jaminan ?? null;
+                $item->tagihan_pasien = $item->pembayaran_tagihan->tagihan_pasien ?? null;
+                $item->jumlah_terbayar = $item->pembayaran_tagihan->jumlah_terbayar ?? null;
+                $item->sisa_tagihan = $item->pembayaran_tagihan->sisa_tagihan ?? null;
+                $item->kembalian = $item->pembayaran_tagihan->kembalian ?? null;
+                return $item;
+            });
 
             return response()->json([
                 'data' => $data,
