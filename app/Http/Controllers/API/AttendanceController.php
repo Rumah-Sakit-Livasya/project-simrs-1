@@ -111,7 +111,7 @@ class AttendanceController extends Controller
                 }
 
                 if ($attendance_kemarin) {
-                    if ($attendance_kemarin->is_day_off != 1 && $attendance_kemarin->shift->time_out <= '07:00' && $attendance_kemarin->shift->time_in >= '20:00' && $attendance_kemarin->clock_in == null) {
+                    if ($attendance_kemarin->is_day_off != 1 && $attendance_kemarin?->shift?->time_out <= '07:00' && $attendance_kemarin?->shift?->time_in >= '20:00' && $attendance_kemarin->clock_in == null) {
                         $waktu_absen = $attendance->shift->time_in;
                         $perbedaanMenit = $request['clock_in']->greaterThan($waktu_absen)
                             ? Carbon::parse($waktu_absen)->seconds(0)->diffInMinutes(Carbon::parse($request['clock_in'])->seconds(0))
