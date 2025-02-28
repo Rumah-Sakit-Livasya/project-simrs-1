@@ -8,6 +8,7 @@ use App\Http\Controllers\Pages\CompanyController;
 use App\Http\Controllers\API\CompanyController as ApiCompanyController;
 use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\Pages\DashboardController;
 use App\Http\Controllers\Pages\UpdateProfileController;
 use App\Http\Controllers\PayrollController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\WhatsappController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\ImpersonateUser;
+use App\Models\ChecklistHarianCategory;
 use Illuminate\Support\Facades\File;
 
 Route::get('/test', [TimeScheduleController::class, 'getEmployeesByOrganizationAndJobPosition']);
@@ -316,6 +318,17 @@ Route::middleware('auth')->group(function () {
         /*END USERS AKSES --------------------------------------------------------*/
     });
     /* END MASTER DATA --------------------------------------------------------*/
+
+    /*
+    |--------------------------------------------------------------------------
+    | USERS AKSES
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('checklist-harian')->group(function () {
+        Route::prefix('category')->group(function () {
+            Route::get('/', [ChecklistHarianCategoryController::class, 'index'])->name('checklist.category.index');
+        });
+    });
 
     Route::get('/optimize', function () {
         Artisan::call('optimize');

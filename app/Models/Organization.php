@@ -39,4 +39,9 @@ class Organization extends Model
     {
         return $this->belongsToMany(RoomMaintenance::class, 'room_maintenance_organization');
     }
+
+    public function checklist_harian()
+    {
+        return $this->hasMany(ChecklistHarian::class);
+    }
 }
