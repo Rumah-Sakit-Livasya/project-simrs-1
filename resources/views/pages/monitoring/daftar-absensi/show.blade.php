@@ -4,6 +4,9 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
+        body {
+            overflow-x: hidden;
+        }
         #gambar-detail-absensi {
             display: flex;
             /* Use flexbox to position images side by side */
@@ -152,21 +155,20 @@
                                         <button type="submit" class="btn-next-step btn btn-primary btn-sm ml-2">
                                             <div class="ikon-tambah">
                                                 <span class="fal fa-search mr-1"></span>Cari
-                                                </div>
-                                                <div class="span spinner-text d-none">
-                                                    <span class="spinner-border spinner-border-sm" role="status"
-                                                        aria-hidden="true"></span>
-                                                    Loading...
-                                                </div>
-                                            </button>
-                                        </div>
+                                            </div>
+                                            <div class="span spinner-text d-none">
+                                                <span class="spinner-border spinner-border-sm" role="status"
+                                                    aria-hidden="true"></span>
+                                                Loading...
+                                            </div>
+                                        </button>
                                     </div>
                                 </div>
-                            </form>
                         </div>
+                        </form>
                     </div>
                 </div>
-                <div id="panel-1" class="panel">
+                <div id="panel-2" class="panel">
                     <div class="panel-hdr">
                         <h2>
                             Daftar Absen {{ $attendances[0]->employees->fullname ?? 'No Name~' }}
@@ -267,8 +269,8 @@
                                                             data-id="{{ $row->id }}" title="Edit Absensi">
                                                             <span class="fal fa-pencil ikon-edit"></span>
                                                             <div class="span spinner-text d-none">
-                                                                <span class="spinner-border spinner-border-sm"
-                                                                    role="status" aria-hidden="true"></span>
+                                                                <span class="spinner-border spinner-border-sm" role="status"
+                                                                    aria-hidden="true"></span>
                                                                 Loading...
                                                             </div>
                                                         </a>
@@ -310,6 +312,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
         @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring detail absensi'))
             @include('pages.monitoring.daftar-absensi.partials.edit')

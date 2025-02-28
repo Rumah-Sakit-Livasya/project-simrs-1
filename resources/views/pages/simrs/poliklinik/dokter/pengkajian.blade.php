@@ -1,11 +1,12 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
+    @include('pages.simrs.poliklinik.partials.css-sidebar-custom')
     <style>
         main {
             overflow-x: hidden;
         }
-        
+
         input[type="time"] {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -135,7 +136,6 @@
                 <div class="tab-content p-3">
                     <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
                         @include('pages.simrs.poliklinik.partials.detail-pasien')
-                       
                         <hr style="border-color: #868686; margin-bottom: 50px;">
                         <header class="text-primary text-center font-weight-bold mb-4">
                             <div id="alert-pengkajian"></div>
@@ -154,8 +154,7 @@
                                         <label class="text-primary" for="pr">Nadi (PR)</label>
                                         <div class="input-group">
                                             <div class="input-group">
-                                                <input id="pr" type="text" name="pr"
-                                                    class="form-control">
+                                                <input id="pr" type="text" name="pr" class="form-control">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">x/menit</span>
                                                 </div>
@@ -540,7 +539,7 @@
                                                 data-dismiss="modal" data-status="0">
                                                 <span class="mdi mdi-printer mr-2"></span> Print
                                             </button>
-                                            <div style="width: 33%" class="d-flex justify-content-between">
+                                            <div style="width: 40%" class="d-flex justify-content-between">
                                                 <button type="button"
                                                     class="btn btn-warning waves-effect text-white waves-light save-form d-flex align-items-center"
                                                     data-dismiss="modal" data-status="0" id="sd-pengkajian-dokter-rajal">
@@ -569,12 +568,14 @@
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');
+
             $('.select2').select2({
                 placeholder: 'Pilih Item',
             });
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
+
             $('#doctor_id').select2({
                 placeholder: 'Pilih Dokter',
             });
@@ -595,4 +596,5 @@
             });
         });
     </script>
+    @include('pages.simrs.poliklinik.partials.action-js.pengkajian-dokter')
 @endsection

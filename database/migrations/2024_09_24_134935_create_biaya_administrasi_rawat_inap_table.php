@@ -22,32 +22,32 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::table('biaya_administrasi_rawat_inap')->insert([
-            [
-                'group_penjamin_id' => 1,
-                'persentase' => 5,
-                'min_tarif' => 0,
-                'max_tarif' => 0,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'group_penjamin_id' => 2,
-                'persentase' => 5,
-                'min_tarif' => 0,
-                'max_tarif' => 0,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'group_penjamin_id' => 3,
-                'persentase' => 5,
-                'min_tarif' => 0,
-                'max_tarif' => 0,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        // DB::table('biaya_administrasi_rawat_inap')->insert([
+        //     [
+        //         'group_penjamin_id' => 1,
+        //         'persentase' => 5,
+        //         'min_tarif' => 0,
+        //         'max_tarif' => 0,
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ],
+        //     [
+        //         'group_penjamin_id' => 2,
+        //         'persentase' => 5,
+        //         'min_tarif' => 0,
+        //         'max_tarif' => 0,
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ],
+        //     [
+        //         'group_penjamin_id' => 3,
+        //         'persentase' => 5,
+        //         'min_tarif' => 0,
+        //         'max_tarif' => 0,
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ],
+        // ]);
     }
 
     /**

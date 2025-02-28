@@ -1,6 +1,7 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
+@include('pages.simrs.poliklinik.partials.css-sidebar-custom')
     <style>
         main {
             overflow-x: hidden;
@@ -176,7 +177,7 @@
                                                         <label for="pid_dokter" class="form-label">Dokter</label>
                                                         <select
                                                             class="select2 form-control @error('doctor_id') is-invalid @enderror"
-                                                            name="doctor_id" id="doctor_id">
+                                                            name="doctor_id" id="cppt_doctor_id">
                                                             <option value=""></option>
                                                             @foreach ($jadwal_dokter as $jadwal)
                                                                 <option value="{{ $jadwal->doctor_id }}">
@@ -209,19 +210,19 @@
                                                             <div class="card-body p-0">
                                                                 <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="4"
                                                                     placeholder="Keluhan Utama">Alergi obat : 
-                    Reaksi alergi obat : 
-                    Keluhan Utama : KONSULTASI
-                    PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-                    DI PUSKESMAS JATITUJUH 
-                    Riwayat Penyakit Sekarang : KONSULTASI
-                    PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-                    DI PUSKESMAS JATITUJUH 
-                    Riwayat Penyakit Dahulu : TIDAK ADA
-                    Riwayat Penyakit Keluarga : TIDAK ADA
-                    Alergi makan : 
-                    Reaksi alergi makan : 
-                    Alergi lainya : 
-                    Reaksi alergi lainya : </textarea>
+Reaksi alergi obat : 
+Keluhan Utama : KONSULTASI
+PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
+DI PUSKESMAS JATITUJUH 
+Riwayat Penyakit Sekarang : KONSULTASI
+PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
+DI PUSKESMAS JATITUJUH 
+Riwayat Penyakit Dahulu : TIDAK ADA
+Riwayat Penyakit Keluarga : TIDAK ADA
+Alergi makan : 
+Reaksi alergi makan : 
+Alergi lainya : 
+Reaksi alergi lainya : </textarea>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -234,12 +235,12 @@
                                                             </div>
                                                             <div class="card-body p-0">
                                                                 <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">Nadi (PR): 
-                    Respirasi (RR): 
-                    Tensi (BP): 
-                    Suhu (T): 
-                    Tinggi Badan: 
-                    Berat Badan: 
-                    Skrining Nyeri:
+Respirasi (RR): 
+Tensi (BP): 
+Suhu (T): 
+Tinggi Badan: 
+Berat Badan: 
+Skrining Nyeri:
                                                             </textarea>
                                                             </div>
                                                         </div>
@@ -305,6 +306,80 @@
                                                                     placeholder="Resep Manual"></textarea>
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="card mt-3">
+                                                            <div class="card-header bg-primary text-white">
+                                                                Resep Elektronik
+                                                            </div>
+                                                            <div class="card-body p-0">
+                                                                <div class="row p-2">
+                                                                    <div class="col-6">
+                                                                        <select
+                                                                            class="select2 form-control @error('doctor_id') is-invalid @enderror"
+                                                                            name="doctor_id" id="cppt_doctor_id">
+                                                                            <option value="152">BK IBU</option>
+                                                                            <option selected="selected" value="3">FARMASI RAJAL</option>
+                                                                            <option value="110">FARMASI RANAP</option>
+                                                                            <option value="150">OBAT KHUSUS KARYAWAN</option>
+                                                                            <option value="140">PSRS</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <input type="text" name="nama_obat" id="nama_obat" class="form-control ui-autocomplete-input" placeholder="Cari Obat" autocomplete="off"><div class="form-control-line"></div>
+                                                                        <input type="hidden" name="mbid" id="mbid">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {{-- <div class="col-lg-12">
+                                                        <div class="card-head deep-purple-text-bg"><header class="no-padding-left">Resep Elektronik</header></div>
+                                                        <div class="col-sm-3">
+                                                            <select name="mgid" id="mgid" class="sel2 select2-hidden-accessible" tabindex="-1" aria-hidden="true">
+                                                                <option value="152">BK IBU</option>
+                                                                <option selected="selected" value="3">FARMASI RAJAL</option>
+                                                                <option value="110">FARMASI RANAP</option>
+                                                                <option value="150">OBAT KHUSUS KARYAWAN</option>
+                                                                <option value="140">PSRS</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-7">
+                                                            <input type="text" name="nama_obat" id="nama_obat" class="form-control ui-autocomplete-input" placeholder="Cari Obat" autocomplete="off"><div class="form-control-line"></div>
+                                                            <input type="hidden" name="mbid" id="mbid">
+                                                            <span class="mdi mdi-magnify mdi-24px pink-text form-control-feedback pointer" id="pilih_item"></span>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <div class="form-group">
+                                                                <div class="form-radio" style="margin: 5px 12px 0 12px;">
+                                                                    <label class="checkbox-styled checkbox-success no-margin">
+                                                                        <input name="zat_aktif" id="zat_aktif" value="true" type="checkbox"><span>Zat Aktif</span>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div> --}}
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <table class="table table-striped">
+                                                            <thead class="smooth">
+                                                            <tr>
+                                                                <th style="width: 25%;">Nama Obat</th><th style="width: 10%;">UOM</th><th style="width: 5%;">Stok</th><th style="width: 5%;">Harga</th><th style="width: 10%;">Qty</th><th style="width: 10%;">Subtotal Harga</th><th style="width: 15%">Signa</th><th style="width: 15%">Instruksi</th><th style="width: 1%;">&nbsp;</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody id="table_re"></tbody>
+                                                            <tbody><tr>
+                                                                <td colspan="8" align="right">Grand Total</td><td align="right"><span id="grand_total" style="text-align: right;" class="numeric">0</span>
+                                                                    <input type="hidden" name="total_bpjs" id="total_bpjs" value="0" readonly="">
+                                                                    <input type="hidden" name="is_bpjs" id="is_bpjs" value="f" readonly="">
+                                                                </td>
+                                                            </tr>
+                                                        </tbody></table>
                                                     </div>
                                                 </div>
 
@@ -608,122 +683,7 @@
 @endsection
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-    @include('pages.simrs.poliklinik.partials.js-filter')
-    <script>
-        $(document).ready(function() {
-
-            $('#cppt_doctor_id').val("{{ $registration->doctor_id }}")
-            $('.btnAdd').click(function() {
-                $('#add_soap').collapse('show');
-            });
-
-            $('#tutup').on('click', function() {
-                $('#add_soap').collapse('hide');
-
-                $('.btnAdd').attr('aria-expanded', 'false');
-                $('.btnAdd').addClass('collapsed');
-            });
-
-            // Saat tombol Save Final diklik
-            $('#bsSOAP').on('click', function() {
-                submitFormCPPT(); // Panggil fungsi submitForm dengan parameter final
-            });
-
-            function loadCPPTData() {
-                $.ajax({
-                    // url: '{{-- route('cppt.get') --}}', // Mengambil route Laravel
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(response) {
-                        // Bersihkan tabel
-                        $('#list_soap').empty();
-
-                        // Iterasi setiap data dan tambahkan ke dalam tabel
-                        $.each(response, function(index, data) {
-                            var row = `
-                            <tr>
-                                <td class="text-center">
-                                    <div class="deep-purple-text">${data.created_at}<br>
-                                        <span class="green-text" style="font-weight:400;">${data.tipe_rawat}</span><br>
-                                        <b style="font-weight: 400;">Dokter ID: ${data.doctor_id}</b><br>
-                                        <div class="input-oleh deep-orange-text">Input oleh: ${data.user_id}</div>
-                                        <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
-                                        <div>
-                                            <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <table width="100%" class="table-soap nurse">
-                                        <tbody>
-                                            <tr><td colspan="3" class="soap-text title">CPPT</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center" width="8%">S</td><td>${data.subjective.replace(/\n/g, "<br>")}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">O</td><td>${data.objective.replace(/\n/g, "<br>")}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">A</td><td>${data.assesment}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">P</td><td>${data.planning}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">I</td><td>${data.instruksi}</td></tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                                <td>
-                                    <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap" data-id="${data.id}" title="Copy"></i>
-                                    <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap" data-id="${data.id}" title="Hapus"></i>
-                                    <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap" data-id="${data.id}" title="Edit SOAP & Resep Elektronik"></i>
-                                    <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print Antrian Resep"></i>
-                                </td>
-                            </tr>
-                        `;
-                            // Tambahkan ke dalam tabel
-                            $('#list_soap').append(row);
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
-                    }
-                });
-            }
-
-            function submitFormCPPT(actionType) {
-                const form = $('#cppt-dokter-rajal-form');
-                const registrationNumber = "{{ $registration->registration_number }}";
-
-                const url =
-                    "{{ route('cppt.dokter-rajal.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
-                    .replace('__registration_number__', registrationNumber);
-
-                // Now you can use `url` in your form submission or AJAX request
-
-                let formData = form.serialize(); // Ambil data dari form
-
-                // Tambahkan tipe aksi (draft atau final) ke data form
-                formData += '&action_type=' + actionType;
-
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: formData,
-                    success: function(response) {
-                        if (actionType === 'draft') {
-                            showSuccessAlert('Data berhasil disimpan sebagai draft!');
-                        } else {
-                            showSuccessAlert('Data berhasil disimpan sebagai final!');
-                        }
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
-                    },
-                    error: function(response) {
-                        // Tangani error
-                        var errors = response.responseJSON.errors;
-                        $.each(errors, function(key, value) {
-                            showErrorAlert(value[0]);
-                        });
-                    }
-                });
-            }
-        });
-    </script>
+    @include('pages.simrs.poliklinik.partials.action-js.cppt-dokter-rajal')
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');
@@ -733,7 +693,12 @@
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
+            
             $('#doctor_id').select2({
+                placeholder: 'Pilih Dokter',
+            });
+            
+            $('#cppt_doctor_id').select2({
                 placeholder: 'Pilih Dokter',
             });
 

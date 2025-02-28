@@ -359,6 +359,7 @@ class BotMessageController extends Controller
                 'message_type' => 'string',
                 'data' => 'Halo String'
             ];
+
         } else if ($msg == 'test_array') {
             $response =  [
                 'message_type' => 'array',
@@ -370,8 +371,8 @@ class BotMessageController extends Controller
                         'title' => 'Jadwal Poli'
                     ],
                     [
-                        'id' => '/info_ranap',
-                        'title' => 'Info Rawat Inap'
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasilitas Unggulan'
                     ],
                     [
                         'id' => '/info_rajal',
@@ -392,6 +393,8 @@ class BotMessageController extends Controller
                 ]
             ];
             
+            // Bagian pilihan jadwal poliklinik
+
         } else if ($msg == '/jadwal_praktek') {
 
             $response =  [
@@ -434,9 +437,44 @@ class BotMessageController extends Controller
                     [
                         'id' => '/klinik_jantung',
                         'title' => 'Poli Jantung'
-                    ],
+                    ]
                 ]
             ];
+
+            // Bagian pilihan fasilitas unggulan
+
+        } else if ($msg == '/info_fasilitas') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Fasilitas Unggulan',
+                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/foto_bayi',
+                        'title' => 'Baby Newborn Photo'
+                    ],
+                    [
+                        'id' => '/baby_spa',
+                        'title' => 'Baby Spa Swimming'
+                    ],
+                    [
+                        'id' => '/maternity',
+                        'title' => 'Maternity'
+                    ],
+                    [
+                        'id' => '/partus_moment',
+                        'title' => 'Partus Moment'
+                    ],
+                    [
+                        'id' => '/senam_hamil',
+                        'title' => 'Senam Hamil'
+                    ]
+                ]
+            ];
+            
+            // Bagian respons jadwal poliklinik
+
         } else if($msg == '/klinik_obgyn') {
             $response = [
                 'message_type' => 'string',
@@ -482,7 +520,31 @@ class BotMessageController extends Controller
                 'message_type' => 'string',
                 'data' => "Jadwal belum ada"
             ];
+            
+            // Bagian Fasilitas unggulan
+
+        } else if($msg == '/foto_bayi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Baby Newborn Photoshoot*\n\nRS Livasya di Majalengka menawarkan layanan fotografi bayi baru lahir (newborn baby photography) yang bertujuan mengabadikan momen berharga si kecil. Layanan ini mencakup berbagai genre fotografi, seperti:\n\nFocusing: Memotret bayi tanpa tambahan aksesoris, menonjolkan keaslian dan kemurnian.\nLifestyle: Mengabadikan interaksi keluarga dengan bayi di rumah sakit atau saat membawa pulang bayi.\nKomersial: Foto yang digunakan untuk promosi produk bayi atau keperluan komeRSl lainnya.\n\n*Biaya untuk Baby Newborn Photoshoot*\nRp 200.000\n(dapat 1 file dan 1 cetak foto + figura)\nRp 50.000\n(untuk menambah file)\nRp 200.000\n(untuk penambahan foto cetak)\n\nUntuk informasi lebih lanjut mengenai layanan ini, Anda dapat mengunjungi situs resmi RS Livasya di https://livasya.com/fasilitas/newborn-baby-photography.\n\nSelain itu, RS Livasya juga menyediakan layanan fotografi maternity shoot untuk mengabadikan momen kehamilan.\n\nInformasi lebih lanjut dapat ditemukan di\nhttps://www.livasya.co.id/fasilitas/photography-maternity-shoot.\nUntuk melihat contoh hasil fotografi bayi baru lahir di RS Livasya, Anda dapat menonton video berikut:"
+            ];
+        } else if($msg == '/foto_bayi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "salah satu fasilitas rs"
+            ];
+        } else if($msg == '/foto_bayi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "salah satu fasilitas rs"
+            ];
+        } else if($msg == '/foto_bayi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "salah satu fasilitas rs"
+            ];
         }
+
         return response()->json($response);
 
 

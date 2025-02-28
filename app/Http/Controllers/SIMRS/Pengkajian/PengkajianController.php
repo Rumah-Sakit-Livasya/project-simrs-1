@@ -213,6 +213,7 @@ class PengkajianController extends Controller
     }
     public function storeOrUpdateTransferPasienAntarRuangan(Request $request)
     {
+        $request['user_id'] = auth()->user()->id;
         // Validate the incoming request data
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',

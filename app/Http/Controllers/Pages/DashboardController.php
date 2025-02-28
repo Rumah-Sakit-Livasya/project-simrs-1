@@ -1000,10 +1000,10 @@ class DashboardController extends Controller
 
         $attendance_kemarin = Attendance::where('employee_id', auth()->user()->employee_id)->where('date', Carbon::now()->subDay()->format('Y-m-d'))->first();
         if (isset($attendance_kemarin) || $attendance_kemarin != null) {
-            if ($attendance_kemarin->shift->time_in > '20.00' && $attendance_kemarin->shift->time_out < '08.00') { //jika absen kemarin shift malam
-                if (($attendance_kemarin->clock_in == null && $attendance_kemarin->clock_out == null) && $attendance_kemarin->is_day_off != 1) {
+            if ($attendance_kemarin?->shift?->time_in > '20.00' && $attendance_kemarin?->shift?->time_out < '08.00') { //jika absen kemarin shift malam
+                if (($attendance_kemarin?->clock_in == null && $attendance_kemarin?->clock_out == null) && $attendance_kemarin?->is_day_off != 1) {
                     $check_date = 'today';
-                } else if ($attendance_kemarin->clock_in != null && $attendance_kemarin->clock_out == null && $attendance_kemarin->is_day_off != 1) {
+                } else if ($attendance_kemarin?->clock_in != null && $attendance_kemarin?->clock_out == null && $attendance_kemarin?->is_day_off != 1) {
                     $check_date = 'yesterday';
                 }
             }

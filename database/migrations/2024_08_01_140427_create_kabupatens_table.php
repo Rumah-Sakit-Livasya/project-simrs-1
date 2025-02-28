@@ -15,7 +15,7 @@ class CreateKabupatensTable extends Migration
     {
         Schema::create('kabupaten', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('provinsi_id')->constrained()->onDelete('cascade');
+            $table->foreignId('provinsi_id')->constrained('provinsi')->onDelete('cascade');
             $table->string('name');
             $table->softDeletes();
             $table->timestamps();
