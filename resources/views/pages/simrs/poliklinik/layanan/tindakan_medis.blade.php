@@ -251,7 +251,7 @@
     </main>
 
     @include('pages.simrs.pendaftaran.partials.modal-tindakan-medis')
-
+    {{-- @dd($tindakan_medis) --}}
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>

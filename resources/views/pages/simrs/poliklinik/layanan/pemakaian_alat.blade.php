@@ -1,6 +1,7 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
+@include('pages.simrs.poliklinik.partials.css-sidebar-custom')
     <style>
         main {
             overflow-x: hidden;
@@ -162,7 +163,6 @@
                                         <tbody>
                                             @foreach ($tindakan_medis_yang_dipakai as $row)
                                                 <tr>
-
                                                     <td>{{ tgl_waktu($row->created_at) }}</td>
                                                     <td>{{ $row->doctor_id }}</td>
                                                     <td>{{ $row->tindakan_medis_id }}</td>

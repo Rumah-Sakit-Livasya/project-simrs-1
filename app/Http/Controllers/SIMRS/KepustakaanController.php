@@ -88,6 +88,7 @@ class KepustakaanController extends Controller
         $file = Kepustakaan::where('id', $id)->firstOrFail();
 
         $path = $file->file;
+        
         // dd($path);
         if (!Storage::disk('private')->exists($path)) {
             abort(404, 'File not found');

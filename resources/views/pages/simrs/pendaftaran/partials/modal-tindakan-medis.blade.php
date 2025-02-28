@@ -1,8 +1,8 @@
-<div class="modal fade" id="modal-tambah-tindakan" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modal-tambah-tindakan" tabindex="-1" aria-hidden="true" data-id="{{$registration->id}}">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-primary">
-                <h5 class="modal-title text-white">Batal Registrasi Pasien</h5>
+                <h5 class="modal-title text-white">Tambah Tindakan Medis</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true"><i class="fal fa-times"></i></span>
                 </button>
@@ -63,6 +63,10 @@
                         <div class="col-sm-9">
                             <select class="form-select" id="tindakanMedis" style="width: 100%;">
                                 <option value="" selected>Pilih Tindakan Medis</option>
+                                {{-- @dd($tindakan_medis) --}}
+                                @foreach ($tindakan_medis as $item)
+                                    <option value="{{$item->id}}">{{$item->nama_tindakan}}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
