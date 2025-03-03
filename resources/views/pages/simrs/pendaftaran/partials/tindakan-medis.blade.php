@@ -380,8 +380,17 @@
                                 $('#dokterPerawat').val(data.dokter_id).trigger('change');
                                 $('#departement').val(data.departement_id).trigger('change');
                                 $('#kelas').val(data.kelas_id).trigger('change');
-                                $('#tindakanMedis').val(data.tindakan_medis_id).trigger(
-                                    'change');
+                                $('#tindakanMedis').empty().append(
+                                    '<option value="" selected>Pilih Tindakan Medis</option>'
+                                    );
+
+                                data.tindakan_medis.forEach(item => {
+                                    $('#tindakanMedis').append(
+                                        `<option value="${item.id}">${item.nama_tindakan}</option>`
+                                        );
+                                });
+
+                                $('#tindakanMedis').trigger('change');
                                 $('#qty').val(data.qty || 1);
                                 $('#diskonDokter').prop('checked', data.diskon_dokter || false);
                             } else {

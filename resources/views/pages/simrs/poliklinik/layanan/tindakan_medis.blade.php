@@ -195,45 +195,29 @@
                                 </div> --}}
 
                                 <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                    <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
                                     <thead class="bg-primary-600">
                                         <tr>
-                                            <th style="white-space: nowrap">Tanggal</th>
-                                            <th style="white-space: nowrap">Dokter</th>
-                                            <th style="white-space: nowrap">Tindakan</th>
-                                            <th style="white-space: nowrap">Kelas</th>
-                                            <th style="white-space: nowrap">QTY</th>
-                                            <th style="white-space: nowrap">F.O.C</th>
-                                            <th style="white-space: nowrap">User Entry</th>
-                                            <th style="white-space: nowrap">Aksi</th>
+                                            <th>No</th>
+                                            <th>Tanggal</th>
+                                            <th>Dokter</th>
+                                            <th>Tindakan</th>
+                                            <th>Kelas</th>
+                                            <th>Qty</th>
+                                            <th>Entry By</th>
+                                            <th>F.O.C</th>
+                                            <th>Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($tindakan_medis_yang_dipakai as $row)
-                                            <tr>
-
-                                                <td>{{ tgl_waktu($row->created_at) }}</td>
-                                                <td>{{ $row->doctor_id }}</td>
-                                                <td>{{ $row->tindakan_medis_id }}</td>
-                                                <td>{{ $row->kelas_rawat_id }}</td>
-                                                <td>{{ $row->qty }}</td>
-                                                <td>{{ $row->total_harga }}</td>
-                                                <td>{{ $row->user_entry }}</td>
-                                                <td>
-                                                    <button class="btn btn-danger py-1 px-2">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        @endforeach
+                                        <!-- Rows will be added here dynamically -->
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <th colspan="8" class="text-center">
+                                            <th colspan="9" class="text-center">
                                                 <button type="button"
                                                     class="btn btn-outline-primary waves-effect waves-themed"
                                                     id="btn-tambah-tindakan" data-toggle="modal"
-                                                    data-target="#modal-tambah-tindakan" data-action="tambah">
+                                                    data-id="{{ $registration->id }}" data-target="#modal-tambah-tindakan">
                                                     <span class="fal fa-plus-circle"></span>
                                                     Tambah Tindakan
                                                 </button>
@@ -285,49 +269,6 @@
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
             });
 
-            $('#dt-basic-example').DataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
-                },
-                responsive: false, // Responsif diaktifkan
-                scrollX: true, // Tambahkan scroll horizontal
-                lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end buttons-container'B>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [{
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1 custom-margin'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1 custom-margin'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm custom-margin'
-                    }
-                ]
-            });
         });
     </script>
     @include('pages.simrs.poliklinik.partials.js-filter')

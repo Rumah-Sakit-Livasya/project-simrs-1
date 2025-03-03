@@ -8,6 +8,7 @@ use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\ERM\TindakanMedisRajal;
 use App\Models\SIMRS\JadwalDokter;
+use App\Models\SIMRS\OrderTindakanMedis;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TindakanMedis;
@@ -98,7 +99,7 @@ class PoliklinikController extends Controller
             foreach ($doctors as $doctor) {
                 $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
             }
-            $tindakan_medis_yang_dipakai = TindakanMedisRajal::where('registration_id', $registration->id)->get();
+            $tindakan_medis_yang_dipakai = OrderTindakanMedis::where('registration_id', $registration->id)->get();
             return view('pages.simrs.poliklinik.layanan.tindakan_medis', compact('groupedDoctors','registration', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai'));
         } elseif ($menu == 'pemakaian_alat') {
             $list_tindakan_medis = TindakanMedis::all();
