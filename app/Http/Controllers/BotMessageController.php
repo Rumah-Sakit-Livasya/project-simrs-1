@@ -548,6 +548,39 @@ class BotMessageController extends Controller
                 'message_type' => 'string',
                 'data' => "*Senam Hamil*\n\nRS Livasya di Majalengka menyediakan layanan senam hamil yang dirancang khusus untuk membantu ibu hamil mempersiapkan diri secara fisik dan mental menjelang persalinan. Program ini bertujuan untuk meningkatkan kebugaran, mengurangi ketidaknyamanan selama kehamilan, serta mempersiapkan tubuh untuk proses persalinan yang lancar.\n\n*Biaya untuk Senam Hamil\nRp 50.000\n\n*Manfaat Senam Hamil di RS Livasya:*\n\nMeningkatkan Kebugaran Fisik: Latihan terstruktur membantu menjaga stamina dan kekuatan otot selama kehamilan.\nMengurangi Ketidaknyamanan: Gerakan senam dapat membantu mengurangi nyeri punggung, kram kaki, dan pembengkakan.\nPersiapan Persalinan: Melatih teknik pernapasan dan relaksasi yang berguna saat proses persalinan.\nDukungan Emosional: Bertemu dengan sesama ibu hamil dapat memberikan dukungan dan berbagi pengalaman.\nInformasi Tambahan:\n\nBiaya: Biaya senam hamil di rumah sakit swasta di Indonesia umumnya berkisar antara Rp 25.000 hingga lebih dari Rp 200.000 per sesi. Untuk informasi tarif spesifik di RS Livasya, disarankan menghubungi langsung pihak rumah sakit.\nALODOKTER\nJadwal: Jadwal senam hamil dapat berbeda-beda. Sebaiknya Anda menghubungi RS Livasya untuk mendapatkan informasi terkini mengenai jadwal kelas.\nKontak RS Livasya:\n\nAlamat: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453\nTelepon: (0233) 8668019\nWhatsApp: 0812-1115-1300\nEmail: contact@livasya.com\nUntuk informasi lebih lanjut mengenai layanan senam hamil dan fasilitas lainnya, Anda dapat mengunjungi situs resmi RS Livasya di https://www.livasya.com/.\n\nRS Livasya berkomitmen untuk mendukung kesehatan ibu dan anak melalui berbagai layanan yang komprehensif dan profesional.."
             ];
+        } else {
+            // Else untuk menampilkan menu jika input tidak dikenali
+            $response = [
+                'message_type' => 'array',
+                'title' => 'Menu Pilihan',
+                'body' => 'Pilihan menu tidak dikenali. Silakan pilih salah satu dari menu berikut:',
+                'data' => [
+                    [
+                        'id' => '/jadwal_praktek',
+                        'title' => 'Jadwal Poli'
+                    ],
+                    [
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasilitas Unggulan'
+                    ],
+                    [
+                        'id' => '/info_rajal',
+                        'title' => 'Info Rawat Jalan'
+                    ],
+                    [
+                        'id' => '/daftar_poli_rajal',
+                        'title' => 'Pendaftaran Poliklinik'
+                    ],
+                    [
+                        'id' => '/info_medical',
+                        'title' => 'Medical Check Up'
+                    ],
+                    [
+                        'id' => '/info_persalinan',
+                        'title' => 'Biaya Persalinan'
+                    ]
+                ]
+            ];
         }
 
         return response()->json($response);
