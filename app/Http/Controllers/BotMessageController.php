@@ -539,11 +539,11 @@ class BotMessageController extends Controller
             $response =  [
                 'message_type' => 'array',
                 'title' => 'Pilih Layanan',
-                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'body' => 'Berikut adalah Informasi Administrasi di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
-                        'id' => '/foto_bayi',
-                        'title' => 'Baby Newborn Photo'
+                        'id' => '/administrasi',
+                        'title' => 'Belum ada'
                     ]
                 ]
             ];
