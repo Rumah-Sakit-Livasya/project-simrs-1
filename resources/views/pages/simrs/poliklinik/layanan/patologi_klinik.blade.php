@@ -167,19 +167,6 @@
                                             <!-- Rows will be added here dynamically -->
                                            
                                         </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <th colspan="9" class="text-center">
-                                                    <button type="button"
-                                                        class="btn btn-outline-primary waves-effect waves-themed"
-                                                        id="btn-tambah-tindakan" data-toggle="modal"
-                                                        data-id="{{ $registration->id }}" data-target="#modal-tambah-alat">
-                                                        <span class="fal fa-plus-circle"></span>
-                                                        Tambah Alat
-                                                    </button>
-                                                </th>
-                                            </tr>
-                                        </tfoot>
                                     </table>
                                 </div>
                                 <!-- datatable end -->
