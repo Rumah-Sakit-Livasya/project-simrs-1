@@ -399,7 +399,7 @@ class BotMessageController extends Controller
 
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Jadwal Poli',
+                'title' => 'Pilih Layanan',
                 'body' => 'Berikut adalah jadwal Poliklinik di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
@@ -447,7 +447,7 @@ class BotMessageController extends Controller
 
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Fasilitas Unggulan',
+                'title' => 'Pilih Layanan',
                 'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
@@ -479,7 +479,7 @@ class BotMessageController extends Controller
 
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Fasilitas Unggulan',
+                'title' => 'Pilih Layanan',
                 'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
@@ -503,7 +503,7 @@ class BotMessageController extends Controller
 
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Fasilitas',
+                'title' => 'Pilih Layanan',
                 'body' => 'Berikut adalah Informasi Fasilitas di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
@@ -522,7 +522,7 @@ class BotMessageController extends Controller
 
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Pelayanan',
+                'title' => 'Pilih Layanan',
                 'body' => 'Berikut adalah informasi pelayanandi Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
@@ -538,7 +538,7 @@ class BotMessageController extends Controller
 
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Fasilitas Unggulan',
+                'title' => 'Pilih Layanan',
                 'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
@@ -627,7 +627,7 @@ class BotMessageController extends Controller
             // Else untuk menampilkan menu jika input tidak dikenali
             $response = [
                 'message_type' => 'array',
-                'title' => 'Menu Pilihan',
+                'title' => 'Pilih Layanan',
                 'body' => 'Mohon maaf, Sahabat Livasya. Silakan ketik ulang kebutuhan Anda dengan benar, pilih salah satu dari menu berikut, atau ketik "halo" untuk menampilkan menu.',
                 'data' => [
                     [
