@@ -920,6 +920,7 @@ class ReportController extends Controller
             'bulan' => $bulan,
             'selectedBulan' => request()->bulan,
             'selectedTahun' => request()->tahun,
+            'selectedTahunGrafikAbsensi' => request()->tahun,
             'attendances' => $attendances,
             'employees' => $employees,
             'startDateReport' => $startDateReport,
