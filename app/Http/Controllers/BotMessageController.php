@@ -483,24 +483,27 @@ class BotMessageController extends Controller
                 'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
-                        'id' => '/jadwal_praktek',
-                        'title' => 'Jadwal Praktek'
-                    ],
+                        'id' => '/fasilitas',
+                        'title' => 'Fasilitas'
+                    ]
+                ]
+            ];
+            
+            // Bagian pelayanan
+
+        }else if ($msg == '/fasilitas') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Fasilitas Unggulan',
+                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
                     [
-                        'id' => '/baby_spa',
-                        'title' => 'Baby Spa Swimming'
-                    ],
-                    [
-                        'id' => '/maternity',
-                        'title' => 'Maternity'
-                    ],
-                    [
-                        'id' => '/partus_moment',
-                        'title' => 'Partus Moment'
-                    ],
-                    [
-                        'id' => '/senam_hamil',
-                        'title' => 'Senam Hamil'
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasilitas Unggulan'
+                    ],                    [
+                        'id' => '/fasilitas_rs',
+                        'title' => 'Fasilitas'
                     ]
                 ]
             ];
@@ -517,22 +520,6 @@ class BotMessageController extends Controller
                     [
                         'id' => '/jadwal_praktek',
                         'title' => 'Jadwal Poli'
-                    ],
-                    [
-                        'id' => '/baby_spa',
-                        'title' => 'Baby Spa Swimming'
-                    ],
-                    [
-                        'id' => '/maternity',
-                        'title' => 'Maternity'
-                    ],
-                    [
-                        'id' => '/partus_moment',
-                        'title' => 'Partus Moment'
-                    ],
-                    [
-                        'id' => '/senam_hamil',
-                        'title' => 'Senam Hamil'
                     ]
                 ]
             ];
@@ -641,7 +628,7 @@ class BotMessageController extends Controller
                     ],
                     [
                         'id' => '/pelayanan',
-                        'title' => 'Pelayanan'
+                        'title' => 'pelayanan'
                     ],
                     [
                         'id' => '/informasi',
