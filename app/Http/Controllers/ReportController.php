@@ -549,6 +549,8 @@ class ReportController extends Controller
     public function filterAttendanceReports()
     {
 
+        ini_set('memory_limit', '256M'); // atau '512M', '1G', dsb.
+
         /*================================================
             START ABSENSI ALL MONTHS REPORTS
         ==================================================*/
