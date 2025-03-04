@@ -19,6 +19,7 @@ use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\KepustakaanController;
 use App\Http\Controllers\SIMRS\Laboratorium\NilaiNormalLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\TarifParameterLaboratoriumController;
+use App\Http\Controllers\SIMRS\LocationController;
 use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
+use App\Http\Controllers\SIMRS\Poliklinik\LayananController;
 use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
@@ -81,6 +83,14 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::prefix('rawat-jalan')->group(function() {
             Route::prefix('perawat')->group(function() {
                 Route::post('/store', [CPPTController::class, 'store'])->name('cppt.rajal.perawat.store');
+            });
+        });
+    });
+    
+    Route::prefix('layanan')->group(function() {
+        Route::prefix('rawat-jalan')->group(function() {
+            Route::prefix('pemakaian_alat')->group(function() {
+                Route::post('/store', [LayananController::class, 'storePemakaianAlat'])->name('layanan.rajal.pemakaian_alat.store');
             });
         });
     });
@@ -323,4 +333,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::patch('/update/{encryptedId}', [KepustakaanController::class, 'update'])->name('kepustakaan.update');
         Route::delete('/delete/{encryptedId}', [KepustakaanController::class, 'delete'])->name('kepustakaan.delete');
     });
+
+    Route::get('/getKabupaten', [LocationController::class, 'getKabupaten'])->name('getKabupaten');
+    Route::get('/getKecamatan', [LocationController::class, 'getKecamatan'])->name('getKecamatan');
+    Route::get('/getKelurahan', [LocationController::class, 'getKelurahan'])->name('getKelurahan');
 });

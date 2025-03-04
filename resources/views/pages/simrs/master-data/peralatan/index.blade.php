@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Grup Parameter Radiologi')
+@section('title', 'Peralatan')
 @section('extended-css')
     <style>
         hr {

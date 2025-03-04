@@ -1,6 +1,7 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
+    @include('pages.simrs.poliklinik.partials.css-sidebar-custom')
     <style>
         main {
             overflow-x: hidden;
@@ -144,7 +145,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <!-- datatable start -->
-                                <div class="table-responsive">
+                                {{-- <div class="table-responsive">
                                     <table id="dt-basic-example"
                                         class="table table-bordered table-hover table-striped w-100">
                                         <thead>
@@ -191,7 +192,39 @@
                                             </tr>
                                         </tfoot>
                                     </table>
-                                </div>
+                                </div> --}}
+
+                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                                    <thead class="bg-primary-600">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Tanggal</th>
+                                            <th>Dokter</th>
+                                            <th>Tindakan</th>
+                                            <th>Kelas</th>
+                                            <th>Qty</th>
+                                            <th>Entry By</th>
+                                            <th>F.O.C</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Rows will be added here dynamically -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="9" class="text-center">
+                                                <button type="button"
+                                                    class="btn btn-outline-primary waves-effect waves-themed"
+                                                    id="btn-tambah-tindakan" data-toggle="modal"
+                                                    data-id="{{ $registration->id }}" data-target="#modal-tambah-tindakan">
+                                                    <span class="fal fa-plus-circle"></span>
+                                                    Tambah Tindakan
+                                                </button>
+                                            </th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
                                 <!-- datatable end -->
                             </div>
                         </div>
@@ -200,21 +233,111 @@
             </div>
         </div>
     </main>
+
+    @include('pages.simrs.pendaftaran.partials.modal-tindakan-medis')
+    {{-- @dd($tindakan_medis) --}}
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    @include('pages.simrs.poliklinik.partials.action-js.tindakan-medis')
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');
+            loadData();
+
+            function loadData() {
+                // $('#tindakan-medis').fadeToggle(); // Menampilkan atau menyembunyikan dengan animasi
+
+                const registrationId = $('#registration').val();
+
+                $.ajax({
+                    url: `/api/simrs/get-medical-actions/${registrationId}`,
+                    method: 'GET',
+                    dataType: 'json', // Pastikan respons diuraikan sebagai JSON
+                    success: function(response) {
+                        console.log('Respons get-medical-actions:', response);
+                        if (response.success) {
+                            const data = response.data;
+                            const tbody = $('#dt-basic-example tbody');
+
+                            // Kosongkan baris yang ada
+                            tbody.empty();
+                            currentIndex = 1; // Reset indeks saat memuat data baru
+
+                            // Isi tabel dengan tindakan medis yang diambil
+                            data.forEach(action => {
+                                const doctorName = action.doctor?.employee?.fullname ||
+                                    'Tidak Diketahui';
+                                const actionName = action.tindakan_medis
+                                    ?.nama_tindakan || 'Tidak Diketahui';
+                                const className = action.departement?.name ||
+                                    'Tidak Diketahui';
+                                const qty = action.qty || 0;
+                                const userName = action.user?.employee?.fullname ||
+                                    'Tidak Diketahui';
+                                const foc = action.foc || 'Tidak Diketahui';
+
+                                const newRow = `
+                                <tr>
+                                    <td>${currentIndex++}</td>
+                                    <td style="white-space: nowrap;">${action.tanggal_tindakan || 'Tidak Diketahui'}</td>
+                                    <td>${doctorName}</td>
+                                    <td>${actionName}</td>
+                                    <td>${className}</td>
+                                    <td>${qty}</td>
+                                    <td>${userName}</td>
+                                    <td>${foc}</td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sm delete-action" data-id="${action.id}">Hapus</button>
+                                    </td>
+                                </tr>
+                            `;
+                                tbody.append(newRow);
+                            });
+                        } else {
+                            $('#modal-tambah-tindakan').modal('hide');
+                            showErrorAlertNoRefresh('Gagal memuat tindakan medis: ' + response
+                                .message);
+                        }
+                    },
+                    error: function(xhr) {
+                        $('#modal-tambah-tindakan').modal('hide');
+
+                        let errorMessage =
+                            'Terjadi kesalahan yang tidak diketahui. Silakan coba lagi nanti.';
+
+                        // Cek apakah respons JSON tersedia
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.status === 0) {
+                            errorMessage =
+                                'Tidak terhubung ke server. Silakan periksa koneksi internet Anda.';
+                        } else if (xhr.status === 404) {
+                            errorMessage = 'Tindakan medis tidak ditemukan.';
+                        } else if (xhr.status === 500) {
+                            errorMessage =
+                                'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
+                        } else {
+                            errorMessage =
+                                `Gagal memuat tindakan medis. Status: ${xhr.status}, Pesan: ${xhr.statusText}`;
+                        }
+
+                        // showErrorAlertNoRefresh(errorMessage);
+                    }
+                });
+            };
+
+            $('#btn-tambah-tindakan').click(function() {
+                $('#modal-tambah-tindakan').modal('show');
+            });
+
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
             $('#doctor_id').select2({
                 placeholder: 'Pilih Dokter',
-            });
-            $('#dt-basic-example').dataTable({
-                responsive: false,
             });
 
             $('.js-thead-colors a').on('click', function() {
@@ -228,6 +351,7 @@
                 console.log(theadColor);
                 $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
             });
+
         });
     </script>
     @include('pages.simrs.poliklinik.partials.js-filter')

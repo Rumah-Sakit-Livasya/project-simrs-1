@@ -528,20 +528,58 @@ class BotMessageController extends Controller
                 'message_type' => 'string',
                 'data' => "*Baby Newborn Photoshoot*\n\nRS Livasya di Majalengka menawarkan layanan fotografi bayi baru lahir (newborn baby photography) yang bertujuan mengabadikan momen berharga si kecil. Layanan ini mencakup berbagai genre fotografi, seperti:\n\nFocusing: Memotret bayi tanpa tambahan aksesoris, menonjolkan keaslian dan kemurnian.\nLifestyle: Mengabadikan interaksi keluarga dengan bayi di rumah sakit atau saat membawa pulang bayi.\nKomersial: Foto yang digunakan untuk promosi produk bayi atau keperluan komeRSl lainnya.\n\n*Biaya untuk Baby Newborn Photoshoot*\nRp 200.000\n(dapat 1 file dan 1 cetak foto + figura)\nRp 50.000\n(untuk menambah file)\nRp 200.000\n(untuk penambahan foto cetak)\n\nUntuk informasi lebih lanjut mengenai layanan ini, Anda dapat mengunjungi situs resmi RS Livasya di https://livasya.com/fasilitas/newborn-baby-photography.\n\nSelain itu, RS Livasya juga menyediakan layanan fotografi maternity shoot untuk mengabadikan momen kehamilan.\n\nInformasi lebih lanjut dapat ditemukan di\nhttps://www.livasya.co.id/fasilitas/photography-maternity-shoot.\nUntuk melihat contoh hasil fotografi bayi baru lahir di RS Livasya, Anda dapat menonton video berikut:"
             ];
-        } else if($msg == '/foto_bayi') {
+        } else if($msg == '/baby_spa') {
             $response = [
                 'message_type' => 'string',
-                'data' => "salah satu fasilitas rs"
+                'data' => "*Baby Spa and Swim*\n\nRS Livasya di Majalengka menyediakan layanan Baby Spa yang terdiri dari hidroterapi dan pijat bayi. Layanan ini tersedia setiap hari mulai pukul 09.00 hingga 15.00. Sebagai promo, setiap kunjungan akan mendapatkan voucher gratis; kumpulkan 10 voucher untuk mendapatkan 1 kali pijat bayi gratis.\n\nAlamat RS Livasya: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453. Untuk informasi lebih lanjut, Anda dapat menghubungi nomor telepon (0233) 8668019 atau WhatsApp di 0812-1115-1300.\n\nSebelum membawa si kecil untuk sesi Baby Spa, pastikan untuk memeriksa kebersihan fasilitas dan bahan yang digunakan guna menghindari risiko alergi atau iritasi pada kulit bayi.\n\n*Biaya untuk Baby Newborn Photoshoot*\n\n*1 Paket Baby Spa*\nRp 150.000\n*Baby Message*\nRp 60.000\n*Baby Swim*\nRp 60.000\n*Foto Bayi (Baby Spa)*\nRp 60.000\n*Tindik Bayi*\nRp 65.000"
             ];
-        } else if($msg == '/foto_bayi') {
+        } else if($msg == '/maternity') {
             $response = [
                 'message_type' => 'string',
-                'data' => "salah satu fasilitas rs"
+                'data' => "*Foto Maternity*\n\nRS Livasya di Majalengka menyediakan layanan Photography Maternity Shoot untuk mengabadikan momen kehamilan Anda. Layanan ini dirancang khusus bagi ibu hamil yang ingin mendokumentasikan masa kehamilan mereka melalui sesi pemotretan profesional.\n\n*Biaya untuk Partus Moment*\nRp 300.000."
             ];
-        } else if($msg == '/foto_bayi') {
+        } else if($msg == '/partus_moment') {
             $response = [
                 'message_type' => 'string',
-                'data' => "salah satu fasilitas rs"
+                'data' => "*Partus Moment*\n\RS Livasya di Majalengka menyediakan layanan Partus Moment, yaitu dokumentasi profesional selama proses persalinan untuk mengabadikan momen berharga kelahiran buah hati Anda. Layanan ini dirancang untuk menangkap setiap detik penting dan emosi yang terjadi selama proses persalinan, sehingga menjadi kenangan yang tak terlupakan bagi keluarga.\n\n*Biaya Partus Moment*\nRp 2.000.000\n\nUntuk melihat contoh dari layanan Partus Moment, Anda dapat mengunjungi kanal YouTube resmi RS Livasya, di mana terdapat berbagai video dokumentasi persalinan yang telah diabadikan sebelumnya. Salah satunya adalah video persalinan normal Ny. Devi & Tn. Dani yang dapat Anda saksikan melalui tautan berikut:\n\nJika Anda tertarik untuk memanfaatkan layanan ini atau memerlukan informasi lebih lanjut, silakan menghubungi RS Livasya melalui nomor telepon (0233) 8668019 atau WhatsApp di 0812-1115-1300. Alamat RS Livasya: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453.\n\nRS Livasya berkomitmen untuk memberikan pelayanan terbaik dalam setiap momen berharga Anda dan keluarga."
+            ];
+        } else if($msg == '/senam_hamil') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Senam Hamil*\n\nRS Livasya di Majalengka menyediakan layanan senam hamil yang dirancang khusus untuk membantu ibu hamil mempersiapkan diri secara fisik dan mental menjelang persalinan. Program ini bertujuan untuk meningkatkan kebugaran, mengurangi ketidaknyamanan selama kehamilan, serta mempersiapkan tubuh untuk proses persalinan yang lancar.\n\n*Biaya untuk Senam Hamil\nRp 50.000\n\n*Manfaat Senam Hamil di RS Livasya:*\n\nMeningkatkan Kebugaran Fisik: Latihan terstruktur membantu menjaga stamina dan kekuatan otot selama kehamilan.\nMengurangi Ketidaknyamanan: Gerakan senam dapat membantu mengurangi nyeri punggung, kram kaki, dan pembengkakan.\nPersiapan Persalinan: Melatih teknik pernapasan dan relaksasi yang berguna saat proses persalinan.\nDukungan Emosional: Bertemu dengan sesama ibu hamil dapat memberikan dukungan dan berbagi pengalaman.\nInformasi Tambahan:\n\nBiaya: Biaya senam hamil di rumah sakit swasta di Indonesia umumnya berkisar antara Rp 25.000 hingga lebih dari Rp 200.000 per sesi. Untuk informasi tarif spesifik di RS Livasya, disarankan menghubungi langsung pihak rumah sakit.\nALODOKTER\nJadwal: Jadwal senam hamil dapat berbeda-beda. Sebaiknya Anda menghubungi RS Livasya untuk mendapatkan informasi terkini mengenai jadwal kelas.\nKontak RS Livasya:\n\nAlamat: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453\nTelepon: (0233) 8668019\nWhatsApp: 0812-1115-1300\nEmail: contact@livasya.com\nUntuk informasi lebih lanjut mengenai layanan senam hamil dan fasilitas lainnya, Anda dapat mengunjungi situs resmi RS Livasya di https://www.livasya.com/.\n\nRS Livasya berkomitmen untuk mendukung kesehatan ibu dan anak melalui berbagai layanan yang komprehensif dan profesional.."
+            ];
+        } else {
+            // Else untuk menampilkan menu jika input tidak dikenali
+            $response = [
+                'message_type' => 'array',
+                'title' => 'Menu Pilihan',
+                'body' => 'Pilihan menu tidak dikenali. Silakan pilih salah satu dari menu berikut:',
+                'data' => [
+                    [
+                        'id' => '/jadwal_praktek',
+                        'title' => 'Jadwal Poli'
+                    ],
+                    [
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasilitas Unggulan'
+                    ],
+                    [
+                        'id' => '/info_rajal',
+                        'title' => 'Info Rawat Jalan'
+                    ],
+                    [
+                        'id' => '/daftar_poli_rajal',
+                        'title' => 'Pendaftaran Poliklinik'
+                    ],
+                    [
+                        'id' => '/info_medical',
+                        'title' => 'Medical Check Up'
+                    ],
+                    [
+                        'id' => '/info_persalinan',
+                        'title' => 'Biaya Persalinan'
+                    ]
+                ]
             ];
         }
 

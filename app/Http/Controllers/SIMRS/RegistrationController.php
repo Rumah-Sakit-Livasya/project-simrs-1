@@ -34,7 +34,7 @@ class RegistrationController extends Controller
         try {
             // Cari data registrasi berdasarkan ID
             $registration = Registration::findOrFail($id);
-
+            $tindakan_medis = TindakanMedis::all();
             // Buat response dengan data yang sesuai
             return response()->json([
                 'success' => true,
@@ -44,6 +44,7 @@ class RegistrationController extends Controller
                     'dokter_id' => $registration->doctor_id,
                     'departement_id' => $registration->departement_id,
                     'kelas_id' => $registration->registration_type,
+                    'tindakan_medis' => $tindakan_medis
                 ],
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -272,6 +273,7 @@ class RegistrationController extends Controller
 
         // Set registration date and status
         $validatedData['registration_date'] = Carbon::now();
+        $validatedData['date'] = Carbon::now();
         $validatedData['status'] = 'online';
 
         // Set department based on registration type
