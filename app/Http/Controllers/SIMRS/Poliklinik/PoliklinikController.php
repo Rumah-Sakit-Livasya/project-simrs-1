@@ -8,6 +8,8 @@ use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\ERM\TindakanMedisRajal;
 use App\Models\SIMRS\JadwalDokter;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
+use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Peralatan\OrderAlatMedis;
@@ -114,7 +116,8 @@ class PoliklinikController extends Controller
 
             return view('pages.simrs.poliklinik.layanan.pemakaian_alat', compact('registration', 'departements', 'jadwal_dokter', 'list_peralatan', 'alat_medis_yang_dipakai', 'doctors'));
         } else if ($menu == 'patologi_klinik') {
-            return view('pages.simrs.poliklinik.layanan.patologi_klinik', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis', 'tindakan_medis_yang_dipakai'));
+            $order_lab = OrderLaboratorium::where('registration_id', $registration->id)->get();
+            return view('pages.simrs.poliklinik.layanan.patologi_klinik', compact('order_lab', 'registration', 'departements', 'jadwal_dokter'));
         } else {
             return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
         }
