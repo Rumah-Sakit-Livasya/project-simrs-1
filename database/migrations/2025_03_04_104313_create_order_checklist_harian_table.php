@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('checklist_harian', function (Blueprint $table) {
+        Schema::create('order_checklist_harian', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('checklist_harian_category_id')->constrained('checklist_harian_categories')->onUpdate('cascade')->onDelete('cascade');
-            $table->string('kegiatan');
+            $table->foreignId('checklist_harian_id')->constrained('checklist_harian')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->string('status');
+            $table->text('keterangan');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('checklist_harian');
+        Schema::dropIfExists('order_checklist_harian');
     }
 };

@@ -9,7 +9,7 @@
             @can('create okr')
                 <div class="col-xl-12">
                     <button type="button" id="btn-tambah" class="btn btn-primary waves-effect waves-themed" data-backdrop="static"
-                        data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah Job Level">
+                        data-keyboard="false" data-toggle="modal" data-target="#tambah-data" title="Tambah OKR">
                         <span class="fal fa-plus-circle mr-1"></span>
                         Tambah OKR
                     </button>
@@ -541,7 +541,6 @@
 
             $('.btn-delete').click(function() {
                 var targetId = $(this).attr('data-id');
-
                 // Using SweetAlert2 for confirmation
                 Swal.fire({
                     title: 'Anda Yakin ingin menghapus ini?',

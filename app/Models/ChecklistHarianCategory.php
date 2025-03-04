@@ -17,6 +17,6 @@ class ChecklistHarianCategory extends Model implements Auditable
 
     public function checklist_harian()
     {
-        return $this->hasMany(ChecklistHarian::class);
+        return $this->hasMany(ChecklistHarian::class, 'checklist_harian_category_id');
     }
 }
