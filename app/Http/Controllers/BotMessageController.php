@@ -473,6 +473,102 @@ class BotMessageController extends Controller
                 ]
             ];
             
+            // Bagian informasi
+
+        } else if ($msg == '/informasi') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Fasilitas Unggulan',
+                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/foto_bayi',
+                        'title' => 'Baby Newborn Photo'
+                    ],
+                    [
+                        'id' => '/baby_spa',
+                        'title' => 'Baby Spa Swimming'
+                    ],
+                    [
+                        'id' => '/maternity',
+                        'title' => 'Maternity'
+                    ],
+                    [
+                        'id' => '/partus_moment',
+                        'title' => 'Partus Moment'
+                    ],
+                    [
+                        'id' => '/senam_hamil',
+                        'title' => 'Senam Hamil'
+                    ]
+                ]
+            ];
+            
+            // Bagian pelayanan
+
+        } else if ($msg == '/informasi') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Fasilitas Unggulan',
+                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/foto_bayi',
+                        'title' => 'Baby Newborn Photo'
+                    ],
+                    [
+                        'id' => '/baby_spa',
+                        'title' => 'Baby Spa Swimming'
+                    ],
+                    [
+                        'id' => '/maternity',
+                        'title' => 'Maternity'
+                    ],
+                    [
+                        'id' => '/partus_moment',
+                        'title' => 'Partus Moment'
+                    ],
+                    [
+                        'id' => '/senam_hamil',
+                        'title' => 'Senam Hamil'
+                    ]
+                ]
+            ];
+            
+            // Bagian administrasi
+
+        } else if ($msg == '/administrasi') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Fasilitas Unggulan',
+                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/foto_bayi',
+                        'title' => 'Baby Newborn Photo'
+                    ],
+                    [
+                        'id' => '/baby_spa',
+                        'title' => 'Baby Spa Swimming'
+                    ],
+                    [
+                        'id' => '/maternity',
+                        'title' => 'Maternity'
+                    ],
+                    [
+                        'id' => '/partus_moment',
+                        'title' => 'Partus Moment'
+                    ],
+                    [
+                        'id' => '/senam_hamil',
+                        'title' => 'Senam Hamil'
+                    ]
+                ]
+            ];
+            
             // Bagian respons jadwal poliklinik
 
         } else if($msg == '/klinik_obgyn') {
@@ -556,28 +652,16 @@ class BotMessageController extends Controller
                 'body' => 'Mohon maaf, Sahabat Livasya. Silakan ketik ulang kebutuhan Anda dengan benar, pilih salah satu dari menu berikut, atau ketik "halo" untuk menampilkan menu.',
                 'data' => [
                     [
-                        'id' => '/jadwal_praktek',
-                        'title' => 'Jadwal Poli'
+                        'id' => '/administrasi',
+                        'title' => 'Administrasi'
                     ],
                     [
-                        'id' => '/info_fasilitas',
-                        'title' => 'Fasilitas Unggulan'
+                        'id' => '/pelayanan',
+                        'title' => 'pelayanan'
                     ],
                     [
-                        'id' => '/info_rajal',
-                        'title' => 'Info Rawat Jalan'
-                    ],
-                    [
-                        'id' => '/daftar_poli_rajal',
-                        'title' => 'Pendaftaran Poliklinik'
-                    ],
-                    [
-                        'id' => '/info_medical',
-                        'title' => 'Medical Check Up'
-                    ],
-                    [
-                        'id' => '/info_persalinan',
-                        'title' => 'Biaya Persalinan'
+                        'id' => '/informasi',
+                        'title' => 'Informasi'
                     ]
                 ]
             ];
