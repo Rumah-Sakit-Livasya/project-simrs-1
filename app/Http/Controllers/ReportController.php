@@ -140,6 +140,8 @@ class ReportController extends Controller
     public function attendanceReports(Request $request)
     {
 
+        ini_set('memory_limit', '256M'); // atau '512M', '1G', dsb.
+
         if (Auth::check() && !Auth::user()->hasRole('super admin')) {
             return redirect()->route('attendances')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
