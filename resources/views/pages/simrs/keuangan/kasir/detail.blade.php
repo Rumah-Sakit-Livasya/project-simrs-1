@@ -9,8 +9,10 @@
     <main id="js-page-content" role="main" class="page-content">
         <div class="row">
             <div class="col-xl-12">
-
-                <div id="panel-5" class="panel" style="height: 88vh;">
+                <a href="{{ route('tagihan.pasien.index') }}" class="btn btn-primary mb-3">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <div id="panel-5" class="panel" style="height: 80vh;">
                     <div class="panel-container show" style="height: 100%;">
                         <div class="panel-content" style="height: calc(100% - 50px);">
                             <ul class="nav nav-tabs" role="tablist">
@@ -579,6 +581,15 @@
             document.getElementById('kembalian').value = formatRupiah(kembalian);
         }
 
+        function updateWajibBayar() {
+            const quantity = parseFloat(row.find('.quantity').value.replace(/\./g, '').replace(/[^0-9]/g,
+                '')) || 0;
+            const nominal = parseFloat(row.find('.nominal').value
+                .replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
+            const wajibBayar = nominal * quantity;
+            document.getElementById('wajib-bayar').value = formatRupiah(wajibBayar);
+        }
+
         var controls = {
             leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
             rightArrow: '<i class="fal fa-angle-right" style="font-size: 1.25rem"></i>'
@@ -648,7 +659,7 @@
                         name: 'quantity',
                         className: 'quantity',
                         render: function(data, type, row) {
-                            return '<input type="number" class="form-control edit-input" value="' +
+                            return '<input type="number" onchange="updateWajibBayar()" class="form-control edit-input" value="' +
                                 data + '" data-column="quantity" data-id="' + row.id + '">';
                         }
                     },
@@ -657,7 +668,7 @@
                         name: 'nominal',
                         className: 'nominal',
                         render: function(data, type, row) {
-                            return '<input type="text" class="form-control edit-input format-currency" value="' +
+                            return '<input type="text" onchange="updateWajibBayar()" class="form-control edit-input format-currency" value="' +
                                 (data ? parseFloat(data).toLocaleString('id-ID') : '') +
                                 '" data-column="nominal" data-id="' + row.id + '">';
                         }
@@ -724,7 +735,7 @@
                         name: 'wajib_bayar',
                         className: 'wajib-bayar',
                         render: function(data, type, row) {
-                            return '<input type="text" class="form-control edit-input format-currency" value="' +
+                            return '<input type="text" id="wajib-bayar" class="form-control edit-input format-currency" value="' +
                                 (data ? parseFloat(data).toLocaleString('id-ID') : '') +
                                 '" data-column="wajib_bayar" data-id="' + row.id + '">';
                         }
@@ -751,22 +762,33 @@
                     $(this).val('');
                 }
             });
-
-            // Event listener for input changes
+            // Event listener untuk perubahan input di dalam tabel
             $('#tagihanTable').on('change', '.edit-input', function() {
+                var row = $(this).closest('tr'); // Ambil baris tabel tempat input berubah
                 var id = $(this).data('id');
                 var column = $(this).data('column');
                 var value = $(this).hasClass('format-currency') ? $(this).val().replace(/\./g, '').replace(
-                        /[^0-9]/g, '') : $(this)
-                    .val(); // Remove formatting for database only if it has class format-currency
+                    /[^0-9]/g, '') : $(this).val();
 
+                // Ambil nilai quantity dan nominal dari baris yang sama
+                const quantity = parseFloat(row.find('.quantity').val().replace(/\./g, '').replace(
+                    /[^0-9]/g, '')) || 0;
+                const nominal = parseFloat(row.find('.nominal').val().replace(/\./g, '').replace(/[^0-9]/g,
+                    '')) || 0;
+
+                let wajibBayar = nominal * quantity; // Hitung wajib bayar berdasarkan input yang sesuai
+
+                // Kirim update wajib bayar ke server via AJAX
+                updateWajibBayar(id, wajibBayar);
+
+                // Kirim update nilai yang diubah ke server
                 $.ajax({
                     url: '/simrs/kasir/tagihan-pasien/update/' + id,
                     type: 'PUT',
                     data: {
                         column: column,
                         value: value,
-                        _token: '{{ csrf_token() }}' // Include CSRF token for security
+                        _token: '{{ csrf_token() }}' // Sertakan CSRF token untuk keamanan
                     },
                     success: function(response) {
                         Swal.fire({
@@ -783,13 +805,26 @@
                             toast: true,
                             position: 'top-end',
                             icon: 'error',
-                            title: 'An error occurred: ' + xhr.responseJSON.error,
+                            title: 'Terjadi kesalahan: ' + xhr.responseJSON.error,
                             showConfirmButton: false,
                             timer: 3000
                         });
                     }
                 });
             });
+
+            // Fungsi AJAX untuk memperbarui wajib bayar di server
+            function updateWajibBayar(id, wajibBayar) {
+                $.ajax({
+                    url: '/simrs/kasir/tagihan-pasien/update/' + id,
+                    type: 'PUT',
+                    data: {
+                        column: 'wajib_bayar',
+                        value: wajibBayar,
+                        _token: '{{ csrf_token() }}' // CSRF token untuk keamanan
+                    }
+                });
+            }
 
             // Bilingan Table
             $('#bilinganTable').DataTable({

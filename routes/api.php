@@ -33,6 +33,7 @@ use App\Http\Controllers\Inventaris\RoomMaintenanceController;
 use App\Http\Controllers\Inventaris\TemplateBarangController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\API\TimeScheduleController;
+use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\SIMRS\TextToSpeech\TextToSpeechController;
 use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\AttendanceRequest;
@@ -56,8 +57,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware(['web', 'auth'])->prefix('inventaris')->group(function () {
     Route::prefix('room-maintenance')->group(function () {
-        Route::get('/{id}', [RoomMaintenanceController::class, 'getRoom'])->name('inventaris.room.get');
         Route::post('/', [RoomMaintenanceController::class, 'store'])->name('inventaris.room.store');
+        Route::get('/{id}', [RoomMaintenanceController::class, 'getRoom'])->name('inventaris.room.get');
         Route::patch('/{id}/update', [RoomMaintenanceController::class, 'update'])->name('inventaris.room.update');
         Route::delete('/{id}/delete', [RoomMaintenanceController::class, 'delete'])->name('inventaris.room.delete');
     });
@@ -151,15 +152,15 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         // Route::get('/delete/{id}', [OrganizationController::class, 'destroy']);
         Route::get('private-signature/{filename}', function ($filename) {
             $path = storage_path('app/private/employee/ttd/' . $filename);
-        
+
             if (!file_exists($path)) {
                 abort(404); // Jika file tidak ditemukan, tampilkan error 404
             }
-            
+
             if (!auth()->check()) {
                 abort(403); // Forbidden
             }
-        
+
             return response()->file($path); // Mengembalikan file sebagai respons
         })->where('filename', '.*')->name('get.ttd');
     });
@@ -323,6 +324,17 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         Route::get("/get-konfirmasi-peserta/{pendidikanPelatihanId}", [PendidikanPelatihanController::class, 'getKonfirmasiPeserta'])->name("pendidikan.pelatihan.get.konfirmasi.peserta");
         Route::put("/confirm/{id}", [PendidikanPelatihanController::class, 'confirmKehadiran'])->name("pendidikan.pelatihan.put");
     });
+
+    Route::prefix('checklist-harian')->group(function () {
+        Route::prefix('category')->group(function () {
+            Route::post("/store", [ChecklistHarianCategoryController::class, 'store'])->name("checklist.category.store");
+            Route::get('/{id}', [ChecklistHarianCategoryController::class, 'getCategory'])->name('checklist.category.get');
+            Route::patch('/{id}/update', [ChecklistHarianCategoryController::class, 'update'])->name('checklist.category.update');
+            Route::delete('/{id}/delete', [ChecklistHarianCategoryController::class, 'delete'])->name('checklist.category.delete');
+        });
+    });
+
+
     Route::get('user/getByName', [UserController::class, 'getByName'])->name('user.getByName');
 });
 

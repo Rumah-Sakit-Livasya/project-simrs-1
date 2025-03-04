@@ -108,8 +108,14 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(OrderTindakanMedis::class);
     }
+
     public function bilingan()
     {
         return $this->hasMany(Bilingan::class);
+    }
+
+    public function checklist_harian()
+    {
+        return $this->hasMany(ChecklistHarian::class);
     }
 }

@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bilingan', function (Blueprint $table) {
+        Schema::create('checklist_harian_categories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('registration_id')->constrained()->onDelete('cascade');
-            $table->string('wajib_bayar')->nullable();
-            $table->string('status');
-            $table->boolean('is_paid')->default(false);
+            $table->string('name');
+            $table->boolean('is_active')->default(1);
             $table->softDeletes();
             $table->timestamps();
         });
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bilingan');
+        Schema::dropIfExists('checklist_harian_categories');
     }
 };
