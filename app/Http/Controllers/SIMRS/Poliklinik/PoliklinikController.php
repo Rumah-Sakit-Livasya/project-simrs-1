@@ -10,6 +10,8 @@ use App\Models\SIMRS\ERM\TindakanMedisRajal;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\OrderTindakanMedis;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
+use App\Models\SIMRS\Peralatan\OrderAlatMedis;
+use App\Models\SIMRS\Peralatan\Peralatan;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TindakanMedis;
 use Carbon\Carbon;
@@ -100,11 +102,17 @@ class PoliklinikController extends Controller
                 $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
             }
             $tindakan_medis_yang_dipakai = OrderTindakanMedis::where('registration_id', $registration->id)->get();
-            return view('pages.simrs.poliklinik.layanan.tindakan_medis', compact('groupedDoctors','registration', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai'));
+            return view('pages.simrs.poliklinik.layanan.tindakan_medis', compact('groupedDoctors', 'registration', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai'));
         } elseif ($menu == 'pemakaian_alat') {
-            $list_tindakan_medis = TindakanMedis::all();
-            $tindakan_medis_yang_dipakai = TindakanMedisRajal::where('registration_id', $registration->id)->get();
-            return view('pages.simrs.poliklinik.layanan.pemakaian_alat', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis', 'tindakan_medis_yang_dipakai'));
+            $list_peralatan = Peralatan::all();
+            $alat_medis_yang_dipakai = OrderAlatMedis::where('registration_id', $registration->id)->get();
+            $doctors = Doctor::with('employee')
+                ->whereHas('employee')
+                ->orderBy(Employee::select('fullname')->whereColumn('employees.id', 'doctors.employee_id'))
+                ->get();
+
+
+            return view('pages.simrs.poliklinik.layanan.pemakaian_alat', compact('registration', 'departements', 'jadwal_dokter', 'list_peralatan', 'alat_medis_yang_dipakai', 'doctors'));
         } else if ($menu == 'patologi_klinik') {
             return view('pages.simrs.poliklinik.layanan.patologi_klinik', compact('registration', 'departements', 'jadwal_dokter', 'list_tindakan_medis', 'tindakan_medis_yang_dipakai'));
         } else {

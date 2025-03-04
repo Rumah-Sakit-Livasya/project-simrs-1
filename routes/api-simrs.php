@@ -33,6 +33,7 @@ use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
+use App\Http\Controllers\SIMRS\Poliklinik\LayananController;
 use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
@@ -82,6 +83,14 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::prefix('rawat-jalan')->group(function() {
             Route::prefix('perawat')->group(function() {
                 Route::post('/store', [CPPTController::class, 'store'])->name('cppt.rajal.perawat.store');
+            });
+        });
+    });
+    
+    Route::prefix('layanan')->group(function() {
+        Route::prefix('rawat-jalan')->group(function() {
+            Route::prefix('pemakaian_alat')->group(function() {
+                Route::post('/store', [LayananController::class, 'storePemakaianAlat'])->name('layanan.rajal.pemakaian_alat.store');
             });
         });
     });
