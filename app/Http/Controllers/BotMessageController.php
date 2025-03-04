@@ -393,7 +393,27 @@ class BotMessageController extends Controller
                 ]
             ];
             
-            // Bagian pilihan jadwal poliklinik
+            // Bagian pilihan informasi
+
+        } else if ($msg == '/informasi') {
+
+            $response =  [
+                'message_type' => 'button',
+                'title' => 'Informasi',
+                'body' => 'Berikut adalah jadwal Poliklinik di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/jadwal_praktek',
+                        'title' => 'Jadwal Praktek'
+                    ],
+                    [
+                        'id' => '/klinik_anak',
+                        'title' => 'Poli Anak'
+                    ]
+                ]
+            ];
+
+            // Bagian pilihan fasilitas unggulan
 
         } else if ($msg == '/jadwal_praktek') {
 
@@ -551,33 +571,21 @@ class BotMessageController extends Controller
         } else {
             // Else untuk menampilkan menu jika input tidak dikenali
             $response = [
-                'message_type' => 'array',
+                'message_type' => 'button',
                 'title' => 'Menu Pilihan',
                 'body' => 'Mohon maaf, Sahabat Livasya. Silakan ketik ulang kebutuhan Anda dengan benar, pilih salah satu dari menu berikut, atau ketik "*halo*" untuk menampilkan menu.',
                 'data' => [
                     [
-                        'id' => '/jadwal_praktek',
-                        'title' => 'Jadwal Poli'
+                        'id' => '/informasi',
+                        'title' => 'Informasi'
                     ],
                     [
-                        'id' => '/info_fasilitas',
-                        'title' => 'Fasilitas Unggulan'
+                        'id' => '/pelayanan',
+                        'title' => 'Pelayanan'
                     ],
                     [
-                        'id' => '/info_rajal',
-                        'title' => 'Info Rawat Jalan'
-                    ],
-                    [
-                        'id' => '/daftar_poli_rajal',
-                        'title' => 'Pendaftaran Poliklinik'
-                    ],
-                    [
-                        'id' => '/info_medical',
-                        'title' => 'Medical Check Up'
-                    ],
-                    [
-                        'id' => '/info_persalinan',
-                        'title' => 'Biaya Persalinan'
+                        'id' => '/administrasi',
+                        'title' => 'administrasi'
                     ]
                 ]
             ];
