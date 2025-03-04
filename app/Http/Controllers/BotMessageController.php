@@ -484,8 +484,16 @@ class BotMessageController extends Controller
                 'data' => [
                     [
                         'id' => '/fasilitas',
-                        'title' => 'Fasilitas'
-                    ]
+                        'title' => 'Informasi Fasilitas'
+                    ],
+                    [
+                        'id' => '/info_bpjs',
+                        'title' => 'Informasi BPJS'
+                    ],
+                    [
+                        'id' => '/asuransi',
+                        'title' => 'Informasi Asuransi'
+                    ],
                 ]
             ];
             
@@ -495,15 +503,15 @@ class BotMessageController extends Controller
 
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Fasilitas Unggulan',
-                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'title' => 'Fasilitas',
+                'body' => 'Berikut adalah Informasi Fasilitas di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
                         'id' => '/info_fasilitas',
                         'title' => 'Fasilitas Unggulan'
                     ],                    [
                         'id' => '/fasilitas_rs',
-                        'title' => 'Fasilitas'
+                        'title' => 'Fasilitas Rumah Sakit'
                     ]
                 ]
             ];
@@ -628,7 +636,7 @@ class BotMessageController extends Controller
                     ],
                     [
                         'id' => '/pelayanan',
-                        'title' => 'pelayanan'
+                        'title' => 'Pelayanan'
                     ],
                     [
                         'id' => '/informasi',
