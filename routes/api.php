@@ -34,6 +34,7 @@ use App\Http\Controllers\Inventaris\TemplateBarangController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
+use App\Http\Controllers\ChecklistHarianController;
 use App\Http\Controllers\SIMRS\TextToSpeech\TextToSpeechController;
 use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\AttendanceRequest;
@@ -332,6 +333,10 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
             Route::patch('/{id}/update', [ChecklistHarianCategoryController::class, 'update'])->name('checklist.category.update');
             Route::delete('/{id}/delete', [ChecklistHarianCategoryController::class, 'delete'])->name('checklist.category.delete');
         });
+        Route::post("/store", [ChecklistHarianController::class, 'store'])->name("checklist.store");
+        Route::get('/{id}', [ChecklistHarianController::class, 'getChecklist'])->name('checklist.get');
+        Route::patch('/{id}/update', [ChecklistHarianController::class, 'update'])->name('checklist.update');
+        Route::delete('/{id}/delete', [ChecklistHarianController::class, 'delete'])->name('checklist.delete');
     });
 
 

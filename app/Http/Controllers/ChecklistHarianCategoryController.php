@@ -13,7 +13,7 @@ class ChecklistHarianCategoryController extends Controller
     public function index()
     {
         $checklistHarianCategory = checklistHarianCategory::orderBy('created_at', 'desc')->get();
-        return view('pages.checklist-harian.category.index', compact('checklistHarianCategory'));
+        return view('pages.checklist-harian.admin.category.index', compact('checklistHarianCategory'));
     }
 
     /**
@@ -32,14 +32,15 @@ class ChecklistHarianCategoryController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
     public function getCategory($id)
     {
         try {
-            $room = ChecklistHarianCategory::findOrFail($id);
+            $checklist = ChecklistHarianCategory::findOrFail($id);
 
             return response()->json([
-                'name' => $room->name,
-                'is_active' => $room->is_active,
+                'name' => $checklist->name,
+                'is_active' => $checklist->is_active,
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([

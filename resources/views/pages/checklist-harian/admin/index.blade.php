@@ -1,206 +1,115 @@
 @extends('inc.layout')
-@section('title', 'Checklis Harian')
-@section('extended-css')
-    <style>
-        hr {
-            border: 1px dashed #fd3995 !important;
-        }
-
-        div.table-responsive>div.dataTables_wrapper>div.row>div[class^="col-"]:last-child {
-            padding: 0px;
-        }
-
-        .dataTables_scrollHeadInner,
-        .dataTables_scrollFootInner {
-            width: 100% !important;
-        }
-
-        #filter-wrapper .form-group {
-            display: flex;
-            align-items: center;
-        }
-
-        #filter-wrapper .form-label {
-            margin-bottom: 0;
-            width: 100px;
-            /* Atur lebar label agar semua label sejajar */
-        }
-
-        #filter-wrapper .form-control {
-            flex: 1;
-        }
-
-        @media (max-width: 767.98px) {
-            .custom-margin {
-                margin-top: 15px;
-            }
-
-            #filter-wrapper .form-group {
-                flex-direction: column;
-                align-items: flex-start !important;
-            }
-
-            #filter-wrapper .form-label {
-                width: auto;
-                /* Biarkan lebar label mengikuti konten */
-                margin-bottom: 0.5rem;
-            }
-
-            #filter-wrapper .form-control {
-                width: 100%;
-            }
-        }
-
-        /* Mengatur border untuk setiap sel */
-        td {
-            border: none;
-            /* Menghilangkan semua border */
-            border-bottom: 1px solid #ccc;
-            /* Menambahkan border bawah */
-            padding: 8px;
-            /* Menambahkan padding untuk estetika */
-        }
-
-        /* Mengatur border untuk input */
-        input {
-            border: none;
-            /* Menghilangkan semua border */
-            border-bottom: 1px solid #ccc;
-            /* Menambahkan border bawah */
-            outline: none;
-            /* Menghilangkan outline saat input aktif */
-            text-align: right;
-            /* Mengatur teks ke kanan */
-            width: 100%;
-            /* Mengatur lebar input agar sesuai dengan sel */
-            padding: 4px 0;
-            /* Menambahkan padding vertikal */
-        }
-
-        /* Jika Anda ingin mengatur border bawah untuk baris terakhir */
-        tr:last-child td {
-            border-bottom: none;
-            /* Menghilangkan border bawah pada baris terakhir */
-        }
-    </style>
-@endsection
+@section('title', ' Checklist Harian')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        {{-- <div class="row justify-content-center">
-            <div class="col-xl-10">
-                <div id="panel-1" class="panel">
+        <div class="row mb-5">
+            <div class="col-xl-12">
+                <button type="button" class="btn btn-primary waves-effect waves-themed" onclick="toggleForm()"
+                    id="toggle-form-btn">
+                    <span class="fal fa-plus-circle mr-1"></span>
+                    Tambah Checklist
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12">
+
+                <div id="form-container" style="display: none;" class="panel form-container">
                     <div class="panel-hdr">
                         <h2>
-                            Form Pencarian</span>
+                            Form Tambah Checklist
                         </h2>
                     </div>
                     <div class="panel-container show">
-                        <div class="panel-content" id="filter-wrapper">
-
-                            <form action="/daftar-rekam-medis" method="get">
+                        <div class="panel-content">
+                            <form autocomplete="off" novalidate action="javascript:void(0)" id="store-form" method="post">
                                 @csrf
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group d-flex align-items-center">
-                                            <label for="departement" class="form-label">Departement</label>
-                                            <input type="text" name="departement_id" id="departement"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group d-flex align-items-center">
-                                            <label for="nama_tindakan_1" class="form-label">Nama</label>
-                                            <input type="text" name="nama_tindakan" id="nama_tindakan_1"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group d-flex align-items-center">
-                                            <label for="nama_tindakan_2" class="form-label">RL (1.3 dan 3.1)</label>
-                                            <input type="text" name="nama_tindakan" id="nama_tindakan_2"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group d-flex align-items-center">
-                                            <label for="nama_tindakan_3" class="form-label">RL (3.4)</label>
-                                            <input type="text" name="nama_tindakan" id="nama_tindakan_3"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <button type="submit" class="btn btn-sm float-right mt-2 btn-primary">
-                                            <i class="fas fa-search mr-1"></i> Cari
-                                        </button>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="checklist_harian_category_id">Kategori</label>
+                                    <select
+                                        class="form-control select2 @error('checklist_harian_category_id') is-invalid @enderror"
+                                        id="checklist_harian_category_id" name="checklist_harian_category_id">
+                                        <option value="" disabled selected>Pilih Kategori</option>
+                                        @foreach ($checklistKategori as $category)
+                                            <option value="{{ $category->id }}"
+                                                {{ old('checklist_harian_category_id') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('checklist_harian_category_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label for="kegiatan">Kegiatan </label>
+                                    <input type="text" value="{{ old('kegiatan') }}"
+                                        class="form-control @error('kegiatan') is-invalid @enderror" id="kegiatan"
+                                        name="kegiatan" placeholder="Kegiatan">
+                                    @error('kegiatan')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="fal fa-plus-circle mr-1"></span>
+                                        Tambah
+                                    </button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div> --}}
 
-        <div class="row">
-            <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Checklist Harian
+                            Table <span class="fw-300"><i> Checklist</i></span>
                         </h2>
+                        @include('pages.partials.panel-toolbar')
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
                             <!-- datatable start -->
-                            <div class="table-responsive">
-                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                    <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
-                                    <thead class="bg-primary-600">
+                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                                <thead>
+                                    <tr>
+                                        <th style="white-space: nowrap">No</th>
+                                        <th style="white-space: nowrap">Kategori</th>
+                                        <th style="white-space: nowrap">Kegiatan</th>
+                                        <th style="white-space: nowrap">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($checklistHarian as $row)
                                         <tr>
-                                            <th>No</th>
-                                            <th>Kegiatan</th>
-                                            <th>Ya</th>
-                                            <th>Tidak</th>
-                                            <th>Keterangan</th>
-                                            <th>Fungsi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($checklis_harian as $checklist)
-                                            <tr>
-                                                <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $row->kegiatan }}</td>
-                                                <td>{{ $row->status === 'Ya' ? 'OK' : '' }}</td>
-                                                <td>{{ $row->status === 'Ya' ? 'OK' : '' }}</td>
-                                                <td>{{ $row->keterangan }}</td>
-                                                <td style="white-space: nowrap">
-                                                    <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
-                                                        data-id="{{ $row->id }}">
-                                                        <i class="fas fa-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-danger px-2 py-1 btn-delete"
-                                                        data-id="{{ $row->id }}">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th colspan="8" class="text-center">
-                                                <button type="button"
-                                                    class="btn btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-checklist" data-toggle="modal"
-                                                    data-target="#modal-tambah-checklist" data-action="tambah">
-                                                    <span class="fal fa-plus-circle"></span>
-                                                    Tambah Checklist
+                                            <td style="white-space: nowrap">{{ $loop->iteration }}</td>
+                                            <td style="white-space: nowrap">{{ $row->checklist_harian_category->name }}
+                                            </td>
+                                            <td style="white-space: nowrap">{{ $row->kegiatan }}</td>
+                                            <td style="white-space: nowrap">
+                                                <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
+                                                    data-id="{{ $row->id }}">
+                                                    <i class="fas fa-pencil"></i>
                                                 </button>
-                                            </th>
+                                                <button class="btn btn-sm btn-danger px-2 py-1 btn-delete"
+                                                    data-id="{{ $row->id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
                                         </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th style="white-space: nowrap">No</th>
+                                        <th style="white-space: nowrap">Kategori</th>
+                                        <th style="white-space: nowrap">Kegiatan</th>
+                                        <th style="white-space: nowrap">Aksi</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
                             <!-- datatable end -->
                         </div>
                     </div>
@@ -208,258 +117,100 @@
             </div>
         </div>
     </main>
-    @include('pages.simrs.master-data.layanan-medis.partials.edit-tindakan')
-    @include('pages.simrs.master-data.layanan-medis.partials.edit-tarif')
-    @include('pages.simrs.master-data.layanan-medis.partials.tambah-tindakan')
+
+    @include('pages.checklist-harian.admin.partials.edit')
 @endsection
 @section('plugin')
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
-    <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    {{-- <script src="/js/datatable/jszip.min.js"></script> --}}
+
     <script>
         $(document).ready(function() {
-            let lastClickedChecklistId = null; // Variabel untuk menyimpan ID tindakan terakhir yang diklik
-
-            // function resetDropdown() {
-            //     $('#group-penjamin').val('').trigger('change');
-            // }
-
-            // Event handler untuk tombol ubah tarif
-            // $('.btn-tarif').on('click', function() {
-            //     // Ambil nama tindakan dari atribut tombol
-
-            //     let checklistId = $(this).data('id'); // Ambil ID tindakan dari tombol yang diklik
-
-            //     // Reset dropdown hanya jika tindakan yang diklik berbeda dari sebelumnya
-            //     if (lastClickedChecklistId !== checklistId) {
-            //         resetDropdown();
-            //     }
-
-            //     lastClickedChecklistId = checklistId; // Update ID tindakan terakhir
-            // });
-
-
-            // Set CSRF token untuk semua permintaan AJAX
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
+            $("form").on("submit", function(e) {
+                // Disable tombol submit setelah form dikirim
+                $(this).find("button[type='submit']").prop("disabled", true);
             });
 
-            // $('#group-penjamin').select2({
-            //     dropdownParent: $("#modal-edit-tarif"),
-            // });
+            $('#store-form .select2').select2({
+                placeholder: "Pilih Status", // Teks placeholder
+                allowClear: true, // Memungkinkan pengguna untuk menghapus pilihan
+                // dropdownCssClass: "select2-dropdown", // Menyesuaikan class CSS dropdown
+            });
 
             let checklistId = null;
-            $('#loading-spinner').show();
-
-            $('#btn-tambah-checklist').click(function() {
-                $('#modal-tambah-checklist').modal('show');
-            });
-
-            $('#modal-tambah-checklist .select2').select2({
-                dropdownParent: $('#modal-tambah-checklist')
-            });
-
-            // Ambil ID tindakan dari atribut tombol
-            let checklistId = $(this).attr('data-id');
-            // let tindakanNama = $(this).data('nama');
-            // console.log(tindakanNama);
-
-            // Set nama tindakan di modal
-            // $('#nama-tindakan').text(tindakanNama);
-
-
-            // Reset dropdown grup penjamin ke nilai default
-            // $('#group-penjamin').val('').trigger('change');
-
-            // Cek jika request sudah pernah dilakukan untuk checklistId yang sama
-            // if ($(this).data('loaded')) {
-            //     console.log('Data sudah di-load, tidak melakukan request ulang.');
-            //     return;
-            // }
-            // $(this).data('loaded', true); // Tandai data sudah dimuat
-
-            // Panggil API untuk mengambil tarif default
-            // $.ajax({
-            //     url: `/api/checklist-harian/${checklistId}`,
-            //     type: 'GET',
-            //     success: function(response) {
-            //         console.log('Tarif default loaded:', response);
-
-            // Tambahkan event listener untuk perubahan dropdown grup penjamin
-            //     $('#group-penjamin').off('change').on('change', function() {
-            //         const selectedGroup = $(this).val();
-
-            //         if (selectedGroup) {
-            //             updateTarifByGroup(selectedGroup, checklistId);
-            //         } else {
-            //             // Reset tabel jika dropdown kembali kosong
-            //             $('#tarif-inputs').html(`
-        //     <tr>
-        //         <td colspan="6" class="text-center">Silakan pilih grup penjamin terlebih dahulu.</td>
-        //     </tr>
-        // `);
-            //         }
-            //     });
-            //         },
-            //         error: function(xhr, status, error) {
-            //             showErrorAlert('Terjadi kesalahan saat memuat tarif default: ' + error);
-            //         }
-            //     });
-            // });
-
-            // Fungsi untuk memperbarui tarif berdasarkan grup penjamin
-            // function updateTarifByGroup(groupId, checklistId) {
-            //     $.ajax({
-            //         url: `/api/simrs/master-data/layanan-medis/tindakan-medis/tarif/${checklistId}/${groupId}`,
-            //         type: 'GET',
-            //         success: function(response) {
-            //             let inputFields = response.map((tarif, index) => `
-        //     <tr>
-        //         <td style="white-space: nowrap;">
-        //             ${tarif.kelas || tarif.kelas_rawat.kelas}
-        //             <input type="hidden" name="kelas_rawat_id_[${index}]" value="${tarif.kelas_rawat_id}" />
-        //             <input type="hidden" name="group_penjamin_id_[${index}]" value="${groupId}" />
-        //             <input type="hidden" name="tindakan_medis_id_[${index}]" value="${tarif.tindakan_medis_id}" />
-        //         </td>
-        //         <td><input style="text-align:right;" type="text" name="share_dr[${index}]" value="${tarif.share_dr || 0}" onkeyup="calc(${index});" /></td>
-        //         <td><input style="text-align:right;" type="text" name="share_rs[${index}]" value="${tarif.share_rs || 0}" onkeyup="calc(${index});" /></td>
-        //         <td><input style="text-align:right;" type="text" name="prasarana[${index}]" value="${tarif.prasarana || 0}" onkeyup="calc(${index});" /></td>
-        //         <td><input style="text-align:right;" type="text" name="bhp[${index}]" value="${tarif.bhp || 0}" onkeyup="calc(${index});" /></td>
-        //         <td><input style="text-align:right;" type="text" name="total[${index}]" value="${tarif.total || 0}" readonly="readonly" /></td>
-        //     </tr>`).join('');
-            //             $('#tarif-inputs').html(inputFields);
-            //         },
-            //         error: function(xhr) {
-            //             console.error('Error fetching tarif:', xhr);
-            //         }
-            //     });
-            // }
-
-            // Event listener untuk tombol save
-            // $('#bSave').off('click').on('click', function() {
-            //     let dataToSave = [];
-
-            //     $('#tarif-inputs tr').each(function() {
-            //         let kelasRawatId = $(this).find('input[name^="kelas_rawat_id_"]').val();
-            //         let groupPenjaminId = $(this).find('input[name^="group_penjamin_id_"]').val();
-            //         let tindakanMedisId = $(this).find('input[name^="tindakan_medis_id_"]').val();
-            //         let shareDr = $(this).find('input[name^="share_dr"]').val();
-            //         let shareRs = $(this).find('input[name^="share_rs"]').val();
-            //         let prasarana = $(this).find('input[name^="prasarana"]').val();
-            //         let bhp = $(this).find('input[name^="bhp"]').val();
-            //         let total = $(this).find('input[name^="total"]').val();
-
-            //         if (kelasRawatId) {
-            //             dataToSave.push({
-            //                 kelas_rawat_id: kelasRawatId,
-            //                 group_penjamin_id: groupPenjaminId,
-            //                 tindakan_medis_id: tindakanMedisId,
-            //                 share_dr: shareDr || 0,
-            //                 share_rs: shareRs || 0,
-            //                 prasarana: prasarana || 0,
-            //                 bhp: bhp || 0,
-            //                 total: total || 0,
-            //             });
-            //         }
-            //     });
-
-            //     console.log('Data to save:', dataToSave);
-
-            //     $(this).prop('disabled', true);
-
-            //     $.ajax({
-            //         url: `/api/simrs/master-data/layanan-medis/tindakan-medis/update/${checklistId}/tarif`,
-            //         type: 'PATCH',
-            //         contentType: 'application/json',
-            //         data: JSON.stringify(dataToSave),
-            //         success: function(response) {
-            //             showSuccessAlert(response.message);
-            //             setTimeout(() => window.location.reload(), 1000);
-            //             $('#modal-edit-tarif').modal('hide');
-            //         },
-            //         error: function(xhr, status, error) {
-            //             showErrorAlert('Terjadi kesalahan: ' + error);
-            //         },
-            //         complete: function() {
-            //             $('#bSave').prop('disabled', false);
-            //         }
-            //     });
-            // });
 
             $('.btn-edit').click(function() {
-                $('#modal-edit-checklist').modal('show');
+                $('#modal-edit').modal('show');
                 checklistId = $(this).attr('data-id');
                 $.ajax({
-                    url: '/api/checklist-harian/' + checklistId,
+                    url: '/api/dashboard/checklist-harian/' + checklistId,
                     type: 'GET',
                     success: function(response) {
                         // Isi form dengan data yang diterima
-                        // $('#modal-edit-checklist #grup_tindakan_medis_id').val(response
-                        //         .grup_tindakan_medis_id)
-                        //     .select2({
-                        //         dropdownParent: $('#modal-edit-checklist')
-                        //     });
-                        // $('#modal-edit-checklist input[name="kode"]').val(response
-                        //     .kode);
-                        // $('#modal-edit-checklist input[name="nama_tindakan"]').val(response
-                        //     .nama_tindakan);
-                        // $('#modal-edit-checklist input[name="nama_billing"]').val(response
-                        //     .nama_billing);
-                        // $('#modal-edit-checklist input[name="is_konsul"][value="' + response
-                        //     .is_konsul + '"]').prop(
-                        //     'checked', true);
-                        // $('#modal-edit-checklist input[name="auto_charge"][value="' +
-                        //         response
-                        //         .auto_charge + '"]')
-                        //     .prop(
-                        //         'checked', true);
-                        // $('#modal-edit-checklist input[name="is_vaksin"][value="' + response
-                        //     .is_vaksin + '"]').prop(
-                        //     'checked', true);
-                        // $('#modal-edit-checklist #mapping_rl_13').val(response.mapping_rl_13)
-                        //     .select2({
-                        //         dropdownParent: $('#modal-edit-checklist')
-                        //     });
-                        // $('#modal-edit-checklist #mapping_rl_34').val(response.mapping_rl_34)
-                        //     .select2({
-                        //         dropdownParent: $('#modal-edit-checklist')
-                        //     });
+                        $('#modal-edit #kegiatan').val(response.kegiatan);
+                        $('#modal-edit #checklist_harian_category_id').val(response
+                            .checklist_harian_category.name).trigger(
+                            'change'); // Set value Select2
                     },
                     error: function(xhr, status, error) {
                         showErrorAlert('Terjadi kesalahan: ' + error);
                     }
                 });
-
             });
 
             $('.btn-delete').click(function() {
                 var checklistId = $(this).attr('data-id');
 
-                // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
-                var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
+                // Use SweetAlert2 for confirmation
+                Swal.fire({
+                    title: 'Anda Yakin ingin menghapus ini?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        // If the user confirms deletion, proceed with the AJAX request
+                        $.ajax({
+                            url: '/api/dashboard/checklist-harian/category/' + checklistId +
+                                '/delete',
+                            type: 'DELETE',
+                            success: function(response) {
+                                Swal.fire({
+                                    title: 'Dihapus!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
 
-                if (userConfirmed) {
-                    // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
-                    $.ajax({
-                        url: '/api/checklist-harian/' + checklistId + '/delete',
-                        type: 'DELETE',
-                        success: function(response) {
-                            showSuccessAlert(response.message);
-
-                            setTimeout(() => {
-                                console.log('Reloading the page now.');
-                                window.location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr, status, error) {
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                        }
-                    });
-                } else {
-                    console.log('Penghapusan dibatalkan oleh pengguna.');
-                }
+                                setTimeout(() => {
+                                    console.log('Reloading the page now.');
+                                    window.location.reload();
+                                }, 1500);
+                            },
+                            error: function(xhr, status, error) {
+                                Swal.fire(
+                                    'Error!',
+                                    'Terjadi kesalahan: ' + error,
+                                    'error'
+                                );
+                            }
+                        });
+                    } else {
+                        console.log('Penghapusan dibatalkan oleh pengguna.');
+                    }
+                });
             });
 
             $('#update-form').on('submit', function(e) {
@@ -468,7 +219,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/checklist-harian/' + checklistId + '/update',
+                    url: '/api/dashboard/checklist-harian/' + checklistId + '/update',
                     type: 'PATCH',
                     data: formData,
                     beforeSend: function() {
@@ -477,7 +228,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-edit-checklist').modal('hide');
+                        $('#modal-edit').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -495,11 +246,11 @@
                                     '\n';
                             });
 
-                            $('#modal-edit-checklist').modal('hide');
+                            $('#modal-edit').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-edit-checklist').modal('hide');
+                            $('#modal-edit').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
@@ -513,7 +264,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/checklist-harian',
+                    url: '/api/dashboard/checklist-harian/store',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {
@@ -522,7 +273,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-tambah-checklist').modal('hide');
+                        // $('#modal-tambah-grup-tindakan').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -539,12 +290,11 @@
                                 errorMessages += value +
                                     '\n';
                             });
-
-                            $('#modal-tambah-checklist').modal('hide');
+                            // $('#modal-tambah-grup-tindakan').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-tambah-checklist').modal('hide');
+                            // $('#modal-tambah-grup-tindakan').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
@@ -552,64 +302,89 @@
                 });
             });
 
-            // initialize datatable
             $('#dt-basic-example').DataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
+                // responsive: true,
+                // scrollY: 400,
+                // scrollX: true,
+                // scrollCollapse: true,
+                // paging: true,
+                pageLength: 200,
+                //fixedColumns: true,
+                fixedColumns: {
+                    leftColumns: 2,
                 },
-                responsive: false, // Responsif diaktifkan
-                scrollX: true, // Tambahkan scroll horizontal
-                lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end buttons-container'B>>" +
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'B>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 buttons: [{
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1 custom-margin'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1 custom-margin'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
+                        extend: 'colvis',
+                        text: '<i class="fas fa-eye"></i> Visibility',
+                        titleAttr: 'Col visibility',
+                        className: 'btn-primary'
                     },
                     {
                         extend: 'print',
-                        text: 'Print',
+                        text: '<i class="fas fa-print"></i> Print',
                         titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm custom-margin'
+                        className: 'btn-primary',
+                        exportOptions: {
+                            columns: ':visible' // Menggunakan kolom yang terlihat sesuai pengaturan ColVis
+                        },
+                        customize: function(win) {
+                            $(win.document.body).find('table').addClass('display').css('font-size',
+                                '12px'); // Menambahkan kelas dan menyesuaikan ukuran font
+                            $(win.document.body).find('thead').addClass(
+                                'thead-light'); // Menambahkan kelas untuk style header
+                        }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        titleAttr: 'Export to Excel',
+                        className: 'btn-primary',
+                        exportOptions: {
+                            columns: ':visible' // Menggunakan kolom yang terlihat sesuai pengaturan ColVis
+                        }
                     }
                 ]
             });
+
+            $('.js-thead-colors a').on('click', function() {
+                var theadColor = $(this).attr("data-bg");
+                console.log(theadColor);
+                $('#dt-basic-example thead').removeClassPrefix('bg-').addClass(theadColor);
+            });
+
+            $('.js-tbody-colors a').on('click', function() {
+                var theadColor = $(this).attr("data-bg");
+                console.log(theadColor);
+                $('#dt-basic-example').removeClassPrefix('bg-').addClass(theadColor);
+            });
+
         });
 
-        function calc(index) {
-            // Ambil nilai dari input yang relevan
-            let shareDr = parseFloat($(`input[name="share_dr[${index}]"]`).val()) || 0;
-            let shareRs = parseFloat($(`input[name="share_rs[${index}]"]`).val()) || 0;
-            let prasarana = parseFloat($(`input[name="prasarana[${index}]"]`).val()) || 0;
-            let bhp = parseFloat($(`input[name="bhp[${index}]"]`).val()) || 0;
+        function toggleForm() {
+            var formContainer = document.getElementById('form-container');
+            var toggleButton = document.getElementById('toggle-form-btn');
+            var closeButton = document.getElementById('close-form-btn');
 
-            // Hitung total
-            let total = shareDr + shareRs + prasarana + bhp;
-
-            // Set nilai total ke input total
-            $(`input[name="total[${index}]"]`).val(total.toFixed(2)); // Format total dengan 2 desimal
+            if (formContainer.style.display === 'none' || formContainer.style.display === '') {
+                formContainer.style.display = 'block';
+                formContainer.style.maxHeight = formContainer.scrollHeight + 'px';
+                toggleButton.innerText = 'Tutup';
+            } else if (formContainer.style.display === 'block') {
+                formContainer.style.maxHeight = '0';
+                setTimeout(function() {
+                    formContainer.style.display = 'none';
+                }, 500); // Sesuaikan dengan durasi transisi (0.5 detik)
+                toggleButton.innerText = 'Tambah  Checklist';
+            } else {
+                formContainer.style.maxHeight = '0';
+                setTimeout(function() {
+                    formContainer.style.display = 'none';
+                }, 500); // Sesuaikan dengan durasi transisi (0.5 detik)
+                toggleButton.innerText = 'Tambah  Checklist';
+            }
         }
     </script>
 @endsection
