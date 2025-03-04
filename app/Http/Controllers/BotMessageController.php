@@ -553,7 +553,7 @@ class BotMessageController extends Controller
             $response = [
                 'message_type' => 'array',
                 'title' => 'Menu Pilihan',
-                'body' => 'Pilihan menu tidak dikenali. Silakan pilih salah satu dari menu berikut:',
+                'body' => 'Mohon maaf, Sahabat Livasya. Silakan ketik ulang kebutuhan Anda dengan benar, pilih salah satu dari menu berikut, atau ketik "*halo*" untuk menampilkan menu.',
                 'data' => [
                     [
                         'id' => '/jadwal_praktek',
