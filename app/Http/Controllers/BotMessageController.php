@@ -483,8 +483,8 @@ class BotMessageController extends Controller
                 'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
-                        'id' => '/foto_bayi',
-                        'title' => 'Baby Newborn Photo'
+                        'id' => '/jadwal_praktek',
+                        'title' => 'Jadwal Praktek'
                     ],
                     [
                         'id' => '/baby_spa',
@@ -507,16 +507,16 @@ class BotMessageController extends Controller
             
             // Bagian pelayanan
 
-        } else if ($msg == '/informasi') {
+        } else if ($msg == '/pelayanan') {
 
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Fasilitas Unggulan',
-                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'title' => 'Pelayanan',
+                'body' => 'Berikut adalah informasi pelayanandi Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
-                        'id' => '/foto_bayi',
-                        'title' => 'Baby Newborn Photo'
+                        'id' => '/jadwal_praktek',
+                        'title' => 'Jadwal Poli'
                     ],
                     [
                         'id' => '/baby_spa',
@@ -549,22 +549,6 @@ class BotMessageController extends Controller
                     [
                         'id' => '/foto_bayi',
                         'title' => 'Baby Newborn Photo'
-                    ],
-                    [
-                        'id' => '/baby_spa',
-                        'title' => 'Baby Spa Swimming'
-                    ],
-                    [
-                        'id' => '/maternity',
-                        'title' => 'Maternity'
-                    ],
-                    [
-                        'id' => '/partus_moment',
-                        'title' => 'Partus Moment'
-                    ],
-                    [
-                        'id' => '/senam_hamil',
-                        'title' => 'Senam Hamil'
                     ]
                 ]
             ];
