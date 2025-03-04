@@ -641,7 +641,7 @@ class BotMessageController extends Controller
                     ],
                     [
                         'id' => '/pelayanan',
-                        'title' => 'pelayanan'
+                        'title' => 'Pelayanan'
                     ],
                     [
                         'id' => '/informasi',
