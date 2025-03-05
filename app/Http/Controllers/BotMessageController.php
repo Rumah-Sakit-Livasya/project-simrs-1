@@ -497,14 +497,6 @@ class BotMessageController extends Controller
                     [
                         'id' => '/info_dafol',
                         'title' => 'Pendaftaran Online'
-                    ],
-                    [
-                        'id' => '/info_rajal',
-                        'title' => 'Info Rawat jalan'
-                    ],
-                    [
-                        'id' => '/info_ranap',
-                        'title' => 'Info Rawat jalan'
                     ]
                 ]
             ];
@@ -514,7 +506,7 @@ class BotMessageController extends Controller
         } else if($msg == '/info_bpjs_asuransi') {
             $response = [
                 'message_type' => 'string',
-                'data' => "Belum ada data"
+                'data' => "*Informasi BPJS* \n\nSaat ini rumah sakit livasya menyediakan layanan rawat inap dan rawat jalan khusus peserta BPJS/JKN/KIS mulai dari :\n\nSpesialis Anak\n▪️ Spesialis kandungan\n▪️ Spesialis bedah\n▪️ Spesialis penyakit dalam"
             ];
 
         }  else if($msg == '/syarat') {
@@ -526,13 +518,13 @@ class BotMessageController extends Controller
         } else if($msg == '/info_dafol') {
             $response = [
                 'message_type' => 'string',
-                'data' => "Belum ada data"
+                'data' => "*Pendafataran online khusus penjamin JKN/BPJS silahkan bapak/ibu akses melalui Aplikasi MOBILE JKN* \n\nPendafataran online khusus penjamin Umum/asuransi silahkan bapak/ibu akses melalui link website berikut :  https://dafol.livasya.com/\n\nNote : \n▪️ Pendaftaran online By link website dapat diakses H-3 atau paling lambat H-1 sebelum tanggal kunjungan\n▪️ Pendafataran online By Mobile JKN(BPJS) dapat diakses H-30 dan paling lambat di hari H sebelum jam praktek poliklinik"
             ];
 
-        } else if($msg == '/info_rajal_ranap') {
+        } else if($msg == '/prosedur') {
             $response = [
                 'message_type' => 'string',
-                'data' => "Belum ada data"
+                'data' => "*Prosedur pendaftaran*\n\nLayanan pendaftaran poliklinik  bisa diakses melalui online maupun onsite sesuai dengan jam praktek poliklinik"
             ];
 
             // Bagian Layanan dan Fasilitas
