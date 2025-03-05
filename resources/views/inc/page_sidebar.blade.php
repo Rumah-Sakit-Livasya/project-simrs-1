@@ -50,6 +50,7 @@
 
         <!-- Sidebar.blade.php -->
         <ul id="js-nav-menu" class="nav-menu">
+            @dd(App\Models\Menu::all())
             @php
                 $appType = session('app_type', 'hr'); // Default ke 'hr' jika tidak ada session
             @endphp
