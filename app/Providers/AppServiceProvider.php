@@ -27,8 +27,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         DB::listen(function ($query) {
-            // Cek apakah query adalah CREATE, UPDATE, atau DELETE
-            if (preg_match('/^(insert|update|delete)/i', $query->sql)) {
+            // Cek apakah query adalah INSERT, UPDATE, atau DELETE, tetapi bukan untuk tabel 'sessions'
+            if (preg_match('/^(insert|update|delete)/i', $query->sql) && !preg_match('/\bsessions\b/i', $query->sql)) {
                 Log::channel('query_action')->debug('Query executed', [
                     'sql' => $query->sql,
                     'bindings' => $query->bindings,
