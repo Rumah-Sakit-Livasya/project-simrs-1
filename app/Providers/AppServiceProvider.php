@@ -38,11 +38,11 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        if (!Session::has('app_type')) {
-            Session::put('app_type', 'hr');
-        }
+        // if (!Session::has('app_type')) {
+        //     Session::put('app_type', 'hr');
+        // }
 
-        // Share session to all views
-        View::share('appType', session('app_type', 'hr'));
+        // // Share session to all views
+        // View::share('appType', session('app_type', 'hr'));
     }
 }
