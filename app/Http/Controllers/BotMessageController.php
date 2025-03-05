@@ -480,23 +480,53 @@ class BotMessageController extends Controller
             $response =  [
                 'message_type' => 'array',
                 'title' => 'Pilih Layanan',
-                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
-                        'id' => '/fasilitas',
-                        'title' => 'Informasi Fasilitas'
+                        'id' => '/info_bpjs_asuransi',
+                        'title' => 'Rawat Jalan & Rawat Inap'
                     ],
                     [
-                        'id' => '/info_bpjs',
-                        'title' => 'Informasi BPJS'
+                        'id' => '/syarat',
+                        'title' => 'Syarat & Prosedur Pendaftaran'
                     ],
                     [
-                        'id' => '/asuransi',
-                        'title' => 'Informasi Asuransi'
+                        'id' => '/info_dafol',
+                        'title' => 'Pendaftaran Online'
                     ],
+                    [
+                        'id' => '/info_rajal_ranap',
+                        'title' => 'Rawat Jalan & Rawat Inap'
+                    ]
                 ]
             ];
-            
+
+            // Isi Respon Menu Pendaftaran
+
+        } else if($msg == '/info_bpjs_asuransi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
+        }  else if($msg == '/syarat') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
+        } else if($msg == '/info_dafol') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
+        } else if($msg == '/info_rajal_ranap') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
             // Bagian Layanan dan Fasilitas
 
         } else if ($msg == '/layanan_fasilitas') {
@@ -504,7 +534,7 @@ class BotMessageController extends Controller
             $response =  [
                 'message_type' => 'array',
                 'title' => 'Pilih Layanan',
-                'body' => 'Berikut adalah informasi pelayanandi Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
                         'id' => '/igd',
@@ -533,14 +563,14 @@ class BotMessageController extends Controller
                 ]
             ];
             
-            // Bagian administrasi
+            // Bagian biaya
 
         } else if ($msg == '/biaya') {
 
             $response =  [
                 'message_type' => 'array',
                 'title' => 'Pilih Layanan',
-                'body' => 'Berikut adalah Informasi Administrasi di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
                         'id' => '/administrasi',
@@ -644,15 +674,19 @@ class BotMessageController extends Controller
                         'title' => 'Layanan & Fasilitas'
                     ],
                     [
-                        'id' => '/biaya',
+                        'id' => '/info_biaya',
                         'title' => 'Biaya & Asuransi'
                     ],
                     [
-                        'id' => '/dafol',
+                        'id' => '/info_dafol',
                         'title' => 'Daftar Online'
                     ],
                     [
-                        'id' => '/kontak_lokasi',
+                        'id' => '/info_medical',
+                        'title' => 'Medical Check-Up'
+                    ],
+                    [
+                        'id' => '/info_cs',
                         'title' => 'Customer Service'
                     ]
                 ]
