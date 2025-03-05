@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,5 +37,12 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
         });
+
+        if (!Session::has('app_type')) {
+            Session::put('app_type', 'hr');
+        }
+
+        // Share session to all views
+        View::share('appType', session('app_type', 'hr'));
     }
 }
