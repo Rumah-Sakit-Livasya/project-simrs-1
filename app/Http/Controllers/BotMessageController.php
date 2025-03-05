@@ -520,7 +520,15 @@ class BotMessageController extends Controller
         }  else if($msg == '/syarat') {
             $response = [
                 'message_type' => 'string',
-                'data' => "Belum ada data"
+                'data' => "*Syarat pendaftaran*\n\n
+                Syarat pendaftaran rawat jalan\n
+                ▪️ khusus peserta penjamin umum cukup membawa data diri/kartu berobat\n
+                ▪️ khusus peserta BPJS/JKN/KIS cukup membawa rujukan faskes 1 dan data diri\n
+                ▪️ khusus peserta asuransi swasta cukup membawa karru asuransi dan data diri\n\n
+                Syarat pendaftaran rawat inap\n
+                ▪️ khusus peserta penjamin umum cukup membawa identitas diri\n
+                ▪️ khusus peserta penjamin BPJS/JKN/KIS Cukup membawa kartu identitas ,KK,KTP dan kartu BPJS (Bila ada)\n
+                ▪️ khusus peserta asuransi swasta cukup membawa kartu asuransi dan data diri"
             ];
 
         } else if($msg == '/info_dafol') {
