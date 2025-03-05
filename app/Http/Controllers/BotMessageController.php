@@ -473,9 +473,9 @@ class BotMessageController extends Controller
                 ]
             ];
             
-            // Bagian informasi
+            // Bagian informasi pendaftaran
 
-        } else if ($msg == '/informasi') {
+        } else if ($msg == '/info_pendaftaran') {
 
             $response =  [
                 'message_type' => 'array',
@@ -497,28 +497,9 @@ class BotMessageController extends Controller
                 ]
             ];
             
-            // Bagian pelayanan
+            // Bagian Layanan dan Fasilitas
 
-        }else if ($msg == '/fasilitas') {
-
-            $response =  [
-                'message_type' => 'array',
-                'title' => 'Pilih Layanan',
-                'body' => 'Berikut adalah Informasi Fasilitas di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
-                'data' => [
-                    [
-                        'id' => '/info_fasilitas',
-                        'title' => 'Fasilitas Unggulan'
-                    ],                    [
-                        'id' => '/fasilitas_rs',
-                        'title' => 'Fasilitas Rumah Sakit'
-                    ]
-                ]
-            ];
-            
-            // Bagian pelayanan
-
-        } else if ($msg == '/pelayanan') {
+        } else if ($msg == '/layanan_fasilitas') {
 
             $response =  [
                 'message_type' => 'array',
@@ -526,15 +507,35 @@ class BotMessageController extends Controller
                 'body' => 'Berikut adalah informasi pelayanandi Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
+                        'id' => '/igd',
+                        'title' => 'IGD (24 Jam)'
+                    ],
+                    [
+                        'id' => '/rawat_inap',
+                        'title' => 'Rawat Inap'
+                    ],
+                    [
                         'id' => '/jadwal_praktek',
-                        'title' => 'Jadwal Poli'
-                    ]
+                        'title' => 'Poliklinik'
+                    ],
+                    [
+                        'id' => '/radiologi_laboratorium',
+                        'title' => 'Radiologi & Laboratorium'
+                    ],
+                    [
+                        'id' => '/layanan_vaksin',
+                        'title' => 'Layanan Vaksin'
+                    ],
+                    [
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasilitas'
+                    ],
                 ]
             ];
             
             // Bagian administrasi
 
-        } else if ($msg == '/administrasi') {
+        } else if ($msg == '/biaya') {
 
             $response =  [
                 'message_type' => 'array',
@@ -631,16 +632,28 @@ class BotMessageController extends Controller
                 'body' => 'Mohon maaf, Sahabat Livasya. Silakan ketik ulang kebutuhan Anda dengan benar, pilih salah satu dari menu berikut, atau ketik "halo" untuk menampilkan menu.',
                 'data' => [
                     [
-                        'id' => '/administrasi',
-                        'title' => 'Administrasi'
+                        'id' => '/info_pendaftaran',
+                        'title' => 'Info Pendaftaran'
                     ],
                     [
-                        'id' => '/pelayanan',
-                        'title' => 'Pelayanan'
+                        'id' => '/Jadwal_dokter',
+                        'title' => 'Jadwal Dokter'
                     ],
                     [
-                        'id' => '/informasi',
-                        'title' => 'Informasi'
+                        'id' => '/layanan_fasilitas',
+                        'title' => 'Layanan & Fasilitas'
+                    ],
+                    [
+                        'id' => '/biaya',
+                        'title' => 'Biaya & Asuransi'
+                    ],
+                    [
+                        'id' => '/dafol',
+                        'title' => 'Daftar Online'
+                    ],
+                    [
+                        'id' => '/kontak_lokasi',
+                        'title' => 'Customer Service'
                     ]
                 ]
             ];
