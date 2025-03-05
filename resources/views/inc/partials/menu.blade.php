@@ -13,7 +13,6 @@
     $isActiveMainMenu = set_active_mainmenu($urls);
     $isActiveSubMenu = set_active($menu->url);
 @endphp
-@dd($menu)
 <li class="{{ $menu->children->count() > 0 ? $isActiveMainMenu : $isActiveSubMenu }}">
     <a href="{{ $menu->url ?: '#' }}" title="{{ $menu->title }}" data-filter-tags="{{ $menu->title }}">
         @if ($menu->icon)
