@@ -506,7 +506,7 @@ class BotMessageController extends Controller
         } else if($msg == '/info_bpjs_asuransi') {
             $response = [
                 'message_type' => 'string',
-                'data' => "*Informasi BPJS* \n\nSaat ini rumah sakit livasya menyediakan layanan rawat inap dan rawat jalan khusus peserta BPJS/JKN/KIS mulai dari :\n\nSpesialis Anak\n▪️ Spesialis kandungan\n▪️ Spesialis bedah\n▪️ Spesialis penyakit dalam\n▪️ Spesialis THT\n▪️ Spesialis Jiwa\n▪️ Spesialis Gigi\n▪️ Spesialis Paru\n▪️ Spesialis Gigi\n▪️ Spesialis Jantung\n"
+                'data' => "*Informasi BPJS* \n\nSaat ini rumah sakit livasya menyediakan layanan rawat inap dan rawat jalan khusus peserta BPJS/JKN/KIS mulai dari :\n\n▪️ Spesialis Anak\n▪️ Spesialis kandungan\n▪️ Spesialis bedah\n▪️ Spesialis penyakit dalam\n▪️ Spesialis THT\n▪️ Spesialis Jiwa\n▪️ Spesialis Gigi\n▪️ Spesialis Paru\n▪️ Spesialis Gigi\n▪️ Spesialis Jantung\n"
             ];
 
         }  else if($msg == '/syarat') {
