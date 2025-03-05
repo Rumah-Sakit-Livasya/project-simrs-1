@@ -473,73 +473,104 @@ class BotMessageController extends Controller
                 ]
             ];
             
-            // Bagian informasi
+            // Bagian informasi pendaftaran
 
-        } else if ($msg == '/informasi') {
-
-            $response =  [
-                'message_type' => 'array',
-                'title' => 'Pilih Layanan',
-                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
-                'data' => [
-                    [
-                        'id' => '/fasilitas',
-                        'title' => 'Informasi Fasilitas'
-                    ],
-                    [
-                        'id' => '/info_bpjs',
-                        'title' => 'Informasi BPJS'
-                    ],
-                    [
-                        'id' => '/asuransi',
-                        'title' => 'Informasi Asuransi'
-                    ],
-                ]
-            ];
-            
-            // Bagian pelayanan
-
-        }else if ($msg == '/fasilitas') {
+        } else if ($msg == '/info_pendaftaran') {
 
             $response =  [
                 'message_type' => 'array',
                 'title' => 'Pilih Layanan',
-                'body' => 'Berikut adalah Informasi Fasilitas di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
-                        'id' => '/info_fasilitas',
-                        'title' => 'Fasilitas Unggulan'
-                    ],                    [
-                        'id' => '/fasilitas_rs',
-                        'title' => 'Fasilitas Rumah Sakit'
+                        'id' => '/info_bpjs_asuransi',
+                        'title' => 'Rawat Jalan & Rawat Inap'
+                    ],
+                    [
+                        'id' => '/syarat',
+                        'title' => 'Syarat & Prosedur Pendaftaran'
+                    ],
+                    [
+                        'id' => '/info_dafol',
+                        'title' => 'Pendaftaran Online'
+                    ],
+                    [
+                        'id' => '/info_rajal_ranap',
+                        'title' => 'Rawat Jalan & Rawat Inap'
                     ]
                 ]
             ];
-            
-            // Bagian pelayanan
 
-        } else if ($msg == '/pelayanan') {
+            // Isi Respon Menu Pendaftaran
+
+        } else if($msg == '/info_bpjs_asuransi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
+        }  else if($msg == '/syarat') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
+        } else if($msg == '/info_dafol') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
+        } else if($msg == '/info_rajal_ranap') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
+            // Bagian Layanan dan Fasilitas
+
+        } else if ($msg == '/layanan_fasilitas') {
 
             $response =  [
                 'message_type' => 'array',
                 'title' => 'Pilih Layanan',
-                'body' => 'Berikut adalah informasi pelayanandi Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
+                    [
+                        'id' => '/igd',
+                        'title' => 'IGD (24 Jam)'
+                    ],
+                    [
+                        'id' => '/rawat_inap',
+                        'title' => 'Rawat Inap'
+                    ],
                     [
                         'id' => '/jadwal_praktek',
-                        'title' => 'Jadwal Poli'
-                    ]
+                        'title' => 'Poliklinik'
+                    ],
+                    [
+                        'id' => '/radiologi_laboratorium',
+                        'title' => 'Radiologi & Laboratorium'
+                    ],
+                    [
+                        'id' => '/layanan_vaksin',
+                        'title' => 'Layanan Vaksin'
+                    ],
+                    [
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasilitas'
+                    ],
                 ]
             ];
             
-            // Bagian administrasi
+            // Bagian biaya
 
-        } else if ($msg == '/administrasi') {
+        } else if ($msg == '/biaya') {
 
             $response =  [
                 'message_type' => 'array',
                 'title' => 'Pilih Layanan',
-                'body' => 'Berikut adalah Informasi Administrasi di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
                         'id' => '/administrasi',
@@ -631,16 +662,32 @@ class BotMessageController extends Controller
                 'body' => 'Mohon maaf, Sahabat Livasya. Silakan ketik ulang kebutuhan Anda dengan benar, pilih salah satu dari menu berikut, atau ketik "halo" untuk menampilkan menu.',
                 'data' => [
                     [
-                        'id' => '/administrasi',
-                        'title' => 'Administrasi'
+                        'id' => '/info_pendaftaran',
+                        'title' => 'Info Pendaftaran'
                     ],
                     [
-                        'id' => '/pelayanan',
-                        'title' => 'Pelayanan'
+                        'id' => '/jadwal_praktek',
+                        'title' => 'Jadwal Dokter'
                     ],
                     [
-                        'id' => '/informasi',
-                        'title' => 'Informasi'
+                        'id' => '/layanan_fasilitas',
+                        'title' => 'Layanan & Fasilitas'
+                    ],
+                    [
+                        'id' => '/info_biaya',
+                        'title' => 'Biaya & Asuransi'
+                    ],
+                    [
+                        'id' => '/info_dafol',
+                        'title' => 'Daftar Online'
+                    ],
+                    [
+                        'id' => '/info_medical',
+                        'title' => 'Medical Check-Up'
+                    ],
+                    [
+                        'id' => '/info_cs',
+                        'title' => 'Customer Service'
                     ]
                 ]
             ];
