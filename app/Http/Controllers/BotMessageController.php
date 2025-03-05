@@ -484,19 +484,27 @@ class BotMessageController extends Controller
                 'data' => [
                     [
                         'id' => '/info_bpjs_asuransi',
-                        'title' => 'Rawat Jalan & Rawat Inap'
+                        'title' => 'Info BPJS'
                     ],
                     [
                         'id' => '/syarat',
-                        'title' => 'Syarat & Prosedur Pendaftaran'
+                        'title' => 'Syarat Pendaftaran'
+                    ],
+                    [
+                        'id' => '/prosedur',
+                        'title' => 'Prosedur Pendaftaran'
                     ],
                     [
                         'id' => '/info_dafol',
                         'title' => 'Pendaftaran Online'
                     ],
                     [
-                        'id' => '/info_rajal_ranap',
-                        'title' => 'Rawat Jalan & Rawat Inap'
+                        'id' => '/info_rajal',
+                        'title' => 'Info Rawat jalan'
+                    ],
+                    [
+                        'id' => '/info_ranap',
+                        'title' => 'Info Rawat jalan'
                     ]
                 ]
             ];
