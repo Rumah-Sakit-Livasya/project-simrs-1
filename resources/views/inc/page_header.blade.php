@@ -1,9 +1,9 @@
-{{-- @php
+@php
     use App\Models\User;
 
     // $appType = session('app_type', 'hr'); // Default ke 'hr' jika tidak ada session
     $users = User::where('is_active', 1)->get();
-@endphp --}}
+@endphp
 
 <!-- BEGIN Page Header -->
 <header class="page-header" role="banner">
