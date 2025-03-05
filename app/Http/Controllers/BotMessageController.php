@@ -518,7 +518,7 @@ class BotMessageController extends Controller
         } else if($msg == '/info_dafol') {
             $response = [
                 'message_type' => 'string',
-                'data' => "*Pendafataran online khusus penjamin JKN/BPJS silahkan bapak/ibu akses melalui Aplikasi MOBILE JKN* \n\nPendafataran online khusus penjamin Umum/asuransi silahkan bapak/ibu akses melalui link website berikut :  https://dafol.livasya.com/\n\nNote : \n▪️ Pendaftaran online By link website dapat diakses H-3 atau paling lambat H-1 sebelum tanggal kunjungan\n▪️ Pendafataran online By Mobile JKN(BPJS) dapat diakses H-30 dan paling lambat di hari H sebelum jam praktek poliklinik"
+                'data' => "*Pendafataran online khusus penjamin JKN/BPJS silahkan bapak/ibu akses melalui Aplikasi MOBILE JKN* \n\nPendafataran online khusus penjamin Umum/asuransi silahkan bapak/ibu akses melalui link website berikut :  https://dafol.livasya.com/\n\n*Note :* \n▪️ Pendaftaran online By link website dapat diakses H-3 atau paling lambat H-1 sebelum tanggal kunjungan\n▪️ Pendafataran online By Mobile JKN(BPJS) dapat diakses H-30 dan paling lambat di hari H sebelum jam praktek poliklinik"
             ];
 
         } else if($msg == '/prosedur') {
