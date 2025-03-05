@@ -636,7 +636,7 @@ class BotMessageController extends Controller
                         'title' => 'Info Pendaftaran'
                     ],
                     [
-                        'id' => '/Jadwal_praktek',
+                        'id' => '/jadwal_praktek',
                         'title' => 'Jadwal Dokter'
                     ],
                     [
