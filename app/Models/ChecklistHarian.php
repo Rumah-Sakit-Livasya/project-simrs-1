@@ -17,7 +17,7 @@ class ChecklistHarian extends Model implements Auditable
 
     public function checklist_harian_category()
     {
-        return $this->hasMany(ChecklistHarianCategory::class);
+        return $this->belongsTo(ChecklistHarianCategory::class, 'checklist_harian_category_id');
     }
 
     public function organization()
@@ -28,5 +28,10 @@ class ChecklistHarian extends Model implements Auditable
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function order_checklist_harian()
+    {
+        return $this->belongsTo(OrderChecklistHarian::class);
     }
 }

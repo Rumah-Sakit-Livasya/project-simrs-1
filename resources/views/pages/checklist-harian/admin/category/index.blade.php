@@ -14,7 +14,6 @@
 
         <div class="row">
             <div class="col-xl-12">
-
                 <div id="form-container" style="display: none;" class="panel form-container">
                     <div class="panel-hdr">
                         <h2>
@@ -34,7 +33,7 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                {{-- <div class="form-group">
+                                <div class="form-group">
                                     <label for="status">Status</label>
                                     <select class="form-control select2 @error('status') is-invalid @enderror"
                                         id="status" name="status">
@@ -46,15 +45,15 @@
                                     @error('status')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div> --}}
-                                {{-- <div class="form-group">
+                                </div>
+                                <div class="form-group">
                                     <label for="kegiatan">Kegiatan</label>
                                     <textarea id="kegiatan" name="kegiatan" class="form-control @error('kegiatan') is-invalid @enderror" rows="4"
                                         placeholder="Masukkan kegiatan di sini...">{{ old('kegiatan') }}</textarea>
                                     @error('kegiatan')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div> --}}
+                                </div>
                                 <div class="modal-footer">
                                     <button type="submit" class="btn btn-primary">
                                         <span class="fal fa-plus-circle mr-1"></span>
@@ -122,7 +121,7 @@
         </div>
     </main>
 
-    @include('pages.checklist-harian.category.partials.edit')
+    @include('pages.checklist-harian.admin.category.partials.edit')
 @endsection
 @section('plugin')
     <script src="/js/formplugins/select2/select2.bundle.js"></script>

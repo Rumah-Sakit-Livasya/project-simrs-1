@@ -9,6 +9,7 @@ use App\Http\Controllers\API\CompanyController as ApiCompanyController;
 use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
+use App\Http\Controllers\ChecklistHarianController;
 use App\Http\Controllers\Pages\DashboardController;
 use App\Http\Controllers\Pages\UpdateProfileController;
 use App\Http\Controllers\PayrollController;
@@ -328,6 +329,7 @@ Route::middleware('auth')->group(function () {
         Route::prefix('category')->group(function () {
             Route::get('/', [ChecklistHarianCategoryController::class, 'index'])->name('checklist.category.index');
         });
+        Route::get('/', [ChecklistHarianController::class, 'index'])->name('checklist.index');
     });
 
     Route::get('/optimize', function () {
