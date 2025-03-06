@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\SIMRS\IGD;
 
 use App\Http\Controllers\Controller;
-use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
 use Illuminate\Http\Request;
 
@@ -51,8 +50,6 @@ class IGDController extends Controller
             // Return empty collection if no filters applied
             $registration = collect();
         }
-
-        // return dd($registration->first()->patient);
 
         return view('pages.simrs.igd.daftar-pasien', [
             'registrations' => $registration
