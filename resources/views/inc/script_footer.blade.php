@@ -105,7 +105,7 @@ DOC: if you remove pace.js from core please note on Internet Explorer some CSS a
                                 var link = '';
 
                                 if (latestRegistration && latestRegistration
-                                    .status === 'online') {
+                                    .status === 'aktif') {
                                     link =
                                         `<a href="/daftar-registrasi-pasien/${latestRegistration.id}/">`;
                                 } else {

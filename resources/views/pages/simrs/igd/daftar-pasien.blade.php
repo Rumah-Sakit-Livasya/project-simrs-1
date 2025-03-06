@@ -1,10 +1,10 @@
 @extends('inc.layout')
-@section('title', 'Daftar Rekam Medis')
+@section('title', 'Daftar Pasien IGD')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row justify-content-center">
             <div class="col-xl-8">
-                <div id="panel-1" class="panel">
+              <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
                             Form <span class="fw-300"><i>Pencarian</i></span>
@@ -13,14 +13,38 @@
                     <div class="panel-container show">
                         <div class="panel-content">
 
-                            <form action="/daftar-rekam-medis" method="get">
+                            <form action="{{ route('igd.daftar-pasien') }}" method="get">
                                 @csrf
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-4" style="text-align: right">
-                                                    <label for="medical_record_number">No. RM</label>
+                                                    <label for="registration_date">Tgl. Registrasi</label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <div class="form-group row">
+                                                        <div class="col-xl ">
+                                                            <input type="text" class="form-control" id="datepicker-1"
+                                                                style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
+                                                                placeholder="Select date" name="registration_date"
+                                                                value="01/01/2018 - 01/15/2018">
+                                                        </div>
+                                                    </div>
+                                                    @error('registration_date')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-4">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-5" style="text-align: right">
+                                                    <label class="form-label text-end" for="medical_record_number">
+                                                        No. RM
+                                                    </label>
                                                 </div>
                                                 <div class="col-xl">
                                                     <input type="text" value="{{ request('medical_record_number') }}"
@@ -38,34 +62,9 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="telp">
-                                                        Penjamin
+                                                    <label class="form-label text-end" for="registration_name">
+                                                        Nama Pasien
                                                     </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select class="form-control w-100 select2" id="penjamin_id"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        name="penjamin_id">
-                                                        <option value=""></option>
-                                                        @foreach ($penjamins as $penjamin)
-                                                            <option value="{{ $penjamin->id }}">{{ $penjamin->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('penjamin_id')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row justify-content-center mt-4">
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="name">Nama</label>
                                                 </div>
                                                 <div class="col-xl">
                                                     <input type="text" value="{{ request('name') }}"
@@ -78,39 +77,22 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-xl-4">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="mobile_phone_number">
-                                                        No. HP
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <input type="text" value="{{ request('mobile_phone_number') }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="mobile_phone_number"
-                                                        name="mobile_phone_number">
-                                                    @error('mobile_phone_number')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                                 <div class="row justify-content-center mt-4">
                                     <div class="col-xl-4">
                                         <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-4" style="text-align: right">
-                                                    <label for="date_of_birth">Tanggal Lahir</label>
+                                              <div class="row">
+                                                <div class="col-xl-5" style="text-align: right">
+                                                    <label class="form-label text-end" for="registration_number">
+                                                        No. Registrasi
+                                                    </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ request('date_of_birth') }}"
+                                                    <input type="text" value="{{ request('registration_number') }}"
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="date_of_birth" name="date_of_birth">
-                                                    @error('date_of_birth')
+                                                        class="form-control" id="registration_number"
+                                                        name="registration_number" onkeyup="formatAngka(this)">
+                                                    @error('registration_number')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
@@ -120,16 +102,19 @@
                                     <div class="col-xl-4">
                                         <div class="form-group">
                                             <div class="row">
-                                                <div class="col-xl-5" style="text-align: right">
-                                                    <label class="form-label text-end" for="address">
-                                                        Alamat
-                                                    </label>
+                                                <div class="col-xl-4" style="text-align: right">
+                                                    <label for="status">Status</label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ request('address') }}"
+                                                    <select class="form-control w-100 select2" id="status"
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="address" name="address">
-                                                    @error('address')
+                                                        name="status">
+                                                        <option value=""></option>
+                                                        <option value="Registrasi Aktif">Registrasi Aktif</option>
+                                                        <option value="Tutup Kunjungan">Tutup Kunjungan</option>
+                                                        <option value="All">All</option>
+                                                    </select>
+                                                    @error('status')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
@@ -137,15 +122,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row justify-content-end mt-4">
-                                    <div class="col-xl-5">
-                                        <a href="{{ route('pendaftaran.pasien.pendaftaran_pasien_baru') }}"
-                                            class="btn btn-outline-primary waves-effect waves-themed">
-                                            <span class="fal fa-plus-circle"></span>
-                                            Tambah Pasien
-                                        </a>
+                                <div class="row justify-content-end mt-3">
+                                    <div class="col-xl-3">
                                         <button type="submit" class="btn btn-outline-primary waves-effect waves-themed">
-                                            <span class="fal fa-search"></span>
+                                            <span class="fal fa-search mr-1"></span>
                                             Cari
                                         </button>
                                     </div>
@@ -184,132 +164,132 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($patients as $patient)
+                                    @foreach ($registrations as $registration)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
                                             <td>
-                                                @if ($patient->registration()->orderBy('created_at', 'desc')->first() !== null)
-                                                    @if ($patient->registration()->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                @if ($registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                    @if ($registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
                                                         <a
-                                                            href="{{ route('detail.registrasi.pasien', $patient->registration()->orderBy('created_at', 'desc')->first()->id) }}">
-                                                            {{ $patient->medical_record_number }}
+                                                            href="{{ route('detail.registrasi.pasien', $registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                            {{ $registration->patient->medical_record_number }}
                                                         </a>
                                                     @else
-                                                        <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                            {{ $patient->medical_record_number }}
+                                                        <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                            {{ $registration->patient->medical_record_number }}
                                                         </a>
                                                     @endif
                                                 @else
-                                                    <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                        {{ $patient->medical_record_number }}
+                                                    <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                        {{ $registration->patient->medical_record_number }}
                                                     </a>
                                                 @endif
                                             </td>
                                             <td>
-                                                @if ($patient->registration()->orderBy('created_at', 'desc')->first() !== null)
-                                                    @if ($patient->registration()->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                @if ($registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                    @if ($registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
                                                         <a
-                                                            href="{{ route('detail.registrasi.pasien', $patient->registration()->orderBy('created_at', 'desc')->first()->id) }}">
-                                                            {{ $patient->name }}
+                                                            href="{{ route('detail.registrasi.pasien', $registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                            {{ $registration->patient->name }}
                                                         </a>
                                                     @else
-                                                        <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                            {{ $patient->name }}
+                                                        <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                            {{ $registration->patient->name }}
                                                         </a>
                                                     @endif
                                                 @else
-                                                    <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                        {{ $patient->name }}
+                                                    <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                        {{ $registration->patient->name }}
                                                     </a>
                                                 @endif
                                             </td>
                                             <td>
-                                                @if ($patient->registration()->orderBy('created_at', 'desc')->first() !== null)
-                                                    @if ($patient->registration()->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                @if ($registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                    @if ($registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
                                                         <a
-                                                            href="{{ route('detail.registrasi.pasien', $patient->registration()->orderBy('created_at', 'desc')->first()->id) }}">
-                                                            {{ $patient->address }}
+                                                            href="{{ route('detail.registrasi.pasien', $registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                            {{ $registration->patient->address }}
                                                         </a>
                                                     @else
-                                                        <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                            {{ $patient->address }}
+                                                        <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                            {{ $registration->patient->address }}
                                                         </a>
                                                     @endif
                                                 @else
-                                                    <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                        {{ $patient->address }}
+                                                    <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                        {{ $registration->patient->address }}
                                                     </a>
                                                 @endif
                                             </td>
                                             <td>
-                                                @if ($patient->registration()->orderBy('created_at', 'desc')->first() !== null)
-                                                    @if ($patient->registration()->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                @if ($registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                    @if ($registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
                                                         <a
-                                                            href="{{ route('detail.registrasi.pasien', $patient->registration()->orderBy('created_at', 'desc')->first()->id) }}">
-                                                            {{ $patient->place }} , {{ $patient->date_of_birth }}
+                                                            href="{{ route('detail.registrasi.pasien', $registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                            {{ $registration->patient->place }} , {{ $registration->patient->date_of_birth }}
                                                         </a>
                                                     @else
-                                                        <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                            {{ $patient->place }} , {{ $patient->date_of_birth }}
+                                                        <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                            {{ $registration->patient->place }} , {{ $registration->patient->date_of_birth }}
                                                         </a>
                                                     @endif
                                                 @else
-                                                    <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                        {{ $patient->place }} , {{ $patient->date_of_birth }}
+                                                    <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                        {{ $registration->patient->place }} , {{ $registration->patient->date_of_birth }}
                                                     </a>
                                                 @endif
                                             </td>
                                             <td>
-                                                @if ($patient->registration()->orderBy('created_at', 'desc')->first() !== null)
-                                                    @if ($patient->registration()->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                @if ($registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                    @if ($registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
                                                         <a
-                                                            href="{{ route('detail.registrasi.pasien', $patient->registration()->orderBy('created_at', 'desc')->first()->id) }}">
-                                                            {{ $patient->mobile_phone_number }}
+                                                            href="{{ route('detail.registrasi.pasien', $registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                            {{ $registration->patient->mobile_phone_number }}
                                                         </a>
                                                     @else
-                                                        <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                            {{ $patient->mobile_phone_number }}
+                                                        <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                            {{ $registration->patient->mobile_phone_number }}
                                                         </a>
                                                     @endif
                                                 @else
-                                                    <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                        {{ $patient->mobile_phone_number }}
+                                                    <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                        {{ $registration->patient->mobile_phone_number }}
                                                     </a>
                                                 @endif
                                             </td>
                                             <td>
-                                                @if ($patient->registration()->orderBy('created_at', 'desc')->first() !== null)
-                                                    @if ($patient->registration()->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                @if ($registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                    @if ($registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
                                                         <a
-                                                            href="{{ route('detail.registrasi.pasien', $patient->registration()->orderBy('created_at', 'desc')->first()->id) }}">
-                                                            {{ $patient->family->name ?? '*Tidak Diketahui' }}
+                                                            href="{{ route('detail.registrasi.pasien', $registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                            {{ $registration->patient->family->name ?? '*Tidak Diketahui' }}
                                                         </a>
                                                     @else
-                                                        <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                            {{ $patient->family->name ?? '*Tidak Diketahui' }}
+                                                        <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                            {{ $registration->patient->family->name ?? '*Tidak Diketahui' }}
                                                         </a>
                                                     @endif
                                                 @else
-                                                    <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                        {{ $patient->family->name ?? '*Tidak Diketahui' }}
+                                                    <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                        {{ $registration->patient->family->name ?? '*Tidak Diketahui' }}
                                                     </a>
                                                 @endif
                                             </td>
                                             <td>
-                                                @if ($patient->registration()->orderBy('created_at', 'desc')->first() !== null)
-                                                    @if ($patient->registration()->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                @if ($registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                    @if ($registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
                                                         <a
-                                                            href="{{ route('detail.registrasi.pasien', $patient->registration()->orderBy('created_at', 'desc')->first()->id) }}">
-                                                            {{ $patient->penjamin->name ?? '-' }}
+                                                            href="{{ route('detail.registrasi.pasien', $registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                            {{ $registration->patient->penjamin->name ?? '-' }}
                                                         </a>
                                                     @else
-                                                        <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                            {{ $patient->penjamin->name ?? '-' }}
+                                                        <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                            {{ $registration->patient->penjamin->name ?? '-' }}
                                                         </a>
                                                     @endif
                                                 @else
-                                                    <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}">
-                                                        {{ $patient->penjamin->name ?? '-' }}
+                                                    <a href="{{ route('detail.pendaftaran.pasien', $registration->patient->id) }}">
+                                                        {{ $registration->patient->penjamin->name ?? '-' }}
                                                     </a>
                                                 @endif
                                             </td>
@@ -343,8 +323,33 @@
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     {{-- Select 2 --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    {{-- Datepicker --}}
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    {{-- Datepicker Range --}}
+    <script src="/js/dependency/moment/moment.js"></script>
+    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+
     <script>
+        var controls = {
+            leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
+            rightArrow: '<i class="fal fa-angle-right" style="font-size: 1.25rem"></i>'
+        }
+
+        var runDatePicker = function() {
+
+            // minimum setup
+            $('#date_of_birth').datepicker({
+                todayHighlight: true,
+                orientation: "bottom left",
+                templates: controls
+            });
+
+        }
+
         $(document).ready(function() {
+
+            // Datepciker
+            runDatePicker();
 
             // Select 2
             $(function() {
@@ -359,6 +364,34 @@
                     searchField.insertBefore(searchField.prev());
                 });
             });
+
+            /// Get the current date and time
+            var today = new Date();
+
+            // Format it as "YYYY-MM-DD"
+            var formattedToday = today.getFullYear() + '-' +
+                ('0' + (today.getMonth() + 1)).slice(-2) + '-' +
+                ('0' + today.getDate()).slice(-2) + ' ' +
+                ('0' + today.getHours()).slice(-2) + ':' +
+                ('0' + today.getMinutes()).slice(-2) + ':' +
+                ('0' + today.getSeconds()).slice(-2);
+
+            // Set the default date for the datepicker
+            $('#datepicker-1').daterangepicker({
+                opens: 'left',
+                startDate: moment(today).format('YYYY-MM-DD'),
+                endDate: moment(today).format('YYYY-MM-DD'),
+                // timePicker: true, // Enable time selection
+                // timePicker24Hour: true, // 24-hour format
+                // timePickerSeconds: true, // Include seconds in time selection
+                locale: {
+                    format: 'YYYY-MM-DD' // Display format for the picker
+                }
+            }, function(start, end, label) {
+                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') +
+                    ' to ' + end.format('YYYY-MM-DD'));
+            });
+
 
             $('#loading-spinner').show();
             // initialize datatable

@@ -159,7 +159,7 @@
                                     Rujuk Rawat Inap / Poli Lain
                                 </a>
                             </li>
-                            @if ($registration->status == 'online')
+                            @if ($registration->status == 'aktif')
                                 <li class="p-2">
                                     <a href="javascript:void(0);" data-toggle="modal" data-target="#tutup-kunjungan">
                                         <i class="fa fa-circle-o fa-fw pink-text text-accent-2"></i>
