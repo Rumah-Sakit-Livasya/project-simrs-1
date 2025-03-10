@@ -565,6 +565,10 @@
                             'title' => 'Rawat Jalan'
                         ],
                         [
+                            'id' => '/layanan_vaksin',
+                            'title' => 'Layanan Vaksin'
+                        ],
+                        [
                             'id' => '/info_fasilitas',
                             'title' => 'Fasilitas'
                         ],
