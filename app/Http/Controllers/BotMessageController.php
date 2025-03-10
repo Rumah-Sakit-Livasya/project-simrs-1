@@ -529,6 +529,14 @@ class BotMessageController extends Controller
 
             // Bagian Medical Checkup
 
+        } else if($msg == '/info_cs') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Costumer Service*\n\nSalam sehat, terima kasih sudah menghubungi kontak Customer Care Rumah Sakit Livasya Majalengka.\n\nJam Operasional\nIGD 24 Jam\nPoliklinik Senin - Sabtu 08:00 - 21:00\n\nUntuk layanan telepon anda dapat menghubungi nomor kami di:\nhotline +622338668019\nwhatsapp: +6281211151300\n\nKunjungi website kami di www.livasya.co.id untuk mendapatkan informasi lengkap mengenai rumah sakit dan jadwal dokter"
+            ];
+
+            // Bagian Rawat Inap
+
         } else if($msg == '/info_medical') {
             $response = [
                 'message_type' => 'string',
