@@ -527,6 +527,22 @@ class BotMessageController extends Controller
                 'data' => "*Prosedur pendaftaran*\n\nLayanan pendaftaran poliklinik  bisa diakses melalui online maupun onsite sesuai dengan jam praktek poliklinik"
             ];
 
+            // Bagian Medical Checkup
+
+        } else if($msg == '/info_medical') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Medical Check - Up*\n\n*Paket Silver*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Pemeriksaan gula darah\n- Pemeriksaan kolesterol\n- Pemeriksaan asam urat\n\n*Biaya : Rp. 150.000*\n\n*Paket Gold*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Hematologi rutin\n- Gula darah puasa\n- Kolesterol\n- Trigliserida\n- Asam urat\n- Ureum\n- Kreatinin\n- SGOT\n- Urine lengkap\n\n*Biaya : Rp. 700.000*\n\n*Paket Diamond*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Hematologi rutin\n- Gula darah puasa\n- Kolesterol\n- Trigliserida\n- Asam urat\n- Ureum\n- Kreatinin\n- SGOT\n- SGPT\n- Urine lengkap\n- EKG\n- Rontgen thorax\n\n*Biaya : Rp. 920.000*"
+            ];
+
+            // Bagian Rawat Inap
+
+        } else if($msg == '/rawat_inap') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Rawat Inap*\n\nLayanan pendaftaran poliklinik  bisa diakses melalui online maupun onsite sesuai dengan jam praktek poliklinik"
+            ];
+
             // Bagian Layanan dan Fasilitas
 
         } else if ($msg == '/layanan_fasilitas') {
