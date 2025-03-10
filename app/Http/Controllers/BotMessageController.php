@@ -1,783 +1,758 @@
-    <?php
+<?php
 
-    namespace App\Http\Controllers;
+namespace App\Http\Controllers;
 
-    use App\Models\Attendance;
-    use App\Models\Employee;
-    use Carbon\Carbon;
-    use Illuminate\Http\Request;
-    use Illuminate\Support\Facades\Http;
-    use Illuminate\Support\Str;
+use App\Models\Attendance;
+use App\Models\Employee;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
-    class BotMessageController extends Controller
+class BotMessageController extends Controller
+{
+    public function processMessage(Request $request)
     {
-        public function processMessage(Request $request)
-        {
-            
-            // Cek apakah metode POST
-            if ($request->getMethod() !== 'POST') {
-                return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
-            }
-
-            // Ambil data dari header dan JSON
-            $headers = $request->headers->all();
-            $content = $request->json()->all();
-
-            // Validasi header
-            $key = $headers['key'][0] ?? '';
-            $user = $headers['nama'][0] ?? '';
-            $sandi = $headers['sandi'][0] ?? '';
-
-            $error = true;
-            if ($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!') {
-                $error = false;
-            }
-
-            if ($error) {
-                return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
-            }
-
-            $response = json_encode($content, JSON_PRETTY_PRINT);
-
-            // Logika bisnis
-            $msg = $content['message'] ?? '';
-            $data = $content['data'] ?? [];
-            $nama = $data[1]['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
-
-            // $response = '';
-            // if ($msg == '/test-kirim') {
-            //     $response .= 'Halo ' . $nama;
-            // } else if ($msg == '/rekapabsen') {
-            //     $total_pegawai_rs = Employee::where('is_active', 1)->where('company_id', 1)->count();
-            //     $total_pegawai_pt = Employee::where('is_active', 1)->where('company_id', 2)->count();
-            //     $total_clockin = Attendance::whereNotNull('clock_in')
-            //         ->whereDate('date', Carbon::now()->format('Y-m-d'))
-            //         ->whereHas('employees', function ($query) {
-            //             $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
-            //         })->count();
-            //     $total_no_clockin = Attendance::whereNull('clock_in')->whereNull('is_day_off')
-            //         ->whereDate('date', Carbon::now()->format('Y-m-d'))
-            //         ->whereHas('employees', function ($query) {
-            //             $query->where('organization_id', '!=', 3);
-            //             $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
-            //         })->count();
-            //     $total_libur = Attendance::where('is_day_off', 1)
-            //         ->whereNull('attendance_code_id')
-            //         ->whereNull('day_off_request_id')
-            //         ->whereDate('date', Carbon::now()->format('Y-m-d'))
-            //         ->whereHas('employees', function ($query) {
-            //             $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
-            //         })->count();
-            //     $total_izin = 0;
-            //     $total_sakit = 0;
-            //     $total_cuti = 0;
-            //     $absensi_pegawai = Attendance::where('is_day_off', '!=', null)->where('date', Carbon::now()->format('Y-m-d'))->get();
-            //     foreach ($absensi_pegawai as $absensi) {
-            //         if ($absensi->attendance_code_id != null || $absensi->day_off_request_id != null) {
-            //             if ($absensi->attendance_code_id == 1) {
-            //                 $total_izin += 1;
-            //             } elseif ($absensi->attendance_code_id == 2) {
-            //                 $total_sakit += 1;
-            //             } elseif ($absensi->attendance_code_id != 1 && $absensi->attendance_code_id != 2) {
-            //                 $total_cuti += 1;
-            //             } elseif ($absensi->attendance_code_id == null || $absensi->attendance_code_id == "") {
-            //                 // Jika attendance_code_id di Attendance tidak ada, cek di DayOffRequest melalui relasi day_off
-            //                 if ($absensi->day_off) {
-            //                     // Cek apakah day_off_request memiliki attendance_code_id yang diinginkan
-            //                     if ($absensi->day_off->attendance_code_id == 1) {
-            //                         $total_izin += 1;
-            //                     } elseif ($absensi->day_off->attendance_code_id == 2) {
-            //                         $total_sakit += 1;
-            //                     } else {
-            //                         $total_cuti += 1;
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //     }
-
-            //     $response = "\n\n⬛️ <b>REKAP ABSEN HARI INI:</b>\n\n";
-            //     $response .= "🔹 <code>Total Pegawai RS: $total_pegawai_rs </code>\n";
-            //     $response .= "🔹 <code>Total Pegawai PT: $total_pegawai_pt </code>\n";
-            //     $response .= "🔹 <code>Sudah clockin: $total_clockin </code>\n";
-            //     $response .= "🔹 <code>Belum clockin: $total_no_clockin </code>\n";
-            //     $response .= "🔹 <code>Pegawai libur: $total_libur </code>\n";
-            //     $response .= "🔹 <code>Pegawai Cuti: $total_cuti </code>\n";
-            //     $response .= "🔹 <code>Pegawai Izin: $total_izin </code>\n";
-            //     $response .= "🔹 <code>Pegawai Sakit: $total_sakit </code>\n\n";
-
-
-            //     $response .= "\n🟥 <b>DAFTAR PEGAWAI YANG TELAT:</b> \n\n";
-            //     $pegawai_telat = Attendance::whereNotNull('clock_in')->whereNotNull('late_clock_in')->whereHas('employees', function ($query) {
-            //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-            //         $query->whereNotIn('id', [1, 2, 14, 222]);
-            //     })->where('date', Carbon::now()->format('Y-m-d'))->orderBy('late_clock_in')->get();
-            //     foreach ($pegawai_telat as $key => $row) {
-            //         if ($row->late_clock_in > 5 && $row->late_clock_in < 70) {
-            //             $response .= "🔸" . Str::limit($row->employees->fullname, $limit = 16) . " ( " . $row->late_clock_in . " menit )\n";
-            //         }
-            //     }
-
-            //     $response .= "\n";
-            //     $response .= "<b>Rekap tersebut diambil berdasarkan tanggal " . Carbon::now()->translatedFormat('d F Y h:i A') . "</b>";
-            // } else if ($msg == '/tidakabsen') {
-            //     $response = "";
-            //     if (isset($data["shift"])) {
-            //         if ($data["shift"] == "pagi") {
-
-            //             // $absent_pagi_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
-            //             //     ->whereHas('shift', function ($query) {
-            //             //         $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
-            //             //             ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
-            //             //     })->whereHas('employees', function ($query) {
-            //             //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-            //             //         $query->where('company_id', 2); // Hanya untuk karyawan PT
-            //             //     })
-            //             //     ->where('date', Carbon::now()->format('Y-m-d'))
-            //             //     ->get();
-
-            //             // $absent_pagi_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
-            //             //     ->whereHas('shift', function ($query) {
-            //             //         $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
-            //             //             ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
-            //             //     })->whereHas('employees', function ($query) {
-            //             //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-            //             //         $query->where('company_id', 1); // Hanya untuk karyawan RS
-            //             //         $query->where('organization_id', '!=', 3);
-            //             //         $query->whereNotIn('id', [1, 2, 14, 222]); // Mengecualikan employee dengan ID;
-            //             //     })
-            //             //     ->where('date', Carbon::now()->format('Y-m-d'))
-            //             //     ->get();
-
-            //             // $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN PAGI ‼️ </b>\n\n";
-            //             // if (isset($absent_pagi_pt)) {
-            //             //     $response .= "🔻 <b>Karyawan PT: </b>\n";
-
-            //             //     foreach ($absent_pagi_pt as $key => $row) {
-            //             //         $response .= "⛔️ " . $row->employees->fullname . "\n";
-            //             //     }
-            //             //     $response .= "\n";
-            //             // }
-
-            //             // if (isset($absent_pagi_rs)) {
-            //             //     $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
-
-            //             //     foreach ($absent_pagi_rs as $key => $row) {
-            //             //         $response .= "⛔️ " . $row->employees->fullname . "\n";
-            //             //     }
-            //             //     $response .= "\n";
-            //             // }
-            //         } else if ($data["shift"] == "siang") {
-            //             // $absent_siang_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
-            //             //     ->whereHas('shift', function ($query) {
-            //             //         $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
-            //             //             ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
-            //             //     })->whereHas('employees', function ($query) {
-            //             //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-            //             //         $query->where('company_id', 2); // Hanya untuk karyawan PT
-            //             //     })
-            //             //     ->where('date', Carbon::now()->format('Y-m-d'))
-            //             //     ->get();
-
-            //             // $absent_siang_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
-            //             //     ->whereHas('shift', function ($query) {
-            //             //         $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
-            //             //             ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
-            //             //     })->whereHas('employees', function ($query) {
-            //             //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-            //             //         $query->where('company_id', 1); // Hanya untuk karyawan RS
-            //             //     })
-            //             //     ->where('date', Carbon::now()->format('Y-m-d'))
-            //             //     ->get();
-
-            //             // $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN SIANG ‼️ </b>\n\n";
-            //             // if (isset($absent_siang_pt)) {
-            //             //     $response .= "🔻 <b>Karyawan PT: </b>\n";
-
-            //             //     foreach ($absent_siang_pt as $key => $row) {
-            //             //         $response .= "⛔️ " . $row->employees->fullname . "\n";
-            //             //     }
-            //             //     $response .= "\n";
-            //             // }
-
-            //             // if (isset($absent_siang_rs)) {
-            //             //     $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
-
-            //             //     foreach ($absent_siang_rs as $key => $row) {
-            //             //         $response .= "⛔️ " . $row->employees->fullname . "\n";
-            //             //     }
-            //             //     $response .= "\n";
-            //             // }
-            //         } else if ($data["shift"] == "malam") {
-            //             $absent_malam_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
-            //                 ->whereHas('shift')->whereHas('employees', function ($query) {
-            //                     $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-            //                     $query->where('company_id', 2); // Hanya untuk karyawan PT
-            //                 })
-            //                 ->where('date', Carbon::now()->format('Y-m-d'))
-            //                 ->get();
-
-            //             $absent_malam_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
-            //                 ->whereHas('shift')->whereHas('employees', function ($query) {
-            //                     $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-            //                     $query->where('company_id', 1); // Hanya untuk karyawan RS
-            //                     $query->whereNotIn('id', [1, 2, 14, 222]);
-            //                 })
-            //                 ->where('date', Carbon::now()->format('Y-m-d'))
-            //                 ->get();
-
-            //             $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN HARI INI ‼️ </b>\n\n";
-            //             if (isset($absent_malam_pt)) {
-            //                 $response .= "🔻 <b>Karyawan PT: </b>\n";
-
-            //                 foreach ($absent_malam_pt as $key => $row) {
-            //                     $response .= "⛔️ " . $row->employees->fullname . "\n";
-            //                 }
-            //                 $response .= "\n";
-            //             }
-
-            //             if (isset($absent_malam_rs)) {
-            //                 $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
-
-            //                 foreach ($absent_malam_rs as $key => $row) {
-            //                     $response .= "⛔️ " . $row->employees->fullname . "\n";
-            //                 }
-            //                 $response .= "\n";
-            //             }
-            //         }
-            //     }
-
-            //     $response .= "\n\n🔴 <b>DAFTAR KARYAWAN YANG LIBUR/IZIN/SAKIT/CUTI: </b>\n\n";
-            //     $response .= "🔻 <b>Karyawan PT: </b>\n";
-            //     $attendancesPT = Attendance::where('is_day_off', '!=', null)->whereHas('employees', function ($query) {
-            //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-            //         $query->where('company_id', 2); // Hanya untuk karyawan PT
-            //     })->where('date', Carbon::now()->format('Y-m-d'))->get();
-
-            //     foreach ($attendancesPT as $key => $row) {
-            //         if ($row->attendance_code_id != null || $row->day_off_request_id != null) {
-            //             $response .= "▪️ " . $row->employees->fullname . " ( " . isset($row->attendance_code_id) ? $row->attendance_code->name : $row->day_off->attendance_code->name . " )\n";
-            //         } else {
-            //             $response .= "▪️ " . $row->employees->fullname . " ( Libur )\n";
-            //         }
-            //     }
-            //     $response .= "\n";
-            //     $attendancesLivasya = Attendance::where('is_day_off', '!=', null)->whereHas('employees', function ($query) {
-            //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-            //         $query->where('company_id', 1); // Hanya untuk karyawan PT
-            //     })->where('date', Carbon::now()->format('Y-m-d'))->get();
-
-            //     // dd($attendancesLivasya);
-            //     $response .= "\n🔻 <b>Karyawan RS Livasya: </b>\n";
-
-            //     // Array untuk pegawai dengan attendance_code_id atau day_off_request_id
-            //     $employeesWithAttendance = [];
-            //     // Array untuk pegawai dengan Libur
-            //     $employeesOnLeave = [];
-
-            //     // Memisahkan pegawai berdasarkan kondisi
-            //     foreach ($attendancesLivasya as $key => $row) {
-            //         if ($row->attendance_code_id != null || $row->day_off_request_id != null) {
-            //             $employeesWithAttendance[] = $row;
-            //         } else {
-            //             $employeesOnLeave[] = $row;
-            //         }
-            //     }
-
-            //     // Menambahkan pegawai dengan attendance_code_id atau day_off_request_id ke dalam respons
-            //     foreach ($employeesWithAttendance as $row) {
-            //         $response .= "<b>▪️ " . $row->employees->fullname . " ( ";
-            //         if ($row->attendance_code_id != null) {
-            //             $response .= $row->attendance_code->description;
-            //         } else {
-            //             $response .= $row->day_off->attendance_code->description;
-            //         }
-            //         $response .= " )</b> \n";
-            //     }
-            //     $response .= "\n";
-            //     // Menambahkan pegawai dengan Libur ke dalam respons
-            //     foreach ($employeesOnLeave as $row) {
-            //         $response .= "▪️ " . $row->employees->fullname . " ( Libur )\n";
-            //     }
-
-            //     $response .= "\n";
-            //     $response .= "<b>Rekap tersebut diambil berdasarkan tanggal " . Carbon::now()->translatedFormat('d F Y h:i A') . "</b>";
-            // } else if ($msg == '/isiabsenpeg') {
-            //     $idTelegram = isset($data['id']) ? $data['id'] : null;
-            //     $usernameTelegram = $data['uname'] ?? null;
-            //     $nama = $data['name'] ?? null;
-            //     $tanggal = date("d M Y H:i:s", $data['date']);
-            //     $latitude = $data['latitude'] ?? null;
-            //     $longitude = $data['longitude'] ?? null;
-
-            //     $response = 'terima kasih ' . $nama . ' sudah mengisi Absensi 😍 ';
-            //     $response .= chr(10) . 'pada tanggal ' . date("d M Y", $data['date']) . ' jam ' . date("H:i:s", $data['date']);;
-            // } else {
-            //     // $idTelegram = isset($data['id']) ? $data['id'] : null;
-            //     // $usernameTelegram = $data['username'] ?? null;
-            //     // $nama = $data['first_name'] ?? null;
-
-            //     // $error = true;
-            //     // $response = 'else';
-            //     $response  = "Halo *$nama* , \r\n";
-            //     $response .= "Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka.* \r\n\r\n";
-            //     $response .= "*Jam Operasional IGD 24 Jam.* \r\n";
-            //     $response .= "Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini: \r\n";
-            // }
-
-            return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
+        
+        // Cek apakah metode POST
+        if ($request->getMethod() !== 'POST') {
+            return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
         }
 
-        public function livasyaMessage(Request $request)
-        {
-            // Cek apakah metode POST
-            if ($request->getMethod() !== 'POST') {
-                return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
-            }
+        // Ambil data dari header dan JSON
+        $headers = $request->headers->all();
+        $content = $request->json()->all();
 
-            // Ambil data dari header dan JSON
-            $headers = $request->headers->all();
-            $content = $request->json()->all();
-            $msg = $content['message'] ?? '';
+        // Validasi header
+        $key = $headers['key'][0] ?? '';
+        $user = $headers['nama'][0] ?? '';
+        $sandi = $headers['sandi'][0] ?? '';
 
-            // Validasi header
-            $key = $headers['key'][0] ?? '';
-            $user = $headers['nama'][0] ?? '';
-            $sandi = $headers['sandi'][0] ?? '';
-
-            $error = true;
-            if ($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!') {
-                $error = false;
-            }
-
-            if ($error) {
-                return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
-            }
-
-            if($msg == 'test_string') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => 'Halo String'
-                ];
-
-            } else if ($msg == 'test_array') {
-                $response =  [
-                    'message_type' => 'array',
-                    'title' => 'judul tombol nya',
-                    'body' => 'isi text nya',
-                    'data' => [
-                        [
-                            'id' => '/jadwal_praktek',
-                            'title' => 'Jadwal Poli'
-                        ],
-                        [
-                            'id' => '/info_fasilitas',
-                            'title' => 'Fasilitas Unggulan'
-                        ],
-                        [
-                            'id' => '/info_rajal',
-                            'title' => 'Info Rawat Jalan'
-                        ],
-                        [
-                            'id' => '/daftar_poli_rajal',
-                            'title' => 'Pendaftaran Poliklinik'
-                        ],
-                        [
-                            'id' => '/info_medical',
-                            'title' => 'Medical Check Up'
-                        ],
-                        [
-                            'id' => '/info_persalinan',
-                            'title' => 'Biaya Persalinan'
-                        ]
-                    ]
-                ];
-                
-                // Bagian pilihan jadwal poliklinik
-
-            } else if ($msg == '/jadwal_praktek') {
-
-                $response =  [
-                    'message_type' => 'array',
-                    'title' => 'Pilih Layanan',
-                    'body' => 'Berikut adalah jadwal Poliklinik di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
-                    'data' => [
-                        [
-                            'id' => '/klinik_obgyn',
-                            'title' => 'Poli Obgyn'
-                        ],
-                        [
-                            'id' => '/klinik_anak',
-                            'title' => 'Poli Anak'
-                        ],
-                        [
-                            'id' => '/klinik_tht',
-                            'title' => 'Poli THT'
-                        ],
-                        [
-                            'id' => '/klinik_dalam',
-                            'title' => 'Poli Penyakit Dalam'
-                        ],
-                        [
-                            'id' => '/klinik_bedah',
-                            'title' => 'Poli Bedah'
-                        ],
-                        [
-                            'id' => '/klinik_paru',
-                            'title' => 'Poli Paru'
-                        ],
-                        [
-                            'id' => '/klinik_jiwa',
-                            'title' => 'Poli Jiwa'
-                        ],
-                        [
-                            'id' => '/klinik_gigi',
-                            'title' => 'Poli Gigi'
-                        ],
-                        [
-                            'id' => '/klinik_jantung',
-                            'title' => 'Poli Jantung'
-                        ]
-                    ]
-                ];
-
-                // Bagian pilihan fasilitas unggulan
-
-            } else if ($msg == '/info_fasilitas') {
-
-                $response =  [
-                    'message_type' => 'array',
-                    'title' => 'Pilih Layanan',
-                    'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
-                    'data' => [
-                        [
-                            'id' => '/foto_bayi',
-                            'title' => 'Baby Newborn Photo'
-                        ],
-                        [
-                            'id' => '/baby_spa',
-                            'title' => 'Baby Spa Swimming'
-                        ],
-                        [
-                            'id' => '/maternity',
-                            'title' => 'Maternity'
-                        ],
-                        [
-                            'id' => '/partus_moment',
-                            'title' => 'Partus Moment'
-                        ],
-                        [
-                            'id' => '/senam_hamil',
-                            'title' => 'Senam Hamil'
-                        ]
-                    ]
-                ];
-                
-                // Bagian informasi pendaftaran
-
-            } else if ($msg == '/info_pendaftaran') {
-
-                $response =  [
-                    'message_type' => 'array',
-                    'title' => 'Pilih Layanan',
-                    'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
-                    'data' => [
-                        [
-                            'id' => '/info_bpjs_asuransi',
-                            'title' => 'Info BPJS'
-                        ],
-                        [
-                            'id' => '/syarat',
-                            'title' => 'Syarat Pendaftaran'
-                        ],
-                        [
-                            'id' => '/prosedur',
-                            'title' => 'Prosedur Pendaftaran'
-                        ],
-                        [
-                            'id' => '/info_dafol',
-                            'title' => 'Pendaftaran Online'
-                        ]
-                    ]
-                ];
-
-                // Isi Respon Menu Pendaftaran
-
-            } else if($msg == '/info_bpjs_asuransi') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Informasi BPJS* \n\nSaat ini rumah sakit livasya menyediakan layanan rawat inap dan rawat jalan khusus peserta BPJS/JKN/KIS mulai dari :\n\n▪️ Spesialis Anak\n▪️ Spesialis kandungan\n▪️ Spesialis bedah\n▪️ Spesialis penyakit dalam\n▪️ Spesialis THT"
-                ];
-
-            }  else if($msg == '/syarat') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Syarat pendaftaran*\n\n*Syarat pendaftaran rawat jalan*\n▪️ khusus peserta penjamin umum cukup membawa data diri/kartu berobat\n▪️ khusus peserta BPJS/JKN/KIS cukup membawa rujukan faskes 1 dan data diri\n▪️ khusus peserta asuransi swasta cukup membawa karru asuransi dan data diri\n\n*Syarat pendaftaran rawat inap*\n▪️ khusus peserta penjamin umum cukup membawa identitas diri\n▪️ khusus peserta penjamin BPJS/JKN/KIS Cukup membawa kartu identitas ,KK,KTP dan kartu BPJS (Bila ada)\n▪️ khusus peserta asuransi swasta cukup membawa kartu asuransi dan data diri"
-                ];
-
-            } else if($msg == '/info_dafol') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Pendafataran online khusus penjamin JKN/BPJS silahkan bapak/ibu akses melalui Aplikasi MOBILE JKN* \n\nPendafataran online khusus penjamin Umum/asuransi silahkan bapak/ibu akses melalui link website berikut :  https://dafol.livasya.com/ \n\n*Note* : \n▪️ Pendaftaran online By link website dapat diakses H-3 atau paling lambat H-1 sebelum tanggal kunjungan\n▪️ Pendafataran online By Mobile JKN(BPJS) dapat diakses H-30 dan paling lambat di hari H sebelum jam praktek poliklinik"
-                ];
-
-            } else if($msg == '/prosedur') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Prosedur pendaftaran*\n\nLayanan pendaftaran poliklinik  bisa diakses melalui online maupun onsite sesuai dengan jam praktek poliklinik"
-                ];
-
-                // Bagian Medical Checkup
-
-            } else if($msg == '/info_medical') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Medical Check - Up*\n\n*Paket Silver*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Pemeriksaan gula darah\n- Pemeriksaan kolesterol\n- Pemeriksaan asam urat\n\n*Biaya : Rp. 150.000*\n\n*Paket Gold*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Hematologi rutin\n- Gula darah puasa\n- Kolesterol\n- Trigliserida\n- Asam urat\n- Ureum\n- Kreatinin\n- SGOT\n- Urine lengkap\n\n*Biaya : Rp. 700.000*\n\n*Paket Diamond*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Hematologi rutin\n- Gula darah puasa\n- Kolesterol\n- Trigliserida\n- Asam urat\n- Ureum\n- Kreatinin\n- SGOT\n- SGPT\n- Urine lengkap\n- EKG\n- Rontgen thorax\n\n*Biaya : Rp. 920.000*"
-                ];
-
-                // Bagian Rawat Inap
-
-            } else if($msg == '/rawat_inap') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Rawat Inap*\n\nLayanan pendaftaran poliklinik  bisa diakses melalui online maupun onsite sesuai dengan jam praktek poliklinik"
-                ];
-
-                // Bagian Layanan dan Fasilitas
-
-            } else if ($msg == '/layanan_fasilitas') {
-
-                $response =  [
-                    'message_type' => 'array',
-                    'title' => 'Pilih Layanan',
-                    'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
-                    'data' => [
-                        [
-                            'id' => '/igd',
-                            'title' => 'IGD (24 Jam)'
-                        ],
-                        [
-                            'id' => '/rawat_inap',
-                            'title' => 'Rawat Inap'
-                        ],
-                        [
-                            'id' => '/jadwal_praktek',
-                            'title' => 'Rawat Jalan'
-                        ],
-                        [
-                            'id' => '/layanan_vaksin',
-                            'title' => 'Layanan Vaksin'
-                        ],
-                        [
-                            'id' => '/info_fasilitas',
-                            'title' => 'Fasilitas'
-                        ],
-                    ]
-                ];
-                
-            } else if($msg == '/layanan_vaksin') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Imunisasi dasar dan tambahan*\n- vaxigrip/influenza: 570.265\n- Influvac/influenza :  549.497\n- Rotarix / Rotavirus: 829.864\n- Synflorix / pcv: 1.710.510\n- prevenar Injc 13 /PCV : 1.349.224\n- PCV dinkes : 28.585\n- Varivax / varicella: 943.764\n- BCG  dinkes : 28.585\n- DPT Pentabio Dinkes (Demam) : 28.585\n- DPT Hexaxim (Tanpa demam) : 2.018.424\n- DPT Infanrix (Tanpa Demam) :  2.098.524\n- MR/Campak dinkes : 28.585\n- MMR 2 : 677.481\n- TYPHIM /thypoid: 571.337\n- Rotavac Dinkes /rotavirus : 28.585\n- Havrix 720 Junior : 834.388\n- Polio tetes (Dinkes) : 28.585\n- Polio Injek ( Dinkes) : 28.585\n- HB 0 : 28.585\n- Cervarix : 1.105.443\n- Gardasil 4' INJ : 1.584.959\n- Gardasil 9' INJ : 3.177.340\n- Imojev : 977.919\n- TD : 28.585\n\n*Note:*\n1. Harga belum termasuk Konsul dokter +Admin+embalase\n2. Beberapa vaksin mengikuti Sistem PO ,konfirmasi ketersediaan terlebih dahulu\n3. Khusus vaksin yang mengikuti sistem PO akan dikenakan biaya Deposit sebelum pemesanan\n4. Deposit pemesanan tidak dapat dikembalikan bila sewaktu cancel / tidak jadi vaksinasi\n5. Khusus vaksin dalam PO, kedatangan vaksin tidak bisa diestimasikan"
-                ];
-            } else if($msg == '/klinik_obgyn') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Jadwal praktek poliklinik Obgyn*\n\n*dr Dindaadi kusuma Sp.OG*\nSenin-kamis : 08.30-13.00\nJumat-sabtu : 13.00-15.00\n\n*dr H Mohammad Taufiq Sp.OG*\nJumat dan sabtu : 8.30-10.30\nSenin- sabtu : 16.00-18.00\nNote : hari libur/tanggal merah tidak ada praktek"
-                ];
-            } else if($msg == '/klinik_anak') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*JADWAL POLI ANAK*\n\n- Pasien umum\n\n*Dr. Tina Restu Sp.A*\nSenin-sabtu Pukul : 07.00-09.00\n\n*Dr. Ratih Sp.A*\nSenin, Rabu Pukul : 14.30 - Selesai\nSelasa,kamis Jumat Pukul :15.30 - Selesai\n- Pasien BPJS dengan Rujukan faskes 1\n\n*Dr. Tina Restu Sp.A*\nSenin - Jumat  Pukul : 13.00 - Selesai\n\n*Dr. Ratih Sp.A*\nSenin,Rabu  Pukul : 14.30 - Selesai\nSelasa , kamis dan jumat  Pukul : 15.30-Selesai\n\nHari libur/tanggal merah tidak praktek"
-                ];
-            } else if($msg == '/klinik_tht') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*JADWAL POLIKLINIK THT*\n\nPasien umum,Asuransi,BPJS\n\n*dr. H.M.Nuruddin Zainudin, Sp.THT-KL*\n\nSelasa & Kamis\nPukul : 12.00-Selesai"
-                ];
-            } else if($msg == '/klinik_dalam') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*JADWAL POLIKLINIK PENYAKIT DALAM*\n\n Pasien umum,asuransi,BPJS\n\n*dr. Zikry Aulia Hidayat, Sp.PD*\n\nSenin,rabu,Jumat\nPukul 16.00-Selesai\n\n*dr. Jansen budiono Sp.PD*\n\nSelasa dan Kamis\nPukul 15.00-Selesai"
-                ];
-            } else if($msg == '/klinik_bedah') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Jadwal Poliklinik Bedah Umum*\n\n*dr. Rizky Baihaqi Sp.B*\n\nSenin-Sabtu\nPukul 08.00-12.00\n\nJumat\nPukul 08.00-11.00\n\nMelayani peserta JKN/BPJS,Umum dan Asuransi Swasta"
-                ];
-            } else if($msg == '/klinik_paru') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Jadwal Poliklinik spesialis Paru*\n\n*dr Tania libristina ambun Sp.P*\n\nSelasa, Rabu, Kamis\nPkl 15.00-17.00\n\nBerlaku dengan reservasi H-1"
-                ];
-            } else if($msg == '/klinik_jiwa') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Jadwal Poliklinik Spesialis Kedokteran Jiwa*\n\n*dr Agri Mohammad iqbal Sp.KJ*\n\nSenin,Rabu,Jumat\nPkl. 08.00-10.00\n\nBerlaku dengan reservasi H-1"
-                ];
-            } else if($msg == '/klinik_gigi') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Jadwal Poliklinik Gigi*\n\n*drg. Viki Dwi prananda*\n\nSenin-Jumat\nPkl . 08.00-15.00\n\nSabtu\nPkl 08.00-12.00"
-                ];
-            } else if($msg == '/klinik_jantung') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "Jadwal belum ada"
-                ];
-                
-                // Bagian Fasilitas unggulan
-
-            } else if($msg == '/foto_bayi') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Baby Newborn Photoshoot*\n\nRS Livasya di Majalengka menawarkan layanan fotografi bayi baru lahir (newborn baby photography) yang bertujuan mengabadikan momen berharga si kecil. Layanan ini mencakup berbagai genre fotografi, seperti:\n\nFocusing: Memotret bayi tanpa tambahan aksesoris, menonjolkan keaslian dan kemurnian.\nLifestyle: Mengabadikan interaksi keluarga dengan bayi di rumah sakit atau saat membawa pulang bayi.\nKomersial: Foto yang digunakan untuk promosi produk bayi atau keperluan komeRSl lainnya.\n\n*Biaya untuk Baby Newborn Photoshoot*\nRp 200.000\n(dapat 1 file dan 1 cetak foto + figura)\nRp 50.000\n(untuk menambah file)\nRp 200.000\n(untuk penambahan foto cetak)\n\nUntuk informasi lebih lanjut mengenai layanan ini, Anda dapat mengunjungi situs resmi RS Livasya di https://livasya.com/fasilitas/newborn-baby-photography.\n\nSelain itu, RS Livasya juga menyediakan layanan fotografi maternity shoot untuk mengabadikan momen kehamilan.\n\nInformasi lebih lanjut dapat ditemukan di\nhttps://www.livasya.co.id/fasilitas/photography-maternity-shoot.\nUntuk melihat contoh hasil fotografi bayi baru lahir di RS Livasya, Anda dapat menonton video berikut:"
-                ];
-            } else if($msg == '/baby_spa') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Baby Spa and Swim*\n\nRS Livasya di Majalengka menyediakan layanan Baby Spa yang terdiri dari hidroterapi dan pijat bayi. Layanan ini tersedia setiap hari mulai pukul 09.00 hingga 15.00. Sebagai promo, setiap kunjungan akan mendapatkan voucher gratis; kumpulkan 10 voucher untuk mendapatkan 1 kali pijat bayi gratis.\n\nAlamat RS Livasya: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453. Untuk informasi lebih lanjut, Anda dapat menghubungi nomor telepon (0233) 8668019 atau WhatsApp di 0812-1115-1300.\n\nSebelum membawa si kecil untuk sesi Baby Spa, pastikan untuk memeriksa kebersihan fasilitas dan bahan yang digunakan guna menghindari risiko alergi atau iritasi pada kulit bayi.\n\n*Biaya untuk Baby Newborn Photoshoot*\n\n*1 Paket Baby Spa*\nRp 150.000\n*Baby Message*\nRp 60.000\n*Baby Swim*\nRp 60.000\n*Foto Bayi (Baby Spa)*\nRp 60.000\n*Tindik Bayi*\nRp 65.000"
-                ];
-            } else if($msg == '/maternity') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Foto Maternity*\n\nRS Livasya di Majalengka menyediakan layanan Photography Maternity Shoot untuk mengabadikan momen kehamilan Anda. Layanan ini dirancang khusus bagi ibu hamil yang ingin mendokumentasikan masa kehamilan mereka melalui sesi pemotretan profesional.\n\n*Biaya untuk Partus Moment*\nRp 300.000."
-                ];
-            } else if($msg == '/partus_moment') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Partus Moment*\n\RS Livasya di Majalengka menyediakan layanan Partus Moment, yaitu dokumentasi profesional selama proses persalinan untuk mengabadikan momen berharga kelahiran buah hati Anda. Layanan ini dirancang untuk menangkap setiap detik penting dan emosi yang terjadi selama proses persalinan, sehingga menjadi kenangan yang tak terlupakan bagi keluarga.\n\n*Biaya Partus Moment*\nRp 2.000.000\n\nUntuk melihat contoh dari layanan Partus Moment, Anda dapat mengunjungi kanal YouTube resmi RS Livasya, di mana terdapat berbagai video dokumentasi persalinan yang telah diabadikan sebelumnya. Salah satunya adalah video persalinan normal Ny. Devi & Tn. Dani yang dapat Anda saksikan melalui tautan berikut:\n\nJika Anda tertarik untuk memanfaatkan layanan ini atau memerlukan informasi lebih lanjut, silakan menghubungi RS Livasya melalui nomor telepon (0233) 8668019 atau WhatsApp di 0812-1115-1300. Alamat RS Livasya: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453.\n\nRS Livasya berkomitmen untuk memberikan pelayanan terbaik dalam setiap momen berharga Anda dan keluarga."
-                ];
-            } else if($msg == '/senam_hamil') {
-                $response = [
-                    'message_type' => 'string',
-                    'data' => "*Senam Hamil*\n\nRS Livasya di Majalengka menyediakan layanan senam hamil yang dirancang khusus untuk membantu ibu hamil mempersiapkan diri secara fisik dan mental menjelang persalinan. Program ini bertujuan untuk meningkatkan kebugaran, mengurangi ketidaknyamanan selama kehamilan, serta mempersiapkan tubuh untuk proses persalinan yang lancar.\n\n*Biaya untuk Senam Hamil\nRp 50.000\n\n*Manfaat Senam Hamil di RS Livasya:*\n\nMeningkatkan Kebugaran Fisik: Latihan terstruktur membantu menjaga stamina dan kekuatan otot selama kehamilan.\nMengurangi Ketidaknyamanan: Gerakan senam dapat membantu mengurangi nyeri punggung, kram kaki, dan pembengkakan.\nPersiapan Persalinan: Melatih teknik pernapasan dan relaksasi yang berguna saat proses persalinan.\nDukungan Emosional: Bertemu dengan sesama ibu hamil dapat memberikan dukungan dan berbagi pengalaman.\nInformasi Tambahan:\n\nBiaya: Biaya senam hamil di rumah sakit swasta di Indonesia umumnya berkisar antara Rp 25.000 hingga lebih dari Rp 200.000 per sesi. Untuk informasi tarif spesifik di RS Livasya, disarankan menghubungi langsung pihak rumah sakit.\nALODOKTER\nJadwal: Jadwal senam hamil dapat berbeda-beda. Sebaiknya Anda menghubungi RS Livasya untuk mendapatkan informasi terkini mengenai jadwal kelas.\nKontak RS Livasya:\n\nAlamat: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453\nTelepon: (0233) 8668019\nWhatsApp: 0812-1115-1300\nEmail: contact@livasya.com\nUntuk informasi lebih lanjut mengenai layanan senam hamil dan fasilitas lainnya, Anda dapat mengunjungi situs resmi RS Livasya di https://www.livasya.com/.\n\nRS Livasya berkomitmen untuk mendukung kesehatan ibu dan anak melalui berbagai layanan yang komprehensif dan profesional.."
-                ];
-            } else {
-                // Else untuk menampilkan menu jika input tidak dikenali
-                $response = [
-                    'message_type' => 'array',
-                    'title' => 'Pilih Layanan',
-                    'body' => 'Mohon maaf, Sahabat Livasya. Silakan ketik ulang kebutuhan Anda dengan benar, pilih salah satu dari menu berikut, atau ketik "halo" untuk menampilkan menu.',
-                    'data' => [
-                        [
-                            'id' => '/info_pendaftaran',
-                            'title' => 'Info Pendaftaran'
-                        ],
-                        [
-                            'id' => '/jadwal_praktek',
-                            'title' => 'Jadwal Dokter'
-                        ],
-                        [
-                            'id' => '/layanan_fasilitas',
-                            'title' => 'Layanan & Fasilitas'
-                        ],
-                        [
-                            'id' => '/info_fasilitas',
-                            'title' => 'Fasillitas Unggulan'
-                        ],
-                        [
-                            'id' => '/info_biaya',
-                            'title' => 'Biaya & Asuransi'
-                        ],
-                        [
-                            'id' => '/info_dafol',
-                            'title' => 'Daftar Online'
-                        ],
-                        [
-                            'id' => '/info_medical',
-                            'title' => 'Medical Check-Up'
-                        ],
-                        [
-                            'id' => '/info_cs',
-                            'title' => 'Customer Service'
-                        ]
-                    ]
-                ];
-            }
-
-            return response()->json($response);
-
-
-            // return response()->json(['error' => ($error ? "1" : "0"), $response]);
+        $error = true;
+        if ($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!') {
+            $error = false;
         }
 
-        public function notifyExpiryContract(Request $request)
-        {
-            // return 'Berhasil';
+        if ($error) {
+            return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
+        }
 
-            // Cek apakah metode POST
-            if ($request->getMethod() !== 'POST') {
-                return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
-            }
+        $response = json_encode($content, JSON_PRETTY_PRINT);
 
-            // Ambil data dari header dan JSON
-            $headers = $request->headers->all();
+        // Logika bisnis
+        $msg = $content['message'] ?? '';
+        $data = $content['data'] ?? [];
+        $nama = $data[1]['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
 
-            // Validasi header
-            $key = $headers['key'][0] ?? '';
-            $user = $headers['nama'][0] ?? '';
-            $sandi = $headers['sandi'][0] ?? '';
+        // $response = '';
+        // if ($msg == '/test-kirim') {
+        //     $response .= 'Halo ' . $nama;
+        // } else if ($msg == '/rekapabsen') {
+        //     $total_pegawai_rs = Employee::where('is_active', 1)->where('company_id', 1)->count();
+        //     $total_pegawai_pt = Employee::where('is_active', 1)->where('company_id', 2)->count();
+        //     $total_clockin = Attendance::whereNotNull('clock_in')
+        //         ->whereDate('date', Carbon::now()->format('Y-m-d'))
+        //         ->whereHas('employees', function ($query) {
+        //             $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
+        //         })->count();
+        //     $total_no_clockin = Attendance::whereNull('clock_in')->whereNull('is_day_off')
+        //         ->whereDate('date', Carbon::now()->format('Y-m-d'))
+        //         ->whereHas('employees', function ($query) {
+        //             $query->where('organization_id', '!=', 3);
+        //             $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
+        //         })->count();
+        //     $total_libur = Attendance::where('is_day_off', 1)
+        //         ->whereNull('attendance_code_id')
+        //         ->whereNull('day_off_request_id')
+        //         ->whereDate('date', Carbon::now()->format('Y-m-d'))
+        //         ->whereHas('employees', function ($query) {
+        //             $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
+        //         })->count();
+        //     $total_izin = 0;
+        //     $total_sakit = 0;
+        //     $total_cuti = 0;
+        //     $absensi_pegawai = Attendance::where('is_day_off', '!=', null)->where('date', Carbon::now()->format('Y-m-d'))->get();
+        //     foreach ($absensi_pegawai as $absensi) {
+        //         if ($absensi->attendance_code_id != null || $absensi->day_off_request_id != null) {
+        //             if ($absensi->attendance_code_id == 1) {
+        //                 $total_izin += 1;
+        //             } elseif ($absensi->attendance_code_id == 2) {
+        //                 $total_sakit += 1;
+        //             } elseif ($absensi->attendance_code_id != 1 && $absensi->attendance_code_id != 2) {
+        //                 $total_cuti += 1;
+        //             } elseif ($absensi->attendance_code_id == null || $absensi->attendance_code_id == "") {
+        //                 // Jika attendance_code_id di Attendance tidak ada, cek di DayOffRequest melalui relasi day_off
+        //                 if ($absensi->day_off) {
+        //                     // Cek apakah day_off_request memiliki attendance_code_id yang diinginkan
+        //                     if ($absensi->day_off->attendance_code_id == 1) {
+        //                         $total_izin += 1;
+        //                     } elseif ($absensi->day_off->attendance_code_id == 2) {
+        //                         $total_sakit += 1;
+        //                     } else {
+        //                         $total_cuti += 1;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
 
-            $error = true;
-            if ($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!') {
-                $error = false;
-            }
+        //     $response = "\n\n⬛️ <b>REKAP ABSEN HARI INI:</b>\n\n";
+        //     $response .= "🔹 <code>Total Pegawai RS: $total_pegawai_rs </code>\n";
+        //     $response .= "🔹 <code>Total Pegawai PT: $total_pegawai_pt </code>\n";
+        //     $response .= "🔹 <code>Sudah clockin: $total_clockin </code>\n";
+        //     $response .= "🔹 <code>Belum clockin: $total_no_clockin </code>\n";
+        //     $response .= "🔹 <code>Pegawai libur: $total_libur </code>\n";
+        //     $response .= "🔹 <code>Pegawai Cuti: $total_cuti </code>\n";
+        //     $response .= "🔹 <code>Pegawai Izin: $total_izin </code>\n";
+        //     $response .= "🔹 <code>Pegawai Sakit: $total_sakit </code>\n\n";
 
-            if ($error) {
-                return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
-            }
 
-            $responsePegawai = '';
-            $responseHRD = '';
-            $employees = Employee::where('is_active', 1)->whereMonth('end_status_date', Carbon::now()->month)->whereYear('end_status_date', Carbon::now()->year)->orderBy('end_status_date', 'asc')->get();
-            $headers = [
-                'Key:KeyAbcKey',
-                'Nama:arul',
-                'Sandi:123###!!',
+        //     $response .= "\n🟥 <b>DAFTAR PEGAWAI YANG TELAT:</b> \n\n";
+        //     $pegawai_telat = Attendance::whereNotNull('clock_in')->whereNotNull('late_clock_in')->whereHas('employees', function ($query) {
+        //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+        //         $query->whereNotIn('id', [1, 2, 14, 222]);
+        //     })->where('date', Carbon::now()->format('Y-m-d'))->orderBy('late_clock_in')->get();
+        //     foreach ($pegawai_telat as $key => $row) {
+        //         if ($row->late_clock_in > 5 && $row->late_clock_in < 70) {
+        //             $response .= "🔸" . Str::limit($row->employees->fullname, $limit = 16) . " ( " . $row->late_clock_in . " menit )\n";
+        //         }
+        //     }
+
+        //     $response .= "\n";
+        //     $response .= "<b>Rekap tersebut diambil berdasarkan tanggal " . Carbon::now()->translatedFormat('d F Y h:i A') . "</b>";
+        // } else if ($msg == '/tidakabsen') {
+        //     $response = "";
+        //     if (isset($data["shift"])) {
+        //         if ($data["shift"] == "pagi") {
+
+        //             // $absent_pagi_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
+        //             //     ->whereHas('shift', function ($query) {
+        //             //         $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
+        //             //             ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
+        //             //     })->whereHas('employees', function ($query) {
+        //             //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+        //             //         $query->where('company_id', 2); // Hanya untuk karyawan PT
+        //             //     })
+        //             //     ->where('date', Carbon::now()->format('Y-m-d'))
+        //             //     ->get();
+
+        //             // $absent_pagi_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
+        //             //     ->whereHas('shift', function ($query) {
+        //             //         $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
+        //             //             ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
+        //             //     })->whereHas('employees', function ($query) {
+        //             //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+        //             //         $query->where('company_id', 1); // Hanya untuk karyawan RS
+        //             //         $query->where('organization_id', '!=', 3);
+        //             //         $query->whereNotIn('id', [1, 2, 14, 222]); // Mengecualikan employee dengan ID;
+        //             //     })
+        //             //     ->where('date', Carbon::now()->format('Y-m-d'))
+        //             //     ->get();
+
+        //             // $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN PAGI ‼️ </b>\n\n";
+        //             // if (isset($absent_pagi_pt)) {
+        //             //     $response .= "🔻 <b>Karyawan PT: </b>\n";
+
+        //             //     foreach ($absent_pagi_pt as $key => $row) {
+        //             //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+        //             //     }
+        //             //     $response .= "\n";
+        //             // }
+
+        //             // if (isset($absent_pagi_rs)) {
+        //             //     $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
+
+        //             //     foreach ($absent_pagi_rs as $key => $row) {
+        //             //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+        //             //     }
+        //             //     $response .= "\n";
+        //             // }
+        //         } else if ($data["shift"] == "siang") {
+        //             // $absent_siang_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
+        //             //     ->whereHas('shift', function ($query) {
+        //             //         $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
+        //             //             ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
+        //             //     })->whereHas('employees', function ($query) {
+        //             //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+        //             //         $query->where('company_id', 2); // Hanya untuk karyawan PT
+        //             //     })
+        //             //     ->where('date', Carbon::now()->format('Y-m-d'))
+        //             //     ->get();
+
+        //             // $absent_siang_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
+        //             //     ->whereHas('shift', function ($query) {
+        //             //         $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
+        //             //             ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
+        //             //     })->whereHas('employees', function ($query) {
+        //             //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+        //             //         $query->where('company_id', 1); // Hanya untuk karyawan RS
+        //             //     })
+        //             //     ->where('date', Carbon::now()->format('Y-m-d'))
+        //             //     ->get();
+
+        //             // $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN SIANG ‼️ </b>\n\n";
+        //             // if (isset($absent_siang_pt)) {
+        //             //     $response .= "🔻 <b>Karyawan PT: </b>\n";
+
+        //             //     foreach ($absent_siang_pt as $key => $row) {
+        //             //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+        //             //     }
+        //             //     $response .= "\n";
+        //             // }
+
+        //             // if (isset($absent_siang_rs)) {
+        //             //     $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
+
+        //             //     foreach ($absent_siang_rs as $key => $row) {
+        //             //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+        //             //     }
+        //             //     $response .= "\n";
+        //             // }
+        //         } else if ($data["shift"] == "malam") {
+        //             $absent_malam_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
+        //                 ->whereHas('shift')->whereHas('employees', function ($query) {
+        //                     $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+        //                     $query->where('company_id', 2); // Hanya untuk karyawan PT
+        //                 })
+        //                 ->where('date', Carbon::now()->format('Y-m-d'))
+        //                 ->get();
+
+        //             $absent_malam_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
+        //                 ->whereHas('shift')->whereHas('employees', function ($query) {
+        //                     $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+        //                     $query->where('company_id', 1); // Hanya untuk karyawan RS
+        //                     $query->whereNotIn('id', [1, 2, 14, 222]);
+        //                 })
+        //                 ->where('date', Carbon::now()->format('Y-m-d'))
+        //                 ->get();
+
+        //             $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN HARI INI ‼️ </b>\n\n";
+        //             if (isset($absent_malam_pt)) {
+        //                 $response .= "🔻 <b>Karyawan PT: </b>\n";
+
+        //                 foreach ($absent_malam_pt as $key => $row) {
+        //                     $response .= "⛔️ " . $row->employees->fullname . "\n";
+        //                 }
+        //                 $response .= "\n";
+        //             }
+
+        //             if (isset($absent_malam_rs)) {
+        //                 $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
+
+        //                 foreach ($absent_malam_rs as $key => $row) {
+        //                     $response .= "⛔️ " . $row->employees->fullname . "\n";
+        //                 }
+        //                 $response .= "\n";
+        //             }
+        //         }
+        //     }
+
+        //     $response .= "\n\n🔴 <b>DAFTAR KARYAWAN YANG LIBUR/IZIN/SAKIT/CUTI: </b>\n\n";
+        //     $response .= "🔻 <b>Karyawan PT: </b>\n";
+        //     $attendancesPT = Attendance::where('is_day_off', '!=', null)->whereHas('employees', function ($query) {
+        //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+        //         $query->where('company_id', 2); // Hanya untuk karyawan PT
+        //     })->where('date', Carbon::now()->format('Y-m-d'))->get();
+
+        //     foreach ($attendancesPT as $key => $row) {
+        //         if ($row->attendance_code_id != null || $row->day_off_request_id != null) {
+        //             $response .= "▪️ " . $row->employees->fullname . " ( " . isset($row->attendance_code_id) ? $row->attendance_code->name : $row->day_off->attendance_code->name . " )\n";
+        //         } else {
+        //             $response .= "▪️ " . $row->employees->fullname . " ( Libur )\n";
+        //         }
+        //     }
+        //     $response .= "\n";
+        //     $attendancesLivasya = Attendance::where('is_day_off', '!=', null)->whereHas('employees', function ($query) {
+        //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+        //         $query->where('company_id', 1); // Hanya untuk karyawan PT
+        //     })->where('date', Carbon::now()->format('Y-m-d'))->get();
+
+        //     // dd($attendancesLivasya);
+        //     $response .= "\n🔻 <b>Karyawan RS Livasya: </b>\n";
+
+        //     // Array untuk pegawai dengan attendance_code_id atau day_off_request_id
+        //     $employeesWithAttendance = [];
+        //     // Array untuk pegawai dengan Libur
+        //     $employeesOnLeave = [];
+
+        //     // Memisahkan pegawai berdasarkan kondisi
+        //     foreach ($attendancesLivasya as $key => $row) {
+        //         if ($row->attendance_code_id != null || $row->day_off_request_id != null) {
+        //             $employeesWithAttendance[] = $row;
+        //         } else {
+        //             $employeesOnLeave[] = $row;
+        //         }
+        //     }
+
+        //     // Menambahkan pegawai dengan attendance_code_id atau day_off_request_id ke dalam respons
+        //     foreach ($employeesWithAttendance as $row) {
+        //         $response .= "<b>▪️ " . $row->employees->fullname . " ( ";
+        //         if ($row->attendance_code_id != null) {
+        //             $response .= $row->attendance_code->description;
+        //         } else {
+        //             $response .= $row->day_off->attendance_code->description;
+        //         }
+        //         $response .= " )</b> \n";
+        //     }
+        //     $response .= "\n";
+        //     // Menambahkan pegawai dengan Libur ke dalam respons
+        //     foreach ($employeesOnLeave as $row) {
+        //         $response .= "▪️ " . $row->employees->fullname . " ( Libur )\n";
+        //     }
+
+        //     $response .= "\n";
+        //     $response .= "<b>Rekap tersebut diambil berdasarkan tanggal " . Carbon::now()->translatedFormat('d F Y h:i A') . "</b>";
+        // } else if ($msg == '/isiabsenpeg') {
+        //     $idTelegram = isset($data['id']) ? $data['id'] : null;
+        //     $usernameTelegram = $data['uname'] ?? null;
+        //     $nama = $data['name'] ?? null;
+        //     $tanggal = date("d M Y H:i:s", $data['date']);
+        //     $latitude = $data['latitude'] ?? null;
+        //     $longitude = $data['longitude'] ?? null;
+
+        //     $response = 'terima kasih ' . $nama . ' sudah mengisi Absensi 😍 ';
+        //     $response .= chr(10) . 'pada tanggal ' . date("d M Y", $data['date']) . ' jam ' . date("H:i:s", $data['date']);;
+        // } else {
+        //     // $idTelegram = isset($data['id']) ? $data['id'] : null;
+        //     // $usernameTelegram = $data['username'] ?? null;
+        //     // $nama = $data['first_name'] ?? null;
+
+        //     // $error = true;
+        //     // $response = 'else';
+        //     $response  = "Halo *$nama* , \r\n";
+        //     $response .= "Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka.* \r\n\r\n";
+        //     $response .= "*Jam Operasional IGD 24 Jam.* \r\n";
+        //     $response .= "Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini: \r\n";
+        // }
+
+        return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
+    }
+
+    public function livasyaMessage(Request $request)
+    {
+        // Cek apakah metode POST
+        if ($request->getMethod() !== 'POST') {
+            return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
+        }
+
+        // Ambil data dari header dan JSON
+        $headers = $request->headers->all();
+        $content = $request->json()->all();
+        $msg = $content['message'] ?? '';
+
+        // Validasi header
+        $key = $headers['key'][0] ?? '';
+        $user = $headers['nama'][0] ?? '';
+        $sandi = $headers['sandi'][0] ?? '';
+
+        $error = true;
+        if ($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!') {
+            $error = false;
+        }
+
+        if ($error) {
+            return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
+        }
+
+        if($msg == 'test_string') {
+            $response = [
+                'message_type' => 'string',
+                'data' => 'Halo String'
             ];
 
-            // Data untuk request HTTP
-            $responseHRD .= "*DAFTAR PEGAWAI YANG AKAN HABIS KONTRAK* \n\n";
-            if ($employees->count() > 0) {
-                foreach ($employees as $employee) {
-                    $responsePegawai .= "*INFO KONTRAK AKAN BERAKHIR* \n\n";
-                    $responsePegawai .= "Halo kak, *" . $employee->fullname . "*, kontrakmu akan berakhir pada tanggal " . tgl(Carbon::parse($employee->end_status_date)->format('Y-m-d')) . ". Harap konfirmasi kebagian HRD untuk kontrak selanjutnya ya! 😇.\n\n";
-                    $responsePegawai .= "_Reported automatic by: Smart HR_";
+        } else if ($msg == 'test_array') {
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'judul tombol nya',
+                'body' => 'isi text nya',
+                'data' => [
+                    [
+                        'id' => '/jadwal_praktek',
+                        'title' => 'Jadwal Poli'
+                    ],
+                    [
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasilitas Unggulan'
+                    ],
+                    [
+                        'id' => '/info_rajal',
+                        'title' => 'Info Rawat Jalan'
+                    ],
+                    [
+                        'id' => '/daftar_poli_rajal',
+                        'title' => 'Pendaftaran Poliklinik'
+                    ],
+                    [
+                        'id' => '/info_medical',
+                        'title' => 'Medical Check Up'
+                    ],
+                    [
+                        'id' => '/info_persalinan',
+                        'title' => 'Biaya Persalinan'
+                    ]
+                ]
+            ];
+            
+            // Bagian pilihan jadwal poliklinik
 
-                    if ($employee->mobile_phone) {
-                        $httpData = [
-                            'number' => formatNomorIndo($employee->mobile_phone),
-                            'message' => $responsePegawai,
-                        ];
+        } else if ($msg == '/jadwal_praktek') {
 
-                        // Mengirim request HTTP menggunakan cURL
-                        $curl = curl_init();
-                        curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.131:3001/send-message');
-                        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-                        curl_setopt($curl, CURLOPT_POST, 1);
-                        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-                        curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
-                        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Pilih Layanan',
+                'body' => 'Berikut adalah jadwal Poliklinik di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/klinik_obgyn',
+                        'title' => 'Poli Obgyn'
+                    ],
+                    [
+                        'id' => '/klinik_anak',
+                        'title' => 'Poli Anak'
+                    ],
+                    [
+                        'id' => '/klinik_tht',
+                        'title' => 'Poli THT'
+                    ],
+                    [
+                        'id' => '/klinik_dalam',
+                        'title' => 'Poli Penyakit Dalam'
+                    ],
+                    [
+                        'id' => '/klinik_bedah',
+                        'title' => 'Poli Bedah'
+                    ],
+                    [
+                        'id' => '/klinik_paru',
+                        'title' => 'Poli Paru'
+                    ],
+                    [
+                        'id' => '/klinik_jiwa',
+                        'title' => 'Poli Jiwa'
+                    ],
+                    [
+                        'id' => '/klinik_gigi',
+                        'title' => 'Poli Gigi'
+                    ],
+                    [
+                        'id' => '/klinik_jantung',
+                        'title' => 'Poli Jantung'
+                    ]
+                ]
+            ];
 
-                        $response = curl_exec($curl);
-                        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-                        $curlError = curl_error($curl);
-                        curl_close($curl);
-                    }
-                    $responsePegawai = '';
-                    $responseHRD .= "🔸 " . $employee->fullname . " (" . tgl(Carbon::parse($employee->end_status_date)->format('Y-m-d')) . ") \n";
-                }
+            // Bagian pilihan fasilitas unggulan
 
-                $responseHRD .= "\n _Reported automatic by: Smart HR_";
+        } else if ($msg == '/info_fasilitas') {
 
-                $hrdList = Employee::where('organization_id', 31)->latest()->get();
-                $responses = [];
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Pilih Layanan',
+                'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/foto_bayi',
+                        'title' => 'Baby Newborn Photo'
+                    ],
+                    [
+                        'id' => '/baby_spa',
+                        'title' => 'Baby Spa Swimming'
+                    ],
+                    [
+                        'id' => '/maternity',
+                        'title' => 'Maternity'
+                    ],
+                    [
+                        'id' => '/partus_moment',
+                        'title' => 'Partus Moment'
+                    ],
+                    [
+                        'id' => '/senam_hamil',
+                        'title' => 'Senam Hamil'
+                    ]
+                ]
+            ];
+            
+            // Bagian informasi pendaftaran
 
-                foreach ($hrdList as $hrd) {
-                    $httpDataHRD = [
-                        'number' => formatNomorIndo($hrd->mobile_phone),
-                        'message' => $responseHRD,
+        } else if ($msg == '/info_pendaftaran') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Pilih Layanan',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/info_bpjs_asuransi',
+                        'title' => 'Info BPJS'
+                    ],
+                    [
+                        'id' => '/syarat',
+                        'title' => 'Syarat Pendaftaran'
+                    ],
+                    [
+                        'id' => '/prosedur',
+                        'title' => 'Prosedur Pendaftaran'
+                    ],
+                    [
+                        'id' => '/info_dafol',
+                        'title' => 'Pendaftaran Online'
+                    ]
+                ]
+            ];
+
+            // Isi Respon Menu Pendaftaran
+
+        } else if($msg == '/info_bpjs_asuransi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Informasi BPJS* \n\nSaat ini rumah sakit livasya menyediakan layanan rawat inap dan rawat jalan khusus peserta BPJS/JKN/KIS mulai dari :\n\n▪️ Spesialis Anak\n▪️ Spesialis kandungan\n▪️ Spesialis bedah\n▪️ Spesialis penyakit dalam\n▪️ Spesialis THT"
+            ];
+
+        }  else if($msg == '/syarat') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Syarat pendaftaran*\n\n*Syarat pendaftaran rawat jalan*\n▪️ khusus peserta penjamin umum cukup membawa data diri/kartu berobat\n▪️ khusus peserta BPJS/JKN/KIS cukup membawa rujukan faskes 1 dan data diri\n▪️ khusus peserta asuransi swasta cukup membawa karru asuransi dan data diri\n\n*Syarat pendaftaran rawat inap*\n▪️ khusus peserta penjamin umum cukup membawa identitas diri\n▪️ khusus peserta penjamin BPJS/JKN/KIS Cukup membawa kartu identitas ,KK,KTP dan kartu BPJS (Bila ada)\n▪️ khusus peserta asuransi swasta cukup membawa kartu asuransi dan data diri"
+            ];
+
+        } else if($msg == '/info_dafol') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Pendafataran online khusus penjamin JKN/BPJS silahkan bapak/ibu akses melalui Aplikasi MOBILE JKN* \n\nPendafataran online khusus penjamin Umum/asuransi silahkan bapak/ibu akses melalui link website berikut :  https://dafol.livasya.com/ \n\n*Note* : \n▪️ Pendaftaran online By link website dapat diakses H-3 atau paling lambat H-1 sebelum tanggal kunjungan\n▪️ Pendafataran online By Mobile JKN(BPJS) dapat diakses H-30 dan paling lambat di hari H sebelum jam praktek poliklinik"
+            ];
+
+        } else if($msg == '/prosedur') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Prosedur pendaftaran*\n\nLayanan pendaftaran poliklinik  bisa diakses melalui online maupun onsite sesuai dengan jam praktek poliklinik"
+            ];
+
+            // Bagian Medical Checkup
+
+        } else if($msg == '/info_medical') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Medical Check - Up*\n\n*Paket Silver*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Pemeriksaan gula darah\n- Pemeriksaan kolesterol\n- Pemeriksaan asam urat\n\n*Biaya : Rp. 150.000*\n\n*Paket Gold*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Hematologi rutin\n- Gula darah puasa\n- Kolesterol\n- Trigliserida\n- Asam urat\n- Ureum\n- Kreatinin\n- SGOT\n- Urine lengkap\n\n*Biaya : Rp. 700.000*\n\n*Paket Diamond*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Hematologi rutin\n- Gula darah puasa\n- Kolesterol\n- Trigliserida\n- Asam urat\n- Ureum\n- Kreatinin\n- SGOT\n- SGPT\n- Urine lengkap\n- EKG\n- Rontgen thorax\n\n*Biaya : Rp. 920.000*"
+            ];
+
+            // Bagian Rawat Inap
+
+        } else if($msg == '/rawat_inap') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Rawat Inap*\n\nLayanan pendaftaran poliklinik  bisa diakses melalui online maupun onsite sesuai dengan jam praktek poliklinik"
+            ];
+
+            // Bagian Layanan dan Fasilitas
+
+        } else if ($msg == '/layanan_fasilitas') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Pilih Layanan',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/igd',
+                        'title' => 'IGD (24 Jam)'
+                    ],
+                    [
+                        'id' => '/rawat_inap',
+                        'title' => 'Rawat Inap'
+                    ],
+                    [
+                        'id' => '/jadwal_praktek',
+                        'title' => 'Rawat Jalan'
+                    ],
+                    [
+                        'id' => '/radiologi_laboratorium',
+                        'title' => 'Radiologi & Laboratorium'
+                    ],
+                    [
+                        'id' => '/layanan_vaksin',
+                        'title' => 'Layanan Vaksin'
+                    ],
+                    [
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasilitas'
+                    ],
+                ]
+            ];
+            
+        } else if($msg == '/layanan_vaksin') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Imunisasi dasar dan tambahan*\n- vaxigrip/influenza: 570.265\n- Influvac/influenza :  549.497\n- Rotarix / Rotavirus: 829.864\n- Synflorix / pcv: 1.710.510\n- prevenar Injc 13 /PCV : 1.349.224\n- PCV dinkes : 28.585\n- Varivax / varicella: 943.764\n- BCG  dinkes : 28.585\n- DPT Pentabio Dinkes (Demam) : 28.585\n- DPT Hexaxim (Tanpa demam) : 2.018.424\n- DPT Infanrix (Tanpa Demam) :  2.098.524\n- MR/Campak dinkes : 28.585\n- MMR 2 : 677.481\n- TYPHIM /thypoid: 571.337\n- Rotavac Dinkes /rotavirus : 28.585\n- Havrix 720 Junior : 834.388\n- Polio tetes (Dinkes) : 28.585\n- Polio Injek ( Dinkes) : 28.585\n- HB 0 : 28.585\n- Cervarix : 1.105.443\n- Gardasil 4' INJ : 1.584.959\n- Gardasil 9' INJ : 3.177.340\n- Imojev : 977.919\n- TD : 28.585\n\n*Note:*\n1. Harga belum termasuk Konsul dokter +Admin+embalase\n2. Beberapa vaksin mengikuti Sistem PO ,konfirmasi ketersediaan terlebih dahulu\n3. Khusus vaksin yang mengikuti sistem PO akan dikenakan biaya Deposit sebelum pemesanan\n4. Deposit pemesanan tidak dapat dikembalikan bila sewaktu cancel / tidak jadi vaksinasi\n5. Khusus vaksin dalam PO, kedatangan vaksin tidak bisa diestimasikan"
+            ];
+        } else if($msg == '/klinik_obgyn') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Jadwal praktek poliklinik Obgyn*\n\n*dr Dindaadi kusuma Sp.OG*\nSenin-kamis : 08.30-13.00\nJumat-sabtu : 13.00-15.00\n\n*dr H Mohammad Taufiq Sp.OG*\nJumat dan sabtu : 8.30-10.30\nSenin- sabtu : 16.00-18.00\nNote : hari libur/tanggal merah tidak ada praktek"
+            ];
+        } else if($msg == '/klinik_anak') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*JADWAL POLI ANAK*\n\n- Pasien umum\n\n*Dr. Tina Restu Sp.A*\nSenin-sabtu Pukul : 07.00-09.00\n\n*Dr. Ratih Sp.A*\nSenin, Rabu Pukul : 14.30 - Selesai\nSelasa,kamis Jumat Pukul :15.30 - Selesai\n- Pasien BPJS dengan Rujukan faskes 1\n\n*Dr. Tina Restu Sp.A*\nSenin - Jumat  Pukul : 13.00 - Selesai\n\n*Dr. Ratih Sp.A*\nSenin,Rabu  Pukul : 14.30 - Selesai\nSelasa , kamis dan jumat  Pukul : 15.30-Selesai\n\nHari libur/tanggal merah tidak praktek"
+            ];
+        } else if($msg == '/klinik_tht') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*JADWAL POLIKLINIK THT*\n\nPasien umum,Asuransi,BPJS\n\n*dr. H.M.Nuruddin Zainudin, Sp.THT-KL*\n\nSelasa & Kamis\nPukul : 12.00-Selesai"
+            ];
+        } else if($msg == '/klinik_dalam') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*JADWAL POLIKLINIK PENYAKIT DALAM*\n\n Pasien umum,asuransi,BPJS\n\n*dr. Zikry Aulia Hidayat, Sp.PD*\n\nSenin,rabu,Jumat\nPukul 16.00-Selesai\n\n*dr. Jansen budiono Sp.PD*\n\nSelasa dan Kamis\nPukul 15.00-Selesai"
+            ];
+        } else if($msg == '/klinik_bedah') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Jadwal Poliklinik Bedah Umum*\n\n*dr. Rizky Baihaqi Sp.B*\n\nSenin-Sabtu\nPukul 08.00-12.00\n\nJumat\nPukul 08.00-11.00\n\nMelayani peserta JKN/BPJS,Umum dan Asuransi Swasta"
+            ];
+        } else if($msg == '/klinik_paru') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Jadwal Poliklinik spesialis Paru*\n\n*dr Tania libristina ambun Sp.P*\n\nSelasa, Rabu, Kamis\nPkl 15.00-17.00\n\nBerlaku dengan reservasi H-1"
+            ];
+        } else if($msg == '/klinik_jiwa') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Jadwal Poliklinik Spesialis Kedokteran Jiwa*\n\n*dr Agri Mohammad iqbal Sp.KJ*\n\nSenin,Rabu,Jumat\nPkl. 08.00-10.00\n\nBerlaku dengan reservasi H-1"
+            ];
+        } else if($msg == '/klinik_gigi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Jadwal Poliklinik Gigi*\n\n*drg. Viki Dwi prananda*\n\nSenin-Jumat\nPkl . 08.00-15.00\n\nSabtu\nPkl 08.00-12.00"
+            ];
+        } else if($msg == '/klinik_jantung') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Jadwal belum ada"
+            ];
+            
+            // Bagian Fasilitas unggulan
+
+        } else if($msg == '/foto_bayi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Baby Newborn Photoshoot*\n\nRS Livasya di Majalengka menawarkan layanan fotografi bayi baru lahir (newborn baby photography) yang bertujuan mengabadikan momen berharga si kecil. Layanan ini mencakup berbagai genre fotografi, seperti:\n\nFocusing: Memotret bayi tanpa tambahan aksesoris, menonjolkan keaslian dan kemurnian.\nLifestyle: Mengabadikan interaksi keluarga dengan bayi di rumah sakit atau saat membawa pulang bayi.\nKomersial: Foto yang digunakan untuk promosi produk bayi atau keperluan komeRSl lainnya.\n\n*Biaya untuk Baby Newborn Photoshoot*\nRp 200.000\n(dapat 1 file dan 1 cetak foto + figura)\nRp 50.000\n(untuk menambah file)\nRp 200.000\n(untuk penambahan foto cetak)\n\nUntuk informasi lebih lanjut mengenai layanan ini, Anda dapat mengunjungi situs resmi RS Livasya di https://livasya.com/fasilitas/newborn-baby-photography.\n\nSelain itu, RS Livasya juga menyediakan layanan fotografi maternity shoot untuk mengabadikan momen kehamilan.\n\nInformasi lebih lanjut dapat ditemukan di\nhttps://www.livasya.co.id/fasilitas/photography-maternity-shoot.\nUntuk melihat contoh hasil fotografi bayi baru lahir di RS Livasya, Anda dapat menonton video berikut:"
+            ];
+        } else if($msg == '/baby_spa') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Baby Spa and Swim*\n\nRS Livasya di Majalengka menyediakan layanan Baby Spa yang terdiri dari hidroterapi dan pijat bayi. Layanan ini tersedia setiap hari mulai pukul 09.00 hingga 15.00. Sebagai promo, setiap kunjungan akan mendapatkan voucher gratis; kumpulkan 10 voucher untuk mendapatkan 1 kali pijat bayi gratis.\n\nAlamat RS Livasya: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453. Untuk informasi lebih lanjut, Anda dapat menghubungi nomor telepon (0233) 8668019 atau WhatsApp di 0812-1115-1300.\n\nSebelum membawa si kecil untuk sesi Baby Spa, pastikan untuk memeriksa kebersihan fasilitas dan bahan yang digunakan guna menghindari risiko alergi atau iritasi pada kulit bayi.\n\n*Biaya untuk Baby Newborn Photoshoot*\n\n*1 Paket Baby Spa*\nRp 150.000\n*Baby Message*\nRp 60.000\n*Baby Swim*\nRp 60.000\n*Foto Bayi (Baby Spa)*\nRp 60.000\n*Tindik Bayi*\nRp 65.000"
+            ];
+        } else if($msg == '/maternity') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Foto Maternity*\n\nRS Livasya di Majalengka menyediakan layanan Photography Maternity Shoot untuk mengabadikan momen kehamilan Anda. Layanan ini dirancang khusus bagi ibu hamil yang ingin mendokumentasikan masa kehamilan mereka melalui sesi pemotretan profesional.\n\n*Biaya untuk Partus Moment*\nRp 300.000."
+            ];
+        } else if($msg == '/partus_moment') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Partus Moment*\n\RS Livasya di Majalengka menyediakan layanan Partus Moment, yaitu dokumentasi profesional selama proses persalinan untuk mengabadikan momen berharga kelahiran buah hati Anda. Layanan ini dirancang untuk menangkap setiap detik penting dan emosi yang terjadi selama proses persalinan, sehingga menjadi kenangan yang tak terlupakan bagi keluarga.\n\n*Biaya Partus Moment*\nRp 2.000.000\n\nUntuk melihat contoh dari layanan Partus Moment, Anda dapat mengunjungi kanal YouTube resmi RS Livasya, di mana terdapat berbagai video dokumentasi persalinan yang telah diabadikan sebelumnya. Salah satunya adalah video persalinan normal Ny. Devi & Tn. Dani yang dapat Anda saksikan melalui tautan berikut:\n\nJika Anda tertarik untuk memanfaatkan layanan ini atau memerlukan informasi lebih lanjut, silakan menghubungi RS Livasya melalui nomor telepon (0233) 8668019 atau WhatsApp di 0812-1115-1300. Alamat RS Livasya: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453.\n\nRS Livasya berkomitmen untuk memberikan pelayanan terbaik dalam setiap momen berharga Anda dan keluarga."
+            ];
+        } else if($msg == '/senam_hamil') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Senam Hamil*\n\nRS Livasya di Majalengka menyediakan layanan senam hamil yang dirancang khusus untuk membantu ibu hamil mempersiapkan diri secara fisik dan mental menjelang persalinan. Program ini bertujuan untuk meningkatkan kebugaran, mengurangi ketidaknyamanan selama kehamilan, serta mempersiapkan tubuh untuk proses persalinan yang lancar.\n\n*Biaya untuk Senam Hamil\nRp 50.000\n\n*Manfaat Senam Hamil di RS Livasya:*\n\nMeningkatkan Kebugaran Fisik: Latihan terstruktur membantu menjaga stamina dan kekuatan otot selama kehamilan.\nMengurangi Ketidaknyamanan: Gerakan senam dapat membantu mengurangi nyeri punggung, kram kaki, dan pembengkakan.\nPersiapan Persalinan: Melatih teknik pernapasan dan relaksasi yang berguna saat proses persalinan.\nDukungan Emosional: Bertemu dengan sesama ibu hamil dapat memberikan dukungan dan berbagi pengalaman.\nInformasi Tambahan:\n\nBiaya: Biaya senam hamil di rumah sakit swasta di Indonesia umumnya berkisar antara Rp 25.000 hingga lebih dari Rp 200.000 per sesi. Untuk informasi tarif spesifik di RS Livasya, disarankan menghubungi langsung pihak rumah sakit.\nALODOKTER\nJadwal: Jadwal senam hamil dapat berbeda-beda. Sebaiknya Anda menghubungi RS Livasya untuk mendapatkan informasi terkini mengenai jadwal kelas.\nKontak RS Livasya:\n\nAlamat: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453\nTelepon: (0233) 8668019\nWhatsApp: 0812-1115-1300\nEmail: contact@livasya.com\nUntuk informasi lebih lanjut mengenai layanan senam hamil dan fasilitas lainnya, Anda dapat mengunjungi situs resmi RS Livasya di https://www.livasya.com/.\n\nRS Livasya berkomitmen untuk mendukung kesehatan ibu dan anak melalui berbagai layanan yang komprehensif dan profesional.."
+            ];
+        } else {
+            // Else untuk menampilkan menu jika input tidak dikenali
+            $response = [
+                'message_type' => 'array',
+                'title' => 'Pilih Layanan',
+                'body' => 'Mohon maaf, Sahabat Livasya. Silakan ketik ulang kebutuhan Anda dengan benar, pilih salah satu dari menu berikut, atau ketik "halo" untuk menampilkan menu.',
+                'data' => [
+                    [
+                        'id' => '/info_pendaftaran',
+                        'title' => 'Info Pendaftaran'
+                    ],
+                    [
+                        'id' => '/jadwal_praktek',
+                        'title' => 'Jadwal Dokter'
+                    ],
+                    [
+                        'id' => '/layanan_fasilitas',
+                        'title' => 'Layanan & Fasilitas'
+                    ],
+                    [
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasillitas Unggulan'
+                    ],
+                    [
+                        'id' => '/info_biaya',
+                        'title' => 'Biaya & Asuransi'
+                    ],
+                    [
+                        'id' => '/info_dafol',
+                        'title' => 'Daftar Online'
+                    ],
+                    [
+                        'id' => '/info_medical',
+                        'title' => 'Medical Check-Up'
+                    ],
+                    [
+                        'id' => '/info_cs',
+                        'title' => 'Customer Service'
+                    ]
+                ]
+            ];
+        }
+
+        return response()->json($response);
+
+
+        // return response()->json(['error' => ($error ? "1" : "0"), $response]);
+    }
+
+    public function notifyExpiryContract(Request $request)
+    {
+        // return 'Berhasil';
+
+        // Cek apakah metode POST
+        if ($request->getMethod() !== 'POST') {
+            return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
+        }
+
+        // Ambil data dari header dan JSON
+        $headers = $request->headers->all();
+
+        // Validasi header
+        $key = $headers['key'][0] ?? '';
+        $user = $headers['nama'][0] ?? '';
+        $sandi = $headers['sandi'][0] ?? '';
+
+        $error = true;
+        if ($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!') {
+            $error = false;
+        }
+
+        if ($error) {
+            return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
+        }
+
+        $responsePegawai = '';
+        $responseHRD = '';
+        $employees = Employee::where('is_active', 1)->whereMonth('end_status_date', Carbon::now()->month)->whereYear('end_status_date', Carbon::now()->year)->orderBy('end_status_date', 'asc')->get();
+        $headers = [
+            'Key:KeyAbcKey',
+            'Nama:arul',
+            'Sandi:123###!!',
+        ];
+
+        // Data untuk request HTTP
+        $responseHRD .= "*DAFTAR PEGAWAI YANG AKAN HABIS KONTRAK* \n\n";
+        if ($employees->count() > 0) {
+            foreach ($employees as $employee) {
+                $responsePegawai .= "*INFO KONTRAK AKAN BERAKHIR* \n\n";
+                $responsePegawai .= "Halo kak, *" . $employee->fullname . "*, kontrakmu akan berakhir pada tanggal " . tgl(Carbon::parse($employee->end_status_date)->format('Y-m-d')) . ". Harap konfirmasi kebagian HRD untuk kontrak selanjutnya ya! 😇.\n\n";
+                $responsePegawai .= "_Reported automatic by: Smart HR_";
+
+                if ($employee->mobile_phone) {
+                    $httpData = [
+                        'number' => formatNomorIndo($employee->mobile_phone),
+                        'message' => $responsePegawai,
                     ];
 
                     // Mengirim request HTTP menggunakan cURL
@@ -786,72 +761,101 @@
                     curl_setopt($curl, CURLOPT_TIMEOUT, 30);
                     curl_setopt($curl, CURLOPT_POST, 1);
                     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-                    curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
+                    curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
                     curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
                     $response = curl_exec($curl);
                     $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
                     $curlError = curl_error($curl);
                     curl_close($curl);
-
-                    // Menyimpan hasil respons untuk setiap HRD
-                    $responses[] = [
-                        'employee_id' => $hrd->id,
-                        'number' => $httpDataHRD['number'],
-                        'http_code' => $httpCode,
-                        'response' => $response,
-                        'error' => $curlError,
-                    ];
                 }
-
-                // Mengembalikan hasil dalam bentuk JSON
-                return response()->json(['results' => $responses]);
+                $responsePegawai = '';
+                $responseHRD .= "🔸 " . $employee->fullname . " (" . tgl(Carbon::parse($employee->end_status_date)->format('Y-m-d')) . ") \n";
             }
+
+            $responseHRD .= "\n _Reported automatic by: Smart HR_";
+
+            $hrdList = Employee::where('organization_id', 31)->latest()->get();
+            $responses = [];
+
+            foreach ($hrdList as $hrd) {
+                $httpDataHRD = [
+                    'number' => formatNomorIndo($hrd->mobile_phone),
+                    'message' => $responseHRD,
+                ];
+
+                // Mengirim request HTTP menggunakan cURL
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.131:3001/send-message');
+                curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+                curl_setopt($curl, CURLOPT_POST, 1);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
+                curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+                $response = curl_exec($curl);
+                $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($curl);
+                curl_close($curl);
+
+                // Menyimpan hasil respons untuk setiap HRD
+                $responses[] = [
+                    'employee_id' => $hrd->id,
+                    'number' => $httpDataHRD['number'],
+                    'http_code' => $httpCode,
+                    'response' => $response,
+                    'error' => $curlError,
+                ];
+            }
+
+            // Mengembalikan hasil dalam bentuk JSON
+            return response()->json(['results' => $responses]);
         }
-
-        // function sendInteractiveMessage($recipient)
-        // {
-        //     $whatsappApiUrl = "https://graph.facebook.com/v19.0/{phone_number_id}/messages";
-        //     $accessToken = "{your_access_token}";
-
-        //     $payload = [
-        //         "messaging_product" => "whatsapp",
-        //         "recipient_type" => "individual",
-        //         "to" => $recipient, // Nomor WhatsApp penerima
-        //         "type" => "interactive",
-        //         "interactive" => [
-        //             "type" => "list",
-        //             "body" => [
-        //                 "text" => "Silakan pilih layanan yang Anda butuhkan:"
-        //             ],
-        //             "action" => [
-        //                 "button" => "Pilih",
-        //                 "sections" => [
-        //                     [
-        //                         "title" => "Layanan Kami",
-        //                         "rows" => [
-        //                             [
-        //                                 "id" => "/jadwal_praktek",
-        //                                 "title" => "Jadwal Praktek Dokter"
-        //                             ],
-        //                             [
-        //                                 "id" => "/info_rawat_inap",
-        //                                 "title" => "Info Rawat Inap"
-        //                             ],
-        //                             [
-        //                                 "id" => "/info_poli",
-        //                                 "title" => "Pendaftaran Poliklinik"
-        //                             ]
-        //                         ]
-        //                     ]
-        //                 ]
-        //             ]
-        //         ]
-        //     ];
-
-        //     $response = Http::withToken($accessToken)
-        //         ->post($whatsappApiUrl, $payload);
-
-        //     return $response->json();
-        // }
     }
+
+    // function sendInteractiveMessage($recipient)
+    // {
+    //     $whatsappApiUrl = "https://graph.facebook.com/v19.0/{phone_number_id}/messages";
+    //     $accessToken = "{your_access_token}";
+
+    //     $payload = [
+    //         "messaging_product" => "whatsapp",
+    //         "recipient_type" => "individual",
+    //         "to" => $recipient, // Nomor WhatsApp penerima
+    //         "type" => "interactive",
+    //         "interactive" => [
+    //             "type" => "list",
+    //             "body" => [
+    //                 "text" => "Silakan pilih layanan yang Anda butuhkan:"
+    //             ],
+    //             "action" => [
+    //                 "button" => "Pilih",
+    //                 "sections" => [
+    //                     [
+    //                         "title" => "Layanan Kami",
+    //                         "rows" => [
+    //                             [
+    //                                 "id" => "/jadwal_praktek",
+    //                                 "title" => "Jadwal Praktek Dokter"
+    //                             ],
+    //                             [
+    //                                 "id" => "/info_rawat_inap",
+    //                                 "title" => "Info Rawat Inap"
+    //                             ],
+    //                             [
+    //                                 "id" => "/info_poli",
+    //                                 "title" => "Pendaftaran Poliklinik"
+    //                             ]
+    //                         ]
+    //                     ]
+    //                 ]
+    //             ]
+    //         ]
+    //     ];
+
+    //     $response = Http::withToken($accessToken)
+    //         ->post($whatsappApiUrl, $payload);
+
+    //     return $response->json();
+    // }
+}
