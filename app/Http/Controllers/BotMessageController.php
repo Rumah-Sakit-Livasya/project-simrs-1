@@ -564,10 +564,7 @@ class BotMessageController extends Controller
                         'id' => '/jadwal_praktek',
                         'title' => 'Rawat Jalan'
                     ],
-                    [
-                        'id' => '/radiologi_laboratorium',
-                        'title' => 'Radiologi & Laboratorium'
-                    ],
+                    
                     [
                         'id' => '/layanan_vaksin',
                         'title' => 'Layanan Vaksin'
