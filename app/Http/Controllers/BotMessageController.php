@@ -677,10 +677,7 @@ class BotMessageController extends Controller
                         'id' => '/info_fasilitas',
                         'title' => 'Fasillitas Unggulan'
                     ],
-                    [
-                        'id' => '/info_biaya',
-                        'title' => 'Biaya & Asuransi'
-                    ],
+                    
                     [
                         'id' => '/info_dafol',
                         'title' => 'Daftar Online'
