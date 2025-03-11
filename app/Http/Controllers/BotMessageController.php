@@ -544,7 +544,7 @@ class BotMessageController extends Controller
         } else if($msg == '/info_usg') {
             $response = [
                 'message_type' => 'string',
-                'data' => "*Biaya USG*\n\nUSG 2D 195k\n- USG 3D 265k\n- USG 4D 325k\n- TRANVAGINAL 350 +-\n\n*Note* : berikut kisaran estimasi include Konsul dokter + usg +print usg dan admin"
+                'data' => "*Biaya USG*\n\n- *USG 2D* 195k\n- *USG 3D* 265k\n- *USG 4D* 325k\n- *TRANSVAGINAL* 350k+-\n\n*Note* : berikut kisaran estimasi include Konsul dokter + usg +print usg dan admin"
             ];
 
             // Bagian Prosedur
