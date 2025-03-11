@@ -556,7 +556,7 @@ class BotMessageController extends Controller
         } else if($msg == '/rawat_inap') {
             $response = [
                 'message_type' => 'string',
-                'data' => "*Rawat Inap*\n\nLayanan pendaftaran poliklinik  bisa diakses melalui online maupun onsite sesuai dengan jam praktek poliklinik"
+                'data' => "*Rawat Inap*\n\nBelum ada informasi"
             ];
 
             // Bagian Layanan dan Fasilitas
