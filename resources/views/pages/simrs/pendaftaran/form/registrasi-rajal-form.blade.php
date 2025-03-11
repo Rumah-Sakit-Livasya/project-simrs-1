@@ -281,7 +281,7 @@
                 <div class="row align-items-center">
                     <div class="col-xl-2 text-right">
                         <label class="form-label" for="diagnosa-awal">
-                            Diagnosa Awal
+                            Skrining Awal
                         </label>
                     </div>
                     <div class="col-xl-10">

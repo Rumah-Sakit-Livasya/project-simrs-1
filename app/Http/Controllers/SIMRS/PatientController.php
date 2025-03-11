@@ -78,7 +78,7 @@ class PatientController extends Controller
     {
         $lastRegis = $patient->registration->last();
         if ($lastRegis) {
-            if ($lastRegis->status === 'online') {
+            if ($lastRegis->status === 'aktif') {
                 return redirect("/daftar-registrasi-pasien/" . $lastRegis->id);
             }
         }

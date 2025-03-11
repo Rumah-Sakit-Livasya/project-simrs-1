@@ -100,10 +100,10 @@
                             <div class="row">
                                 <div class="col biodata-pasien">
                                     @if ($patient->gender == 'Laki-laki')
-                                        <img src="http://103.191.196.126:8888/real/include/avatar/man-icon.png"
+                                        <img src="http://103.191.197.117:8888/real/include/avatar/man-icon.png"
                                             style="width: 120px; height: 120px;">
                                     @else
-                                        <img src="http://103.191.196.126:8888/real/include/avatar/woman-icon.png"
+                                        <img src="http://103.191.197.117:8888/real/include/avatar/woman-icon.png"
                                             style="width: 120px; height: 120px;">
                                     @endif
 
@@ -239,7 +239,7 @@
                                     Rujuk Rawat Inap / Poli Lain
                                 </a>
                             </li>
-                            @if ($registration->status == 'online')
+                            @if ($registration->status == 'aktif')
                                 <li class="p-2">
                                     <a href="javascript:void(0);" data-toggle="modal" data-target="#tutup-kunjungan">
                                         <i class="fa fa-circle-o fa-fw pink-text text-accent-2"></i>
@@ -503,7 +503,7 @@
                     dropdownParent: $('#tutup-kunjungan'),
                     placeholder: "Pilih Alasan Keluar"
                 });
-                
+
                 $('#tutup-kunjungan #proses_keluar').select2({
                     dropdownCssClass: "move-up",
                     dropdownParent: $('#tutup-kunjungan'),

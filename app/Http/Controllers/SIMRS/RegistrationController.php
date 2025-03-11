@@ -81,6 +81,7 @@ class RegistrationController extends Controller
                 $query->whereBetween('registration_date', [$startDate, $endDate]);
                 $filterApplied = true;
             }
+            // return dd($query);
         }
 
         foreach ($regFilters as $filter) {
@@ -116,6 +117,7 @@ class RegistrationController extends Controller
             $filterApplied = true;
         }
 
+
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
             $registrations = $query->orderBy('registration_date', 'asc')->get();
@@ -146,7 +148,7 @@ class RegistrationController extends Controller
 
         $doctorsIGD = Doctor::with('employee', 'departement')
             ->whereHas('departement', function ($query) {
-                $query->where('name', 'POLIKLINIK UMUM');
+                $query->where('name', 'KLINIK UMUM');
             })
             ->get();
 
@@ -274,7 +276,7 @@ class RegistrationController extends Controller
         // Set registration date and status
         $validatedData['registration_date'] = Carbon::now();
         $validatedData['date'] = Carbon::now();
-        $validatedData['status'] = 'online';
+        $validatedData['status'] = 'aktif';
 
         // Set department based on registration type
         $validatedData['departement_id'] = $this->getDepartmentId($validatedData);
@@ -544,7 +546,7 @@ class RegistrationController extends Controller
 
             // Update the status of the registration
             $registration->update([
-                'status' => 'online',
+                'status' => 'aktif',
                 'registration_close_date' => null
             ]);
 

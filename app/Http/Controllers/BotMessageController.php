@@ -484,19 +484,39 @@ class BotMessageController extends Controller
                 'data' => [
                     [
                         'id' => '/info_bpjs_asuransi',
-                        'title' => 'Rawat Jalan & Rawat Inap'
+                        'title' => 'Info BPJS'
                     ],
                     [
                         'id' => '/syarat',
-                        'title' => 'Syarat & Prosedur Pendaftaran'
+                        'title' => 'Syarat Pendaftaran'
+                    ],
+                    [
+                        'id' => '/prosedur',
+                        'title' => 'Prosedur Pendaftaran'
                     ],
                     [
                         'id' => '/info_dafol',
                         'title' => 'Pendaftaran Online'
+                    ]
+                ]
+            ];
+
+            // Isi Respon Menu Pendaftaran
+
+        } else if ($msg == '/usg_persalinan') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Pilih Layanan',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/info_usg',
+                        'title' => 'Biaya USG'
                     ],
                     [
-                        'id' => '/info_rajal_ranap',
-                        'title' => 'Rawat Jalan & Rawat Inap'
+                        'id' => '/info_persalinan',
+                        'title' => 'Biaya Persalinan'
                     ]
                 ]
             ];
@@ -506,29 +526,74 @@ class BotMessageController extends Controller
         } else if($msg == '/info_bpjs_asuransi') {
             $response = [
                 'message_type' => 'string',
-                'data' => "Belum ada data"
+                'data' => "*Informasi BPJS* \n\nSaat ini rumah sakit livasya menyediakan layanan rawat inap dan rawat jalan khusus peserta BPJS/JKN/KIS mulai dari :\n\n▪️ Spesialis Anak\n▪️ Spesialis kandungan\n▪️ Spesialis bedah\n▪️ Spesialis penyakit dalam\n▪️ Spesialis THT"
             ];
 
         }  else if($msg == '/syarat') {
             $response = [
                 'message_type' => 'string',
-                'data' => "Belum ada data"
+                'data' => "*Syarat pendaftaran*\n\n*Syarat pendaftaran rawat jalan*\n▪️ khusus peserta penjamin umum cukup membawa data diri/kartu berobat\n▪️ khusus peserta BPJS/JKN/KIS cukup membawa rujukan faskes 1 dan data diri\n▪️ khusus peserta asuransi swasta cukup membawa karru asuransi dan data diri\n\n*Syarat pendaftaran rawat inap*\n▪️ khusus peserta penjamin umum cukup membawa identitas diri\n▪️ khusus peserta penjamin BPJS/JKN/KIS Cukup membawa kartu identitas ,KK,KTP dan kartu BPJS (Bila ada)\n▪️ khusus peserta asuransi swasta cukup membawa kartu asuransi dan data diri"
             ];
 
         } else if($msg == '/info_dafol') {
             $response = [
                 'message_type' => 'string',
-                'data' => "Belum ada data"
+                'data' => "*Pendafataran online khusus penjamin JKN/BPJS silahkan bapak/ibu akses melalui Aplikasi MOBILE JKN* \n\nPendafataran online khusus penjamin Umum/asuransi silahkan bapak/ibu akses melalui link website berikut :  https://dafol.livasya.com/ \n\n*Note* : \n▪️ Pendaftaran online By link website dapat diakses H-3 atau paling lambat H-1 sebelum tanggal kunjungan\n▪️ Pendafataran online By Mobile JKN(BPJS) dapat diakses H-30 dan paling lambat di hari H sebelum jam praktek poliklinik"
             ];
 
-        } else if($msg == '/info_rajal_ranap') {
+        } else if($msg == '/info_usg') {
             $response = [
                 'message_type' => 'string',
-                'data' => "Belum ada data"
+                'data' => "*Biaya USG*\n\n- *USG 2D* 195k\n- *USG 3D* 265k\n- *USG 4D* 325k\n- *TRANSVAGINAL* 350k+-\n\n*Note* : berikut kisaran estimasi include Konsul dokter + usg +print usg dan admin"
             ];
 
-            // Bagian Layanan dan Fasilitas
+            // Bagian Prosedur
 
+        } else if($msg == '/prosedur') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Prosedur pendaftaran*\n\nLayanan pendaftaran poliklinik  bisa diakses melalui online maupun onsite sesuai dengan jam praktek poliklinik"
+            ];
+
+            // Bagian Medical Checkup
+
+        } else if($msg == '/info_persalinan') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Biaya Persalinan*\n\n*Biaya Persalinan Normal*\n- *Superior* : Mulai dari 6,5t\n- *Deluxe 2* : Mulai dari 7jt\n- *Deluxe 1* : Mulai dari 8,5jt\n- *VIP* : Mulai dari 9 jt\n\n*Biaya Persalinan Caesar*\n- *Superior* : Mulai dari 12jt\n- *Deluxe 2* : Mulai dari 14jt\n- *Deluxe 1* : Mulai dari 16jt\n- *VIP* : Mulai dari 18jt\n\n*Fasilitas yang diberikan* : Vaksin Hb + Polio, Foto Baby setelah melahirkan, dan bingkisan.\n*Fasilitas tambahan* : Foto Maternity dan Video Partus Moment (video persalinan khusus VIP), namun harus booking terlebih dahulu min. 1bulan sebelum HPL\n\n*NOTE* : Biaya tsb hanya sbg perkiraan total. Biaya total bisa kurang/lebih dari daftar diatas."
+            ];
+
+            // Bagian Medical Checkup
+
+        } else if($msg == '/info_cs') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Costumer Service*\n\nSalam sehat, terima kasih sudah menghubungi kontak Customer Care Rumah Sakit Livasya Majalengka.\n\nJam Operasional\nIGD 24 Jam\nPoliklinik Senin - Sabtu 08:00 - 21:00\n\nUntuk layanan telepon anda dapat menghubungi nomor kami di:\nhotline +622338668019\nwhatsapp: +6281211151300\n\nKunjungi website kami di www.livasya.co.id untuk mendapatkan informasi lengkap mengenai rumah sakit dan jadwal dokter"
+            ];
+
+            // Bagian Rawat Inap
+
+        } else if($msg == '/info_medical') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Medical Check - Up*\n\n*Paket Silver*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Pemeriksaan gula darah\n- Pemeriksaan kolesterol\n- Pemeriksaan asam urat\n\n*Biaya : Rp. 150.000*\n\n*Paket Gold*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Hematologi rutin\n- Gula darah puasa\n- Kolesterol\n- Trigliserida\n- Asam urat\n- Ureum\n- Kreatinin\n- SGOT\n- Urine lengkap\n\n*Biaya : Rp. 700.000*\n\n*Paket Diamond*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Hematologi rutin\n- Gula darah puasa\n- Kolesterol\n- Trigliserida\n- Asam urat\n- Ureum\n- Kreatinin\n- SGOT\n- SGPT\n- Urine lengkap\n- EKG\n- Rontgen thorax\n\n*Biaya : Rp. 920.000*"
+            ];
+
+            // Bagian Rawat Inap
+
+        } else if($msg == '/igd') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Instalasi Gawat Darurat - IGD*\n\nPelayanan IGD (Instalasi Gawat Darurat) 24 jam di Rumah Sakit Livasya adalah salah satu fasilitas krusial yang menyediakan layanan medis mendesak sepanjang hari, tujuh hari seminggu. Berikut adalah penjelasan singkat tentang IGD 24 jam Rumah Sakit Livasya:\n\n- *Aksesibilitas* : IGD Rumah Sakit Livasya buka 24 jam setiap hari, sehingga siap menerima pasien yang membutuhkan perawatan medis mendesak kapan pun dibutuhkan. Ini memastikan bahwa pasien dapat mengakses perawatan medis dengan cepat, tanpa harus menunggu jam kerja normal.\n- *Tim Medis Siap Sedia* : IGD Rumah Sakit Livasya dilengkapi dengan tim medis yang terlatih dan siap sedia untuk menangani berbagai jenis keadaan darurat. Tim ini terdiri dari dokter, perawat, dan tenaga medis lainnya yang memiliki pengalaman dan keterampilan dalam menangani situasi medis yang mendesak.\n- *Peralatan dan Fasilitas Medis* : Instalasi Gawat Darurat Rumah Sakit Livasya dilengkapi dengan peralatan medis canggih dan fasilitas pendukung yang diperlukan untuk menangani berbagai kondisi medis darurat. Ini termasuk peralatan resusitasi, ruang operasi darurat, ruang observasi, dan fasilitas pencitraan medis seperti X-ray\n- *Penanganan Kasus Mendesak* : IGD Rumah Sakit Livasya menerima berbagai kasus medis mendesak, termasuk kecelakaan, cedera, dan keadaan darurat lainnya. Tim medis di sini terlatih untuk menangani kasus-kasus ini dengan cepat dan efektif, memberikan perawatan yang tepat sesuai dengan kondisi pasien.\n- *Prioritas pada Kepedulian dan Kehati-hatian* : Meskipun memberikan perawatan medis yang cepat, tim medis IGD Rumah Sakit Livasya tetap menjaga kehati-hatian dan memastikan bahwa setiap langkah yang diambil sesuai dengan standar keamanan dan kualitas yang tinggi. Kepedulian terhadap kebutuhan dan kondisi pasien juga menjadi prioritas utama dalam setiap tindakan yang dilakukan.\n- *Koordinasi dengan Unit Perawatan Lanjutan* : Setelah mendapatkan perawatan di IGD, pasien yang membutuhkan perawatan lebih lanjut akan dirujuk ke unit perawatan lanjutan di Rumah Sakit Livasya atau di fasilitas kesehatan lainnya, jika diperlukan. Koordinasi yang baik antara tim medis di IGD dan unit perawatan lanjutan penting untuk memastikan kelancaran proses perawatan pasien.\n\nDengan pelayanan IGD 24 jam yang komprehensif, tim medis yang terlatih, dan fasilitas medis yang lengkap, Rumah Sakit Livasya berkomitmen untuk memberikan perawatan medis berkualitas tinggi kepada setiap pasien yang membutuhkan bantuan medis mendesak, kapan pun diperlukan.*"
+            ];
+
+            // Bagian Rawat Inap
+
+        } else if($msg == '/rawat_inap') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Fasilitas Rawat Inap*\n\n*VIP Room*\nNikmati kenyamanan maksimal dengan fasilitas eksklusif dalam ruangan pribadi yang dirancang untuk memberikan privasi dan ketenangan:\n- Bed pasien (1 pasien per ruangan)\n- Box bayi\n- Sofa bed untuk pendamping\n- Kamar mandi dalam\n- Nakas\n- Meja Mayo & Meja Crandenza\n- TV LED\n- AC untuk kesejukan optimal\n- Dispenser untuk kemudahan akses air minum\n- Lemari es untuk menyimpan makanan & minuman\n\n*Deluxe 1*\nKombinasi kenyamanan dan efisiensi dalam ruangan yang tetap memberikan privasi:\n- Bed pasien (1 ruangan berkapasitas 2 pasien)\n- Kursi tunggu untuk keluarga/pengunjung\n- Box bayi\n- Kamar mandi dalam\n- Nakas\n- Meja Mayo & Meja Crandenza\n- TV LED\n- AC\n- Lemari es\n\n*Deluxe 2*\nPilihan ideal dengan fasilitas lengkap untuk kenyamanan pasien dan pendamping:\n- Bed pasien (1 ruangan berkapasitas 2 pasien)\n- Kursi tunggu untuk pendamping\n- Box bayi\n- Kamar mandi dalam\n- Nakas\n- Meja Mayo & Meja Crandenza\n- TV LED\n- AC\n\n*Superior Room*\nKamar dengan fasilitas standar terbaik untuk mendukung pemulihan pasien:\n- Bed pasien (1 ruangan berkapasitas 2 pasien)\n- Kursi tunggu untuk pendamping\n- Box bayi\n- Kamar mandi dalam\n- Nakas\n- Meja Mayo & Meja Crandenza\n- TV LED\n- AC\n\nSetiap kamar di RS Livasya dirancang untuk memberikan kenyamanan, keamanan, dan kemudahan bagi pasien serta keluarga."
+            ];
         } else if ($msg == '/layanan_fasilitas') {
 
             $response =  [
@@ -546,12 +611,9 @@ class BotMessageController extends Controller
                     ],
                     [
                         'id' => '/jadwal_praktek',
-                        'title' => 'Poliklinik'
+                        'title' => 'Rawat Jalan'
                     ],
-                    [
-                        'id' => '/radiologi_laboratorium',
-                        'title' => 'Radiologi & Laboratorium'
-                    ],
+                    
                     [
                         'id' => '/layanan_vaksin',
                         'title' => 'Layanan Vaksin'
@@ -563,24 +625,11 @@ class BotMessageController extends Controller
                 ]
             ];
             
-            // Bagian biaya
-
-        } else if ($msg == '/biaya') {
-
-            $response =  [
-                'message_type' => 'array',
-                'title' => 'Pilih Layanan',
-                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
-                'data' => [
-                    [
-                        'id' => '/administrasi',
-                        'title' => 'Belum ada'
-                    ]
-                ]
+        } else if($msg == '/layanan_vaksin') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Imunisasi dasar dan tambahan*\n- vaxigrip/influenza: 570.265\n- Influvac/influenza :  549.497\n- Rotarix / Rotavirus: 829.864\n- Synflorix / pcv: 1.710.510\n- prevenar Injc 13 /PCV : 1.349.224\n- PCV dinkes : 28.585\n- Varivax / varicella: 943.764\n- BCG  dinkes : 28.585\n- DPT Pentabio Dinkes (Demam) : 28.585\n- DPT Hexaxim (Tanpa demam) : 2.018.424\n- DPT Infanrix (Tanpa Demam) :  2.098.524\n- MR/Campak dinkes : 28.585\n- MMR 2 : 677.481\n- TYPHIM /thypoid: 571.337\n- Rotavac Dinkes /rotavirus : 28.585\n- Havrix 720 Junior : 834.388\n- Polio tetes (Dinkes) : 28.585\n- Polio Injek ( Dinkes) : 28.585\n- HB 0 : 28.585\n- Cervarix : 1.105.443\n- Gardasil 4' INJ : 1.584.959\n- Gardasil 9' INJ : 3.177.340\n- Imojev : 977.919\n- TD : 28.585\n\n*Note:*\n1. Harga belum termasuk Konsul dokter +Admin+embalase\n2. Beberapa vaksin mengikuti Sistem PO ,konfirmasi ketersediaan terlebih dahulu\n3. Khusus vaksin yang mengikuti sistem PO akan dikenakan biaya Deposit sebelum pemesanan\n4. Deposit pemesanan tidak dapat dikembalikan bila sewaktu cancel / tidak jadi vaksinasi\n5. Khusus vaksin dalam PO, kedatangan vaksin tidak bisa diestimasikan"
             ];
-            
-            // Bagian respons jadwal poliklinik
-
         } else if($msg == '/klinik_obgyn') {
             $response = [
                 'message_type' => 'string',
@@ -674,8 +723,12 @@ class BotMessageController extends Controller
                         'title' => 'Layanan & Fasilitas'
                     ],
                     [
-                        'id' => '/info_biaya',
-                        'title' => 'Biaya & Asuransi'
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasillitas Unggulan'
+                    ],
+                    [
+                        'id' => '/usg_persalinan',
+                        'title' => 'USG & Persalinan'
                     ],
                     [
                         'id' => '/info_dafol',
