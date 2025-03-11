@@ -399,7 +399,7 @@ class BotMessageController extends Controller
 
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Jadwal Poli',
+                'title' => 'Pilih Layanan',
                 'body' => 'Berikut adalah jadwal Poliklinik di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
@@ -447,7 +447,7 @@ class BotMessageController extends Controller
 
             $response =  [
                 'message_type' => 'array',
-                'title' => 'Fasilitas Unggulan',
+                'title' => 'Pilih Layanan',
                 'body' => 'Berikut adalah Fasilitas Unggulan di Rumah Sakit Livasya. Silahkan klik tombol dibawah untuk info selengkapnya.',
                 'data' => [
                     [
@@ -469,6 +469,112 @@ class BotMessageController extends Controller
                     [
                         'id' => '/senam_hamil',
                         'title' => 'Senam Hamil'
+                    ]
+                ]
+            ];
+            
+            // Bagian informasi pendaftaran
+
+        } else if ($msg == '/info_pendaftaran') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Pilih Layanan',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/info_bpjs_asuransi',
+                        'title' => 'Rawat Jalan & Rawat Inap'
+                    ],
+                    [
+                        'id' => '/syarat',
+                        'title' => 'Syarat & Prosedur Pendaftaran'
+                    ],
+                    [
+                        'id' => '/info_dafol',
+                        'title' => 'Pendaftaran Online'
+                    ],
+                    [
+                        'id' => '/info_rajal_ranap',
+                        'title' => 'Rawat Jalan & Rawat Inap'
+                    ]
+                ]
+            ];
+
+            // Isi Respon Menu Pendaftaran
+
+        } else if($msg == '/info_bpjs_asuransi') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
+        }  else if($msg == '/syarat') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
+        } else if($msg == '/info_dafol') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
+        } else if($msg == '/info_rajal_ranap') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "Belum ada data"
+            ];
+
+            // Bagian Layanan dan Fasilitas
+
+        } else if ($msg == '/layanan_fasilitas') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Pilih Layanan',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/igd',
+                        'title' => 'IGD (24 Jam)'
+                    ],
+                    [
+                        'id' => '/rawat_inap',
+                        'title' => 'Rawat Inap'
+                    ],
+                    [
+                        'id' => '/jadwal_praktek',
+                        'title' => 'Poliklinik'
+                    ],
+                    [
+                        'id' => '/radiologi_laboratorium',
+                        'title' => 'Radiologi & Laboratorium'
+                    ],
+                    [
+                        'id' => '/layanan_vaksin',
+                        'title' => 'Layanan Vaksin'
+                    ],
+                    [
+                        'id' => '/info_fasilitas',
+                        'title' => 'Fasilitas'
+                    ],
+                ]
+            ];
+            
+            // Bagian biaya
+
+        } else if ($msg == '/biaya') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Pilih Layanan',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/administrasi',
+                        'title' => 'Belum ada'
                     ]
                 ]
             ];
@@ -552,32 +658,36 @@ class BotMessageController extends Controller
             // Else untuk menampilkan menu jika input tidak dikenali
             $response = [
                 'message_type' => 'array',
-                'title' => 'Menu Pilihan',
-                'body' => 'Pilihan menu tidak dikenali. Silakan pilih salah satu dari menu berikut:',
+                'title' => 'Pilih Layanan',
+                'body' => 'Mohon maaf, Sahabat Livasya. Silakan ketik ulang kebutuhan Anda dengan benar, pilih salah satu dari menu berikut, atau ketik "halo" untuk menampilkan menu.',
                 'data' => [
                     [
+                        'id' => '/info_pendaftaran',
+                        'title' => 'Info Pendaftaran'
+                    ],
+                    [
                         'id' => '/jadwal_praktek',
-                        'title' => 'Jadwal Poli'
+                        'title' => 'Jadwal Dokter'
                     ],
                     [
-                        'id' => '/info_fasilitas',
-                        'title' => 'Fasilitas Unggulan'
+                        'id' => '/layanan_fasilitas',
+                        'title' => 'Layanan & Fasilitas'
                     ],
                     [
-                        'id' => '/info_rajal',
-                        'title' => 'Info Rawat Jalan'
+                        'id' => '/info_biaya',
+                        'title' => 'Biaya & Asuransi'
                     ],
                     [
-                        'id' => '/daftar_poli_rajal',
-                        'title' => 'Pendaftaran Poliklinik'
+                        'id' => '/info_dafol',
+                        'title' => 'Daftar Online'
                     ],
                     [
                         'id' => '/info_medical',
-                        'title' => 'Medical Check Up'
+                        'title' => 'Medical Check-Up'
                     ],
                     [
-                        'id' => '/info_persalinan',
-                        'title' => 'Biaya Persalinan'
+                        'id' => '/info_cs',
+                        'title' => 'Customer Service'
                     ]
                 ]
             ];
