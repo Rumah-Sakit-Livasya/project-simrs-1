@@ -503,6 +503,26 @@ class BotMessageController extends Controller
 
             // Isi Respon Menu Pendaftaran
 
+        } else if ($msg == '/usg_persalinan') {
+
+            $response =  [
+                'message_type' => 'array',
+                'title' => 'Pilih Layanan',
+                'body' => 'Silahkan klik tombol dibawah untuk info selengkapnya.',
+                'data' => [
+                    [
+                        'id' => '/info_usg',
+                        'title' => 'Biaya USG'
+                    ],
+                    [
+                        'id' => '/info_persalinan',
+                        'title' => 'Biaya Persalinan'
+                    ]
+                ]
+            ];
+
+            // Isi Respon Menu Pendaftaran
+
         } else if($msg == '/info_bpjs_asuransi') {
             $response = [
                 'message_type' => 'string',
@@ -521,10 +541,26 @@ class BotMessageController extends Controller
                 'data' => "*Pendafataran online khusus penjamin JKN/BPJS silahkan bapak/ibu akses melalui Aplikasi MOBILE JKN* \n\nPendafataran online khusus penjamin Umum/asuransi silahkan bapak/ibu akses melalui link website berikut :  https://dafol.livasya.com/ \n\n*Note* : \n▪️ Pendaftaran online By link website dapat diakses H-3 atau paling lambat H-1 sebelum tanggal kunjungan\n▪️ Pendafataran online By Mobile JKN(BPJS) dapat diakses H-30 dan paling lambat di hari H sebelum jam praktek poliklinik"
             ];
 
+        } else if($msg == '/info_usg') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Biaya USG*\n\nUSG 2D 195k\n- USG 3D 265k\n- USG 4D 325k\n- TRANVAGINAL 350 +-\n\n*Note* : berikut kisaran estimasi include Konsul dokter + usg +print usg dan admin"
+            ];
+
+            // Bagian Prosedur
+
         } else if($msg == '/prosedur') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Prosedur pendaftaran*\n\nLayanan pendaftaran poliklinik  bisa diakses melalui online maupun onsite sesuai dengan jam praktek poliklinik"
+            ];
+
+            // Bagian Medical Checkup
+
+        } else if($msg == '/info_persalinan') {
+            $response = [
+                'message_type' => 'string',
+                'data' => "*Biaya Persalinan*\n\n*Biaya Persalinan Normal*\n- Superior : Mulai dari 6,5t\n- Deluxe 2 : Mulai dari 7jt\n- *Deluxe 1* : Mulai dari 8,5jt\n- *VIP* : Mulai dari 9 jt\n\n*Biaya Persalinan Caesar*\n- Superior : Mulai dari 12jt\n- *Deluxe 2* : Mulai dari 14jt\n- *Deluxe 1* : Mulai dari 16jt\n- *VIP* : Mulai dari 18jt\n\n*Fasilitas yang diberikan* : Vaksin Hb + Polio, Foto Baby setelah melahirkan, dan bingkisan.\n*Fasilitas tambahan* : Foto Maternity dan Video Partus Moment (video persalinan khusus VIP), namun harus booking terlebih dahulu min. 1bulan sebelum HPL\n\n*NOTE* : Biaya tsb hanya sbg perkiraan total. Biaya total bisa kurang/lebih dari daftar diatas."
             ];
 
             // Bagian Medical Checkup
@@ -558,8 +594,6 @@ class BotMessageController extends Controller
                 'message_type' => 'string',
                 'data' => "*Rawat Inap*\n\nBelum ada informasi"
             ];
-
-            // Bagian Layanan dan Fasilitas
 
         } else if ($msg == '/layanan_fasilitas') {
 
@@ -693,7 +727,10 @@ class BotMessageController extends Controller
                         'id' => '/info_fasilitas',
                         'title' => 'Fasillitas Unggulan'
                     ],
-                    
+                    [
+                        'id' => '/USG_persalinan',
+                        'title' => 'USG & Persalinan'
+                    ],
                     [
                         'id' => '/info_dafol',
                         'title' => 'Daftar Online'
