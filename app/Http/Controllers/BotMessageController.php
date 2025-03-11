@@ -560,7 +560,7 @@ class BotMessageController extends Controller
         } else if($msg == '/info_persalinan') {
             $response = [
                 'message_type' => 'string',
-                'data' => "*Biaya Persalinan*\n\n*Biaya Persalinan Normal*\n- Superior : Mulai dari 6,5t\n- Deluxe 2 : Mulai dari 7jt\n- *Deluxe 1* : Mulai dari 8,5jt\n- *VIP* : Mulai dari 9 jt\n\n*Biaya Persalinan Caesar*\n- Superior : Mulai dari 12jt\n- *Deluxe 2* : Mulai dari 14jt\n- *Deluxe 1* : Mulai dari 16jt\n- *VIP* : Mulai dari 18jt\n\n*Fasilitas yang diberikan* : Vaksin Hb + Polio, Foto Baby setelah melahirkan, dan bingkisan.\n*Fasilitas tambahan* : Foto Maternity dan Video Partus Moment (video persalinan khusus VIP), namun harus booking terlebih dahulu min. 1bulan sebelum HPL\n\n*NOTE* : Biaya tsb hanya sbg perkiraan total. Biaya total bisa kurang/lebih dari daftar diatas."
+                'data' => "*Biaya Persalinan*\n\n*Biaya Persalinan Normal*\n- *Superior* : Mulai dari 6,5t\n- *Deluxe 2* : Mulai dari 7jt\n- *Deluxe 1* : Mulai dari 8,5jt\n- *VIP* : Mulai dari 9 jt\n\n*Biaya Persalinan Caesar*\n- *Superior* : Mulai dari 12jt\n- *Deluxe 2* : Mulai dari 14jt\n- *Deluxe 1* : Mulai dari 16jt\n- *VIP* : Mulai dari 18jt\n\n*Fasilitas yang diberikan* : Vaksin Hb + Polio, Foto Baby setelah melahirkan, dan bingkisan.\n*Fasilitas tambahan* : Foto Maternity dan Video Partus Moment (video persalinan khusus VIP), namun harus booking terlebih dahulu min. 1bulan sebelum HPL\n\n*NOTE* : Biaya tsb hanya sbg perkiraan total. Biaya total bisa kurang/lebih dari daftar diatas."
             ];
 
             // Bagian Medical Checkup
