@@ -728,7 +728,7 @@ class BotMessageController extends Controller
                         'title' => 'Fasillitas Unggulan'
                     ],
                     [
-                        'id' => '/USG_persalinan',
+                        'id' => '/usg_persalinan',
                         'title' => 'USG & Persalinan'
                     ],
                     [
