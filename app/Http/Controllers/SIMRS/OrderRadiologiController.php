@@ -57,6 +57,7 @@ class OrderRadiologiController extends Controller
 
         try {
             $orderRadiologi = OrderRadiologi::create([
+                'user_id' => $validatedData['user_id'],
                 'registration_id' => $validatedData['registration_id'],
                 'dokter_radiologi_id' => $validatedData['doctor_id'],
                 'order_date' => Carbon::now(),

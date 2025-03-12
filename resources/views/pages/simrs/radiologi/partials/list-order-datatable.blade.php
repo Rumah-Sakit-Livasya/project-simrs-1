@@ -45,7 +45,8 @@
                                                  </a>
                                              @endif
                                          @else
-                                             <a href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                             <a
+                                                 href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                  {{ $order->order_date }}
                                              </a>
                                          @endif
@@ -64,7 +65,8 @@
                                                  </a>
                                              @endif
                                          @else
-                                             <a href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                             <a
+                                                 href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                  {{ $order->registration->patient->medical_record_number }}
                                              </a>
                                          @endif
@@ -83,7 +85,8 @@
                                                  </a>
                                              @endif
                                          @else
-                                             <a href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                             <a
+                                                 href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                  {{ $order->registration->registration_number }}
                                              </a>
                                          @endif
@@ -102,7 +105,8 @@
                                                  </a>
                                              @endif
                                          @else
-                                             <a href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                             <a
+                                                 href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                  {{ $order->no_order }}
                                              </a>
                                          @endif
@@ -121,7 +125,8 @@
                                                  </a>
                                              @endif
                                          @else
-                                             <a href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                             <a
+                                                 href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                  {{ $order->registration->patient->name }}
                                              </a>
                                          @endif
@@ -140,7 +145,8 @@
                                                  </a>
                                              @endif
                                          @else
-                                             <a href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                             <a
+                                                 href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                  {{ $order->registration->poliklinik }}
                                              </a>
                                          @endif
@@ -159,7 +165,8 @@
                                                  </a>
                                              @endif
                                          @else
-                                             <a href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                             <a
+                                                 href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                  {{ $order->registration->patient->penjamin->name ?? '-' }}
                                              </a>
                                          @endif
@@ -178,7 +185,8 @@
                                                  </a>
                                              @endif
                                          @else
-                                             <a href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                             <a
+                                                 href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                  {{ $order->doctor->employee->fullname }}
                                              </a>
                                          @endif
@@ -197,7 +205,8 @@
                                                  </a>
                                              @endif
                                          @else
-                                             <a href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                             <a
+                                                 href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                  {{ $order->status_isi_hasil == 1 ? 'Finished' : 'Ongoing' }}
                                              </a>
                                          @endif
@@ -216,12 +225,17 @@
                                                  </a>
                                              @endif
                                          @else
-                                             <a href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                             <a
+                                                 href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                  {{ $order->status_billed == 1 ? 'Billed' : 'Not Billed' }}
                                              </a>
                                          @endif
                                      </td>
-                                     <td> - </td>
+                                     <td> <a class="mdi mdi-printer pointer mdi-24px text-primary nota-btn"
+                                             title="Nota Order Radiologi"
+                                             data-id="{{ $order->id }}"
+                                             href="/patient"></a>
+                                     </td>
                                  </tr>
                              @endforeach
                          </tbody>

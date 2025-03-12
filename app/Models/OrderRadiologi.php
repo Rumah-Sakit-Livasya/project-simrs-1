@@ -40,4 +40,9 @@ class OrderRadiologi extends Model
     {
         return $this->belongsTo(Doctor::class, 'dokter_radiologi_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

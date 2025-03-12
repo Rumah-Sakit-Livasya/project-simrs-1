@@ -148,4 +148,6 @@
             input.value = formattedValue;
         }
     </script>
+
+    <script src="{{ asset('js/simrs/list-order-radiologi.js') }}?v={{ time() }}"></script>
 @endsection

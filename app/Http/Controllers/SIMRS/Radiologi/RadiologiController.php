@@ -10,16 +10,9 @@ class RadiologiController extends Controller
 {
     public function index(Request $request)
     {
-        // return dd(OrderRadiologi::with('registration')->get());
         $query = OrderRadiologi::query()->with('registration');
-        // $query = OrderRadiologi::query()
-        //     ->join('registrations', 'order_radiologi.registration_id', '=', 'registration.id')
-        //     ->select('order_radiologi.*', 'registrations.*');
         $filters = ['medical_record_number', 'registration_number', 'no_order'];
         $filterApplied = false;
-
-        // return dd($request->all());
-
 
         foreach ($filters as $filter) {
             if ($request->filled($filter)) {
@@ -35,12 +28,12 @@ class RadiologiController extends Controller
                 $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
                 $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
                 $query->whereBetween('order_date', [$startDate, $endDate]);
-                $filterApplied = true;
             }
+            $filterApplied = true;
         }
 
-        if($request->filled('name')){
-            $query->whereHas('registration.patient', function($q) use ($request){
+        if ($request->filled('name')) {
+            $query->whereHas('registration.patient', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->name . '%');
             });
             $filterApplied = true;
@@ -56,6 +49,13 @@ class RadiologiController extends Controller
 
         return view('pages.simrs.radiologi.list-order', [
             'orders' => $order
+        ]);
+    }
+
+    public function notaOrder($id) {
+        $order = OrderRadiologi::findOrFail($id);
+        return view('pages.simrs.radiologi.partials.nota-order', [
+            'order' => $order
         ]);
     }
 }

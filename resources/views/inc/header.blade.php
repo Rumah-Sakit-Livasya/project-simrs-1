@@ -283,6 +283,10 @@
         .logo-dashboard-simrs {
             width: 100%;
         }
+
+    .pointer{
+        cursor: pointer;
+    }
         
 </style>
 @yield('extended-css')

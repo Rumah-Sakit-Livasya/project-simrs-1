@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('registration_id')->constrained('registrations')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('dokter_radiologi_id')->constrained('employees')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->date('order_date');
             $table->string('no_order');
             $table->enum('tipe_order', ['normal', 'cito'])->default('normal');
