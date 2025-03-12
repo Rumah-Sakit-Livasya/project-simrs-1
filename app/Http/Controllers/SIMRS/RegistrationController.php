@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Models\OrderRadiologi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\SIMRS\Bed;
 use App\Models\SIMRS\Bilingan;
@@ -11,9 +12,12 @@ use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GantiDiagnosa;
 use App\Models\SIMRS\GantiDokter;
+use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\ParameterRadiologi;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
+use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
@@ -81,7 +85,6 @@ class RegistrationController extends Controller
                 $query->whereBetween('registration_date', [$startDate, $endDate]);
                 $filterApplied = true;
             }
-            // return dd($query);
         }
 
         foreach ($regFilters as $filter) {
@@ -228,7 +231,8 @@ class RegistrationController extends Controller
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Radiologi",
                     'doctors' => Doctor::all(),
-                    'penjamins' => Penjamin::all(),
+                    'radiology_categories' => KategoriRadiologi::all(),
+                    'tarifs' => TarifParameterRadiologi::all(),
                     'case' => 'radiologi',
                     'patient' => $patient,
                     'age' => $age
@@ -380,16 +384,27 @@ class RegistrationController extends Controller
             $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
         }
 
-        // $patient = $registration->patient;
+        $radiologiOrders = [];
+
+        OrderRadiologi::where('registration_id', $registration->id)
+            ->get()
+            ->each(function ($order) use (&$radiologiOrders) {
+                $radiologiOrders[$order->id] = $order;
+            });
+
         $patient = Patient::with(['registration' => function ($query) {
             $query->orderBy('id', 'desc');
         }])->find($registration->patient->id);
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
+
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
             'kelasRawat' => $kelasRawat,
             'penjamin' => $penjamin,
             'groupedDoctors' => $groupedDoctors,
+            'radiologiOrders' => $radiologiOrders,
+            'radiology_categories' => KategoriRadiologi::all(),
+            'tarifs' => TarifParameterRadiologi::all(),
             'registration' => $registration,
             'patient' => $patient,
             'departements' => $departements,

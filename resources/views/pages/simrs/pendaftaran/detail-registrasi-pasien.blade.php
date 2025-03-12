@@ -445,6 +445,10 @@
                         {{-- Tindakan Medis --}}
                         @include('pages.simrs.pendaftaran.partials.tindakan-medis')
                     </div>
+                    <div id="radiologi" style="display: none;">
+                        {{-- Radiologi --}}
+                        @include('pages.simrs.pendaftaran.partials.radiologi')
+                    </div>
                 </div>
             </div>
         </div>
@@ -485,9 +489,15 @@
 
                 // Get data-layanan to determine which element to show
                 var namaLayanan = $(this).data('layanan');
-                if (namaLayanan == 'pengkajian-nurse-rajal') {
-                    $('#pengkajian-nurse-rajal').show();
+                switch (namaLayanan) {
+                    case 'pengkajian-nurse-rajal':
+                        $('#pengkajian-nurse-rajal').show();
+                        break;
+                    case 'radiologi':
+                        $('#radiologi').show();
+                        break;
                 }
+
                 var pengkajianId = $('#pengkajian-rajal-id').val();
 
                 // Show the selected service element with fade in effect
@@ -646,6 +656,7 @@
         });
     </script>
 
+    @yield('script-radiologi')
     @yield('script-tindakan-medis')
 
     <script>

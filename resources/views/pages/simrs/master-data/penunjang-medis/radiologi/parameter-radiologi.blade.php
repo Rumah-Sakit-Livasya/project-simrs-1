@@ -1,4 +1,4 @@
-@extends('inc.layout')
+@extends('inc.layout-no-side')
 @section('title', 'Parameter Radiologi')
 @section('extended-css')
     <style>
