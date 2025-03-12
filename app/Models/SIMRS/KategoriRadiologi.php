@@ -12,4 +12,9 @@ class KategoriRadiologi extends Model
 
     protected $table = 'kategori_radiologi';
     protected $fillable = ['nama_kategori', 'status'];
+
+    public function parameter_radiologi()
+    {
+        return $this->hasMany(ParameterRadiologi::class);
+    }
 }

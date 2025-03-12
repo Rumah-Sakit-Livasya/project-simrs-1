@@ -1,11 +1,11 @@
 @extends('inc.layout')
-@section('title', 'Daftar Pasien IGD')
+@section('title', 'List Order Radiologi')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
 
-        @include('pages.simrs.igd.partials.daftar-pasien-form')
+        @include('pages.simrs.radiologi.partials.list-order-form')
 
-        @include('pages.simrs.igd.partials.daftar-pasien-datatable')
+        @include('pages.simrs.radiologi.partials.list-order-datatable')
 
     </main>
 @endsection
