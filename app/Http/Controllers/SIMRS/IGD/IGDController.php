@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\SIMRS\IGD;
 
 use App\Http\Controllers\Controller;
-use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
 use Illuminate\Http\Request;
 
@@ -33,11 +32,9 @@ class IGDController extends Controller
             }
         }
 
-        // Check if penjamin_id filter is applied
-        if ($request->filled('penjamin_id')) {
-            $query->where('penjamin_id', $request->penjamin_id)
-                ->where('registration_type', 'igd')
-                ->where('status', 'aktif');
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status == 'aktif' ? 'aktif' : 'tutup_kunjungan');
             $filterApplied = true;
         }
 
@@ -45,17 +42,19 @@ class IGDController extends Controller
         if ($filterApplied) {
             $registration = $query->orderBy('date', 'asc')
                 ->where('registration_type', 'igd')
-                ->where('status', 'aktif')
                 ->get();
         } else {
             // Return empty collection if no filters applied
             $registration = collect();
         }
 
-        // return dd($registration->first()->patient);
-
         return view('pages.simrs.igd.daftar-pasien', [
             'registrations' => $registration
         ]);
+    }
+
+    public function catatanMedis()
+    {
+        return view('pages.simrs.igd.catatan-medis');
     }
 }

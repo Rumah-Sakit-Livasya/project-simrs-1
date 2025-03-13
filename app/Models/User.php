@@ -118,4 +118,9 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(ChecklistHarian::class);
     }
+
+    public function order_radiologi()
+    {
+        return $this->hasMany(OrderRadiologi::class);
+    }
 }
