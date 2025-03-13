@@ -52,10 +52,34 @@ class RadiologiController extends Controller
         ]);
     }
 
-    public function notaOrder($id) {
+    public function notaOrder($id)
+    {
         $order = OrderRadiologi::findOrFail($id);
         return view('pages.simrs.radiologi.partials.nota-order', [
             'order' => $order
+        ]);
+    }
+
+    public function editOrder($id)
+    {
+        $order = OrderRadiologi::findOrFail($id);
+        $parameters =  $order->order_parameter_radiologi;
+        $parameterCategories = [];
+
+        foreach ($parameters as $parameter) {
+            $category = $parameter->parameter_radiologi->kategori_radiologi->nama_kategori;
+            $category = $parameter['parameter_radiologi']['kategori_radiologi']['nama_kategori'];
+            if (!isset($parameterCategories[$category])) {
+                $parameterCategories[$category] = [];
+            }
+            $parameterCategories[$category][] = $parameter;
+        }
+
+
+
+        return view('pages.simrs.radiologi.partials.edit-order', [
+            'order' => $order,
+            'parametersInCategory' => $parameterCategories
         ]);
     }
 }

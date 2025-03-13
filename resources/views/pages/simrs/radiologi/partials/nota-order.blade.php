@@ -641,14 +641,16 @@
             <ul>
                 <li><span>Nama</span>: {{ $order->registration->patient->name }} </li>
                 <li><span>Jenis Kelamin</span>: {{ $order->registration->patient->gender }}</li>
-                <li><span>Tgl Lahir / Umur</span>: {{ $order->registration->patient->date_of_birth }} / {{ displayAge($order->registration->patient->date_of_birth) }}</li>
+                <li><span>Tgl Lahir / Umur</span>: {{ $order->registration->patient->date_of_birth }} /
+                    {{ displayAge($order->registration->patient->date_of_birth) }}</li>
                 <li><span>No telp</span>: {{ $order->registration->patient->mobile_phone_number }}</li>
                 <li><span>Alamat</span>: {{ $order->registration->patient->address }}</li>
             </ul>
         </div>
         <div id="hhr" class="hrt" style="font-size:.9em; margin-bottom:0px;">
             <ul>
-                <li><span>No RM / No Registrasi</span>: {{ $order->registration->patient->medical_record_number }} / {{ $order->registration->registration_number }}</li>
+                <li><span>No RM / No Registrasi</span>: {{ $order->registration->patient->medical_record_number }} /
+                    {{ $order->registration->registration_number }}</li>
                 <li><span>Dokter</span>: {{ $order->doctor->employee->fullname }}</li>
                 <li><span>Disiapkan Oleh</span>: {{ $order->user->employee->fullname }}</li>
                 <li><span>Poly/Ruang</span>: {{ $order->registration->poliklinik }}</li>
@@ -661,24 +663,25 @@
                 <tr>
                     <th width="5%">No</th>
                     <th>Item</th>
-                    <th width="5%">Jumlah</th>
                     <th width="25%">@Harga</th>
                 </tr>
             </thead>
             <tbody>
 
                 @foreach ($order->order_parameter_radiologi as $orderParameter)
-            <tr>
-                <td align="center">{{ $loop->iteration }}</td>
-                <td>{{ $orderParameter->parameter_radiologi->parameter }}</td>
-                <td align="right">{{ $orderParameter->qty }}</td>
-                <td align="right"> {{ (new NumberFormatter('id_ID', NumberFormatter::CURRENCY))->formatCurrency($orderParameter->nominal_rupiah, 'IDR') }}
-                </td>
-            </tr>
-        @endforeach
+                    <tr>
+                        <td align="center">{{ $loop->iteration }}</td>
+                        <td>{{ $orderParameter->parameter_radiologi->parameter }}</td>
+                        <td align="right">
+                            {{ (new NumberFormatter('id_ID', NumberFormatter::CURRENCY))->formatCurrency($orderParameter->nominal_rupiah, 'IDR') }}
+                        </td>
+                    </tr>
+                @endforeach
                 <tr>
-                    <td colspan="3" align="right"><strong>TOTAL</strong></td>
-                    <td align="right"><strong>{{ (new NumberFormatter('id_ID', NumberFormatter::CURRENCY))->formatCurrency($order->order_parameter_radiologi->sum('nominal_rupiah'), 'IDR') }}</strong></td>
+                    <td colspan="2" align="right"><strong>TOTAL</strong></td>
+                    <td align="right">
+                        <strong>{{ (new NumberFormatter('id_ID', NumberFormatter::CURRENCY))->formatCurrency($order->order_parameter_radiologi->sum('nominal_rupiah'), 'IDR') }}</strong>
+                    </td>
                 </tr>
             </tbody>
         </table>

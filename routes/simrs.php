@@ -256,6 +256,7 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('template-hasil', [RadiologiController::class, 'templateHasil'])->name('radiologi.template-hasil');
             Route::get('report', [RadiologiController::class, 'report'])->name('radiologi.report');
             Route::get('nota-order/{id}', [RadiologiController::class, 'notaOrder'])->name('radiologi.nota-order');
+            Route::get('edit-order/{id}', [RadiologiController::class, 'editOrder'])->name('radiologi.edit-order');
         });
 
         Route::prefix('laboratorium')->group(function () {

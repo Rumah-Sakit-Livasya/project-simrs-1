@@ -78,13 +78,26 @@ class OrderRadiologiController extends Controller
         $orderRadiologiId = $orderRadiologi->id;
 
         foreach ($validatedData['parameters'] as $parameter) {
-            OrderParameterRadiologi::create([
-                'order_radiologi_id' => $orderRadiologiId,
-                'parameter_radiologi_id' => $parameter['id'],
-                'qty' => $parameter['qty'],
-                'nominal_rupiah' => $parameter['price'],
-            ]);
+            for ($i = 0; $i < $parameter['qty']; $i++) {
+                OrderParameterRadiologi::create([
+                    'order_radiologi_id' => $orderRadiologiId,
+                    'parameter_radiologi_id' => $parameter['id'],
+                    'nominal_rupiah' => $parameter['price'],
+                ]);
+            }
         }
+
+        return response("ok");
+    }
+
+    public function confirmPayment(Request $request)
+    {
+        $validatedData = $request->validate([
+            'id' => 'required|integer'
+        ]);
+
+        OrderRadiologi::where('id', $validatedData['id'])
+            ->update(['status_billed' => 1]);
 
         return response("ok");
     }

@@ -45,8 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
     searchBar.addEventListener("keyup", handleSearchBarChange);
 
     // Harga
-    elementHarga = document.getElementById("radiologi-total");
-    if (!elementHarga) return;
+    elementHarga = document.getElementById("radiologi-total") || undefined;
 
     // Order Type Radio
     const orderType = document.querySelectorAll("input[type='radio'][name='order_type']");
@@ -104,7 +103,10 @@ function submit(event) {
             const QtyElement = /** @type {HTMLInputElement} */ (document.querySelector("input#jumlah_" + parameterId));
             const Qty = parseInt(QtyElement.value);
             const Tarif = TarifRadiologi.find((t) => t.parameter_radiologi_id == parameterId);
-            let Price = Tarif.total * Qty;
+            if (!Tarif) {
+                return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameterId);
+            }
+            let Price = Tarif.total;
             if (CITO) {
                 Price += (Price * 30 / 100);
             }
@@ -123,9 +125,12 @@ function submit(event) {
         }
     })
         .then(data => {
-            console.log('Success:', data);
+            console.log(data);
+            if(data.status != 200) {
+                throw new Error('Error: ' + data.statusText);
+            }
             showSuccessAlert('Data berhasil disimpan');
-            setTimeout(() => window.location.reload(), 3000);
+            setTimeout(() => window.location.reload(), 2000);
         })
         .catch(error => {
             console.error('Error:', error);
@@ -183,8 +188,12 @@ function handleSearchBarChange(event) {
 
     const parameters = document.querySelectorAll(".parameter_radiologi");
     parameters.forEach((parameter) => {
-        const parameterName = parameter.querySelector(".form-check-label").textContent.toLowerCase();
-        if (parameterName.includes(searchQuery)) {
+        const parameterNameElement = parameter.querySelector(".form-check-label");
+        if (!parameterNameElement) return;
+        const parameterName = parameterNameElement.textContent;
+        if (!parameterName) return;
+
+        if (parameterName.toLowerCase().includes(searchQuery)) {
             // @ts-ignore
             parameter.style.display = "block";
         } else {
