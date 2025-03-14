@@ -131,7 +131,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::prefix('simrs')->group(function () {
         Route::get('/dashboard', function () {
-            return view('simrs.dashboard');
+            return view('app-type.simrs.dashboard');
         })->name('dashboard.simrs');
 
         Route::prefix('/master-data')->group(function () {

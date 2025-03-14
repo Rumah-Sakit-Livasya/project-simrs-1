@@ -18,8 +18,16 @@ class ApplicationController extends Controller
 
         if ($appType == 'simrs') {
             return redirect()->route('dashboard.simrs');
-        } else {
+        } else if ($appType == 'hr') {
             return redirect()->route('attendances');
+        } else if ($appType == 'inventaris') {
+            return redirect()->route('logistik');
+        } else if ($appType == 'keuangan') {
+            return redirect()->route('keuangan');
+        } else if ($appType == 'kepustakaan') {
+            return redirect()->route('kepustakaan');
+        } else if ($appType == 'mutu') {
+            return redirect()->route('mutu');
         }
     }
 }
