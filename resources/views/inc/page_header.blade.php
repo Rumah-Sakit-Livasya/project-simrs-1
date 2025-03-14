@@ -724,7 +724,7 @@
                     <div class="col-6 col-lg-4 mb-3">
                         <form action="{{ route('set-app') }}" method="POST">
                             @csrf
-                            <input type="hidden" name="app_type" value="inventaris">
+                            <input type="hidden" name="app_type" value="logistik">
                             <button type="submit" class="btn btn-light w-100 h-100 text-center shadow-sm">
                                 <i class="fas fa-boxes fa-2x mb-2 text-warning"></i>
                                 <h5 class="text-warning">E-Logistic</h5>
