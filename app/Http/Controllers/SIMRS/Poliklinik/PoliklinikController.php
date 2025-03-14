@@ -11,6 +11,8 @@ use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
+use App\Models\SIMRS\Pengkajian\FormKategori;
+use App\Models\SIMRS\Pengkajian\FormTemplate;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Peralatan\OrderAlatMedis;
 use App\Models\SIMRS\Peralatan\Peralatan;
@@ -94,7 +96,9 @@ class PoliklinikController extends Controller
         } elseif ($menu == 'rekonsiliasi_obat') {
             return view('pages.simrs.poliklinik.farmasi.rekonsiliasi_obat', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_lanjutan') {
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));
+            $form = FormKategori::all();
+
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form'));
         } elseif ($menu == 'tindakan_medis') {
             $tindakan_medis = TindakanMedis::all();
             $doctors = Doctor::with('employee', 'departement')->get();
@@ -154,6 +158,22 @@ class PoliklinikController extends Controller
                 'message' => 'Failed to retrieve data',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function showForm(Request $request, $encryptedID)
+    {
+        try {
+            // Dekripsi ID
+            $id = base64_decode($encryptedID);
+    
+            // Ambil data berdasarkan ID
+            $formTemplate = FormTemplate::findOrFail($id)->form_source;
+    
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.show_form', compact('formTemplate'));
+
+        } catch (\Exception $e) {
+            abort(404, 'Data tidak ditemukan.');
         }
     }
 }
