@@ -20,7 +20,7 @@ class ApplicationController extends Controller
             return redirect()->route('dashboard.simrs');
         } else if ($appType == 'hr') {
             return redirect()->route('attendances');
-        } else if ($appType == 'inventaris') {
+        } else if ($appType == 'logistik') {
             return redirect()->route('logistik');
         } else if ($appType == 'keuangan') {
             return redirect()->route('keuangan');
