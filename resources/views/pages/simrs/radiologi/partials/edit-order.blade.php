@@ -66,11 +66,17 @@
                                                             class="form-control" id="poly_ruang" readonly
                                                             value="{{ $order->registration->poliklinik }}"
                                                             name="poly_ruang">
-                                                    @else
+                                                    @elseif(isset($order->registration->kelas_rawat))
                                                         <input type="text"
                                                             style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
                                                             class="form-control" id="poly_ruang" readonly
-                                                            value="[Belum Ada]" name="poly_ruang">
+                                                            value="{{ $order->registration->kelas_rawat->room->ruangan }}"
+                                                            name="poly_ruang">
+                                                    @else
+                                                        <input type="text"
+                                                            style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
+                                                            class="form-control" id="poly_ruang" readonly value=" - "
+                                                            name="poly_ruang">
                                                     @endif
                                                 </div>
                                             </div>
@@ -81,9 +87,7 @@
                                                     <label class="form-label" for="doctor_id">Diagnosa Klinis*</label>
                                                 </div>
                                                 <div class="col-xl-8">
-                                                    <input type="text"
-                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="diagnosa_klinis"
+                                                    <input type="text" class="form-control" id="diagnosa_klinis"
                                                         value="{{ $order->diagnosa_klinis }}" name="diagnosa_klinis">
                                                 </div>
                                             </div>
@@ -97,7 +101,8 @@
                                                     <input type="text"
                                                         style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="doctor_perujuk" readonly
-                                                        value="{{ $order->registration->doctor->employee->fullname }}" name="doctor_perujuk">
+                                                        value="{{ $order->registration->doctor->employee->fullname }}"
+                                                        name="doctor_perujuk">
                                                 </div>
                                             </div>
                                         </div>
@@ -114,7 +119,8 @@
                                                     <input type="text"
                                                         style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="patient_name" readonly
-                                                        value="{{ $order->registration->patient->name }}" name="patient_name">
+                                                        value="{{ $order->registration->patient->name }}"
+                                                        name="patient_name">
                                                 </div>
                                             </div>
                                         </div>
@@ -146,8 +152,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-xl-4">
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-xl-4 text-right">
@@ -169,15 +173,88 @@
                                             <div class="row align-items-center">
                                                 <div class="col-xl-4 text-right">
                                                     <label class="form-label" for="inspection_date">
-                                                        Tgl Pemeriksaan
+                                                        Tgl Pemeriksaan*
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl-8">
+                                                    <input type="date"
+                                                        class="@error('inspection_date') is-invalid @enderror form-control"
+                                                        id="inspection_date" placeholder="Tanggal Lahir"
+                                                        name="inspection_date" value="{{ old('inspection_date') }}">
+                                                    @error('inspection_date')
+                                                        <p class="invalid-feedback">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-4">
+                                        <div class="form-group">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-right">
+                                                    <label class="form-label" for="rm_reg">
+                                                        No RM / Registrasi
                                                     </label>
                                                 </div>
                                                 <div class="col-xl-8">
                                                     <input type="text"
                                                         style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="inspection_date"
-                                                        value="{{ $today }}"
-                                                        name="inspection_date">
+                                                        class="form-control" id="rm_reg" readonly
+                                                        value="{{ $order->registration->patient->medical_record_number }} / {{ $order->registration->registration_number }}"
+                                                        name="rm_reg">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-right">
+                                                    <label class="form-label" for="mobile_phone_number">
+                                                        No Telp
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl-8">
+                                                    <input type="text"
+                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
+                                                        class="form-control" id="mobile_phone_number" readonly
+                                                        value="{{ $order->registration->patient->mobile_phone_number }}"
+                                                        name="mobile_phone_number">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-right">
+                                                    <label class="form-label" for="age">
+                                                        Umur
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl-8">
+                                                    <input type="text"
+                                                        style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
+                                                        class="form-control" id="age" readonly
+                                                        value="{{ displayAge($order->registration->patient->date_of_birth) }}"
+                                                        name="age">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="row align-items-center">
+                                                <div class="col-xl-4 text-right">
+                                                    <label class="form-label" for="pickup_date">
+                                                        Tgl Pengambilan*
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl-8">
+                                                    <input type="date"
+                                                        class="@error('pickup_date') is-invalid @enderror form-control"
+                                                        id="pickup_date" placeholder="Tanggal Lahir" name="pickup_date"
+                                                        value="{{ old('pickup_date') }}">
+                                                    @error('pickup_date')
+                                                        <p class="invalid-feedback">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
                                             </div>
                                         </div>
@@ -211,7 +288,18 @@
                                                         </tr>
                                                         @foreach ($parameters as $parameter)
                                                             <td>{{ ++$totalCount }}</td>
-                                                            <td> [Radiografer] </td>
+                                                            <td>
+                                                                <select class="select2 form-control w-100"
+                                                                    id="radiografer_{{ $parameter->id }}"
+                                                                    name="radiografer_{{ $parameter->id }}">
+                                                                    <option value=""></option>
+                                                                    @foreach ($radiografers as $employee)
+                                                                        <option value="{{ $employee->id }}">
+                                                                            {{ $employee->fullname }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </td>
                                                             <td>
                                                                 <h3> {{ $parameter->parameter_radiologi->parameter }}</h3>
                                                                 <p>
@@ -228,9 +316,35 @@
                                                                 </div>
                                                             </td>
                                                             <td> [Photo] </td>
-                                                            <td> [Jumlah Film] </td>
-                                                            <td> [Verifikasi] </td>
-                                                            <td> [Action] </td>
+                                                            <td>
+                                                                <input type="number" class="form-control"
+                                                                    style="width: 60px;"
+                                                                    id="jumlah_film_{{ $parameter->id }}" value="0"
+                                                                    name="jumlah_film_{{ $parameter->id }}">
+                                                            </td>
+                                                            <td>
+                                                                @if (!isset($parameter->verifikator_id))
+                                                                    <div align="center">
+                                                                        <button type="button"
+                                                                            data-id="{{ $parameter->id }}"
+                                                                            class="btn btn-primary verify-btn">Verifikasi</button>
+                                                                    </div>
+                                                                @else
+                                                                    <div align="center">
+                                                                        <i class="mdi mdi-check text-success"
+                                                                            style="font-size: 40px"></i>
+                                                                        <p>Verified by
+                                                                            <i>{{ $parameter->verifikator->fullname }}</i>
+                                                                            <br>
+                                                                            On
+                                                                            <i>{{ $parameter->verifikasi_date }}</i>
+                                                                        </p>
+                                                                    </div>
+                                                                @endif
+                                                            </td>
+                                                            <td> <a class="mdi mdi-pencil pointer mdi-24px text-secondary edit-btn"
+                                                                    title="Edit Pemeriksaan" data-id="{{ $parameter->id }}"></a>
+                                                            </td>
                                                             </tr>
                                                         @endforeach
                                                     @endforeach
@@ -273,4 +387,7 @@
             </div>
         </div>
     </main>
+
+    <script src="{{ asset('js/simrs/edit-order-radiologi.js') }}?v={{ time() }}"></script>
+
 @endsection

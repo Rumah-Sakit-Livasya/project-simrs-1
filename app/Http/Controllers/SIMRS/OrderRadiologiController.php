@@ -87,7 +87,10 @@ class OrderRadiologiController extends Controller
             }
         }
 
-        return response("ok");
+
+        return response()->json([
+            'success' => true,
+        ]);
     }
 
     public function confirmPayment(Request $request)
@@ -100,6 +103,38 @@ class OrderRadiologiController extends Controller
             ->update(['status_billed' => 1]);
 
         return response("ok");
+    }
+
+    public function verificate(Request $request)
+    {
+        $validatedData = $request->validate([
+            'id' => 'required|integer',
+            'verifikator_id' => 'required|integer',
+            'verifikasi_date' => 'required|date'
+        ]);
+
+        OrderParameterRadiologi::where('id', $validatedData['id'])
+            ->update([
+                'verifikator_id' => $validatedData['verifikator_id'],
+                'verifikasi_date' => $validatedData['verifikasi_date']
+            ]);
+
+        return response('ok');
+    }
+
+    public function parameterCheckUpdate(Request $request){
+        $validatedData = $request->validate([
+            'parameter_id' => 'required|integer',
+            'user_id' => 'required|integer',
+            'employee_id' => 'required|integer',
+            'catatan' => 'required'
+        ]);
+
+        OrderParameterRadiologi::where('id', $validatedData['id'])
+            ->update([
+                'verifikator_id' => $validatedData['verifikator_id'],
+            ]);
+
     }
 
     // Display the specified resource.

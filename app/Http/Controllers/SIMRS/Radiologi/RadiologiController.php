@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\SIMRS\Radiologi;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
+use App\Models\OrderParameterRadiologi;
 use App\Models\OrderRadiologi;
 use Illuminate\Http\Request;
 
@@ -60,9 +62,19 @@ class RadiologiController extends Controller
         ]);
     }
 
+    public function editHasilParameter($id)
+    {
+        $parameter = OrderParameterRadiologi::findOrFail($id);
+        return view('pages.simrs.radiologi.partials.edit-hasil-parameter', [
+            'parameter' => $parameter
+        ]);
+    }
+
     public function editOrder($id)
     {
         $order = OrderRadiologi::findOrFail($id);
+        // organizations table, id "Radiologi" = 24
+        $radiografers = Employee::where(['organization_id' => 24])->get();
         $parameters =  $order->order_parameter_radiologi;
         $parameterCategories = [];
 
@@ -79,7 +91,8 @@ class RadiologiController extends Controller
 
         return view('pages.simrs.radiologi.partials.edit-order', [
             'order' => $order,
-            'parametersInCategory' => $parameterCategories
+            'parametersInCategory' => $parameterCategories,
+            'radiografers' => $radiografers
         ]);
     }
 }

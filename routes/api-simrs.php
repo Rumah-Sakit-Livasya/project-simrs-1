@@ -66,6 +66,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
     Route::post('order-radiologi/', [OrderRadiologiController::class, 'store'])->name('order.radiologi.store');
     Route::post('konfirmasi-tagihan-order-radiologi/', [OrderRadiologiController::class, 'confirmPayment'])->name('order.radiologi.confirm-payment');
+    Route::post('verifikasi-order-parameter-radiologi/', [OrderRadiologiController::class, 'verificate'])->name('order.radiologi.verificate');
+    Route::post('update-pemeriksaan-parameter-radiologi/', [OrderRadiologiController::class, 'parameterCheckUpdate'])->name('order.radiologi.parameter-check-update');
 
 
     Route::prefix('pengkajian')->group(function () {

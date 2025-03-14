@@ -23,4 +23,8 @@ class OrderParameterRadiologi extends Model
     {
         return $this->belongsTo(ParameterRadiologi::class);
     }
+
+    public function verifikator(){
+        return $this->belongsTo(Employee::class, 'verifikator_id', 'id');
+    }
 }
