@@ -15,6 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('nama_kategori', 30);
             $table->boolean('is_active')->default(true);
+            $table->unsignedBigInteger('entry_by');
+            $table->unsignedBigInteger('modify_id')->nullable();
+            
+            $table->foreign('entry_by')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('modify_id')->references('id')->on('users')->onDelete('cascade');
+
             $table->softDeletes();
             $table->timestamps();
         });
