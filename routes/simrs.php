@@ -35,6 +35,7 @@ use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
+use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
@@ -151,6 +152,9 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/tarif-registrasi-layanan', [TarifRegistrasiController::class, 'index'])->name('master-data.setup.tarif-registrasi.index');
                 Route::get('/tarif-registrasi-layanan/{id}/set-tarif', [TarifRegistrasiController::class, 'setTarif'])->name('master-data.setup.tarif-registrasi.set-tarif');
                 Route::get('/tarif-registrasi-layanan/{id}/set-departement', [TarifRegistrasiController::class, 'setDepartement'])->name('master-data.setup.tarif-registrasi.set-departement');
+
+                Route::get('/form-builder', [FormBuilderController::class, 'index'])->name('master-data.setup.form-builder');
+                Route::get('/form-builder/tambah', [FormBuilderController::class, 'create'])->name('master-data.setup.form-builder.tambah');
             });
             Route::prefix('layanan-medis')->group(function () {
                 Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');
@@ -211,6 +215,7 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('poliklinik')->group(function () {
             Route::get('/daftar-pasien', [PoliklinikController::class, 'index'])->name('poliklinik.daftar-pasien');
+            Route::get('/pengkajian-lanjutan/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
         });
 
         Route::prefix('igd')->group(function () {

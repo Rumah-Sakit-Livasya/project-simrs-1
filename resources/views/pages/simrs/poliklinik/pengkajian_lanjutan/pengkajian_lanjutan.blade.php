@@ -1,6 +1,7 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
+    @include('pages.simrs.poliklinik.partials.css-sidebar-custom')
     <style>
         main {
             overflow-x: hidden;
@@ -140,30 +141,30 @@
                             <div class="col-12">
                                 <table class="table table-borderless">
                                     <tbody>
-                                        <tr>
-                                            <td style="width: 20%;" valign="middle">
-                                                <label class="mt-2">Nama Pasien</label>
-                                            </td>
-                                            <td style="width: 3%;" valign="middle">
-                                                <label class="mt-2">:</label>
-                                            </td>
-                                            <td style="width: 50%;">
-                                                <select
-                                                    class="select2 form-control @error('departement_id') is-invalid @enderror filter-poli"
-                                                    name="departement_id" id="departement_id_pengkajian_lanjutan">
-                                                    <option value=""></option>
-                                                    @foreach ($departements as $departement)
-                                                        <option value="{{ $departement->id }}"
-                                                            {{ ($registration->departement_id ?? '') == $departement->id ? 'selected' : '' }}>
-                                                            {{ $departement->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </td>
-                                            <td style="width: 20%;">
-                                                <button class="btn btn-primary">Tambah</button>
-                                            </td>
-                                        </tr>
+                                        @foreach ($form as $item)
+                                            <tr>
+                                                <td style="width: 20%;" valign="middle">
+                                                    <label class="mt-2">{{ $item->nama_kategori }}</label>
+                                                </td>
+                                                <td style="width: 3%;" valign="middle">
+                                                    <label class="mt-2">:</label>
+                                                </td>
+                                                <td style="width: 50%;">
+                                                    <select class="select2 form-control" name="form_id"
+                                                        id="form_id_{{ $item->id }}">
+                                                        <option value=""></option>
+                                                        @foreach ($item->form_templates as $template)
+                                                            <option value="{{ $template->id }}">
+                                                                {{ $template->nama_form }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </td>
+                                                <td style="width: 20%;">
+                                                    <button class="btn btn-primary tambah-form">Tambah</button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -188,6 +189,34 @@
             });
             $('#doctor_id').select2({
                 placeholder: 'Pilih Dokter',
+            });
+
+            $('.tambah-form').on('click', function(e) {
+                e.preventDefault();
+
+                let idForm = $(this).closest('tr').find('select').val();
+
+                if (idForm) {
+                    // Panggil route yang sudah dienkripsi dari Blade
+                    let url = "{{ route('poliklinik.pengkajian-lanjutan.show', ':encryptedId') }}"
+                        .replace(':encryptedId', btoa(idForm)); // Enkripsi dengan Base64
+
+                    // Ukuran popup
+                    let popupWidth = 1200;
+                    let popupHeight = 600;
+
+                    // Hitung posisi tengah
+                    let screenWidth = window.screen.width;
+                    let screenHeight = window.screen.height;
+                    let left = (screenWidth - popupWidth) / 2;
+                    let top = (screenHeight - popupHeight) / 2.8;
+
+                    // Buka popup di tengah
+                    window.open(url, '_blank',
+                        `width=${popupWidth},height=${popupHeight},top=${top},left=${left}`);
+                } else {
+                    alert('Silakan pilih departement terlebih dahulu.');
+                }
             });
         });
     </script>
