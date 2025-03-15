@@ -24,22 +24,16 @@ class FormBuilderController extends Controller
     public function store(Request $request)
     {
 
-        dd($request);
-        // $validatedData = $request->validate([
-            
-        // ]);
+        $validatedData = $request->validate([
+           'nama_form' => 'required',
+           'form_kategori_id' => 'required',
+           'form_source' => 'required',
+           'is_active' => 'nullable' 
+        ]);
 
         try {
-            $validatedData['is_verified'] = 1;
-            $validatedData['awal_rencana_tindak_lanjut'] = json_encode($request->awal_rencana_tindak_lanjut);
-            $validatedData['awal_evaluasi_penyakit'] = json_encode($request->awal_evaluasi_penyakit);
-            $validatedData['awal_edukasi'] = json_encode($request->awal_edukasi);
-            $validatedData['asesmen_dilakukan_melalui'] = json_encode($request->asesmen_dilakukan_melalui);
-            $validatedData['user_id'] = auth()->user()->id;
-            if ($request->action_type = 'final') {
-                $validatedData['is_final'] = 1;
-            }
-            $store = PengkajianDokterRajal::create($validatedData);
+            $validatedData['created_by'] = auth()->user()->id;
+            $store = FormTemplate::create($validatedData);
             return response()->json(['message' => ' berhasil ditambahkan!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
