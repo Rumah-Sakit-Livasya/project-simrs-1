@@ -35,6 +35,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
+use App\Http\Controllers\Keuangan\CategoryController;
 use App\Http\Controllers\SIMRS\TextToSpeech\TextToSpeechController;
 use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\AttendanceRequest;
@@ -350,6 +351,7 @@ Route::post('process-message', [BotMessageController::class, 'processMessage'])-
 Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])->middleware(CheckAuthorizationBot::class);
 // Route::get('notify-contract', [BotMessageController::class, 'notifyExpiryContract']);
 
-
+// Keuangan
+Route::get('get-kategori/{jenis}', [CategoryController::class, 'getKategori']);
 
 require __DIR__ . '/api-simrs.php';

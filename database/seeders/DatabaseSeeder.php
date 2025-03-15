@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Keuangan\Type;
 use App\Models\Target;
 use Illuminate\Database\Seeder;
 
@@ -28,10 +29,15 @@ class DatabaseSeeder extends Seeder
         // $this->call(EthnicSeeder::class);
         // $this->call(GroupPenjaminSeeder::class);
         // $this->call(PenjaminSeeder::class);
-        $this->call([
-            TimeScheduleSeeder::class,
-            TimeScheduleEmployeeSeeder::class,
-            // Seeder lainnya jika ada
+        // $this->call([
+        //     TimeScheduleSeeder::class,
+        //     TimeScheduleEmployeeSeeder::class,
+        //     // Seeder lainnya jika ada
+        // ]);
+
+        Type::insert([
+            ['id' => 1, 'nama' => 'Pemasukan', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 2, 'nama' => 'Pengeluaran', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }
