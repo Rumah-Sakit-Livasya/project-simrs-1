@@ -37,7 +37,7 @@
                         <span>Laboratorium</span>
                     </li>
                     <li>
-                        <div class="circle-menu waves-effect red menu-layanan" data-layanan="order_rad/list_order">
+                        <div class="circle-menu waves-effect red menu-layanan" data-layanan="radiologi">
                             <i class="mdi mdi-radioactive"></i>
                         </div>
                         <span>Radiologi</span>

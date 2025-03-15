@@ -24,6 +24,7 @@ use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
+use App\Http\Controllers\SIMRS\OrderRadiologiController;
 use App\Http\Controllers\SIMRS\OrderTindakanMedisController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
 use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
@@ -64,10 +65,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::get('get-medical-actions/{registrationId}', [OrderTindakanMedisController::class, 'getMedicalActions'])->name('medical.action.get');
     Route::delete('delete-medical-action/{id}', [OrderTindakanMedis::class, 'destroy'])->name('medical.action.destroy');
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
+    Route::post('order-radiologi/', [OrderRadiologiController::class, 'store'])->name('order.radiologi.store');
+    Route::post('konfirmasi-tagihan-order-radiologi/', [OrderRadiologiController::class, 'confirmPayment'])->name('order.radiologi.confirm-payment');
+
 
     Route::prefix('pengkajian')->group(function () {
-        Route::prefix('rawat-jalan')->group(function() {
-            Route::prefix('perawat')->group(function(){
+        Route::prefix('rawat-jalan')->group(function () {
+            Route::prefix('perawat')->group(function () {
                 Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianRajal'])->name('pengkajian.nurse-rajal.store');
             });
             Route::prefix('dokter')->group(function () {
@@ -75,29 +79,29 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             });
         });
     });
-    
+
     Route::prefix('transfer-pasien-antar-ruangan')->group(function () {
         Route::post('/store', [PengkajianController::class, 'storeOrUpdateTransferPasienAntarRuangan'])->name('transfer-pasien-antar-ruangan.store');
     });
 
-    Route::prefix('cppt')->group(function() {
-        Route::prefix('rawat-jalan')->group(function() {
-            Route::prefix('perawat')->group(function() {
+    Route::prefix('cppt')->group(function () {
+        Route::prefix('rawat-jalan')->group(function () {
+            Route::prefix('perawat')->group(function () {
                 Route::post('/store', [CPPTController::class, 'store'])->name('cppt.rajal.perawat.store');
             });
         });
     });
-    
-    Route::prefix('layanan')->group(function() {
-        Route::prefix('rawat-jalan')->group(function() {
-            Route::prefix('pemakaian_alat')->group(function() {
+
+    Route::prefix('layanan')->group(function () {
+        Route::prefix('rawat-jalan')->group(function () {
+            Route::prefix('pemakaian_alat')->group(function () {
                 Route::post('/store', [LayananController::class, 'storePemakaianAlat'])->name('layanan.rajal.pemakaian_alat.store');
             });
         });
     });
 
 
-    Route::prefix('poliklinik')->group(function() {
+    Route::prefix('poliklinik')->group(function () {
         Route::post('/filter-pasien', [PoliklinikController::class, 'filterPasien'])->name('poliklinik.filter-pasien');
     });
 
@@ -191,6 +195,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post('store', [FormBuilderController::class, 'store']);
             });
         });
+
+
 
         Route::prefix('penunjang-medis')->group(function () {
             Route::get('/radiologi/grup-parameter-radiologi/{id}', [GrupParameterRadiologiController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.radiologi.grup-parameter.get');

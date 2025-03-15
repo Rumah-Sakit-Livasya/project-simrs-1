@@ -382,12 +382,12 @@
                                 $('#kelas').val(data.kelas_id).trigger('change');
                                 $('#tindakanMedis').empty().append(
                                     '<option value="" selected>Pilih Tindakan Medis</option>'
-                                    );
+                                );
 
                                 data.tindakan_medis.forEach(item => {
                                     $('#tindakanMedis').append(
                                         `<option value="${item.id}">${item.nama_tindakan}</option>`
-                                        );
+                                    );
                                 });
 
                                 $('#tindakanMedis').trigger('change');

@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('order_parameter_radiologi', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('order_radiologi_id')->constrained('order_radiologi')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('parameter_radiologi_id')->constrained('parameter_radiologi')->onUpdate('cascade')->onDelete('cascade');
+            $table->bigInteger('nominal_rupiah');
+            $table->foreignId('radiografer_id')->nullable()->constrained('employees')->onUpdate('cascade')->nullOnDelete();
+            $table->tinyInteger('film_qty')->nullable();
+            $table->string('foto')->nullable();
+            $table->foreignId('verifikator_id')->nullable()->constrained('employees')->onUpdate('cascade');
+            $table->date('verifikasi_date')->nullable();
+            $table->string('catatan')->nullable();
+            $table->softDeletes();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('order_parameter_radiologi');
+    }
+};

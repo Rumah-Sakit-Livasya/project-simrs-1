@@ -132,7 +132,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::prefix('simrs')->group(function () {
         Route::get('/dashboard', function () {
-            return view('simrs.dashboard');
+            return view('app-type.simrs.dashboard');
         })->name('dashboard.simrs');
 
         Route::prefix('/master-data')->group(function () {
@@ -260,7 +260,8 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('list-order', [RadiologiController::class, 'index'])->name('radiologi.list-order');
             Route::get('template-hasil', [RadiologiController::class, 'templateHasil'])->name('radiologi.template-hasil');
             Route::get('report', [RadiologiController::class, 'report'])->name('radiologi.report');
-            Route::get('simulasi-harga', [RadiologiController::class, 'simulasiHarga'])->name('radiologi.simulasi-harga');
+            Route::get('nota-order/{id}', [RadiologiController::class, 'notaOrder'])->name('radiologi.nota-order');
+            Route::get('edit-order/{id}', [RadiologiController::class, 'editOrder'])->name('radiologi.edit-order');
         });
 
         Route::prefix('laboratorium')->group(function () {

@@ -20,6 +20,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['auth']], function () {
     Route::prefix('inventaris')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('app-type.logistik.dashboard');
+        })->name('logistik');
+
         Route::get('/room-maintenance', [RoomMaintenanceController::class, 'index'])->name('inventaris.rooms.index');
         Route::get('/room-maintenance/{id}', [RoomMaintenanceController::class, 'show'])->name('inventaris.rooms.show');
         Route::get('/category-barang', [CategoryBarangController::class, 'index'])->name('inventaris.category.index');

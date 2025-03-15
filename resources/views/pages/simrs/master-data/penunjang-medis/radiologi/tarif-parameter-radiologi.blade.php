@@ -1,4 +1,4 @@
-@extends('inc.layout')
+@extends('inc.layout-no-side')
 @section('title', 'Parameter Radiologi')
 @section('extended-css')
     <style>
@@ -98,6 +98,12 @@
             $('#loading-spinner').show();
 
             $('.select2').select2();
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
 
             $('#store-form').on('submit', function(e) {
                 e.preventDefault(); // Mencegah form dari pengiriman default
