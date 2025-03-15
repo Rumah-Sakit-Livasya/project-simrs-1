@@ -30,27 +30,31 @@
                     <div class="panel-container show">
                         <div class="panel-content" id="filter-wrapper">
 
-                            <form action="javascript:void(0)" method="POST">
+                            <form action="#" method="POST" id="store-form">
                                 @csrf
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <div class="form-group">
-                                            <label for="nama_tindakan" class="form-label">Nama Formulir</label>
-                                            <input type="text" name="nama_tindakan" id="nama_tindakan"
+                                            <label for="nama_form" class="form-label">Nama Formulir</label>
+                                            <input type="text" name="nama_form" id="nama_form"
                                                 class="form-control">
                                         </div>
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <div class="form-group">
-                                            <label for="kategori_formulir" class="form-label">Kategori Formulir</label>
-                                            <input type="text" name="kategori_formulir" id="kategori_formulir"
-                                                class="form-control">
+                                            <label for="form_kategori_id" class="form-label">Kategori Formulir</label>
+                                            <select class="form-control select2" name="form_kategori_id" id="form_kategori_id">
+                                                {{-- <option value=""></option> --}}
+                                                @foreach ($kategori as $item)
+                                                    <option value="{{$item->id}}">{{$item->nama_kategori}}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <div class="form-group">
-                                            <label for="status" class="form-label">Status</label>
-                                            <select class="form-control" name="status" id="status">
+                                            <label for="is_active" class="form-label">Status</label>
+                                            <select class="form-control select2" name="is_active" id="is_active">
                                                 <option value="1">Aktif</option>
                                                 <option value="0">Tidak Aktif</option>
                                             </select>
@@ -96,7 +100,7 @@
                 var formData = $(this).serialize(); // Mengambil semua data dari form
 
                 $.ajax({
-                    url: '/api/simrs/master-data/operasi/tipe',
+                    url: '/api/simrs/master-data/setup/form-builder/store',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {
@@ -105,7 +109,7 @@
                             'd-none');
                     },
                     success: function(response) {
-                        $('#modal-tambah-tipe').modal('hide');
+                        
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -122,12 +126,9 @@
                                 errorMessages += value +
                                     '\n';
                             });
-
-                            $('#modal-tambah-tipe').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-tambah-tipe').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }

@@ -26,6 +26,7 @@ use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\OrderTindakanMedisController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
+use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianDokterRajalController;
 use App\Http\Controllers\SIMRS\Penjamin\GroupPenjaminController;
@@ -184,6 +185,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::get('/{biayaMateraiId}/get', [BiayaMateraiController::class, 'getBiayaMaterai']);
                 Route::patch('/{biayaMateraiId}/update', [BiayaMateraiController::class, 'update']);
                 Route::delete('/{biayaMateraiId}/delete', [BiayaMateraiController::class, 'destroy']);
+            });
+
+            Route::prefix('form-builder')->group(function() {
+                Route::post('store', [FormBuilderController::class, 'store']);
             });
         });
 
