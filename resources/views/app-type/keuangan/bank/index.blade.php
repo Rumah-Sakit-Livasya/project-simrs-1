@@ -78,6 +78,7 @@
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datatable/jszip.min.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
 
     <script>
         $(document).ready(function() {

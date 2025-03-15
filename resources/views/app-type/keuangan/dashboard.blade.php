@@ -145,6 +145,10 @@
     <script src="/js/statistics/easypiechart/easypiechart.bundle.js"></script>
     <script src="/js/statistics/flot/flot.bundle.js"></script>
     <script src="/js/miscellaneous/jqvmap/jqvmap.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+    <script src="/js/datatable/jszip.min.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
+
     <script>
         $(document).ready(function() {
             //$('#js-page-content').smartPanel();

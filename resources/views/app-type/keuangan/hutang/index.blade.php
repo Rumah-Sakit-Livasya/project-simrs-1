@@ -81,6 +81,7 @@
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datatable/jszip.min.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
 
     <script>
         var controls = {
