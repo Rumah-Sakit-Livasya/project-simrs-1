@@ -179,7 +179,7 @@
         </div>
     </main>
 
-    @include('pages.inventaris.rooms.partials.edit')
+    @include('app-type.logistik.rooms.partials.edit')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>

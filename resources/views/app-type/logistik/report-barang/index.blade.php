@@ -174,6 +174,7 @@
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/datatable/jszip.min.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         /* demo scripts for change table color */
         /* change background */

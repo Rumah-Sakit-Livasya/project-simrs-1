@@ -90,23 +90,23 @@
 
     <div style="width:21.3cm; height: 13.8cm; margin-left: -9px;">
         @foreach ($items as $item)
-        <div class="block">
-            <div class="delete" style="float:right"><a href="#"><img src="/img/delete.png" /></a></div>
-            <div class="ceklist" style="float:right"><a href="#"><img src="/img/tick.png" /></a></div>
-            <table width="100%" border="0" class="whowme">
-                <tr>
-                    <td style="text-align: center"><span class="head_anak">No: </span></td>
-                </tr>
-                <tr>
-                    <td style="text-align: center; font-weight: bold;">
-                        <span class="head_anak">
-                            {{ strtoupper($item->item_code) }}
-                            {{ strtoupper($item->merk) }}
-                        </span>
-                    </td>
-                </tr>
-            </table>
-        </div>
+            <div class="block">
+                <div class="delete" style="float:right"><a href="#"><img src="/img/delete.png" /></a></div>
+                <div class="ceklist" style="float:right"><a href="#"><img src="/img/tick.png" /></a></div>
+                <table width="100%" border="0" class="whowme">
+                    <tr>
+                        <td style="text-align: center"><span class="head_anak">No: </span></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">
+                            <span class="head_anak">
+                                {{ strtoupper($item->item_code) }}
+                                {{ strtoupper($item->merk) }}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         @endforeach
     </div>
 

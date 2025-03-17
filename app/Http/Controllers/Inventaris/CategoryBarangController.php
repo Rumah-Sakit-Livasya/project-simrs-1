@@ -13,7 +13,7 @@ class CategoryBarangController extends Controller
     public function index()
     {
         $categoryBarang = CategoryBarang::orderBy('created_at', 'desc')->get();
-        return view('pages.inventaris.category-barang.index', compact('categoryBarang'));
+        return view('app-type.logistik.category-barang.index', compact('categoryBarang'));
     }
 
     public function store(Request $request)
@@ -86,7 +86,7 @@ class CategoryBarangController extends Controller
         $templateBarang = TemplateBarang::orderBy('created_at', 'desc')->get();
         $categoryBarang = CategoryBarang::orderBy('created_at', 'desc')->get();
 
-        return view('pages.inventaris.category-barang.show', [
+        return view('app-type.logistik.category-barang.show', [
             'categories' => CategoryBarang::all(),
             'category' => $category,
             'items' => $TBarang,
