@@ -18,7 +18,7 @@
                                 <div class="row">
                                     <div class="col-md-4">
                                         <label for="month">Bulan</label>
-                                        <select name="month" id="month" class="form-control">
+                                        <select name="month" id="month" class="form-control select2">
                                             @for ($i = 1; $i <= 12; $i++)
                                                 <option value="{{ $i }}"
                                                     {{ request('month') == $i ? 'selected' : '' }}>
@@ -29,7 +29,7 @@
                                     </div>
                                     <div class="col-md-4">
                                         <label for="year">Tahun</label>
-                                        <select name="year" id="year" class="form-control">
+                                        <select name="year" id="year" class="form-control select2">
                                             @for ($i = date('Y'); $i >= 2000; $i--)
                                                 <option value="{{ $i }}"
                                                     {{ request('year') == $i ? 'selected' : '' }}>
@@ -202,8 +202,13 @@
     </div>
 @endsection
 @section('plugin')
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            $(document).ready(function() {
+                $('.select2').select2();
+            });
+
             $('.clickable-data-category').on('click', function() {
                 var category = $(this).data('category');
                 var month = $('#month').val();
