@@ -35,7 +35,7 @@ Route::group(['middleware' => ['auth']], function () {
                 'users' => User::select('id')->count(),
                 'reports' => ReportBarang::latest()->orderBy('created_at', 'desc')->take(100)->get(),
             ]);
-        })->name('logistik');
+        })->middleware('can:view inventaris dashboard')->name('logistik');
 
         Route::get('/room-maintenance', [RoomMaintenanceController::class, 'index'])
             ->middleware('can:view inventaris ruangan')
