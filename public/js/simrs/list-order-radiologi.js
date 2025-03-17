@@ -14,17 +14,20 @@ class RadiologiOrderHandler {
         this.#addEventListeners("a.nota-btn", this.#handleNotaClick);
         this.#addEventListeners("a.edit-btn", this.#handleEditClick);
         this.#addEventListeners("a.pay-btn", this.#handlePayClick);
+        this.#addEventListeners("a.result-btn", this.#handleResultClick);
+        this.#addEventListeners("a.label-btn", this.#handleLabelClick);
     }
 
     /**
      * Add event listeners
      * @param {string} selector 
      * @param {Function} handler 
+     * @param {string} event
      */
-    #addEventListeners(selector, handler) {
+    #addEventListeners(selector, handler, event = 'click') {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
-            button.addEventListener("click", handler.bind(this));
+            button.addEventListener(event, handler.bind(this));
         });
     }
 
@@ -84,10 +87,6 @@ class RadiologiOrderHandler {
         if (!id) return;
 
         const url = `/simrs/radiologi/edit-order/${id}`;
-        const popupWidth = 900;
-        const popupHeight = 600;
-        const left = (screen.width - popupWidth) / 2;
-        const top = (screen.height - popupHeight) / 2;
 
         window.open(
             url,
@@ -108,10 +107,46 @@ class RadiologiOrderHandler {
         if (!id) return;
 
         const url = `/simrs/radiologi/nota-order/${id}`;
-        const popupWidth = 900;
-        const popupHeight = 600;
-        const left = (screen.width - popupWidth) / 2;
-        const top = (screen.height - popupHeight) / 2;
+
+        window.open(
+            url,
+            "popupWindow_" + new Date().getTime(),
+            "width=" + screen.width + ",height=" + screen.height +
+            ",scrollbars=yes,resizable=yes"
+        );
+    }
+
+    /**
+    * Handle print nota button click
+    * @param {Event} event 
+    */
+    #handleResultClick(event) {
+        event.preventDefault();
+        const target = /** @type {HTMLElement} */ (event.target);
+        const id = target.getAttribute("data-id");
+        if (!id) return;
+
+        const url = `/simrs/radiologi/hasil-order/${id}`;
+
+        window.open(
+            url,
+            "popupWindow_" + new Date().getTime(),
+            "width=" + screen.width + ",height=" + screen.height +
+            ",scrollbars=yes,resizable=yes"
+        );
+    }
+
+    /**
+    * Handle print nota button click
+    * @param {Event} event 
+    */
+    #handleLabelClick(event) {
+        event.preventDefault();
+        const target = /** @type {HTMLElement} */ (event.target);
+        const id = target.getAttribute("data-id");
+        if (!id) return;
+
+        const url = `/simrs/radiologi/label-order/${id}`;
 
         window.open(
             url,

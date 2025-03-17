@@ -2,6 +2,9 @@
 /// <reference types="jquery" />
 /// <reference path="../types.d.ts" />
 
+// @ts-ignore
+const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
+
 class EditOrderRadiologi {
     constructor() {
         this.#init();
@@ -9,6 +12,7 @@ class EditOrderRadiologi {
 
     #init() {
         this.#addEventListeners('.verify-btn', this.#handleVerifyButton);
+        this.#addEventListeners('.parameter-photo', this.#handleParameterPhotoClick);
         this.#addEventListeners(".edit-btn", this.#handleEditClick);
     }
 
@@ -16,12 +20,31 @@ class EditOrderRadiologi {
      * Add event listeners
      * @param {string} selector 
      * @param {Function} handler 
+     * @param {string} event
      */
-    #addEventListeners(selector, handler) {
+    #addEventListeners(selector, handler, event = 'click') {
         const buttons = document.querySelectorAll(selector);
         buttons.forEach((button) => {
-            button.addEventListener("click", handler.bind(this));
+            button.addEventListener(event, handler.bind(this));
         });
+    }
+
+    /**
+    * Handle upload photo button click
+    * @param {Event} event 
+    */
+    #handleParameterPhotoClick(event) {
+        event.preventDefault();
+        const target = /** @type {HTMLElement} */ (event.target);
+        const src = target.getAttribute("src");
+        if (!src) return;
+
+        window.open(
+            src,
+            "popupWindow_" + new Date().getTime(),
+            "width=" + screen.width + ",height=" + screen.height + 
+            ",scrollbars=yes,resizable=yes"
+        );
     }
 
     /**
@@ -35,10 +58,6 @@ class EditOrderRadiologi {
         if (!id) return;
 
         const url = `/simrs/radiologi/edit-hasil-parameter/${id}`;
-        const popupWidth = 900;
-        const popupHeight = 600;
-        const left = (screen.width - popupWidth) / 2;
-        const top = (screen.height - popupHeight) / 2;
 
         window.open(
             url,

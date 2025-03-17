@@ -1,6 +1,10 @@
 @extends('inc.layout-no-side')
 @section('title', 'Pemeriksaan')
+@section('extended-css')
+    <style src="{{ asset('summernote-0.9.0/summernote-bs4.min.css') }}"></style>
+@endsection
 @section('content')
+
     <main id="js-page-content" role="main" class="page-content">
         <div class="row">
             <div class="col-xl-12">
@@ -18,7 +22,9 @@
                                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
                                 @csrf
                                 <div class="form-group">
-                                    <textarea name="catatan" id="catatan"></textarea>
+                                    <textarea name="catatan" id="summernote">
+                                        {{ $parameter->catatan }}
+                                    </textarea>
                                 </div>
                                 <div class="col-xl-12 mt-5">
                                     <div class="row">
@@ -46,22 +52,19 @@
         </div>
 
     </main>
+@endsection
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/7.6.0/tinymce.min.js"
-        integrity="sha512-/4EpSbZW47rO/cUIb0AMRs/xWwE8pyOLf8eiDWQ6sQash5RP1Cl8Zi2aqa4QEufjeqnzTK8CLZWX7J5ZjLcc1Q=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+@section('plugin')
+    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.export.js"></script>
+    <script src="{{ asset('summernote-0.9.0/summernote-bs4.min.js') }}"></script>
+
     <script>
-        tinymce.init({
-            selector: '#catatan'
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                const promotionDiv = document.querySelector('.tox-promotion');
-                if (promotionDiv) {
-                    promotionDiv.remove();
-                }
-            }, 1000);
-
+        $(document).ready(function() {
+            $('#summernote').summernote({
+                height: 400,
+                placeholder: 'Hasil pemeriksaan...'
+            });
         });
     </script>
 @endsection

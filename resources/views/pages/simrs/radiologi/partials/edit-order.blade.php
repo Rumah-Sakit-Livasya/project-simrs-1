@@ -1,5 +1,22 @@
 @extends('inc.layout-no-side')
 @section('title', 'Edit Order Radiologi')
+@section('extended-css')
+    <style>
+        .display-none {
+            display: none;
+        }
+
+        .popover {
+            max-width: 100%;
+            max-height:
+        }
+
+        .parameter-photo {
+            max-width: 80px;
+            max-height: 80px;
+        }
+    </style>
+@endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="row">
@@ -14,7 +31,7 @@
                         <div class="panel-content">
 
 
-                            <form id="form-radiologi">
+                            <form id="form-radiologi" action="{{ route('order.radiologi.edit-order') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
@@ -177,10 +194,11 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl-8">
-                                                    <input type="date"
+                                                    <input type="datetime-local"
                                                         class="@error('inspection_date') is-invalid @enderror form-control"
                                                         id="inspection_date" placeholder="Tanggal Lahir"
-                                                        name="inspection_date" value="{{ old('inspection_date') }}">
+                                                        name="inspection_date"
+                                                        value="{{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('Y-m-d\TH:i') : old('inspection_date') }}">
                                                     @error('inspection_date')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -251,7 +269,7 @@
                                                     <input type="date"
                                                         class="@error('pickup_date') is-invalid @enderror form-control"
                                                         id="pickup_date" placeholder="Tanggal Lahir" name="pickup_date"
-                                                        value="{{ old('pickup_date') }}">
+                                                        value="{{ $order->pickup_date ?? old('pickup_date') }}">
                                                     @error('pickup_date')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -270,7 +288,7 @@
                                                         <th>Parameter</th>
                                                         <th>Dokter</th>
                                                         <th>Photo</th>
-                                                        <th>Jumlah Film</th>
+                                                        <th>Film Qty</th>
                                                         <th>Verifikasi</th>
                                                         <th>Action</th>
                                                     </tr>
@@ -294,9 +312,15 @@
                                                                     name="radiografer_{{ $parameter->id }}">
                                                                     <option value=""></option>
                                                                     @foreach ($radiografers as $employee)
-                                                                        <option value="{{ $employee->id }}">
-                                                                            {{ $employee->fullname }}
-                                                                        </option>
+                                                                        @if ($parameter->radiografer_id != $employee->id)
+                                                                            <option value="{{ $employee->id }}">
+                                                                                {{ $employee->fullname }}
+                                                                            </option>
+                                                                        @else
+                                                                            <option value="{{ $employee->id }}" selected>
+                                                                                {{ $employee->fullname }}
+                                                                            </option>
+                                                                        @endif
                                                                     @endforeach
                                                                 </select>
                                                             </td>
@@ -315,38 +339,63 @@
                                                                     </div>
                                                                 </div>
                                                             </td>
-                                                            <td> [Photo] </td>
                                                             <td>
-                                                                <input type="number" class="form-control"
-                                                                    style="width: 60px;"
-                                                                    id="jumlah_film_{{ $parameter->id }}" value="0"
-                                                                    name="jumlah_film_{{ $parameter->id }}">
+                                                                @if ($parameter->foto)
+                                                                    @php
+                                                                        $images = json_decode($parameter->foto);
+                                                                    @endphp
+                                                                    @foreach ($images as $image)
+                                                                        <img src="{{ url('storage/' . $image) }}"
+                                                                            class="parameter-photo pointer">
+                                                                    @endforeach
                                                             </td>
-                                                            <td>
-                                                                @if (!isset($parameter->verifikator_id))
-                                                                    <div align="center">
-                                                                        <button type="button"
-                                                                            data-id="{{ $parameter->id }}"
-                                                                            class="btn btn-primary verify-btn">Verifikasi</button>
-                                                                    </div>
-                                                                @else
-                                                                    <div align="center">
-                                                                        <i class="mdi mdi-check text-success"
-                                                                            style="font-size: 40px"></i>
-                                                                        <p>Verified by
-                                                                            <i>{{ $parameter->verifikator->fullname }}</i>
-                                                                            <br>
-                                                                            On
-                                                                            <i>{{ $parameter->verifikasi_date }}</i>
-                                                                        </p>
-                                                                    </div>
-                                                                @endif
-                                                            </td>
-                                                            <td> <a class="mdi mdi-pencil pointer mdi-24px text-secondary edit-btn"
-                                                                    title="Edit Pemeriksaan" data-id="{{ $parameter->id }}"></a>
-                                                            </td>
-                                                            </tr>
-                                                        @endforeach
+                                                        @endif
+                                                        <td>
+                                                            <input type="number" class="form-control"
+                                                                style="width: 60px;"
+                                                                id="jumlah_film_{{ $parameter->id }}"
+                                                                value="{{ $parameter->film_qty ?? 0 }}"
+                                                                name="jumlah_film_{{ $parameter->id }}">
+                                                        </td>
+                                                        <td>
+                                                            @if (!isset($parameter->verifikator_id))
+                                                                <div align="center">
+                                                                    <button type="button" data-id="{{ $parameter->id }}"
+                                                                        class="btn btn-primary verify-btn">Verifikasi</button>
+                                                                </div>
+                                                            @else
+                                                                <div align="center">
+                                                                    <i class="mdi mdi-check text-success"
+                                                                        style="font-size: 40px"></i>
+                                                                    <p>Verified by
+                                                                        <i>{{ $parameter->verifikator->fullname }}</i>
+                                                                        <br>
+                                                                        On
+                                                                        <i>{{ $parameter->verifikasi_date }}</i>
+                                                                    </p>
+                                                                </div>
+                                                            @endif
+                                                        </td>
+                                                        <td> <a class="mdi mdi-pencil pointer mdi-24px text-secondary edit-btn"
+                                                                title="Edit Pemeriksaan"
+                                                                data-id="{{ $parameter->id }}"></a>
+                                                            <a class="mdi mdi-image pointer mdi-24px text-warning photo-up-btn"
+                                                                data-toggle="modal"
+                                                                data-target="#importModal{{ $parameter->id }}">
+                                                            </a>
+
+                                                            <div class="modal fade" id="importModal{{ $parameter->id }}"
+                                                                tabindex="-1" role="dialog"
+                                                                aria-labelledby="importModalLabel" aria-hidden="true">
+                                                                @include(
+                                                                    'pages.simrs.radiologi.partials.upload-photo-parameter',
+                                                                    ['parameter' => $parameter]
+                                                                )
+                                                            </div>
+
+                                                        </td>
+                                                        </tr>
+                                                    @endforeach
                                                     @endforeach
                                                     <tr>
                                                         <td class="text-danger" colspan="8">
@@ -388,6 +437,27 @@
         </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+    </script>
     <script src="{{ asset('js/simrs/edit-order-radiologi.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/upload-photo-parameter-radiologi.js') }}?v={{ time() }}"></script>
+    <script>
+        function initializePhotoUploadPopover() {
+            const list = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+            list.map((el) => {
+                let opts = {
+                    animation: true,
+                }
+                if (el.hasAttribute('data-bs-content-id')) {
+                    opts.content = document.getElementById(el.getAttribute('data-bs-content-id')).innerHTML;
+                    opts.html = true;
+                    opts.sanitize = false;
+                }
+                new bootstrap.Popover(el, opts);
+            })
+        }
+        initializePhotoUploadPopover();
+    </script>
 
 @endsection

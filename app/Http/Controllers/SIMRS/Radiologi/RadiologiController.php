@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\OrderParameterRadiologi;
 use App\Models\OrderRadiologi;
+use App\Models\TemplateHasilRadiologi;
 use Illuminate\Http\Request;
 
 class RadiologiController extends Controller
@@ -62,6 +63,22 @@ class RadiologiController extends Controller
         ]);
     }
 
+    public function hasilOrder($id)
+    {
+        $order = OrderRadiologi::findOrFail($id);
+        return view('pages.simrs.radiologi.partials.hasil-order', [
+            'order' => $order
+        ]);
+    }
+
+    public function labelOrder($id)
+    {
+        $order = OrderRadiologi::findOrFail($id);
+        return view('pages.simrs.radiologi.partials.label-order', [
+            'order' => $order
+        ]);
+    }
+
     public function editHasilParameter($id)
     {
         $parameter = OrderParameterRadiologi::findOrFail($id);
@@ -94,5 +111,48 @@ class RadiologiController extends Controller
             'parametersInCategory' => $parameterCategories,
             'radiografers' => $radiografers
         ]);
+    }
+
+    public function templateHasil(Request $request)
+    {
+        $query = TemplateHasilRadiologi::query();
+        $filters = ['judul', 'template'];
+        $filterApplied = false;
+
+        foreach ($filters as $filter) {
+            if ($request->filled($filter)) {
+                $query->where($filter, 'like', '%' . $request->$filter . '%');
+                $filterApplied = true;
+            }
+        }
+
+        // Get the filtered results if any filter is applied
+        if ($filterApplied) {
+            $template = $query->get();
+        } else {
+            $template = TemplateHasilRadiologi::all();
+        }
+
+        // return dd(TemplateHasilRadiologi::all());
+
+        return view('pages.simrs.radiologi.template-hasil', [
+            'templates' => $template
+        ]);
+    }
+
+    public function tambahTemplateHasil(Request $request)
+    {
+        $validatedData = $request->validate([
+            'judul' => 'required',
+            'template' => 'required',
+        ]);
+
+        try {
+            TemplateHasilRadiologi::create($validatedData);
+        } catch (\Exception $e) {
+            return response("<script> alert('Error: " . $e->getMessage() . "'); </script>");
+        }
+
+        return back();
     }
 }

@@ -36,6 +36,7 @@ use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Poliklinik\LayananController;
 use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
+use App\Http\Controllers\SIMRS\Radiologi\RadiologiController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\ResumeMedisRajal\ResumeMedisRajalController;
@@ -64,10 +65,16 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::get('get-medical-actions/{registrationId}', [OrderTindakanMedisController::class, 'getMedicalActions'])->name('medical.action.get');
     Route::delete('delete-medical-action/{id}', [OrderTindakanMedis::class, 'destroy'])->name('medical.action.destroy');
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
+
+    
     Route::post('order-radiologi/', [OrderRadiologiController::class, 'store'])->name('order.radiologi.store');
+    Route::post('edit-order-radiologi/', [OrderRadiologiController::class, 'editOrderRadiologi'])->name('order.radiologi.edit-order');
     Route::post('konfirmasi-tagihan-order-radiologi/', [OrderRadiologiController::class, 'confirmPayment'])->name('order.radiologi.confirm-payment');
     Route::post('verifikasi-order-parameter-radiologi/', [OrderRadiologiController::class, 'verificate'])->name('order.radiologi.verificate');
     Route::post('update-pemeriksaan-parameter-radiologi/', [OrderRadiologiController::class, 'parameterCheckUpdate'])->name('order.radiologi.parameter-check-update');
+    Route::post('upload-photo-parameter-radiologi/', [OrderRadiologiController::class, 'uploadPhotoParameter'])->name('order.radiologi.upload-photo-parameter');
+
+    Route::post('tambah-template-radiologi/', [RadiologiController::class, 'tambahTemplateHasil'])->name('radiologi.template.tambah');
 
 
     Route::prefix('pengkajian')->group(function () {
