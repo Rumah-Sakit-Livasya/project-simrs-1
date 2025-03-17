@@ -70,14 +70,14 @@ Route::group(['middleware' => ['auth']], function () {
             // ->middleware('can:view maintenance barang')
             ->name("inventaris.maintenance.index");
         Route::get('/report-barang', [ReportBarangController::class, 'index'])
-            ->middleware('can:view inventaris report')
+            ->middleware('can:view inventaris report barang')
             ->name('inventaris.report.index');
 
         Route::get('/report-bulanan', [ReportBarangController::class, 'laporanBulanan'])
-            ->middleware('can:view report bulanan')
+            ->middleware('can:view inventaris report bulanan')
             ->name('inventaris.report.bulanan');
         Route::post('/report-bulanan', [ReportBarangController::class, 'laporanBulanan'])
-            ->middleware('can:store report bulanan')
+            // ->middleware('can:store report bulanan')
             ->name('inventaris.report.bulanan.store');
         Route::get('/report/maintenance', [ReportBarangController::class, 'getMaintenanceData'])
             ->middleware('can:view report maintenance')
