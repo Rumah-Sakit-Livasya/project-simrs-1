@@ -8,6 +8,7 @@ use App\Models\OrderRadiologi;
 use App\Models\SIMRS\Keuangan\Kasir;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
+use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\TransferPasienAntarRuangan;
 use App\Models\SIMRS\ResumeMedisRajal\ResumeMedisRajal;
 use App\Models\User;
@@ -43,6 +44,11 @@ class Registration extends Model implements AuditableContract
     public function pengkajian_nurse_rajal()
     {
         return $this->hasOne(PengkajianNurseRajal::class, 'registration_id');
+    }
+    
+    public function pengkajian_lanjutan()
+    {
+        return $this->hasOne(PengkajianLanjutan::class, 'registration_id');
     }
 
     // Define the relationship to TransferPasienAntarRuangan

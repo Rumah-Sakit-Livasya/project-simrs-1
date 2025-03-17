@@ -215,7 +215,7 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('poliklinik')->group(function () {
             Route::get('/daftar-pasien', [PoliklinikController::class, 'index'])->name('poliklinik.daftar-pasien');
-            Route::get('/pengkajian-lanjutan/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
+            Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
         });
 
         Route::prefix('igd')->group(function () {

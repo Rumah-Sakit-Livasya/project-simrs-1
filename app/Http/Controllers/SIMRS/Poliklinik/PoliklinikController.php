@@ -161,17 +161,35 @@ class PoliklinikController extends Controller
         }
     }
 
-    public function showForm(Request $request, $encryptedID)
+    public function showForm(Request $request, $registrationId, $encryptedID)
     {
         try {
             // Dekripsi ID
             $id = base64_decode($encryptedID);
-    
+
             // Ambil data berdasarkan ID
             $formTemplate = FormTemplate::findOrFail($id)->form_source;
-    
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.show_form', compact('formTemplate'));
+            $registration = Registration::findOrFail($registrationId);
 
+            // Data pasien
+            $data = [
+                'no_rm' => $registration->patient->medical_record_number ?? '',
+                'nama_pasien' => $registration->patient->name ?? '',
+                'tgl_lahir_pasien' => Carbon::parse($registration->patient->date_of_birth)->format('Y-m-d') ?? '',
+                'umur_pasien' => Carbon::parse($registration->patient->date_of_birth)->diffInYears(Carbon::now()) ?? '',
+                'kelamin_pasien' => $registration->patient->gender ?? '',
+                'alamat_pasien' => $registration->patient->address ?? '',
+                'dpjp' => $registration->doctor->employee->fullname ?? '',
+                'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
+            ];
+
+            // Replace placeholder di formTemplate dengan data pasien
+            foreach ($data as $key => $value) {
+                $formTemplate = str_replace("{{$key}}", $value, $formTemplate);
+            }
+            $formTemplateId = $id;
+
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.show_form', compact('formTemplate', 'formTemplateId', 'registrationId'));
         } catch (\Exception $e) {
             abort(404, 'Data tidak ditemukan.');
         }

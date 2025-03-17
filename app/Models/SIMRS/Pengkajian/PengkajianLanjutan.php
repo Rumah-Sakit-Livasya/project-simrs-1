@@ -1,0 +1,16 @@
+<?php
+
+namespace App\Models\SIMRS\Pengkajian;
+
+use App\Models\SIMRS\Registration;
+use Illuminate\Database\Eloquent\Model;
+
+class PengkajianLanjutan extends Model
+{
+    protected $table = 'pengkajian_table', $guarded = ['id'];
+
+    public function registration()
+    {
+        return $this->belongsTo(Registration::class, 'registration_id');
+    }
+}

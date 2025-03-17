@@ -198,8 +198,10 @@
 
                 if (idForm) {
                     // Panggil route yang sudah dienkripsi dari Blade
-                    let url = "{{ route('poliklinik.pengkajian-lanjutan.show', ':encryptedId') }}"
-                        .replace(':encryptedId', btoa(idForm)); // Enkripsi dengan Base64
+                    let registrationId = "{{ $registration->id }}"; // Ambil registration ID dari Blade
+                    let url = "{{ route('poliklinik.pengkajian-lanjutan.show', [':registrationId', ':encryptedId']) }}"
+                        .replace(':encryptedId', btoa(idForm)) // Enkripsi dengan Base64
+                        .replace(':registrationId', registrationId); // Tambahkan registration ID
 
                     // Ukuran popup
                     let popupWidth = 1200;

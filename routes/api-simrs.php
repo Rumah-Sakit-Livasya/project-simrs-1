@@ -78,6 +78,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
             });
         });
+
+        Route::prefix('lanjutan')->group(function() {
+            Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianLanjutan'])->name('pengkajian.lanjutan.store');
+        });
     });
 
     Route::prefix('transfer-pasien-antar-ruangan')->group(function () {

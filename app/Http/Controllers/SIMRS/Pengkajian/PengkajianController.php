@@ -330,4 +330,29 @@ class PengkajianController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function storeOrUpdatePengkajianLanjutan(Request $request)
+    {
+
+        // Check if the registration type is 'rawat-jalan'
+        $registration = Registration::find($request->registration_id);
+
+        // Check if a PengkajianNurseRajal already exists for this registration
+        $existingPengkajian = $registration->pengkajian_lanjutan;
+
+
+        try {
+            if ($existingPengkajian) {
+                // Update the existing Pengkajian Lanjutan Record
+                $existingPengkajian->update($request->all());
+                return response()->json(['message' => 'Data updated successfully!', 'data' => $existingPengkajian]);
+            } else {
+                // Create a new Pengkajian Lanjutan record
+                $pengkajian = PengkajianNurseRajal::create($request->all());
+                return response()->json(['message' => 'Data saved successfully!', 'data' => $pengkajian], 201);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }
