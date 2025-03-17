@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS\Pengkajian;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\TransferPasienAntarRuangan;
@@ -334,6 +335,7 @@ class PengkajianController extends Controller
     public function storeOrUpdatePengkajianLanjutan(Request $request)
     {
 
+        // dd($request);
         // Check if the registration type is 'rawat-jalan'
         $registration = Registration::find($request->registration_id);
 
@@ -344,11 +346,21 @@ class PengkajianController extends Controller
         try {
             if ($existingPengkajian) {
                 // Update the existing Pengkajian Lanjutan Record
-                $existingPengkajian->update($request->all());
+                // $existingPengkajian->update($request->all());
                 return response()->json(['message' => 'Data updated successfully!', 'data' => $existingPengkajian]);
             } else {
                 // Create a new Pengkajian Lanjutan record
-                $pengkajian = PengkajianNurseRajal::create($request->all());
+                $data = $request->except(['_token', '_method', 'status']); // Hapus kolom yang tidak perlu
+                $jsonData = json_encode($data);
+
+                $pengkajian = PengkajianLanjutan::create([
+                    'registration_id' => $request->registration_id,
+                    'form_template_id' => $request->form_template_id,
+                    'form_values' => json_encode($jsonData),
+                    'is_final' => $request->status == 1 ? true : false,
+                    'created_by' => auth()->user()->id,
+                    'modified_by' => auth()->user()->id,
+                ]);
                 return response()->json(['message' => 'Data saved successfully!', 'data' => $pengkajian], 201);
             }
         } catch (\Exception $e) {

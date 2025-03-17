@@ -181,6 +181,7 @@ class PoliklinikController extends Controller
                 'alamat_pasien' => $registration->patient->address ?? '',
                 'dpjp' => $registration->doctor->employee->fullname ?? '',
                 'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
+                'tgl_sekarang' => Carbon::now()->format('Y-m-d') ?? '',
             ];
 
             // Replace placeholder di formTemplate dengan data pasien

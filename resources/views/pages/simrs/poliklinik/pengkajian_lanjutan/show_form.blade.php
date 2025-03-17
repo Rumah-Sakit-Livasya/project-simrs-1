@@ -366,7 +366,7 @@
                         confirmButtonText: 'OK'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            location.reload();
+                            window.close();
                         }
                     });
                 },

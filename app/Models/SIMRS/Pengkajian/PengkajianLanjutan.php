@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PengkajianLanjutan extends Model
 {
-    protected $table = 'pengkajian_table', $guarded = ['id'];
+    protected $table = 'pengkajian_lanjutan', $guarded = ['id'];
 
     public function registration()
     {
