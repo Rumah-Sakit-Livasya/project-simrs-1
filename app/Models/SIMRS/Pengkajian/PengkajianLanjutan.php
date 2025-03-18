@@ -13,4 +13,9 @@ class PengkajianLanjutan extends Model
     {
         return $this->belongsTo(Registration::class, 'registration_id');
     }
+    
+    public function form_template()
+    {
+        return $this->belongsTo(FormTemplate::class);
+    }
 }

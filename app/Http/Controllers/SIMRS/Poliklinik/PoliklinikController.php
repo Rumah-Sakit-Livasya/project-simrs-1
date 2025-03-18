@@ -13,6 +13,7 @@ use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
 use App\Models\SIMRS\Pengkajian\FormKategori;
 use App\Models\SIMRS\Pengkajian\FormTemplate;
+use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Peralatan\OrderAlatMedis;
 use App\Models\SIMRS\Peralatan\Peralatan;
@@ -97,8 +98,9 @@ class PoliklinikController extends Controller
             return view('pages.simrs.poliklinik.farmasi.rekonsiliasi_obat', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_lanjutan') {
             $form = FormKategori::all();
+            $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
 
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form'));
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian'));
         } elseif ($menu == 'tindakan_medis') {
             $tindakan_medis = TindakanMedis::all();
             $doctors = Doctor::with('employee', 'departement')->get();

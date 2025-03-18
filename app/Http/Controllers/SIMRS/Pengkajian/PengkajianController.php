@@ -340,14 +340,19 @@ class PengkajianController extends Controller
         $registration = Registration::find($request->registration_id);
 
         // Check if a PengkajianNurseRajal already exists for this registration
-        $existingPengkajian = $registration->pengkajian_lanjutan;
-
+        $existingPengkajian = PengkajianLanjutan::where('registration_id', $request->registration_id)->where('form_template_id', $request->form_template_id)->first() ?? null;
 
         try {
             if ($existingPengkajian) {
-                // Update the existing Pengkajian Lanjutan Record
-                // $existingPengkajian->update($request->all());
-                return response()->json(['message' => 'Data updated successfully!', 'data' => $existingPengkajian]);
+                $data = $request->except(['_token', '_method', 'status']); // Hapus kolom yang tidak perlu
+                $jsonData = json_encode($data);
+
+                $existingPengkajian->update([
+                    'form_values' => json_encode($jsonData),
+                    'is_final' => $request->status == 1 ? true : false,
+                    'modified_by' => auth()->user()->id,
+                ]);
+                return response()->json(['message' => 'Data saved successfully!', 'data' => $pengkajian], 201);
             } else {
                 // Create a new Pengkajian Lanjutan record
                 $data = $request->except(['_token', '_method', 'status']); // Hapus kolom yang tidak perlu
@@ -359,7 +364,6 @@ class PengkajianController extends Controller
                     'form_values' => json_encode($jsonData),
                     'is_final' => $request->status == 1 ? true : false,
                     'created_by' => auth()->user()->id,
-                    'modified_by' => auth()->user()->id,
                 ]);
                 return response()->json(['message' => 'Data saved successfully!', 'data' => $pengkajian], 201);
             }
