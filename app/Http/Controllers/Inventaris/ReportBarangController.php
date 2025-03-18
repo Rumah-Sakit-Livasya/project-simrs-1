@@ -16,7 +16,7 @@ class ReportBarangController extends Controller
 {
     public function index()
     {
-        return view('pages.inventaris.report-barang.index', [
+        return view('app-type.logistik.report-barang.index', [
             'rooms' => RoomMaintenance::all(),
             'category' => CategoryBarang::all(),
             'template' => TemplateBarang::all(),
@@ -160,7 +160,7 @@ class ReportBarangController extends Controller
         $totalPerbaikan = $perbaikanAlatMedis + $perbaikanAlatNonMedis + $perbaikanAlatIT;
         $totalTidakTersedia = $alatMedisTidakTersedia + $alatNonMedisTidakTersedia + $alatITTidakTersedia;
 
-        return view('pages.inventaris.report-barang.laporan-bulanan', compact(
+        return view('app-type.logistik.report-barang.laporan-bulanan', compact(
             'alatMedis',
             'alatMedisTidakBerfungsi',
             'alatNonmedisTidakBerfungsi',

@@ -193,7 +193,7 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            @include('pages.inventaris.barang.partials.barang-table')
+                            @include('app-type.logistik.barang.partials.barang-table')
                         </div>
                     </div>
                 </div>

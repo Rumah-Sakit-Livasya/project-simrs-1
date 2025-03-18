@@ -118,10 +118,10 @@
     </tfoot>
 </table>
 
-@include('pages.inventaris.barang.partials.form-pindahkan-barang')
-@include('pages.inventaris.barang.partials.form-pinjam-barang')
-@include('pages.inventaris.barang.partials.form-kembalikan-barang')
-@include('pages.inventaris.barang.partials.form-update-barang')
+@include('app-type.logistik.barang.partials.form-pindahkan-barang')
+@include('app-type.logistik.barang.partials.form-pinjam-barang')
+@include('app-type.logistik.barang.partials.form-kembalikan-barang')
+@include('app-type.logistik.barang.partials.form-update-barang')
 
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>

@@ -87,14 +87,15 @@
         </div>
     </div>
 
-    @include('pages.inventaris.maintenance.partials.tambah-data')
-    @include('pages.inventaris.maintenance.partials.view-foto')
+    @include('app-type.logistik.maintenance.partials.tambah-data')
+    @include('app-type.logistik.maintenance.partials.view-foto')
 @endsection
 @section('plugin')
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/datatable/jszip.min.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         // Class definition
 

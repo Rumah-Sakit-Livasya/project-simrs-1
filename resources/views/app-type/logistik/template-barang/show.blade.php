@@ -26,7 +26,7 @@
                     <div class="panel-container show">
                         <div class="panel-content">
                             <!-- datatable start -->
-                            @include('pages.inventaris.barang.partials.barang-table')
+                            @include('app-type.logistik.barang.partials.barang-table')
                             <!-- datatable end -->
                         </div>
                     </div>
