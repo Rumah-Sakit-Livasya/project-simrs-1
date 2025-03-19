@@ -141,7 +141,7 @@ class RegistrationController extends Controller
         $kelas_rawats = KelasRawat::all();
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
-        $doctors = Doctor::with('employee', 'departement')->get();
+        $doctors = Doctor::with('employee', 'departements')->get();
 
         // Group doctors by department
         $groupedDoctors = [];
@@ -149,17 +149,15 @@ class RegistrationController extends Controller
             $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
         }
 
-        $doctorsIGD = Doctor::with('employee', 'departement')
-            ->whereHas('departement', function ($query) {
-                $query->where('name', 'KLINIK UMUM');
-            })
-            ->get();
+        $doctorsIGD = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%UGD%');
+        })->get();
 
-        $doctorsLAB = Doctor::with('employee', 'departement')
-            ->whereHas('departement', function ($query) {
-                $query->where('name', 'like', '%Laboratorium%');
-            })
-            ->get();
+        // dd($doctorsIGD);
+
+        $doctorsLAB = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%Laboratorium%');
+        })->get();
 
         switch ($registrasi) {
             case 'rawat-jalan':
@@ -185,7 +183,7 @@ class RegistrationController extends Controller
                 break;
 
             case 'odc':
-                $doctors = Doctor::with('employee', 'departement')->get();
+                $doctors = Doctor::with('employee', 'departements')->get();
 
                 // Group doctors by department
                 $groupedDoctors = [];
@@ -374,7 +372,7 @@ class RegistrationController extends Controller
             $kelasRawat = 'RAWAT INAP';
         }
 
-        $doctors = Doctor::with('employee', 'departement')->get();
+        $doctors = Doctor::with('employee', 'departements')->get();
         $departements = Departement::with('grup_tindakan_medis.tindakan_medis')->get();
         $tindakan_medis = TindakanMedis::all();
 
