@@ -14,6 +14,8 @@ use App\Models\SIMRS\GantiDiagnosa;
 use App\Models\SIMRS\GantiDokter;
 use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
+use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
 use App\Models\SIMRS\ParameterRadiologi;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
@@ -153,11 +155,13 @@ class RegistrationController extends Controller
             $query->where('name', 'like', '%UGD%');
         })->get();
 
+
         // dd($doctorsIGD);
 
         $doctorsLAB = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
             $query->where('name', 'like', '%Laboratorium%');
         })->get();
+
 
         switch ($registrasi) {
             case 'rawat-jalan':
@@ -172,7 +176,7 @@ class RegistrationController extends Controller
                 break;
 
             case 'igd':
-                return view('pages.simrs.pendaftaran.form-registrasi', [
+                return view('pages.simrs.pendafta   ran.form-registrasi', [
                     'title' => "IGD",
                     'doctors' => $doctorsIGD,
                     'penjamins' => Penjamin::all(),
@@ -217,6 +221,8 @@ class RegistrationController extends Controller
             case 'laboratorium':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Laboratorium",
+                    'laboratorium_categories' => KategoriLaboratorium::all(),
+                    'tarifs' => TarifParameterLaboratorium::all(),
                     'doctors' => $doctorsLAB,
                     'penjamins' => Penjamin::all(),
                     'case' => 'laboratorium',

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('foto')->nullable();
             $table->foreignId('verifikator_id')->nullable()->constrained('employees')->onUpdate('cascade');
             $table->date('verifikasi_date')->nullable();
-            $table->string('catatan')->nullable();
+            $table->text('catatan')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

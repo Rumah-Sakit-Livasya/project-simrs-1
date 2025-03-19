@@ -2,21 +2,16 @@
 /// <reference types="jquery" />
 /// <reference path="../types.d.ts" />
 
-class RadiologiForm {
+class LaboratoriumForm {
     /**
-     * @type {ParameterRadiologi[]}
+     * @type {ParameterLaboratorium[]}
      */
-    #ParameterRadiologi;
+    #ParameterLaboratorium;
 
     /**
-     * @type {TarifRadiologi[]}
+     * @type {TarifLaboratorium[]}
      */
-    #TarifRadiologi;
-
-    /**
-     * @type {Registration}
-     */
-    #Registration;
+    #TarifLaboratorium;
 
     #totalHarga = 0;
     /**
@@ -33,36 +28,34 @@ class RadiologiForm {
 
     constructor() {
         // @ts-ignore
-        this.#ParameterRadiologi = window._parameterRadiologi;
+        this.#ParameterLaboratorium = window._parameterLaboratorium;
         // @ts-ignore
-        this.#TarifRadiologi = window._tarifRadiologi;
-        // @ts-ignore
-        this.#Registration = window._registration;
+        this.#TarifLaboratorium = window._tarifLaboratorium;
 
         document.addEventListener("DOMContentLoaded", this.#init.bind(this));
     }
 
     #init() {
         // Select all checkboxes inside the Blade-generated form
-        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
+        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_laboratorium_checkbox");
         checkboxes.forEach((checkbox) => {
             checkbox.addEventListener("change", this.#handleCheckboxChange.bind(this));
         });
 
         // Select all number input fields
-        const numberInputs = document.querySelectorAll("input[type='number'].parameter_radiologi_number");
+        const numberInputs = document.querySelectorAll("input[type='number'].parameter_laboratorium_number");
         numberInputs.forEach((input) => {
             input.addEventListener("input", this.#handleNumberChange.bind(this));
         });
 
         // Search bar
-        const searchBar = document.getElementById("searchRadiology");
+        const searchBar = document.getElementById("searchLaboratorium");
         if (searchBar) {
             searchBar.addEventListener("keyup", this.#handleSearchBarChange.bind(this));
         }
 
         // Harga
-        this.#elementHarga = document.getElementById("radiologi-total") || undefined;
+        this.#elementHarga = document.getElementById("laboratorium-total") || undefined;
 
         // Order Type Radio
         const orderType = document.querySelectorAll("input[type='radio'][name='order_type']");
@@ -73,7 +66,7 @@ class RadiologiForm {
         }
 
         // Form
-        const form = document.querySelector("form#form-radiologi");
+        const form = document.querySelector("form#form-laboratorium");
         if (form) {
             this.#elementForm = /** @type {HTMLFormElement} */ (form);
             form.addEventListener("submit", this.#submit.bind(this));
@@ -111,7 +104,7 @@ class RadiologiForm {
          *  }} Parameter
          */
         let parameters = /** @type {Parameter[]} */ ([]);
-        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
+        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_laboratorium_checkbox");
         checkboxes.forEach((_checkbox) => {
             const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
             const isChecked = checkbox.checked;
@@ -119,7 +112,7 @@ class RadiologiForm {
             if (isChecked) {
                 const QtyElement = /** @type {HTMLInputElement} */ (document.querySelector("input#jumlah_" + parameterId));
                 const Qty = parseInt(QtyElement.value);
-                const Tarif = this.#TarifRadiologi.find((t) => t.parameter_radiologi_id == parameterId);
+                const Tarif = this.#TarifLaboratorium.find((t) => t.parameter_laboratorium_id == parameterId);
                 if (!Tarif) {
                     return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameterId);
                 }
@@ -132,9 +125,13 @@ class RadiologiForm {
             }
         })
         formData.append('parameters', JSON.stringify(parameters));
-        formData.append('registration_id', String(this.#Registration.id));
 
-        fetch('/api/simrs/order-radiologi', {
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        return;
+
+        fetch('/api/simrs/order-laboratorium', {
             method: 'POST',
             body: formData,
             headers: {
@@ -158,15 +155,15 @@ class RadiologiForm {
 
     #calculateCost() {
         this.#totalHarga = 0;
-        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
+        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_laboratorium_checkbox");
         checkboxes.forEach((_checkbox) => {
             const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
             const isChecked = checkbox.checked;
             const parameterId = checkbox.value;
-            const parameter = this.#ParameterRadiologi.find((p) => p.id == parseInt(parameterId));
+            const parameter = this.#ParameterLaboratorium.find((p) => p.id == parseInt(parameterId));
 
             if (isChecked && parameter) {
-                const tarif = this.#TarifRadiologi.find((t) => t.parameter_radiologi_id == parameter.id);
+                const tarif = this.#TarifLaboratorium.find((t) => t.parameter_laboratorium_id == parameter.id);
                 if (tarif) {
                     const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}']`));
                     if (parseInt(jumlah.value) < 1) {
@@ -204,7 +201,7 @@ class RadiologiForm {
             return;
         }
 
-        const parameters = document.querySelectorAll(".parameter_radiologi");
+        const parameters = document.querySelectorAll(".parameter_laboratorium");
         parameters.forEach((parameter) => {
             const parameterNameElement = parameter.querySelector(".form-check-label");
             if (!parameterNameElement) return;
@@ -222,7 +219,7 @@ class RadiologiForm {
     }
 
     #showAllParameters() {
-        const parameters = document.querySelectorAll(".parameter_radiologi");
+        const parameters = document.querySelectorAll(".parameter_laboratorium");
         parameters.forEach((parameter) => {
             // @ts-ignore
             parameter.style.display = "block";
@@ -250,17 +247,17 @@ class RadiologiForm {
     }
 }
 
-const RadiologiFormClass =new RadiologiForm();
+const LaboratoriumFormClass =new LaboratoriumForm();
 
 // // @ts-check
 // /// <reference types="jquery" />
 // /// <reference path="../types.d.ts" />
 
 // // @ts-ignore
-// const ParameterRadiologi = /** @type {ParameterRadiologi[]} */ (window._parameterRadiologi);
+// const ParameterLaboratorium = /** @type {ParameterLaboratorium[]} */ (window._parameterLaboratorium);
 
 // // @ts-ignore
-// const TarifRadiologi = /** @type {TarifRadiologi[]} */ (window._tarifRadiologi);
+// const TarifLaboratorium = /** @type {TarifLaboratorium[]} */ (window._tarifLaboratorium);
 
 // // @ts-ignore
 // const Registration = /** @type {Registration} */ (window._registration);
@@ -281,25 +278,25 @@ const RadiologiFormClass =new RadiologiForm();
 // document.addEventListener("DOMContentLoaded", function () {
 
 //     // Select all checkboxes inside the Blade-generated form
-//     const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
+//     const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_laboratorium_checkbox");
 
 //     checkboxes.forEach((checkbox) => {
 //         checkbox.addEventListener("change", handleCheckboxChange);
 //     });
 
 //     // Select all number input fields
-//     const numberInputs = document.querySelectorAll("input[type='number'].parameter_radiologi_number");
+//     const numberInputs = document.querySelectorAll("input[type='number'].parameter_laboratorium_number");
 //     numberInputs.forEach((input) => {
 //         input.addEventListener("input", handleNumberChange);
 //     });
 
 //     // Search bar
-//     const searchBar = document.getElementById("searchRadiology");
+//     const searchBar = document.getElementById("searchLaboratorium");
 //     if (!searchBar) return;
 //     searchBar.addEventListener("keyup", handleSearchBarChange);
 
 //     // Harga
-//     elementHarga = document.getElementById("radiologi-total") || undefined;
+//     elementHarga = document.getElementById("laboratorium-total") || undefined;
 
 //     // Order Type Radio
 //     const orderType = document.querySelectorAll("input[type='radio'][name='order_type']");
@@ -310,7 +307,7 @@ const RadiologiFormClass =new RadiologiForm();
 //     }
 
 //     // Form
-//     const form = document.querySelector("form#form-radiologi");
+//     const form = document.querySelector("form#form-laboratorium");
 //     if (form) {
 //         elementForm = /** @type {HTMLFormElement} */ (form);
 //         form.addEventListener("submit", submit);
@@ -348,7 +345,7 @@ const RadiologiFormClass =new RadiologiForm();
 //      *  }} Parameter
 //      */
 //     let parameters = /** @type {Parameter[]} */ ([]);
-//     const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
+//     const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_laboratorium_checkbox");
 //     checkboxes.forEach((_checkbox) => {
 //         const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
 //         const isChecked = checkbox.checked;
@@ -356,7 +353,7 @@ const RadiologiFormClass =new RadiologiForm();
 //         if (isChecked) {
 //             const QtyElement = /** @type {HTMLInputElement} */ (document.querySelector("input#jumlah_" + parameterId));
 //             const Qty = parseInt(QtyElement.value);
-//             const Tarif = TarifRadiologi.find((t) => t.parameter_radiologi_id == parameterId);
+//             const Tarif = TarifLaboratorium.find((t) => t.parameter_laboratorium_id == parameterId);
 //             if (!Tarif) {
 //                 return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameterId);
 //             }
@@ -371,7 +368,7 @@ const RadiologiFormClass =new RadiologiForm();
 //     formData.append('parameters', JSON.stringify(parameters));
 //     formData.append('registration_id', String(Registration.id));
 
-//     fetch('/api/simrs/order-radiologi', {
+//     fetch('/api/simrs/order-laboratorium', {
 //         method: 'POST',
 //         body: formData,
 //         headers: {
@@ -395,15 +392,15 @@ const RadiologiFormClass =new RadiologiForm();
 
 // function calculateCost() {
 //     totalHarga = 0;
-//     const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
+//     const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_laboratorium_checkbox");
 //     checkboxes.forEach((_checkbox) => {
 //         const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
 //         const isChecked = checkbox.checked;
 //         const parameterId = checkbox.value;
-//         const parameter = ParameterRadiologi.find((p) => p.id == parseInt(parameterId));
+//         const parameter = ParameterLaboratorium.find((p) => p.id == parseInt(parameterId));
 
 //         if (isChecked && parameter) {
-//             const tarif = TarifRadiologi.find((t) => t.parameter_radiologi_id == parameter.id);
+//             const tarif = TarifLaboratorium.find((t) => t.parameter_laboratorium_id == parameter.id);
 //             if (tarif) {
 //                 const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}']`));
 //                 if (parseInt(jumlah.value) < 1) {
@@ -441,7 +438,7 @@ const RadiologiFormClass =new RadiologiForm();
 //         return;
 //     }
 
-//     const parameters = document.querySelectorAll(".parameter_radiologi");
+//     const parameters = document.querySelectorAll(".parameter_laboratorium");
 //     parameters.forEach((parameter) => {
 //         const parameterNameElement = parameter.querySelector(".form-check-label");
 //         if (!parameterNameElement) return;
@@ -459,7 +456,7 @@ const RadiologiFormClass =new RadiologiForm();
 // }
 
 // function showAllParameters() {
-//     const parameters = document.querySelectorAll(".parameter_radiologi");
+//     const parameters = document.querySelectorAll(".parameter_laboratorium");
 //     parameters.forEach((parameter) => {
 //         // @ts-ignore
 //         parameter.style.display = "block";

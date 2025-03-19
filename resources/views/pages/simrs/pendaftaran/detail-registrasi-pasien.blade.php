@@ -658,6 +658,7 @@
 
     @yield('script-radiologi')
     @yield('script-tindakan-medis')
+    @yield('script-laboratorium')
 
     <script>
         let idSignature = null;

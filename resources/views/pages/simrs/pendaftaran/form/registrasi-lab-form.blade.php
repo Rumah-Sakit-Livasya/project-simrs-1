@@ -108,7 +108,61 @@
                     </div>
                 </div>
             </div>
+            <br>
         </div>
+        <div class="col-xl-6">
+            <h3>Parameter Laboratorium</h3>
+        </div>
+        <div class="col-xl-6">
+            <h3 class="text-success" style="text-align: right"> <i class="fa fa-calculator"></i> <span
+                    id="laboratorium-total">Rp 0</span>
+            </h3>
+        </div>
+        <div class="col-xl-2"></div>
+        <div class="col-xl-8">
+            <div class="form-group">
+                <input type="text" class="form-control mb-3" id="searchLaboratorium"
+                    placeholder="Cari parameter...">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody id="laboratoriumTable">
+                        @foreach ($laboratorium_categories as $category)
+                            <tr class="table-info">
+                                <td colspan="2">
+                                    <h4 style="text-align: center">{{ $category->nama_kategori }}</h4>
+                                </td>
+                            </tr>
+                            @foreach ($category->parameter_laboratorium as $parameter)
+                                <tr class="parameter_laboratorium">
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input parameter_laboratorium_checkbox"
+                                                type="checkbox" value="{{ $parameter->id }}"
+                                                id="parameter_laboratorium_{{ $parameter->id }}">
+                                            <label class="form-check-label"
+                                                for="parameter_laboratorium_{{ $parameter->id }}">
+                                                {{ $parameter->parameter }}
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="number" value="1"
+                                            class="form-control parameter_laboratorium_number"
+                                            id="jumlah_{{ $parameter->id }}">
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-xl-2"></div>
         <div class="col-xl-12 mt-5">
             <div class="row">
                 <div class="col-xl-6">
@@ -127,3 +181,10 @@
         </div>
     </div>
 </form>
+
+
+<script>
+    window._parameterLaboratorium = @json($laboratorium_categories);
+    window._tarifLaboratorium = @json($tarifs);
+</script>
+<script src="{{ asset('js/simrs/form-laboratorium.js') }}?v={{ time() }}"></script>
