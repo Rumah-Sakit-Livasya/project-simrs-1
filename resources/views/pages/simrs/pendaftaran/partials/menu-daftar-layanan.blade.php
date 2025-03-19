@@ -9,12 +9,22 @@
         <div class="card-body style-default-bright">
             <div class="row">
                 <ul id="patient-menu-icon">
-                    <li>
-                        <div class="circle-menu waves-effect pink accent-2 menu-layanan"
-                            data-layanan="pengkajian-nurse-rajal">
-                            <i class="mdi mdi-clipboard-pulse"></i>
-                        </div>
-                        <span>Catatan Medis</span>
+                    <li class="text-center">
+                        @if ($registration->registration_type == 'rawat-jalan')
+                            <a href="{{route('poliklinik.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number])}}">
+                        @elseif($registration->registration_type == 'rawat-inap')
+                            <a href="{{route('rawat-inap.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number])}}">
+                        @elseif($registration->registration_type == 'igd')
+                            <a href="{{route('igd.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number])}}">
+                        @endif
+                        <center>
+                            <div class="circle-menu waves-effect pink accent-2"
+                                data-layanan="pengkajian-nurse-rajal">
+                                <i class="mdi mdi-clipboard-pulse"></i>
+                            </div>
+                            <span>Catatan Medis</span>
+                        </center>
+                        </a>
                     </li>
                     <li>
                         <div class="circle-menu waves-effect light-green accent-3 menu-layanan"

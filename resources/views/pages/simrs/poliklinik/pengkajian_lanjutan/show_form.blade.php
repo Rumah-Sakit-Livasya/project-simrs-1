@@ -294,144 +294,115 @@
 </head>
 
 <body>
-    {!! $formTemplate !!}
-    
+    <form action="#" method="POST">
+        @csrf
+        @method('post')
+        {!! $formTemplate !!}
+    </form>
+
+    <div class="mt-3">
+        <div class="card">
+            <div class="card-body d-flex justify-content-between">
+                <!-- Tombol Print di Kiri -->
+                <a href="#!" class="btn btn-primary waves-effect waves-light" {dis_none}="">
+                    <span class="mdi mdi-printer print-pengkajian" data-pkid="" data-pregid="216320"
+                        data-ftid="155" data-printtype="{print_type}" data-link="{link}"> Print</span>
+                </a>
+
+                <!-- Tombol Simpan di Kanan -->
+                <div>
+                    <button type="button" class="btn btn-warning waves-effect waves-light save-form text-white"
+                        data-dismiss="modal" data-status="0">
+                        <span class="mdi mdi-content-save"></span> Simpan (draft)
+                    </button>
+                    <button type="button" class="btn btn-success btn-save-final waves-effect waves-light save-form"
+                        data-dismiss="modal" data-status="1">
+                        <span class="mdi mdi-content-save"></span> Simpan (final)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 <script src="/js/vendors.bundle.js"></script>
 <script src="/js/app.bundle.js"></script>
 <script type="text/javascript">
-    /* Activate smart panels */
-    $('#js-page-content').smartPanel();
-    // Fungsi untuk menampilkan notifikasi sukses SweetAlert
-    function showSuccessAlert(message) {
-        // alert("Sukses")
-        Swal.fire({
-            icon: 'success',
-            title: 'Sukses!',
-            text: message,
-            showConfirmButton: false,
-            timer: 2000 // Durasi notifikasi dalam milidetik (ms)
-        });
-    }
-
-    // Fungsi untuk menampilkan notifikasi kesalahan SweetAlert 
-    function showErrorAlert(message) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Terjadi Kesalahan!',
-            text: message,
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'OK',
-            allowOutsideClick: false, // Mencegah penutupan saat klik di luar
-            allowEscapeKey: false, // Mencegah penutupan saat tekan tombol ESC
-            allowEnterKey: false // Mencegah penutupan saat tekan tombol Enter
-        }).then((result) => {
-            // Memuat ulang halaman jika pengguna mengklik tombol OK
-            if (result.isConfirmed) {
-                location.reload();
-            }
-        });
-    }
-
-
-    function showErrorAlertNoRefresh(message) {
-        // alert('Terjadi Kesalahan');
-        Swal.fire({
-            icon: 'error',
-            title: 'Terjadi Kesalahan!',
-            text: message,
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'OK',
-            allowOutsideClick: false, // Mencegah penutupan saat klik di luar
-            allowEscapeKey: false, // Mencegah penutupan saat tekan tombol ESC
-            allowEnterKey: false // Mencegah penutupan saat tekan tombol Enter
-        });
-    }
-
     $(document).ready(function() {
-        $('#impersonateModal').on('shown.bs.modal', function() {
-            $('#impersonate').select2({
-                placeholder: "Select a user",
-                dropdownParent: $('#impersonateModal'),
-                allowClear: true,
+        $('.save-form').on('click', function() {
+            let status = $(this).data('status');
+            let formData = new FormData();
+
+            // Append all form data
+            $('form').each(function() {
+                let form = $(this).closest('form')[0];
+                let formElements = form.elements;
+                for (let i = 0; i < formElements.length; i++) {
+                    if (formElements[i].name) {
+                        if (formElements[i].type === 'radio' && !formElements[i].checked) {
+                            continue;
+                        }
+                        formData.append(formElements[i].name, formElements[i].value);
+                    }
+                }
+            });
+
+            formData.append('form_template_id', '{{ $formTemplateId }}');
+            formData.append('registration_id', '{{ $registrationId }}');
+            formData.append('status', status);
+            formData.append('_token', '{{ csrf_token() }}'); // Add CSRF token
+
+            $.ajax({
+                url: "{{ route('pengkajian.lanjutan.store') }}",
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Data has been saved successfully.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.close();
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred while saving the data.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+
+            $('#impersonateModal').on('shown.bs.modal', function() {
+                $('#impersonate').select2({
+                    placeholder: "Select a user",
+                    dropdownParent: $('#impersonateModal'),
+                    allowClear: true,
+                });
+            });
+
+            $('.employeeId').click(function() {
+                var employeeId = $(this).data('employee-id');
+                var width = screen.width;
+                var height = screen.height;
+                var popupWindow = window.open('/dashboard/attendances/employee/' + employeeId +
+                    '/payroll',
+                    'popupWindow',
+                    'width=' + width + ',height=' + height + ',scrollbars=yes');
+
+                popupWindow.onbeforeunload = function() {
+                    location.reload();
+                };
             });
         });
-
-        $('.employeeId').click(function() {
-            var employeeId = $(this).data('employee-id');
-            var width = screen.width;
-            var height = screen.height;
-            var popupWindow = window.open('/dashboard/attendances/employee/' + employeeId + '/payroll',
-                'popupWindow',
-                'width=' + width + ',height=' + height + ',scrollbars=yes');
-
-            popupWindow.onbeforeunload = function() {
-                location.reload();
-            };
-        });
-
-        $('#global_search').on('keyup', function() {
-            var query = $(this).val();
-
-            if (query.length > 0) {
-                $.ajax({
-                    url: '{{ route('patients.search') }}',
-                    type: 'GET',
-                    data: {
-                        query: query
-                    },
-                    success: function(data) {
-                        var results = $('#search-results');
-                        results.empty();
-
-                        if (data.length > 0) {
-                            $.each(data, function(index, patient) {
-                                var latestRegistration = patient.registration
-                                    .length > 0 ? patient.registration[0] : null;
-                                var link = '';
-
-                                if (latestRegistration && latestRegistration
-                                    .status === 'aktif') {
-                                    link =
-                                        `<a href="/daftar-registrasi-pasien/${latestRegistration.id}/">`;
-                                } else {
-                                    link =
-                                        `<a href="/patients/${patient.id}/">`;
-                                }
-
-                                results.append(
-                                    `<div class="search-item" style="padding: 10px; border-bottom: 1px solid #ccc;">` +
-                                    link +
-                                    `<strong>` + patient.name +
-                                    `</strong><br>` +
-                                    `No RM: ` + patient.medical_record_number +
-                                    `<br>` +
-                                    `Tgl Lahir: ` + patient.date_of_birth +
-                                    `</a>` +
-                                    `</div>`
-                                );
-                            });
-                        } else {
-                            results.append(
-                                '<div class="search-item" style="padding: 10px;">No results found</div>'
-                            );
-                        }
-                    }
-                });
-            } else {
-                $('#search-results').empty();
-            }
-        });
-    });
-
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('#global_search').length) {
-            $('#search-results').empty();
-        }
     });
 </script>
-
-<script src="/js/script.js"></script>
 
 </html>

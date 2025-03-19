@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users')->cascadeOnDelete();
             
-            $table->unsignedBigInteger('modify_by');
+            $table->unsignedBigInteger('modify_by')->nullable();
             $table->foreign('modify_by')->references('id')->on('users')->cascadeOnDelete();
             
             $table->longText('keterangan')->nullable();

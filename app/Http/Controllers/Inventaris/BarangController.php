@@ -69,6 +69,11 @@ class BarangController extends Controller
             $barang = $query->orderBy('id', 'desc')->limit(100)->get();
         }
 
+        // If no filters are applied, limit the results to 50
+        if (!$customName && !$templateBarang && !$kategoriBarang && !$identitasBarang && !$ruanganId && !$companyId) {
+            $barang = $query->orderBy('id', 'desc')->limit(50)->get();
+        }
+
         // Prepare alert message only if there are filters applied
         $jumlahBarang = $barang->count();
         $filterMessage = "Jumlah barang yang terget: $jumlahBarang. Filter yang digunakan: ";
@@ -99,7 +104,7 @@ class BarangController extends Controller
             $filterMessage = null; // Do not display the message if no filters are applied
         }
 
-        return view('pages.inventaris.barang.index', [
+        return view('app-type.logistik.barang.index', [
             'barang' => $barang,
             'companies' => $companies,
             'templates' => TemplateBarang::orderBy('name', 'asc')->get(),

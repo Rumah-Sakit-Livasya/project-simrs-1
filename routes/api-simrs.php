@@ -27,6 +27,7 @@ use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\OrderRadiologiController;
 use App\Http\Controllers\SIMRS\OrderTindakanMedisController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
+use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianDokterRajalController;
 use App\Http\Controllers\SIMRS\Penjamin\GroupPenjaminController;
@@ -86,6 +87,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::prefix('dokter')->group(function () {
                 Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
             });
+        });
+
+        Route::prefix('lanjutan')->group(function() {
+            Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianLanjutan'])->name('pengkajian.lanjutan.store');
         });
     });
 
@@ -199,6 +204,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::patch('/{biayaMateraiId}/update', [BiayaMateraiController::class, 'update']);
                 Route::delete('/{biayaMateraiId}/delete', [BiayaMateraiController::class, 'destroy']);
             });
+
+            Route::prefix('form-builder')->group(function() {
+                Route::post('store', [FormBuilderController::class, 'store']);
+            });
         });
 
 
@@ -247,7 +256,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::patch('/grup-parameter/{id}/update', [GrupParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.update');
                 Route::delete('/grup-parameter/{id}/delete', [GrupParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.delete');
 
-                Route::get('/parameter/{id}', [ParameterLaboratoriumController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.get');
+                Route::get('/parameter/{id}', [ParameterLaboratoriumController::class, 'getParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.get');
                 Route::post('/parameter', [ParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.parameter.store');
                 Route::patch('/parameter/{id}/update', [ParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.parameter.update');
                 Route::delete('/parameter/{id}/delete', [ParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.parameter.delete');

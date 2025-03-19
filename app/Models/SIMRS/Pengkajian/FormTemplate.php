@@ -12,4 +12,9 @@ class FormTemplate extends Model
     {
         return $this->belongsTo(FormKategori::class, 'form_kategori_id');
     }
+    
+    public function pengkajian_lanjutan()
+    {
+        return $this->hasMany(PengkajianLanjutan::class);
+    }
 }

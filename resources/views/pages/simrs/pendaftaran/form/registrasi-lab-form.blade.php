@@ -1,4 +1,4 @@
-<form action="{{ route('simpan.registrasi') }}" method="post">
+<form id="form-laboratorium">
     @method('post')
     @csrf
     <input type="hidden" name="patient_id" value="{{ $patient->id }}">
@@ -94,12 +94,12 @@
                         <div class="custom-control custom-checkbox">
                             <div class="frame-wrap">
                                 <div class="custom-control custom-radio custom-control-inline p-0">
-                                    <input type="radio" class="custom-control-input" id="normal" name="rujukan"
+                                    <input type="radio" class="custom-control-input" id="normal" name="order_type"
                                         value="normal">
                                     <label class="custom-control-label" for="normal">Normal</label>
                                 </div>
                                 <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" id="cito" name="rujukan"
+                                    <input type="radio" class="custom-control-input" id="cito" name="order_type"
                                         value="cito">
                                     <label class="custom-control-label" for="cito">CITO</label>
                                 </div>

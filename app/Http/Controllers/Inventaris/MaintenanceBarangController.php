@@ -14,7 +14,7 @@ class MaintenanceBarangController extends Controller
     {
         $barang = Barang::where('id', $id)->first();
 
-        return view('pages.inventaris.maintenance.index', [
+        return view('app-type.logistik.maintenance.index', [
             'maintenances' => MaintenanceBarang::where('barang_id', $id)->orderBy('created_at', 'asc')->get(),
             'barang' => $barang,
         ]);

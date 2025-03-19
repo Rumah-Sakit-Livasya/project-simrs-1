@@ -97,8 +97,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/daftar-registrasi-pasien/{registrations:id}/ganti-dpjp', [RegistrationController::class, 'ganti_dpjp'])->name('ganti.dpjp');
     Route::post('/daftar-registrasi-pasien/{registrations:id}/ganti-diagnosa', [RegistrationController::class, 'ganti_diagnosa'])->name('ganti.diagnosa');
 
-    Route::get('/patients/{patient:id}/{registrasi}', [RegistrationController::class, 'create'])->name('form.registrasi');
-    Route::post('/patients/simpan/registrasi', [RegistrationController::class, 'store'])->name('simpan.registrasi');
+    Route::get('/patients/{patient:id}/{registrasi}', [RegistrationController::class, 'create'])->name('form.registrasi'); // Pendaftaran Poli / Ranap / IGD
+    Route::post('/patients/simpan/registrasi', [RegistrationController::class, 'store'])->name('simpan.registrasi'); // Aksi Pendaftaran Poli / Ranap / IGD
     // Route::post('/patients/{id}/{registrasi}', [RegistrationController::class, 'store'])->name('simpan.registrasi.rajal');
     // Route::post('/patients/{patient:id}/{registrasi}', [PatientController::class, 'store_registrasi'])->name('simpan.registrasi.rawat.jalan');
 
@@ -132,7 +132,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::prefix('simrs')->group(function () {
         Route::get('/dashboard', function () {
-            return view('simrs.dashboard');
+            return view('app-type.simrs.dashboard');
         })->name('dashboard.simrs');
 
         Route::prefix('/master-data')->group(function () {
@@ -215,7 +215,7 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('poliklinik')->group(function () {
             Route::get('/daftar-pasien', [PoliklinikController::class, 'index'])->name('poliklinik.daftar-pasien');
-            Route::get('/pengkajian-lanjutan/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
+            Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
         });
 
         Route::prefix('igd')->group(function () {

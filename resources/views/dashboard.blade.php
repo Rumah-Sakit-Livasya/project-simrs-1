@@ -743,7 +743,6 @@
     @include('pages.partials.show')
 @endsection
 @section('plugin')
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>

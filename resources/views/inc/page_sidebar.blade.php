@@ -6,8 +6,36 @@
             data-toggle="modal" data-target="#modal-shortcut">
             <img src="{{ asset('/img/logo.png') }}" alt="Laravel" aria-roledescription="logo" style="width: 45px">
             <div class="text-left ml-2">
-                <span
-                    class="page-logo-text text-left font-weight-bold ml-0">{{ session('app_type', 'hr') == 'hr' ? 'SMART HR' : 'S  I  M  R  S' }}</span>
+                <span class="page-logo-text text-left font-weight-bold ml-0">
+                    @switch(session('app_type', 'hr'))
+                        @case('hr')
+                            SMART HR
+                        @break
+
+                        @case('simrs')
+                            S I M R S
+                        @break
+
+                        @case('inventaris')
+                            INVENTARIS
+                        @break
+
+                        @case('library')
+                            KEPUSTAKAAN
+                        @break
+
+                        @case('keuangan')
+                            KEUANGAN
+                        @break
+
+                        @case('mutu')
+                            MUTU
+                        @break
+
+                        @default
+                            SMART HR
+                    @endswitch
+                </span>
                 <p class="mb-0 text-small text-white"> {{ auth()->user()->employee->company->name }}</p>
             </div>
         </a>
