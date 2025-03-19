@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\OrderParameterRadiologi;
 use App\Models\OrderRadiologi;
+use App\Models\SIMRS\GrupParameterRadiologi;
+use App\Models\SIMRS\KategoriRadiologi;
+use App\Models\SIMRS\Penjamin;
+use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\TemplateHasilRadiologi;
 use Illuminate\Http\Request;
 
@@ -104,24 +108,26 @@ class RadiologiController extends Controller
             $parameterCategories[$category][] = $parameter;
         }
 
+        $template = TemplateHasilRadiologi::all();
 
 
         return view('pages.simrs.radiologi.partials.edit-order', [
             'order' => $order,
             'parametersInCategory' => $parameterCategories,
-            'radiografers' => $radiografers
+            'radiografers' => $radiografers,
+            'templates' => $template
         ]);
     }
 
     public function templateHasil(Request $request)
     {
         $query = TemplateHasilRadiologi::query();
-        $filters = ['judul', 'template'];
+        $filters = ['cari-judul', 'cari-template'];
         $filterApplied = false;
 
         foreach ($filters as $filter) {
             if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
+                $query->where(str_replace("cari-", "", $filter), 'like', '%' . $request->$filter . '%');
                 $filterApplied = true;
             }
         }
@@ -133,26 +139,124 @@ class RadiologiController extends Controller
             $template = TemplateHasilRadiologi::all();
         }
 
-        // return dd(TemplateHasilRadiologi::all());
-
         return view('pages.simrs.radiologi.template-hasil', [
             'templates' => $template
         ]);
     }
 
-    public function tambahTemplateHasil(Request $request)
+    public function simpanTemplateHasil(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'judul' => 'required',
-            'template' => 'required',
-        ]);
-
         try {
-            TemplateHasilRadiologi::create($validatedData);
+            if (!isset($id) || $id == 0) {
+                // insert
+                $validatedData = $request->validate([
+                    'judul' => 'required',
+                    'template' => 'required',
+                ]);
+                TemplateHasilRadiologi::create([
+                    'judul' => $validatedData['judul'],
+                    'template' => $validatedData['template']
+                ]);
+            } else {
+                // update
+                $validatedData = $request->validate([
+                    'judul' . $id => 'required',
+                    'template' . $id => 'required'
+                ]);
+                $template = TemplateHasilRadiologi::findOrFail($id);
+                $template->update([
+                    'judul' => $validatedData['judul' . $id],
+                    'template' => $validatedData['template' . $id]
+                ]);
+            }
+        } catch (\Exception $e) {
+            return response("<script> alert('Error: " . $e->getMessage() . "'); </script>");
+        }
+
+        // success
+        return back();
+    }
+
+    public function deleteTemplate($id)
+    {
+        try {
+            $template = TemplateHasilRadiologi::findOrFail($id);
+            $template->delete();
         } catch (\Exception $e) {
             return response("<script> alert('Error: " . $e->getMessage() . "'); </script>");
         }
 
         return back();
+    }
+
+    public function simulasiHarga()
+    {
+        return view('pages.simrs.radiologi.simulasi-harga', [
+            'radiology_categories' => KategoriRadiologi::all(),
+            'tarifs' => TarifParameterRadiologi::all(),
+        ]);
+    }
+
+    public function report(Request $request)
+    {
+        $groupParameter = GrupParameterRadiologi::all();
+        $radiografer = Employee::where('organization_id', 24)->get();
+        $penjamin = Penjamin::all();
+
+        return view('pages.simrs.radiologi.laporan', [
+            'groupParameters' => $groupParameter,
+            'radiografers' => $radiografer,
+            'penjamins' => $penjamin
+        ]);
+    }
+
+    public function reportView($fromDate, $endDate, $tipe_rawat, $group_parameter, $penjamin, $radiografer)
+    {
+
+        $query = OrderParameterRadiologi::query()->with(['order_radiologi', 'registration']);
+        $query->whereHas('order_radiologi', function ($q) use ($fromDate, $endDate) {
+            $q->whereBetween('order_radiologi.order_date', [$fromDate, $endDate]);
+        });
+
+        $query->whereHas('registration', function ($q) use ($tipe_rawat) {
+            switch ($tipe_rawat) {
+                case 'rajal':
+                    $q->where('registration_type', 'rawat-jalan');
+                    break;
+                case 'ranap':
+                    $q->where('registration_type', 'rawat-inap');
+                    break;
+                case 'otc':
+                    $q->where('registration_type', 'odc');
+                    break;
+            }
+        });
+
+        if ($group_parameter && $group_parameter != '-') {
+            $query->whereHas('grup_parameter_radiologi', function ($q) use ($group_parameter) {
+                $q->where('id', 'like', '%' . $group_parameter . '%');
+            });
+        }
+
+        if ($penjamin && $penjamin != '-') {
+            $query->whereHas('penjamins', function ($q) use ($penjamin) {
+                $q->where('id', 'like', '%' . $penjamin . '%');
+            });
+        }
+
+        if ($radiografer && $radiografer != '-') {
+            $query->whereHas('employees', function ($q) use ($radiografer) {
+                $q->where('id', 'like', '%' . $radiografer . '%');
+            });
+        }
+
+        $orders = $query->get();
+
+
+        return view('pages.simrs.radiologi.partials.laporan-view', [
+            'orders' => $orders,
+            'startDate' => $fromDate,
+            'endDate' => $endDate
+        ]);
     }
 }

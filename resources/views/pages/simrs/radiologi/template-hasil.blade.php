@@ -8,7 +8,10 @@
         @include('pages.simrs.radiologi.partials.template-hasil-datatable')
 
     </main>
+
+
 @endsection
+
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
@@ -20,12 +23,11 @@
     <script src="{{ asset('summernote-0.9.0/summernote-bs4.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-            console.log(1);
-
-            $('#summernote').summernote({
-                height: 400,
-                wdith: 800,
-                placeholder: 'Hasil pemeriksaan...'
+            $('.summernote').each(function() {
+                $(this).summernote({
+                    height: 400,
+                    placeholder: 'Hasil pemeriksaan...'
+                });
             });
         });
     </script>

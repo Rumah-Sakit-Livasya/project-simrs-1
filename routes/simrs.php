@@ -258,8 +258,10 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('radiologi')->group(function () {
             Route::get('list-order', [RadiologiController::class, 'index'])->name('radiologi.list-order');
+            Route::get('simulasi-harga', [RadiologiController::class, 'simulasiHarga'])->name('radiologi.simulasi-harga');
             Route::get('template-hasil', [RadiologiController::class, 'templateHasil'])->name('radiologi.template-hasil');
-            Route::get('report', [RadiologiController::class, 'report'])->name('radiologi.report');
+            Route::get('laporan', [RadiologiController::class, 'report'])->name('radiologi.report');
+            Route::get('laporan-view/{fromDate}/{endDate}/{tipe_rawat}/{group_parameter}/{penjamin}/{radiografer}', [RadiologiController::class, 'reportView'])->name('radiologi.report.view');
             Route::get('nota-order/{id}', [RadiologiController::class, 'notaOrder'])->name('radiologi.nota-order');
             Route::get('hasil-order/{id}', [RadiologiController::class, 'hasilOrder'])->name('radiologi.hasiil-order');
             Route::get('label-order/{id}', [RadiologiController::class, 'labelOrder'])->name('radiologi.label-order');

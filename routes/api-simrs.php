@@ -74,7 +74,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::post('update-pemeriksaan-parameter-radiologi/', [OrderRadiologiController::class, 'parameterCheckUpdate'])->name('order.radiologi.parameter-check-update');
     Route::post('upload-photo-parameter-radiologi/', [OrderRadiologiController::class, 'uploadPhotoParameter'])->name('order.radiologi.upload-photo-parameter');
 
-    Route::post('tambah-template-radiologi/', [RadiologiController::class, 'tambahTemplateHasil'])->name('radiologi.template.tambah');
+    Route::post('simpan-template-radiologi/{id}', [RadiologiController::class, 'simpanTemplateHasil'])->name('radiologi.template.simpan');
+    Route::post('delete-template-radiologi/{id}', [RadiologiController::class, 'deleteTemplate'])->name('radiologi.template.delete');
 
 
     Route::prefix('pengkajian')->group(function () {

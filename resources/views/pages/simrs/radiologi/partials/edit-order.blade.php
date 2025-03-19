@@ -8,12 +8,15 @@
 
         .popover {
             max-width: 100%;
-            max-height:
         }
 
         .parameter-photo {
             max-width: 80px;
             max-height: 80px;
+        }
+
+        .modal-dialog {
+            max-width: 70%;
         }
     </style>
 @endsection
@@ -380,7 +383,7 @@
                                                                 title="Edit Pemeriksaan"
                                                                 data-id="{{ $parameter->id }}"></a>
                                                             <a class="mdi mdi-image pointer mdi-24px text-warning photo-up-btn"
-                                                                data-toggle="modal"
+                                                                title="Upload photo" data-toggle="modal"
                                                                 data-target="#importModal{{ $parameter->id }}">
                                                             </a>
 
@@ -390,6 +393,30 @@
                                                                 @include(
                                                                     'pages.simrs.radiologi.partials.upload-photo-parameter',
                                                                     ['parameter' => $parameter]
+                                                                )
+                                                            </div>
+
+                                                            <a class="mdi mdi-file-document pointer mdi-24px text-success template-btn"
+                                                                title="Template Hasil" data-toggle="modal"
+                                                                data-target="#templateModal{{ $parameter->id }}">
+                                                            </a>
+                                                            <div class="modal fade"
+                                                                id="templateModal{{ $parameter->id }}" tabindex="-1"
+                                                                role="dialog" aria-labelledby="templateModal"
+                                                                aria-hidden="true">
+                                                                @include(
+                                                                    'pages.simrs.radiologi.partials.template-hasil-form',
+                                                                    [
+                                                                        'orderParameterId' => $parameter->id,
+                                                                        'templates' => $templates,
+                                                                    ]
+                                                                )
+                                                                @include(
+                                                                    'pages.simrs.radiologi.partials.template-hasil-datatable',
+                                                                    [
+                                                                        'orderParameterId' => $parameter->id,
+                                                                        'templates' => $templates,
+                                                                    ]
                                                                 )
                                                             </div>
 
