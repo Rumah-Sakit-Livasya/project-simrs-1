@@ -39,6 +39,8 @@ class EditOrderRadiologi {
         const src = target.getAttribute("src");
         if (!src) return;
 
+        
+
         window.open(
             src,
             "popupWindow_" + new Date().getTime(),

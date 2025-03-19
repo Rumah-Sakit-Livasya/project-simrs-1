@@ -120,7 +120,8 @@
             <h3 class="text-success" style="text-align: right"> <i class="fa fa-calculator"></i> <span id="radiologi-total">Rp 0</span>
             </h3>
         </div>
-        <div class="col-xl-12">
+        <div class="col-xl-2"></div>
+        <div class="col-xl-8">
             <div class="form-group">
                 <input type="text" class="form-control mb-3" id="searchRadiology" placeholder="Cari tindakan...">
                 <table class="table table-bordered">
@@ -162,6 +163,7 @@
                 </table>
             </div>
         </div>
+        <div class="col-xl-2"></div>
         <div class="col-xl-12 mt-5">
             <div class="row">
                 <div class="col-xl-6">
