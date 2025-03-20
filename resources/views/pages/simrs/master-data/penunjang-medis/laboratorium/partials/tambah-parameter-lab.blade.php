@@ -109,11 +109,25 @@
                                     <input type="text" class="form-control" id="metode" name="metode">
                                 </div>
                             </div>
-                            <div class="col-md-12 mt-3">
+                            <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label for="no_urut">No Urut
                                     </label>
                                     <input type="text" class="form-control" id="no_urut" name="no_urut">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <div class="form-group">
+                                    <label for="sub_parameter">Sub Parameter
+                                    </label>
+                                    <select class="form-control select2 w-100" id="sub_parameter"
+                                        name="sub_parameter[]" multiple="multiple">
+                                        @foreach ($parameter as $p)
+                                            @if (!$p->is_order && $p->is_hasil)
+                                                <option value="{{ $p->id }}">{{ $p->parameter }}</option>
+                                            @endif
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
