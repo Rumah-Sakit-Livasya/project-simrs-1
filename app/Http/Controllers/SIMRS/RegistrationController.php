@@ -146,6 +146,8 @@ class RegistrationController extends Controller
         $age = displayAge($birthdate);
         $doctors = Doctor::with('employee', 'departement')->get();
 
+        $groupPenjaminStandarId = GroupPenjamin::where('name', 'like', '%standar%')->first()->id;
+        $kelasRawatRajalId = KelasRawat::where('kelas', 'like', '%rawat jalan%')->first()->id;
 
         // Group doctors by department
         $groupedDoctors = [];
@@ -161,7 +163,7 @@ class RegistrationController extends Controller
 
         $doctorsLAB = Doctor::with('employee', 'departement')
             ->whereHas('departement', function ($query) {
-                $query->where('name','LABORATORIUM');
+                $query->where('name', 'LABORATORIUM');
             })
             ->get();
 
@@ -228,6 +230,8 @@ class RegistrationController extends Controller
                     'doctors' => $doctorsLAB,
                     'penjamins' => Penjamin::all(),
                     'case' => 'laboratorium',
+                    'groupPenjaminId' => $groupPenjaminStandarId,
+                    'kelasRawatId' => $kelasRawatRajalId,
                     'patient' => $patient,
                     'age' => $age
                 ]);

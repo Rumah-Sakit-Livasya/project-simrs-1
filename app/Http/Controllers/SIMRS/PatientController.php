@@ -7,6 +7,8 @@ use App\Helpers\MedicalRecordHelper;
 use App\Http\Controllers\Controller;
 use App\Models\SIMRS\Ethnic;
 use App\Models\SIMRS\Family;
+use App\Models\SIMRS\GroupPenjamin;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Provinsi;

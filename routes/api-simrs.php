@@ -247,7 +247,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::patch('/grup-parameter/{id}/update', [GrupParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.update');
                 Route::delete('/grup-parameter/{id}/delete', [GrupParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.delete');
 
-                Route::get('/parameter/{id}', [ParameterLaboratoriumController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.get');
+                Route::get('/parameter/{id}', [ParameterLaboratoriumController::class, 'getParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.get');
                 Route::post('/parameter', [ParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.parameter.store');
                 Route::patch('/parameter/{id}/update', [ParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.parameter.update');
                 Route::delete('/parameter/{id}/delete', [ParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.parameter.delete');

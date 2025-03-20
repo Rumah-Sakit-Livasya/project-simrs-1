@@ -138,24 +138,26 @@
                                 </td>
                             </tr>
                             @foreach ($category->parameter_laboratorium as $parameter)
-                                <tr class="parameter_laboratorium">
-                                    <td>
-                                        <div class="form-check">
-                                            <input class="form-check-input parameter_laboratorium_checkbox"
-                                                type="checkbox" value="{{ $parameter->id }}"
-                                                id="parameter_laboratorium_{{ $parameter->id }}">
-                                            <label class="form-check-label"
-                                                for="parameter_laboratorium_{{ $parameter->id }}">
-                                                {{ $parameter->parameter }}
-                                            </label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <input type="number" value="1"
-                                            class="form-control parameter_laboratorium_number"
-                                            id="jumlah_{{ $parameter->id }}">
-                                    </td>
-                                </tr>
+                                @if ($parameter->is_order)
+                                    <tr class="parameter_laboratorium">
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input parameter_laboratorium_checkbox"
+                                                    type="checkbox" value="{{ $parameter->id }}"
+                                                    id="parameter_laboratorium_{{ $parameter->id }}">
+                                                <label class="form-check-label"
+                                                    for="parameter_laboratorium_{{ $parameter->id }}">
+                                                    {{ $parameter->parameter }}
+                                                </label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="number" value="1"
+                                                class="form-control parameter_laboratorium_number"
+                                                id="jumlah_{{ $parameter->id }}">
+                                        </td>
+                                    </tr>
+                                @endif
                             @endforeach
                         @endforeach
                     </tbody>
@@ -186,5 +188,7 @@
 <script>
     window._parameterLaboratorium = @json($laboratorium_categories);
     window._tarifLaboratorium = @json($tarifs);
+    window._groupPenjaminId = @json($groupPenjaminId);
+    window._kelasRawatId = @json($kelasRawatId);
 </script>
 <script src="{{ asset('js/simrs/form-laboratorium.js') }}?v={{ time() }}"></script>
