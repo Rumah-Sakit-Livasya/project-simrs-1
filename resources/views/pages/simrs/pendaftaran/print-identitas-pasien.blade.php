@@ -1,5 +1,9 @@
 @php
     use App\Helpers\DateHelper;
+    use App\Models\SIMRS\Provinsi;
+    use App\Models\SIMRS\Kabupaten;
+    use App\Models\SIMRS\Kecamatan;
+    use App\Models\SIMRS\Kelurahan;
 @endphp
 
 <!DOCTYPE html>
@@ -67,6 +71,37 @@
             return 'http://192.168.1.253/real/';
         }
     </script>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="http://simrs-laravel.test/img/logo.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="http://simrs-laravel.test/img/logo.png">
+    <link rel="mask-icon" href="/img/favicon/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="stylesheet" media="screen, print" href="/css/miscellaneous/reactions/reactions.css">
+    <link rel="stylesheet" media="screen, print" href="/css/miscellaneous/fullcalendar/fullcalendar.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="/css/miscellaneous/jqvmap/jqvmap.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="/css/fa-brands.css">
+    <link rel="stylesheet" media="screen, print" href="/css/fa-regular.css">
+    <link rel="stylesheet" media="screen, print" href="/css/fa-solid.css">
+    <link rel="stylesheet" media="screen, print" href="/css/datagrid/datatables/datatables.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="/css/statistics/chartjs/chartjs.css">
+    <link rel="stylesheet" media="screen, print" href="/css/statistics/chartist/chartist.css">
+    <link rel="stylesheet" media="screen, print" href="/css/statistics/c3/c3.css">
+    <link rel="stylesheet" media="screen, print" href="/css/statistics/dygraph/dygraph.css">
+    <link rel="stylesheet" media="screen, print" href="/css/notifications/sweetalert2/sweetalert2.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="/css/notifications/toastr/toastr.css">
+    <link rel="stylesheet" media="screen, print"
+        href="/css/formplugins/bootstrap-colorpicker/bootstrap-colorpicker.css">
+    <link rel="stylesheet" media="screen, print" href="/css/formplugins/bootstrap-datepicker/bootstrap-datepicker.css">
+    <link rel="stylesheet" media="screen, print"
+        href="/css/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.css">
+    <link rel="stylesheet" media="screen, print" href="/css/formplugins/dropzone/dropzone.css">
+    <link rel="stylesheet" media="screen, print" href="/css/formplugins/ion-rangeslider/ion-rangeslider.css">
+    <link rel="stylesheet" media="screen, print" href="/css/formplugins/cropperjs/cropper.css">
+    <link rel="stylesheet" media="screen, print" href="/css/formplugins/select2/select2.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="/css/formplugins/summernote/summernote.css">
+    <link rel="stylesheet" media="screen, print" href="/css/miscellaneous/fullcalendar/fullcalendar.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="/css/miscellaneous/lightgallery/lightgallery.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="/css/page-invoice.css">
+    <link rel="stylesheet" media="screen, print" href="/css/theme-demo.css">
 </head>
 
 <body class="loaded">
@@ -91,7 +126,7 @@
                 <div class="modal-footer">
                     <div class="card-actionbar-row-left">
                         <button type="button" class="btn btn-flat waves-effect" data-dismiss="modal"><i
-                                class="fa fa-window-close"></i> Tutup</button>
+                                class="fal fa-window-close"></i> Tutup</button>
                     </div>
                 </div>
             </div>
@@ -135,10 +170,10 @@
         <div class="card" id="printdiv">
             <div class="card-actionbar">
                 <div class="card-actionbar-row" id="group-print-pasien">
-                    <button class="btn btn-success pull-left waves-effect" onclick="printit(); return false"><i
-                            class="mdi mdi-printer"></i> Print</button>
-                    <button class="btn btn-danger pull-left waves-effect" onclick="window.close()"><i
-                            class="mdi mdi-close"></i> Tutup</button>
+                    <button class="btn btn-success pull-left waves-effect" onclick="printit(); return false">
+                        <span class="far fa-print"></span> Print</button>
+                    <button class="btn btn-danger pull-left waves-effect" onclick="window.close()">
+                        <span class="far fa-times-circle"></span> Tutup</button>
                 </div>
             </div>
         </div>
@@ -225,30 +260,30 @@
                             <td>
                                 <div class="head"><u>Kelurahan</u></div>
                             </td>
-                            <td>: {{ $patient->ward }}</td>
+                            <td>: {{ Kelurahan::find($patient->ward)->name }}</td>
                             <td>
                                 <div class="head"><u>Kecamatan</u></div>
                             </td>
-                            <td>: {{ $patient->subdistrict }} </td>
+                            <td>: {{ Kecamatan::find($patient->subdistrict)->name }} </td>
                         </tr>
 
                         <tr>
                             <td>
                                 <div class="head"><u>Kota/Kab</u></div>
                             </td>
-                            <td>: {{ $patient->regency }}</td>
+                            <td>: {{ Kabupaten::find($patient->regency)->name }}</td>
                             <td>
                                 <div class="head"><u>Provinsi</u></div>
                             </td>
-                            <td>: {{ $patient->province }}</td>
+                            <td>: {{ Provinsi::find($patient->province)->name }}</td>
                         </tr>
 
                         <tr>
                             <td>
-                                <div class="head"><u>No. Telp</u></div>
-                                <div class="child"><em>Phone Number</em></div>
+                                <div class="head"><u>Nama Ibu</u></div>
+                                <div class="child"><em>mother's name</em></div>
                             </td>
-                            <td>: </td>
+                            <td>: {{ $patient->family->mother_name }}</td>
                             <td>
                                 <div class="head"><u>Handphone</u></div>
                                 <div class="child"><em>Mobile Number</em></div>
@@ -258,15 +293,15 @@
 
                         <tr>
                             <td>
-                                <div class="head"><u>Nama Suami</u></div>
-                                <div class="child"><em>husband's name</em></div>
+                                <div class="head"><u>Nama Ayah</u></div>
+                                <div class="child"><em>father's name</em></div>
                             </td>
-                            <td>: </td>
+                            <td>: {{ $patient->family->father_name }}</td>
                             <td>
                                 <div class="head"><u>Usia</u></div>
                                 <div class="child"><em>Age</em></div>
                             </td>
-                            <td>: </td>
+                            <td>: {{ hitungUmur($patient->date_of_birth) }}</td>
                         </tr>
 
                         <tr>
@@ -274,34 +309,22 @@
                                 <div class="head"><u>Pekerjaan</u></div>
                                 <div class="child"><em>Occupation</em></div>
                             </td>
-                            <td>: </td>
+                            <td>: {{ $patient->family->family_job }}</td>
                             <td>
-                                <div class="head"><u>Nama Orang Tua</u></div>
-                                <div class="child"><em>Parent's Name</em></div>
+                                <div class="head"><u>Nama Keluarga</u></div>
+                                <div class="child"><em>family name</em></div>
                             </td>
-                            <td>: DUDI YUDIANA</td>
+                            <td>: {{ $patient->family->family_name }}</td>
                         </tr>
 
                         <tr>
                             <td>
-                                <div class="head"><u>Askes</u></div>
-                                <div class="child"><em>Askes Insurance</em></div>
+                                <div class="head"><u>Nomor Keluarga</u></div>
+                                <div class="child"><em>family number</em></div>
                             </td>
-                            <td></td>
-                            <td>
-                                <div class="head"><u>Asuransi Lain</u></div>
-                                <div class="child"><em>Other Insurance</em></div>
-                            </td>
-                            <td>: </td>
+                            <td colspan="3">: {{ $patient->family->family_number }}</td>
                         </tr>
 
-                        <tr>
-                            <td>
-                                <div class="head"><u>Klinik Tujuan</u></div>
-                                <div class="child"><em>Clinic</em></div>
-                            </td>
-                            <td colspan="3">: </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>

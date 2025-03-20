@@ -242,9 +242,9 @@
 
                                     <div class="row justify-content-end mt-3">
                                         <div class="col-md-4">
-                                            <button class="btn btn-primary pull-right waves-effect"
-                                                onclick="popupwindow('http://192.168.1.253/real/regprint/print_kartu_pdf/4459','p_card', 400,400,'no'); return false"><i
-                                                    class="mdi mdi-printer"></i> Kartu pasien</button>
+                                            <button class="btn btn-primary pull-right waves-effect" id="kartu">
+                                                <i class="mdi mdi-printer"></i> Kartu Pasien
+                                            </button>
                                             <button class="btn btn-primary pull-right waves-effect" id="identitas"><i
                                                     class="mdi mdi-printer"></i> Identitas Pasien</button>
                                         </div>
@@ -367,6 +367,7 @@
         var button = document.getElementById('button');
         var identitas = document.getElementById('identitas');
         var kunjungan = document.getElementById('kunjungan');
+        var kartu = document.getElementById('kartu');
         var width = window.screen.width;
         var height = window.screen.height;
 
@@ -380,6 +381,11 @@
             // Membuka pop-up window saat tombol diklik
             window.open('{{ route('print.identitas.pasien', $patient->id) }}', '_blank', 'width=500' + width +
                 ',height=' + height);
+        });
+        kartu.addEventListener('click', function() {
+            // Membuka pop-up window untuk mencetak langsung
+            window.open('{{ route('print.kartu.pasien', $patient->id) }}', '_blank',
+                'width=400,height=400');
         });
         kunjungan.addEventListener('click', function() {
             // Membuka pop-up window saat tombol diklik

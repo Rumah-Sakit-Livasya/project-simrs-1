@@ -10,6 +10,7 @@ use App\Models\SIMRS\Family;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Provinsi;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
@@ -205,12 +206,12 @@ class PatientController extends Controller
 
     public function edit_pendaftaran_pasien(Patient $patient)
     {
-        // return $patient;
-        $response = Http::get('https://dev.farizdotid.com/api/daerahindonesia/provinsi');
-        $provinces = $response->json()['provinsi'];
+        $dataPenjamin = Penjamin::all();
+        $provinces = Provinsi::all();
 
         return view('pages.simrs.pendaftaran.edit-pasien', [
             'patient' => $patient,
+            'penjamins' => $dataPenjamin,
             'provinces' => $provinces,
             'ethnics' => Ethnic::all()
         ]);
@@ -258,6 +259,19 @@ class PatientController extends Controller
             'patient' => $patient,
             'age' => $age
         ]);
+    }
+
+    public function print_kartu_pasien(Patient $patient)
+    {
+        // Ambil data pasien berdasarkan ID
+        $patient = Patient::findOrFail($patient->id);
+
+        // Render view ke PDF
+        $pdf = Pdf::loadView('pages.simrs.pendaftaran.print-kartu-pasien', compact('patient'));
+
+        // Unduh atau tampilkan PDF
+        return $pdf->stream('kartu-pasien.pdf'); // Untuk menampilkan di browser
+        // return $pdf->download('kartu-pasien.pdf'); // Untuk mengunduh file
     }
 
     public function history_kunjungan_pasien(Patient $patient)
