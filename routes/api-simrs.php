@@ -79,7 +79,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             });
         });
 
-        Route::prefix('lanjutan')->group(function() {
+        Route::prefix('lanjutan')->group(function () {
             Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianLanjutan'])->name('pengkajian.lanjutan.store');
         });
     });
@@ -195,7 +195,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::delete('/{biayaMateraiId}/delete', [BiayaMateraiController::class, 'destroy']);
             });
 
-            Route::prefix('form-builder')->group(function() {
+            Route::prefix('form-builder')->group(function () {
                 Route::post('store', [FormBuilderController::class, 'store']);
             });
         });
@@ -352,4 +352,5 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::get('/getKabupaten', [LocationController::class, 'getKabupaten'])->name('getKabupaten');
     Route::get('/getKecamatan', [LocationController::class, 'getKecamatan'])->name('getKecamatan');
     Route::get('/getKelurahan', [LocationController::class, 'getKelurahan'])->name('getKelurahan');
+    Route::get('/get-kecamatan-by-kelurahan', [LocationController::class, 'getKecamatanByKelurahan'])->name('getKecamatanByKelurahan');
 });
