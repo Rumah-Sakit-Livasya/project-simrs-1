@@ -9,6 +9,11 @@ class RadiologiForm {
     #ParameterRadiologi;
 
     /**
+    * @type {number}
+    */
+    #GroupPenjaminId;
+
+    /**
      * @type {TarifRadiologi[]}
      */
     #TarifRadiologi;
@@ -38,6 +43,8 @@ class RadiologiForm {
         this.#TarifRadiologi = window._tarifRadiologi;
         // @ts-ignore
         this.#Registration = window._registration;
+        // @ts-ignore
+        this.#GroupPenjaminId = window._groupPenjaminId;
 
         document.addEventListener("DOMContentLoaded", this.#init.bind(this));
     }
@@ -141,10 +148,10 @@ class RadiologiForm {
                 'X-CSRF-TOKEN': String(formData.get("_token"))
             }
         })
-            .then(async(data) => {
+            .then(async (data) => {
                 console.log(data.url);
                 console.log(await data.text())
-                if(data.status != 200) {
+                if (data.status != 200) {
                     throw new Error('Error: ' + data.statusText);
                 }
                 showSuccessAlert('Data berhasil disimpan');
@@ -166,7 +173,16 @@ class RadiologiForm {
             const parameter = this.#ParameterRadiologi.find((p) => p.id == parseInt(parameterId));
 
             if (isChecked && parameter) {
-                const tarif = this.#TarifRadiologi.find((t) => t.parameter_radiologi_id == parameter.id);
+                const tarif = this.#TarifRadiologi.find((t) => {
+                    if (
+                        t.parameter_radiologi_id == parameter.id
+                        &&
+                        t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1)
+                        &&
+                        t.group_penjamin_id == (this.#GroupPenjaminId ?? -1)
+                    ) return t;
+                });
+
                 if (tarif) {
                     const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}']`));
                     if (parseInt(jumlah.value) < 1) {
@@ -177,6 +193,10 @@ class RadiologiForm {
                     if (this.#CITO) {
                         this.#totalHarga += (this.#totalHarga * 30 / 100);
                     }
+                }
+                else {
+                    showErrorAlertNoRefresh("Tarif untuk penjamin dan kelas rawat ini tidak ditemukan!");
+                    return;
                 }
             }
         });
@@ -250,7 +270,7 @@ class RadiologiForm {
     }
 }
 
-const RadiologiFormClass =new RadiologiForm();
+const RadiologiFormClass = new RadiologiForm();
 
 // // @ts-check
 // /// <reference types="jquery" />

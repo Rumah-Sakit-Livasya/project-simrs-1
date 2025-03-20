@@ -12,6 +12,7 @@ use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GantiDiagnosa;
 use App\Models\SIMRS\GantiDokter;
+use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
@@ -145,6 +146,7 @@ class RegistrationController extends Controller
         $age = displayAge($birthdate);
         $doctors = Doctor::with('employee', 'departement')->get();
 
+
         // Group doctors by department
         $groupedDoctors = [];
         foreach ($doctors as $doctor) {
@@ -176,7 +178,7 @@ class RegistrationController extends Controller
                 break;
 
             case 'igd':
-                return view('pages.simrs.pendafta   ran.form-registrasi', [
+                return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "IGD",
                     'doctors' => $doctorsIGD,
                     'penjamins' => Penjamin::all(),
@@ -401,9 +403,12 @@ class RegistrationController extends Controller
         }])->find($registration->patient->id);
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
+        $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
+
 
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
             'kelasRawat' => $kelasRawat,
+            'groupPenjaminId' => $groupPenjaminId,
             'penjamin' => $penjamin,
             'groupedDoctors' => $groupedDoctors,
             'radiologiOrders' => $radiologiOrders,

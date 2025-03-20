@@ -189,6 +189,7 @@
         window._parameterRadiologi = @json($radiology_categories);
         window._tarifRadiologi = @json($tarifs);
         window._registration = @json($registration);
+        window._groupPenjaminId = @json($groupPenjaminId);
     </script>
     <script src="{{ asset('js/simrs/form-radiologi.js') }}?v={{ time() }}"></script>
 @endsection
