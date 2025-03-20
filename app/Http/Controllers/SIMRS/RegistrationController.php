@@ -394,6 +394,10 @@ class RegistrationController extends Controller
             $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
         }
 
+        $radiologyDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%radiologi%');
+        })->get();
+
         $radiologiOrders = [];
 
         OrderRadiologi::where('registration_id', $registration->id)
@@ -415,6 +419,7 @@ class RegistrationController extends Controller
             'groupPenjaminId' => $groupPenjaminId,
             'penjamin' => $penjamin,
             'groupedDoctors' => $groupedDoctors,
+            'radiologyDoctors' => $radiologyDoctors,
             'radiologiOrders' => $radiologiOrders,
             'radiology_categories' => KategoriRadiologi::all(),
             'tarifs' => TarifParameterRadiologi::all(),

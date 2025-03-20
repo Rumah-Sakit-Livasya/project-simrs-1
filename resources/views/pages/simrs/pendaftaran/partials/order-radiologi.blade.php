@@ -40,13 +40,10 @@
                         <div class="form-group">
                             <select class="select2 form-control w-100" id="doctor_id" name="doctor_id">
                                 <option value=""></option>
-                                @foreach ($groupedDoctors as $groupName => $group)
-                                    <option class="text-light bg-info" disabled>{{ $groupName }}</option>
-                                    @foreach ($group as $doctor)
+                                    @foreach ($radiologyDoctors as $doctor)
                                         <option value="{{ $doctor->id }}">
                                             {{ $doctor->employee->fullname }}
                                         </option>
-                                    @endforeach
                                 @endforeach
                             </select>
                         </div>
@@ -114,7 +111,7 @@
             </div>
         </div>
         <div class="col-xl-6">
-            <h3>Tindakan</h3>
+            <h3>Parameter</h3>
         </div>
 
         <div class="col-xl-6">
@@ -129,7 +126,7 @@
                     <h2 class="accordion-header" style="text-align: center">
                         <button class="accordion-button collapsed btn btn-primary" type="button" data-bs-toggle="collapse"
                             data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                            Tampilkan Tindakan
+                            Tampilkan Parameter
                         </button>
                     </h2>
                     <div id="collapseOne" class="accordion-collapse collapse"
@@ -137,11 +134,11 @@
                         <div class="accordion-body">
                             <div class="form-group">
                                 <input type="text" class="form-control mb-3" id="searchRadiology"
-                                    placeholder="Cari tindakan...">
+                                    placeholder="Cari parameter...">
                                 <table class="table table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>Tindakan</th>
+                                            <th>Parameter</th>
                                             <th>Jumlah</th>
                                         </tr>
                                     </thead>
