@@ -410,23 +410,23 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="alergi_makanan"
+                                            <label for="alergi_lainnya"
                                                 class="control-label text-primary margin-tb-10 d-block">Alergi
-                                                Makanan</label>
+                                                Lainnya</label>
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Ya"
-                                                    name="alergi_makanan" id="alergi_makanan1">
+                                                    name="alergi_lainnya" id="alergi_lainnya1">
                                                 <label class="custom-control-label text-primary"
-                                                    for="alergi_makanan1">Ya</label>
+                                                    for="alergi_lainnya1">Ya</label>
                                             </div>
-                                            <input name="ket_alergi_makanan" id="ket_alergi_makanan"
+                                            <input name="ket_alergi_lainnya" id="ket_alergi_lainnya"
                                                 style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
                                                 type="text">
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Tidak"
-                                                    name="alergi_makanan" id="alergi_makanan2">
+                                                    name="alergi_lainnya" id="alergi_lainnya2">
                                                 <label class="custom-control-label text-primary"
-                                                    for="alergi_makanan2">Tidak</label>
+                                                    for="alergi_lainnya2">Tidak</label>
                                             </div>
                                         </div>
                                     </div>

@@ -12,7 +12,7 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $orderParameter->parameter_radiologi->parameter }}</td>
-                <td> {{ (new NumberFormatter('id_ID', NumberFormatter::CURRENCY))->formatCurrency($orderParameter->nominal_rupiah, 'IDR') }}
+                <td> {{ rp($orderParameter->nominal_rupiah) }}
                 </td>
                 <td>{{ $orderParameter->catatan }}</td>
             </tr>

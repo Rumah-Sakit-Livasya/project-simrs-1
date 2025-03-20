@@ -35,19 +35,19 @@ class PoliklinikController extends Controller
         $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
         $registration = Registration::where('registration_number', $noRegist)->first();
 
+        $query = Registration::whereDate('registration_date', Carbon::today());
+
+        $query->when(isset($registration->departement_id), function ($q) use ($registration) {
+            return $q->where('departement_id', $registration->departement_id);
+        });
+
+        $query->when(isset($registration->doctor_id), function ($q) use ($registration) {
+            return $q->where('doctor_id', $registration->doctor_id);
+        });
+
+        $registrations = $query->get();
+        
         if ($menu && $noRegist) {
-            $query = Registration::where('date', now()->format('Y-m-d'));
-
-            $query->when($registration->departement_id, function ($q) use ($registration) {
-                return $q->where('departement_id', $registration->departement_id);
-            });
-
-            $query->when($registration->doctor_id, function ($q) use ($registration) {
-                return $q->where('doctor_id', $registration->doctor_id);
-            });
-
-            $registrations = $query->get();
-
             // Render partial view sebagai HTML
             $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
 
@@ -56,7 +56,7 @@ class PoliklinikController extends Controller
                 return $menuResponse;
             }
         } else {
-            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration'));
+            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration', 'registrations'));
         }
     }
 
@@ -134,7 +134,7 @@ class PoliklinikController extends Controller
     public function filterPasien(Request $request)
     {
         try {
-            $query = Registration::where('date', now()->format('Y-m-d'));
+            $query = Registration::whereDate('registration_date', Carbon::today());
 
             $query->when($request->departement_id, function ($q) use ($request) {
                 return $q->where('departement_id', $request->departement_id);

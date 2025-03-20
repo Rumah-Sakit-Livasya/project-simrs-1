@@ -1360,6 +1360,7 @@
         // ===================================================
         // :                    STORE                        :
         // ===================================================
+        
         let actionType = '';
 
         $('#sd-pengkajian-dokter-rajal').off('click').on('click', function(event) {
