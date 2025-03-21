@@ -375,16 +375,16 @@
                                                 Obat</label>
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Ya"
-                                                    name="alergi_obat" id="alergi_obat1">
+                                                    name="alergi_obat" id="alergi_obat1" @if($pengkajian?->alergi_obat == 'Ya') checked @endif>
                                                 <label class="custom-control-label text-primary"
                                                     for="alergi_obat1">Ya</label>
                                             </div>
                                             <input name="ket_alergi_obat" id="ket_alergi_obat"
                                                 style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
-                                                type="text">
+                                                type="text" @if($pengkajian?->alergi_obat == 'Ya') value="{{ $pengkajian?->ket_alergi_obat }}" @endif>
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Tidak"
-                                                    name="alergi_obat" id="alergi_obat2">
+                                                    name="alergi_obat" id="alergi_obat2" @if($pengkajian?->alergi_obat == 'Tidak') checked @endif>
                                                 <label class="custom-control-label text-primary"
                                                     for="alergi_obat2">Tidak</label>
                                             </div>
@@ -395,18 +395,18 @@
                                                 Makanan</label>
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Ya"
-                                                    name="alergi_makanan" id="alergi_makanan1">
+                                                    name="alergi_makanan" id="alergi_makanan1" @if($pengkajian?->alergi_makanan == 'Ya') checked @endif>
                                                 <label class="custom-control-label text-primary"
                                                     for="alergi_makanan1">Ya</label>
                                             </div>
                                             <input name="ket_alergi_makanan" id="ket_alergi_makanan"
                                                 style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
-                                                type="text">
+                                                type="text" @if($pengkajian?->alergi_makanan == 'Ya') value="{{ $pengkajian?->ket_alergi_makanan }}" @endif>
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Tidak"
-                                                    name="alergi_makanan" id="alergi_makanan2">
+                                                    name="alergi_makanan" id="alergi_makanan2" @if($pengkajian?->alergi_makanan == 'Tidak') checked @endif>
                                                 <label class="custom-control-label text-primary"
-                                                    for="alergi_makanan2">Tidak</label>
+                                                    for="alergi_makanan1">Tidak</label>
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -415,16 +415,16 @@
                                                 Lainnya</label>
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Ya"
-                                                    name="alergi_lainnya" id="alergi_lainnya1">
+                                                    name="alergi_lainnya" id="alergi_lainnya1" @if($pengkajian?->alergi_lainnya == 'Ya') checked @endif>
                                                 <label class="custom-control-label text-primary"
                                                     for="alergi_lainnya1">Ya</label>
                                             </div>
                                             <input name="ket_alergi_lainnya" id="ket_alergi_lainnya"
                                                 style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
-                                                type="text">
+                                                type="text" @if($pengkajian?->alergi_lainnya == 'Ya') value="{{ $pengkajian?->ket_alergi_lainnya }}" @endif>
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Tidak"
-                                                    name="alergi_lainnya" id="alergi_lainnya2">
+                                                    name="alergi_lainnya" id="alergi_lainnya2" @if($pengkajian?->alergi_lainnya == 'Tidak') checked @endif>
                                                 <label class="custom-control-label text-primary"
                                                     for="alergi_lainnya2">Tidak</label>
                                             </div>
@@ -437,7 +437,7 @@
                                                 alergi
                                                 obat</label>
                                             <input name="reaksi_alergi_obat" id="reaksi_alergi_obat"
-                                                class="form-control alergi" type="text">
+                                                class="form-control alergi" type="text" value="{{$pengkajian?->reaksi_alergi_obat}}">
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="reaksi_alergi_makanan" class="control-label text-primary">Reaksi
@@ -445,7 +445,7 @@
                                                 alergi
                                                 makanan</label>
                                             <input name="reaksi_alergi_makanan" id="reaksi_alergi_makanan"
-                                                class="form-control alergi" type="text">
+                                                class="form-control alergi" type="text" value="{{$pengkajian?->reaksi_alergi_makanan}}">
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="reaksi_alergi_lainnya" class="control-label text-primary">Reaksi
@@ -453,7 +453,7 @@
                                                 alergi
                                                 lainnya</label>
                                             <input name="reaksi_alergi_lainnya" id="reaksi_alergi_lainnya"
-                                                class="form-control alergi" type="text">
+                                                class="form-control alergi" type="text" value="{{$pengkajian?->reaksi_alergi_lainnya}}">
                                         </div>
                                     </div>
                                     <div class="col-md-12">
@@ -478,14 +478,14 @@
                                 <div class="row mt-3">
                                     <div class="col-md-12 mb-4 d-flex flex-wrap justify-content-between">
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/1.jpg"
+                                            <img src="{{asset('img/emoticon/1.jpg')}}"
                                                 class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-warning text-white" data-skor="0">0</span>
                                             </div>
                                         </div>
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/2.jpg"
+                                            <img src="{{asset('img/emoticon/2.jpg')}}"
                                                 class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-success" data-skor="1">1</span>
@@ -493,7 +493,7 @@
                                             </div>
                                         </div>
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/3.jpg"
+                                            <img src="{{asset('img/emoticon/3.jpg')}}"
                                                 class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-primary" data-skor="3">3</span>
@@ -501,7 +501,7 @@
                                             </div>
                                         </div>
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/4.jpg"
+                                            <img src="{{asset('img/emoticon/4.jpg')}}"
                                                 class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-info" data-skor="5">5</span>
@@ -509,7 +509,7 @@
                                             </div>
                                         </div>
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/5.jpg"
+                                            <img src="{{asset('img/emoticon/5.jpg')}}"
                                                 class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-orange" data-skor="7">7</span>
@@ -517,7 +517,7 @@
                                             </div>
                                         </div>
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/6.jpg"
+                                            <img src="{{asset('img/emoticon/6.jpg')}}"
                                                 class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-red" data-skor="9">9</span>
@@ -620,7 +620,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus1" id="kondisi_khusus1"
+                                                    <input name="kondisi_khusus[]" id="kondisi_khusus1"
                                                         value="Anak usia 1-5 tahun" type="checkbox"
                                                         class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Anak usia 1-5
@@ -633,7 +633,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus2" id="kondisi_khusus2"
+                                                    <input name="kondisi_khusus[]" id="kondisi_khusus2"
                                                         value="Lansia > 60 tahun" type="checkbox"
                                                         class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Lansia &gt; 60
@@ -646,7 +646,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus3" id="kondisi_khusus3"
+                                                    <input name="kondisi_khusus[]" id="kondisi_khusus3"
                                                         value="Penyakit kronis dengan komplikasi" type="checkbox"
                                                         class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Penyakit kronis dengan
@@ -659,7 +659,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus4" id="kondisi_khusus4"
+                                                    <input name="kondisi_khusus[]" id="kondisi_khusus4"
                                                         value="Kanker stadium III/IV" type="checkbox"
                                                         class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Kanker stadium
@@ -674,7 +674,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus5" id="kondisi_khusus5" value="HIV/AIDS"
+                                                    <input name="kondisi_khusus[]" id="kondisi_khusus5" value="HIV/AIDS"
                                                         type="checkbox" class="custom-control-input">
                                                     <span class="custom-control-label text-primary">HIV/AIDS</span>
                                                 </label>
@@ -685,7 +685,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus6" id="kondisi_khusus6" value="TB"
+                                                    <input name="kondisi_khusus[]" id="kondisi_khusus6" value="TB"
                                                         type="checkbox" class="custom-control-input">
                                                     <span class="custom-control-label text-primary">TB</span>
                                                 </label>
@@ -696,7 +696,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus7" id="kondisi_khusus7"
+                                                    <input name="kondisi_khusus[]" id="kondisi_khusus7"
                                                         value="Bedah mayor degestif" type="checkbox"
                                                         class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Bedah mayor
@@ -709,7 +709,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus8" id="kondisi_khusus8"
+                                                    <input name="kondisi_khusus[]" id="kondisi_khusus8"
                                                         value="Luka bakar > 20%" type="checkbox"
                                                         class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Luka bakar &gt;
@@ -727,7 +727,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="imunisasi_dasar1" id="imunisasi_dasar1" value="BCG"
+                                                    <input name="imunisasi_dasar[]" id="imunisasi_dasar1" value="BCG"
                                                         type="checkbox" class="custom-control-input">
                                                     <span class="custom-control-label text-primary">BCG</span>
                                                 </label>
@@ -738,7 +738,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="imunisasi_dasar2" id="imunisasi_dasar2" value="DPT"
+                                                    <input name="imunisasi_dasar[]" id="imunisasi_dasar2" value="DPT"
                                                         type="checkbox" class="custom-control-input">
                                                     <span class="custom-control-label text-primary">DPT</span>
                                                 </label>
@@ -749,7 +749,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="imunisasi_dasar3" id="imunisasi_dasar3"
+                                                    <input name="imunisasi_dasar[]" id="imunisasi_dasar3"
                                                         value="Hepatitis B" type="checkbox" class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Hepatitis B</span>
                                                 </label>
@@ -760,7 +760,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="imunisasi_dasar4" id="imunisasi_dasar4" value="Polio"
+                                                    <input name="imunisasi_dasar[]" id="imunisasi_dasar4" value="Polio"
                                                         type="checkbox" class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Polio</span>
                                                 </label>
@@ -771,7 +771,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="imunisasi_dasar5" id="imunisasi_dasar5" value="Campak"
+                                                    <input name="imunisasi_dasar[]" id="imunisasi_dasar5" value="Campak"
                                                         type="checkbox" class="custom-control-input">
                                                     <span class="custom-control-label text-primary">Campak</span>
                                                 </label>
@@ -835,7 +835,7 @@
                                         <div class="form-group">
                                             <span class="input-group-addon grey-text">Hasil : </span>
                                             <div class="input-group-content">
-                                                <input class="form-control" name="resiko_jatuh_hasil"
+                                                <input class="form-control" name="hasil_resiko_jatuh"
                                                     id="resiko_jatuh_hasil" type="text" readonly="">
                                             </div>
                                         </div>
@@ -984,7 +984,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar1"
+                                                    <input class="custom-control-input" name="hambatan_belajar[]"
                                                         id="hambatan_belajar1" value="Pendengaran" type="checkbox">
                                                     <label for="hambatan_belajar1"
                                                         class="custom-control-label text-primary">Pendengaran</label>
@@ -996,7 +996,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar2"
+                                                    <input class="custom-control-input" name="hambatan_belajar[]"
                                                         id="hambatan_belajar2" value="Penglihatan" type="checkbox">
                                                     <label for="hambatan_belajar2"
                                                         class="custom-control-label text-primary">Penglihatan</label>
@@ -1008,7 +1008,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar3"
+                                                    <input class="custom-control-input" name="hambatan_belajar[]"
                                                         id="hambatan_belajar3" value="Kognitif" type="checkbox">
                                                     <label for="hambatan_belajar3"
                                                         class="custom-control-label text-primary">Kognitif</label>
@@ -1020,7 +1020,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar4"
+                                                    <input class="custom-control-input" name="hambatan_belajar[]"
                                                         id="hambatan_belajar4" value="Fisik" type="checkbox">
                                                     <label for="hambatan_belajar4"
                                                         class="custom-control-label text-primary">Fisik</label>
@@ -1032,7 +1032,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar5"
+                                                    <input class="custom-control-input" name="hambatan_belajar[]"
                                                         id="hambatan_belajar5" value="Budaya" type="checkbox">
                                                     <label for="hambatan_belajar5"
                                                         class="custom-control-label text-primary">Budaya</label>
@@ -1044,7 +1044,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar6"
+                                                    <input class="custom-control-input" name="hambatan_belajar[]"
                                                         id="hambatan_belajar6" value="Agama" type="checkbox">
                                                     <label for="hambatan_belajar6"
                                                         class="custom-control-label text-primary">Agama</label>
@@ -1056,7 +1056,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar7"
+                                                    <input class="custom-control-input" name="hambatan_belajar[]"
                                                         id="hambatan_belajar7" value="Emosi" type="checkbox">
                                                     <label for="hambatan_belajar7"
                                                         class="custom-control-label text-primary">Emosi</label>
@@ -1068,7 +1068,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar8"
+                                                    <input class="custom-control-input" name="hambatan_belajar[]"
                                                         id="hambatan_belajar8" value="Bahasa" type="checkbox">
                                                     <label for="hambatan_belajar8"
                                                         class="custom-control-label text-primary">Bahasa</label>
@@ -1080,7 +1080,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar9"
+                                                    <input class="custom-control-input" name="hambatan_belajar[]"
                                                         id="hambatan_belajar9" value="Tidak ada Hamabatan"
                                                         type="checkbox">
                                                     <label for="hambatan_belajar9"
@@ -1116,7 +1116,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran1"
+                                                    <input class="custom-control-input" name="kebutuhan_pembelajaran[]"
                                                         id="kebuthan_pembelajaran1" value="Diagnosa managemen"
                                                         type="checkbox">
                                                     <label for="kebuthan_pembelajaran1"
@@ -1130,7 +1130,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran2"
+                                                    <input class="custom-control-input" name="kebutuhan_pembelajaran[]"
                                                         id="kebuthan_pembelajaran2" value="Obat-obatan" type="checkbox">
                                                     <label for="kebuthan_pembelajaran2"
                                                         class="custom-control-label text-primary">Obat-obatan</label>
@@ -1142,7 +1142,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran3"
+                                                    <input class="custom-control-input" name="kebutuhan_pembelajaran[]"
                                                         id="kebuthan_pembelajaran3" value="Perawatan luka"
                                                         type="checkbox">
                                                     <label for="kebuthan_pembelajaran3"
@@ -1155,7 +1155,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran4"
+                                                    <input class="custom-control-input" name="kebutuhan_pembelajaran[]"
                                                         id="kebuthan_pembelajaran4" value="Rehabilitasi" type="checkbox">
                                                     <label for="kebuthan_pembelajaran4"
                                                         class="custom-control-label text-primary">Rehabilitasi</label>
@@ -1169,10 +1169,10 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran5"
-                                                        id="kebuthan_pembelajaran5" value="Manajemen nyeri"
+                                                    <input class="custom-control-input" name="kebutuhan_pembelajaran[]"
+                                                        id="kebutuhan_pembelajaran5" value="Manajemen nyeri"
                                                         type="checkbox">
-                                                    <label for="kebuthan_pembelajaran5"
+                                                    <label for="kebutuhan_pembelajaran5"
                                                         class="custom-control-label text-primary">Manajemen nyeri</label>
                                                 </div>
                                             </div>
@@ -1182,7 +1182,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran6"
+                                                    <input class="custom-control-input" name="kebutuhan_pembelajaran[]"
                                                         id="kebuthan_pembelajaran6" value="Diet &amp; nutrisi"
                                                         type="checkbox">
                                                     <label for="kebuthan_pembelajaran6"
@@ -1196,7 +1196,7 @@
                                         <div class="form-group">
                                             <div class="form-radio">
                                                 <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran7"
+                                                    <input class="custom-control-input" name="kebutuhan_pembelajaran[]"
                                                         id="kebuthan_pembelajaran7" value="Tidak ada Hamabatan"
                                                         type="checkbox">
                                                     <label for="kebuthan_pembelajaran7"
@@ -1529,6 +1529,8 @@
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+        const pengkajian = @json($pengkajian);
+
             $('body').addClass('layout-composed');
             $('.select2').select2({
                 placeholder: 'Pilih Item',
@@ -1539,6 +1541,9 @@
             $('#doctor_id').select2({
                 placeholder: 'Pilih Dokter',
             });
+            console.log(pengkajian.diagnosa_keperawatan);
+            $('#diagnosa-keperawatan').val(pengkajian.diagnosa_keperawatan).select2();
+            $('#rencana-tindak-lanjut').val(pengkajian.rencana_tindak_lanjut).select2();
 
             $('#toggle-pasien').on('click', function() {
                 var target = $('#js-slide-left'); // Mengambil elemen target berdasarkan data-target

@@ -48,13 +48,13 @@
 
         if (resiko_jatuh1 == false && resiko_jatuh2 == false && resiko_jatuh3 == false) {
             $('#resiko_jatuh_hasil').val("Tidak Beresiko");
-        } else if (resiko_jatuh1 == true || resiko_jatuh2 == true){
+        } else if (resiko_jatuh1 == true || resiko_jatuh2 == true) {
             if (resiko_jatuh3 == true) {
                 $('#resiko_jatuh_hasil').val("Resiko Tinggi");
             } else if (resiko_jatuh3 == false) {
                 $('#resiko_jatuh_hasil').val("Resiko Sedang");
             }
-        } else if (resiko_jatuh1 == false || resiko_jatuh2 == false){
+        } else if (resiko_jatuh1 == false || resiko_jatuh2 == false) {
             if (resiko_jatuh3 == true) {
                 $('#resiko_jatuh_hasil').val("Resiko Sedang");
             } else if (resiko_jatuh3 == false) {
