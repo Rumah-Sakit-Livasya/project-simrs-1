@@ -1,8 +1,9 @@
-<div class="modal fade" id="modal-tambah-parameter-laboratorium" tabindex="-1" role="dialog">
+<div class="modal fade" id="modal-edit-parameter-laboratorium" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" role="document"> <!-- Menggunakan kelas modal-xl untuk ukuran ekstra besar -->
         <div class="modal-content">
-            <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="store-form">
-                @method('post')
+            <form autocomplete="off" novalidate action="javascript:void(0)" method="patch" id="update-form">
+                <input type="hidden" value="" name="kode">
+                @method('patch')
                 @csrf
                 <div class="modal-header pb-1 mb-0">
                     <h5 class="modal-title font-weight-bold">Edit Parameter Laboratorium</h5>
@@ -109,11 +110,25 @@
                                     <input type="text" class="form-control" id="metode" name="metode">
                                 </div>
                             </div>
-                            <div class="col-md-12 mt-3">
+                            <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label for="no_urut">No Urut
                                     </label>
                                     <input type="text" class="form-control" id="no_urut" name="no_urut">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <div class="form-group">
+                                    <label for="sub_parameter">Sub Parameter
+                                    </label>
+                                    <select class="form-control select2 w-100" id="sub_parameter"
+                                        name="sub_parameter[]" multiple="multiple">
+                                        @foreach ($parameter as $p)
+                                            @if (!$p->is_order && $p->is_hasil)
+                                                <option value="{{ $p->id }}">{{ $p->parameter }}</option>
+                                            @endif
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -121,10 +136,10 @@
                 </div>
                 <div class="modal-footer pt-0">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" data-backdrop="static" data-keyboard="false" id="btn-tambah"
-                        class="btn mx-1 btn-tambah btn-primary text-white" title="Hapus">
-                        <div class="ikon-tambah">
-                            <span class="fal fa-plus-circle mr-1"></span>Edit
+                    <button type="submit" data-backdrop="static" data-keyboard="false" id="btn-edit"
+                        class="btn mx-1 btn-edit btn-primary text-white" title="Hapus">
+                        <div class="ikon-edit">
+                            <span class="fal fa-pencil mr-1"></span>Edit
                         </div>
                         <div class="span spinner-text d-none">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
