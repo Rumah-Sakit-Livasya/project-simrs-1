@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS\Pengkajian;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\TransferPasienAntarRuangan;
@@ -325,6 +326,46 @@ class PengkajianController extends Controller
                 // Create a new TransferPasienAntarRuangan record
                 $transfer = TransferPasienAntarRuangan::create($validatedData);
                 return response()->json(['message' => 'Data saved successfully!', 'data' => $transfer], 201);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function storeOrUpdatePengkajianLanjutan(Request $request)
+    {
+
+        // dd($request);
+        // Check if the registration type is 'rawat-jalan'
+        $registration = Registration::find($request->registration_id);
+
+        // Check if a PengkajianNurseRajal already exists for this registration
+        $existingPengkajian = PengkajianLanjutan::where('registration_id', $request->registration_id)->where('form_template_id', $request->form_template_id)->first() ?? null;
+
+        try {
+            if ($existingPengkajian) {
+                $data = $request->except(['_token', '_method', 'status']); // Hapus kolom yang tidak perlu
+                $jsonData = json_encode($data);
+
+                $existingPengkajian->update([
+                    'form_values' => json_encode($jsonData),
+                    'is_final' => $request->status == 1 ? true : false,
+                    'modified_by' => auth()->user()->id,
+                ]);
+                return response()->json(['message' => 'Data saved successfully!', 'data' => $pengkajian], 201);
+            } else {
+                // Create a new Pengkajian Lanjutan record
+                $data = $request->except(['_token', '_method', 'status']); // Hapus kolom yang tidak perlu
+                $jsonData = json_encode($data);
+
+                $pengkajian = PengkajianLanjutan::create([
+                    'registration_id' => $request->registration_id,
+                    'form_template_id' => $request->form_template_id,
+                    'form_values' => json_encode($jsonData),
+                    'is_final' => $request->status == 1 ? true : false,
+                    'created_by' => auth()->user()->id,
+                ]);
+                return response()->json(['message' => 'Data saved successfully!', 'data' => $pengkajian], 201);
             }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

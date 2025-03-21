@@ -12,4 +12,9 @@ class KategoriLaboratorium extends Model
 
     protected $table = 'kategori_laboratorium';
     protected $fillable = ['nama_kategori', 'status'];
+
+    public function parameter_laboratorium()
+    {
+        return $this->hasMany(ParameterLaboratorium::class);
+    }
 }

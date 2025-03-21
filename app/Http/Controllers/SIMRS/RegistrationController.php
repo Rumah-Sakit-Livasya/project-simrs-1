@@ -12,8 +12,11 @@ use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GantiDiagnosa;
 use App\Models\SIMRS\GantiDokter;
+use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
+use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
 use App\Models\SIMRS\ParameterRadiologi;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
@@ -141,7 +144,10 @@ class RegistrationController extends Controller
         $kelas_rawats = KelasRawat::all();
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
-        $doctors = Doctor::with('employee', 'departement')->get();
+        $doctors = Doctor::with('employee', 'departements')->get();
+
+        $groupPenjaminStandarId = GroupPenjamin::where('name', 'like', '%standar%')->first()->id;
+        $kelasRawatRajalId = KelasRawat::where('kelas', 'like', '%rawat jalan%')->first()->id;
 
         // Group doctors by department
         $groupedDoctors = [];
@@ -149,17 +155,19 @@ class RegistrationController extends Controller
             $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
         }
 
-        $doctorsIGD = Doctor::with('employee', 'departement')
-            ->whereHas('departement', function ($query) {
-                $query->where('name', 'KLINIK UMUM');
-            })
-            ->get();
+        $doctorsIGD = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%UGD%');
+        })->get();
 
-        $doctorsLAB = Doctor::with('employee', 'departement')
-            ->whereHas('departement', function ($query) {
-                $query->where('name', 'like', '%Laboratorium%');
-            })
-            ->get();
+        // dd($doctorsIGD);
+
+        $doctorsLAB = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%Laboratorium%');
+        })->get();
+
+        $doctorsLAB = Doctor::with('employee', 'departements')->whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%LABORATORIUM%');
+        })->get();
 
         switch ($registrasi) {
             case 'rawat-jalan':
@@ -185,7 +193,7 @@ class RegistrationController extends Controller
                 break;
 
             case 'odc':
-                $doctors = Doctor::with('employee', 'departement')->get();
+                $doctors = Doctor::with('employee', 'departements')->get();
 
                 // Group doctors by department
                 $groupedDoctors = [];
@@ -219,9 +227,13 @@ class RegistrationController extends Controller
             case 'laboratorium':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Laboratorium",
+                    'laboratorium_categories' => KategoriLaboratorium::all(),
+                    'tarifs' => TarifParameterLaboratorium::all(),
                     'doctors' => $doctorsLAB,
                     'penjamins' => Penjamin::all(),
                     'case' => 'laboratorium',
+                    'groupPenjaminId' => $groupPenjaminStandarId,
+                    'kelasRawatId' => $kelasRawatRajalId,
                     'patient' => $patient,
                     'age' => $age
                 ]);
@@ -374,7 +386,7 @@ class RegistrationController extends Controller
             $kelasRawat = 'RAWAT INAP';
         }
 
-        $doctors = Doctor::with('employee', 'departement')->get();
+        $doctors = Doctor::with('employee', 'departements')->get();
         $departements = Departement::with('grup_tindakan_medis.tindakan_medis')->get();
         $tindakan_medis = TindakanMedis::all();
 
@@ -383,6 +395,10 @@ class RegistrationController extends Controller
         foreach ($doctors as $doctor) {
             $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
         }
+
+        $radiologyDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%radiologi%');
+        })->get();
 
         $radiologiOrders = [];
 
@@ -397,11 +413,15 @@ class RegistrationController extends Controller
         }])->find($registration->patient->id);
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
+        $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
+
 
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
             'kelasRawat' => $kelasRawat,
+            'groupPenjaminId' => $groupPenjaminId,
             'penjamin' => $penjamin,
             'groupedDoctors' => $groupedDoctors,
+            'radiologyDoctors' => $radiologyDoctors,
             'radiologiOrders' => $radiologiOrders,
             'radiology_categories' => KategoriRadiologi::all(),
             'tarifs' => TarifParameterRadiologi::all(),

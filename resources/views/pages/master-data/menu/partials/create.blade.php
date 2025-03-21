@@ -66,8 +66,12 @@
                                 <label for="title">Type Web</label>
                                 <select class="select2 form-control w-100  @error('parent_id') is-invalid @enderror"
                                     id="type1" name="type">
-                                    <option value="simrs">SIMRS</option>
-                                    <option value="hr">SMART HR</option>
+                                    <option value="simrs">E-RM</option>
+                                    <option value="hr">E-HR</option>
+                                    <option value="logistik">E-Logistic</option>
+                                    <option value="keuangan">E-Finance</option>
+                                    <option value="kepustakaan">E-Library</option>
+                                    <option value="mutu">E-Mutu</option>
                                 </select>
                             </div>
                         </div>

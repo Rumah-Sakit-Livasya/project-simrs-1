@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OrderLaboratoriumController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\SIMRS\BedController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\OrderRadiologiController;
 use App\Http\Controllers\SIMRS\OrderTindakanMedisController;
 use App\Http\Controllers\SIMRS\ParameterRadiologiController;
+use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianDokterRajalController;
 use App\Http\Controllers\SIMRS\Penjamin\GroupPenjaminController;
@@ -36,6 +38,7 @@ use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Poliklinik\LayananController;
 use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
+use App\Http\Controllers\SIMRS\Radiologi\RadiologiController;
 use App\Http\Controllers\SIMRS\Radiologi\TarifParameterRadiologiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\ResumeMedisRajal\ResumeMedisRajalController;
@@ -64,7 +67,21 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::get('get-medical-actions/{registrationId}', [OrderTindakanMedisController::class, 'getMedicalActions'])->name('medical.action.get');
     Route::delete('delete-medical-action/{id}', [OrderTindakanMedis::class, 'destroy'])->name('medical.action.destroy');
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
+
+    
     Route::post('order-radiologi/', [OrderRadiologiController::class, 'store'])->name('order.radiologi.store');
+    Route::post('edit-order-radiologi/', [OrderRadiologiController::class, 'editOrderRadiologi'])->name('order.radiologi.edit-order');
+    Route::post('konfirmasi-tagihan-order-radiologi/', [OrderRadiologiController::class, 'confirmPayment'])->name('order.radiologi.confirm-payment');
+    Route::post('verifikasi-order-parameter-radiologi/', [OrderRadiologiController::class, 'verificate'])->name('order.radiologi.verificate');
+    Route::post('update-pemeriksaan-parameter-radiologi/', [OrderRadiologiController::class, 'parameterCheckUpdate'])->name('order.radiologi.parameter-check-update');
+    Route::post('upload-photo-parameter-radiologi/', [OrderRadiologiController::class, 'uploadPhotoParameter'])->name('order.radiologi.upload-photo-parameter');
+
+    Route::post('simpan-template-radiologi/{id}', [RadiologiController::class, 'simpanTemplateHasil'])->name('radiologi.template.simpan');
+    Route::post('delete-template-radiologi/{id}', [RadiologiController::class, 'deleteTemplate'])->name('radiologi.template.delete');
+
+    Route::prefix('laboratorium')->group(function(){
+        Route::post('/order', [OrderLaboratoriumController::class, 'store'])->name('order.laboratorium.store');
+    });
 
 
     Route::prefix('pengkajian')->group(function () {
@@ -75,6 +92,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::prefix('dokter')->group(function () {
                 Route::post('/store', [PengkajianDokterRajalController::class, 'store'])->name('pengkajian.dokter-rajal.store');
             });
+        });
+
+        Route::prefix('lanjutan')->group(function() {
+            Route::post('/store', [PengkajianController::class, 'storeOrUpdatePengkajianLanjutan'])->name('pengkajian.lanjutan.store');
         });
     });
 
@@ -188,6 +209,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::patch('/{biayaMateraiId}/update', [BiayaMateraiController::class, 'update']);
                 Route::delete('/{biayaMateraiId}/delete', [BiayaMateraiController::class, 'destroy']);
             });
+
+            Route::prefix('form-builder')->group(function() {
+                Route::post('store', [FormBuilderController::class, 'store']);
+            });
         });
 
 
@@ -236,7 +261,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::patch('/grup-parameter/{id}/update', [GrupParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.update');
                 Route::delete('/grup-parameter/{id}/delete', [GrupParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.grup-parameter.delete');
 
-                Route::get('/parameter/{id}', [ParameterLaboratoriumController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.get');
+                Route::get('/parameter/{id}', [ParameterLaboratoriumController::class, 'getParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.get');
                 Route::post('/parameter', [ParameterLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.parameter.store');
                 Route::patch('/parameter/{id}/update', [ParameterLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.parameter.update');
                 Route::delete('/parameter/{id}/delete', [ParameterLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.parameter.delete');
@@ -254,6 +279,11 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::delete('/tipe/{id}/delete', [TipeLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.tipe.delete');
 
                 Route::get('/nilai-normal/{parameterId}/get', [NilaiNormalLaboratoriumController::class, 'getNilaiParameter'])->name('master-data.penunjang-medis.laboratorium.nilai-normal');
+
+                Route::post('/nilai-normal-parameter', [NilaiNormalLaboratoriumController::class, 'store'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.store');
+                Route::get('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'getNilaiNormal'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.get');
+                Route::patch('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.update');
+                Route::delete('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.delete');
             });
         });
 

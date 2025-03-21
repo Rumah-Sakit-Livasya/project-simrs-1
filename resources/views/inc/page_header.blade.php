@@ -45,28 +45,6 @@
         </a>
     </div>
     <div class="ml-auto d-flex">
-        <!-- Tombol untuk Memanggil Modal Impersonasi User -->
-        @if (Auth::user()->hasRole('super admin') && !session('original_user_id'))
-            <div class="d-flex align-items-center">
-                <button type="button" class="btn btn-sm btn-primary mr-3 py-1 px-2" data-toggle="modal"
-                    data-target="#impersonateModal">
-                    <i class='fas fa-user-secret'></i>
-                </button>
-            </div>
-        @endif
-
-        <!-- Tombol untuk Switchback ke Pengguna Asli -->
-        @if (session('original_user_id'))
-            <div class="d-flex align-items-center mr-4">
-                <form action="{{ route('switchback') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-danger">
-                        Switch Back to Original User
-                    </button>
-                </form>
-            </div>
-        @endif
-
         @if ($appType == 'simrs')
             <div class="form-group mt-4 mr-3" id="header-search-bar">
                 <div class="input-group global-search d-flex align-items-center">
@@ -83,13 +61,72 @@
                 </div>
             </div>
         @endif
-        <div class="d-flex align-items-center mr-4">
+        <!-- Tombol untuk Memanggil Modal Impersonasi User -->
+        @if (Auth::user()->hasRole('super admin') && !session('original_user_id'))
+            <div class="d-flex align-items-center">
+                <button type="button" class="btn btn-sm btn-primary mr-3 py-1 px-2" data-toggle="modal"
+                    data-target="#impersonateModal">
+                    <span data-toggle="tooltip" data-placement="top"
+                        data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-primary-500&quot;></div></div>"
+                        title="" data-original-title="Impersonate User">
+                        <i class='fas fa-user-secret'></i>
+                    </span>
+                </button>
+            </div>
+        @endif
+        <div class="d-flex align-items-center">
+            <button type="button" class="btn btn-sm btn-primary mr-3 py-1 px-2" data-toggle="modal"
+                data-target="#changeApp">
+                <span data-toggle="tooltip" data-placement="top"
+                    data-template="<div class=&quot;tooltip&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-primary-500&quot;></div></div>"
+                    title="" data-original-title="Pilih Aplikasi">
+                    <i class="fas fa-th-large"></i>
+                </span>
+            </button>
+        </div>
+
+        <!-- Tombol untuk Switchback ke Pengguna Asli -->
+        @if (session('original_user_id'))
+            <div class="d-flex align-items-center mr-4">
+                <form action="{{ route('switchback') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        Switch Back to Original User
+                    </button>
+                </form>
+            </div>
+        @endif
+        {{-- <div class="d-flex align-items-center mr-4">
             @if ($appType == 'simrs')
                 <form action="{{ route('set-app') }}" method="POST">
                     @csrf
                     <input type="hidden" name="app_type" value="hr">
                     <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
                         <i class="fas fa-users mr-2"></i> SMART HR
+                    </button>
+                </form>
+            @elseif ($appType == 'inventory')
+                <form action="{{ route('set-app') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="app_type" value="library">
+                    <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
+                        <i class="fas fa-book mr-2"></i> Library
+                    </button>
+                </form>
+            @elseif ($appType == 'library')
+                <form action="{{ route('set-app') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="app_type" value="finance">
+                    <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
+                        <i class="fas fa-coins mr-2"></i> Finance
+                    </button>
+                </form>
+            @elseif ($appType == 'finance')
+                <form action="{{ route('set-app') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="app_type" value="quality">
+                    <button class="btn btn-sm btn-primary" onclick="this.closest('form').submit()">
+                        <i class="fas fa-chart-line mr-2"></i> Quality
                     </button>
                 </form>
             @else
@@ -101,8 +138,7 @@
                     </button>
                 </form>
             @endif
-        </div>
-
+        </div> --}}
 
         <!-- app settings -->
         @if ($settings_app == 'Y')
@@ -649,6 +685,83 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Impersonate User</button>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="changeApp" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeAppLabel">Pilih Aplikasi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row justify-content-center">
+                    <div class="col-6 col-lg-4 mb-3">
+                        <form action="{{ route('set-app') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="app_type" value="hr">
+                            <button type="submit" class="btn btn-light w-100 h-100 text-center shadow-sm">
+                                <i class="fas fa-users fa-2x mb-2 text-primary"></i>
+                                <h5 class="text-primary">E-HR</h5>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-6 col-lg-4 mb-3">
+                        <form action="{{ route('set-app') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="app_type" value="simrs">
+                            <button type="submit" class="btn btn-light w-100 h-100 text-center shadow-sm">
+                                <i class="fas fa-notes-medical fa-2x mb-2 text-danger"></i>
+                                <h5 class="text-danger">E-RM</h5>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-6 col-lg-4 mb-3">
+                        <form action="{{ route('set-app') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="app_type" value="logistik">
+                            <button type="submit" class="btn btn-light w-100 h-100 text-center shadow-sm">
+                                <i class="fas fa-boxes fa-2x mb-2 text-warning"></i>
+                                <h5 class="text-warning">E-Logistic</h5>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-6 col-lg-4 mb-3">
+                        <form action="{{ route('set-app') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="app_type" value="kepustakaan">
+                            <button type="submit" class="btn btn-light w-100 h-100 text-center shadow-sm">
+                                <i class="fas fa-folder fa-2x mb-2 text-info"></i>
+                                <h5 class="text-info">E-Library</h5>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-6 col-lg-4 mb-3">
+                        <form action="{{ route('set-app') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="app_type" value="keuangan">
+                            <button type="submit" class="btn btn-light w-100 h-100 text-center shadow-sm">
+                                <i class="fas fa-money-bill-alt fa-2x mb-2 text-success"></i>
+                                <h5 class="text-success">E-Finance</h5>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-6 col-lg-4 mb-3">
+                        <form action="{{ route('set-app') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="app_type" value="mutu">
+                            <button type="submit" class="btn btn-light w-100 h-100 text-center shadow-sm">
+                                <i class="fas fa-chart-line fa-2x mb-2 text-secondary"></i>
+                                <h5 class="text-secondary">E-Mutu</h5>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

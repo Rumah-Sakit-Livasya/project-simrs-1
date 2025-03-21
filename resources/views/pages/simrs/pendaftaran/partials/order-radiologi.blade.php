@@ -40,13 +40,10 @@
                         <div class="form-group">
                             <select class="select2 form-control w-100" id="doctor_id" name="doctor_id">
                                 <option value=""></option>
-                                @foreach ($groupedDoctors as $groupName => $group)
-                                    <option class="text-light bg-info" disabled>{{ $groupName }}</option>
-                                    @foreach ($group as $doctor)
+                                    @foreach ($radiologyDoctors as $doctor)
                                         <option value="{{ $doctor->id }}">
                                             {{ $doctor->employee->fullname }}
                                         </option>
-                                    @endforeach
                                 @endforeach
                             </select>
                         </div>
@@ -114,54 +111,75 @@
             </div>
         </div>
         <div class="col-xl-6">
-            <h3>Tindakan</h3>
+            <h3>Parameter</h3>
         </div>
+
         <div class="col-xl-6">
-            <h3 class="text-success" style="text-align: right"> <i class="fa fa-calculator"></i> <span id="radiologi-total">Rp 0</span>
+            <h3 class="text-success" style="text-align: right"> <i class="fa fa-calculator"></i> <span
+                    id="radiologi-total">Rp 0</span>
             </h3>
         </div>
-        <div class="col-xl-12">
-            <div class="form-group">
-                <input type="text" class="form-control mb-3" id="searchRadiology" placeholder="Cari tindakan...">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Tindakan</th>
-                            <th>Jumlah</th>
-                        </tr>
-                    </thead>
-                    <tbody id="radiologyTable">
-                        @foreach ($radiology_categories as $category)
-                            <tr class="table-info">
-                                <td colspan="2">
-                                    <h4 style="text-align: center">{{ $category->nama_kategori }}</h4>
-                                </td>
-                            </tr>
-                            @foreach ($category->parameter_radiologi as $parameter)
-                                <tr class="parameter_radiologi">
-                                    <td>
-                                        <div class="form-check">
-                                            <input class="form-check-input parameter_radiologi_checkbox"
-                                                type="checkbox" value="{{ $parameter->id }}"
-                                                id="parameter_radiologi_{{ $parameter->id }}">
-                                            <label class="form-check-label"
-                                                for="parameter_radiologi_{{ $parameter->id }}">
-                                                {{ $parameter->parameter }}
-                                            </label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <input type="number" value="1"
-                                            class="form-control parameter_radiologi_number"
-                                            id="jumlah_{{ $parameter->id }}">
-                                    </td>
-                                </tr>
-                            @endforeach
-                        @endforeach
-                    </tbody>
-                </table>
+        <div class="col-xl-2"></div>
+        <div class="col-xl-8">
+            <div class="accordion" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" style="text-align: center">
+                        <button class="accordion-button collapsed btn btn-primary" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                            Tampilkan Parameter
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse"
+                        data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="form-group">
+                                <input type="text" class="form-control mb-3" id="searchRadiology"
+                                    placeholder="Cari parameter...">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Jumlah</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="radiologyTable">
+                                        @foreach ($radiology_categories as $category)
+                                            <tr class="table-info">
+                                                <td colspan="2">
+                                                    <h4 style="text-align: center">{{ $category->nama_kategori }}</h4>
+                                                </td>
+                                            </tr>
+                                            @foreach ($category->parameter_radiologi as $parameter)
+                                                <tr class="parameter_radiologi">
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input
+                                                                class="form-check-input parameter_radiologi_checkbox"
+                                                                type="checkbox" value="{{ $parameter->id }}"
+                                                                id="parameter_radiologi_{{ $parameter->id }}">
+                                                            <label class="form-check-label"
+                                                                for="parameter_radiologi_{{ $parameter->id }}">
+                                                                {{ $parameter->parameter }}
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" value="1"
+                                                            class="form-control parameter_radiologi_number"
+                                                            id="jumlah_{{ $parameter->id }}">
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+        <div class="col-xl-2"></div>
         <div class="col-xl-12 mt-5">
             <div class="row">
                 <div class="col-xl-6">
@@ -187,6 +205,7 @@
         window._parameterRadiologi = @json($radiology_categories);
         window._tarifRadiologi = @json($tarifs);
         window._registration = @json($registration);
+        window._groupPenjaminId = @json($groupPenjaminId);
     </script>
     <script src="{{ asset('js/simrs/form-radiologi.js') }}?v={{ time() }}"></script>
 @endsection

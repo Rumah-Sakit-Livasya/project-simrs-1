@@ -19,9 +19,14 @@ class Departement extends Model
         return $this->belongsTo(Doctor::class, 'default_dokter');
     }
 
+    public function departements()
+    {
+        return $this->belongsToMany(Departement::class, 'doctor_departement', 'doctor_id', 'departement_id');
+    }
+
     public function doctors()
     {
-        return $this->hasMany(Doctor::class);
+        return $this->hasMany(Doctor::class, 'department_id');
     }
 
     public function employees()

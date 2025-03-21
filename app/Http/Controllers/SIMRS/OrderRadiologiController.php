@@ -10,18 +10,6 @@ use Carbon\Carbon;
 
 class OrderRadiologiController extends Controller
 {
-    // Display a listing of the resource.
-    public function index()
-    {
-        // Code to list all radiology orders
-    }
-
-    // Show the form for creating a new resource.
-    public function create()
-    {
-        // Code to show form for creating a new radiology order
-    }
-
     private function generate_order_number()
     {
         $date = Carbon::now();
@@ -78,38 +66,163 @@ class OrderRadiologiController extends Controller
         $orderRadiologiId = $orderRadiologi->id;
 
         foreach ($validatedData['parameters'] as $parameter) {
-            OrderParameterRadiologi::create([
-                'order_radiologi_id' => $orderRadiologiId,
-                'parameter_radiologi_id' => $parameter['id'],
-                'qty' => $parameter['qty'],
-                'nominal_rupiah' => $parameter['price'],
-            ]);
+            for ($i = 0; $i < $parameter['qty']; $i++) {
+                OrderParameterRadiologi::create([
+                    'order_radiologi_id' => $orderRadiologiId,
+                    'parameter_radiologi_id' => $parameter['id'],
+                    'nominal_rupiah' => $parameter['price'],
+                ]);
+            }
         }
+
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    public function confirmPayment(Request $request)
+    {
+        $validatedData = $request->validate([
+            'id' => 'required|integer'
+        ]);
+
+        OrderRadiologi::where('id', $validatedData['id'])
+            ->update(['status_billed' => 1]);
 
         return response("ok");
     }
 
-    // Display the specified resource.
-    public function show($id)
+    public function verificate(Request $request)
     {
-        // Code to display a specific radiology order
+        $validatedData = $request->validate([
+            'id' => 'required|integer',
+            'verifikator_id' => 'required|integer',
+            'verifikasi_date' => 'required|date'
+        ]);
+
+        OrderParameterRadiologi::where('id', $validatedData['id'])
+            ->update([
+                'verifikator_id' => $validatedData['verifikator_id'],
+                'verifikasi_date' => $validatedData['verifikasi_date']
+            ]);
+
+        return response('ok');
     }
 
-    // Show the form for editing the specified resource.
-    public function edit($id)
+    public function parameterCheckUpdate(Request $request)
     {
-        // Code to show form for editing a specific radiology order
+        $validatedData = $request->validate([
+            'parameter_id' => 'required|integer',
+            'user_id' => 'required|integer',
+            'employee_id' => 'required|integer',
+            'catatan' => 'required'
+        ]);
+
+        OrderParameterRadiologi::where('id', $validatedData['parameter_id'])
+            ->update([
+                'catatan' => $validatedData['catatan'],
+            ]);
+
+        return response("<script>window.close();</script>");
     }
 
-    // Update the specified resource in storage.
-    public function update(Request $request, $id)
+    public function uploadPhotoParameter(Request $request)
     {
-        // Code to update a specific radiology order
+        $validatedData = $request->validate([
+            'parameter_id' => 'required|integer',
+            'user_id' => 'required|integer',
+            'employee_id' => 'required|integer',
+            'photo.*' => 'required|image|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        // Check if files are uploaded
+        if ($request->hasFile('photo')) {
+            $filePaths = [];
+            $fails = [];
+
+            foreach ($request->file('photo') as $file) {
+                if ($file->isValid()) {
+                    $fileName = 'rad-param-' . $validatedData['parameter_id'] . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $directory = 'radiologi/parameter-photo/' . now()->format('m-Y') . '/' . now()->format('d-m-Y');
+
+                    $storagePath = storage_path('app/public/' . $directory);
+                    if (!file_exists($storagePath)) {
+                        mkdir($storagePath, 0755, true);
+                    }
+
+                    $file->move($storagePath, $fileName);
+                    $uploadedFilePath = $directory . '/' . $fileName;
+                    $filePaths[] = $uploadedFilePath; // Store file paths in an array
+                } else {
+                    $fails[] = $file->getClientOriginalName();
+                }
+            }
+
+            $currentFilePaths = OrderParameterRadiologi::where('id', $validatedData['parameter_id'])->value('foto');
+            if ($currentFilePaths) {
+                $currentFilePaths = json_decode($currentFilePaths, true);
+                $filePaths = array_merge($currentFilePaths, $filePaths);
+            }
+
+            OrderParameterRadiologi::where('id', $validatedData['parameter_id'])
+                ->update([
+                    'foto' => json_encode($filePaths),
+                ]);
+
+            // Optionally, return success with all file paths
+            return response()->json([
+                "success" => $filePaths,
+                "fails" => $fails
+            ]);
+        }
+
+        return response(null, 500)->json([
+            "success" => null,
+            "fails" => null,
+            "error" => "Unknown error"
+        ]);
     }
 
-    // Remove the specified resource from storage.
-    public function destroy($id)
+    public function editOrderRadiologi(Request $request)
     {
-        // Code to delete a specific radiology order
+        $validatedData = $request->validate([
+            'order_id' => 'required|integer',
+            'diagnosa_klinis' => 'required|string',
+            'inspection_date' => 'required|date',
+            'pickup_date' => 'required|date',
+        ]);
+
+        try {
+            $order = OrderRadiologi::find($validatedData['order_id']);
+            $order->update([
+                'diagnosa_klinis' => $validatedData['diagnosa_klinis'],
+                'inspection_date' => $validatedData['inspection_date'],
+                'pickup_date' => $validatedData['pickup_date'],
+            ]);
+
+            foreach ($order->order_parameter_radiologi as $parameter) {
+                $id = $parameter->id;
+                if ($request->get('radiografer_' . $id)) {
+                    OrderParameterRadiologi::find($id)
+                        ->update([
+                            'radiografer_id' => $request->get('radiografer_' . $id),
+                        ]);
+                }
+                if ($request->get('jumlah_film_' . $id)) {
+                    OrderParameterRadiologi::find($id)
+                        ->update([
+                            'film_qty' => $request->get('jumlah_film_' . $id),
+                        ]);
+                }
+            }
+
+            return "<script>window.close()</script>";
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getLine()
+            ]);
+        }
     }
 }

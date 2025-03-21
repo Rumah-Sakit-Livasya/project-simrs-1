@@ -17,7 +17,7 @@ class RoomMaintenanceController extends Controller
     {
         $rooms = RoomMaintenance::orderBy('created_at', 'desc')->get();
         $organizations = Organization::orderBy('created_at', 'desc')->get();
-        return view('pages.inventaris.rooms.index', compact('rooms', 'organizations'));
+        return view('app-type.logistik.rooms.index', compact('rooms', 'organizations'));
     }
 
     public function store(Request $request)
@@ -118,7 +118,7 @@ class RoomMaintenanceController extends Controller
 
         // return dd($item);
 
-        return view('pages.inventaris.rooms.show', [
+        return view('app-type.logistik.rooms.show', [
             'title' => "$namaRuang",
             'rooms' => RoomMaintenance::orderBy('name')->get(),
             'ruang' => $room,
@@ -128,6 +128,16 @@ class RoomMaintenanceController extends Controller
             'companies' => Company::all(),
             'templates' => TemplateBarang::orderBy('name')->get(),
             'jumlah' => count(Barang::where('room_id', $room->id)->get())
+        ]);
+    }
+
+    public function printLabel(Request $request)
+    {
+        $barang = Barang::where('room_id', $request->room_id)->get();
+        $room_id = RoomMaintenance::where('id', $request->room_id)->first('id')->id;
+        return view('app-type.logistik.rooms.print-label', [
+            'items' => $barang,
+            'room_id' => $room_id
         ]);
     }
 }

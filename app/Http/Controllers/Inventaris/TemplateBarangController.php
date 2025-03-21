@@ -17,7 +17,7 @@ class TemplateBarangController extends Controller
     {
         $templateBarang = TemplateBarang::orderBy('created_at', 'desc')->get();
         $categoryBarang = CategoryBarang::orderBy('created_at', 'desc')->get();
-        return view('pages.inventaris.template-barang.index', compact('templateBarang', 'categoryBarang'));
+        return view('app-type.logistik.template-barang.index', compact('templateBarang', 'categoryBarang'));
     }
 
     public function store(Request $request)
@@ -104,7 +104,7 @@ class TemplateBarangController extends Controller
             $companies = Auth::user()->employee->company;
         }
 
-        return view('pages.inventaris.template-barang.show', [
+        return view('app-type.logistik.template-barang.show', [
             'barang' => $barang,
             'companies' => $companies,
             'templates' => TemplateBarang::orderBy('name')->get(),

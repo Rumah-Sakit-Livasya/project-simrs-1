@@ -11,6 +11,9 @@ use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
+use App\Models\SIMRS\Pengkajian\FormKategori;
+use App\Models\SIMRS\Pengkajian\FormTemplate;
+use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Peralatan\OrderAlatMedis;
 use App\Models\SIMRS\Peralatan\Peralatan;
@@ -94,7 +97,10 @@ class PoliklinikController extends Controller
         } elseif ($menu == 'rekonsiliasi_obat') {
             return view('pages.simrs.poliklinik.farmasi.rekonsiliasi_obat', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_lanjutan') {
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));
+            $form = FormKategori::all();
+            $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
+
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian'));
         } elseif ($menu == 'tindakan_medis') {
             $tindakan_medis = TindakanMedis::all();
             $doctors = Doctor::with('employee', 'departement')->get();
@@ -154,6 +160,41 @@ class PoliklinikController extends Controller
                 'message' => 'Failed to retrieve data',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function showForm(Request $request, $registrationId, $encryptedID)
+    {
+        try {
+            // Dekripsi ID
+            $id = base64_decode($encryptedID);
+
+            // Ambil data berdasarkan ID
+            $formTemplate = FormTemplate::findOrFail($id)->form_source;
+            $registration = Registration::findOrFail($registrationId);
+
+            // Data pasien
+            $data = [
+                'no_rm' => $registration->patient->medical_record_number ?? '',
+                'nama_pasien' => $registration->patient->name ?? '',
+                'tgl_lahir_pasien' => Carbon::parse($registration->patient->date_of_birth)->format('Y-m-d') ?? '',
+                'umur_pasien' => Carbon::parse($registration->patient->date_of_birth)->diffInYears(Carbon::now()) ?? '',
+                'kelamin_pasien' => $registration->patient->gender ?? '',
+                'alamat_pasien' => $registration->patient->address ?? '',
+                'dpjp' => $registration->doctor->employee->fullname ?? '',
+                'no_hp_pasien' => $registration->patient->mobile_phone_number ?? '',
+                'tgl_sekarang' => Carbon::now()->format('Y-m-d') ?? '',
+            ];
+
+            // Replace placeholder di formTemplate dengan data pasien
+            foreach ($data as $key => $value) {
+                $formTemplate = str_replace("{{$key}}", $value, $formTemplate);
+            }
+            $formTemplateId = $id;
+
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.show_form', compact('formTemplate', 'formTemplateId', 'registrationId'));
+        } catch (\Exception $e) {
+            abort(404, 'Data tidak ditemukan.');
         }
     }
 }
