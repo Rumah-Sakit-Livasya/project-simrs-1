@@ -73,11 +73,6 @@
                                         value="luar rs">
                                     <label class="custom-control-label" for="luar_rs">Luar RS</label>
                                 </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" id="rujukan_bpjs" name="rujukan"
-                                        value="rujukan bpjs">
-                                    <label class="custom-control-label" for="rujukan_bpjs">Rujukan BPJS</label>
-                                </div>
                             </div>
                         </div>
                     </div>

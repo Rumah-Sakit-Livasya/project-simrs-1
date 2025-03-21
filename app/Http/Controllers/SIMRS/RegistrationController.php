@@ -163,9 +163,13 @@ class RegistrationController extends Controller
 
         $doctorsLAB = Doctor::with('employee', 'departement')
             ->whereHas('departement', function ($query) {
-                $query->where('name', 'LABORATORIUM');
+                $query->where('name', 'like', '%LABORATORIUM%');
             })
             ->get();
+
+        $doctorsLAB = Doctor::with('employee', 'departement')->whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%LABORATORIUM%');
+        })->get();
 
         switch ($registrasi) {
             case 'rawat-jalan':

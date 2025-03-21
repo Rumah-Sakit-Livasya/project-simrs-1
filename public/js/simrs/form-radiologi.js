@@ -126,7 +126,15 @@ class RadiologiForm {
             if (isChecked) {
                 const QtyElement = /** @type {HTMLInputElement} */ (document.querySelector("input#jumlah_" + parameterId));
                 const Qty = parseInt(QtyElement.value);
-                const Tarif = this.#TarifRadiologi.find((t) => t.parameter_radiologi_id == parameterId);
+                const Tarif = this.#TarifRadiologi.find((t) => {
+                    if (
+                        t.parameter_radiologi_id == parameterId
+                        &&
+                        t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1)
+                        &&
+                        t.group_penjamin_id == (this.#GroupPenjaminId ?? -1)
+                    ) return t;
+                });
                 if (!Tarif) {
                     return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameterId);
                 }

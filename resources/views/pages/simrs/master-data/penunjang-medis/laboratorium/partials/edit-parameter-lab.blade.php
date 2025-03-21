@@ -1,9 +1,9 @@
 <div class="modal fade" id="modal-edit-parameter-laboratorium" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" role="document"> <!-- Menggunakan kelas modal-xl untuk ukuran ekstra besar -->
         <div class="modal-content">
-            <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="update-form">
+            <form autocomplete="off" novalidate action="javascript:void(0)" method="patch" id="update-form">
                 <input type="hidden" value="" name="kode">
-                @method('post')
+                @method('patch')
                 @csrf
                 <div class="modal-header pb-1 mb-0">
                     <h5 class="modal-title font-weight-bold">Edit Parameter Laboratorium</h5>

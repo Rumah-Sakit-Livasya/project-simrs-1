@@ -130,7 +130,16 @@ class LaboratoriumForm {
             if (isChecked) {
                 const QtyElement = /** @type {HTMLInputElement} */ (document.querySelector("input#jumlah_" + parameterId));
                 const Qty = parseInt(QtyElement.value);
-                const Tarif = this.#TarifLaboratorium.find((t) => t.parameter_laboratorium_id == parameterId);
+                const Tarif = this.#TarifLaboratorium.find((t) => {
+                    if (
+                        t.parameter_laboratorium_id == parameterId
+                        &&
+                        t.kelas_rawat_id == (this.#KelasRawatId ?? -1)
+                        &&
+                        t.group_penjamin_id == (this.#GroupPenjaminId ?? -1)
+                    ) return t;
+                });
+                
                 if (!Tarif) {
                     return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameterId);
                 }
@@ -156,10 +165,10 @@ class LaboratoriumForm {
                 'X-CSRF-TOKEN': String(formData.get("_token"))
             }
         })
-            .then(async(data) => {
+            .then(async (data) => {
                 console.log(data.url);
                 console.log(await data.text())
-                if(data.status != 200) {
+                if (data.status != 200) {
                     throw new Error('Error: ' + data.statusText);
                 }
                 showSuccessAlert('Data berhasil disimpan');
@@ -273,4 +282,4 @@ class LaboratoriumForm {
     }
 }
 
-const LaboratoriumFormClass =new LaboratoriumForm();
+const LaboratoriumFormClass = new LaboratoriumForm();

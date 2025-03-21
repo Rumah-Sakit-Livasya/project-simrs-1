@@ -1,11 +1,12 @@
 <div class="modal fade" id="modal-edit-nilai-parameter-laboratorium" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" role="document"> <!-- Menggunakan kelas modal-xl untuk ukuran ekstra besar -->
         <div class="modal-content">
-            <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="store-form">
+            <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="update-form">
                 @method('post')
                 @csrf
+                <input type="hidden" name="user_input" value="{{ auth()->user()->id }}">
                 <div class="modal-header pb-1 mb-0">
-                    <h5 class="modal-title font-weight-bold">Tambah Nilai Parameter Laboratorium</h5>
+                    <h5 class="modal-title font-weight-bold">Edit Nilai Parameter Laboratorium</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true"><i class="fal fa-times"></i></span>
                     </button>
@@ -20,9 +21,10 @@
                                 <div class="form-group">
                                     <label for="tanggal">Tanggal <span class="text-danger fw-bold">*</span>
                                     </label>
-                                    <input type="text" class="form-control" id="tanggal"
+                                    <input type="text" class="form-control" id="tanggal"    
                                         value="{{ now()->format('Y-m-d') }}" name="tanggal" disabled>
-                                </div>
+                                    <input type="hidden" name="tanggal" value="{{ now()->format('Y-m-d') }}">
+                                    </div>
                             </div>
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">

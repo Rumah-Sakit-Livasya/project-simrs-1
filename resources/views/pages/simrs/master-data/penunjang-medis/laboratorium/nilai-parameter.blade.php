@@ -184,19 +184,36 @@
                 $('#modal-edit-nilai-parameter-laboratorium form').attr('data-id', kategoriId);
 
                 $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-parameter/' +
+                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/' +
                         kategoriId,
                     type: 'GET',
                     success: function(response) {
-                        $('#modal-edit-nilai-parameter-laboratorium input[name="nama_tipe"]')
-                            .val(
-                                response
-                                .nama_tipe);
-                        $('#modal-edit-nilai-parameter-laboratorium input[name="status"][value="' +
-                                response
-                                .status + '"]')
-                            .prop(
-                                'checked', true);
+                        $('#modal-edit-nilai-parameter-laboratorium button#btn-edit')
+                            .attr('data-id',response.id);
+
+                        $.each(response, function(key, value) {
+                            const selector =
+                                `#modal-edit-nilai-parameter-laboratorium [name="${key}"]`;
+
+                            if ($(selector).is('input[type="radio"]')) {
+                                $(selector + '[value="' + value + '"]')
+                                    .prop('checked', true)
+                                    .trigger('change');
+                            } else if ($(selector)
+                                .is('input[type="checkbox"]')) {
+                                $(selector)
+                                    .prop('checked', value)
+                                    .trigger('change');
+                            } else if ($(selector).is('select')) {
+                                $(selector)
+                                    .val(value)
+                                    .trigger('change');
+                            } else {
+                                $(selector)
+                                    .val(value)
+                                    .trigger('change');
+                            }
+                        });
                     },
                     error: function(xhr, status, error) {
                         $('#modal-edit-nilai-parameter-laboratorium').modal('hide');
@@ -215,9 +232,11 @@
                 if (userConfirmed) {
                     // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
                     $.ajax({
-                        url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-parameter/' +
-                            kategoriId +
-                            '/delete',
+                        url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/' +
+                            kategoriId,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         type: 'DELETE',
                         success: function(response) {
                             showSuccessAlert(response.message);
@@ -240,11 +259,10 @@
                 e.preventDefault(); // Mencegah form submit secara default
 
                 var formData = $(this).serialize();
-                kategoriId = $(this).attr('data-id');
+                Id = $(this).attr('data-id');
                 $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-parameter/' +
-                        kategoriId +
-                        '/update',
+                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter/' +
+                        Id,
                     type: 'PATCH',
                     data: formData,
                     beforeSend: function() {
@@ -289,7 +307,7 @@
                 var formData = $(this).serialize();
 
                 $.ajax({
-                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-parameter',
+                    url: '/api/simrs/master-data/penunjang-medis/laboratorium/nilai-normal-parameter',
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {
@@ -300,6 +318,8 @@
                     success: function(response) {
                         $('#modal-tambah-nilai-parameter-laboratorium').modal('hide');
                         showSuccessAlert(response.message);
+                        console.log(response);
+
 
                         setTimeout(() => {
                             console.log('Reloading the page now.');

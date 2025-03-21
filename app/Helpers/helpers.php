@@ -478,3 +478,59 @@ function formatTanggalBulan($tanggal)
 
     return "{$tanggalFormat} {$bulan}";
 }
+
+
+class Age
+{
+    public $years;
+    public $months;
+    public $days;
+
+    public function __construct($years, $months, $days)
+    {
+        $this->years = $years;
+        $this->months = $months;
+        $this->days = $days;
+    }
+}
+
+// digunakan di laboratorium
+// untuk nilai normal parameter
+class AgeComparison
+{
+    private $minAge;
+    private $maxAge;
+
+    public function __construct(Age $minAge, Age $maxAge)
+    {
+        $this->minAge = $minAge;
+        $this->maxAge = $maxAge;
+    }
+
+    public function calculateAge($dob)
+    {
+        $dob = new DateTime($dob);
+        $now = new DateTime();
+        $diff = $now->diff($dob);
+
+        return new Age($diff->y, $diff->m, $diff->d);
+    }
+
+    public function isAgeWithinRange($dob)
+    {
+        $age = $this->calculateAge($dob);
+
+        return $this->compareAge($age, $this->minAge) >= 0 && $this->compareAge($age, $this->maxAge) <= 0;
+    }
+
+    private function compareAge(Age $age1, Age $age2)
+    {
+        if ($age1->years != $age2->years) {
+            return $age1->years - $age2->years;
+        }
+        if ($age1->months != $age2->months) {
+            return $age1->months - $age2->months;
+        }
+        return $age1->days - $age2->days;
+    }
+}
