@@ -156,9 +156,8 @@ class LaboratoriumForm {
         for (let [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
         }
-        return;
 
-        fetch('/api/simrs/order-laboratorium', {
+        fetch('/api/simrs/laboratorium/order', {
             method: 'POST',
             body: formData,
             headers: {
@@ -166,6 +165,8 @@ class LaboratoriumForm {
             }
         })
             .then(async (data) => {
+                console.log(await data.json());
+                return;
                 console.log(data.url);
                 console.log(await data.text())
                 if (data.status != 200) {

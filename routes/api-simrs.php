@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OrderLaboratoriumController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\SIMRS\BedController;
@@ -77,6 +78,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
     Route::post('simpan-template-radiologi/{id}', [RadiologiController::class, 'simpanTemplateHasil'])->name('radiologi.template.simpan');
     Route::post('delete-template-radiologi/{id}', [RadiologiController::class, 'deleteTemplate'])->name('radiologi.template.delete');
+
+    Route::prefix('laboratorium')->group(function(){
+        Route::post('/order', [OrderLaboratoriumController::class, 'store'])->name('order.laboratorium.store');
+    });
 
 
     Route::prefix('pengkajian')->group(function () {
