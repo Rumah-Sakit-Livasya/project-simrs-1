@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(EthnicSeeder::class);
         // Target::factory()->count(100)->create();
         // $this->call(RolePermissionSeeder::class);
         // $this->call(MenusTableSeeder::class);
@@ -35,9 +36,9 @@ class DatabaseSeeder extends Seeder
         //     // Seeder lainnya jika ada
         // ]);
 
-        Type::insert([
-            ['id' => 1, 'nama' => 'Pemasukan', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 2, 'nama' => 'Pengeluaran', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        // Type::insert([
+        //     ['id' => 1, 'nama' => 'Pemasukan', 'created_at' => now(), 'updated_at' => now()],
+        //     ['id' => 2, 'nama' => 'Pengeluaran', 'created_at' => now(), 'updated_at' => now()],
+        // ]);
     }
 }

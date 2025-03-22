@@ -373,10 +373,10 @@
                                                     <label for="province" class="form-label">Provinsi *</label>
                                                 </div>
                                                 <div class="col-sm-8">
-                                                    <select
+                                                    <select disabled
                                                         class="@error('province') is-invalid @enderror form-control w-100"
                                                         id="province" name="province">
-                                                        <option value="" disabled selected></option>
+                                                        <option value="" selected></option>
                                                         @foreach ($provinces as $province)
                                                             <option
                                                                 value="{{ $province['id'] }}  {{ old('province') == $province['id'] ? 'selected' : '' }}">
@@ -431,10 +431,9 @@
                                                     <label class="form-label" for="ward">Kelurahan *</label>
                                                 </div>
                                                 <div class="col-sm-8">
-                                                    <select disabled
-                                                        class="@error('ward') is-invalid @enderror form-control w-100"
+                                                    <select class="@error('ward') is-invalid @enderror form-control w-100"
                                                         id="ward" name="ward">
-                                                        <option value="" disabled selected></option>
+                                                        <option value="" disabled selected>Pilih Kelurahan</option>
                                                     </select>
                                                     @error('ward')
                                                         <p class="invalid-feedback">{{ $message }}</p>
@@ -994,104 +993,72 @@
         });
 
         $(document).ready(function() {
-            function resetDropdown(element, placeholder) {
-                element.prop('disabled', true);
-                element.html(`<option value="">${placeholder}</option>`);
-            }
+            // Inisialisasi Select2 untuk Kelurahan
+            $('#ward').select2({
+                placeholder: 'Pilih Kelurahan',
+                ajax: {
+                    url: "{{ route('getKelurahan') }}", // Route untuk mendapatkan data kelurahan
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            search: params.term // Kata kunci pencarian
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: $.map(data, function(item) {
+                                return {
+                                    id: item.id,
+                                    text: item.name + ' - ' + item.kecamatan.name
+                                };
+                            })
+                        };
+                    },
+                    cache: true
+                }
+            });
 
-
-            $('#province').change(function() {
-                var provinceId = $(this).val();
+            // Event ketika kelurahan dipilih
+            $('#ward').change(function() {
+                var wardId = $(this).val();
+                var subdistrict = $('#subdistrict');
                 var regency = $('#regency');
-                var district = $('#subdistrict');
-                var village = $('#ward');
+                var province = $('#province');
 
-                if (provinceId) {
-                    regency.prop('disabled', true);
-                    regency.html('<option value="">Loading...</option>');
+                if (wardId) {
+                    subdistrict.prop('disabled', true);
+                    subdistrict.html('<option value="">Loading...</option>');
 
                     $.ajax({
-                        url: "{{ route('getKabupaten') }}",
+                        url: "{{ route('getKecamatanByKelurahan') }}", // Route untuk mendapatkan kecamatan berdasarkan kelurahan
                         type: 'GET',
                         data: {
-                            provinsi_id: provinceId
+                            kelurahan_id: wardId
                         },
                         success: function(data) {
+                            // Isi kecamatan
+                            subdistrict.prop('disabled', false);
+                            subdistrict.empty();
+                            subdistrict.append('<option value="">Pilih Kecamatan</option>');
+                            subdistrict.append(new Option(data.kecamatan.name, data.kecamatan
+                                .id, true, true));
+
+                            // Isi kabupaten
                             regency.prop('disabled', false);
                             regency.empty();
-                            regency.append('<option value="">Pilih Kabupaten/Kota</option>');
-                            $.each(data, function(id, name) {
-                                regency.append(new Option(name, id));
-                            });
+                            regency.append('<option value="">Pilih Kabupaten</option>');
+                            regency.append(new Option(data.kabupaten.name, data.kabupaten.id,
+                                true, true));
 
-                            resetDropdown(district, 'Pilih Kecamatan');
-                            resetDropdown(village, 'Pilih Kelurahan');
+                            // Isi provinsi
+                            province.prop('disabled', false);
+                            province.empty();
+                            province.append('<option value="">Pilih Provinsi</option>');
+                            province.append(new Option(data.provinsi.name, data.provinsi.id,
+                                true, true));
                         }
                     });
-                } else {
-                    resetDropdown(regency, 'Pilih Kabupaten/Kota');
-                    resetDropdown(district, 'Pilih Kecamatan');
-                    resetDropdown(village, 'Pilih Kelurahan');
-                }
-            });
-
-            $('#regency').change(function() {
-                var regencyId = $(this).val();
-                var district = $('#subdistrict');
-                var village = $('#ward');
-
-                if (regencyId) {
-                    district.prop('disabled', true);
-                    district.html('<option value="">Loading...</option>');
-
-                    $.ajax({
-                        url: "{{ route('getKecamatan') }}",
-                        type: 'GET',
-                        data: {
-                            kabupaten_id: regencyId
-                        },
-                        success: function(data) {
-                            district.prop('disabled', false);
-                            district.empty();
-                            district.append('<option value="">Pilih Kecamatan</option>');
-                            $.each(data, function(id, name) {
-                                district.append(new Option(name, id));
-                            });
-
-                            resetDropdown(village, 'Pilih Kelurahan');
-                        }
-                    });
-                } else {
-                    resetDropdown(district, 'Pilih Kecamatan');
-                    resetDropdown(village, 'Pilih Kelurahan');
-                }
-            });
-
-            $('#subdistrict').change(function() {
-                var districtId = $(this).val();
-                var village = $('#ward');
-
-                if (districtId) {
-                    village.prop('disabled', true);
-                    village.html('<option value="">Loading...</option>');
-
-                    $.ajax({
-                        url: "{{ route('getKelurahan') }}",
-                        type: 'GET',
-                        data: {
-                            kecamatan_id: districtId
-                        },
-                        success: function(data) {
-                            village.prop('disabled', false);
-                            village.empty();
-                            village.append('<option value="">Pilih Kelurahan</option>');
-                            $.each(data, function(id, name) {
-                                village.append(new Option(name, id));
-                            });
-                        }
-                    });
-                } else {
-                    resetDropdown(village, 'Pilih Kelurahan');
                 }
             });
         });

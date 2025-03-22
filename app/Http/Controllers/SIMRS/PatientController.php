@@ -12,6 +12,7 @@ use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Provinsi;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
@@ -94,44 +95,97 @@ class PatientController extends Controller
 
     public function simpan_pendaftaran_pasien(Request $request)
     {
-        $validatedData = $request->validate([
-            'name' => 'required|max:255',
-            'nickname' => 'max:255',
-            'title' => 'required|max:255',
-            'gender' => 'required|max:255',
-            'place' => 'required|max:255',
-            'date_of_birth' => 'required|max:255',
-            'religion' => 'required|max:255',
-            'blood_group' => 'max:255',
-            'allergy' => 'max:255',
-            'married_status' => 'max:255',
-            'language' => 'required|max:255',
-            'citizenship' => 'max:255',
-            'id_card' => 'required|max:255',
-            'address' => 'required|max:255',
-            'province' => 'max:255',
-            'regency' => 'required|max:255',
-            'subdistrict' => 'required|max:255',
-            'ward' => 'required|max:255',
-            'mobile_phone_number' => 'max:255',
-            'email' => 'max:255',
-            'last_education' => 'required|max:255',
-            'ethnic' => 'required|max:255',
-            'job' => 'required|max:255',
+        $validatedData =
+            $validatedData = $request->validate([
+                'name' => 'required|max:255',
+                'nickname' => 'max:255',
+                'title' => 'required|max:255',
+                'gender' => 'required|max:255',
+                'place' => 'required|max:255',
+                'date_of_birth' => 'required|max:255',
+                'religion' => 'required|max:255',
+                'blood_group' => 'max:255',
+                'allergy' => 'max:255',
+                'married_status' => 'max:255',
+                'language' => 'required|max:255',
+                'citizenship' => 'max:255',
+                'id_card' => 'required|max:255',
+                'address' => 'required|max:255',
+                'province' => 'max:255',
+                'regency' => 'required|max:255',
+                'subdistrict' => 'required|max:255',
+                'ward' => 'required|max:255',
+                'mobile_phone_number' => 'max:255',
+                'email' => 'max:255',
+                'last_education' => 'required|max:255',
+                'ethnic' => 'required|max:255',
+                'job' => 'required|max:255',
 
-            // Informasi Keluarga
-            'family_name' => 'max:255',
-            'father_name' => 'max:255',
-            'mother_name' => 'max:255',
-            'family_number' => 'max:255',
-            'family_age' => 'max:255',
-            'family_job' => 'max:255',
-            'family_relation' => 'max:255',
-            'family_address' => 'max:255',
+                // Informasi Keluarga
+                'family_name' => 'max:255',
+                'father_name' => 'max:255',
+                'mother_name' => 'max:255',
+                'family_number' => 'max:255',
+                'family_age' => 'max:255',
+                'family_job' => 'max:255',
+                'family_relation' => 'max:255',
+                'family_address' => 'max:255',
 
-            // Informasi Penjamin
-            'penjamin_id' => 'nullable',
-        ]);
+                // Informasi Penjamin
+                'penjamin_id' => 'nullable',
+            ], [
+                'name.required' => 'Nama wajib diisi.',
+                'name.max' => 'Nama tidak boleh lebih dari 255 karakter.',
+                'nickname.max' => 'Nama panggilan tidak boleh lebih dari 255 karakter.',
+                'title.required' => 'Gelar wajib diisi.',
+                'title.max' => 'Gelar tidak boleh lebih dari 255 karakter.',
+                'gender.required' => 'Jenis kelamin wajib diisi.',
+                'gender.max' => 'Jenis kelamin tidak boleh lebih dari 255 karakter.',
+                'place.required' => 'Tempat lahir wajib diisi.',
+                'place.max' => 'Tempat lahir tidak boleh lebih dari 255 karakter.',
+                'date_of_birth.required' => 'Tanggal lahir wajib diisi.',
+                'date_of_birth.max' => 'Tanggal lahir tidak boleh lebih dari 255 karakter.',
+                'religion.required' => 'Agama wajib diisi.',
+                'religion.max' => 'Agama tidak boleh lebih dari 255 karakter.',
+                'blood_group.max' => 'Golongan darah tidak boleh lebih dari 255 karakter.',
+                'allergy.max' => 'Alergi tidak boleh lebih dari 255 karakter.',
+                'married_status.max' => 'Status pernikahan tidak boleh lebih dari 255 karakter.',
+                'language.required' => 'Bahasa wajib diisi.',
+                'language.max' => 'Bahasa tidak boleh lebih dari 255 karakter.',
+                'citizenship.max' => 'Kewarganegaraan tidak boleh lebih dari 255 karakter.',
+                'id_card.required' => 'Nomor KTP wajib diisi.',
+                'id_card.max' => 'Nomor KTP tidak boleh lebih dari 255 karakter.',
+                'address.required' => 'Alamat wajib diisi.',
+                'address.max' => 'Alamat tidak boleh lebih dari 255 karakter.',
+                'province.max' => 'Provinsi tidak boleh lebih dari 255 karakter.',
+                'regency.required' => 'Kabupaten/Kota wajib diisi.',
+                'regency.max' => 'Kabupaten/Kota tidak boleh lebih dari 255 karakter.',
+                'subdistrict.required' => 'Kecamatan wajib diisi.',
+                'subdistrict.max' => 'Kecamatan tidak boleh lebih dari 255 karakter.',
+                'ward.required' => 'Kelurahan wajib diisi.',
+                'ward.max' => 'Kelurahan tidak boleh lebih dari 255 karakter.',
+                'mobile_phone_number.max' => 'Nomor HP tidak boleh lebih dari 255 karakter.',
+                'email.max' => 'Email tidak boleh lebih dari 255 karakter.',
+                'last_education.required' => 'Pendidikan terakhir wajib diisi.',
+                'last_education.max' => 'Pendidikan terakhir tidak boleh lebih dari 255 karakter.',
+                'ethnic.required' => 'Suku wajib diisi.',
+                'ethnic.max' => 'Suku tidak boleh lebih dari 255 karakter.',
+                'job.required' => 'Pekerjaan wajib diisi.',
+                'job.max' => 'Pekerjaan tidak boleh lebih dari 255 karakter.',
+
+                // Informasi Keluarga
+                'family_name.max' => 'Nama keluarga tidak boleh lebih dari 255 karakter.',
+                'father_name.max' => 'Nama ayah tidak boleh lebih dari 255 karakter.',
+                'mother_name.max' => 'Nama ibu tidak boleh lebih dari 255 karakter.',
+                'family_number.max' => 'Nomor keluarga tidak boleh lebih dari 255 karakter.',
+                'family_age.max' => 'Umur keluarga tidak boleh lebih dari 255 karakter.',
+                'family_job.max' => 'Pekerjaan keluarga tidak boleh lebih dari 255 karakter.',
+                'family_relation.max' => 'Hubungan keluarga tidak boleh lebih dari 255 karakter.',
+                'family_address.max' => 'Alamat keluarga tidak boleh lebih dari 255 karakter.',
+
+                // Informasi Penjamin
+                'penjamin_id.nullable' => 'Penjamin tidak wajib diisi.',
+            ]);
 
         if ($request['penjamin_id']) {
             if ($request['penjamin_id'] !== 1) {
@@ -154,12 +208,12 @@ class PatientController extends Controller
 
     public function edit_pendaftaran_pasien(Patient $patient)
     {
-        // return $patient;
-        $response = Http::get('https://dev.farizdotid.com/api/daerahindonesia/provinsi');
-        $provinces = $response->json()['provinsi'];
+        $dataPenjamin = Penjamin::all();
+        $provinces = Provinsi::all();
 
         return view('pages.simrs.pendaftaran.edit-pasien', [
             'patient' => $patient,
+            'penjamins' => $dataPenjamin,
             'provinces' => $provinces,
             'ethnics' => Ethnic::all()
         ]);
@@ -207,6 +261,19 @@ class PatientController extends Controller
             'patient' => $patient,
             'age' => $age
         ]);
+    }
+
+    public function print_kartu_pasien(Patient $patient)
+    {
+        // Ambil data pasien berdasarkan ID
+        $patient = Patient::findOrFail($patient->id);
+
+        // Render view ke PDF
+        $pdf = Pdf::loadView('pages.simrs.pendaftaran.print-kartu-pasien', compact('patient'));
+
+        // Unduh atau tampilkan PDF
+        return $pdf->stream('kartu-pasien.pdf'); // Untuk menampilkan di browser
+        // return $pdf->download('kartu-pasien.pdf'); // Untuk mengunduh file
     }
 
     public function history_kunjungan_pasien(Patient $patient)

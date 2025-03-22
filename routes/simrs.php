@@ -85,6 +85,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/patients/{patient:id}/edit', [PatientController::class, 'edit_pendaftaran_pasien'])->name('edit.pendaftaran.pasien');
     Route::post('/patients/{patient:id}/', [PatientController::class, 'update_pendaftaran_pasien'])->name('update.pendaftaran.pasien');
     Route::get('/patients/{patient:id}/print', [PatientController::class, 'print_identitas_pasien'])->name('print.identitas.pasien');
+    Route::get('/patients/{patient:id}/print-kartu', [PatientController::class, 'print_kartu_pasien'])->name('print.kartu.pasien');
     Route::get('/patients/{patient:id}/history', [PatientController::class, 'history_kunjungan_pasien'])->name('history.kunjungan.pasien');
     Route::get('/data', [PatientController::class, 'getData'])->name('data.route');
     Route::get('/beds/get-data', [RegistrationController::class, 'getDataBed'])->name('beds.getData');

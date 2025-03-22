@@ -13,7 +13,7 @@ class KelasRawatController extends Controller
 {
     public function index()
     {
-        $kelas_rawat = KelasRawat::where('id', '!=', 1)->get();
+        $kelas_rawat = KelasRawat::where('id', '!=', 1)->orderBy('urutan')->get();
         return view('pages.simrs.master-data.setup.kelas-rawat.index', compact('kelas_rawat'));
     }
 
