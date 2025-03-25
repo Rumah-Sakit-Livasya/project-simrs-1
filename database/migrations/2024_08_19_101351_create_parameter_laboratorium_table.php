@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('grup_parameter_laboratorium_id')->references('id')->on('grup_parameter_laboratorium')->cascadeOnDelete();
             $table->foreignId('kategori_laboratorium_id')->references('id')->on('kategori_laboratorium')->cascadeOnDelete();
-            $table->foreignId('tipe_laboratorium_id')git ->references('id')->on('tipe_laboratorium')->cascadeOnDelete();
+            $table->foreignId('tipe_laboratorium_id') ->references('id')->on('tipe_laboratorium')->cascadeOnDelete();
             $table->bigInteger('kode');
             $table->string('parameter', 100);
             $table->string('satuan', 50)->nullable();

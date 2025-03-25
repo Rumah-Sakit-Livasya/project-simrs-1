@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\CPPT\CPPTController;
 use App\Http\Controllers\SIMRS\DepartementController;
+use App\Http\Controllers\SIMRS\EthnicController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianDokterRajalController;
 use App\Http\Controllers\SIMRS\Penjamin\GroupPenjaminController;
+use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
@@ -137,6 +139,9 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
 
     Route::prefix('master-data')->group(function () {
+        Route::prefix('penjamin')->group(function(){
+            Route::post('/', [PenjaminController::class, 'store'])->name('master-data.penjamin.store');
+        });
         Route::get('/group-penjamin', [GroupPenjaminController::class, 'index']);
         Route::prefix('layanan-medis')->group(function () {
             Route::get('/tindakan-medis/{id}', [TindakanMedisController::class, 'getTindakan'])->name('master-data.layanan-medis.tindakan-medis.get');
@@ -212,6 +217,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
             Route::prefix('form-builder')->group(function () {
                 Route::post('store', [FormBuilderController::class, 'store']);
+            });
+
+            Route::prefix('ethnics')->group(function(){
+                Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');
             });
         });
 
@@ -296,6 +305,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::get('/{peralatanId}/tarif/{grupPenjaminId}', [PeralatanController::class, 'getTarifPeralatan'])->name('master-data.peralatan.tarif.get');
             Route::post('/{peralatanId}/tarif/{grupPenjaminId}', [PeralatanController::class, 'storeTarif'])->name('master-data.peralatan.tarif.store');
         });
+
 
         Route::prefix('persalinan')->group(function () {
             Route::prefix('kategori')->group(function () {

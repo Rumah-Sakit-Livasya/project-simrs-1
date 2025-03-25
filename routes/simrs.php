@@ -9,6 +9,7 @@ use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\Depo\StokRequestController;
 use App\Http\Controllers\SIMRS\Depo\UnitCostController as DepoUnitCostController;
 use App\Http\Controllers\SIMRS\Dokter\DokterController;
+use App\Http\Controllers\SIMRS\EthnicController;
 use App\Http\Controllers\SIMRS\Farmasi\FarmasiController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
@@ -156,6 +157,10 @@ Route::group(['middleware' => ['auth']], function () {
 
                 Route::get('/form-builder', [FormBuilderController::class, 'index'])->name('master-data.setup.form-builder');
                 Route::get('/form-builder/tambah', [FormBuilderController::class, 'create'])->name('master-data.setup.form-builder.tambah');
+
+                Route::prefix('ethnics')->group(function () {
+                    Route::get('/', [EthnicController::class, 'index'])->name('master-data.ethnics');
+                });
             });
             Route::prefix('layanan-medis')->group(function () {
                 Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');

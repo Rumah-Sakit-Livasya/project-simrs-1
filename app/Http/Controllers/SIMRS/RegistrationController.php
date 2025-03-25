@@ -169,12 +169,14 @@ class RegistrationController extends Controller
             $query->where('name', 'like', '%LABORATORIUM%');
         })->get();
 
+        $penjamins = Penjamin::all();
+
         switch ($registrasi) {
             case 'rawat-jalan':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Rawat Jalan",
                     'groupedDoctors' => $groupedDoctors,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'rawat-jalan',
                     'patient' => $patient,
                     'age' => $age
@@ -185,7 +187,7 @@ class RegistrationController extends Controller
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "IGD",
                     'doctors' => $doctorsIGD,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'igd',
                     'patient' => $patient,
                     'age' => $age
@@ -204,7 +206,7 @@ class RegistrationController extends Controller
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "ODC",
                     'groupedDoctors' => $groupedDoctors,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'odc',
                     'patient' => $patient,
                     'age' => $age
@@ -212,15 +214,26 @@ class RegistrationController extends Controller
                 break;
 
             case 'rawat-inap':
+                $lastRanapRegistration = Registration::where(['patient_id' => $patient->id, 'registration_type' => 'rawat-inap'])->orderBy('created_at', 'desc')->first();
+                $grupPenjaminBPJS = GroupPenjamin::where('name', 'like', '%BPJS%')->first();
+                $ranapBPJSdalam1bulan =
+                    $lastRanapRegistration['penjamin_id'] == $grupPenjaminBPJS->id && // ranap BPJS
+                    \Carbon\Carbon::parse($lastRanapRegistration['registration_date'])->diffInDays() <= 30; // kurang dari 30 hari / 1 bulan
+                if ($ranapBPJSdalam1bulan) {
+                    // reassign the $penjamins variable
+                    // filter it to exclude penjamins BPJS
+                    $penjamins = Penjamin::where('group_penjamin_id', '!=', $grupPenjaminBPJS->id)->get();
+                }
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Rawat Inap",
                     'groupedDoctors' => $groupedDoctors,
                     'kelas_rawats' => $kelas_rawats,
                     'kelasTitipan' => $kelas_rawats,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'rawat-inap',
                     'patient' => $patient,
-                    'age' => $age
+                    'age' => $age,
+                    'ranapBPJSdalam1bulan' => $ranapBPJSdalam1bulan
                 ]);
                 break;
 
@@ -230,7 +243,7 @@ class RegistrationController extends Controller
                     'laboratorium_categories' => KategoriLaboratorium::all(),
                     'tarifs' => TarifParameterLaboratorium::all(),
                     'doctors' => $doctorsLAB,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'laboratorium',
                     'groupPenjaminId' => $groupPenjaminStandarId,
                     'kelasRawatId' => $kelasRawatRajalId,
@@ -255,7 +268,7 @@ class RegistrationController extends Controller
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Hemodialisa",
                     'doctors' => Doctor::all(),
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'hemodialisa',
                     'patient' => $patient,
                     'age' => $age

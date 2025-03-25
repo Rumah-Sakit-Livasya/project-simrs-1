@@ -17,4 +17,9 @@ class PengkajianDokterRajal extends Model implements AuditableContract
     {
         return $this->belongsTo(Registration::class, 'registration_id');
     }
+
+    public function pengkajian_nurse_rajal()
+    {
+        return $this->hasOne(PengkajianNurseRajal::class, 'registration_id', 'registration_id');
+    }
 }
