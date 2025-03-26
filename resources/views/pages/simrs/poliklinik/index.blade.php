@@ -535,25 +535,25 @@
                                         <div class="form-group">
                                             <label for="provokatif" class="control-label text-primary">Provokatif</label>
                                             <input name="provokatif" id="provokatif" class="form-control"
-                                                type="text">
+                                                type="text" value="{{$pengkajian?->provokatif}}">
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="quality" class="control-label text-primary">Quality</label>
-                                            <input name="quality" id="quality" class="form-control" type="text">
+                                            <input name="quality" id="quality" class="form-control" type="text" value="{{$pengkajian?->quality}}">
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="region" class="control-label text-primary">Region</label>
-                                            <input name="region" id="region" class="form-control" type="text">
+                                            <input name="region" id="region" class="form-control" type="text" value="{{$pengkajian?->region}}">
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="time" class="control-label text-primary">Time</label>
-                                            <input name="time" id="time" class="form-control" type="text">
+                                            <input name="time" id="time" class="form-control" type="text" value="{{$pengkajian?->time}}">
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1541,7 +1541,7 @@
             $('#doctor_id').select2({
                 placeholder: 'Pilih Dokter',
             });
-            console.log(pengkajian.diagnosa_keperawatan);
+            
             $('#diagnosa-keperawatan').val(pengkajian.diagnosa_keperawatan).select2();
             $('#rencana-tindak-lanjut').val(pengkajian.rencana_tindak_lanjut).select2();
 
