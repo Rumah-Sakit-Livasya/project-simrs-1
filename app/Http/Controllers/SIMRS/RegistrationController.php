@@ -12,8 +12,11 @@ use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GantiDiagnosa;
 use App\Models\SIMRS\GantiDokter;
+use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
+use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
 use App\Models\SIMRS\ParameterRadiologi;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
@@ -143,6 +146,9 @@ class RegistrationController extends Controller
         $age = displayAge($birthdate);
         $doctors = Doctor::with('employee', 'departements')->get();
 
+        $groupPenjaminStandarId = GroupPenjamin::where('name', 'like', '%standar%')->first()->id;
+        $kelasRawatRajalId = KelasRawat::where('kelas', 'like', '%rawat jalan%')->first()->id;
+
         // Group doctors by department
         $groupedDoctors = [];
         foreach ($doctors as $doctor) {
@@ -159,12 +165,18 @@ class RegistrationController extends Controller
             $query->where('name', 'like', '%Laboratorium%');
         })->get();
 
+        $doctorsLAB = Doctor::with('employee', 'departements')->whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%LABORATORIUM%');
+        })->get();
+
+        $penjamins = Penjamin::all();
+
         switch ($registrasi) {
             case 'rawat-jalan':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Rawat Jalan",
                     'groupedDoctors' => $groupedDoctors,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'rawat-jalan',
                     'patient' => $patient,
                     'age' => $age
@@ -175,7 +187,7 @@ class RegistrationController extends Controller
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "IGD",
                     'doctors' => $doctorsIGD,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'igd',
                     'patient' => $patient,
                     'age' => $age
@@ -194,7 +206,7 @@ class RegistrationController extends Controller
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "ODC",
                     'groupedDoctors' => $groupedDoctors,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'odc',
                     'patient' => $patient,
                     'age' => $age
@@ -202,24 +214,39 @@ class RegistrationController extends Controller
                 break;
 
             case 'rawat-inap':
+                $lastRanapRegistration = Registration::where(['patient_id' => $patient->id, 'registration_type' => 'rawat-inap'])->orderBy('created_at', 'desc')->first();
+                $grupPenjaminBPJS = GroupPenjamin::where('name', 'like', '%BPJS%')->first();
+                $ranapBPJSdalam1bulan =
+                    $lastRanapRegistration['penjamin_id'] == $grupPenjaminBPJS->id && // ranap BPJS
+                    \Carbon\Carbon::parse($lastRanapRegistration['registration_date'])->diffInDays() <= 30; // kurang dari 30 hari / 1 bulan
+                if ($ranapBPJSdalam1bulan) {
+                    // reassign the $penjamins variable
+                    // filter it to exclude penjamins BPJS
+                    $penjamins = Penjamin::where('group_penjamin_id', '!=', $grupPenjaminBPJS->id)->get();
+                }
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Rawat Inap",
                     'groupedDoctors' => $groupedDoctors,
                     'kelas_rawats' => $kelas_rawats,
                     'kelasTitipan' => $kelas_rawats,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'rawat-inap',
                     'patient' => $patient,
-                    'age' => $age
+                    'age' => $age,
+                    'ranapBPJSdalam1bulan' => $ranapBPJSdalam1bulan
                 ]);
                 break;
 
             case 'laboratorium':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Laboratorium",
+                    'laboratorium_categories' => KategoriLaboratorium::all(),
+                    'tarifs' => TarifParameterLaboratorium::all(),
                     'doctors' => $doctorsLAB,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'laboratorium',
+                    'groupPenjaminId' => $groupPenjaminStandarId,
+                    'kelasRawatId' => $kelasRawatRajalId,
                     'patient' => $patient,
                     'age' => $age
                 ]);
@@ -241,7 +268,7 @@ class RegistrationController extends Controller
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Hemodialisa",
                     'doctors' => Doctor::all(),
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'hemodialisa',
                     'patient' => $patient,
                     'age' => $age
@@ -256,85 +283,121 @@ class RegistrationController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'patient_id' => 'nullable',
-            'user_id' => 'nullable',
-            'employee_id' => 'nullable',
-            'doctor_id' => 'nullable',
-            'registration_type' => 'nullable',
-            'poliklinik' => 'nullable|string',
-            'penjamin_id' => 'nullable',
-            'rujukan' => 'required|string',
-            'dokter_perujuk' => 'nullable|integer',
-            'tipe_rujukan' => 'nullable|string',
-            'igd_type' => 'nullable|string',
-            'odc_type' => 'nullable|string',
-            'nama_perujuk' => 'nullable|string',
-            'telp_perujuk' => 'nullable|string',
-            'alamat_perujuk' => 'nullable|string',
-            'diagnosa_awal' => 'nullable|string',
-        ]);
+        // return dd($request->all());
+        try {
+            $validatedData = $request->validate([
+                'patient_id' => 'required',
+                'user_id' => 'required',
+                'employee_id' => 'required',
+                'doctor_id' => 'required',
+                'registration_type' => 'required',
+                'poliklinik' => 'nullable|string',
+                'penjamin_id' => 'required',
+                'rujukan' => 'required|string',
+                'dokter_perujuk' => 'nullable|integer',
+                'tipe_rujukan' => 'nullable|string',
+                'igd_type' => 'nullable|string',
+                'odc_type' => 'nullable|string',
+                'nama_perujuk' => 'nullable|string',
+                'telp_perujuk' => 'nullable|string',
+                'alamat_perujuk' => 'nullable|string',
+                'diagnosa_awal' => 'nullable|string',
+                'kelas_rawat_id' => 'nullable|string',
+            ], [
+                'penjamin_id.required' => 'Kolom Penjamin tidak boleh kosong.',
+                'patient_id.nullable' => 'Kolom patient_id boleh kosong.',
+                'user_id.nullable' => 'Kolom user_id boleh kosong.',
+                'employee_id.nullable' => 'Kolom employee_id boleh kosong.',
+                'doctor_id.nullable' => 'Kolom doctor_id boleh kosong.',
+                'registration_type.nullable' => 'Kolom registration_type boleh kosong.',
+                'poliklinik.nullable' => 'Kolom poliklinik boleh kosong.',
+                'poliklinik.string' => 'Kolom poliklinik harus berupa teks.',
+                'penjamin_id.nullable' => 'Kolom penjamin_id boleh kosong.',
+                'rujukan.required' => 'Kolom rujukan wajib diisi.',
+                'rujukan.string' => 'Kolom rujukan harus berupa teks.',
+                'dokter_perujuk.nullable' => 'Kolom dokter perujuk boleh kosong.',
+                'dokter_perujuk.integer' => 'Kolom dokter perujuk harus berupa angka.',
+                'tipe_rujukan.nullable' => 'Kolom tipe rujukan boleh kosong.',
+                'tipe_rujukan.string' => 'Kolom tipe rujukan harus berupa teks.',
+                'igd_type.nullable' => 'Kolom igd_type boleh kosong.',
+                'igd_type.string' => 'Kolom igd_type harus berupa teks.',
+                'odc_type.nullable' => 'Kolom odc_type boleh kosong.',
+                'odc_type.string' => 'Kolom odc_type harus berupa teks.',
+                'nama_perujuk.nullable' => 'Kolom nama perujuk boleh kosong.',
+                'nama_perujuk.string' => 'Kolom nama perujuk harus berupa teks.',
+                'telp_perujuk.nullable' => 'Kolom telepon perujuk boleh kosong.',
+                'telp_perujuk.string' => 'Kolom telepon perujuk harus berupa teks.',
+                'alamat_perujuk.nullable' => 'Kolom alamat perujuk boleh kosong.',
+                'alamat_perujuk.string' => 'Kolom alamat perujuk harus berupa teks.',
+                'diagnosa_awal.nullable' => 'Kolom diagnosa awal boleh kosong.',
+                'diagnosa_awal.string' => 'Kolom diagnosa awal harus berupa teks.',
+            ]);
 
-        // Set registration date and status
-        $validatedData['registration_date'] = Carbon::now();
-        $validatedData['date'] = Carbon::now();
-        $validatedData['status'] = 'aktif';
+            // Set registration date and status
+            $validatedData['registration_date'] = Carbon::now();
+            $validatedData['date'] = Carbon::now();
+            $validatedData['status'] = 'aktif';
 
-        // Set department based on registration type
-        $validatedData['departement_id'] = $this->getDepartmentId($validatedData);
+            // Set department based on registration type
+            $validatedData['departement_id'] = $this->getDepartmentId($validatedData);
 
-        // Update bed if rawat inap
-        if ($validatedData['registration_type'] == 'rawat-inap') {
-            Bed::findOrFail($request->bed_id)->update(['patient_id' => $request->patient_id]);
-        }
+            // Update bed if rawat inap
+            // Update bed if rawat inap
+            if ($validatedData['registration_type'] == 'rawat-inap') {
+                Bed::findOrFail($request->bed_id)->update(['patient_id' => $request->patient_id]);
+                $this->assignBedToPatient($request);
+            }
 
-        // Generate registration numbers
-        $validatedData['registration_number'] = generate_registration_number();
-        $validatedData['no_urut'] = generateDoctorSequenceNumber($request->doctor_id, $request->registration_date);
+            // Generate registration numbers
+            $validatedData['registration_number'] = generate_registration_number();
+            $validatedData['no_urut'] = generateDoctorSequenceNumber($request->doctor_id, $request->registration_date);
 
-        // Create registration
-        $registration = Registration::create($validatedData);
+            // Create registration
+            $registration = Registration::create($validatedData);
 
-        // Create billing
-        $billing = Bilingan::create([
-            'registration_id' => $registration->id,
-            'patient_id' => $request->patient_id,
-            'status' => 'belum final'
-        ]);
+            // Create billing
+            $billing = Bilingan::create([
+                'registration_id' => $registration->id,
+                'patient_id' => $request->patient_id,
+                'status' => 'belum final'
+            ]);
 
-        // Add registration fee for outpatient visits
-        if ($validatedData['registration_type'] == 'rawat-jalan') {
-            $department = Departement::find($validatedData['departement_id']);
+            // Add registration fee for outpatient visits
+            if ($validatedData['registration_type'] == 'rawat-jalan') {
+                $department = Departement::find($validatedData['departement_id']);
 
-            // Get registration fees associated with this department
-            $registrationFees = $department->tarif_registrasi()
-                ->with(['harga_tarif' => function ($query) use ($request) {
-                    $query->where('group_penjamin_id', $request->penjamin_id);
-                }])
-                ->get();
+                // Get registration fees associated with this department
+                $registrationFees = $department->tarif_registrasi()
+                    ->with(['harga_tarif' => function ($query) use ($request) {
+                        $query->where('group_penjamin_id', $request->penjamin_id);
+                    }])
+                    ->get();
 
-            // Add registration fee to billing details
-            foreach ($registrationFees as $fee) {
-                if ($fee->harga_tarif->isNotEmpty()) {
-                    $harga = $fee->harga_tarif->first()->harga;
-                    TagihanPasien::create([
-                        'user_id' => auth()->user()->id,
-                        'bilingan_id' => $billing->id,
-                        'registration_id' => $registration->id,
-                        'date' => Carbon::now(),
-                        'tagihan' => "[Biaya Administrasi] Rawat Jalan",
-                        'detail_tagihan' => $fee->nama_tarif,
-                        'nominal' => $harga,
-                        'quantity' => 1,
-                        'harga' => $harga,
-                        'total' => $harga
-                    ]);
+                // Add registration fee to billing details
+                foreach ($registrationFees as $fee) {
+                    if ($fee->harga_tarif->isNotEmpty()) {
+                        $harga = $fee->harga_tarif->first()->harga;
+                        TagihanPasien::create([
+                            'user_id' => auth()->user()->id,
+                            'bilingan_id' => $billing->id,
+                            'registration_id' => $registration->id,
+                            'date' => Carbon::now(),
+                            'tagihan' => "[Biaya Administrasi] Rawat Jalan",
+                            'detail_tagihan' => $fee->nama_tarif,
+                            'nominal' => $harga,
+                            'quantity' => 1,
+                            'harga' => $harga,
+                            'total' => $harga
+                        ]);
+                    }
                 }
             }
-        }
 
-        return redirect("/daftar-registrasi-pasien/$registration->id")
-            ->with('success', 'Registrasi berhasil ditambahkan!');
+            return redirect("/daftar-registrasi-pasien/$registration->id")
+                ->with('success', 'Registrasi berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     private function getDepartmentId($data)
@@ -382,6 +445,10 @@ class RegistrationController extends Controller
             $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
         }
 
+        $radiologyDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%radiologi%');
+        })->get();
+
         $radiologiOrders = [];
 
         OrderRadiologi::where('registration_id', $registration->id)
@@ -395,11 +462,15 @@ class RegistrationController extends Controller
         }])->find($registration->patient->id);
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
+        $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
+
 
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
             'kelasRawat' => $kelasRawat,
+            'groupPenjaminId' => $groupPenjaminId,
             'penjamin' => $penjamin,
             'groupedDoctors' => $groupedDoctors,
+            'radiologyDoctors' => $radiologyDoctors,
             'radiologiOrders' => $radiologiOrders,
             'radiology_categories' => KategoriRadiologi::all(),
             'tarifs' => TarifParameterRadiologi::all(),
@@ -446,36 +517,6 @@ class RegistrationController extends Controller
             ->make(true);
     }
 
-
-
-    public function edit(Registration $registration)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Registration  $registration
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Registration $registration)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Registration  $registration
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Registration $registration)
-    {
-        //
-    }
-
     public function batal_register(Request $request, $id)
     {
         $request->validate([
@@ -498,12 +539,8 @@ class RegistrationController extends Controller
 
             // Kosongkan Bed
             if ($registration['registration_type'] == 'rawat-inap') {
-                $bed = Bed::findOrFail($registration->patient->bed->id);
-                $bed->patient_id = null;
-                $bed->save();
+                $this->removePatientFromBed($registration->patient->bed->id, $registration->patient->id);
             }
-
-
 
             // Create a new BatalRegister entry
             BatalRegister::create([
@@ -591,11 +628,8 @@ class RegistrationController extends Controller
             // Find the registration record
             $registration = Registration::findOrFail($id);
 
-            // Kosongkan Bed
             if ($registration['registration_type'] == 'rawat-inap') {
-                $bed = Bed::findOrFail($registration->patient->bed->id);
-                $bed->patient_id = null;
-                $bed->save();
+                $this->removePatientFromBed($registration->patient->bed->id, $registration->patient->id);
             }
 
             // Create a new BatalRegister entry
@@ -750,5 +784,36 @@ class RegistrationController extends Controller
             // Tangani kesalahan saat menjalankan permintaan cURL
             return false;
         }
+    }
+
+    public function assignBedToPatient(Request $request)
+    {
+        $bed = Bed::findOrFail($request->bed_id);
+        $patient = Patient::findOrFail($request->patient_id);
+
+        // Tambahkan pasien ke bed dengan status 'terisi' dan tanggal masuk
+        $bed->patients()->attach($patient->id, [
+            'status' => 'terisi',
+            'tanggal_masuk' => Carbon::now(),
+        ]);
+
+        return response()->json(['message' => 'Pasien berhasil ditambahkan ke bed.']);
+    }
+
+    public function removePatientFromBed($bed_id, $patient_id)
+    {
+        $bed = Bed::findOrFail($bed_id);
+        $bed->patient_id = null;
+        $bed->save();
+
+        $patient = Patient::findOrFail($patient_id);
+
+        // Hapus hubungan pasien dari bed
+        $bed->patients()->updateExistingPivot($patient->id, [
+            'status' => 'kosong',
+            'tanggal_keluar' => Carbon::now(),
+        ]);
+
+        return response()->json(['message' => 'Pasien berhasil dihapus dari bed.']);
     }
 }

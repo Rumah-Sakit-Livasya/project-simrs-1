@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS\Laboratorium;
 
 use App\Http\Controllers\Controller;
+use App\Models\RelasiParameterLaboratorium;
 use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Laboratorium\GrupParameterLaboratorium;
@@ -26,15 +27,9 @@ class ParameterLaboratoriumController extends Controller
     {
         try {
             $parameter_laboratorium = ParameterLaboratorium::findOrFail($id);
-
-            return response()->json([
-                'grup_parameter_laboratorium_id' => $parameter_laboratorium->grup_parameter_laboratorium_id,
-                'kategori_laboratorium_id' => $parameter_laboratorium->kategori_laboratorium_id,
-                'parameter' => $parameter_laboratorium->parameter,
-                'kode' => $parameter_laboratorium->kode,
-                'is_reverse' => $parameter_laboratorium->is_reverse,
-                'is_kontras' => $parameter_laboratorium->is_kontras,
-            ], 200);
+            $sub_parameters = RelasiParameterLaboratorium::where('main_parameter_id', $id)->get();
+            $parameter_laboratorium->sub_parameters = $sub_parameters;
+            return response()->json($parameter_laboratorium, 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'message' => 'Data tidak ditemukan',
@@ -69,7 +64,7 @@ class ParameterLaboratoriumController extends Controller
             'is_order' => 'nullable',
             'tipe_hasil' => 'nullable',
             'metode' => 'nullable',
-            'no_urut' => 'nullable',
+            'no_urut' => 'nullable'
         ]);
 
         $validatedData['is_hasil'] = $request->is_hasil === "on" ? 1 : 0;
@@ -79,6 +74,19 @@ class ParameterLaboratoriumController extends Controller
 
         try {
             $store = ParameterLaboratorium::create($validatedData);
+
+            // for each sub_parameter, add relation between the new parameter and
+            // existing sub parameter to `relasi_parameter_laboratorium` table
+            if ($request->has('sub_parameter')) {
+                $subParameterIds = $request->input('sub_parameter');
+                foreach ($subParameterIds as $subParameterId) {
+                    \DB::table('relasi_parameter_laboratorium')->insert([
+                        'main_parameter_id' => $store->id,
+                        'sub_parameter_id' => $subParameterId
+                    ]);
+                }
+            }
+
             return response()->json(['message' => ' berhasil ditambahkan!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -90,26 +98,32 @@ class ParameterLaboratoriumController extends Controller
         $validatedData = $request->validate([
             'grup_parameter_laboratorium_id' => 'required',
             'kategori_laboratorium_id' => 'required',
+            'tipe_laboratorium_id' => 'required',
             'kode' => 'required',
             'parameter' => 'required',
-            'is_kontras' => 'nullable',
-            'is_reverse' => 'nullable',
+            'satuan' => 'nullable',
+            'status' => 'nullable',
+            'is_hasil' => 'nullable',
+            'is_order' => 'nullable',
+            'tipe_hasil' => 'nullable',
+            'metode' => 'nullable',
+            'no_urut' => 'nullable',
+            'sub_parameter' => 'nullable',
         ]);
 
-        if ($request->has('is_kontras')) {
-            $validatedData['is_kontras'] = $request->is_kontras === "on" ? 1 : 0;
-        } else {
-            $validatedData['is_kontras'] = 0;
-        }
-        if ($request->has('is_reverse')) {
-            $validatedData['is_reverse'] = $request->is_reverse === "on" ? 1 : 0;
-        } else {
-            $validatedData['is_reverse'] = 0;
-        }
+        $validatedData['is_hasil'] = $request->is_hasil === "on" ? 1 : 0;
+        $validatedData['is_order'] = $request->is_order === "on" ? 1 : 0;
+
+      
 
         try {
-            $grup_parameter_laboratorium = ParameterLaboratorium::find($id);
-            $grup_parameter_laboratorium->update($validatedData);
+            $parameter_laboratorium = ParameterLaboratorium::find($id);
+            if ($request->has('sub_parameter')) { // update relations between main and sub parameters
+                $parameter_laboratorium = ParameterLaboratorium::find($id);
+                $parameter_laboratorium->subParameters()->sync($request->sub_parameter);
+            }
+
+            $parameter_laboratorium->update($validatedData);
             return response()->json(['message' => ' berhasil diupdate!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

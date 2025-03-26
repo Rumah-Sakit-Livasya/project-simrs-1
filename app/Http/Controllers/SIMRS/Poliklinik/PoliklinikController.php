@@ -13,6 +13,7 @@ use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
 use App\Models\SIMRS\Pengkajian\FormKategori;
 use App\Models\SIMRS\Pengkajian\FormTemplate;
+use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Peralatan\OrderAlatMedis;
@@ -34,6 +35,7 @@ class PoliklinikController extends Controller
         $hariIni = Carbon::now()->translatedFormat('l');
         $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
         $registration = Registration::where('registration_number', $noRegist)->first();
+
 
         if ($menu && $noRegist) {
             $query = Registration::where('date', now()->format('Y-m-d'));
@@ -71,8 +73,12 @@ class PoliklinikController extends Controller
         // }
 
         if ($menu == 'pengkajian_perawat') {
-            $pengkajian = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
-            return view('pages.simrs.poliklinik.index', compact('registration', 'departements', 'jadwal_dokter', 'pengkajian'));
+            $pengkajianPerawat = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
+            $pengkajianDokter = PengkajianDokterRajal::where('registration_id', $registration->id)->first();
+            return view(
+                'pages.simrs.poliklinik.index',
+                compact('registration', 'departements', 'jadwal_dokter',  'pengkajianPerawat', 'pengkajianDokter')
+            );
         } elseif ($menu == 'cppt_perawat') {
             $perawat = Employee::whereHas('organization', function ($query) {
                 $query->where('name', 'Rawat Jalan');
@@ -81,7 +87,9 @@ class PoliklinikController extends Controller
         } elseif ($menu == 'transfer_pasien_perawat') {
             return view('pages.simrs.poliklinik.perawat.transfer_pasien_perawat', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_dokter') {
-            return view('pages.simrs.poliklinik.dokter.pengkajian', compact('registration', 'departements', 'jadwal_dokter'));
+            $pengkajianPerawat = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
+            $pengkajianDokter = PengkajianDokterRajal::where('registration_id', $registration->id)->first();
+            return view('pages.simrs.poliklinik.dokter.pengkajian', compact('registration', 'departements', 'jadwal_dokter',  'pengkajianPerawat', 'pengkajianDokter'));
         } elseif ($menu == 'cppt_dokter') {
             return view('pages.simrs.poliklinik.dokter.cppt', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'resume_medis_rajal') {

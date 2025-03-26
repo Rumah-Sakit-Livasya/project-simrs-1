@@ -24,4 +24,9 @@ class PengkajianNurseRajal extends Model implements \OwenIt\Auditing\Contracts\A
     {
         return $this->belongsTo(Registration::class, 'registration_id');
     }
+
+    public function pengkajian_dokter_rajal()
+    {
+        return $this->hasOne(PengkajianDokterRajal::class, 'registration_id', 'registration_id');
+    }
 }

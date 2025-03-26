@@ -5,7 +5,7 @@
 
     .popover {
         max-width: 100%;
-        max-height: 100%
+        max-height:
     }
 </style>
 
@@ -261,7 +261,7 @@
                                     <td>
                                         @if ($order->status_billed == 1)
                                             <a class="mdi mdi-printer pointer mdi-24px text-success nota-btn"
-                                                title="Nota Order Radiologi" data-id="{{ $order->id }}"></a>
+                                                title="Print Nota Order" data-id="{{ $order->id }}"></a>
                                         @else
                                             <a class="mdi mdi-cash pointer mdi-24px text-danger pay-btn"
                                                 title="Konfirmasi Tagihan" data-id="{{ $order->id }}"></a>
@@ -269,6 +269,12 @@
 
                                         <a class="mdi mdi-pencil pointer mdi-24px text-secondary edit-btn"
                                             title="Edit" data-id="{{ $order->id }}"></a>
+
+                                        <a class="mdi mdi-tag pointer mdi-24px text-danger label-btn"
+                                            title="Print Label" data-id="{{ $order->id }}"></a>
+
+                                        <a class="mdi mdi-file-document pointer mdi-24px text-warning result-btn"
+                                            title="Print Hasil" data-id="{{ $order->id }}"></a>
                                     </td>
                                 </tr>
                             @endforeach

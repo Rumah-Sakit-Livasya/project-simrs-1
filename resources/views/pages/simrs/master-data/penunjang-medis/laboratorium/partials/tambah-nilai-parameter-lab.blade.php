@@ -4,6 +4,7 @@
             <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="store-form">
                 @method('post')
                 @csrf
+                <input type="hidden" name="user_input" value="{{ auth()->user()->id }}">
                 <div class="modal-header pb-1 mb-0">
                     <h5 class="modal-title font-weight-bold">Tambah Nilai Parameter Laboratorium</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -22,6 +23,7 @@
                                     </label>
                                     <input type="text" class="form-control" id="tanggal"
                                         value="{{ now()->format('Y-m-d') }}" name="tanggal" disabled>
+                                    <input type="hidden" name="tanggal" value="{{ now()->format('Y-m-d') }}">
                                 </div>
                             </div>
                             <div class="col-md-6 mt-3">

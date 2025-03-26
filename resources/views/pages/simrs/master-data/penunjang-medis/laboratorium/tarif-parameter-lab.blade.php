@@ -26,6 +26,7 @@
                         <div class="panel-content">
                             <!-- datatable start -->
                             <form id="store-form">
+                                @csrf
                                 <div class="table-responsive">
                                     <div class="mb-3">
                                         <select id="grup-penjamin-id" class="form-control select2" name="grup_penjamin_id">
@@ -156,6 +157,9 @@
                     .replace(':grupPenjaminId', grupPenjaminId);
 
                 $.ajax({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     url: url,
                     type: 'GET',
                     data: $(this).serialize(), // Ambil semua data dari form

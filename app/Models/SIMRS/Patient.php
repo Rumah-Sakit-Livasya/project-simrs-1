@@ -31,4 +31,11 @@ class Patient extends Model
     {
         return $this->hasOne(Bed::class);
     }
+
+    public function beds()
+    {
+        return $this->belongsToMany(Bed::class, 'bed_patient')
+            ->withPivot('status')
+            ->withTimestamps();
+    }
 }
