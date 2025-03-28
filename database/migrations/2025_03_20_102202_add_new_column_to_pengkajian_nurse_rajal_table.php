@@ -12,25 +12,28 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pengkajian_nurse_rajal', function (Blueprint $table) {
-            $table->dropColumn('kondisi_khusus1');
-            $table->dropColumn('kondisi_khusus2');
-            $table->dropColumn('kondisi_khusus3');
-            $table->dropColumn('kondisi_khusus4');
-            $table->dropColumn('kondisi_khusus5');
-            $table->dropColumn('kondisi_khusus6');
-            $table->dropColumn('kondisi_khusus7');
-            $table->dropColumn('kondisi_khusus8');
+            // Cek dan hapus kolom kondisi_khusus1 hingga kondisi_khusus8
+            for ($i = 1; $i <= 8; $i++) {
+                if (Schema::hasColumn('pengkajian_nurse_rajal', "kondisi_khusus$i")) {
+                    $table->dropColumn("kondisi_khusus$i");
+                }
+            }
 
-            $table->dropColumn('imunisasi_dasar1');
-            $table->dropColumn('imunisasi_dasar2');
-            $table->dropColumn('imunisasi_dasar3');
-            $table->dropColumn('imunisasi_dasar4');
-            $table->dropColumn('imunisasi_dasar5');
+            // Cek dan hapus kolom imunisasi_dasar1 hingga imunisasi_dasar5
+            for ($i = 1; $i <= 5; $i++) {
+                if (Schema::hasColumn('pengkajian_nurse_rajal', "imunisasi_dasar$i")) {
+                    $table->dropColumn("imunisasi_dasar$i");
+                }
+            }
 
-            $table->dropColumn('resiko_jatuh1');
-            $table->dropColumn('resiko_jatuh2');
-            $table->dropColumn('resiko_jatuh3');
+            // Cek dan hapus kolom resiko_jatuh1 hingga resiko_jatuh3
+            for ($i = 1; $i <= 3; $i++) {
+                if (Schema::hasColumn('pengkajian_nurse_rajal', "resiko_jatuh$i")) {
+                    $table->dropColumn("resiko_jatuh$i");
+                }
+            }
 
+            // Tambahkan kolom baru
             $table->json('kondisi_khusus')->nullable();
             $table->json('imunisasi_dasar')->nullable();
             $table->json('resiko_jatuh')->nullable();
@@ -41,7 +44,6 @@ return new class extends Migration
             $table->string('ket_alergi_lainnya', 20)->nullable()->after('alergi_lainnya');
 
             $table->string('hasil_resiko_jatuh')->nullable()->after('resiko_jatuh');
-
             $table->string('status_psikologis')->nullable()->after('hasil_resiko_jatuh');
             $table->string('status_spiritual')->nullable()->after('status_psikologis');
             $table->string('masalah_prilaku')->nullable()->after('status_spiritual');
@@ -65,37 +67,34 @@ return new class extends Migration
             $table->foreign('created_by')->references('id')->on('users');
             $table->unsignedBigInteger('modified_by')->nullable();
             $table->foreign('modified_by')->references('id')->on('users');
-            
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('pengkajian_nurse_rajal', function (Blueprint $table) {
-            // Menambahkan kembali kolom yang dihapus
-            $table->string('kondisi_khusus1')->nullable();
-            $table->string('kondisi_khusus2')->nullable();
-            $table->string('kondisi_khusus3')->nullable();
-            $table->string('kondisi_khusus4')->nullable();
-            $table->string('kondisi_khusus5')->nullable();
-            $table->string('kondisi_khusus6')->nullable();
-            $table->string('kondisi_khusus7')->nullable();
-            $table->string('kondisi_khusus8')->nullable();
+            // Tambahkan kembali kolom kondisi_khusus1 hingga kondisi_khusus8
+            for ($i = 1; $i <= 8; $i++) {
+                if (!Schema::hasColumn('pengkajian_nurse_rajal', "kondisi_khusus$i")) {
+                    $table->string("kondisi_khusus$i")->nullable();
+                }
+            }
 
-            $table->string('imunisasi_dasar1')->nullable();
-            $table->string('imunisasi_dasar2')->nullable();
-            $table->string('imunisasi_dasar3')->nullable();
-            $table->string('imunisasi_dasar4')->nullable();
-            $table->string('imunisasi_dasar5')->nullable();
+            // Tambahkan kembali kolom imunisasi_dasar1 hingga imunisasi_dasar5
+            for ($i = 1; $i <= 5; $i++) {
+                if (!Schema::hasColumn('pengkajian_nurse_rajal', "imunisasi_dasar$i")) {
+                    $table->string("imunisasi_dasar$i")->nullable();
+                }
+            }
 
-            $table->string('resiko_jatuh1')->nullable();
-            $table->string('resiko_jatuh2')->nullable();
-            $table->string('resiko_jatuh3')->nullable();
+            // Tambahkan kembali kolom resiko_jatuh1 hingga resiko_jatuh3
+            for ($i = 1; $i <= 3; $i++) {
+                if (!Schema::hasColumn('pengkajian_nurse_rajal', "resiko_jatuh$i")) {
+                    $table->string("resiko_jatuh$i")->nullable();
+                }
+            }
 
-            // Menghapus kolom baru yang ditambahkan
+            // Hapus kolom baru yang ditambahkan
             $table->dropColumn('kondisi_khusus');
             $table->dropColumn('imunisasi_dasar');
             $table->dropColumn('resiko_jatuh');
@@ -125,10 +124,17 @@ return new class extends Migration
             $table->dropColumn('sensorik');
             $table->dropColumn('kognitif');
             $table->dropColumn('motorik');
-            $table->dropForeign(['created_by']);
-            $table->dropForeign(['modified_by']);
-            $table->dropColumn('created_by');
-            $table->dropColumn('modified_by');
+
+            // Hapus foreign key sebelum menghapus kolom
+            if (Schema::hasColumn('pengkajian_nurse_rajal', 'created_by')) {
+                $table->dropForeign(['created_by']);
+                $table->dropColumn('created_by');
+            }
+
+            if (Schema::hasColumn('pengkajian_nurse_rajal', 'modified_by')) {
+                $table->dropForeign(['modified_by']);
+                $table->dropColumn('modified_by');
+            }
         });
     }
 };

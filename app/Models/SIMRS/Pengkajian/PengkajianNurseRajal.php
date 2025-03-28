@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS\Pengkajian;
 
+use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
