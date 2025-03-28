@@ -1,3 +1,23 @@
+<script>
+    const ranapBPJS1bulan = {{ $ranapBPJSdalam1bulan }};
+
+    function alertRanapBPJS1Bulan() {
+        // fire alert with sweetalert2
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'Ranap BPJS Dalam 1 Bulan',
+            text: 'Pasien ini telah melakukan rawat inap dengan BPJS dalam 1 bulan terakhir. Pesan ini akan hilang dalam 5 detik.',
+            showConfirmButton: false,
+            timer: 5000
+        });
+    }
+
+    if (ranapBPJS1bulan) {
+        alertRanapBPJS1Bulan();
+    }
+</script>
+
 <form action="{{ route('simpan.registrasi') }}" method="POST" id="form-registrasi">
     @method('post')
     @csrf
@@ -215,12 +235,15 @@
                                             {{ old('rujukan') == 'luar rs' ? 'checked' : '' }}>
                                         <label class="custom-control-label" for="luar_rs">Luar RS</label>
                                     </div>
-                                    <div class="custom-control custom-radio custom-control-inline">
-                                        <input type="radio" class="custom-control-input" id="rujukan_bpjs"
-                                            name="rujukan" value="rujukan bpjs"
-                                            {{ old('rujukan') == 'rujukan bpjs' ? 'checked' : '' }}>
-                                        <label class="custom-control-label" for="rujukan_bpjs">Rujukan BPJS</label>
-                                    </div>
+                                    @if (!$ranapBPJSdalam1bulan)
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" class="custom-control-input" id="rujukan_bpjs"
+                                                name="rujukan" value="rujukan bpjs"
+                                                {{ old('rujukan') == 'rujukan bpjs' ? 'checked' : '' }}>
+                                            <label class="custom-control-label" for="rujukan_bpjs">Rujukan
+                                                BPJS</label>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -252,6 +275,16 @@
                     </a>
                 </div>
                 <div class="col-xl-6 text-right">
+
+                    @if ($ranapBPJSdalam1bulan)
+                        <a href="#" onclick="alertRanapBPJS1Bulan()"
+                            class="btn btn-lg btn-warning waves-effect waves-themed">
+                            <span class="fal fa-exclamation mr-1 text-black"></span>
+                            <span class="text-black">Peringatan</span>
+                        </a>
+                        {{-- <br> --}}
+                    @endif
+
                     <button type="submit" class="btn btn-lg btn-primary waves-effect waves-themed" id="simpan-btn"
                         onclick="disableButton(event)">
                         <span class="fal fa-save mr-1"></span>

@@ -23,8 +23,8 @@ return new class extends Migration
             $table->boolean('is_billed');
             $table->boolean('is_cito');
             $table->string('nama_pasien', 100);
-            $table->text('diagnosa_klinis');
-            $table->integer('tipe_pasien')->comment('1. rajal 2. ranap 3 otc');; // 1. rajal 2. ranap 3 otc
+            $table->text('diagnosa_klinis')->nullable();
+            $table->enum('tipe_pasien', ['rawat-jalan', 'rawat-inap', 'oct']); // 1. rajal 2. ranap 3 otc
             $table->string('entry_by', 70);
             $table->string('modify_by', 70)->nullable();
             $table->softDeletes();

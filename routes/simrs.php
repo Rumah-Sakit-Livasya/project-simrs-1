@@ -9,6 +9,7 @@ use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\Depo\StokRequestController;
 use App\Http\Controllers\SIMRS\Depo\UnitCostController as DepoUnitCostController;
 use App\Http\Controllers\SIMRS\Dokter\DokterController;
+use App\Http\Controllers\SIMRS\EthnicController;
 use App\Http\Controllers\SIMRS\Farmasi\FarmasiController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
@@ -156,6 +157,10 @@ Route::group(['middleware' => ['auth']], function () {
 
                 Route::get('/form-builder', [FormBuilderController::class, 'index'])->name('master-data.setup.form-builder');
                 Route::get('/form-builder/tambah', [FormBuilderController::class, 'create'])->name('master-data.setup.form-builder.tambah');
+
+                Route::prefix('ethnics')->group(function () {
+                    Route::get('/', [EthnicController::class, 'index'])->name('master-data.ethnics');
+                });
             });
             Route::prefix('layanan-medis')->group(function () {
                 Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');
@@ -259,10 +264,15 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('radiologi')->group(function () {
             Route::get('list-order', [RadiologiController::class, 'index'])->name('radiologi.list-order');
+            Route::get('simulasi-harga', [RadiologiController::class, 'simulasiHarga'])->name('radiologi.simulasi-harga');
             Route::get('template-hasil', [RadiologiController::class, 'templateHasil'])->name('radiologi.template-hasil');
-            Route::get('report', [RadiologiController::class, 'report'])->name('radiologi.report');
+            Route::get('laporan', [RadiologiController::class, 'report'])->name('radiologi.report');
+            Route::get('laporan-view/{fromDate}/{endDate}/{tipe_rawat}/{group_parameter}/{penjamin}/{radiografer}', [RadiologiController::class, 'reportView'])->name('radiologi.report.view');
             Route::get('nota-order/{id}', [RadiologiController::class, 'notaOrder'])->name('radiologi.nota-order');
+            Route::get('hasil-order/{id}', [RadiologiController::class, 'hasilOrder'])->name('radiologi.hasiil-order');
+            Route::get('label-order/{id}', [RadiologiController::class, 'labelOrder'])->name('radiologi.label-order');
             Route::get('edit-order/{id}', [RadiologiController::class, 'editOrder'])->name('radiologi.edit-order');
+            Route::get('edit-hasil-parameter/{id}', [RadiologiController::class, 'editHasilParameter'])->name('radiologi.edit-hasil-parameter');
         });
 
         Route::prefix('laboratorium')->group(function () {

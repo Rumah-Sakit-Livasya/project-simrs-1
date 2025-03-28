@@ -2,6 +2,51 @@ declare function showErrorAlert(message: string): void;
 declare function showSuccessAlert(message: string): void;
 declare function showErrorAlertNoRefresh(message: string): void;
 
+interface TarifLaboratorium {
+    id: number;
+    parameter_laboratorium_id: number;
+    group_penjamin_id: number;
+    kelas_rawat_id: number;
+    share_dr: number;
+    share_rs: number;
+    prasarana: number;
+    bhp: number;
+    total: number;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+interface ParameterLaboratorium {
+    id: number;
+    grup_parameter_laboratorium_id: number;
+    kategori_laboratorium_id: number;
+    tipe_laboratorium_id: number;
+    kode: number;
+    parameter: string;
+    satuan: string;
+    status: number | null;
+    is_hasil: number;
+    is_order: number;
+    tipe_hasil: string;
+    metode: string;
+    no_urut: number;
+    sub_parameter: string | null;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+interface KategoriLaboratorium {
+    id: number;
+    nama_kategori: string;
+    status: number;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+    parameter_laboratorium: ParameterLaboratorium[];
+}
+
 interface Registration {
     id: number;
     date: string;

@@ -7,9 +7,12 @@ use App\Helpers\MedicalRecordHelper;
 use App\Http\Controllers\Controller;
 use App\Models\SIMRS\Ethnic;
 use App\Models\SIMRS\Family;
+use App\Models\SIMRS\GroupPenjamin;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Provinsi;
+use App\Models\SIMRS\Registration;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -85,6 +88,7 @@ class PatientController extends Controller
         }
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
+
         return view('pages.simrs.pendaftaran.detail-pasien', [
             'patient' => $patient,
             'age' => $age
@@ -301,7 +305,15 @@ class PatientController extends Controller
         $patient = Patient::where('id', $id)->first();
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
-
+        $lastRanapRegistration = Registration::where(['patient_id' => $patient->id, 'registration_type' => 'rawat-inap'])->orderBy('created_at', 'desc')->first();
+        $grupPenjaminBPJS = GroupPenjamin::where('name', 'like', '%BPJS%')->first();
+        $ranapBPJSdalam1bulan = false;
+        if ($lastRanapRegistration) {
+            $ranapBPJSdalam1bulan =
+                $lastRanapRegistration['penjamin_id'] == $grupPenjaminBPJS->id && // ranap dengan BPJS
+                \Carbon\Carbon::parse($lastRanapRegistration['registration_date'])->diffInDays() <= 30; // dalam 30 hari / 1 bulan
+        }
+        
         switch ($registrasi) {
             case 'rawat-jalan':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
@@ -335,7 +347,8 @@ class PatientController extends Controller
                     'title' => "Rawat Inap",
                     'case' => 'rawat-inap',
                     'patient' => $patient,
-                    'age' => $age
+                    'age' => $age,
+                    'ranapBPJSdalam1bulan' => $ranapBPJSdalam1bulan
                 ]);
                 break;
 

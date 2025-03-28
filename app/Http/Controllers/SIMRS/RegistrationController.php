@@ -12,8 +12,11 @@ use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GantiDiagnosa;
 use App\Models\SIMRS\GantiDokter;
+use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
+use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
 use App\Models\SIMRS\ParameterRadiologi;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
@@ -143,6 +146,9 @@ class RegistrationController extends Controller
         $age = displayAge($birthdate);
         $doctors = Doctor::with('employee', 'departements')->get();
 
+        $groupPenjaminStandarId = GroupPenjamin::where('name', 'like', '%standar%')->first()->id;
+        $kelasRawatRajalId = KelasRawat::where('kelas', 'like', '%rawat jalan%')->first()->id;
+
         // Group doctors by department
         $groupedDoctors = [];
         foreach ($doctors as $doctor) {
@@ -159,12 +165,18 @@ class RegistrationController extends Controller
             $query->where('name', 'like', '%Laboratorium%');
         })->get();
 
+        $doctorsLAB = Doctor::with('employee', 'departements')->whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%LABORATORIUM%');
+        })->get();
+
+        $penjamins = Penjamin::all();
+
         switch ($registrasi) {
             case 'rawat-jalan':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Rawat Jalan",
                     'groupedDoctors' => $groupedDoctors,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'rawat-jalan',
                     'patient' => $patient,
                     'age' => $age
@@ -175,7 +187,7 @@ class RegistrationController extends Controller
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "IGD",
                     'doctors' => $doctorsIGD,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'igd',
                     'patient' => $patient,
                     'age' => $age
@@ -194,7 +206,7 @@ class RegistrationController extends Controller
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "ODC",
                     'groupedDoctors' => $groupedDoctors,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'odc',
                     'patient' => $patient,
                     'age' => $age
@@ -202,24 +214,39 @@ class RegistrationController extends Controller
                 break;
 
             case 'rawat-inap':
+                $lastRanapRegistration = Registration::where(['patient_id' => $patient->id, 'registration_type' => 'rawat-inap'])->orderBy('created_at', 'desc')->first();
+                $grupPenjaminBPJS = GroupPenjamin::where('name', 'like', '%BPJS%')->first();
+                $ranapBPJSdalam1bulan =
+                    $lastRanapRegistration['penjamin_id'] == $grupPenjaminBPJS->id && // ranap BPJS
+                    \Carbon\Carbon::parse($lastRanapRegistration['registration_date'])->diffInDays() <= 30; // kurang dari 30 hari / 1 bulan
+                if ($ranapBPJSdalam1bulan) {
+                    // reassign the $penjamins variable
+                    // filter it to exclude penjamins BPJS
+                    $penjamins = Penjamin::where('group_penjamin_id', '!=', $grupPenjaminBPJS->id)->get();
+                }
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Rawat Inap",
                     'groupedDoctors' => $groupedDoctors,
                     'kelas_rawats' => $kelas_rawats,
                     'kelasTitipan' => $kelas_rawats,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'rawat-inap',
                     'patient' => $patient,
-                    'age' => $age
+                    'age' => $age,
+                    'ranapBPJSdalam1bulan' => $ranapBPJSdalam1bulan
                 ]);
                 break;
 
             case 'laboratorium':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Laboratorium",
+                    'laboratorium_categories' => KategoriLaboratorium::all(),
+                    'tarifs' => TarifParameterLaboratorium::all(),
                     'doctors' => $doctorsLAB,
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'laboratorium',
+                    'groupPenjaminId' => $groupPenjaminStandarId,
+                    'kelasRawatId' => $kelasRawatRajalId,
                     'patient' => $patient,
                     'age' => $age
                 ]);
@@ -241,7 +268,7 @@ class RegistrationController extends Controller
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Hemodialisa",
                     'doctors' => Doctor::all(),
-                    'penjamins' => Penjamin::all(),
+                    'penjamins' => $penjamins,
                     'case' => 'hemodialisa',
                     'patient' => $patient,
                     'age' => $age
@@ -417,6 +444,10 @@ class RegistrationController extends Controller
             $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
         }
 
+        $radiologyDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%radiologi%');
+        })->get();
+
         $radiologiOrders = [];
 
         OrderRadiologi::where('registration_id', $registration->id)
@@ -430,11 +461,15 @@ class RegistrationController extends Controller
         }])->find($registration->patient->id);
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
+        $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
+
 
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
             'kelasRawat' => $kelasRawat,
+            'groupPenjaminId' => $groupPenjaminId,
             'penjamin' => $penjamin,
             'groupedDoctors' => $groupedDoctors,
+            'radiologyDoctors' => $radiologyDoctors,
             'radiologiOrders' => $radiologiOrders,
             'radiology_categories' => KategoriRadiologi::all(),
             'tarifs' => TarifParameterRadiologi::all(),

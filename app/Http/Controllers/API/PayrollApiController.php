@@ -187,7 +187,7 @@ class PayrollApiController extends Controller
 
 
                 // Query untuk mencari data absensi sesuai dengan periode yang diminta
-                $endPeriodHariKerja = Carbon::createFromFormat('F Y', $endMonth)->endOfMonth()->subMonth()->addDays(24);
+                $endPeriodHariKerja = Carbon::createFromFormat('F Y', $endMonth)->endOfMonth()->subMonth()->addDays(22);
                 $absensi = Attendance::where('employee_id', $employee->id)
                     ->whereBetween('date', [$startPeriod, $endPeriodHariKerja])
                     ->whereNull('attendance_code_id')
@@ -196,6 +196,8 @@ class PayrollApiController extends Controller
                     ->whereNull('clock_in')
                     ->whereNull('is_day_off')
                     ->count();
+
+                    // dd($startPeriod, $endPeriodHariKerja);
 
                 // Jika ada catatan kehadiran yang memenuhi syarat, tambahkan potongan absensi sebesar 99000
 

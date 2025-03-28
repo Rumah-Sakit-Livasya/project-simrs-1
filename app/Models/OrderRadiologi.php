@@ -33,7 +33,7 @@ class OrderRadiologi extends Model
 
     public function order_parameter_radiologi()
     {
-        return $this->hasMany(OrderParameterRadiologi::class);
+        return $this->hasMany(OrderParameterRadiologi::class, 'order_radiologi_id');
     }
 
     public function doctor()

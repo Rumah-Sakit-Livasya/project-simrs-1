@@ -181,6 +181,10 @@
                 dropdownParent: $('#modal-tambah-parameter-laboratorium')
             });
 
+            $('#modal-edit-parameter-laboratorium .select2').select2({
+                dropdownParent: $('#modal-edit-parameter-laboratorium')
+            });
+
             $('.btn-tarif').click(function() {
                 const id_param = $(this).attr('data-id');
                 const url = `{{ route('master-data.penunjang-medis.laboratorium.parameter.tarif', ':id') }}`
@@ -209,15 +213,54 @@
                         kategoriId,
                     type: 'GET',
                     success: function(response) {
-                        $('#modal-edit-parameter-laboratorium input[name="nama_tipe"]')
-                            .val(
-                                response
-                                .nama_tipe);
-                        $('#modal-edit-parameter-laboratorium input[name="status"][value="' +
-                                response
-                                .status + '"]')
-                            .prop(
-                                'checked', true);
+                        console.log(response);
+
+                        $('#modal-edit-parameter-laboratorium #grup_parameter_laboratorium_id')
+                            .val(response.grup_parameter_laboratorium_id)
+                            .trigger('change');
+
+                        $('#modal-edit-parameter-laboratorium select[name="kategori_laboratorium_id"]')
+                            .val(response.kategori_laboratorium_id)
+                            .trigger('change');
+
+                        $('#modal-edit-parameter-laboratorium select[name="tipe_laboratorium_id"]')
+                            .val(response.tipe_laboratorium_id)
+                            .trigger('change');
+
+                        $('#modal-edit-parameter-laboratorium input[name="parameter"]')
+                            .val(response.parameter);
+
+                        $('#modal-edit-parameter-laboratorium input[name="satuan"]')
+                            .val(response.satuan);
+
+                        // this is a checkbox
+                        $('#modal-edit-parameter-laboratorium input[name="is_hasil"]')
+                            .prop('checked', response.is_hasil);
+
+                        // this is a checkbox
+                        $('#modal-edit-parameter-laboratorium input[name="is_order"]')
+                            .prop('checked', response.is_order);
+
+                        $('#modal-edit-parameter-laboratorium input[name="metode"]')
+                            .val(response.metode);
+
+                        $('#modal-edit-parameter-laboratorium input[name="no_urut"]')
+                            .val(response.no_urut);
+
+                        $('#modal-edit-parameter-laboratorium input[name="kode"]')
+                            .val(response.kode);
+
+                        const subParameters = [];
+                        for (let i = 0; i < response.sub_parameters.length; i++) {
+                            subParameters.push(
+                            `${response.sub_parameters[i].sub_parameter_id}`);
+                        }
+
+                        // this is a multiple select
+                        $('#modal-edit-parameter-laboratorium select[name="sub_parameter[]"]')
+                            .val(subParameters)
+                            .trigger('change');
+
                     },
                     error: function(xhr, status, error) {
                         $('#modal-edit-parameter-laboratorium').modal('hide');
@@ -261,10 +304,10 @@
                 e.preventDefault(); // Mencegah form submit secara default
 
                 var formData = $(this).serialize();
-                kategoriId = $(this).attr('data-id');
+                parameterId = $(this).attr('data-id');
                 $.ajax({
                     url: '/api/simrs/master-data/penunjang-medis/laboratorium/parameter/' +
-                        kategoriId +
+                        parameterId +
                         '/update',
                     type: 'PATCH',
                     data: formData,
@@ -308,6 +351,12 @@
                 e.preventDefault(); // Mencegah form submit secara default
 
                 var formData = $(this).serialize();
+                const _formData = new FormData(this);
+                for (var pair of _formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+                // return;
+
 
                 $.ajax({
                     url: '/api/simrs/master-data/penunjang-medis/laboratorium/parameter',
