@@ -72,6 +72,7 @@ class PoliklinikController extends Controller
 
         if ($menu == 'pengkajian_perawat') {
             $pengkajian = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
+            
             return view('pages.simrs.poliklinik.index', compact('registration', 'departements', 'jadwal_dokter', 'pengkajian'));
         } elseif ($menu == 'cppt_perawat') {
             $perawat = Employee::whereHas('organization', function ($query) {
@@ -89,7 +90,11 @@ class PoliklinikController extends Controller
         } else if ($menu == 'profil_ringkas_rajal') {
             return view('pages.simrs.poliklinik.dokter.resume_medis', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_gizi') {
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));
+            $form = FormKategori::all();
+            $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
+
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian'));
+        
         } elseif ($menu == 'cppt_farmasi') {
             return view('pages.simrs.poliklinik.farmasi.cppt', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_resep') {
@@ -103,7 +108,7 @@ class PoliklinikController extends Controller
             return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian'));
         } elseif ($menu == 'tindakan_medis') {
             $tindakan_medis = TindakanMedis::all();
-            $doctors = Doctor::with('employee', 'departement')->get();
+            $doctors = Doctor::with('employee', 'departements')->get();
             // Group doctors by department
             $groupedDoctors = [];
             foreach ($doctors as $doctor) {
