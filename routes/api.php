@@ -36,6 +36,7 @@ use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
 use App\Http\Controllers\Keuangan\CategoryController;
+use App\Http\Controllers\Keuangan\ChartOfAccountController;
 use App\Http\Controllers\SIMRS\TextToSpeech\TextToSpeechController;
 use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\AttendanceRequest;
@@ -343,7 +344,6 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
 
     Route::get('user/getByName', [UserController::class, 'getByName'])->name('user.getByName');
 });
-
 
 Route::get('/tts', [TextToSpeechController::class, 'tts'])->name('tts');
 Route::post('livasya-message', [BotMessageController::class, 'livasyaMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.verified');

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Keuangan\BankController;
 use App\Http\Controllers\Keuangan\CategoryController;
+use App\Http\Controllers\Keuangan\ChartOfAccountController;
 use App\Http\Controllers\Keuangan\GroupChartOfAccountController;
 use App\Http\Controllers\Keuangan\HutangController;
 use App\Http\Controllers\Keuangan\KeuanganController;
@@ -107,6 +108,24 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name("group-chart-of-account.update");
             // ->middleware('can:edit keuangan data kategori');
 
+            Route::get("/chart-of-account/{chartOfAccount:id}", [ChartOfAccountController::class, 'getById'])
+                ->name("chart-of-account.get");
+            // ->middleware('can:view keuangan laporan perbulan');
+            Route::get("/chart-of-account", [ChartOfAccountController::class, 'index'])
+                ->name("chart-of-account.index")
+                ->middleware('can:view keuangan laporan perbulan');
+            Route::post("/chart-of-account", [ChartOfAccountController::class, 'store'])
+                ->name("chart-of-account.store");
+            // ->middleware('can:tambah keuangan data kategori');
+            Route::patch("/chart-of-account/{chartOfAccount:id}", [ChartOfAccountController::class, 'update'])
+                ->name("chart-of-account.update");
+            // ->middleware('can:edit keuangan data kategori');
+
         });
+    });
+
+    Route::prefix('api')->group(function () {
+        Route::get('/coa/group/{group_id}', [ChartOfAccountController::class, 'getByGroup'])->name('coa.byGroup');
+        Route::get('/coa/{coa:id}', [ChartOfAccountController::class, 'show'])->name('coa.show');
     });
 });
