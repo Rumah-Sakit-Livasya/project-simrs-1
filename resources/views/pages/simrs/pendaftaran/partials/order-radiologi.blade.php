@@ -1,3 +1,8 @@
+<style>
+    .parameter_radiologi_number {
+        width: 40px
+    }
+</style>
 <div class="panel-hdr border-top">
     <h2 class="text-light">
         <i class="fas fa-address-card mr-3 ml-2 text-primary" style="transform: scale(2.1)"></i>
@@ -40,10 +45,10 @@
                         <div class="form-group">
                             <select class="select2 form-control w-100" id="doctor_id" name="doctor_id">
                                 <option value=""></option>
-                                    @foreach ($radiologyDoctors as $doctor)
-                                        <option value="{{ $doctor->id }}">
-                                            {{ $doctor->employee->fullname }}
-                                        </option>
+                                @foreach ($radiologyDoctors as $doctor)
+                                    <option value="{{ $doctor->id }}">
+                                        {{ $doctor->employee->fullname }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -71,6 +76,30 @@
                                     CITO (naik 30%)
                                 </label>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="row align-items-center">
+                    <div class="col-xl-4 text-right">
+                        <label class="form-label" for="select_parameter">Parameter</label>
+                    </div>
+                    <div class="col-xl-8">
+                        <div class="form-group">
+                            <select class="select2 form-control w-100" id="select_parameter" name="select_parameter">
+                                <option value=""></option>
+                                @foreach ($radiology_categories as $category)
+                                    <optgroup label="{{ $category->nama_kategori }}">
+                                        @foreach ($category->parameter_radiologi as $parameter)
+                                            <option value="{{ $parameter->id }}">
+                                                {{ $parameter->parameter }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -108,21 +137,31 @@
                         @enderror
                     </div>
                 </div>
+
+                <div class="row align-items-center">
+                    <div class="col-xl-4 text-right">
+                        <label class="form-label">
+                            Parameter Terpilih
+                        </label>
+                    </div>
+
+                    <div class="col-xl-8" id="active-parameters">
+                    </div>
+
+                </div>
+
+                <div class="row align-items-center">
+                    <div class="col-xl-4"></div>
+                    <div class="col-xl-8 text-center">
+                        <h3 class="text-success"> <i class="fa fa-calculator"></i> <span id="radiologi-total">Rp
+                                0</span>
+                        </h3>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-xl-6">
-            <h3>Parameter</h3>
-        </div>
-
-        <div class="col-xl-6">
-            <h3 class="text-success" style="text-align: right"> <i class="fa fa-calculator"></i> <span
-                    id="radiologi-total">Rp 0</span>
-            </h3>
-        </div>
-        <div class="col-xl-2"></div>
-        <div class="col-xl-8">
-            <div class="accordion" id="accordionExample">
-                <div class="accordion-item">
+        <div class="col-xl-12">
+            {{-- <div class="accordion-item">
                     <h2 class="accordion-header" style="text-align: center">
                         <button class="accordion-button collapsed btn btn-primary" type="button" data-bs-toggle="collapse"
                             data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
@@ -176,10 +215,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </div> --}}
         </div>
-        <div class="col-xl-2"></div>
+
         <div class="col-xl-12 mt-5">
             <div class="row">
                 <div class="col-xl-6">

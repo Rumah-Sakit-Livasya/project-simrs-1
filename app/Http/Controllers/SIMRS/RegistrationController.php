@@ -217,7 +217,7 @@ class RegistrationController extends Controller
                 $lastRanapRegistration = Registration::where(['patient_id' => $patient->id, 'registration_type' => 'rawat-inap'])->orderBy('created_at', 'desc')->first();
                 $grupPenjaminBPJS = GroupPenjamin::where('name', 'like', '%BPJS%')->first();
                 $ranapBPJSdalam1bulan =
-                    $lastRanapRegistration['penjamin_id'] == $grupPenjaminBPJS->id && // ranap BPJS
+                    $lastRanapRegistration && $lastRanapRegistration['penjamin_id'] == $grupPenjaminBPJS->id && // ranap BPJS
                     \Carbon\Carbon::parse($lastRanapRegistration['registration_date'])->diffInDays() <= 30; // kurang dari 30 hari / 1 bulan
                 if ($ranapBPJSdalam1bulan) {
                     // reassign the $penjamins variable
