@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Link;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -11,9 +12,19 @@ class LinkController extends Controller
 {
     public function index()
     {
-        return view('pages.links.index', [
-            'links' => Link::orderBy('created_at', 'desc')->get()
-        ]);
+        $query = Link::query();
+
+        if (Auth::user()->hasRole('super admin')) {
+            // Super admin melihat semua links
+            $links = $query->orderBy('created_at', 'desc')->get();
+        } else {
+            // User biasa hanya melihat links miliknya
+            $links = $query->where('user_id', Auth::id())
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        return view('pages.links.index', compact('links'));
     }
 
     public function shorten(Request $request)
