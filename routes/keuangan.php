@@ -38,16 +38,6 @@ Route::group(['middleware' => ['auth']], function () {
             ->name("category.update");
         // ->middleware('can:edit keuangan data kategori');
 
-        // Bank
-        Route::get("/banks", [BankController::class, 'index'])
-            ->name("bank.index")
-            ->middleware('can:view keuangan data rekening');
-        Route::post("/banks", [BankController::class, 'store'])
-            ->name("bank.store");
-        // ->middleware('can:tambah keuangan data rekening');
-        Route::put("/banks/{banks:id}", [BankController::class, 'update'])
-            ->name("bank.update");
-        // ->middleware('can:edit keuangan data rekening');
 
         // Transaksi
         Route::get("/transaksi", [TransaksiController::class, 'index'])
@@ -98,6 +88,7 @@ Route::group(['middleware' => ['auth']], function () {
             ->name("laporan-perbulan.store");
         // ->middleware('can:tambah keuangan laporan perbulan');
         Route::prefix('setup')->group(function () {
+
             Route::get("/group-chart-of-account", [GroupChartOfAccountController::class, 'index'])
                 ->name("group-chart-of-account.index")
                 ->middleware('can:view keuangan laporan perbulan');
@@ -121,6 +112,16 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name("chart-of-account.update");
             // ->middleware('can:edit keuangan data kategori');
 
+            // Bank
+            Route::get("/banks", [BankController::class, 'index'])
+                ->name("bank.index")
+                ->middleware('can:view keuangan data rekening');
+            Route::post("/banks", [BankController::class, 'store'])
+                ->name("bank.store");
+            // ->middleware('can:tambah keuangan data rekening');
+            Route::put("/banks/{banks:id}", [BankController::class, 'update'])
+                ->name("bank.update");
+            // ->middleware('can:edit keuangan data rekening');
         });
     });
 
