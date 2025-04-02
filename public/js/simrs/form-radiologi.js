@@ -3,10 +3,6 @@
 /// <reference path="../types.d.ts" />
 
 class RadiologiForm {
-    /**
-     * @type {ParameterRadiologi[]}
-     */
-    #ParameterRadiologi;
 
     /**
     * @type {number}
@@ -34,6 +30,16 @@ class RadiologiForm {
      */
     #elementForm = undefined;
 
+    /**
+     * @type {HTMLDivElement | undefined}
+     */
+    #activeParameterDiv = undefined;
+
+    /**
+     * @type {{ id: number, qty: number }[]}
+     */
+    #selectedParameters = [];
+
     #CITO = false;
 
     constructor() {
@@ -50,24 +56,6 @@ class RadiologiForm {
     }
 
     #init() {
-        // Select all checkboxes inside the Blade-generated form
-        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
-        checkboxes.forEach((checkbox) => {
-            checkbox.addEventListener("change", this.#handleCheckboxChange.bind(this));
-        });
-
-        // Select all number input fields
-        const numberInputs = document.querySelectorAll("input[type='number'].parameter_radiologi_number");
-        numberInputs.forEach((input) => {
-            input.addEventListener("input", this.#handleNumberChange.bind(this));
-        });
-
-        // Search bar
-        const searchBar = document.getElementById("searchRadiology");
-        if (searchBar) {
-            searchBar.addEventListener("keyup", this.#handleSearchBarChange.bind(this));
-        }
-
         // Harga
         this.#elementHarga = document.getElementById("radiologi-total") || undefined;
 
@@ -85,6 +73,93 @@ class RadiologiForm {
             this.#elementForm = /** @type {HTMLFormElement} */ (form);
             form.addEventListener("submit", this.#submit.bind(this));
         }
+
+        // Select parameter (for Select2)
+        const selectParameter = $('#select_parameter');
+        if (selectParameter.length) {
+            selectParameter.on("select2:select", this.#selectParameterChange.bind(this));
+        }
+
+        // Active parameters div
+        const activeParameterDiv = document.querySelector("div#active-parameters");
+        if (form) {
+            this.#activeParameterDiv = /** @type {HTMLDivElement} */ (activeParameterDiv);
+        }
+    }
+
+    /**
+     * Handle select parameter changes
+     * @param {Event} event 
+     */
+    #selectParameterChange(event) {
+        const select = /** @type {HTMLSelectElement | null} */ (event.target);
+        if (!select) return;
+
+        const selectedOption = select.options[select.selectedIndex];
+        if (selectedOption) {
+            this.#insertParameter(selectedOption);
+        }
+    }
+
+    /**
+     * Insert parameter to active parameter div
+     * @param {HTMLOptionElement} option 
+     */
+    #insertParameter(option) {
+        // push to array
+        // get html object
+        this.#selectedParameters.push({ id: parseInt(option.value), qty: 1 });
+        const html = this.#parameterBox(option, this.#selectedParameters.length - 1);
+
+        // insert to active parameter div
+        if (this.#activeParameterDiv) {
+            this.#activeParameterDiv.insertAdjacentHTML('beforeend', html);
+
+            // listen to quantity number changes
+            const numberInputs = document.querySelectorAll("input[type='number']#jumlah_" + option.value);
+            numberInputs.forEach((input) => {
+                input.addEventListener("input", this.#handleNumberChange.bind(this));
+            });
+
+            //  recalculate cost
+            this.#calculateCost();
+            $('#select_parameter').val('').trigger('change'); // Reset the Select2 dropdown
+        } else {
+            console.error(new Error('Active parameter div not found'));
+        }
+    }
+
+    /**
+     * Get parameter box html string
+     * @param {HTMLOptionElement} option 
+     * @param {number} index
+     */
+    #parameterBox(option, index) {
+        return /*html*/`
+            <h5 class="form-control active_parameter" id="parameter_box_${option.value}">
+                <a class="mdi mdi-close pointer mdi-24px text-danger" onclick="RadiologiFormClass.removeParameter(${option.value}, ${index})" title="Hapus Parameter"></a>
+                <input type="number" value="1" class="parameter_radiologi_number" id="jumlah_${option.value}" index="${index}">
+                    ${option.text}
+            </h5>
+        `;
+    }
+
+    /**
+     * Remove parameter
+     * @param {number} id 
+     * @param {number} index
+     */
+    removeParameter(id, index) {
+        const box = document.getElementById(`parameter_box_${id}`);
+        if (!box) return;
+
+        // remove from array
+        this.#selectedParameters.splice(index, 1);
+
+        // remove html object
+        // recalculate cost
+        box.remove();
+        this.#calculateCost();
     }
 
     /**
@@ -118,34 +193,26 @@ class RadiologiForm {
          *  }} Parameter
          */
         let parameters = /** @type {Parameter[]} */ ([]);
-        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
-        checkboxes.forEach((_checkbox) => {
-            const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
-            const isChecked = checkbox.checked;
-            const parameterId = parseInt(checkbox.value);
-            if (isChecked) {
-                const QtyElement = /** @type {HTMLInputElement} */ (document.querySelector("input#jumlah_" + parameterId));
-                const Qty = parseInt(QtyElement.value);
-                const Tarif = this.#TarifRadiologi.find((t) => {
-                    if (
-                        t.parameter_radiologi_id == parameterId
-                        &&
-                        t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1)
-                        &&
-                        t.group_penjamin_id == (this.#GroupPenjaminId ?? -1)
-                    ) return t;
-                });
-                if (!Tarif) {
-                    return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameterId);
-                }
-                let Price = Tarif.total;
-                if (this.#CITO) {
-                    Price += (Price * 30 / 100);
-                }
-
-                parameters.push({ id: parameterId, qty: Qty, price: Price });
+        for (let i = 0; i < this.#selectedParameters.length; i++) {
+            const parameter = this.#selectedParameters[i];
+            const Tarif = this.#TarifRadiologi.find((t) => {
+                const EqualParameterId = t.parameter_radiologi_id == parameter.id;
+                const EqualKelasRawatId = this.#Registration.registration_type == "rawat-jalan" ? true : (t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1));
+                const EqualGroupPenjaminId = t.group_penjamin_id == (this.#GroupPenjaminId ?? -1);
+                if (
+                    EqualParameterId && EqualKelasRawatId && EqualGroupPenjaminId
+                ) return t;
+            });
+            if (!Tarif) {
+                return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameter.id);
             }
-        })
+            let Price = Tarif.total;
+            if (this.#CITO) {
+                Price += (Price * 30 / 100);
+            }
+            parameters.push({ id: parameter.id, qty: parameter.qty, price: Price });
+
+        }
         formData.append('parameters', JSON.stringify(parameters));
         formData.append('registration_id', String(this.#Registration.id));
 
@@ -173,41 +240,26 @@ class RadiologiForm {
 
     #calculateCost() {
         this.#totalHarga = 0;
-        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
-        checkboxes.forEach((_checkbox) => {
-            const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
-            const isChecked = checkbox.checked;
-            const parameterId = checkbox.value;
-            const parameter = this.#ParameterRadiologi.find((p) => p.id == parseInt(parameterId));
 
-            if (isChecked && parameter) {
-                const tarif = this.#TarifRadiologi.find((t) => {
-                    if (
-                        t.parameter_radiologi_id == parameter.id
-                        &&
-                        t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1)
-                        &&
-                        t.group_penjamin_id == (this.#GroupPenjaminId ?? -1)
-                    ) return t;
-                });
-
-                if (tarif) {
-                    const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}']`));
-                    if (parseInt(jumlah.value) < 1) {
-                        jumlah.value = String(1);
-                    }
-                    this.#totalHarga += tarif.total * parseInt(jumlah.value);
-
-                    if (this.#CITO) {
-                        this.#totalHarga += (this.#totalHarga * 30 / 100);
-                    }
-                }
-                else {
-                    showErrorAlertNoRefresh("Tarif untuk penjamin dan kelas rawat ini tidak ditemukan!");
-                    return;
-                }
+        for (let i = 0; i < this.#selectedParameters.length; i++) {
+            const parameter = this.#selectedParameters[i];
+            const Tarif = this.#TarifRadiologi.find((t) => {
+                const EqualParameterId = t.parameter_radiologi_id == parameter.id;
+                const EqualKelasRawatId = this.#Registration.registration_type == "rawat-jalan" ? true : (t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1));
+                const EqualGroupPenjaminId = t.group_penjamin_id == (this.#GroupPenjaminId ?? -1);
+                if (
+                    EqualParameterId && EqualKelasRawatId && EqualGroupPenjaminId
+                ) return t;
+            });
+            if (!Tarif) {
+                return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameter.id);
             }
-        });
+            let Price = Tarif.total * parameter.qty;
+            if (this.#CITO) {
+                Price += (Price * 30 / 100);
+            }
+            this.#totalHarga += Price;
+        }
 
         if (this.#elementHarga) {
             this.#elementHarga.textContent = this.#totalHarga.toLocaleString("id-ID", {
@@ -215,56 +267,8 @@ class RadiologiForm {
                 currency: "IDR",
             });
         }
-    }
 
-    /**
-     * Handle search bar changes
-     * @param {Event} event 
-     */
-    #handleSearchBarChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-
-        const searchBar = /** @type {HTMLInputElement} */ (_target);
-        const searchQuery = searchBar.value.toLowerCase();
-        if (searchQuery == "") {
-            this.#showAllParameters();
-            return;
-        }
-
-        const parameters = document.querySelectorAll(".parameter_radiologi");
-        parameters.forEach((parameter) => {
-            const parameterNameElement = parameter.querySelector(".form-check-label");
-            if (!parameterNameElement) return;
-            const parameterName = parameterNameElement.textContent;
-            if (!parameterName) return;
-
-            if (parameterName.toLowerCase().includes(searchQuery)) {
-                // @ts-ignore
-                parameter.style.display = "block";
-            } else {
-                // @ts-ignore
-                parameter.style.display = "none";
-            }
-        });
-    }
-
-    #showAllParameters() {
-        const parameters = document.querySelectorAll(".parameter_radiologi");
-        parameters.forEach((parameter) => {
-            // @ts-ignore
-            parameter.style.display = "block";
-        });
-    }
-
-    /**
-     * Handles checkbox state changes
-     * @param {Event} event
-     */
-    #handleCheckboxChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        this.#calculateCost();
+        return this.#totalHarga;
     }
 
     /**
@@ -274,6 +278,20 @@ class RadiologiForm {
     #handleNumberChange(event) {
         const _target = event.target;
         if (!_target) return;
+
+        const input = /** @type {HTMLInputElement} */ (_target);
+        let qty = parseInt(input.value);
+
+        if (qty < 1) {
+            input.value = "1";
+            qty = 1;
+        }
+
+        // get attribute "index"
+        const index = input.getAttribute("index");
+        if(!index) return console.error("No index found");
+        this.#selectedParameters[index].qty = qty;
+
         this.#calculateCost();
     }
 }
