@@ -10,6 +10,7 @@ use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
+use App\Http\Controllers\LinkController;
 use App\Http\Controllers\Pages\DashboardController;
 use App\Http\Controllers\Pages\UpdateProfileController;
 use App\Http\Controllers\PayrollController;
@@ -330,6 +331,14 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [ChecklistHarianCategoryController::class, 'index'])->name('checklist.category.index');
         });
         Route::get('/', [ChecklistHarianController::class, 'index'])->name('checklist.index');
+    });
+
+    Route::prefix('links')->group(function () {
+        Route::get('/', [LinkController::class, 'index'])->name('links.index');
+        Route::post('/shorten', [LinkController::class, 'shorten'])->name('shorten');
+        Route::get('/{code}', [LinkController::class, 'redirect']);
+        Route::delete('/links/{id}', [LinkController::class, 'destroy'])->name('links.destroy');
+        // Tambahkan route untuk analytics
     });
 
     Route::get('/optimize', function () {
