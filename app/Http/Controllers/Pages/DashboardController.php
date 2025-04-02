@@ -271,7 +271,10 @@ class DashboardController extends Controller
             ->orderByRaw('MONTH(birthdate) ASC') // Order by month
             ->get();
 
+        $links = auth()->user()->links()->latest()->get();
+
         return view('dashboard', [
+            'links' => $links,
             'lateCount' => $lateCount,
             'totalEmployees' => $totalEmployees,
             'jobLevel' => $jobLevel,

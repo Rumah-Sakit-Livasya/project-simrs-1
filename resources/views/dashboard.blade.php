@@ -379,6 +379,101 @@
                 </div>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">URL Shortener</h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Form Create Short URL -->
+                        <form id="shortenForm" method="POST" action="{{ route('dashboard.url_shortener.store') }}">
+                            @csrf
+                            <div class="form-row">
+                                <div class="col-md-8 mb-3">
+                                    <label for="original_url">URL Asli</label>
+                                    <input type="url" class="form-control" id="original_url" name="original_url"
+                                        required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="custom_code">Kode Kustom (opsional)</label>
+                                    <input type="text" class="form-control" id="custom_code" name="custom_code">
+                                </div>
+                                <div class="col-md-1 mb-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary">Buat</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Hasil Short URL -->
+                        @if (session('short_url'))
+                            <div class="alert alert-success mt-3">
+                                <p>Short URL berhasil dibuat:</p>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" value="{{ session('short_url') }}"
+                                        id="shortUrlInput" readonly>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            onclick="copyShortUrl()">
+                                            <i class="fas fa-copy"></i> Salin
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Daftar Link -->
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Daftar Link Saya</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="linksTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>URL Asli</th>
+                                        <th>Short URL</th>
+                                        <th>Kode</th>
+                                        <th>Klik</th>
+                                        <th>Dibuat</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($links as $link)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td class="text-truncate" style="max-width: 200px;">
+                                                <a href="{{ $link->original_url }}"
+                                                    target="_blank">{{ $link->original_url }}</a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ url('/links/' . $link->short_code) }}" target="_blank">
+                                                    {{ url('/links/' . $link->short_code) }}
+                                                </a>
+                                            </td>
+                                            <td>{{ $link->short_code }}</td>
+                                            <td>{{ $link->clicks }}</td>
+                                            <td>{{ $link->created_at->format('d/m/Y H:i') }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-danger delete-link"
+                                                    data-id="{{ $link->id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-5 d-flex chart">
             <div class="col-lg-4 mt-0 mb-2">
                 <!--Default-->
@@ -1074,6 +1169,45 @@
             radarChart();
             pieChart();
             doughnutChart();
+        });
+    </script>
+
+    {{-- Shortlink --}}
+    <script>
+        // Inisialisasi DataTable
+        $(document).ready(function() {
+            $('#linksTable').DataTable({
+                responsive: true
+            });
+        });
+
+        // Fungsi Copy URL
+        function copyShortUrl() {
+            const copyText = document.getElementById("shortUrlInput");
+            copyText.select();
+            document.execCommand("copy");
+            alert("URL berhasil disalin: " + copyText.value);
+        }
+
+        // Delete Link
+        $('.delete-link').click(function() {
+            const linkId = $(this).data('id');
+
+            if (confirm('Apakah Anda yakin ingin menghapus link ini?')) {
+                $.ajax({
+                    url: "{{ route('dashboard.url_shortener.delete', '') }}/" + linkId,
+                    type: 'DELETE',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert('Gagal menghapus link');
+                    }
+                });
+            }
         });
     </script>
 @endsection

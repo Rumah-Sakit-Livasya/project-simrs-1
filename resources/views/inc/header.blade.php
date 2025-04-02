@@ -289,7 +289,7 @@
     }
 </style>
 @yield('extended-css')
-{{-- @vite('resources/js/app.jsx') --}}
+{{-- @vite('resources//app.jsx') --}}
 
 {{-- <script src="/js/jspdf.umd.min.js"></script> --}}
 <!-- BEGIN Body -->

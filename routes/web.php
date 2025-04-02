@@ -18,6 +18,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SurveiKebersihanKamarController;
 use App\Http\Controllers\SwitchUserController;
+use App\Http\Controllers\UrlShortenerController;
 use App\Http\Controllers\WhatsappController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -333,6 +334,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [ChecklistHarianController::class, 'index'])->name('checklist.index');
     });
 
+    // routes/web.php
+    Route::middleware(['auth'])->group(function () {
+        Route::prefix('dashboard')->group(function () {
+            Route::post('/url-shortener', [UrlShortenerController::class, 'store'])->name('dashboard.url_shortener.store');
+            Route::delete('/url-shortener/{id}', [UrlShortenerController::class, 'destroy'])->name('dashboard.url_shortener.delete');
+        });
+    });
     Route::prefix('links')->group(function () {
         Route::get('/', [LinkController::class, 'index'])->name('links.index');
         Route::post('/shorten', [LinkController::class, 'shorten'])->name('shorten');

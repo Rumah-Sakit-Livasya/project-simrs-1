@@ -123,4 +123,9 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(OrderRadiologi::class);
     }
+
+    public function links()
+    {
+        return $this->hasMany(Link::class);
+    }
 }
