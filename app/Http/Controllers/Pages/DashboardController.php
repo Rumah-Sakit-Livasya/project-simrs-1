@@ -1070,11 +1070,12 @@ class DashboardController extends Controller
             }
         }
 
+        $check_date = null;
 
         $selectedBulan = request()->bulan;
         $selectedTahun = request()->tahun;
 
-        return view('pages.absensi.absensi.index', compact('selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance'));
+        return view('pages.absensi.absensi.index', compact('selectedBulan', 'selectedTahun', 'attendances', 'getNotify', 'jumlah_izin', 'jumlah_sakit', 'jumlah_cuti', 'jumlah_hadir', 'last_attendance', 'check_date'));
     }
 
     public function getSettingAttendances()

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Keuangan\BankController;
 use App\Http\Controllers\Keuangan\CategoryController;
+use App\Http\Controllers\Keuangan\GroupChartOfAccountController;
 use App\Http\Controllers\Keuangan\HutangController;
 use App\Http\Controllers\Keuangan\KeuanganController;
 use App\Http\Controllers\Keuangan\LaporanController;
@@ -95,5 +96,17 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post("/laporan-perbulan", [LaporanController::class, 'perbulan'])
             ->name("laporan-perbulan.store");
         // ->middleware('can:tambah keuangan laporan perbulan');
+        Route::prefix('setup')->group(function () {
+            Route::get("/group-chart-of-account", [GroupChartOfAccountController::class, 'index'])
+                ->name("group-chart-of-account.index")
+                ->middleware('can:view keuangan laporan perbulan');
+            Route::post("/group-chart-of-account", [GroupChartOfAccountController::class, 'store'])
+                ->name("group-chart-of-account.store");
+            // ->middleware('can:tambah keuangan data kategori');
+            Route::put("/group-chart-of-account/{chartOfAccount:id}", [GroupChartOfAccountController::class, 'update'])
+                ->name("group-chart-of-account.update");
+            // ->middleware('can:edit keuangan data kategori');
+
+        });
     });
 });
