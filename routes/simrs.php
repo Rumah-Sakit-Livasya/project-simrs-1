@@ -273,6 +273,8 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('label-order/{id}', [RadiologiController::class, 'labelOrder'])->name('radiologi.label-order');
             Route::get('edit-order/{id}', [RadiologiController::class, 'editOrder'])->name('radiologi.edit-order');
             Route::get('edit-hasil-parameter/{id}', [RadiologiController::class, 'editHasilParameter'])->name('radiologi.edit-hasil-parameter');
+            Route::get("order", [RadiologiController::class, 'order'])->name('radiologi.order');
+            Route::get("popup/pilih-pasien/{poli}", [RadiologiController::class, 'popupPilihPasien'])->name('radiologi.popup.pilih-pasien');
         });
 
         Route::prefix('laboratorium')->group(function () {

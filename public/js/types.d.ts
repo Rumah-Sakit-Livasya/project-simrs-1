@@ -2,6 +2,47 @@ declare function showErrorAlert(message: string): void;
 declare function showSuccessAlert(message: string): void;
 declare function showErrorAlertNoRefresh(message: string): void;
 
+interface GroupPenjamin {
+    id: number;
+    name: string;
+    code: string;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+interface Penjamin {
+    id: number;
+    group_penjamin_id: number;
+    mulai_kerjasama: string;
+    akhir_kerjasama: string | null;
+    tipe_perusahaan: string;
+    kode_perusahaan: string | null;
+    nama_perusahaan: string;
+    alamat_surat: string | null;
+    alamat_email: string | null;
+    direktur: string | null;
+    nama_kontak: string | null;
+    diskon: string;
+    jabatan: string | null;
+    termasuk_penjamin: number;
+    fax_kontak: string | null;
+    alamat: string | null;
+    alamat_tagihan: string | null;
+    telepon_kontak: string | null;
+    email_kontak: string | null;
+    kota: string | null;
+    status: number;
+    kode_pos: string | null;
+    jenis_kerjasama: string;
+    jenis_kontrak: string;
+    pasien_otc: number;
+    keterangan: string | null;
+    deleted_at: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+}
+
 interface TarifLaboratorium {
     id: number;
     parameter_laboratorium_id: number;

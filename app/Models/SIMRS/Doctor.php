@@ -3,6 +3,7 @@
 namespace App\Models\SIMRS;
 
 use App\Models\Employee;
+use App\Models\RegistrationOTC;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -41,6 +42,11 @@ class Doctor extends Model
     public function registration()
     {
         return $this->hasMany(Registration::class);
+    }
+
+    public function registration_otc()
+    {
+        return $this->hasMany(RegistrationOTC::class, 'doctor_id');
     }
 
     public function order_tindakan_medis()

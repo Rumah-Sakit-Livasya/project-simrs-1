@@ -5,6 +5,10 @@
         table {
             font-size: 8pt !important;
         }
+
+        .active_parameter {
+            
+        }
     </style>
     <main id="js-page-content" role="main" class="page-content">
         <div class="row justify-content-center">

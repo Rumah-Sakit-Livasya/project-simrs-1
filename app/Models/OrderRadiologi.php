@@ -21,6 +21,11 @@ class OrderRadiologi extends Model
         'updated_at'
     ];
 
+    public function registration_otc()
+    {
+        return $this->belongsTo(RegistrationOTC::class, 'otc_id');
+    }
+
     public function registration()
     {
         return $this->belongsTo(Registration::class, 'registration_id');

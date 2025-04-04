@@ -80,23 +80,33 @@
                                                     <label class="form-label" for="doctor_id">Poly/Ruang</label>
                                                 </div>
                                                 <div class="col-xl-8">
-                                                    @if ($order->registration->registration_type != 'rawat-inap')
-                                                        <input type="text"
-                                                            style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                            class="form-control" id="poly_ruang" readonly
-                                                            value="{{ $order->registration->poliklinik }}"
-                                                            name="poly_ruang">
-                                                    @elseif(isset($order->registration->kelas_rawat))
-                                                        <input type="text"
-                                                            style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                            class="form-control" id="poly_ruang" readonly
-                                                            value="{{ $order->registration->kelas_rawat->room->ruangan }}"
-                                                            name="poly_ruang">
+                                                    @if ($order->registration_otc)
+                                                        <a>
+                                                            <input type="text"
+                                                                style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
+                                                                class="form-control" id="poly_ruang" readonly
+                                                                value="{{ $order->registration_otc->poly_ruang }}"
+                                                                name="poly_ruang">
+                                                        </a>
                                                     @else
-                                                        <input type="text"
-                                                            style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                                            class="form-control" id="poly_ruang" readonly value=" - "
-                                                            name="poly_ruang">
+                                                        @if ($order->registration->registration_type != 'rawat-inap')
+                                                            <input type="text"
+                                                                style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
+                                                                class="form-control" id="poly_ruang" readonly
+                                                                value="{{ $order->registration->poliklinik }}"
+                                                                name="poly_ruang">
+                                                        @elseif(isset($order->registration->kelas_rawat))
+                                                            <input type="text"
+                                                                style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
+                                                                class="form-control" id="poly_ruang" readonly
+                                                                value="{{ $order->registration->kelas_rawat->room->ruangan }}"
+                                                                name="poly_ruang">
+                                                        @else
+                                                            <input type="text"
+                                                                style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
+                                                                class="form-control" id="poly_ruang" readonly value=" - "
+                                                                name="poly_ruang">
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </div>
@@ -121,7 +131,7 @@
                                                     <input type="text"
                                                         style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="doctor_perujuk" readonly
-                                                        value="{{ $order->registration->doctor->employee->fullname }}"
+                                                        value="{{ $order->registration ? $order->registration->doctor->employee->fullname : 'OTC' }}"
                                                         name="doctor_perujuk">
                                                 </div>
                                             </div>
@@ -139,7 +149,7 @@
                                                     <input type="text"
                                                         style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="patient_name" readonly
-                                                        value="{{ $order->registration->patient->name }}"
+                                                        value="{{ $order->registration ? $order->registration->patient->name : $order->registration_otc->nama_pasien }}"
                                                         name="patient_name">
                                                 </div>
                                             </div>
@@ -153,7 +163,7 @@
                                                     <input type="text"
                                                         style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="gender" readonly
-                                                        value="{{ $order->registration->patient->gender }}"
+                                                        value="{{ $order->registration ? $order->registration->patient->gender : $order->registration_otc->jenis_kelamin }}"
                                                         name="gender">
                                                 </div>
                                             </div>
@@ -167,7 +177,7 @@
                                                     <input type="text"
                                                         style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="date_of_birth" readonly
-                                                        value="{{ $order->registration->patient->date_of_birth }}"
+                                                        value="{{ $order->registration ? $order->registration->patient->date_of_birth : $order->registration_otc->date_of_birth }}"
                                                         name="date_of_birth">
                                                 </div>
                                             </div>
@@ -183,7 +193,7 @@
                                                     <input type="text"
                                                         style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="address" readonly
-                                                        value="{{ $order->registration->patient->address }}"
+                                                        value="{{ $order->registration ? $order->registration->patient->address : $order->registration_otc->alamat }}"
                                                         name="address">
                                                 </div>
                                             </div>
@@ -218,11 +228,19 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl-8">
+                                                    @if($order->registration_otc)
+                                                        <input type="text"
+                                                            style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
+                                                            class="form-control" id="rm_reg" readonly
+                                                            value="OTC"
+                                                            name="rm_reg">
+                                                    @else
                                                     <input type="text"
                                                         style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="rm_reg" readonly
                                                         value="{{ $order->registration->patient->medical_record_number }} / {{ $order->registration->registration_number }}"
                                                         name="rm_reg">
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -238,7 +256,7 @@
                                                     <input type="text"
                                                         style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="mobile_phone_number" readonly
-                                                        value="{{ $order->registration->patient->mobile_phone_number }}"
+                                                        value="{{ $order->registration ? $order->registration->patient->mobile_phone_number : $order->registration_otc->no_telp }}"
                                                         name="mobile_phone_number">
                                                 </div>
                                             </div>
@@ -255,7 +273,7 @@
                                                     <input type="text"
                                                         style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="age" readonly
-                                                        value="{{ displayAge($order->registration->patient->date_of_birth) }}"
+                                                        value="{{ $order->registration ? displayAge($order->registration->patient->date_of_birth) : displayAge($order->registration_otc->date_of_birth) }}"
                                                         name="age">
                                                 </div>
                                             </div>

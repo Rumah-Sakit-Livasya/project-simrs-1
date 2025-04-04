@@ -1862,24 +1862,43 @@
                                             {{-- @php
                                                 dd($orderParameter);
                                             @endphp --}}
-                                            <td align="center">{{ $orderParameter->order_radiologi->registration->registration_number }}</td>
-                                            <td align="center">{{ $orderParameter->order_radiologi->registration->date }}</td>
-                                            <td align="center"></td>
-                                            <td align="center">{{ $orderParameter->order_radiologi->registration->patient->medical_record_number }}</td>
-                                            <td>{{ $orderParameter->order_radiologi->registration->patient->name }}</td>
-                                            <td>{{ $orderParameter->order_radiologi->registration->patient->gender }}</td>
-                                            <td> {{ displayAge($orderParameter->order_radiologi->registration->patient->date_of_birth) }}</td>
-                                            <td>{{ $orderParameter->order_radiologi->registration->patient->address }} </td>
-                                            <td>{{ $orderParameter->order_radiologi->registration->patient->mobile_phone_number }}</td>
-                                            <td>{{ $orderParameter->order_radiologi->registration->poliklinik }}</td>
-                                            <td>{{ $orderParameter->order_radiologi->registration->penjamin->nama_perusahaan }}</td>
-                                            <td>{{ $orderParameter->order_radiologi->registration->doctor->employee->fullname }}</td>
+                                            @if($orderParameter->order_radiologi->registration_otc)
+                                                <td align="center">{{ $orderParameter->order_radiologi->registration_otc->registration_number }}</td>
+                                                <td align="center">{{ $orderParameter->order_radiologi->registration_otc->order_date }}</td>
+                                                <td align="center">OTC</td>
+                                                <td align="center"></td>
+                                                <td>{{ $orderParameter->order_radiologi->registration_otc->nama_pasien }}</td>
+                                                <td>{{ $orderParameter->order_radiologi->registration_otc->jenis_kelamin }}</td>
+                                                <td> {{ displayAge($orderParameter->order_radiologi->registration_otc->date_of_birth) }}</td>
+                                                <td>{{ $orderParameter->order_radiologi->registration_otc->alamat}} </td>
+                                                <td>{{ $orderParameter->order_radiologi->registration_otc->no_telp }}</td>
+                                                <td>{{ $orderParameter->order_radiologi->registration_otc->poly_ruang }}</td>
+                                                <td>{{ $orderParameter->order_radiologi->registration_otc->penjamin->nama_perusahaan }}</td>
+                                                {{-- @php
+                                                    dd($orderParameter->registration_otc->doctor);
+                                                @endphp --}}
+                                                <td>{{ $orderParameter->registration_otc->doctor->employee->fullname }}</td>
+                                            @else
+                                                <td align="center">{{ $orderParameter->order_radiologi->registration->registration_number }}</td>
+                                                <td align="center">{{ $orderParameter->order_radiologi->registration->date }}</td>
+                                                <td align="center"></td>
+                                                <td align="center">{{ $orderParameter->order_radiologi->registration->patient->medical_record_number }}</td>
+                                                <td>{{ $orderParameter->order_radiologi->registration->patient->name }}</td>
+                                                <td>{{ $orderParameter->order_radiologi->registration->patient->gender }}</td>
+                                                <td> {{ displayAge($orderParameter->order_radiologi->registration->patient->date_of_birth) }}</td>
+                                                <td>{{ $orderParameter->order_radiologi->registration->patient->address }} </td>
+                                                <td>{{ $orderParameter->order_radiologi->registration->patient->mobile_phone_number }}</td>
+                                                <td>{{ $orderParameter->order_radiologi->registration->poliklinik }}</td>
+                                                <td>{{ $orderParameter->order_radiologi->registration->penjamin->nama_perusahaan }}</td>
+                                                <td>{{ $orderParameter->order_radiologi->registration->doctor->employee->fullname }}</td>
+                                            @endif
+
                                             <td align="center">{{ $orderParameter->order_radiologi->no_order }}</td>
                                             <td align="center">{{ $orderParameter->order_radiologi->inspection_date }}</td>
                                             <td align="center">{{ $orderParameter->order_radiologi->pickup_date }}</td>
                                             <td align="center">{{ $orderParameter->verifikasi_date }}</td>
                                             <td>{{ $orderParameter->order_radiologi->doctor->employee->fullname }}</td>
-                                            <td>{{ $orderParameter->radiografer->fullname }}</td>
+                                            <td>{{ $orderParameter->radiografer ? $orderParameter->radiografer->fullname : '' }}</td>
                                             <td>{{ $orderParameter->parameter_radiologi->parameter }}</td>
                                             <td align="right">{{ (new NumberFormatter('id_ID', NumberFormatter::CURRENCY))->formatCurrency($orderParameter->nominal_rupiah, 'IDR') }}</td>
                                             <td><span style="color:#f00; font-style:italic;">{{ $orderParameter->verifikasi_date ? 'Unconfirmed' : '' }}</span></td>

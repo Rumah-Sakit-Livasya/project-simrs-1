@@ -466,11 +466,11 @@ class RegistrationController extends Controller
 
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
             'kelasRawat' => $kelasRawat,
-            'groupPenjaminId' => $groupPenjaminId,
             'penjamin' => $penjamin,
             'groupedDoctors' => $groupedDoctors,
             'radiologyDoctors' => $radiologyDoctors,
             'radiologiOrders' => $radiologiOrders,
+            'groupPenjaminId' => $groupPenjaminId,
             'radiology_categories' => KategoriRadiologi::all(),
             'tarifs' => TarifParameterRadiologi::all(),
             'registration' => $registration,

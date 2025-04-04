@@ -30,12 +30,18 @@ class OrderParameterRadiologi extends Model
         return $this->belongsTo(Employee::class, 'radiografer_id', 'id');
     }
 
-    public function verifikator(){
+    public function verifikator()
+    {
         return $this->belongsTo(Employee::class, 'verifikator_id', 'id');
     }
 
     public function registration()
     {
         return $this->hasOneThrough(Registration::class, OrderRadiologi::class, 'id', 'id', 'order_radiologi_id', 'registration_id');
+    }
+
+    public function registration_otc()
+    {
+        return $this->hasOneThrough(RegistrationOTC::class, OrderRadiologi::class, 'id', 'id', 'order_radiologi_id', 'otc_id');
     }
 }

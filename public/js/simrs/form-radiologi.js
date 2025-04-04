@@ -5,6 +5,11 @@
 class RadiologiForm {
 
     /**
+     * @type {ParameterRadiologi[]}
+     */
+    #ParameterRadiologi;
+
+    /**
     * @type {number}
     */
     #GroupPenjaminId;
@@ -245,11 +250,10 @@ class RadiologiForm {
             const parameter = this.#selectedParameters[i];
             const Tarif = this.#TarifRadiologi.find((t) => {
                 const EqualParameterId = t.parameter_radiologi_id == parameter.id;
-                const EqualKelasRawatId = this.#Registration.registration_type == "rawat-jalan" ? true : (t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1));
+                const EqualKelasRawatId = this.#Registration.registration_type == "rawat-jalan"
+                    ? true : (t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1));
                 const EqualGroupPenjaminId = t.group_penjamin_id == (this.#GroupPenjaminId ?? -1);
-                if (
-                    EqualParameterId && EqualKelasRawatId && EqualGroupPenjaminId
-                ) return t;
+                if (EqualParameterId && EqualKelasRawatId && EqualGroupPenjaminId) return t;
             });
             if (!Tarif) {
                 return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameter.id);
@@ -289,7 +293,7 @@ class RadiologiForm {
 
         // get attribute "index"
         const index = input.getAttribute("index");
-        if(!index) return console.error("No index found");
+        if (!index) return console.error("No index found");
         this.#selectedParameters[index].qty = qty;
 
         this.#calculateCost();
