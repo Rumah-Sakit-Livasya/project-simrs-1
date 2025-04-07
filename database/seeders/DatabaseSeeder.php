@@ -13,7 +13,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(EthnicSeeder::class);
+        $this->call(GroupCOASeeders::class);
+        // $this->call(EthnicSeeder::class);
         // Target::factory()->count(100)->create();
         // $this->call(RolePermissionSeeder::class);
         // $this->call(MenusTableSeeder::class);

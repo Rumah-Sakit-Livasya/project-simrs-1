@@ -224,7 +224,7 @@ class RegistrationController extends Controller
                 $lastRanapRegistration = Registration::where(['patient_id' => $patient->id, 'registration_type' => 'rawat-inap'])->orderBy('created_at', 'desc')->first();
                 $grupPenjaminBPJS = GroupPenjamin::where('name', 'like', '%BPJS%')->first();
                 $ranapBPJSdalam1bulan =
-                    $lastRanapRegistration['penjamin_id'] == $grupPenjaminBPJS->id && // ranap BPJS
+                    $lastRanapRegistration && $lastRanapRegistration['penjamin_id'] == $grupPenjaminBPJS->id && // ranap BPJS
                     \Carbon\Carbon::parse($lastRanapRegistration['registration_date'])->diffInDays() <= 30; // kurang dari 30 hari / 1 bulan
                 if ($ranapBPJSdalam1bulan) {
                     // reassign the $penjamins variable
@@ -312,14 +312,13 @@ class RegistrationController extends Controller
                 'kelas_rawat_id' => 'nullable|string',
             ], [
                 'penjamin_id.required' => 'Kolom Penjamin tidak boleh kosong.',
-                'patient_id.nullable' => 'Kolom patient_id boleh kosong.',
-                'user_id.nullable' => 'Kolom user_id boleh kosong.',
-                'employee_id.nullable' => 'Kolom employee_id boleh kosong.',
-                'doctor_id.nullable' => 'Kolom doctor_id boleh kosong.',
-                'registration_type.nullable' => 'Kolom registration_type boleh kosong.',
+                'patient_id.required' => 'Kolom Pasien tidak boleh kosong.',
+                'user_id.required' => 'Kolom User tidak boleh kosong.',
+                'employee_id.required' => 'Kolom Pegawai tidak boleh kosong.',
+                'doctor_id.required' => 'Kolom Dokter tidak boleh kosong.',
+                'registration_type.required' => 'Kolom Tipe Registrasi tidak boleh kosong.',
                 'poliklinik.nullable' => 'Kolom poliklinik boleh kosong.',
                 'poliklinik.string' => 'Kolom poliklinik harus berupa teks.',
-                'penjamin_id.nullable' => 'Kolom penjamin_id boleh kosong.',
                 'rujukan.required' => 'Kolom rujukan wajib diisi.',
                 'rujukan.string' => 'Kolom rujukan harus berupa teks.',
                 'dokter_perujuk.nullable' => 'Kolom dokter perujuk boleh kosong.',

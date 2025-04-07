@@ -212,84 +212,84 @@
     }
 
     #daftar-pasien-poli ul {
-            padding: 0px;
-            margin-top: 20px;
-        }
+        padding: 0px;
+        margin-top: 20px;
+    }
 
-        #daftar-pasien-poli li {
-            display: grid;
-            grid-template-columns: 45px 1fr;
-            grid-template-rows: repeat(3, 20px);
-            font-weight: 300;
-            align-items: start;
-            margin-top: 5px;
-            column-gap: 5px;
-            padding: 7px;
-        }
+    #daftar-pasien-poli li {
+        display: grid;
+        grid-template-columns: 45px 1fr;
+        grid-template-rows: repeat(3, 20px);
+        font-weight: 300;
+        align-items: start;
+        margin-top: 5px;
+        column-gap: 5px;
+        padding: 7px;
+    }
 
-        #daftar-pasien-poli li .number {
-            grid-row: 1 / 8;
-            font-size: 1.5rem;
-            align-self: center;
-            justify-self: center;
-            color: #3f51b5;
-        }
+    #daftar-pasien-poli li .number {
+        grid-row: 1 / 8;
+        font-size: 1.5rem;
+        align-self: center;
+        justify-self: center;
+        color: #3f51b5;
+    }
 
-        #daftar-pasien-poli li .patient-name {
-            color: #3366b9;
-            font-size: 0.95rem;
-            align-self: center;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            font-weight: 400;
-        }
+    #daftar-pasien-poli li .patient-name {
+        color: #3366b9;
+        font-size: 0.95rem;
+        align-self: center;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-weight: 400;
+    }
 
-        #daftar-pasien-poli li .birth {
-            color: #fd3995;
-            font-size: 0.7rem;
-            align-self: center;
-            font-weight: 400;
-        }
+    #daftar-pasien-poli li .birth {
+        color: #fd3995;
+        font-size: 0.7rem;
+        align-self: center;
+        font-weight: 400;
+    }
 
-        #daftar-pasien-poli li .rm {
-            font-size: 0.75rem;
-            font-weight: 400;
-            color: #6c757d;
-        }
+    #daftar-pasien-poli li .rm {
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: #6c757d;
+    }
 
-        .gradient-text {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-align: center;
-            background: linear-gradient(135deg, rgba(0, 123, 255, 1), rgb(255 121 0 / 100%));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: block;
-        }
+    .gradient-text {
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(0, 123, 255, 1), rgb(255 121 0 / 100%));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: block;
+    }
 
-        .spaced-text {
-            letter-spacing: 0.4em;
-            font-weight: bold;
-            background: linear-gradient(135deg, rgba(0, 123, 255, 1), rgb(255 121 0 / 100%));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: block;
-        }
+    .spaced-text {
+        letter-spacing: 0.4em;
+        font-weight: bold;
+        background: linear-gradient(135deg, rgba(0, 123, 255, 1), rgb(255 121 0 / 100%));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: block;
+    }
 
-        .logo-dashboard-simrs {
-            width: 100%;
-        }
+    .logo-dashboard-simrs {
+        width: 100%;
+    }
 
-    .pointer{
+    .pointer {
         cursor: pointer;
     }
-        
 </style>
 @yield('extended-css')
+{{-- @vite('resources//app.jsx') --}}
 
 {{-- <script src="/js/jspdf.umd.min.js"></script> --}}
 <!-- BEGIN Body -->
