@@ -242,7 +242,7 @@ class PengkajianController extends Controller
             'reaksi_alergi_obat' => $request->reaksi_alergi_obat,
             'reaksi_alergi_makanan' => $request->reaksi_alergi_makanan,
             'reaksi_alergi_lainnya' => $request->reaksi_alergi_lainnya,
-            'gelang' => $request->gelang,
+            'gelang' => $request->gelang ? true : false,
             'skor_nyeri' => $request->skor_nyeri,
             'provokatif' => $request->provokatif,
             'quality' => $request->quality,

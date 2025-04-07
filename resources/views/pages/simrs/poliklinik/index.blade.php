@@ -972,7 +972,8 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <input name="pembelajaran_lainnya" id="pembelajaran_lainnya"
-                                                class="form-control" type="text" value="{{$pengkajian?->pembelajaran_lainnya}}">
+                                                class="form-control" type="text"
+                                                value="{{ $pengkajian?->pembelajaran_lainnya }}">
                                         </div>
                                     </div>
                                 </div>
@@ -984,107 +985,47 @@
                                     <h4 class="mt-5 font-weight-bold">Sensorik</h4>
                                 </header>
                                 <div class="row mt-3">
+                                    @php
+                                        $data = json_decode($pengkajian->sensorik, true);
+
+                                        $opsi = [
+                                            'sensorik_penglihatan' => ['Normal', 'Kabur', 'Kaca Mata', 'Lensa Kontak'],
+                                            'sensorik_penciuman' => ['Normal', 'Tidak'],
+                                            'sensorik_pendengaran' => [
+                                                'Normal',
+                                                'Tuli Ka / Ki',
+                                                'Ada alat bantu dengar ka/ki',
+                                            ],
+                                        ];
+
+                                    @endphp
                                     <table class="table">
                                         <tbody>
-                                            <tr>
-                                                <td>Penglihatan</td>
-                                                <td>
-                                                    <div class="custom-control custom-radio custom-control-inline">
-                                                        <input name="sensorik_penglihatan" id="sensorik_penglihatan1"
-                                                            value="Normal" data-skor="0" class="custom-control-input"
-                                                            type="radio">
-                                                        <label class="custom-control-label"
-                                                            for="sensorik_penglihatan1">Normal</label>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="custom-control custom-radio custom-control-inline">
-                                                        <input name="sensorik_penglihatan" id="sensorik_penglihatan2"
-                                                            value="Kabur" data-skor="1" class="custom-control-input"
-                                                            type="radio">
-                                                        <label class="custom-control-label"
-                                                            for="sensorik_penglihatan2">Kabur</label>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="custom-control custom-radio custom-control-inline">
-                                                        <input name="sensorik_penglihatan" id="sensorik_penglihatan3"
-                                                            value="Kaca Mata" data-skor="2" class="custom-control-input"
-                                                            type="radio">
-                                                        <label class="custom-control-label"
-                                                            for="sensorik_penglihatan3">Kaca
-                                                            Mata</label>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="custom-control custom-radio custom-control-inline">
-                                                        <input name="sensorik_penglihatan" id="sensorik_penglihatan4"
-                                                            value="Lensa Kontak" data-skor="3"
-                                                            class="custom-control-input" type="radio">
-                                                        <label class="custom-control-label"
-                                                            for="sensorik_penglihatan4">Lensa
-                                                            Kontak</label>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Penciuman</td>
-                                                <td>
-                                                    <div class="custom-control custom-radio custom-control-inline">
-                                                        <input name="sensorik_penciuman" id="sensorik_penciuman1"
-                                                            value="Normal" data-skor="0" class="custom-control-input"
-                                                            type="radio">
-                                                        <label class="custom-control-label"
-                                                            for="sensorik_penciuman1">Normal</label>
-                                                    </div>
-                                                </td>
-                                                <td colspan="3">
-                                                    <div class="custom-control custom-radio custom-control-inline">
-                                                        <input name="sensorik_penciuman" id="sensorik_penciuman2"
-                                                            value="Tidak" data-skor="1" class="custom-control-input"
-                                                            type="radio">
-                                                        <label class="custom-control-label"
-                                                            for="sensorik_penciuman2">Tidak</label>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Pendengaran</td>
-                                                <td>
-                                                    <div class="custom-control custom-radio custom-control-inline">
-                                                        <input name="sensorik_pendengaran" id="sensorik_pendengaran1"
-                                                            value="Normal" data-skor="0" class="custom-control-input"
-                                                            type="radio">
-                                                        <label class="custom-control-label"
-                                                            for="sensorik_pendengaran1">Normal</label>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="custom-control custom-radio custom-control-inline">
-                                                        <input name="sensorik_pendengaran" id="sensorik_pendengaran2"
-                                                            value="Tuli Ka / Ki" data-skor="1"
-                                                            class="custom-control-input" type="radio">
-                                                        <label class="custom-control-label"
-                                                            for="sensorik_pendengaran2">Tuli
-                                                            Ka
-                                                            /
-                                                            Ki</label>
-                                                    </div>
-                                                </td>
-                                                <td colspan="2">
-                                                    <div class="custom-control custom-radio custom-control-inline">
-                                                        <input name="sensorik_pendengaran" id="sensorik_pendengaran3"
-                                                            value="Ada alat bantu dengar ka/ki" data-skor="2"
-                                                            class="custom-control-input" type="radio">
-                                                        <label class="custom-control-label"
-                                                            for="sensorik_pendengaran3">Ada
-                                                            alat
-                                                            bantu dengar ka/ki</label>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            @foreach ($opsi as $kategori => $listOpsional)
+                                                <tr>
+                                                    <td>{{ Str::of($kategori)->after('sensorik_')->ucfirst() }}</td>
+                                                    @foreach ($listOpsional as $i => $opsiValue)
+                                                        <td
+                                                            {{ $loop->remaining < 3 - count($listOpsional) ? 'colspan=2' : '' }}>
+                                                            <div class="custom-control custom-radio custom-control-inline">
+                                                                <input name="{{ $kategori }}"
+                                                                    id="{{ $kategori . $i }}"
+                                                                    value="{{ $opsiValue }}"
+                                                                    data-skor="{{ $i }}"
+                                                                    class="custom-control-input" type="radio"
+                                                                    @checked(($data[$kategori] ?? '') == $opsiValue)>
+                                                                <label class="custom-control-label"
+                                                                    for="{{ $kategori . $i }}">
+                                                                    {{ $opsiValue }}
+                                                                </label>
+                                                            </div>
+                                                        </td>
+                                                    @endforeach
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
+
                                 </div>
 
                                 <header class="text-danger">
@@ -1097,15 +1038,16 @@
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="kognitif" class="custom-control-input"
-                                                            id="kognitif1" value="Normal" data-skor="0" type="radio">
+                                                            id="kognitif1" value="Normal" data-skor="0" type="radio"
+                                                            @checked(($pengkajian->kognitif ?? '') == 'Normal')>
                                                         <label class="custom-control-label" for="kognitif1">Normal</label>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="kognitif" class="custom-control-input"
-                                                            id="kognitif2" value="Bingung" data-skor="1"
-                                                            type="radio">
+                                                            id="kognitif2" value="Bingung" data-skor="1" type="radio"
+                                                            @checked(($pengkajian->kognitif ?? '') == 'Bingung')>
                                                         <label class="custom-control-label"
                                                             for="kognitif2">Bingung</label>
                                                     </div>
@@ -1113,7 +1055,8 @@
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="kognitif" class="custom-control-input"
-                                                            id="kognitif3" value="Pelupa" data-skor="2" type="radio">
+                                                            id="kognitif3" value="Pelupa" data-skor="2" type="radio"
+                                                            @checked(($pengkajian->kognitif ?? '') == 'Pelupa')>
                                                         <label class="custom-control-label" for="kognitif3">Pelupa</label>
                                                     </div>
                                                 </td>
@@ -1121,7 +1064,7 @@
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="kognitif" class="custom-control-input"
                                                             id="kognitif4" value="Tidak Dapat dimengerti" data-skor="3"
-                                                            type="radio">
+                                                            type="radio" @checked(($pengkajian->kognitif ?? '') == 'Tidak Dapat dimengerti')>
                                                         <label class="custom-control-label" for="kognitif4">Tidak Dapat
                                                             dimengerti</label>
                                                     </div>
@@ -1138,79 +1081,51 @@
                                     <h4 class="mt-5 font-weight-bold">Motorik</h4>
                                 </header>
                                 <div class="row mt-3">
+                                    @php
+                                        $data = json_decode($pengkajian->motorik, true);
+
+                                        $opsiMotorik = [
+                                            'motorik_aktifitas' => [
+                                                'Mandiri',
+                                                'Bantuan Minimal',
+                                                'Bantuan Ketergantungan Total',
+                                            ],
+                                            'motorik_berjalan' => [
+                                                'Tidak Ada kesulitan',
+                                                'Perlu Bantuan',
+                                                'Sering Jatuh',
+                                                'Kelumpuhan',
+                                            ],
+                                        ];
+                                    @endphp
                                     <table class="table">
                                         <tbody>
+                                            @foreach ($opsiMotorik as $kategori => $opsiList)
                                             <tr>
-                                                <td>Aktifitas Sehari - hari</td>
-                                                <td>
-                                                    <div class="custom-control custom-radio">
-                                                        <input name="motorik_aktifitas" id="motorik_aktifitas1"
-                                                            value="Mandiri" data-skor="0" class="custom-control-input"
-                                                            type="radio">
-                                                        <label class="custom-control-label text-primary"
-                                                            for="motorik_aktifitas1">Mandiri</label>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="custom-control custom-radio">
-                                                        <input name="motorik_aktifitas" id="motorik_aktifitas2"
-                                                            value="Bantuan Minimal" data-skor="1"
-                                                            class="custom-control-input" type="radio">
-                                                        <label class="custom-control-label text-primary"
-                                                            for="motorik_aktifitas2">Bantuan Minimal</label>
-                                                    </div>
-                                                </td>
-                                                <td colspan="2">
-                                                    <div class="custom-control custom-radio">
-                                                        <input name="motorik_aktifitas" id="motorik_aktifitas3"
-                                                            value="Bantuan Ketergantungan Total" data-skor="2"
-                                                            class="custom-control-input" type="radio">
-                                                        <label class="custom-control-label text-primary"
-                                                            for="motorik_aktifitas3">Bantuan Ketergantungan Total</label>
-                                                    </div>
-                                                </td>
+                                                <td>{{ Str::of($kategori)->after('motorik_')->replace('_', ' ')->ucfirst() }}</td>
+                                                @foreach ($opsiList as $i => $opsiValue)
+                                                    <td @if($loop->last && $loop->count < 4) colspan="{{ 5 - $loop->count }}" @endif>
+                                                        <div class="custom-control custom-radio">
+                                                            <input 
+                                                                name="{{ $kategori }}" 
+                                                                id="{{ $kategori . $i }}" 
+                                                                value="{{ $opsiValue }}" 
+                                                                data-skor="{{ $i }}" 
+                                                                class="custom-control-input" 
+                                                                type="radio"
+                                                                @checked(($data[$kategori] ?? '') == $opsiValue)
+                                                            >
+                                                            <label class="custom-control-label text-primary" for="{{ $kategori . $i }}">
+                                                                {{ $opsiValue }}
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                @endforeach
                                             </tr>
-                                            <tr>
-                                                <td>Berjalan</td>
-                                                <td>
-                                                    <div class="custom-control custom-radio">
-                                                        <input name="motorik_berjalan" id="motorik_berjalan1"
-                                                            value="Tidak Ada kesulitan" data-skor="0"
-                                                            class="custom-control-input" type="radio">
-                                                        <label class="custom-control-label text-primary"
-                                                            for="motorik_berjalan1">Tidak Ada kesulitan</label>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="custom-control custom-radio">
-                                                        <input name="motorik_berjalan" id="motorik_berjalan2"
-                                                            value="Perlu Bantuan" data-skor="1"
-                                                            class="custom-control-input" type="radio">
-                                                        <label class="custom-control-label text-primary"
-                                                            for="motorik_berjalan2">Perlu Bantuan</label>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="custom-control custom-radio">
-                                                        <input name="motorik_berjalan" id="motorik_berjalan3"
-                                                            value="Sering Jatuh" data-skor="0"
-                                                            class="custom-control-input" type="radio">
-                                                        <label class="custom-control-label text-primary"
-                                                            for="motorik_berjalan3">Sering Jatuh</label>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="custom-control custom-radio">
-                                                        <input name="motorik_berjalan" id="motorik_berjalan4"
-                                                            value="Kelumpuhan" data-skor="1"
-                                                            class="custom-control-input" type="radio">
-                                                        <label class="custom-control-label text-primary"
-                                                            for="motorik_berjalan4">Kelumpuhan</label>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
+                                    
                                 </div>
 
                                 <div class="row mt-5">
@@ -1295,7 +1210,7 @@
                 placeholder: 'Pilih Dokter',
             });
 
-            if(pengkajian) {
+            if (pengkajian) {
                 $('#diagnosa-keperawatan').val(pengkajian.diagnosa_keperawatan).select2();
                 $('#rencana-tindak-lanjut').val(pengkajian.rencana_tindak_lanjut).select2();
                 $('#nyeri').val(pengkajian.nyeri).select2();
