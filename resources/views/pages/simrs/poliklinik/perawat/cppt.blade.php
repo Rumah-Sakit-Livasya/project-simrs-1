@@ -200,20 +200,7 @@
                                                             </div>
                                                             <div class="card-body p-0">
                                                                 <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="4"
-                                                                    placeholder="Keluhan Utama">Alergi obat : 
-Reaksi alergi obat : 
-Keluhan Utama : KONSULTASI
-PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-DI PUSKESMAS JATITUJUH 
-Riwayat Penyakit Sekarang : KONSULTASI
-PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-DI PUSKESMAS JATITUJUH 
-Riwayat Penyakit Dahulu : TIDAK ADA
-Riwayat Penyakit Keluarga : TIDAK ADA
-Alergi makan : 
-Reaksi alergi makan : 
-Alergi lainya : 
-Reaksi alergi lainya : </textarea>
+                                                                    placeholder="Keluhan Utama">Keluhan Utama: {{$registration?->pengkajian_nurse_rajal?->keluhan_utama}}</textarea>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -225,13 +212,14 @@ Reaksi alergi lainya : </textarea>
                                                                 <span>Objective</span>
                                                             </div>
                                                             <div class="card-body p-0">
-                                                                <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">Nadi (PR): 
-Respirasi (RR): 
-Tensi (BP): 
-Suhu (T): 
-Tinggi Badan: 
-Berat Badan: 
-Skrining Nyeri:
+                                                                <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">Nadi (PR): {{$registration?->pengkajian_nurse_rajal?->pr}}
+Respirasi (RR): {{$registration?->pengkajian_nurse_rajal?->rr}}
+Tensi (BP): {{$registration?->pengkajian_nurse_rajal?->bp}}
+Suhu (T): {{$registration?->pengkajian_nurse_rajal?->temperatur}}
+Tinggi Badan: {{$registration?->pengkajian_nurse_rajal?->body_height}}
+Berat Badan: {{$registration?->pengkajian_nurse_rajal?->body_weight}}
+SPO2 : {{$registration?->pengkajian_nurse_rajal?->sp02}}
+Skor Nyeri: {{$registration?->pengkajian_nurse_rajal?->skor_nyeri}}
                                                             </textarea>
                                                             </div>
                                                         </div>
@@ -252,7 +240,9 @@ Skrining Nyeri:
                                                             </div>
                                                             <div class="card-body p-0">
                                                                 <textarea class="form-control border-0 rounded-0" id="assesment" name="assesment" rows="4"
-                                                                    placeholder="Diagnosa Keperawatan">Diagnosa Kerja:</textarea>
+                                                                    placeholder="Diagnosa Keperawatan">Diagnosa Kerja:
+Diagnosa Keperawatan: {{$registration?->pengkajian_nurse_rajal?->diagnosa_keperawatan}}
+                                                                </textarea>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -279,22 +269,11 @@ Skrining Nyeri:
                                                     <div class="col-md-6">
                                                         <div class="card mt-3">
                                                             <div class="card-header bg-info text-white">
-                                                                Instruksi
+                                                                Evaluasi
                                                             </div>
                                                             <div class="card-body p-0">
-                                                                <textarea class="form-control border-0 rounded-0" id="instruksi" name="instruksi" rows="4"
+                                                                <textarea class="form-control border-0 rounded-0" id="evaluasi" name="evaluasi" rows="4"
                                                                     placeholder="Evaluasi"></textarea>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="card mt-3">
-                                                            <div class="card-header bg-info text-white">
-                                                                Resep Manual
-                                                            </div>
-                                                            <div class="card-body p-0">
-                                                                <textarea class="form-control border-0 rounded-0" id="resep_manual" name="resep_manual" rows="4"
-                                                                    placeholder="Resep Manual"></textarea>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -622,59 +601,59 @@ Skrining Nyeri:
                 submitFormCPPT(); // Panggil fungsi submitForm dengan parameter final
             });
 
-            // function loadCPPTData() {
-            //     $.ajax({
-            //         // url: '{{-- route('cppt.get') --}}', // Mengambil route Laravel
-            //         type: 'GET',
-            //         dataType: 'json',
-            //         success: function(response) {
-            //             // Bersihkan tabel
-            //             $('#list_soap').empty();
+            function loadCPPTData() {
+                $.ajax({
+                    url: '{{-- route('cppt.get') --}}', // Mengambil route Laravel
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        // Bersihkan tabel
+                        $('#list_soap').empty();
 
-            //             // Iterasi setiap data dan tambahkan ke dalam tabel
-            //             $.each(response, function(index, data) {
-            //                 var row = `
-            //                 <tr>
-            //                     <td class="text-center">
-            //                         <div class="deep-purple-text">${data.created_at}<br>
-            //                             <span class="green-text" style="font-weight:400;">${data.tipe_rawat}</span><br>
-            //                             <b style="font-weight: 400;">Dokter ID: ${data.doctor_id}</b><br>
-            //                             <div class="input-oleh deep-orange-text">Input oleh: ${data.user_id}</div>
-            //                             <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
-            //                             <div>
-            //                                 <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">
-            //                             </div>
-            //                         </div>
-            //                     </td>
-            //                     <td>
-            //                         <table width="100%" class="table-soap nurse">
-            //                             <tbody>
-            //                                 <tr><td colspan="3" class="soap-text title">CPPT</td></tr>
-            //                                 <tr><td class="soap-text deep-purple-text text-center" width="8%">S</td><td>${data.subjective.replace(/\n/g, "<br>")}</td></tr>
-            //                                 <tr><td class="soap-text deep-purple-text text-center">O</td><td>${data.objective.replace(/\n/g, "<br>")}</td></tr>
-            //                                 <tr><td class="soap-text deep-purple-text text-center">A</td><td>${data.assesment}</td></tr>
-            //                                 <tr><td class="soap-text deep-purple-text text-center">P</td><td>${data.planning}</td></tr>
-            //                                 <tr><td class="soap-text deep-purple-text text-center">I</td><td>${data.instruksi}</td></tr>
-            //                             </tbody>
-            //                         </table>
-            //                     </td>
-            //                     <td>
-            //                         <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap" data-id="${data.id}" title="Copy"></i>
-            //                         <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap" data-id="${data.id}" title="Hapus"></i>
-            //                         <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap" data-id="${data.id}" title="Edit SOAP & Resep Elektronik"></i>
-            //                         <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print Antrian Resep"></i>
-            //                     </td>
-            //                 </tr>
-            //             `;
-            //                 // Tambahkan ke dalam tabel
-            //                 $('#list_soap').append(row);
-            //             });
-            //         },
-            //         error: function(xhr, status, error) {
-            //             console.error(xhr.responseText);
-            //         }
-            //     });
-            // }
+                        // Iterasi setiap data dan tambahkan ke dalam tabel
+                        $.each(response, function(index, data) {
+                            var row = `
+                            <tr>
+                                <td class="text-center">
+                                    <div class="deep-purple-text">${data.created_at}<br>
+                                        <span class="green-text" style="font-weight:400;">${data.tipe_rawat}</span><br>
+                                        <b style="font-weight: 400;">Dokter ID: ${data.doctor_id}</b><br>
+                                        <div class="input-oleh deep-orange-text">Input oleh: ${data.user_id}</div>
+                                        <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
+                                        <div>
+                                            <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <table width="100%" class="table-soap nurse">
+                                        <tbody>
+                                            <tr><td colspan="3" class="soap-text title">CPPT</td></tr>
+                                            <tr><td class="soap-text deep-purple-text text-center" width="8%">S</td><td>${data.subjective.replace(/\n/g, "<br>")}</td></tr>
+                                            <tr><td class="soap-text deep-purple-text text-center">O</td><td>${data.objective.replace(/\n/g, "<br>")}</td></tr>
+                                            <tr><td class="soap-text deep-purple-text text-center">A</td><td>${data.assesment}</td></tr>
+                                            <tr><td class="soap-text deep-purple-text text-center">P</td><td>${data.planning}</td></tr>
+                                            <tr><td class="soap-text deep-purple-text text-center">I</td><td>${data.instruksi}</td></tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td>
+                                    <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap" data-id="${data.id}" title="Copy"></i>
+                                    <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap" data-id="${data.id}" title="Hapus"></i>
+                                    <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap" data-id="${data.id}" title="Edit SOAP & Resep Elektronik"></i>
+                                    <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print Antrian Resep"></i>
+                                </td>
+                            </tr>
+                        `;
+                            // Tambahkan ke dalam tabel
+                            $('#list_soap').append(row);
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
 
             function submitFormCPPT(actionType) {
                 const form = $('#cppt-perawat-rajal-form');
