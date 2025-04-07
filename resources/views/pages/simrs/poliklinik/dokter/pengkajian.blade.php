@@ -157,8 +157,7 @@
                                         <label class="text-primary" for="pr">Nadi (PR)</label>
                                         <div class="input-group">
                                             <div class="input-group">
-                                                <input id="pr" type="text" name="pr" class="form-control"
-                                                    value="{{ $pengkajian?->pr }}">
+                                                <input id="pr" type="text" name="pr" class="form-control" value="{{$registration?->pengkajian_nurse_rajal?->pr}}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">x/menit</span>
                                                 </div>
@@ -170,8 +169,8 @@
                                     <div class="form-group">
                                         <label for="rr" class="text-primary">Respirasi (RR)</label>
                                         <div class="input-group">
-                                            <input class="form-control numeric" id="rr" name="rr" type="text"
-                                                value="{{ $pengkajian?->rr }}">
+                                            <input class="form-control numeric" id="rr" name="rr"
+                                                type="text" value="{{$registration?->pengkajian_nurse_rajal?->rr}}">
                                             <div class="input-group-append">
                                                 <span class="input-group-text">x/menit</span>
                                             </div>
@@ -183,7 +182,7 @@
                                         <label for="body_height">Tinggi Badan (cm)</label>
                                         <div class="input-group">
                                             <input class="form-control numeric calc-bmi-pd" id="body_height"
-                                                name="body_height" type="text" value="{{ $pengkajian?->body_height }}">
+                                                name="body_height" type="text" value="{{$registration?->pengkajian_nurse_rajal?->body_height}}">
                                             <div class="input-group-append">
                                                 <span class="input-group-text">cm</span>
                                             </div>
@@ -195,7 +194,7 @@
                                         <label for="body_weight">Berat Badan (kg)</label>
                                         <div class="input-group">
                                             <input class="form-control numeric calc-bmi-pd" id="body_weight"
-                                                name="body_weight" type="text" value="{{ $pengkajian?->body_weight }}">
+                                                name="body_weight" type="text" value="{{$registration?->pengkajian_nurse_rajal?->body_weight}}">
                                             <div class="input-group-append">
                                                 <span class="input-group-text">kg</span>
                                             </div>
@@ -210,8 +209,8 @@
                                     <div class="form-group">
                                         <label for="bp">Tensi (BP)</label>
                                         <div class="input-group">
-                                            <input class="form-control numeric" id="bp" name="bp" type="text"
-                                                value="{{ $pengkajian?->bp }}">
+                                            <input class="form-control numeric" id="bp" name="bp"
+                                                type="text" value="{{$registration?->pengkajian_nurse_rajal?->bp}}">
                                             <div class="input-group-append">
                                                 <span class="input-group-text">mmHg</span>
                                             </div>
@@ -224,6 +223,7 @@
                                         <div class="input-group">
                                             <input class="form-control numeric" id="temperatur" name="temperatur"
                                                 type="text" value="{{ $pengkajian?->temperatur }}">
+
                                             <div class="input-group-append">
                                                 <span class="input-group-text">°C</span>
                                             </div>

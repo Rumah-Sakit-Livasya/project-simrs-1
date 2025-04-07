@@ -36,20 +36,23 @@ class PoliklinikController extends Controller
         $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
         $registration = Registration::where('registration_number', $noRegist)->first();
 
+<<<<<<< HEAD
 
+=======
+        $query = Registration::whereDate('registration_date', Carbon::today());
+
+        $query->when(isset($registration->departement_id), function ($q) use ($registration) {
+            return $q->where('departement_id', $registration->departement_id);
+        });
+
+        $query->when(isset($registration->doctor_id), function ($q) use ($registration) {
+            return $q->where('doctor_id', $registration->doctor_id);
+        });
+
+        $registrations = $query->get();
+        
+>>>>>>> rajal
         if ($menu && $noRegist) {
-            $query = Registration::where('date', now()->format('Y-m-d'));
-
-            $query->when($registration->departement_id, function ($q) use ($registration) {
-                return $q->where('departement_id', $registration->departement_id);
-            });
-
-            $query->when($registration->doctor_id, function ($q) use ($registration) {
-                return $q->where('doctor_id', $registration->doctor_id);
-            });
-
-            $registrations = $query->get();
-
             // Render partial view sebagai HTML
             $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
 
@@ -58,7 +61,7 @@ class PoliklinikController extends Controller
                 return $menuResponse;
             }
         } else {
-            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration'));
+            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration', 'registrations'));
         }
     }
 
@@ -73,12 +76,18 @@ class PoliklinikController extends Controller
         // }
 
         if ($menu == 'pengkajian_perawat') {
+<<<<<<< HEAD
             $pengkajianPerawat = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
             $pengkajianDokter = PengkajianDokterRajal::where('registration_id', $registration->id)->first();
             return view(
                 'pages.simrs.poliklinik.index',
                 compact('registration', 'departements', 'jadwal_dokter',  'pengkajianPerawat', 'pengkajianDokter')
             );
+=======
+            $pengkajian = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
+            
+            return view('pages.simrs.poliklinik.index', compact('registration', 'departements', 'jadwal_dokter', 'pengkajian'));
+>>>>>>> rajal
         } elseif ($menu == 'cppt_perawat') {
             $perawat = Employee::whereHas('organization', function ($query) {
                 $query->where('name', 'Rawat Jalan');
@@ -97,7 +106,11 @@ class PoliklinikController extends Controller
         } else if ($menu == 'profil_ringkas_rajal') {
             return view('pages.simrs.poliklinik.dokter.resume_medis', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_gizi') {
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));
+            $form = FormKategori::all();
+            $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
+
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian'));
+        
         } elseif ($menu == 'cppt_farmasi') {
             return view('pages.simrs.poliklinik.farmasi.cppt', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_resep') {
@@ -111,7 +124,7 @@ class PoliklinikController extends Controller
             return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian'));
         } elseif ($menu == 'tindakan_medis') {
             $tindakan_medis = TindakanMedis::all();
-            $doctors = Doctor::with('employee', 'departement')->get();
+            $doctors = Doctor::with('employee', 'departements')->get();
             // Group doctors by department
             $groupedDoctors = [];
             foreach ($doctors as $doctor) {
@@ -142,7 +155,7 @@ class PoliklinikController extends Controller
     public function filterPasien(Request $request)
     {
         try {
-            $query = Registration::where('date', now()->format('Y-m-d'));
+            $query = Registration::whereDate('registration_date', Carbon::today());
 
             $query->when($request->departement_id, function ($q) use ($request) {
                 return $q->where('departement_id', $request->departement_id);

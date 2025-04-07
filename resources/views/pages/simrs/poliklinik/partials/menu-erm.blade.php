@@ -89,13 +89,13 @@
                     href="{{ route($routePrefix . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'radiologi']) }}">Radiologi</a>
             </div>
         </li>
-        <li class="nav-item dropdown">
+        {{-- <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button">Lain-lain</a>
             <div class="dropdown-menu">
                 <a class="dropdown-item">Pengkajian</a>
                 <a class="dropdown-item" href="#">CPPT</a>
                 <a class="dropdown-item" href="#">Transfer Pasien Antar Ruangan</a>
             </div>
-        </li>
+        </li> --}}
     </ul>
 @endif

@@ -29,13 +29,13 @@ class CPPTController extends Controller
     {
         $validatedData = $request->validate([
             'registration_id' => 'required',
-            'doctor_id' => 'required',
+            'doctor_id' => 'nullable',
             'konsulkan_ke' => 'nullable',
             'subjective' => 'required',
             'objective' => 'required',
             'assesment' => 'required',
             'planning' => 'required',
-            'instruksi' => 'required',
+            'instruksi' => 'nullable',
             'evaluasi' => 'nullable',
             'implementasi' => 'nullable',
             'medical_record_number' => 'required'

@@ -18,8 +18,6 @@
                     '<p>Sedang memuat...</p>'); // Tambahkan loading
                 },
                 success: function(response) {
-                    console.log(response);
-
                     if (response.success) {
                         $('#daftar-pasien-poli .col-12').html(response.html);
                     } else {
@@ -28,7 +26,6 @@
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.log(xhr.responseText);
                     alert("Terjadi kesalahan, silakan coba lagi.");
                 }
             });
@@ -36,7 +33,6 @@
 
 
         if($('#filter_poliklinik #departement_id').val() != null || $('#filter_poliklinik #doctor_id').val() != null) {
-            console.log('changed');
             $.ajax({
                 url: "{{ route('poliklinik.filter-pasien') }}",
                 type: "POST",
@@ -51,7 +47,7 @@
                     '<p>Sedang memuat...</p>'); // Tambahkan loading
                 },
                 success: function(response) {
-                    console.log(response);
+                    
 
                     if (response.success) {
                         $('#daftar-pasien-poli .col-12').html(response.html);
@@ -65,9 +61,7 @@
                     alert("Terjadi kesalahan, silakan coba lagi.");
                 }
             });
-        }
-
-        
+        } 
     });
     // Close the panel if the backdrop is clicked
 </script>

@@ -169,7 +169,7 @@
                                                         value="{{ $pengkajianPerawat?->tgl_masuk?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
                                                     <input type="time" name="jam_masuk" class="form-control "
                                                         placeholder="Jam" id="jam_masuk"
-                                                        value="{{ $pengkajianPerawat?->jam_masuk ?? '' }}">
+                                                        value="{{ $pengkajian?->jam_masuk ?? '' }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -181,10 +181,10 @@
                                             <div class="input-group">
                                                 <input type="date" name="tgl_dilayani" class="form-control"
                                                     placeholder="Tanggal" id="tgl_dilayani"
-                                                    value="{{ $pengkajianPerawat?->tgl_dilayani?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
+                                                    value="{{ $pengkajian?->tgl_dilayani?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
                                                 <input type="time" name="jam_dilayani" class="form-control"
                                                     placeholder="Jam" id="jam_dilayani"
-                                                    value="{{ $pengkajianPerawat?->jam_dilayani ?? '' }}">
+                                                    value="{{ $pengkajian?->jam_dilayani ?? '' }}">
                                             </div>
                                         </div>
                                     </div>
@@ -193,7 +193,7 @@
                                             <label for="keluhan_utama" class="control-label text-primary">Keluhan utama
                                                 *</label>
                                             <textarea class="form-control" id="keluhan_utama" name="keluhan_utama" rows="3" required=""
-                                                data-label="Keluhan utama">{{ $pengkajianPerawat ? $pengkajianPerawat->keluhan_utama : $registration->diagnosa_awal }}</textarea>
+                                                data-label="Keluhan utama">{{ $pengkajian?->keluhan_utama }}</textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -207,7 +207,7 @@
                                             <div class="input-group">
                                                 <div class="input-group">
                                                     <input id="pr" type="text" name="pr" class="form-control"
-                                                        value="{{ $pengkajianPerawat?->pr }}">
+                                                        value="{{ $pengkajian?->pr }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">x/menit</span>
                                                     </div>
@@ -220,7 +220,7 @@
                                             <label for="rr" class="text-primary">Respirasi (RR)</label>
                                             <div class="input-group">
                                                 <input class="form-control numeric" id="rr" name="rr"
-                                                    type="text" value="{{ $pengkajianPerawat?->rr }}">
+                                                    type="text" value="{{ $pengkajian?->rr }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">x/menit</span>
                                                 </div>
@@ -232,7 +232,7 @@
                                             <label for="bp" class="text-primary">Tensi (BP)</label>
                                             <div class="input-group">
                                                 <input class="form-control numeric" id="bp" name="bp"
-                                                    type="text" value="{{ $pengkajianPerawat?->bp }}">
+                                                    type="text" value="{{ $pengkajian?->bp }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">mmHg</span>
                                                 </div>
@@ -244,7 +244,7 @@
                                             <label for="temperatur" class="text-primary">Suhu (T)</label>
                                             <div class="input-group">
                                                 <input class="form-control numeric" id="temperatur" name="temperatur"
-                                                    type="text" value="{{ $pengkajianPerawat?->temperatur }}">
+                                                    type="text" value="{{ $pengkajian?->temperatur }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">C°</span>
                                                 </div>
@@ -257,7 +257,7 @@
                                             <div class="input-group">
                                                 <input class="form-control numeric calc-bmi" id="body_height"
                                                     name="body_height" type="text"
-                                                    value="{{ $pengkajianPerawat?->body_height }}">
+                                                    value="{{ $pengkajian?->body_height }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">Cm</span>
                                                 </div>
@@ -270,7 +270,7 @@
                                             <div class="input-group">
                                                 <input class="form-control numeric calc-bmi" id="body_weight"
                                                     name="body_weight" type="text"
-                                                    value="{{ $pengkajianPerawat?->body_weight }}">
+                                                    value="{{ $pengkajian?->body_weight }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">Kg</span>
                                                 </div>
@@ -282,8 +282,7 @@
                                             <label for="bmi" class="text-primary">Index Massa Tubuh</label>
                                             <div class="input-group">
                                                 <input class="form-control numeric" id="bmi" name="bmi"
-                                                    readonly="readonly" type="text"
-                                                    value="{{ $pengkajianPerawat?->bmi }}">
+                                                    readonly="readonly" type="text" value="{{ $pengkajian?->bmi }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">Kg/m²</span>
                                                 </div>
@@ -296,7 +295,7 @@
                                             <div class="input-group">
                                                 <input class="form-control" id="kat_bmi" name="kat_bmi"
                                                     readonly="readonly" type="text"
-                                                    value="{{ $pengkajianPerawat?->kat_bmi }}">
+                                                    value="{{ $pengkajian?->kat_bmi }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text"></span>
                                                 </div>
@@ -308,7 +307,7 @@
                                             <label for="sp02" class="text-primary">SP 02</label>
                                             <div class="input-group">
                                                 <input class="form-control" id="sp02" name="sp02" type="text"
-                                                    value="{{ $pengkajianPerawat?->sp02 }}">
+                                                    value="{{ $pengkajian?->sp02 }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
@@ -320,7 +319,7 @@
                                             <label for="lingkar_kepala" class="text-primary">Lingkar Kepala</label>
                                             <div class="input-group">
                                                 <input class="form-control" id="lingkar_kepala" name="lingkar_kepala"
-                                                    type="text" value="{{ $pengkajianPerawat?->lingkar_kepala }}">
+                                                    type="text" value="{{ $pengkajian?->lingkar_kepala }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">Cm</span>
                                                 </div>
@@ -418,17 +417,19 @@
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Ya"
                                                     name="alergi_obat" id="alergi_obat1"
-                                                    {{ $pengkajianPerawat?->alergi_obat1 == 'Ya' ? 'checked' : '' }}>
+                                                    @if ($pengkajian?->alergi_obat == 'Ya') checked @endif>
                                                 <label class="custom-control-label text-primary"
                                                     for="alergi_obat1">Ya</label>
                                             </div>
                                             <input name="ket_alergi_obat" id="ket_alergi_obat"
                                                 style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
-                                                type="text" value="{{ $pengkajianPerawat?->ket_alergi_obat }}">
+
+                                                type="text"
+                                                @if ($pengkajian?->alergi_obat == 'Ya') value="{{ $pengkajian?->ket_alergi_obat }}" @endif>
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Tidak"
                                                     name="alergi_obat" id="alergi_obat2"
-                                                    {{ $pengkajianPerawat?->alergi_obat1 == 'Tidak' ? 'checked' : '' }}>
+                                                    @if ($pengkajian?->alergi_obat == 'Tidak') checked @endif>
                                                 <label class="custom-control-label text-primary"
                                                     for="alergi_obat2">Tidak</label>
                                             </div>
@@ -440,17 +441,18 @@
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Ya"
                                                     name="alergi_makanan" id="alergi_makanan1"
-                                                    {{ $pengkajianPerawat?->alergi_obat2 == 'Ya' ? 'checked' : '' }}>
+                                                    @if ($pengkajian?->alergi_makanan == 'Ya') checked @endif>
                                                 <label class="custom-control-label text-primary"
                                                     for="alergi_makanan1">Ya</label>
                                             </div>
                                             <input name="ket_alergi_makanan" id="ket_alergi_makanan"
                                                 style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
-                                                type="text" value="{{ $pengkajianPerawat?->ket_alergi_makanan }}">
+                                                type="text"
+                                                @if ($pengkajian?->alergi_makanan == 'Ya') value="{{ $pengkajian?->ket_alergi_makanan }}" @endif>
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Tidak"
                                                     name="alergi_makanan" id="alergi_makanan2"
-                                                    {{ $pengkajianPerawat?->alergi_obat2 == 'Tidak' ? 'checked' : '' }}>
+                                                    @if ($pengkajian?->alergi_makanan == 'Tidak') checked @endif>
                                                 <label class="custom-control-label text-primary"
                                                     for="alergi_makanan2">Tidak</label>
                                             </div>
@@ -462,17 +464,18 @@
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Ya"
                                                     name="alergi_lainnya" id="alergi_lainnya1"
-                                                    {{ $pengkajianPerawat?->alerg_lainnya1 == 'Ya' ? 'checked' : '' }}>
+                                                    @if ($pengkajian?->alergi_lainnya == 'Ya') checked @endif>
                                                 <label class="custom-control-label text-primary"
                                                     for="alergi_lainnya1">Ya</label>
                                             </div>
                                             <input name="ket_alergi_lainnya" id="ket_alergi_lainnya"
                                                 style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
-                                                type="text" value="{{ $pengkajianPerawat?->ket_alergi_lainnya }}">
+                                                type="text"
+                                                @if ($pengkajian?->alergi_lainnya == 'Ya') value="{{ $pengkajian?->ket_alergi_lainnya }}" @endif>
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" class="custom-control-input" value="Tidak"
                                                     name="alergi_lainnya" id="alergi_lainnya2"
-                                                    {{ $pengkajianPerawat?->alergi_obat2 == 'Tidak' ? 'checked' : '' }}>
+                                                    @if ($pengkajian?->alergi_lainnya == 'Tidak') checked @endif>
                                                 <label class="custom-control-label text-primary"
                                                     for="alergi_lainnya2">Tidak</label>
                                             </div>
@@ -486,7 +489,11 @@
                                                 obat</label>
                                             <input name="reaksi_alergi_obat" id="reaksi_alergi_obat"
                                                 class="form-control alergi" type="text"
+<<<<<<< HEAD
                                                 value="{{ $pengkajianPerawat?->reaksi_alergi_obat }}">
+=======
+                                                value="{{ $pengkajian?->reaksi_alergi_obat }}">
+>>>>>>> rajal
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="reaksi_alergi_makanan" class="control-label text-primary">Reaksi
@@ -495,7 +502,11 @@
                                                 makanan</label>
                                             <input name="reaksi_alergi_makanan" id="reaksi_alergi_makanan"
                                                 class="form-control alergi" type="text"
+<<<<<<< HEAD
                                                 value="{{ $pengkajianPerawat?->reaksi_alergi_makanan }}">
+=======
+                                                value="{{ $pengkajian?->reaksi_alergi_makanan }}">
+>>>>>>> rajal
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="reaksi_alergi_lainnya" class="control-label text-primary">Reaksi
@@ -504,19 +515,25 @@
                                                 lainnya</label>
                                             <input name="reaksi_alergi_lainnya" id="reaksi_alergi_lainnya"
                                                 class="form-control alergi" type="text"
+<<<<<<< HEAD
                                                 value="{{ $pengkajianPerawat?->reaksi_alergi_lainnya }}">
+=======
+                                                value="{{ $pengkajian?->reaksi_alergi_lainnya }}">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group mb-3">
                                             <label for="kondisi_khusus1"
-                                                class="control-label text-primary margin-tb-10">Gelang
-                                                tanda
-                                                alergi</label>
+                                                class="control-label text-primary margin-tb-10">Gelang tanda alergi</label>
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input" value="1"
                                                     name="gelang" id="gelang1"
+<<<<<<< HEAD
                                                     {{ $pengkajianPerawat?->gelang == '1' ? 'checked' : '' }}>
+=======
+                                                    {{ $pengkajian?->gelang == 1 ? 'checked' : '' }}>
+>>>>>>> rajal
                                                 <label class="custom-control-label text-primary" for="gelang1">Dipasang
                                                     (warna
                                                     merah)</label>
@@ -530,47 +547,41 @@
                                 <div class="row mt-3">
                                     <div class="col-md-12 mb-4 d-flex flex-wrap justify-content-between">
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/1.jpg"
-                                                class="mb-2 img-fluid">
+                                            <img src="{{ asset('img/emoticon/1.jpg') }}" class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-warning text-white" data-skor="0">0</span>
                                             </div>
                                         </div>
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/2.jpg"
-                                                class="mb-2 img-fluid">
+                                            <img src="{{ asset('img/emoticon/2.jpg') }}" class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-success" data-skor="1">1</span>
                                                 <span class="badge badge-success" data-skor="2">2</span>
                                             </div>
                                         </div>
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/3.jpg"
-                                                class="mb-2 img-fluid">
+                                            <img src="{{ asset('img/emoticon/3.jpg') }}" class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-primary" data-skor="3">3</span>
                                                 <span class="badge badge-primary" data-skor="4">4</span>
                                             </div>
                                         </div>
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/4.jpg"
-                                                class="mb-2 img-fluid">
+                                            <img src="{{ asset('img/emoticon/4.jpg') }}" class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-info" data-skor="5">5</span>
                                                 <span class="badge badge-info" data-skor="6">6</span>
                                             </div>
                                         </div>
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/5.jpg"
-                                                class="mb-2 img-fluid">
+                                            <img src="{{ asset('img/emoticon/5.jpg') }}" class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-orange" data-skor="7">7</span>
                                                 <span class="badge badge-orange" data-skor="8">8</span>
                                             </div>
                                         </div>
                                         <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                            <img src="http://103.191.196.126:8888/testing/include/images/wongbaker/6.jpg"
-                                                class="mb-2 img-fluid">
+                                            <img src="{{ asset('img/emoticon/6.jpg') }}" class="mb-2 img-fluid">
                                             <div class="text-center">
                                                 <span class="badge badge-red" data-skor="9">9</span>
                                                 <span class="badge badge-red" data-skor="10">10</span>
@@ -580,38 +591,61 @@
                                             <input name="skor_nyeri" id="skor_nyeri"
                                                 class="form-control text-center mt-3"
                                                 style="font-size: 3rem; height: 60px;" type="text"
+<<<<<<< HEAD
                                                 value="{{ $pengkajianPerawat?->skor_nyeri }}">
+=======
+                                                value="{{ $pengkajian?->skor_nyeri }}">
+>>>>>>> rajal
                                             <label for="skor_nyeri" class="control-label text-primary">Skor</label>
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="provokatif" class="control-label text-primary">Provokatif</label>
+<<<<<<< HEAD
                                             <input name="provokatif" value="{{ $pengkajianPerawat?->provokatif }}"
                                                 id="provokatif" class="form-control" type="text">
+=======
+                                            <input name="provokatif" id="provokatif" class="form-control" type="text"
+                                                value="{{ $pengkajian?->provokatif }}">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="quality" class="control-label text-primary">Quality</label>
+<<<<<<< HEAD
                                             <input name="quality" id="quality"
                                                 value="{{ $pengkajianPerawat?->quality }}" class="form-control"
                                                 type="text">
+=======
+                                            <input name="quality" id="quality" class="form-control" type="text"
+                                                value="{{ $pengkajian?->quality }}">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="region" class="control-label text-primary">Region</label>
+<<<<<<< HEAD
                                             <input name="region" id="region"
                                                 value="{{ $pengkajianPerawat?->region }}" class="form-control"
                                                 type="text">
+=======
+                                            <input name="region" id="region" class="form-control" type="text"
+                                                value="{{ $pengkajian?->region }}">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="time" class="control-label text-primary">Time</label>
                                             <input name="time" id="time" class="form-control" type="text"
+<<<<<<< HEAD
                                                 value="{{ $pengkajianPerawat?->time }}">
+=======
+                                                value="{{ $pengkajian?->time }}">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -637,7 +671,11 @@
                                             <label for="nyeri_hilang" class="control-label text-primary">Nyeri hilang
                                                 apabila</label>
                                             <input name="nyeri_hilang" id="nyeri_hilang" class="form-control"
+<<<<<<< HEAD
                                                 type="text" value="{{ $pengkajianPerawat?->nyeri_hilang }}">
+=======
+                                                value="{{ $pengkajian?->nyeri_hilang }}" type="text">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                 </div>
@@ -699,7 +737,12 @@
                                 </div>
                                 <label for="kondisi_khusus1" class="control-label text-primary mt-3">Pasien dalam kondisi
                                     khusus</label>
+                                @php
+                                    $kondisi_khusus_terpilih = json_decode($pengkajian?->kondisi_khusus ?? '[]', true);
+                                @endphp
+
                                 <div class="row mt-3">
+<<<<<<< HEAD
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <div class="form-radio">
@@ -810,11 +853,39 @@
                                             </div>
                                         </div>
                                     </div>
+=======
+                                    @foreach (['Anak usia 1-5 tahun', 'Lansia > 60 tahun', 'Penyakit kronis dengan komplikasi', 'Kanker stadium III/IV', 'HIV/AIDS', 'TB', 'Bedah mayor degestif', 'Luka bakar > 20%'] as $index => $kondisi)
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <div class="form-radio">
+                                                    <label class="custom-control custom-checkbox custom-control-inline">
+                                                        <input name="kondisi_khusus[]"
+                                                            id="kondisi_khusus{{ $index + 1 }}"
+                                                            value="{{ $kondisi }}" type="checkbox"
+                                                            class="custom-control-input"
+                                                            {{ in_array($kondisi, $kondisi_khusus_terpilih) ? 'checked' : '' }}>
+                                                        <span
+                                                            class="custom-control-label text-primary">{{ $kondisi }}</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+>>>>>>> rajal
                                 </div>
+
                                 <header class="text-secondary">
                                     <h4 class="mt-5 font-weight-bold">RIWAYAT IMUNISASI DASAR</h4>
                                 </header>
+                                @php
+                                    $imunisasi_dasar_terpilih = json_decode(
+                                        $pengkajian?->imunisasi_dasar ?? '[]',
+                                        true,
+                                    );
+                                @endphp
+
                                 <div class="row mt-3">
+<<<<<<< HEAD
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <div class="form-radio">
@@ -875,15 +946,40 @@
                                             </div>
                                         </div>
                                     </div>
+=======
+                                    @foreach (['BCG', 'DPT', 'Hepatitis B', 'Polio', 'Campak'] as $index => $imunisasi)
+                                        <div class="col-md-3 mb-3">
+                                            <div class="form-group">
+                                                <div class="form-radio">
+                                                    <label class="custom-control custom-checkbox custom-control-inline">
+                                                        <input name="imunisasi_dasar[]"
+                                                            id="imunisasi_dasar{{ $index + 1 }}"
+                                                            value="{{ $imunisasi }}" type="checkbox"
+                                                            class="custom-control-input"
+                                                            {{ in_array($imunisasi, $imunisasi_dasar_terpilih) ? 'checked' : '' }}>
+                                                        <span
+                                                            class="custom-control-label text-primary">{{ $imunisasi }}</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+>>>>>>> rajal
                                 </div>
+
                                 <header class="text-secondary">
                                     <h4 class="mt-5 font-weight-bold">SKRINING RESIKO JATUH - GET UP & GO</h4>
                                 </header>
+                                @php
+                                    $resiko_jatuh_terpilih = json_decode($pengkajian?->resiko_jatuh ?? '[]', true);
+                                @endphp
+
                                 <div class="row mt-3">
                                     <div class="col-md-12 mb-3">
                                         <label for="resiko_jatuh3" class="control-label text-primary margin-tb-10">A. Cara
                                             Berjalan</label>
                                     </div>
+<<<<<<< HEAD
                                     <div class="col-md-6 mb-3">
                                         <div class="form-group">
                                             <div class="form-radio">
@@ -931,17 +1027,49 @@
                                             </div>
                                         </div>
                                     </div>
+=======
+
+                                    @foreach (['Tidak seimbang/sempoyongan/limbung', 'Alat bantu: kruk,kursi roda/dibantu', 'Pegang pinggiran meja/kursi/alat bantu untuk duduk'] as $index => $resiko)
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-group">
+                                                @if ($index == 2)
+                                                    <label for="resiko_jatuh{{ $index + 1 }}"
+                                                        class="control-label mb-3 text-primary margin-tb-10">B. Menopang
+                                                        saat duduk</label>
+                                                @endif
+                                                <div class="form-radio">
+                                                    <label class="custom-control custom-checkbox custom-control-inline">
+                                                        <input onclick="resiko_jatuh()" name="resiko_jatuh[]"
+                                                            id="resiko_jatuh{{ $index + 1 }}"
+                                                            value="{{ $resiko }}" type="checkbox"
+                                                            class="custom-control-input"
+                                                            {{ in_array($resiko, $resiko_jatuh_terpilih) ? 'checked' : '' }}>
+                                                        <span
+                                                            class="custom-control-label text-primary">{{ $resiko }}</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+
+>>>>>>> rajal
                                     <div class="col-md-6 mb-3">
                                         <div class="form-group">
                                             <span class="input-group-addon grey-text">Hasil : </span>
                                             <div class="input-group-content">
+<<<<<<< HEAD
                                                 <input class="form-control" name="resiko_jatuh_hasil"
                                                     {{ $pengkajianPerawat?->resiko_jatuh_hasil }} id="resiko_jatuh_hasil"
                                                     type="text" readonly="">
+=======
+                                                <input class="form-control" name="hasil_resiko_jatuh"
+                                                    id="resiko_jatuh_hasil" type="text" readonly>
+>>>>>>> rajal
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
 
                                 <header class="text-secondary">
                                     <h4 class="mt-5 font-weight-bold">RIWAYAT PSIKOSOSIAL, SPIRITUAL &amp; KEPERCAYAAN</h4>
@@ -1001,7 +1129,11 @@
                                                 prilaku(bila
                                                 ada)</label>
                                             <input name="masalah_prilaku" id="masalah_prilaku" class="form-control"
+<<<<<<< HEAD
                                                 type="text" value="{{ $pengkajianPerawat?->masalah_prilaku }}">
+=======
+                                                value="{{ $pengkajian?->masalah_prilaku }}" type="text">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1010,7 +1142,11 @@
                                                 pernah
                                                 dialami</label>
                                             <input name="kekerasan_dialami" id="kekerasan_dialami" class="form-control"
+<<<<<<< HEAD
                                                 type="text" value="{{ $pengkajianPerawat?->kekerasan_dialami }}">
+=======
+                                                value="{{ $pengkajian?->kekerasan_dialami }}" type="text">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1020,8 +1156,13 @@
                                                 anggota
                                                 keluarga</label>
                                             <input name="hub_dengan_keluarga" id="hub_dengan_keluarga"
+<<<<<<< HEAD
                                                 class="form-control" type="text"
                                                 value="{{ $pengkajianPerawat?->hub_dengan_keluarga }}">
+=======
+                                                value="{{ $pengkajian?->hub_dengan_keluarga }}" class="form-control"
+                                                type="text">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1029,7 +1170,11 @@
                                             <label for="tempat_tinggal" class="control-label text-primary">Tempat tinggal
                                                 (rumah/panti/kos/dll)</label>
                                             <input name="tempat_tinggal" id="tempat_tinggal" class="form-control"
+<<<<<<< HEAD
                                                 type="text" value="{{ $pengkajianPerawat?->tempat_tinggal }}">
+=======
+                                                value="{{ $pengkajian?->tempat_tinggal }}" type="text">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1038,7 +1183,11 @@
                                                 dapat
                                                 dihubungi</label>
                                             <input name="kerabat_dihub" id="kerabat_dihub" class="form-control"
+<<<<<<< HEAD
                                                 type="text" value="{{ $pengkajianPerawat?->kerabat_dihub }}">
+=======
+                                                value="{{ $pengkajian?->kerabat_dihub }}" type="text">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1049,7 +1198,11 @@
                                                 dapat
                                                 dihubungi</label>
                                             <input name="no_kontak_kerabat" id="no_kontak_kerabat" class="form-control"
+<<<<<<< HEAD
                                                 type="text" value="{{ $pengkajianPerawat?->no_kontak_kerabat }}">
+=======
+                                                value="{{ $pengkajian?->no_kontak_kerabat }}" type="text">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1057,15 +1210,24 @@
                                             <label for="status_perkawinan" class="control-label text-primary">Status
                                                 perkawinan</label>
                                             <input name="status_perkawinan" id="status_perkawinan" class="form-control"
+<<<<<<< HEAD
                                                 value="Belum Nikah" disabled="" type="text"
                                                 value="{{ $pengkajianPerawat?->status_perkawinan ?? 'Belum Nikah' }}">
+=======
+                                                value="{{ $pengkajian?->registration?->patient?->married_status }}"
+                                                readonly type="text">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="pekerjaan" class="control-label text-primary">Pekerjaan</label>
                                             <input name="pekerjaan" id="pekerjaan" class="form-control"
+<<<<<<< HEAD
                                                 value="{{ $pengkajianPerawat?->pekerjaan }}" disabled=""
+=======
+                                                value="{{ $pengkajian?->registration?->patient?->job }}" readonly
+>>>>>>> rajal
                                                 type="text">
                                         </div>
                                     </div>
@@ -1104,8 +1266,13 @@
                                         <div class="form-group">
                                             <label for="pendidikan" class="control-label text-primary">Pendidikan</label>
                                             <input name="pendidikan" id="pendidikan" class="form-control" type="text"
+<<<<<<< HEAD
                                                 value="Belum / Tidak tamat SD"
                                                 value="{{ $pengkajianPerawat?->pekerjaan ?? 'Belum / Tidak tamat SD' }}">
+=======
+                                                value="{{ $pengkajian?->registration?->patient?->last_education }}"
+                                                readonly>
+>>>>>>> rajal
                                         </div>
                                     </div>
                                 </div>
@@ -1117,6 +1284,7 @@
                                         pembelajaran</label>
                                 </header>
                                 <div class="row mt-3">
+<<<<<<< HEAD
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <div class="form-radio">
@@ -1237,12 +1405,53 @@
                                             </div>
                                         </div>
                                     </div>
+=======
+                                    @php
+                                        $hambatan_belajar_terpilih = json_decode(
+                                            $pengkajian?->hambatan_belajar ?? '[]',
+                                            true,
+                                        );
+                                        $options = [
+                                            'Pendengaran',
+                                            'Penglihatan',
+                                            'Kognitif',
+                                            'Fisik',
+                                            'Budaya',
+                                            'Agama',
+                                            'Emosi',
+                                            'Bahasa',
+                                            'Tidak ada Hambatan',
+                                        ];
+                                    @endphp
+
+                                    @foreach ($options as $key => $option)
+                                        <div class="col-md-3 mb-3">
+                                            <div class="form-group">
+                                                <div class="form-radio">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" name="hambatan_belajar[]"
+                                                            id="hambatan_belajar{{ $key + 1 }}"
+                                                            value="{{ $option }}" type="checkbox"
+                                                            {{ in_array($option, $hambatan_belajar_terpilih) ? 'checked' : '' }}>
+                                                        <label for="hambatan_belajar{{ $key + 1 }}"
+                                                            class="custom-control-label text-primary">{{ $option }}</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+
+>>>>>>> rajal
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="hambatan_lainnya" class="control-label text-primary">Hambatan
                                                 lainnya</label>
                                             <input name="hambatan_lainnya" id="hambatan_lainnya" class="form-control"
+<<<<<<< HEAD
                                                 value="{{ $pengkajianPerawat?->hambatan_lainnya }}" type="text">
+=======
+                                                type="text" value="{{ $pengkajian?->hambatan_lainnya }}">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3">
@@ -1250,8 +1459,13 @@
                                             <label for="kebutuhan_penerjemah" class="control-label text-primary">Kebutuhan
                                                 penerjemah</label>
                                             <input name="kebutuhan_penerjemah" id="kebutuhan_penerjemah"
+<<<<<<< HEAD
                                                 value="{{ $pengkajianPerawat?->kebutuhan_penerjemah }}"
                                                 class="form-control" type="text">
+=======
+                                                class="form-control" type="text"
+                                                value="{{ $pengkajian?->kebutuhan_penerjemah }}">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-12">
@@ -1259,6 +1473,7 @@
                                             class="control-label font-weight-bold margin-tb-10 text-primary mt-3">Kebutuhan
                                             pembelajaran</label>
                                     </div>
+<<<<<<< HEAD
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <div class="form-radio">
@@ -1360,6 +1575,40 @@
                                             </div>
                                         </div>
                                     </div>
+=======
+                                    @php
+                                        $kebutuhan_pembelajaran_terpilih = json_decode(
+                                            $pengkajian?->kebutuhan_pembelajaran ?? '[]',
+                                            true,
+                                        ); // Data dari database
+                                        $options = [
+                                            'Diagnosa managemen',
+                                            'Obat-obatan',
+                                            'Perawatan luka',
+                                            'Rehabilitasi',
+                                            'Diet & nutrisi',
+                                            'Tidak ada Hambatan',
+                                        ];
+                                    @endphp
+
+                                    @foreach ($options as $key => $option)
+                                        <div class="col-md-3 mt-3">
+                                            <div class="form-group">
+                                                <div class="form-radio">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input"
+                                                            name="kebutuhan_pembelajaran[]"
+                                                            id="kebutuhan_pembelajaran{{ $key + 1 }}"
+                                                            value="{{ $option }}" type="checkbox"
+                                                            {{ in_array($option, $kebutuhan_pembelajaran_terpilih) ? 'checked' : '' }}>
+                                                        <label for="kebutuhan_pembelajaran{{ $key + 1 }}"
+                                                            class="custom-control-label text-primary">{{ $option }}</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+>>>>>>> rajal
                                     <div class="col-md-12 mt-3">
                                         <label for="pembelajaran_lainnya"
                                             class="control-label font-weight-bold margin-tb-10 text-primary">Kebutuhan
@@ -1369,8 +1618,12 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <input name="pembelajaran_lainnya" id="pembelajaran_lainnya"
+<<<<<<< HEAD
                                                 value="{{ $pengkajianPerawat?->pembelajaran_lainnya }}"
                                                 class="form-control" type="text">
+=======
+                                                class="form-control" type="text" value="{{$pengkajian?->pembelajaran_lainnya}}">
+>>>>>>> rajal
                                         </div>
                                     </div>
                                 </div>
@@ -1409,9 +1662,14 @@
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="sensorik_penglihatan" id="sensorik_penglihatan3"
+<<<<<<< HEAD
                                                             {{ $pengkajianPerawat?->sensorik_penglihatan == 'Kaca Mata' ? 'checked' : '' }}
                                                             value="Kaca Mata" data-skor="2"
                                                             class="custom-control-input" type="radio">
+=======
+                                                            value="Kaca Mata" data-skor="2" class="custom-control-input"
+                                                            type="radio">
+>>>>>>> rajal
                                                         <label class="custom-control-label"
                                                             for="sensorik_penglihatan3">Kaca
                                                             Mata</label>
@@ -1504,10 +1762,15 @@
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="kognitif" class="custom-control-input"
+<<<<<<< HEAD
                                                             id="kognitif1" value="Normal" data-skor="0" {{ $pengkajianPerawat?->kognitif == 'Normal' ? 'checked' : '' }}
                                                             type="radio">
                                                         <label class="custom-control-label"
                                                             for="kognitif1">Normal</label>
+=======
+                                                            id="kognitif1" value="Normal" data-skor="0" type="radio">
+                                                        <label class="custom-control-label" for="kognitif1">Normal</label>
+>>>>>>> rajal
                                                     </div>
                                                 </td>
                                                 <td>
@@ -1522,17 +1785,27 @@
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="kognitif" class="custom-control-input"
+<<<<<<< HEAD
                                                             id="kognitif3" value="Pelupa" data-skor="2" {{ $pengkajianPerawat?->kognitif == 'Pelupa' ? 'checked' : '' }}
                                                             type="radio">
                                                         <label class="custom-control-label"
                                                             for="kognitif3">Pelupa</label>
+=======
+                                                            id="kognitif3" value="Pelupa" data-skor="2" type="radio">
+                                                        <label class="custom-control-label" for="kognitif3">Pelupa</label>
+>>>>>>> rajal
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="kognitif" class="custom-control-input"
+<<<<<<< HEAD
                                                             id="kognitif4" value="Tidak Dapat dimengerti" {{ $pengkajianPerawat?->kognitif == 'Tidak Dapat dimengerti' ? 'checked' : '' }}
                                                             data-skor="3" type="radio">
+=======
+                                                            id="kognitif4" value="Tidak Dapat dimengerti" data-skor="3"
+                                                            type="radio">
+>>>>>>> rajal
                                                         <label class="custom-control-label" for="kognitif4">Tidak Dapat
                                                             dimengerti</label>
                                                     </div>
@@ -1556,8 +1829,13 @@
                                                 <td>
                                                     <div class="custom-control custom-radio">
                                                         <input name="motorik_aktifitas" id="motorik_aktifitas1"
+<<<<<<< HEAD
                                                             value="Mandiri" data-skor="0" {{ $pengkajianPerawat?->motorik_aktifitas == 'Mandiri' ? 'checked' : '' }}
                                                             class="custom-control-input" type="radio">
+=======
+                                                            value="Mandiri" data-skor="0" class="custom-control-input"
+                                                            type="radio">
+>>>>>>> rajal
                                                         <label class="custom-control-label text-primary"
                                                             for="motorik_aktifitas1">Mandiri</label>
                                                     </div>
@@ -1628,8 +1906,8 @@
                                     <div class="col-md-4 text-center">
                                         <span>Perawat,</span>
                                         <div id="tombol-1" class="mt-3">
-                                            <a class="btn btn-primary btn-sm text-white ttd"
-                                                onclick="openSignaturePad(1)" id="ttd_pegawai">Tanda tangan</a>
+                                            <a class="btn btn-primary btn-sm text-white ttd" onclick="openSignaturePad(1)"
+                                                id="ttd_pegawai">Tanda tangan</a>
                                         </div>
                                         <div class="mt-3">
                                             <img id="signature-display-1" src="" alt="Signature Image"
@@ -1694,6 +1972,8 @@
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            const pengkajian = @json($pengkajian ?? []);
+
             $('body').addClass('layout-composed');
             $('.select2').select2({
                 placeholder: 'Pilih Item',
@@ -1704,6 +1984,17 @@
             $('#doctor_id').select2({
                 placeholder: 'Pilih Dokter',
             });
+
+            if(pengkajian) {
+                $('#diagnosa-keperawatan').val(pengkajian.diagnosa_keperawatan).select2();
+                $('#rencana-tindak-lanjut').val(pengkajian.rencana_tindak_lanjut).select2();
+                $('#nyeri').val(pengkajian.nyeri).select2();
+                $('#penurunan_bb').val(pengkajian.penurunan_bb).select2();
+                $('#asupan_makan').val(pengkajian.asupan_makan).select2();
+                $('#status_psikologis').val(pengkajian.status_psikologis).select2();
+                $('#status_spiritual').val(pengkajian.status_spiritual).select2();
+                $('#penghasilan').val(pengkajian.penghasilan).select2();
+            }
 
             $('#toggle-pasien').on('click', function() {
                 var target = $('#js-slide-left'); // Mengambil elemen target berdasarkan data-target
