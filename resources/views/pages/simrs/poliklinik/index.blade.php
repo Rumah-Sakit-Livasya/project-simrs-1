@@ -166,7 +166,7 @@
                                                 <div class="input-group">
                                                     <input type="date" name="tgl_masuk" class="form-control "
                                                         placeholder="Tanggal" id="tgl_masuk"
-                                                        value="{{ $pengkajianPerawat?->tgl_masuk?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
+                                                        value="{{ $pengkajian?->tgl_masuk?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
                                                     <input type="time" name="jam_masuk" class="form-control "
                                                         placeholder="Jam" id="jam_masuk"
                                                         value="{{ $pengkajian?->jam_masuk ?? '' }}">
@@ -332,48 +332,48 @@
                                                 Keperawatan</label>
                                             <select name="diagnosa_keperawatan" id="diagnosa_keperawatan"
                                                 class="form-control select2"
-                                                value="{{ $pengkajianPerawat?->diagnosa_keperawatan }}">
+                                                value="{{ $pengkajian?->diagnosa_keperawatan }}">
                                                 <option value="-"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == '-' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == '-' ? 'selected' : '' }}>
                                                     -</option>
                                                 <option value="Gangguan rasa nyaman"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Gangguan rasa nyaman' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Gangguan rasa nyaman' ? 'selected' : '' }}>
                                                     Gangguan rasa nyaman</option>
                                                 <option value="Nyeri"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Nyeri' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Nyeri' ? 'selected' : '' }}>
                                                     Nyeri</option>
                                                 <option value="Pola Nafas tidak efektif"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Pola Nafas tidak efektif' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Pola Nafas tidak efektif' ? 'selected' : '' }}>
                                                     Pola Nafas tidak efektif</option>
                                                 <option value="Bersihan jalan nafas tidak efektif"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Bersihan jalan nafas tidak efektif' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Bersihan jalan nafas tidak efektif' ? 'selected' : '' }}>
                                                     Bersihan jalan nafas tidak efektif</option>
                                                 <option value="Nyeri Akut"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Nyeri Akut' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Nyeri Akut' ? 'selected' : '' }}>
                                                     Nyeri Akut</option>
                                                 <option value="Nyeri Kronis"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Nyeri Kronis' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Nyeri Kronis' ? 'selected' : '' }}>
                                                     Nyeri Kronis</option>
                                                 <option value="Resiko Infeksi"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Resiko Infeksi' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Resiko Infeksi' ? 'selected' : '' }}>
                                                     Resiko Infeksi</option>
                                                 <option value="Harga diri Rendah"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Harga diri Rendah' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Harga diri Rendah' ? 'selected' : '' }}>
                                                     Harga diri Rendah</option>
                                                 <option value="Resiko Perilaku Kekerasan"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Resiko Perilaku Kekerasan' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Resiko Perilaku Kekerasan' ? 'selected' : '' }}>
                                                     Resiko Perilaku Kekerasan</option>
                                                 <option value="Halusinasi"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Halusinasi' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Halusinasi' ? 'selected' : '' }}>
                                                     Halusinasi</option>
                                                 <option value="Isolasi Sosial"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Isolasi Sosial' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Isolasi Sosial' ? 'selected' : '' }}>
                                                     Isolasi Sosial</option>
                                                 <option value="Resiko Bunuh Diri"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Resiko Bunuh Diri' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Resiko Bunuh Diri' ? 'selected' : '' }}>
                                                     Resiko Bunuh Diri</option>
                                                 <option value="Waham"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->diagnosa_keperawatan == 'Waham' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Waham' ? 'selected' : '' }}>
                                                     Waham</option>
                                             </select>
                                         </div>
@@ -385,21 +385,21 @@
                                                 Lanjut</label>
                                             <select name="rencana_tindak_lanjut" id="rencana_tindak_lanjut"
                                                 class="form-control select2"
-                                                value="{{ $pengkajianPerawat?->rencana_tidak_lanjut }}">
+                                                value="{{ $pengkajian?->rencana_tidak_lanjut }}">
                                                 <option value="-"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->rencana_tindak_lanjut == '-' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == '-' ? 'selected' : '' }}>
                                                     -</option>
                                                 <option value="Kolaborasi Dokter"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->rencana_tindak_lanjut == 'Kolaborasi Dokter' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Kolaborasi Dokter' ? 'selected' : '' }}>
                                                     Kolaborasi Dokter</option>
                                                 <option value="Perawatan Luka"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->rencana_tindak_lanjut == 'Perawatan Luka' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Perawatan Luka' ? 'selected' : '' }}>
                                                     Perawatan Luka</option>
                                                 <option value="Memberikan Edukasi"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->rencana_tindak_lanjut == 'Memberikan Edukasi' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Memberikan Edukasi' ? 'selected' : '' }}>
                                                     Memberikan Edukasi</option>
                                                 <option value="Mengukur tanda - tanda vital"
-                                                    {{ $pengkajianPerawat && $pengkajianPerawat->rencana_tindak_lanjut == 'Mengukur tanda - tanda vital' ? 'selected' : '' }}>
+                                                    {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Mengukur tanda - tanda vital' ? 'selected' : '' }}>
                                                     Mengukur tanda - tanda vital</option>
                                             </select>
                                         </div>
@@ -489,11 +489,7 @@
                                                 obat</label>
                                             <input name="reaksi_alergi_obat" id="reaksi_alergi_obat"
                                                 class="form-control alergi" type="text"
-<<<<<<< HEAD
-                                                value="{{ $pengkajianPerawat?->reaksi_alergi_obat }}">
-=======
                                                 value="{{ $pengkajian?->reaksi_alergi_obat }}">
->>>>>>> rajal
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="reaksi_alergi_makanan" class="control-label text-primary">Reaksi
@@ -502,11 +498,7 @@
                                                 makanan</label>
                                             <input name="reaksi_alergi_makanan" id="reaksi_alergi_makanan"
                                                 class="form-control alergi" type="text"
-<<<<<<< HEAD
-                                                value="{{ $pengkajianPerawat?->reaksi_alergi_makanan }}">
-=======
                                                 value="{{ $pengkajian?->reaksi_alergi_makanan }}">
->>>>>>> rajal
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="reaksi_alergi_lainnya" class="control-label text-primary">Reaksi
@@ -515,11 +507,7 @@
                                                 lainnya</label>
                                             <input name="reaksi_alergi_lainnya" id="reaksi_alergi_lainnya"
                                                 class="form-control alergi" type="text"
-<<<<<<< HEAD
-                                                value="{{ $pengkajianPerawat?->reaksi_alergi_lainnya }}">
-=======
                                                 value="{{ $pengkajian?->reaksi_alergi_lainnya }}">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-12">
@@ -529,11 +517,7 @@
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input" value="1"
                                                     name="gelang" id="gelang1"
-<<<<<<< HEAD
-                                                    {{ $pengkajianPerawat?->gelang == '1' ? 'checked' : '' }}>
-=======
                                                     {{ $pengkajian?->gelang == 1 ? 'checked' : '' }}>
->>>>>>> rajal
                                                 <label class="custom-control-label text-primary" for="gelang1">Dipasang
                                                     (warna
                                                     merah)</label>
@@ -591,61 +575,36 @@
                                             <input name="skor_nyeri" id="skor_nyeri"
                                                 class="form-control text-center mt-3"
                                                 style="font-size: 3rem; height: 60px;" type="text"
-<<<<<<< HEAD
-                                                value="{{ $pengkajianPerawat?->skor_nyeri }}">
-=======
                                                 value="{{ $pengkajian?->skor_nyeri }}">
->>>>>>> rajal
                                             <label for="skor_nyeri" class="control-label text-primary">Skor</label>
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="provokatif" class="control-label text-primary">Provokatif</label>
-<<<<<<< HEAD
-                                            <input name="provokatif" value="{{ $pengkajianPerawat?->provokatif }}"
-                                                id="provokatif" class="form-control" type="text">
-=======
                                             <input name="provokatif" id="provokatif" class="form-control" type="text"
                                                 value="{{ $pengkajian?->provokatif }}">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="quality" class="control-label text-primary">Quality</label>
-<<<<<<< HEAD
-                                            <input name="quality" id="quality"
-                                                value="{{ $pengkajianPerawat?->quality }}" class="form-control"
-                                                type="text">
-=======
                                             <input name="quality" id="quality" class="form-control" type="text"
                                                 value="{{ $pengkajian?->quality }}">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="region" class="control-label text-primary">Region</label>
-<<<<<<< HEAD
-                                            <input name="region" id="region"
-                                                value="{{ $pengkajianPerawat?->region }}" class="form-control"
-                                                type="text">
-=======
                                             <input name="region" id="region" class="form-control" type="text"
                                                 value="{{ $pengkajian?->region }}">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="time" class="control-label text-primary">Time</label>
                                             <input name="time" id="time" class="form-control" type="text"
-<<<<<<< HEAD
-                                                value="{{ $pengkajianPerawat?->time }}">
-=======
                                                 value="{{ $pengkajian?->time }}">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -671,11 +630,7 @@
                                             <label for="nyeri_hilang" class="control-label text-primary">Nyeri hilang
                                                 apabila</label>
                                             <input name="nyeri_hilang" id="nyeri_hilang" class="form-control"
-<<<<<<< HEAD
-                                                type="text" value="{{ $pengkajianPerawat?->nyeri_hilang }}">
-=======
                                                 value="{{ $pengkajian?->nyeri_hilang }}" type="text">
->>>>>>> rajal
                                         </div>
                                     </div>
                                 </div>
@@ -742,118 +697,6 @@
                                 @endphp
 
                                 <div class="row mt-3">
-<<<<<<< HEAD
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus1" id="kondisi_khusus1"
-                                                        value="Anak usia 1-5 tahun" type="checkbox"
-                                                        {{ $pengkajianPerawat?->kondisi_khusus1 == 'Anak usia 1-5 tahun' ? 'checked' : '' }}
-                                                        class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">Anak usia 1-5
-                                                        tahun</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus2" id="kondisi_khusus2"
-                                                        value="Lansia > 60 tahun" type="checkbox"
-                                                        class="custom-control-input"
-                                                        {{ $pengkajianPerawat?->kondisi_khusus2 == 'Lansia > 60 tahun' ? 'checked' : '' }}>
-                                                    <span class="custom-control-label text-primary">Lansia &gt; 60
-                                                        tahun</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus3" id="kondisi_khusus3"
-                                                        value="Penyakit kronis dengan komplikasi" type="checkbox"
-                                                        class="custom-control-input"
-                                                        {{ $pengkajianPerawat?->kondisi_khusus3 == 'Penyakit kronis dengan komplikasi' ? 'checked' : '' }}>
-                                                    <span class="custom-control-label text-primary">Penyakit kronis dengan
-                                                        komplikasi</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus4" id="kondisi_khusus4"
-                                                        value="Kanker stadium III/IV" type="checkbox"
-                                                        {{ $pengkajianPerawat?->kondisi_khusus4 == 'Kanker stadium III/IV' ? 'checked' : '' }}
-                                                        class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">Kanker stadium
-                                                        III/IV</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus5" id="kondisi_khusus5" value="HIV/AIDS"
-                                                        {{ $pengkajianPerawat?->kondisi_khusus5 == 'HIV/AIDS' ? 'checked' : '' }}
-                                                        type="checkbox" class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">HIV/AIDS</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus6" id="kondisi_khusus6" value="TB"
-                                                        {{ $pengkajianPerawat?->kondisi_khusus6 == 'TB' ? 'checked' : '' }}
-                                                        type="checkbox" class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">TB</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus7" id="kondisi_khusus7"
-                                                        value="Bedah mayor degestif" type="checkbox"
-                                                        {{ $pengkajianPerawat?->kondisi_khusus7 == 'Bedah mayor degestif' ? 'checked' : '' }}
-                                                        class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">Bedah mayor
-                                                        degestif</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="kondisi_khusus8" id="kondisi_khusus8"
-                                                        value="Luka bakar > 20%" type="checkbox"
-                                                        {{ $pengkajianPerawat?->kondisi_khusus8 == 'Luka bakar > 20%' ? 'checked' : '' }}
-                                                        class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">Luka bakar &gt;
-                                                        20%</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-=======
                                     @foreach (['Anak usia 1-5 tahun', 'Lansia > 60 tahun', 'Penyakit kronis dengan komplikasi', 'Kanker stadium III/IV', 'HIV/AIDS', 'TB', 'Bedah mayor degestif', 'Luka bakar > 20%'] as $index => $kondisi)
                                         <div class="col-md-3">
                                             <div class="form-group">
@@ -871,7 +714,6 @@
                                             </div>
                                         </div>
                                     @endforeach
->>>>>>> rajal
                                 </div>
 
                                 <header class="text-secondary">
@@ -885,68 +727,6 @@
                                 @endphp
 
                                 <div class="row mt-3">
-<<<<<<< HEAD
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="imunisasi_dasar1" id="imunisasi_dasar1" value="BCG"
-                                                        {{ $pengkajianPerawat?->imunisasi_dasar1 == 'BCG' ? 'checked' : '' }}
-                                                        type="checkbox" class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">BCG</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="imunisasi_dasar2" id="imunisasi_dasar2" value="DPT"
-                                                        {{ $pengkajianPerawat?->imunisasi_dasar2 == 'DPT' ? 'checked' : '' }}
-                                                        type="checkbox" class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">DPT</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="imunisasi_dasar3" id="imunisasi_dasar3"
-                                                        {{ $pengkajianPerawat?->imunisasi_dasar3 == 'Hepatitis B' ? 'checked' : '' }}
-                                                        value="Hepatitis B" type="checkbox" class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">Hepatitis B</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="imunisasi_dasar4" id="imunisasi_dasar4" value="Polio"
-                                                        {{ $pengkajianPerawat?->imunisasi_dasar4 == 'Polio' ? 'checked' : '' }}
-                                                        type="checkbox" class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">Polio</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input name="imunisasi_dasar5" id="imunisasi_dasar5" value="Campak"
-                                                        {{ $pengkajianPerawat?->imunisasi_dasar5 == 'Campak' ? 'checked' : '' }}
-                                                        type="checkbox" class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">Campak</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-=======
                                     @foreach (['BCG', 'DPT', 'Hepatitis B', 'Polio', 'Campak'] as $index => $imunisasi)
                                         <div class="col-md-3 mb-3">
                                             <div class="form-group">
@@ -964,7 +744,6 @@
                                             </div>
                                         </div>
                                     @endforeach
->>>>>>> rajal
                                 </div>
 
                                 <header class="text-secondary">
@@ -979,55 +758,6 @@
                                         <label for="resiko_jatuh3" class="control-label text-primary margin-tb-10">A. Cara
                                             Berjalan</label>
                                     </div>
-<<<<<<< HEAD
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input onclick="resiko_jatuh()" name="resiko_jatuh1"
-                                                        id="resiko_jatuh1" value="Tidak seimbang/sempoyongan/limbung"
-                                                        {{ $pengkajianPerawat?->resiko_jatuh1 == 'Tidak seimbang/sempoyongan/limbung' ? 'checked' : '' }}
-                                                        type="checkbox" class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">Tidak
-                                                        seimbang/sempoyongan/limbung</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input onclick="resiko_jatuh()" name="resiko_jatuh2"
-                                                        id="resiko_jatuh2" value="Alat bantu: kruk,kursi roda/dibantu"
-                                                        {{ $pengkajianPerawat?->resiko_jatuh2 == 'Alat bantu: kruk,kursi roda/dibantu' ? 'checked' : '' }}
-                                                        type="checkbox" class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">Jalan dengan alat
-                                                        bantu(kruk,kursi
-                                                        roda/dibantu)</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group">
-                                            <label for="resiko_jatuh3"
-                                                class="control-label mb-3 text-primary margin-tb-10">B.
-                                                Menopang saat duduk</label>
-                                            <div class="form-radio">
-                                                <label class="custom-control custom-checkbox custom-control-inline">
-                                                    <input onclick="resiko_jatuh()" name="resiko_jatuh3"
-                                                        id="resiko_jatuh3"
-                                                        value="Pegang pinggiran meja/kursi/alat bantu untuk duduk"
-                                                        {{ $pengkajianPerawat?->resiko_jatuh3 == 'Pegang pinggiran meja/kursi/alat bantu untuk duduk' ? 'checked' : '' }}
-                                                        type="checkbox" class="custom-control-input">
-                                                    <span class="custom-control-label text-primary">Pegang pinggiran
-                                                        meja/kursi/alat bantu untuk duduk</span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-=======
 
                                     @foreach (['Tidak seimbang/sempoyongan/limbung', 'Alat bantu: kruk,kursi roda/dibantu', 'Pegang pinggiran meja/kursi/alat bantu untuk duduk'] as $index => $resiko)
                                         <div class="col-md-6 mb-3">
@@ -1051,20 +781,12 @@
                                             </div>
                                         </div>
                                     @endforeach
-
->>>>>>> rajal
                                     <div class="col-md-6 mb-3">
                                         <div class="form-group">
                                             <span class="input-group-addon grey-text">Hasil : </span>
                                             <div class="input-group-content">
-<<<<<<< HEAD
-                                                <input class="form-control" name="resiko_jatuh_hasil"
-                                                    {{ $pengkajianPerawat?->resiko_jatuh_hasil }} id="resiko_jatuh_hasil"
-                                                    type="text" readonly="">
-=======
                                                 <input class="form-control" name="hasil_resiko_jatuh"
                                                     id="resiko_jatuh_hasil" type="text" readonly>
->>>>>>> rajal
                                             </div>
                                         </div>
                                     </div>
@@ -1129,11 +851,7 @@
                                                 prilaku(bila
                                                 ada)</label>
                                             <input name="masalah_prilaku" id="masalah_prilaku" class="form-control"
-<<<<<<< HEAD
-                                                type="text" value="{{ $pengkajianPerawat?->masalah_prilaku }}">
-=======
                                                 value="{{ $pengkajian?->masalah_prilaku }}" type="text">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1142,11 +860,7 @@
                                                 pernah
                                                 dialami</label>
                                             <input name="kekerasan_dialami" id="kekerasan_dialami" class="form-control"
-<<<<<<< HEAD
-                                                type="text" value="{{ $pengkajianPerawat?->kekerasan_dialami }}">
-=======
                                                 value="{{ $pengkajian?->kekerasan_dialami }}" type="text">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1156,13 +870,8 @@
                                                 anggota
                                                 keluarga</label>
                                             <input name="hub_dengan_keluarga" id="hub_dengan_keluarga"
-<<<<<<< HEAD
-                                                class="form-control" type="text"
-                                                value="{{ $pengkajianPerawat?->hub_dengan_keluarga }}">
-=======
                                                 value="{{ $pengkajian?->hub_dengan_keluarga }}" class="form-control"
                                                 type="text">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1170,11 +879,7 @@
                                             <label for="tempat_tinggal" class="control-label text-primary">Tempat tinggal
                                                 (rumah/panti/kos/dll)</label>
                                             <input name="tempat_tinggal" id="tempat_tinggal" class="form-control"
-<<<<<<< HEAD
-                                                type="text" value="{{ $pengkajianPerawat?->tempat_tinggal }}">
-=======
                                                 value="{{ $pengkajian?->tempat_tinggal }}" type="text">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1183,11 +888,7 @@
                                                 dapat
                                                 dihubungi</label>
                                             <input name="kerabat_dihub" id="kerabat_dihub" class="form-control"
-<<<<<<< HEAD
-                                                type="text" value="{{ $pengkajianPerawat?->kerabat_dihub }}">
-=======
                                                 value="{{ $pengkajian?->kerabat_dihub }}" type="text">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1198,11 +899,7 @@
                                                 dapat
                                                 dihubungi</label>
                                             <input name="no_kontak_kerabat" id="no_kontak_kerabat" class="form-control"
-<<<<<<< HEAD
-                                                type="text" value="{{ $pengkajianPerawat?->no_kontak_kerabat }}">
-=======
                                                 value="{{ $pengkajian?->no_kontak_kerabat }}" type="text">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -1210,24 +907,15 @@
                                             <label for="status_perkawinan" class="control-label text-primary">Status
                                                 perkawinan</label>
                                             <input name="status_perkawinan" id="status_perkawinan" class="form-control"
-<<<<<<< HEAD
-                                                value="Belum Nikah" disabled="" type="text"
-                                                value="{{ $pengkajianPerawat?->status_perkawinan ?? 'Belum Nikah' }}">
-=======
                                                 value="{{ $pengkajian?->registration?->patient?->married_status }}"
                                                 readonly type="text">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="pekerjaan" class="control-label text-primary">Pekerjaan</label>
                                             <input name="pekerjaan" id="pekerjaan" class="form-control"
-<<<<<<< HEAD
-                                                value="{{ $pengkajianPerawat?->pekerjaan }}" disabled=""
-=======
                                                 value="{{ $pengkajian?->registration?->patient?->job }}" readonly
->>>>>>> rajal
                                                 type="text">
                                         </div>
                                     </div>
@@ -1266,13 +954,8 @@
                                         <div class="form-group">
                                             <label for="pendidikan" class="control-label text-primary">Pendidikan</label>
                                             <input name="pendidikan" id="pendidikan" class="form-control" type="text"
-<<<<<<< HEAD
-                                                value="Belum / Tidak tamat SD"
-                                                value="{{ $pengkajianPerawat?->pekerjaan ?? 'Belum / Tidak tamat SD' }}">
-=======
                                                 value="{{ $pengkajian?->registration?->patient?->last_education }}"
                                                 readonly>
->>>>>>> rajal
                                         </div>
                                     </div>
                                 </div>
@@ -1284,128 +967,6 @@
                                         pembelajaran</label>
                                 </header>
                                 <div class="row mt-3">
-<<<<<<< HEAD
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar1"
-                                                        {{ $pengkajianPerawat?->hambatan_belajar1 == 'Pendengaran' ? 'checked' : '' }}
-                                                        id="hambatan_belajar1" value="Pendengaran" type="checkbox">
-                                                    <label for="hambatan_belajar1"
-                                                        class="custom-control-label text-primary">Pendengaran</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar2"
-                                                        {{ $pengkajianPerawat?->hambatan_belajar2 == 'Penglihatan' ? 'checked' : '' }}
-                                                        id="hambatan_belajar2" value="Penglihatan" type="checkbox">
-                                                    <label for="hambatan_belajar2"
-                                                        class="custom-control-label text-primary">Penglihatan</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar3"
-                                                        {{ $pengkajianPerawat?->hambatan_belajar3 == 'Kognitif' ? 'checked' : '' }}
-                                                        id="hambatan_belajar3" value="Kognitif" type="checkbox">
-                                                    <label for="hambatan_belajar3"
-                                                        class="custom-control-label text-primary">Kognitif</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar4"
-                                                        {{ $pengkajianPerawat?->hambatan_belajar4 == 'Fisik' ? 'checked' : '' }}
-                                                        id="hambatan_belajar4" value="Fisik" type="checkbox">
-                                                    <label for="hambatan_belajar4"
-                                                        class="custom-control-label text-primary">Fisik</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar5"
-                                                        {{ $pengkajianPerawat?->hambatan_belajar5 == 'Budaya' ? 'checked' : '' }}
-                                                        id="hambatan_belajar5" value="Budaya" type="checkbox">
-                                                    <label for="hambatan_belajar5"
-                                                        class="custom-control-label text-primary">Budaya</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar6"
-                                                        {{ $pengkajianPerawat?->hambatan_belajar6 == 'Agama' ? 'checked' : '' }}
-                                                        id="hambatan_belajar6" value="Agama" type="checkbox">
-                                                    <label for="hambatan_belajar6"
-                                                        class="custom-control-label text-primary">Agama</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar7"
-                                                        {{ $pengkajianPerawat?->hambatan_belajar7 == 'Emosi' ? 'checked' : '' }}
-                                                        id="hambatan_belajar7" value="Emosi" type="checkbox">
-                                                    <label for="hambatan_belajar7"
-                                                        class="custom-control-label text-primary">Emosi</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar8"
-                                                        {{ $pengkajianPerawat?->hambatan_belajar8 == 'Bahasa' ? 'checked' : '' }}
-                                                        id="hambatan_belajar8" value="Bahasa" type="checkbox">
-                                                    <label for="hambatan_belajar8"
-                                                        class="custom-control-label text-primary">Bahasa</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="hambatan_belajar9"
-                                                        {{ $pengkajianPerawat?->hambatan_belajar9 == 'Tidak ada Hamabatan' ? 'checked' : '' }}
-                                                        id="hambatan_belajar9" value="Tidak ada Hamabatan"
-                                                        type="checkbox">
-                                                    <label for="hambatan_belajar9"
-                                                        class="custom-control-label text-primary">Tidak
-                                                        ada
-                                                        Hamabatan</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-=======
                                     @php
                                         $hambatan_belajar_terpilih = json_decode(
                                             $pengkajian?->hambatan_belajar ?? '[]',
@@ -1440,18 +1001,12 @@
                                             </div>
                                         </div>
                                     @endforeach
-
->>>>>>> rajal
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="hambatan_lainnya" class="control-label text-primary">Hambatan
                                                 lainnya</label>
                                             <input name="hambatan_lainnya" id="hambatan_lainnya" class="form-control"
-<<<<<<< HEAD
-                                                value="{{ $pengkajianPerawat?->hambatan_lainnya }}" type="text">
-=======
                                                 type="text" value="{{ $pengkajian?->hambatan_lainnya }}">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-3">
@@ -1459,13 +1014,8 @@
                                             <label for="kebutuhan_penerjemah" class="control-label text-primary">Kebutuhan
                                                 penerjemah</label>
                                             <input name="kebutuhan_penerjemah" id="kebutuhan_penerjemah"
-<<<<<<< HEAD
-                                                value="{{ $pengkajianPerawat?->kebutuhan_penerjemah }}"
-                                                class="form-control" type="text">
-=======
                                                 class="form-control" type="text"
                                                 value="{{ $pengkajian?->kebutuhan_penerjemah }}">
->>>>>>> rajal
                                         </div>
                                     </div>
                                     <div class="col-md-12">
@@ -1473,109 +1023,6 @@
                                             class="control-label font-weight-bold margin-tb-10 text-primary mt-3">Kebutuhan
                                             pembelajaran</label>
                                     </div>
-<<<<<<< HEAD
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran1"
-                                                        id="kebuthan_pembelajaran1" value="Diagnosa managemen"
-                                                        {{ $pengkajianPerawat?->kebuthan_pembelajaran1 == 'Diagnosa managemen' ? 'checked' : '' }}
-                                                        type="checkbox">
-                                                    <label for="kebuthan_pembelajaran1"
-                                                        class="custom-control-label text-primary">Diagnosa
-                                                        managemen</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran2"
-                                                        {{ $pengkajianPerawat?->kebuthan_pembelajaran2 == 'Obat-obatan' ? 'checked' : '' }}
-                                                        id="kebuthan_pembelajaran2" value="Obat-obatan" type="checkbox">
-                                                    <label for="kebuthan_pembelajaran2"
-                                                        class="custom-control-label text-primary">Obat-obatan</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran3"
-                                                        id="kebuthan_pembelajaran3" value="Perawatan luka"
-                                                        {{ $pengkajianPerawat?->kebuthan_pembelajaran3 == 'Perawatan luka' ? 'checked' : '' }}
-                                                        type="checkbox">
-                                                    <label for="kebuthan_pembelajaran3"
-                                                        class="custom-control-label text-primary">Perawatan luka</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran4"
-                                                        {{ $pengkajianPerawat?->kebuthan_pembelajaran4 == 'Rehabilitasi' ? 'checked' : '' }}
-                                                        id="kebuthan_pembelajaran4" value="Rehabilitasi" type="checkbox">
-                                                    <label for="kebuthan_pembelajaran4"
-                                                        class="custom-control-label text-primary">Rehabilitasi</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran5"
-                                                        id="kebuthan_pembelajaran5" value="Manajemen nyeri"
-                                                        {{ $pengkajianPerawat?->kebuthan_pembelajaran5 == 'Manajemen nyeri' ? 'checked' : '' }}
-                                                        type="checkbox">
-                                                    <label for="kebuthan_pembelajaran5"
-                                                        class="custom-control-label text-primary">Manajemen nyeri</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran6"
-                                                        id="kebuthan_pembelajaran6" value="Diet &amp; nutrisi"
-                                                        {{ $pengkajianPerawat?->kebuthan_pembelajaran6 == 'Diet &amp; nutrisi' ? 'checked' : '' }}
-                                                        type="checkbox">
-                                                    <label for="kebuthan_pembelajaran6"
-                                                        class="custom-control-label text-primary">Diet
-                                                        &amp; nutrisi</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <div class="form-radio">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" name="kebuthan_pembelajaran7"
-                                                        id="kebuthan_pembelajaran7" value="Tidak ada Hamabatan"
-                                                        {{ $pengkajianPerawat?->kebuthan_pembelajaran7 == 'Tidak ada Hamabatan' ? 'checked' : '' }}
-                                                        type="checkbox">
-                                                    <label for="kebuthan_pembelajaran7"
-                                                        class="custom-control-label text-primary">Tidak ada
-                                                        Hamabatan</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-=======
                                     @php
                                         $kebutuhan_pembelajaran_terpilih = json_decode(
                                             $pengkajian?->kebutuhan_pembelajaran ?? '[]',
@@ -1608,7 +1055,6 @@
                                             </div>
                                         </div>
                                     @endforeach
->>>>>>> rajal
                                     <div class="col-md-12 mt-3">
                                         <label for="pembelajaran_lainnya"
                                             class="control-label font-weight-bold margin-tb-10 text-primary">Kebutuhan
@@ -1618,12 +1064,7 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <input name="pembelajaran_lainnya" id="pembelajaran_lainnya"
-<<<<<<< HEAD
-                                                value="{{ $pengkajianPerawat?->pembelajaran_lainnya }}"
-                                                class="form-control" type="text">
-=======
                                                 class="form-control" type="text" value="{{$pengkajian?->pembelajaran_lainnya}}">
->>>>>>> rajal
                                         </div>
                                     </div>
                                 </div>
@@ -1662,14 +1103,8 @@
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="sensorik_penglihatan" id="sensorik_penglihatan3"
-<<<<<<< HEAD
-                                                            {{ $pengkajianPerawat?->sensorik_penglihatan == 'Kaca Mata' ? 'checked' : '' }}
-                                                            value="Kaca Mata" data-skor="2"
-                                                            class="custom-control-input" type="radio">
-=======
                                                             value="Kaca Mata" data-skor="2" class="custom-control-input"
                                                             type="radio">
->>>>>>> rajal
                                                         <label class="custom-control-label"
                                                             for="sensorik_penglihatan3">Kaca
                                                             Mata</label>
@@ -1762,15 +1197,8 @@
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="kognitif" class="custom-control-input"
-<<<<<<< HEAD
-                                                            id="kognitif1" value="Normal" data-skor="0" {{ $pengkajianPerawat?->kognitif == 'Normal' ? 'checked' : '' }}
-                                                            type="radio">
-                                                        <label class="custom-control-label"
-                                                            for="kognitif1">Normal</label>
-=======
                                                             id="kognitif1" value="Normal" data-skor="0" type="radio">
                                                         <label class="custom-control-label" for="kognitif1">Normal</label>
->>>>>>> rajal
                                                     </div>
                                                 </td>
                                                 <td>
@@ -1785,27 +1213,15 @@
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="kognitif" class="custom-control-input"
-<<<<<<< HEAD
-                                                            id="kognitif3" value="Pelupa" data-skor="2" {{ $pengkajianPerawat?->kognitif == 'Pelupa' ? 'checked' : '' }}
-                                                            type="radio">
-                                                        <label class="custom-control-label"
-                                                            for="kognitif3">Pelupa</label>
-=======
                                                             id="kognitif3" value="Pelupa" data-skor="2" type="radio">
                                                         <label class="custom-control-label" for="kognitif3">Pelupa</label>
->>>>>>> rajal
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="kognitif" class="custom-control-input"
-<<<<<<< HEAD
-                                                            id="kognitif4" value="Tidak Dapat dimengerti" {{ $pengkajianPerawat?->kognitif == 'Tidak Dapat dimengerti' ? 'checked' : '' }}
-                                                            data-skor="3" type="radio">
-=======
                                                             id="kognitif4" value="Tidak Dapat dimengerti" data-skor="3"
                                                             type="radio">
->>>>>>> rajal
                                                         <label class="custom-control-label" for="kognitif4">Tidak Dapat
                                                             dimengerti</label>
                                                     </div>
@@ -1829,13 +1245,8 @@
                                                 <td>
                                                     <div class="custom-control custom-radio">
                                                         <input name="motorik_aktifitas" id="motorik_aktifitas1"
-<<<<<<< HEAD
-                                                            value="Mandiri" data-skor="0" {{ $pengkajianPerawat?->motorik_aktifitas == 'Mandiri' ? 'checked' : '' }}
-                                                            class="custom-control-input" type="radio">
-=======
                                                             value="Mandiri" data-skor="0" class="custom-control-input"
                                                             type="radio">
->>>>>>> rajal
                                                         <label class="custom-control-label text-primary"
                                                             for="motorik_aktifitas1">Mandiri</label>
                                                     </div>

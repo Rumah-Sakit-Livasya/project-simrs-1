@@ -36,9 +36,7 @@ class PoliklinikController extends Controller
         $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
         $registration = Registration::where('registration_number', $noRegist)->first();
 
-<<<<<<< HEAD
 
-=======
         $query = Registration::whereDate('registration_date', Carbon::today());
 
         $query->when(isset($registration->departement_id), function ($q) use ($registration) {
@@ -51,7 +49,6 @@ class PoliklinikController extends Controller
 
         $registrations = $query->get();
         
->>>>>>> rajal
         if ($menu && $noRegist) {
             // Render partial view sebagai HTML
             $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
@@ -76,18 +73,8 @@ class PoliklinikController extends Controller
         // }
 
         if ($menu == 'pengkajian_perawat') {
-<<<<<<< HEAD
-            $pengkajianPerawat = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
-            $pengkajianDokter = PengkajianDokterRajal::where('registration_id', $registration->id)->first();
-            return view(
-                'pages.simrs.poliklinik.index',
-                compact('registration', 'departements', 'jadwal_dokter',  'pengkajianPerawat', 'pengkajianDokter')
-            );
-=======
             $pengkajian = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
-            
             return view('pages.simrs.poliklinik.index', compact('registration', 'departements', 'jadwal_dokter', 'pengkajian'));
->>>>>>> rajal
         } elseif ($menu == 'cppt_perawat') {
             $perawat = Employee::whereHas('organization', function ($query) {
                 $query->where('name', 'Rawat Jalan');
