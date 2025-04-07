@@ -330,51 +330,26 @@
                                         <div class="form-group">
                                             <label for="diagnosa-keperawatan" class="control-label text-primary">Diagnosa
                                                 Keperawatan</label>
-                                            <select name="diagnosa_keperawatan" id="diagnosa_keperawatan"
-                                                class="form-control select2"
-                                                value="{{ $pengkajian?->diagnosa_keperawatan }}">
-                                                <option value="-"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == '-' ? 'selected' : '' }}>
-                                                    -</option>
-                                                <option value="Gangguan rasa nyaman"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Gangguan rasa nyaman' ? 'selected' : '' }}>
-                                                    Gangguan rasa nyaman</option>
-                                                <option value="Nyeri"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Nyeri' ? 'selected' : '' }}>
-                                                    Nyeri</option>
-                                                <option value="Pola Nafas tidak efektif"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Pola Nafas tidak efektif' ? 'selected' : '' }}>
-                                                    Pola Nafas tidak efektif</option>
-                                                <option value="Bersihan jalan nafas tidak efektif"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Bersihan jalan nafas tidak efektif' ? 'selected' : '' }}>
-                                                    Bersihan jalan nafas tidak efektif</option>
-                                                <option value="Nyeri Akut"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Nyeri Akut' ? 'selected' : '' }}>
-                                                    Nyeri Akut</option>
-                                                <option value="Nyeri Kronis"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Nyeri Kronis' ? 'selected' : '' }}>
-                                                    Nyeri Kronis</option>
-                                                <option value="Resiko Infeksi"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Resiko Infeksi' ? 'selected' : '' }}>
-                                                    Resiko Infeksi</option>
-                                                <option value="Harga diri Rendah"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Harga diri Rendah' ? 'selected' : '' }}>
-                                                    Harga diri Rendah</option>
-                                                <option value="Resiko Perilaku Kekerasan"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Resiko Perilaku Kekerasan' ? 'selected' : '' }}>
-                                                    Resiko Perilaku Kekerasan</option>
-                                                <option value="Halusinasi"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Halusinasi' ? 'selected' : '' }}>
-                                                    Halusinasi</option>
-                                                <option value="Isolasi Sosial"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Isolasi Sosial' ? 'selected' : '' }}>
-                                                    Isolasi Sosial</option>
-                                                <option value="Resiko Bunuh Diri"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Resiko Bunuh Diri' ? 'selected' : '' }}>
-                                                    Resiko Bunuh Diri</option>
-                                                <option value="Waham"
-                                                    {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Waham' ? 'selected' : '' }}>
-                                                    Waham</option>
+                                            <select name="diagnosa_keperawatan" id="diagnosa-keperawatan"
+                                                class="select2 form-select">
+                                                <option value="-">-</option>
+                                                <option value="Gangguan rasa nyaman">Gangguan rasa nyaman</option>`
+                                                <option value="Nyeri">Nyeri</option>
+                                                <option value="Pola Nafas tidak efektif">Pola Nafas tidak efektif</option>
+                                                <option value="Bersihan jalan nafas tidak efektif">Bersihan jalan nafas
+                                                    tidak
+                                                    efektif
+                                                </option>
+                                                <option value="Nyeri Akut">Nyeri Akut</option>
+                                                <option value="Nyeri Kronis">Nyeri Kronis</option>
+                                                <option value="Resiko Infeksi">Resiko Infeksi</option>
+                                                <option value="Harga diri Rendah">Harga diri Rendah</option>
+                                                <option value="Resiko Perilaku Kekerasan">Resiko Perilaku Kekerasan
+                                                </option>
+                                                <option value="Halusinasi">Halusinasi</option>
+                                                <option value="Isolasi Sosial">Isolasi Sosial</option>
+                                                <option value="Resiko Bunuh Diri">Resiko Bunuh Diri</option>
+                                                <option value="Waham">Waham</option>
                                             </select>
                                         </div>
                                     </div>
@@ -383,24 +358,14 @@
                                             <label for="rencana-tindak-lanjut" class="control-label text-primary">Rencana
                                                 Tindak
                                                 Lanjut</label>
-                                            <select name="rencana_tindak_lanjut" id="rencana_tindak_lanjut"
-                                                class="form-control select2"
-                                                value="{{ $pengkajian?->rencana_tidak_lanjut }}">
-                                                <option value="-"
-                                                    {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == '-' ? 'selected' : '' }}>
-                                                    -</option>
-                                                <option value="Kolaborasi Dokter"
-                                                    {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Kolaborasi Dokter' ? 'selected' : '' }}>
-                                                    Kolaborasi Dokter</option>
-                                                <option value="Perawatan Luka"
-                                                    {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Perawatan Luka' ? 'selected' : '' }}>
-                                                    Perawatan Luka</option>
-                                                <option value="Memberikan Edukasi"
-                                                    {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Memberikan Edukasi' ? 'selected' : '' }}>
-                                                    Memberikan Edukasi</option>
-                                                <option value="Mengukur tanda - tanda vital"
-                                                    {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Mengukur tanda - tanda vital' ? 'selected' : '' }}>
-                                                    Mengukur tanda - tanda vital</option>
+                                            <select name="rencana_tindak_lanjut" id="rencana-tindak-lanjut"
+                                                class="select2 form-select">
+                                                <option value="-">-</option>
+                                                <option value="Kolaborasi Dokter">Kolaborasi Dokter</option>
+                                                <option value="Perawatan Luka">Perawatan Luka</option>
+                                                <option value="Memberikan Edukasi">Memberikan Edukasi</option>
+                                                <option value="Mengukur tanda - tanda vital">Mengukur tanda - tanda vital
+                                                </option>
                                             </select>
                                         </div>
                                     </div>
@@ -423,7 +388,6 @@
                                             </div>
                                             <input name="ket_alergi_obat" id="ket_alergi_obat"
                                                 style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
-
                                                 type="text"
                                                 @if ($pengkajian?->alergi_obat == 'Ya') value="{{ $pengkajian?->ket_alergi_obat }}" @endif>
                                             <div class="custom-control custom-radio custom-control-inline">
@@ -610,18 +574,11 @@
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="nyeri" class="control-label text-primary">Nyeri</label>
-                                            <select name="nyeri" id="nyeri" class="select2"
-                                                value="{{ $pengkajianPerawat?->nyeri }}">
+                                            <select name="nyeri" id="nyeri" class="select2">
                                                 <option value="-">-</option>
-                                                <option value="Nyeri kronis"
-                                                    {{ $pengkajianPerawat?->nyeri == 'Nyeri kronis' ? 'selected' : '' }}>
-                                                    Nyeri kronis</option>
-                                                <option value="Nyeri akut"
-                                                    {{ $pengkajianPerawat?->nyeri == 'Nyeri akut' ? 'selected' : '' }}>
-                                                    Nyeri akut</option>
-                                                <option value="TIdak ada nyeri"
-                                                    {{ $pengkajianPerawat?->nyeri == 'TIdak ada nyeri' ? 'selected' : '' }}>
-                                                    TIdak ada nyeri</option>
+                                                <option value="Nyeri kronis">Nyeri kronis</option>
+                                                <option value="Nyeri akut">Nyeri akut</option>
+                                                <option value="TIdak ada nyeri">TIdak ada nyeri</option>
                                             </select>
                                         </div>
                                     </div>
@@ -645,30 +602,15 @@
                                                 6
                                                 bln
                                                 terakhir</label>
-                                            <select name="penurunan_bb" id="penurunan_bb" class="select2"
-                                                value="{{ $pengkajianPerawat?->penurunan_bb }}">
+                                            <select name="penurunan_bb" id="penurunan_bb" class="select2">
                                                 <option></option>
-                                                <option value="Tidak"
-                                                    {{ $pengkajianPerawat?->penurunan_bb == 'Tidak' ? 'selected' : '' }}>
-                                                    Tidak</option>
-                                                <option value="Tidak yakin / Ragu-ragu"
-                                                    {{ $pengkajianPerawat?->penurunan_bb == 'Tidak yakin / Ragu-ragu' ? 'selected' : '' }}>
-                                                    Tidak yakin / Ragu-ragu</option>
-                                                <option value="Ya, 1-5 Kg"
-                                                    {{ $pengkajianPerawat?->penurunan_bb == 'Ya, 1-5 Kg' ? 'selected' : '' }}>
-                                                    Ya, 1-5 Kg</option>
-                                                <option value="Ya, 6-10 Kg"
-                                                    {{ $pengkajianPerawat?->penurunan_bb == 'Ya, 6-10 Kg' ? 'selected' : '' }}>
-                                                    Ya, 6-10 Kg</option>
-                                                <option value="Ya, 11-15 Kg"
-                                                    {{ $pengkajianPerawat?->penurunan_bb == 'Ya, 11-15 Kg' ? 'selected' : '' }}>
-                                                    Ya, 11-15 Kg</option>
-                                                <option value="Ya, > 15 Kg"
-                                                    {{ $pengkajianPerawat?->penurunan_bb == 'Ya, > 15 Kg' ? 'selected' : '' }}>
-                                                    Ya, &gt; 15 Kg</option>
-                                                <option value="Ya, tidak tahu berapa Kg"
-                                                    {{ $pengkajianPerawat?->penurunan_bb == 'Ya, tidak tahu berapa Kg' ? 'selected' : '' }}>
-                                                    Ya, tidak tahu berapa Kg</option>
+                                                <option value="Tidak">Tidak</option>
+                                                <option value="Tidak yakin / Ragu-ragu">Tidak yakin / Ragu-ragu</option>
+                                                <option value="Ya, 1-5 Kg">Ya, 1-5 Kg</option>
+                                                <option value="Ya, 6-10 Kg">Ya, 6-10 Kg</option>
+                                                <option value="Ya, 11-15 Kg">Ya, 11-15 Kg</option>
+                                                <option value="Ya, > 15 Kg">Ya, &gt; 15 Kg</option>
+                                                <option value="Ya, tidak tahu berapa Kg">Ya, tidak tahu berapa Kg</option>
                                             </select>
                                         </div>
                                     </div>
@@ -676,15 +618,11 @@
                                         <div class="form-group">
                                             <label for="asupan_makan" class="control-label text-primary">Asupan makanan
                                                 pasien</label>
-                                            <select name="asupan_makan" id="asupan_makan" class="select2"
-                                                value="{{ $pengkajianPerawat?->asupan_makan }}">
+                                            <select name="asupan_makan" id="asupan_makan" class="select2">
                                                 <option></option>
-                                                <option value="Normal"
-                                                    {{ $pengkajianPerawat?->asupan_makan == 'Normal' ? 'selected' : '' }}>
-                                                    Normal</option>
+                                                <option value="Normal">Normal</option>
                                                 <option value="Berkurang, penurunan nafsu makan/kesulitan menerima makan"
-                                                    data-skor="1"
-                                                    {{ $pengkajianPerawat?->asupan_makan == 'Berkurang, penurunan nafsu makan/kesulitan menerima makan' ? 'selected' : '' }}>
+                                                    data-skor="1">
                                                     Berkurang, penurunan nafsu makan/kesulitan menerima makan</option>
                                             </select>
                                         </div>
@@ -781,6 +719,7 @@
                                             </div>
                                         </div>
                                     @endforeach
+
                                     <div class="col-md-6 mb-3">
                                         <div class="form-group">
                                             <span class="input-group-addon grey-text">Hasil : </span>
@@ -801,27 +740,14 @@
                                         <div class="form-group">
                                             <label for="status_psikologis" class="control-label text-primary">Status
                                                 psikologis</label>
-                                            <select name="status_psikologis" id="status_psikologis" class="select2"
-                                                value={{ $pengkajianPerawat?->status_psikologi }}>
+                                            <select name="status_psikologis" id="status_psikologis" class="select2">
                                                 <option></option>
-                                                <option value="Tenang"
-                                                    {{ $pengkajianPerawat?->status_psikologis == 'Tenang' ? 'selected' : '' }}>
-                                                    Tenang</option>
-                                                <option value="Cemas"
-                                                    {{ $pengkajianPerawat?->status_psikologis == 'Cemas' ? 'selected' : '' }}>
-                                                    Cemas</option>
-                                                <option value="Takut"
-                                                    {{ $pengkajianPerawat?->status_psikologis == 'Takut' ? 'selected' : '' }}>
-                                                    Takut</option>
-                                                <option value="Marah"
-                                                    {{ $pengkajianPerawat?->status_psikologis == 'Marah' ? 'selected' : '' }}>
-                                                    Marah</option>
-                                                <option value="Sedih"
-                                                    {{ $pengkajianPerawat?->status_psikologis == 'Sedih' ? 'selected' : '' }}>
-                                                    Sedih</option>
-                                                <option value="Kecenderungan bunuh diri"
-                                                    {{ $pengkajianPerawat?->status_psikologis == 'Kecenderungan bunuh diri' ? 'selected' : '' }}>
-                                                    Kecenderungan bunuh diri</option>
+                                                <option value="Tenang">Tenang</option>
+                                                <option value="Cemas">Cemas</option>
+                                                <option value="Takut">Takut</option>
+                                                <option value="Marah">Marah</option>
+                                                <option value="Sedih">Sedih</option>
+                                                <option value="Kecenderungan bunuh diri">Kecenderungan bunuh diri</option>
                                             </select>
                                         </div>
                                     </div>
@@ -831,14 +757,10 @@
                                                 spiritual</label>
                                             <select name="status_spiritual" id="status_spiritual" class="select2">
                                                 <option></option>
-                                                <option value="Percaya Nilai-nilai dan kepercayaan"
-                                                    {{ $pengkajianPerawat?->status_spiritual == 'Percaya Nilai-nilai dan kepercayaan' ? 'selected' : '' }}>
-                                                    Percaya Nilai-nilai dan
+                                                <option value="Percaya Nilai-nilai dan kepercayaan">Percaya Nilai-nilai dan
                                                     kepercayaan
                                                 </option>
-                                                <option value="Tidak Percaya Nilai-nilai dan kepercayaan"
-                                                    {{ $pengkajianPerawat?->status_spiritual == 'Tidak Percaya Nilai-nilai dan kepercayaan' ? 'selected' : '' }}>
-                                                    Tidak Percaya
+                                                <option value="Tidak Percaya Nilai-nilai dan kepercayaan">Tidak Percaya
                                                     Nilai-nilai
                                                     dan
                                                     kepercayaan</option>
@@ -923,30 +845,15 @@
                                         <div class="form-group">
                                             <label for="penghasilan"
                                                 class="control-label text-primary">Penghasilan</label>
-                                            <select name="penghasilan" id="penghasilan" class="select2"
-                                                value="{{ $pengkajianPerawat?->penghasilan }}">
+                                            <select name="penghasilan" id="penghasilan" class="select2">
                                                 <option></option>
-                                                <option value="< 1 Juta"
-                                                    {{ $pengkajianPerawat?->penghasilan == '< 1 Juta' ? 'selected' : '' }}>
-                                                    &lt; 1 Juta</option>
-                                                <option value="1 - 2,9 Juta"
-                                                    {{ $pengkajianPerawat?->penghasilan == '1 - 2,9 Juta' ? 'selected' : '' }}>
-                                                    1 - 2,9 Juta</option>
-                                                <option value="3 - 4,9 Juta"
-                                                    {{ $pengkajianPerawat?->penghasilan == '3 - 4,9 Juta' ? 'selected' : '' }}>
-                                                    3 - 4,9 Juta</option>
-                                                <option value="5 - 9,9 Juta"
-                                                    {{ $pengkajianPerawat?->penghasilan == '5 - 9,9 Juta' ? 'selected' : '' }}>
-                                                    5 - 9,9 Juta</option>
-                                                <option value="10 - 14,9 Juta"
-                                                    {{ $pengkajianPerawat?->penghasilan == '10 - 14,9 Juta' ? 'selected' : '' }}>
-                                                    10 - 14,9 Juta</option>
-                                                <option value="15 - 19.5 Juta"
-                                                    {{ $pengkajianPerawat?->penghasilan == '15 - 19.5 Juta' ? 'selected' : '' }}>
-                                                    15 - 19.5 Juta</option>
-                                                <option value="> 20 Juta"
-                                                    {{ $pengkajianPerawat?->penghasilan == '> 20 Juta' ? 'selected' : '' }}>
-                                                    &gt; 20 Juta</option>
+                                                <option value="< 1 Juta">&lt; 1 Juta</option>
+                                                <option value="1 - 2,9 Juta">1 - 2,9 Juta</option>
+                                                <option value="3 - 4,9 Juta">3 - 4,9 Juta</option>
+                                                <option value="5 - 9,9 Juta">5 - 9,9 Juta</option>
+                                                <option value="10 - 14,9 Juta">10 - 14,9 Juta</option>
+                                                <option value="15 - 19.5 Juta">15 - 19.5 Juta</option>
+                                                <option value="> 20 Juta">&gt; 20 Juta</option>
                                             </select>
                                         </div>
                                     </div>
@@ -1001,6 +908,7 @@
                                             </div>
                                         </div>
                                     @endforeach
+
                                     <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="hambatan_lainnya" class="control-label text-primary">Hambatan
@@ -1084,7 +992,6 @@
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="sensorik_penglihatan" id="sensorik_penglihatan1"
                                                             value="Normal" data-skor="0" class="custom-control-input"
-                                                            {{ $pengkajianPerawat?->sensorik_penglihatan == 'Normal' ? 'checked' : '' }}
                                                             type="radio">
                                                         <label class="custom-control-label"
                                                             for="sensorik_penglihatan1">Normal</label>
@@ -1094,7 +1001,6 @@
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="sensorik_penglihatan" id="sensorik_penglihatan2"
                                                             value="Kabur" data-skor="1" class="custom-control-input"
-                                                            {{ $pengkajianPerawat?->sensorik_penglihatan == 'Kabur' ? 'checked' : '' }}
                                                             type="radio">
                                                         <label class="custom-control-label"
                                                             for="sensorik_penglihatan2">Kabur</label>
@@ -1113,7 +1019,6 @@
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="sensorik_penglihatan" id="sensorik_penglihatan4"
-                                                            {{ $pengkajianPerawat?->sensorik_penglihatan == 'Lensa Kontak' ? 'checked' : '' }}
                                                             value="Lensa Kontak" data-skor="3"
                                                             class="custom-control-input" type="radio">
                                                         <label class="custom-control-label"
@@ -1128,7 +1033,6 @@
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="sensorik_penciuman" id="sensorik_penciuman1"
                                                             value="Normal" data-skor="0" class="custom-control-input"
-                                                            {{ $pengkajianPerawat?->sensorik_penciuman == 'Normal' ? 'checked' : '' }}
                                                             type="radio">
                                                         <label class="custom-control-label"
                                                             for="sensorik_penciuman1">Normal</label>
@@ -1138,7 +1042,6 @@
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="sensorik_penciuman" id="sensorik_penciuman2"
                                                             value="Tidak" data-skor="1" class="custom-control-input"
-                                                            {{ $pengkajianPerawat?->sensorik_penciuman == 'Tidak' ? 'checked' : '' }}
                                                             type="radio">
                                                         <label class="custom-control-label"
                                                             for="sensorik_penciuman2">Tidak</label>
@@ -1151,7 +1054,6 @@
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="sensorik_pendengaran" id="sensorik_pendengaran1"
                                                             value="Normal" data-skor="0" class="custom-control-input"
-                                                            {{ $pengkajianPerawat?->sensorik_pendengaran == 'Normal' ? 'checked' : '' }}
                                                             type="radio">
                                                         <label class="custom-control-label"
                                                             for="sensorik_pendengaran1">Normal</label>
@@ -1160,7 +1062,6 @@
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="sensorik_pendengaran" id="sensorik_pendengaran2"
-                                                            {{ $pengkajianPerawat?->sensorik_pendengaran == 'Tuli Ka / Ki' ? 'checked' : '' }}
                                                             value="Tuli Ka / Ki" data-skor="1"
                                                             class="custom-control-input" type="radio">
                                                         <label class="custom-control-label"
@@ -1173,7 +1074,6 @@
                                                 <td colspan="2">
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="sensorik_pendengaran" id="sensorik_pendengaran3"
-                                                            {{ $pengkajianPerawat?->sensorik_pendengaran == 'Ada alat bantu dengar ka/ki' ? 'checked' : '' }}
                                                             value="Ada alat bantu dengar ka/ki" data-skor="2"
                                                             class="custom-control-input" type="radio">
                                                         <label class="custom-control-label"
@@ -1204,7 +1104,7 @@
                                                 <td>
                                                     <div class="custom-control custom-radio custom-control-inline">
                                                         <input name="kognitif" class="custom-control-input"
-                                                            id="kognitif2" value="Bingung" data-skor="1" {{ $pengkajianPerawat?->kognitif == 'Bingung' ? 'checked' : '' }}
+                                                            id="kognitif2" value="Bingung" data-skor="1"
                                                             type="radio">
                                                         <label class="custom-control-label"
                                                             for="kognitif2">Bingung</label>
@@ -1254,7 +1154,7 @@
                                                 <td>
                                                     <div class="custom-control custom-radio">
                                                         <input name="motorik_aktifitas" id="motorik_aktifitas2"
-                                                            value="Bantuan Minimal" data-skor="1" {{ $pengkajianPerawat?->motorik_aktifitas == 'Bantuan Minimal' ? 'checked' : '' }}
+                                                            value="Bantuan Minimal" data-skor="1"
                                                             class="custom-control-input" type="radio">
                                                         <label class="custom-control-label text-primary"
                                                             for="motorik_aktifitas2">Bantuan Minimal</label>
@@ -1263,7 +1163,7 @@
                                                 <td colspan="2">
                                                     <div class="custom-control custom-radio">
                                                         <input name="motorik_aktifitas" id="motorik_aktifitas3"
-                                                            value="Bantuan Ketergantungan Total" data-skor="2" {{ $pengkajianPerawat?->motorik_aktifitas == 'Bantuan Ketergantungan Total' ? 'checked' : '' }}
+                                                            value="Bantuan Ketergantungan Total" data-skor="2"
                                                             class="custom-control-input" type="radio">
                                                         <label class="custom-control-label text-primary"
                                                             for="motorik_aktifitas3">Bantuan Ketergantungan Total</label>
@@ -1275,7 +1175,7 @@
                                                 <td>
                                                     <div class="custom-control custom-radio">
                                                         <input name="motorik_berjalan" id="motorik_berjalan1"
-                                                            value="Tidak Ada kesulitan" data-skor="0" {{ $pengkajianPerawat?->motorik_berjalan == 'Tidak Ada kesulitan' ? 'checked' : '' }}
+                                                            value="Tidak Ada kesulitan" data-skor="0"
                                                             class="custom-control-input" type="radio">
                                                         <label class="custom-control-label text-primary"
                                                             for="motorik_berjalan1">Tidak Ada kesulitan</label>
@@ -1284,7 +1184,7 @@
                                                 <td>
                                                     <div class="custom-control custom-radio">
                                                         <input name="motorik_berjalan" id="motorik_berjalan2"
-                                                            value="Perlu Bantuan" data-skor="1" {{ $pengkajianPerawat?->motorik_berjalan == 'Perlu Bantuan' ? 'checked' : '' }}
+                                                            value="Perlu Bantuan" data-skor="1"
                                                             class="custom-control-input" type="radio">
                                                         <label class="custom-control-label text-primary"
                                                             for="motorik_berjalan2">Perlu Bantuan</label>
@@ -1293,7 +1193,7 @@
                                                 <td>
                                                     <div class="custom-control custom-radio">
                                                         <input name="motorik_berjalan" id="motorik_berjalan3"
-                                                            value="Sering Jatuh" data-skor="0" {{ $pengkajianPerawat?->motorik_berjalan == 'Sering Jatuh' ? 'checked' : '' }}
+                                                            value="Sering Jatuh" data-skor="0"
                                                             class="custom-control-input" type="radio">
                                                         <label class="custom-control-label text-primary"
                                                             for="motorik_berjalan3">Sering Jatuh</label>
@@ -1302,7 +1202,7 @@
                                                 <td>
                                                     <div class="custom-control custom-radio">
                                                         <input name="motorik_berjalan" id="motorik_berjalan4"
-                                                            value="Kelumpuhan" data-skor="1" {{ $pengkajianPerawat?->motorik_berjalan == 'Kelumpuhan' ? 'checked' : '' }}
+                                                            value="Kelumpuhan" data-skor="1"
                                                             class="custom-control-input" type="radio">
                                                         <label class="custom-control-label text-primary"
                                                             for="motorik_berjalan4">Kelumpuhan</label>
@@ -1366,8 +1266,7 @@
                         <div class="col-lg-12 d-flex align-items-center justify-content-center">
                             <div class="logo-dashboard-simrs text-center">
                                 <h3 class="text-center spaced-text gradient-text">COMING SOON</h3>
-                                <img src="{{ asset('img/logo.png') }}" width="130" height="130"
-                                    alt="Logo RS">
+                                <img src="{{ asset('img/logo.png') }}" width="130" height="130" alt="Logo RS">
                                 <h3 class="text-center spaced-text mt-3">RUMAH SAKIT LIVASYA</h3>
                                 <p style="letter-spacing: 0.2em">Jl. Raya Timur III Dawuan No. 875 Kab. Majalengka Telp
                                     081211151300</p>
