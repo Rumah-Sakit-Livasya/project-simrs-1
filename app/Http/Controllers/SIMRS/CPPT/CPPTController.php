@@ -12,8 +12,8 @@ class CPPTController extends Controller
     public function getCPPT(Request $request)
     {
         try {
-            $noRM = $request->no_rm;
-            $cppt = CPPT::where('medical_record_number', $noRM)->get();
+            $id = $request->registration_id;
+            $cppt = CPPT::where('registration_id', $id)->get();
             if ($cppt) {
                 return response()->json($cppt, 200);
             } else {

@@ -27,6 +27,10 @@
             color: #ffffff;
         }
 
+        .dataTables_filter label::before {
+            content: "";
+        }
+
         @media (max-width: 768px) {
             .img-baker {
                 width: 45%;
@@ -354,7 +358,7 @@ Diagnosa Keperawatan: {{$registration?->pengkajian_nurse_rajal?->diagnosa_kepera
 
                             <div class="col-md-12">
                                 <hr style="border-color: #868686; margin-bottom: 50px;">
-                                <div class="card-body p-3">
+                                <div class="card-body">
                                     <div class="table-responsive no-margin">
                                         <table id="cppt-table" class="table table-striped table-bordered"
                                             style="width:100%">
@@ -578,6 +582,9 @@ Diagnosa Keperawatan: {{$registration?->pengkajian_nurse_rajal?->diagnosa_kepera
     </main>
     @endsection
     @section('plugin')
+    
+    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
     @include('pages.simrs.poliklinik.partials.js-filter')
     
@@ -601,52 +608,136 @@ Diagnosa Keperawatan: {{$registration?->pengkajian_nurse_rajal?->diagnosa_kepera
                 submitFormCPPT(); // Panggil fungsi submitForm dengan parameter final
             });
 
+            // function loadCPPTData() {
+            //     $.ajax({
+            //         url: '{{ route('cppt.get') }}', // Mengambil route Laravel
+            //         type: 'GET',
+            //         dataType: 'json',
+            //         data: {
+            //             registration_id: "{{ $registration->id }}",
+            //         },
+            //         success: function(response) {
+            //             // Bersihkan tabel
+            //             $('#list_soap').empty();
+
+            //             // Iterasi setiap data dan tambahkan ke dalam tabel
+            //             $.each(response, function(index, data) {
+            //                 var row = `
+            //                 <tr>
+            //                     <td class="text-center">
+            //                         <div class="deep-purple-text">${data.created_at}<br>
+            //                             <span class="green-text" style="font-weight:400;">${data.tipe_rawat}</span><br>
+            //                             <b style="font-weight: 400;">Dokter ID: ${data.doctor_id}</b><br>
+            //                             <div class="input-oleh deep-orange-text">Input oleh: ${data.user_id}</div>
+            //                             <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
+            //                             <div>
+            //                                 <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">
+            //                             </div>
+            //                         </div>
+            //                     </td>
+            //                     <td>
+            //                         <table width="100%" class="table-soap nurse">
+            //                             <tbody>
+            //                                 <tr><td colspan="3" class="soap-text title">CPPT</td></tr>
+            //                                 <tr><td class="soap-text deep-purple-text text-center" width="8%">S</td><td>${data.subjective.replace(/\n/g, "<br>")}</td></tr>
+            //                                 <tr><td class="soap-text deep-purple-text text-center">O</td><td>${data.objective.replace(/\n/g, "<br>")}</td></tr>
+            //                                 <tr><td class="soap-text deep-purple-text text-center">A</td><td>${data.assesment}</td></tr>
+            //                                 <tr><td class="soap-text deep-purple-text text-center">P</td><td>${data.planning}</td></tr>
+            //                                 <tr><td class="soap-text deep-purple-text text-center">I</td><td>${data.instruksi}</td></tr>
+            //                             </tbody>
+            //                         </table>
+            //                     </td>
+            //                     <td>
+            //                         <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap" data-id="${data.id}" title="Copy"></i>
+            //                         <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap" data-id="${data.id}" title="Hapus"></i>
+            //                         <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap" data-id="${data.id}" title="Edit SOAP & Resep Elektronik"></i>
+            //                         <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print Antrian Resep"></i>
+            //                     </td>
+            //                 </tr>
+            //             `;
+            //                 // Tambahkan ke dalam tabel
+            //                 $('#list_soap').append(row);
+            //             });
+            //         },
+            //         error: function(xhr, status, error) {
+            //             console.error(xhr.responseText);
+            //         }
+            //     });
+            // }
+
             function loadCPPTData() {
                 $.ajax({
-                    url: '{{-- route('cppt.get') --}}', // Mengambil route Laravel
+                    url: '{{ route('cppt.get') }}',
                     type: 'GET',
                     dataType: 'json',
+                    data: {
+                        registration_id: "{{ $registration->id }}",
+                    },
                     success: function(response) {
-                        // Bersihkan tabel
+                        // Bersihkan isi tbody
                         $('#list_soap').empty();
 
-                        // Iterasi setiap data dan tambahkan ke dalam tabel
+                        // Hancurkan DataTable kalau sudah diinisialisasi
+                        if ($.fn.DataTable.isDataTable('#cppt-table')) {
+                            $('#cppt-table').DataTable().destroy();
+                        }
+
+                        // Loop data dan tambahkan baris
                         $.each(response, function(index, data) {
+                            let formattedDate = new Intl.DateTimeFormat('id-ID', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false,
+                                timeZone: 'Asia/Jakarta'
+                            }).format(new Date(data.created_at));
                             var row = `
-                            <tr>
-                                <td class="text-center">
-                                    <div class="deep-purple-text">${data.created_at}<br>
-                                        <span class="green-text" style="font-weight:400;">${data.tipe_rawat}</span><br>
-                                        <b style="font-weight: 400;">Dokter ID: ${data.doctor_id}</b><br>
-                                        <div class="input-oleh deep-orange-text">Input oleh: ${data.user_id}</div>
-                                        <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
-                                        <div>
-                                            <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="deep-purple-text">${formattedDate}<br>
+                                            <span class="green-text" style="font-weight:400;">${data.tipe_rawat}</span><br>
+                                            <b style="font-weight: 400;">Dokter ID: ${data.doctor_id}</b><br>
+                                            <div class="input-oleh deep-orange-text">Input oleh: ${data.user_id}</div>
+                                            <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
+                                            <div>
+                                                <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <table width="100%" class="table-soap nurse">
-                                        <tbody>
-                                            <tr><td colspan="3" class="soap-text title">CPPT</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center" width="8%">S</td><td>${data.subjective.replace(/\n/g, "<br>")}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">O</td><td>${data.objective.replace(/\n/g, "<br>")}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">A</td><td>${data.assesment}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">P</td><td>${data.planning}</td></tr>
-                                            <tr><td class="soap-text deep-purple-text text-center">I</td><td>${data.instruksi}</td></tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                                <td>
-                                    <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap" data-id="${data.id}" title="Copy"></i>
-                                    <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap" data-id="${data.id}" title="Hapus"></i>
-                                    <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap" data-id="${data.id}" title="Edit SOAP & Resep Elektronik"></i>
-                                    <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print Antrian Resep"></i>
-                                </td>
-                            </tr>
-                        `;
-                            // Tambahkan ke dalam tabel
+                                    </td>
+                                    <td>
+                                        <table width="100%" class="table-soap nurse">
+                                            <tbody>
+                                                <tr><td colspan="3" class="soap-text title">CPPT</td></tr>
+                                                <tr><td class="soap-text deep-purple-text text-center" width="8%">S</td><td>${data.subjective.replace(/\n/g, "<br>")}</td></tr>
+                                                <tr><td class="soap-text deep-purple-text text-center">O</td><td>${data.objective.replace(/\n/g, "<br>")}</td></tr>
+                                                <tr><td class="soap-text deep-purple-text text-center">A</td><td>${data.assesment}</td></tr>
+                                                <tr><td class="soap-text deep-purple-text text-center">P</td><td>${data.planning}</td></tr>
+                                                <tr><td class="soap-text deep-purple-text text-center">I</td><td>${data.instruksi}</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td>
+                                        <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap" data-id="${data.id}" title="Copy"></i>
+                                        <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap" data-id="${data.id}" title="Hapus"></i>
+                                        <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap" data-id="${data.id}" title="Edit SOAP & Resep Elektronik"></i>
+                                        <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print Antrian Resep"></i>
+                                    </td>
+                                </tr>
+                            `;
                             $('#list_soap').append(row);
+                        });
+
+                        // Inisialisasi ulang DataTable
+                        $('#cppt-table').DataTable({
+                            paging: true,
+                            searching: true,
+                            ordering: false,
+                            responsive: true,
+                            pageLength: 5, // Bisa diubah sesuai kebutuhan
+                            
                         });
                     },
                     error: function(xhr, status, error) {
@@ -654,6 +745,7 @@ Diagnosa Keperawatan: {{$registration?->pengkajian_nurse_rajal?->diagnosa_kepera
                     }
                 });
             }
+
 
             function submitFormCPPT(actionType) {
                 const form = $('#cppt-perawat-rajal-form');
@@ -694,6 +786,8 @@ Diagnosa Keperawatan: {{$registration?->pengkajian_nurse_rajal?->diagnosa_kepera
                     }
                 });
             }
+
+            loadCPPTData();
         });
     </script>
     <script>
