@@ -108,6 +108,7 @@
                                             <th style="white-space: nowrap">Izin (Hari)</th>
                                             <th style="white-space: nowrap">Sakit (Hari)</th>
                                             <th style="white-space: nowrap">Cuti (Hari)</th>
+                                            <th style="white-space: nowrap">Sisa CT (Hari)</th>
                                             <th style="white-space: nowrap">Aksi</th>
                                         </tr>
                                     </thead>
@@ -132,6 +133,9 @@
                                                 </th>
                                                 <th style="white-space: nowrap">
                                                     {{$row['total_cuti']}}
+                                                </th>
+                                                <th style="white-space: nowrap">
+                                                    {{$row['sisa_ct']}}
                                                 </th>
                                                 <th style="white-space: nowrap">
                                                     <a href="{{route('reports.dayOffReq.detail', ['id' => $row['employee_id'], 'tahun' => $currentYear])}}" class="btn btn-primary">

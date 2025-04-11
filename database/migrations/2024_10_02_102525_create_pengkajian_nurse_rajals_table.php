@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('bmi')->nullable(); // index masa tubuh
             $table->string('kat_bmi')->nullable(); // kategori IMT
             $table->string('sp02')->nullable(); // sp02
-            $table->string('lingkar_kepala')->nullable(); // lingkar kepala
+            // $table->string('lingkar_kepala')->nullable(); // lingkar kepala
             $table->text('diagnosa_keperawatan')->nullable(); // Changed to text
             $table->text('rencana_tindak_lanjut')->nullable(); // Changed to text
 
@@ -80,53 +80,53 @@ return new class extends Migration
             $table->string('resiko_jatuh2')->nullable(); // Alat bantu: kruk,kursi roda/dibantu
             $table->string('resiko_jatuh3')->nullable(); // Pegang pinggiran meja/kursi/alat bantu untuk duduk
 
-            //======== RIWAYAT PSIKOSOSIAL, SPIRITUAL & KEPERCAYAAN =========
-            $table->text('status_psikologis')->nullable(); // Luka bakar > 20%  
-            $table->text('status_spiritual')->nullable(); // Luka bakar > 20%  
-            $table->text('masalah_prilaku')->nullable(); // Luka bakar > 20%  
-            $table->text('hub_dengan_keluarga')->nullable(); // Luka bakar > 20%  
-            $table->text('tempat_tinggal')->nullable(); // Luka bakar > 20%  
-            $table->text('kerabat_dihub')->nullable(); // Luka bakar > 20%  
-            $table->text('no_kontak_kerabat')->nullable(); // Luka bakar > 20%  
-            $table->text('status_perkawinan')->nullable(); // Luka bakar > 20%  
-            $table->text('pekerjaan')->nullable(); // Luka bakar > 20%  
-            $table->text('penghasilan')->nullable(); // Luka bakar > 20%  
-            $table->text('pendidikan')->nullable(); // Luka bakar > 20%  
+            // //======== RIWAYAT PSIKOSOSIAL, SPIRITUAL & KEPERCAYAAN =========
+            // $table->text('status_psikologis')->nullable(); // Luka bakar > 20%  
+            // $table->text('status_spiritual')->nullable(); // Luka bakar > 20%  
+            // $table->text('masalah_prilaku')->nullable(); // Luka bakar > 20%  
+            // $table->text('hub_dengan_keluarga')->nullable(); // Luka bakar > 20%  
+            // $table->text('tempat_tinggal')->nullable(); // Luka bakar > 20%  
+            // $table->text('kerabat_dihub')->nullable(); // Luka bakar > 20%  
+            // $table->text('no_kontak_kerabat')->nullable(); // Luka bakar > 20%  
+            // $table->text('status_perkawinan')->nullable(); // Luka bakar > 20%  
+            // $table->text('pekerjaan')->nullable(); // Luka bakar > 20%  
+            // $table->text('penghasilan')->nullable(); // Luka bakar > 20%  
+            // $table->text('pendidikan')->nullable(); // Luka bakar > 20%  
 
-            //======== KEBUTUHAN EDUKASI =========
-            $table->text('hambatan_belajar1')->nullable(); // Luka bakar > 20%  
-            $table->text('hambatan_belajar2')->nullable(); // Luka bakar > 20%  
-            $table->text('hambatan_belajar3')->nullable(); // Luka bakar > 20%  
-            $table->text('hambatan_belajar4')->nullable(); // Luka bakar > 20%  
-            $table->text('hambatan_belajar5')->nullable(); // Luka bakar > 20%  
-            $table->text('hambatan_belajar6')->nullable(); // Luka bakar > 20%  
-            $table->text('hambatan_belajar7')->nullable(); // Luka bakar > 20%  
-            $table->text('hambatan_belajar8')->nullable(); // Luka bakar > 20%  
-            $table->text('hambatan_belajar9')->nullable(); // Luka bakar > 20%  
-            $table->text('hambatan_lainnya')->nullable(); // Luka bakar > 20%  
-            $table->text('kebutuhan_penerjemah')->nullable(); // Luka bakar > 20%  
+            // //======== KEBUTUHAN EDUKASI =========
+            // $table->text('hambatan_belajar1')->nullable(); // Luka bakar > 20%  
+            // $table->text('hambatan_belajar2')->nullable(); // Luka bakar > 20%  
+            // $table->text('hambatan_belajar3')->nullable(); // Luka bakar > 20%  
+            // $table->text('hambatan_belajar4')->nullable(); // Luka bakar > 20%  
+            // $table->text('hambatan_belajar5')->nullable(); // Luka bakar > 20%  
+            // $table->text('hambatan_belajar6')->nullable(); // Luka bakar > 20%  
+            // $table->text('hambatan_belajar7')->nullable(); // Luka bakar > 20%  
+            // $table->text('hambatan_belajar8')->nullable(); // Luka bakar > 20%  
+            // $table->text('hambatan_belajar9')->nullable(); // Luka bakar > 20%  
+            // $table->text('hambatan_lainnya')->nullable(); // Luka bakar > 20%  
+            // $table->text('kebutuhan_penerjemah')->nullable(); // Luka bakar > 20%  
 
-            $table->text('kebuthan_pembelajaran1')->nullable(); // Luka bakar > 20%  
-            $table->text('kebuthan_pembelajaran2')->nullable(); // Luka bakar > 20%  
-            $table->text('kebuthan_pembelajaran3')->nullable(); // Luka bakar > 20%  
-            $table->text('kebuthan_pembelajaran4')->nullable(); // Luka bakar > 20%  
-            $table->text('kebuthan_pembelajaran5')->nullable(); // Luka bakar > 20%  
-            $table->text('kebuthan_pembelajaran6')->nullable(); // Luka bakar > 20%  
-            $table->text('kebuthan_pembelajaran7')->nullable(); // Luka bakar > 20%  
+            // $table->text('kebuthan_pembelajaran1')->nullable(); // Luka bakar > 20%  
+            // $table->text('kebuthan_pembelajaran2')->nullable(); // Luka bakar > 20%  
+            // $table->text('kebuthan_pembelajaran3')->nullable(); // Luka bakar > 20%  
+            // $table->text('kebuthan_pembelajaran4')->nullable(); // Luka bakar > 20%  
+            // $table->text('kebuthan_pembelajaran5')->nullable(); // Luka bakar > 20%  
+            // $table->text('kebuthan_pembelajaran6')->nullable(); // Luka bakar > 20%  
+            // $table->text('kebuthan_pembelajaran7')->nullable(); // Luka bakar > 20%  
 
-            $table->text('pembelajaran_lainnya')->nullable(); // Luka bakar > 20%  
+            // $table->text('pembelajaran_lainnya')->nullable(); // Luka bakar > 20%  
 
-            //======== Assesment fungsional =========
-            $table->text('sensorik_penglihatan')->nullable(); // Luka bakar > 20%  
-            $table->text('sensorik_penciuman')->nullable(); // Luka bakar > 20%  
-            $table->text('sensorik_pendengaran')->nullable(); // Luka bakar > 20%  
+            // //======== Assesment fungsional =========
+            // $table->text('sensorik_penglihatan')->nullable(); // Luka bakar > 20%  
+            // $table->text('sensorik_penciuman')->nullable(); // Luka bakar > 20%  
+            // $table->text('sensorik_pendengaran')->nullable(); // Luka bakar > 20%  
 
-            //======== Kognitif =========
-            $table->text('kognitif')->nullable(); // Luka bakar > 20%  
+            // //======== Kognitif =========
+            // $table->text('kognitif')->nullable(); // Luka bakar > 20%  
 
-            //======== Motorik =========
-            $table->text('motorik_aktifitas')->nullable(); // Luka bakar > 20%  
-            $table->text('motorik_berjalan')->nullable(); // Luka bakar > 20%  
+            // //======== Motorik =========
+            // $table->text('motorik_aktifitas')->nullable(); // Luka bakar > 20%  
+            // $table->text('motorik_berjalan')->nullable(); // Luka bakar > 20%  
 
             $table->timestamps(); // created_at dan updated_at
             $table->softDeletes(); // deleted_at

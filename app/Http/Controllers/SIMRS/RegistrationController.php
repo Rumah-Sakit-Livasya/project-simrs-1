@@ -160,17 +160,24 @@ class RegistrationController extends Controller
             $query->where('name', 'like', '%UGD%');
         })->get();
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> rajal
         // dd($doctorsIGD);
 
         $doctorsLAB = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
             $query->where('name', 'like', '%Laboratorium%');
         })->get();
 
+<<<<<<< HEAD
         $doctorsLAB = Doctor::with('employee', 'departements')->whereHas('department_from_doctors', function ($query) {
             $query->where('name', 'like', '%LABORATORIUM%');
         })->get();
 
         $penjamins = Penjamin::all();
+=======
+>>>>>>> rajal
 
         switch ($registrasi) {
             case 'rawat-jalan':
