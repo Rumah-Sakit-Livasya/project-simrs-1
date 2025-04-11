@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\DownPayment;
+use App\Models\SIMRS\TagihanPasien;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class BilinganController extends Controller
@@ -72,6 +72,28 @@ class BilinganController extends Controller
         } catch (\Exception $e) {
             Log::error('Error fetching billing list data: ' . $e->getMessage());
             return response()->json(['error' => 'Data could not be retrieved: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function updateBilinganStatus(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'status' => 'required',
+            'wajib_bayar' => 'required',
+        ]);
+
+        try {
+            // Update the related bilingan record if exists
+            $bilingan = Bilingan::find($id);
+            if ($bilingan) {
+                $bilingan->update($validatedData);
+            } else {
+                return response()->json(['error' => 'Record not found.'], 404);
+            }
+            return response()->json(['success' => 'Data updated successfully.']);
+        } catch (\Exception $e) {
+            Log::error('Error updating data: ' . $e->getMessage());
+            return response()->json(['error' => 'Data could not be updated. Reason: ' . $e->getMessage()], 500);
         }
     }
 }

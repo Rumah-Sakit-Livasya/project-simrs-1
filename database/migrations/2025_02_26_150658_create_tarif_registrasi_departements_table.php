@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tarif_registrasi_id')->constrained('tarif_registrasi')->onDelete('cascade');
             $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');
+            $table->string('harga')->nullable();
             $table->timestamps();
         });
     }

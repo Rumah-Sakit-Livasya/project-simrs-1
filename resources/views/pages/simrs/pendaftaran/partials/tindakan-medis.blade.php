@@ -349,10 +349,12 @@
                                 errorMessage = 'Data yang dikirim tidak valid.';
                             }
                         } else {
+                            $('#modal-tambah-tindakan').modal('hide');
                             errorMessage =
                                 `Gagal menambahkan tindakan medis. Status: ${xhr.status}, Pesan: ${xhr.statusText}`;
                         }
 
+                        $('#modal-tambah-tindakan').modal('hide');
                         showErrorAlertNoRefresh(errorMessage);
                     }
                 });

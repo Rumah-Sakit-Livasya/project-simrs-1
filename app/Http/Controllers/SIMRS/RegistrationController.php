@@ -22,6 +22,7 @@ use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\Setup\HargaTarifRegistrasi;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
 use App\Models\SIMRS\TutupKunjungan;
@@ -363,33 +364,29 @@ class RegistrationController extends Controller
 
             // Add registration fee for outpatient visits
             if ($validatedData['registration_type'] == 'rawat-jalan') {
-                $department = Departement::find($validatedData['departement_id']);
-
+                $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $request->penjamin_id)
+                    ->where('tarif_registrasi_id', 1)
+                    ->first()->harga;
                 // Get registration fees associated with this department
-                $registrationFees = $department->tarif_registrasi()
-                    ->with(['harga_tarif' => function ($query) use ($request) {
-                        $query->where('group_penjamin_id', $request->penjamin_id);
-                    }])
-                    ->get();
+                // $registrationFees = $department->tarif_registrasi()
+                //     ->with(['harga_tarif' => function ($query) use ($request) {
+                //         $query->where('group_penjamin_id', $request->penjamin_id);
+                //     }])
+                //     ->get();
 
                 // Add registration fee to billing details
-                foreach ($registrationFees as $fee) {
-                    if ($fee->harga_tarif->isNotEmpty()) {
-                        $harga = $fee->harga_tarif->first()->harga;
-                        TagihanPasien::create([
-                            'user_id' => auth()->user()->id,
-                            'bilingan_id' => $billing->id,
-                            'registration_id' => $registration->id,
-                            'date' => Carbon::now(),
-                            'tagihan' => "[Biaya Administrasi] Rawat Jalan",
-                            'detail_tagihan' => $fee->nama_tarif,
-                            'nominal' => $harga,
-                            'quantity' => 1,
-                            'harga' => $harga,
-                            'total' => $harga
-                        ]);
-                    }
-                }
+                $tagihanPasien = TagihanPasien::create([
+                    'user_id' => auth()->user()->id,
+                    'bilingan_id' => $billing->id,
+                    'registration_id' => $registration->id,
+                    'date' => Carbon::now(),
+                    'tagihan' => "[Biaya Administrasi] Rawat Jalan",
+                    // 'detail_tagihan' => $fee->nama_tarif,
+                    'nominal' => $hargaTarifAdmin,
+                    'quantity' => 1,
+                    'harga' => $hargaTarifAdmin,
+                    'total' => $hargaTarifAdmin
+                ]);
             }
 
             return redirect("/daftar-registrasi-pasien/$registration->id")

@@ -9,11 +9,12 @@ use Illuminate\Http\Request;
 
 class DepartementController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function getDepartements()
+    {
+        $departements = Departement::all();
+        return response()->json($departements);
+    }
+
     public function index()
     {
         $departements = Departement::orderBy('name', 'asc')->get();

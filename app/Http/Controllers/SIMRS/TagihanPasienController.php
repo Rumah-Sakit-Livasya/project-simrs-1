@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\SIMRS\Bilingan;
+use App\Models\SIMRS\Departement;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\TagihanPasien;
+use App\Models\SIMRS\TindakanMedis;
 use Illuminate\Http\Request;
 
 class TagihanPasienController extends Controller
@@ -39,12 +43,72 @@ class TagihanPasienController extends Controller
         return view('pages.simrs.keuangan.kasir.index', compact('tagihan_pasien'));
     }
 
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'date' => 'required|date',
+            'tipe_tagihan' => 'required|string',
+            'kelas_rawat_id' => 'required|integer',
+            'dokter_id' => 'required|integer',
+            'departement_id' => 'required|integer',
+            'tindakan_id' => 'required|integer',
+            'quantity' => 'required|integer|min:1',
+            'nominal' => 'required|numeric',
+            'bilingan_id' => 'required|integer',
+            'registration_id' => 'required|integer',
+            'user_id' => 'required|integer',
+        ]);
+        $tindakan = TindakanMedis::where('id', $request->tindakan_id)->first();
+        if ($validatedData['tipe_tagihan'] == "Biaya Tindakan Medis") {
+            $validatedData['tagihan'] =  "[Tindakan Medis] " . $tindakan->nama_tindakan;
+        }
+
+        try {
+            // Simpan data ke database
+            $tagihanPasien = TagihanPasien::create($validatedData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil disimpan.',
+                'data' => $tagihanPasien,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan data.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function detailTagihan($id)
     {
-        // dd($id);
-        // dd(TagihanPasien::where('id', $id)->first());
         $bilingan = Bilingan::where('id', $id)->first();
-        return view('pages.simrs.keuangan.kasir.detail', compact('bilingan'));
+        $kelasRawats = KelasRawat::all();
+        $doctors = Employee::where('is_doctor', 1)->get();
+        $departements = Departement::all();
+        // return dd($kelasRawats);
+        return view('pages.simrs.keuangan.kasir.detail', compact('bilingan', 'kelasRawats', 'doctors', 'departements'));
+    }
+
+    public function destroyTagihan($id)
+    {
+        try {
+            $tagihan = TagihanPasien::findOrFail($id);
+            $tagihan->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil dihapus.'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting tagihan: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menghapus data.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getData($id)
@@ -82,29 +146,39 @@ class TagihanPasienController extends Controller
         }
     }
 
+    public function getNominalAwal($id)
+    {
+        try {
+            $tagihan = TagihanPasien::findOrFail($id);
+            return response()->json(['nominal_awal' => $tagihan->nominal_awal]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching nominal awal: ' . $e->getMessage());
+            return response()->json(['error' => 'Data could not be retrieved.'], 500);
+        }
+    }
+
     // Method to update the TagihanPasien data
     public function updateTagihan(Request $request, $id)
     {
-        $columnMapping = [
-            'detail_tagihan' => 'tagihan',
-            'tanggal' => 'date',
-            'diskon_rp' => 'diskon',
-            'jaminan_rp' => 'jaminan',
-        ];
-
-        if (array_key_exists($request->column, $columnMapping)) {
-            $request->column = $columnMapping[$request->column];
-        }
-
-        $request->validate([
-            'column' => 'required|string',
-            'value' => 'required'
+        $validatedData = $request->validate([
+            'tanggal' => 'required',
+            'detail_tagihan' => 'required',
+            'quantity' => 'required',
+            'nominal' => 'required',
+            'tipe_diskon' => 'required',
+            'disc' => 'required',
+            'diskon_rp' => 'required',
+            'jamin' => 'required',
+            'jaminan_rp' => 'required',
+            'wajib_bayar' => 'required',
         ]);
 
         try {
             $tagihan = TagihanPasien::findOrFail($id);
-            $tagihan->{$request->column} = $request->value;
-            $tagihan->save();
+            if (is_null($tagihan->nominal_awal)) {
+                $tagihan->nominal_awal = $tagihan->nominal;
+            }
+            $tagihan->update($validatedData);
 
             return response()->json(['success' => 'Data updated successfully.']);
         } catch (\Exception $e) {

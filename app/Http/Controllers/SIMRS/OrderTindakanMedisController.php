@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\Bilingan;
+use App\Models\SIMRS\BilinganTagihanPasien;
 use App\Models\SIMRS\OrderTindakanMedis;
 use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\TagihanPasien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -63,28 +66,37 @@ class OrderTindakanMedisController extends Controller
                 'tindakan_medis_id.required' => 'Tindakan medis harus diisi.',
                 'qty.required' => 'Jumlah harus diisi dan tidak boleh kurang dari 1.',
             ]);
-        
+
             if ($request->diskon_dokter) {
                 $validatedData['diskon_dokter'] = true;
             }
-        
+
             // Simpan tindakan medis
             $medicalAction = OrderTindakanMedis::create($validatedData);
-        
+
             $groupPenjaminId = Registration::find($validatedData['registration_id'])->penjamin->group_penjamin->id;
-            $kelasId = Registration::find($validatedData['registration_id'])->kelas_rawat->id;
-        
+            $kelasId = Registration::find($validatedData['registration_id'])->kelas_rawat;
+            if (!$kelasId) {
+                $kelasId = 1; // Default to 1 if kelas_id is not found
+            } else {
+                $kelasId = $kelasId->id;
+            }
+
             // Periksa apakah bilingan sudah ada
-            $bilingan = \App\Models\SIMRS\Bilingan::firstOrCreate([
+            $bilingan = Bilingan::firstOrCreate([
                 'registration_id' => $validatedData['registration_id']
             ], [
                 'status' => 'belum final',
                 'is_paid' => 0,
             ]);
-        
+
+            // return dd($bilingan);
+
+
             // Simpan tagihan pasien
-            $tagihanPasien = \App\Models\SIMRS\TagihanPasien::create([
+            $tagihanPasien = TagihanPasien::create([
                 'user_id' => $validatedData['user_id'],
+                'bilingan_id' => $bilingan->id,
                 'registration_id' => $validatedData['registration_id'],
                 'tindakan_medis_id' => $validatedData['tindakan_medis_id'],
                 'date' => now(),
@@ -98,27 +110,27 @@ class OrderTindakanMedisController extends Controller
                 'jaminan' => $request->jaminan ?? null,
                 'wajib_bayar' => ($validatedData['qty'] * $medicalAction->tindakan_medis->getTotalTarif($groupPenjaminId, $kelasId)) - ($request->diskon ?? 0),
             ]);
-        
+
             // Simpan relasi bilingan-tagihan pasien
-            \App\Models\SIMRS\BilinganTagihanPasien::create([
+            BilinganTagihanPasien::create([
                 'tagihan_pasien_id' => $tagihanPasien->id,
                 'bilingan_id' => $bilingan->id,
                 'status' => 'belum final',
                 'is_paid' => 0,
             ]);
-        
+
             if ($request->bilingan_ids) {
                 foreach ($request->bilingan_ids as $bilinganId) {
-                    \App\Models\SIMRS\BilinganTagihanPasien::create([
+                    BilinganTagihanPasien::create([
                         'tagihan_pasien_id' => $tagihanPasien->id,
                         'bilingan_id' => $bilinganId,
                     ]);
                 }
             }
-        
+
             // Jika semua berhasil, commit transaksi
             DB::commit();
-        
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -138,7 +150,7 @@ class OrderTindakanMedisController extends Controller
         } catch (\Exception $e) {
             // Jika ada error, rollback semua perubahan ke database
             DB::rollBack();
-        
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menyimpan tindakan medis. Error: ' . $e->getMessage(),

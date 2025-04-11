@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\OrderLaboratoriumController;
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +51,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Models\Employee;
 use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Support\Facades\Storage;
 
@@ -65,12 +67,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         abort(404, 'File not found');
     })->name('signature.show');
 
+    // Route::get('/api/registration/{id}', [RegistrationController::class, 'getRegistrationData']);
     Route::get('get-registrasi-data/{registrasiId}', [RegistrationController::class, 'getRegistrationData'])->name('registration.get');
     Route::get('get-medical-actions/{registrationId}', [OrderTindakanMedisController::class, 'getMedicalActions'])->name('medical.action.get');
     Route::delete('delete-medical-action/{id}', [OrderTindakanMedis::class, 'destroy'])->name('medical.action.destroy');
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
 
-    
+
     Route::post('order-radiologi/', [OrderRadiologiController::class, 'store'])->name('order.radiologi.store');
     Route::post('edit-order-radiologi/', [OrderRadiologiController::class, 'editOrderRadiologi'])->name('order.radiologi.edit-order');
     Route::post('konfirmasi-tagihan-order-radiologi/', [OrderRadiologiController::class, 'confirmPayment'])->name('order.radiologi.confirm-payment');
@@ -81,7 +84,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::post('simpan-template-radiologi/{id}', [RadiologiController::class, 'simpanTemplateHasil'])->name('radiologi.template.simpan');
     Route::post('delete-template-radiologi/{id}', [RadiologiController::class, 'deleteTemplate'])->name('radiologi.template.delete');
 
-    Route::prefix('laboratorium')->group(function(){
+    Route::prefix('laboratorium')->group(function () {
         Route::post('/order', [OrderLaboratoriumController::class, 'store'])->name('order.laboratorium.store');
     });
 
@@ -139,11 +142,17 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
 
     Route::prefix('master-data')->group(function () {
-        Route::prefix('penjamin')->group(function(){
+        Route::prefix('employee')->group(function () {
+            Route::get('/doctors', [EmployeeController::class, 'getDoctors']);
+        });
+        Route::prefix('penjamin')->group(function () {
             Route::post('/', [PenjaminController::class, 'store'])->name('master-data.penjamin.store');
         });
+
         Route::get('/group-penjamin', [GroupPenjaminController::class, 'index']);
         Route::prefix('layanan-medis')->group(function () {
+            Route::get('/tindakan-medis', [TindakanMedisController::class, 'getTindakanByDepartementAndKelas']);
+            Route::get('/tarif-tindakan', [TindakanMedisController::class, 'getTarifTindakan']);
             Route::get('/tindakan-medis/{id}', [TindakanMedisController::class, 'getTindakan'])->name('master-data.layanan-medis.tindakan-medis.get');
             Route::post('/tindakan-medis', [TindakanMedisController::class, 'store'])->name('master-data.layanan-medis.tindakan-medis.store');
             Route::get('/tindakan-medis/tarif/{id}', [TindakanMedisController::class, 'getTarif'])->name('master-data.layanan-medis.tindakan-medis.getTarif');
@@ -167,6 +176,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         });
 
         Route::prefix('setup')->group(function () {
+            Route::get('/kelas-rawat', [KelasRawatController::class, 'getKelasRawat']);
             Route::get('/kelas-rawat/{id}', [KelasRawatController::class, 'getKelas'])->name('master-data.setup.kelas-rawat.get');
             Route::post('/kelas-rawat', [KelasRawatController::class, 'store'])->name('master-data.setup.kelas-rawat.store');
             Route::patch('/kelas-rawat/{id}/update', [KelasRawatController::class, 'update'])->name('master-data.setup.kelas-rawat.update');
@@ -188,6 +198,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::delete('/bed/{id}/delete', [BedController::class, 'delete'])->name('master-data.setup.bed.delete');
 
             Route::prefix('departemen')->group(function () {
+                Route::get('/', [DepartementController::class, 'getDepartements']);
                 Route::post('/', [DepartementController::class, 'store'])->name('master-data.setup.departemen.store');
                 Route::patch('/{id}/update', [DepartementController::class, 'update'])->name('master-data.setup.departemen.update');
             });
@@ -219,7 +230,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post('store', [FormBuilderController::class, 'store']);
             });
 
-            Route::prefix('ethnics')->group(function(){
+            Route::prefix('ethnics')->group(function () {
                 Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');
             });
         });
