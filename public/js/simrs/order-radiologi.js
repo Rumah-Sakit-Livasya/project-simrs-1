@@ -9,9 +9,14 @@
 class OrderRadiologi {
 
     /**
-     * @type {ParameterRadiologi[]}
+     * @type {KategoriRadiologi[]}
      */
-    #ParameterRadiologi;
+    #KategoriRadiologi;
+
+    /**
+     * @type {KelasRawat[]}
+     */
+    #KelasRawat;
 
     /**
      * @type {Penjamin[]}
@@ -29,6 +34,11 @@ class OrderRadiologi {
     #Registration;
 
     #totalHarga = 0;
+
+    #groupTarif = 1;
+
+    #kelasPerawatan = 1;
+
     /**
      * @type {HTMLElement | undefined}
      */
@@ -38,16 +48,6 @@ class OrderRadiologi {
      * @type {HTMLFormElement | undefined}
      */
     #elementForm = undefined;
-
-    /**
-     * @type {HTMLDivElement | undefined}
-     */
-    #activeParameterDiv = undefined;
-
-    /**
-     * @type {{ id: number, qty: number }[]}
-     */
-    #selectedParameters = [];
 
     /**
      * @type {HTMLInputElement[]}
@@ -68,16 +68,36 @@ class OrderRadiologi {
 
     constructor() {
         // @ts-ignore
-        this.#ParameterRadiologi = window._parameterRadiologi;
+        this.#KategoriRadiologi = window._kategoriRadiologi;
         // @ts-ignore
         this.#TarifRadiologi = window._tarifRadiologi;
         // @ts-ignore
         this.#Penjamins = window._penjamins;
+        // @ts-ignore
+        this.#KelasRawat = window._kelasRawats;
 
         document.addEventListener("DOMContentLoaded", this.#init.bind(this));
     }
 
     #init() {
+        // Select all checkboxes inside the Blade-generated form
+        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
+        checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", this.#handleCheckboxChange.bind(this));
+        });
+
+        // Select all number input fields
+        const numberInputs = document.querySelectorAll("input[type='number'].parameter_radiologi_number");
+        numberInputs.forEach((input) => {
+            input.addEventListener("input", this.#handleNumberChange.bind(this));
+        });
+
+        // Search bar
+        const searchBar = document.getElementById("searchRadiology");
+        if (searchBar) {
+            searchBar.addEventListener("keyup", this.#handleSearchBarChange.bind(this));
+        }
+
         // Harga
         this.#elementHarga = document.getElementById("radiologi-total") || undefined;
 
@@ -104,19 +124,7 @@ class OrderRadiologi {
             submitButton.addEventListener("click", this.#submit.bind(this));
         }
 
-        // Select parameter (for Select2)
-        const selectParameter = $('#select_parameter');
-        if (selectParameter.length) {
-            selectParameter.on("select2:select", this.#selectParameterChange.bind(this));
-        }
-
-        // Active parameters div
-        const activeParameterDiv = document.querySelector("div#active-parameters");
-        if (form) {
-            this.#activeParameterDiv = /** @type {HTMLDivElement} */ (activeParameterDiv);
-        }
-
-        // get all disabled inputs AND hidden inputs
+        // get all disabled inputs
         const disabledInputs = document.querySelectorAll("input:disabled");
         for (const input of disabledInputs) {
             this.#initialDisabledInputs.push(/** @type {HTMLInputElement} */(input))
@@ -143,6 +151,48 @@ class OrderRadiologi {
             console.log("Receiving message from popup", event.data);
 
             this.changeRegistration(event.data.data);
+        });
+
+        this.#updateCost();
+    }
+
+    /**
+     * Handle search bar changes
+     * @param {Event} event 
+     */
+    #handleSearchBarChange(event) {
+        const _target = event.target;
+        if (!_target) return;
+
+        const searchBar = /** @type {HTMLInputElement} */ (_target);
+        const searchQuery = searchBar.value.toLowerCase();
+        if (searchQuery == "") {
+            this.#showAllParameters();
+            return;
+        }
+
+        const parameters = document.querySelectorAll(".parameter_radiologi");
+        parameters.forEach((parameter) => {
+            const parameterNameElement = parameter.querySelector(".form-check-label");
+            if (!parameterNameElement) return;
+            const parameterName = parameterNameElement.textContent;
+            if (!parameterName) return;
+
+            if (parameterName.toLowerCase().includes(searchQuery)) {
+                // @ts-ignore
+                parameter.style.display = "inherit";
+            } else {
+                // @ts-ignore
+                parameter.style.display = "none";
+            }
+        });
+    }
+
+    #showAllParameters() {
+        const parameters = document.querySelectorAll(".parameter_radiologi");
+        parameters.forEach((parameter) => {
+            // @ts-ignore
+            parameter.style.display = "inherit";
         });
     }
 
@@ -176,6 +226,14 @@ class OrderRadiologi {
     changeRegistration(registration) {
         this.#Registration = registration;
         console.log("Change registration called");
+
+        // get Penjamin object from Penjamins with id equals to registration.penjamin_id
+        const Penjamin = this.#Penjamins.find((p) => p.id == registration.penjamin_id);
+        if (Penjamin) {
+            this.#groupTarif = Penjamin.group_penjamin_id;
+        }
+
+        this.#kelasPerawatan = registration.kelas_rawat_id ? parseInt(registration.kelas_rawat_id) : 1;
 
 
         // change input with name "nama_pasien"
@@ -239,6 +297,8 @@ class OrderRadiologi {
 
     #clearInputs() {
         this.#Registration = undefined;
+        this.#groupTarif = 1;
+        this.#kelasPerawatan = 1;
         this.#initialDisabledInputs.forEach((input) => {
             if (input.id != "order_date") {
                 if (input.type != "radio") {
@@ -299,101 +359,12 @@ class OrderRadiologi {
     }
 
     /**
-     * Handle select parameter changes
-     * @param {Event} event 
-     */
-    #selectParameterChange(event) {
-        const select = /** @type {HTMLSelectElement | null} */ (event.target);
-        if (!select) return;
-
-        const selectedOption = select.options[select.selectedIndex];
-        if (selectedOption) {
-            this.#insertParameter(selectedOption);
-        }
-    }
-
-    /**
-     * Insert parameter to active parameter div
-     * @param {HTMLOptionElement} option 
-     */
-    #insertParameter(option) {
-        // push to array
-        // get html object
-        this.#selectedParameters.push({ id: parseInt(option.value), qty: 1 });
-        const html = this.#parameterBox(option, this.#selectedParameters.length - 1);
-
-        // insert to active parameter div
-        if (this.#activeParameterDiv) {
-            this.#activeParameterDiv.insertAdjacentHTML('beforeend', html);
-
-            // listen to quantity number changes
-            const numberInputs = document.querySelectorAll("input[type='number']#jumlah_" + option.value);
-            numberInputs.forEach((input) => {
-                input.addEventListener("input", this.#handleNumberChange.bind(this));
-            });
-
-            //  recalculate cost
-            this.#calculateCost();
-            $('#select_parameter').val('').trigger('change'); // Reset the Select2 dropdown
-        } else {
-            console.error(new Error('Active parameter div not found'));
-        }
-    }
-
-    /**
-     * Get parameter box html string
-     * @param {HTMLOptionElement} option 
-     * @param {number} index
-     */
-    #parameterBox(option, index) {
-        return /*html*/`
-            <h5 class="active_parameter" id="parameter_box_${option.value}">
-                <a class="mdi mdi-close pointer mdi-24px text-danger" onclick="OrderRadiologiClass.removeParameter(${option.value}, ${index})" title="Hapus Parameter"></a>
-                <input type="number" value="1" class="parameter_radiologi_number" id="jumlah_${option.value}" index="${index}">
-                    ${option.text}
-            </h5>
-        `;
-    }
-
-    /**
-     * Remove parameter
-     * @param {number} id 
-     * @param {number} index
-     */
-    removeParameter(id, index) {
-        const box = document.getElementById(`parameter_box_${id}`);
-        if (!box) return;
-
-        // remove from array
-        this.#selectedParameters.splice(index, 1);
-
-        // remove html object
-        // recalculate cost
-        box.remove();
-        this.#calculateCost();
-    }
-
-    /**
      * Handles number input changes
      * @param {Event} event
      */
     #handleNumberChange(event) {
         const _target = event.target;
         if (!_target) return;
-
-        const input = /** @type {HTMLInputElement} */ (_target);
-        let qty = parseInt(input.value);
-
-        if (qty < 1) {
-            input.value = "1";
-            qty = 1;
-        }
-
-        // get attribute "index"
-        const index = input.getAttribute("index");
-        if (!index) return console.error("No index found");
-        this.#selectedParameters[index].qty = qty;
-
         this.#calculateCost();
     }
 
@@ -411,41 +382,92 @@ class OrderRadiologi {
         this.#calculateCost();
     }
 
+    #updateCost() {
+        for (let i = 0; i < this.#KategoriRadiologi.length; i++) {
+            const KategoriRadiologi = this.#KategoriRadiologi[i];
+            for (let ii = 0; ii < KategoriRadiologi.parameter_radiologi.length; ii++) {
+                const ParameterRadiologi = KategoriRadiologi.parameter_radiologi[ii];
+
+                // get span with id "harga_parameter_radiologi_${ParameterRadiologi.id}"
+                const hargaParameterRadiologi = document.getElementById(`harga_parameter_radiologi_${ParameterRadiologi.id}`);
+                if (hargaParameterRadiologi == null) continue;
+
+                // get tarif from #TarifRadiologi with equal parameter_radiologi_id, group_penjamin_id and kelas_rawat_id
+                const tarif = this.#TarifRadiologi
+                    .find((t) => {
+                        if (t.parameter_radiologi_id == ParameterRadiologi.id &&
+                            t.group_penjamin_id == this.#groupTarif &&
+                            t.kelas_rawat_id == this.#kelasPerawatan)
+                            return t;
+                    });
+
+                if (tarif) {
+                    hargaParameterRadiologi.textContent = tarif.total.toLocaleString("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                    });
+                } else {
+                    console.error("Tarif belum di set atau tidak ditemukan! ID Parameter: " + ParameterRadiologi.id);
+                    showErrorAlertNoRefresh("Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!");
+                }
+
+            }
+        }
+    }
+
     #calculateCost() {
         this.#totalHarga = 0;
 
-        for (let i = 0; i < this.#selectedParameters.length; i++) {
-            const parameter = this.#selectedParameters[i];
-            const Tarif = this.#TarifRadiologi.find((t) => {
-                const EqualParameterId = t.parameter_radiologi_id == parameter.id;
-                let EqualKelasRawatId = true;
-                let EqualGroupPenjaminId = true;
+        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
+        checkboxes.forEach((_checkbox) => {
+            const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
+            const isChecked = checkbox.checked;
+            const parameterId = checkbox.value;
+            const parameter = this.#KategoriRadiologi.find((p) => p.id == parseInt(parameterId));
 
-                if (this.#Registration) {
-                    console.log("Calculating cost with registration")
-                    EqualKelasRawatId = this.#Registration.registration_type == "rawat-jalan" ? true : (t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1));
+            if (isChecked && parameter) {
+                const Tarif = this.#TarifRadiologi.find((t) => {
+                    const EqualParameterId = t.parameter_radiologi_id == parameter.id;
+                    let EqualKelasRawatId = true;
+                    let EqualGroupPenjaminId = true;
+                    const kelasRajal = this.#KelasRawat.find((k) => k.kelas.toLowerCase() == "rawat jalan");
+                    if(!kelasRajal) return showErrorAlertNoRefresh("Kelas rawat jalan tidak ditemukan!");
 
-                    // get "group_penjamin_id" which is in Penjamin object
-                    // with id equals to "penjamin_id" which is in Registration object
-                    const Penjamin = this.#Penjamins.find((p) => p.id == this.#Registration?.penjamin_id);
-                    if (Penjamin) {
-                        EqualGroupPenjaminId = t.group_penjamin_id == Penjamin.group_penjamin_id;
+                    if (this.#Registration) {
+                        console.log("Calculating cost with registration");
+                        EqualKelasRawatId = this.#Registration.registration_type == "rawat-jalan"
+                            ? (t.kelas_rawat_id == kelasRajal.id)
+                            : (t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1));
+
+                        // get "group_penjamin_id" which is in Penjamin object
+                        // with id equals to "penjamin_id" which is in Registration object
+                        const Penjamin = this.#Penjamins.find((p) => p.id == this.#Registration?.penjamin_id);
+                        if (Penjamin) {
+                            EqualGroupPenjaminId = t.group_penjamin_id == Penjamin.group_penjamin_id;
+                        }
+                    }
+                    if (EqualParameterId && EqualKelasRawatId && EqualGroupPenjaminId) return t;
+                });
+
+                if (!Tarif) {
+                    console.error("Tarif belum di set atau tidak ditemukan! ID Parameter: " + parameter.id);
+                    showErrorAlertNoRefresh("Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!");
+                }
+                else {
+                    const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}']`));
+                    if (parseInt(jumlah.value) < 1) {
+                        jumlah.value = String(1);
                     }
 
-                } else {
-                    console.log("Calculating cost without registration")
+                    let Price = Tarif.total * parseInt(jumlah.value);
+                    if (this.#CITO) {
+                        Price += (Price * 30 / 100);
+                    }
+
+                    this.#totalHarga += Price;
                 }
-                if (EqualParameterId && EqualKelasRawatId && EqualGroupPenjaminId) return t;
-            });
-            if (!Tarif) {
-                return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameter.id);
             }
-            let Price = Tarif.total * parameter.qty;
-            if (this.#CITO) {
-                Price += (Price * 30 / 100);
-            }
-            this.#totalHarga += Price;
-        }
+        })
 
         if (this.#elementHarga) {
             this.#elementHarga.textContent = this.#totalHarga.toLocaleString("id-ID", {
@@ -455,6 +477,16 @@ class OrderRadiologi {
         }
 
         return this.#totalHarga;
+    }
+
+    /**
+     * Handles checkbox state changes
+     * @param {Event} event
+     */
+    #handleCheckboxChange(event) {
+        const _target = event.target;
+        if (!_target) return;
+        this.#calculateCost();
     }
 
     /**
@@ -475,17 +507,6 @@ class OrderRadiologi {
             formData.append('registration_type', this.#Registration.registration_type);
         }
 
-        // Append user_id and employee_id to formData
-        // const userIdInput = /** @type {HTMLInputElement} */ (document.querySelector("input[name='user_id']"));
-        // if (userIdInput) {
-        //     formData.append('user_id', userIdInput.value);
-        // }
-
-        // const employeeIdInput = /** @type {HTMLInputElement} */ (document.querySelector("input[name='employee_id']"));
-        // if (employeeIdInput) {
-        //     formData.append('employee_id', employeeIdInput.value);
-        // }
-
 
         // get parameters
         /**
@@ -496,38 +517,57 @@ class OrderRadiologi {
          *  }} Parameter
          */
         let parameters = /** @type {Parameter[]} */ ([]);
-        for (let i = 0; i < this.#selectedParameters.length; i++) {
-            const parameter = this.#selectedParameters[i];
-            const Tarif = this.#TarifRadiologi.find((t) => {
-                const EqualParameterId = t.parameter_radiologi_id == parameter.id;
-                let EqualKelasRawatId = true;
-                let EqualGroupPenjaminId = true;
+        const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_radiologi_checkbox");
+        checkboxes.forEach((_checkbox) => {
+            const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
+            const isChecked = checkbox.checked;
+            const parameterId = checkbox.value;
+            const parameter = this.#KategoriRadiologi.find((p) => p.id == parseInt(parameterId));
 
-                if (this.#Registration) {
-                    EqualKelasRawatId = this.#Registration.registration_type == "rawat-jalan" ? true : (t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1));
+            if (isChecked && parameter) {
+                const Tarif = this.#TarifRadiologi.find((t) => {
+                    const EqualParameterId = t.parameter_radiologi_id == parameter.id;
+                    let EqualKelasRawatId = true;
+                    let EqualGroupPenjaminId = true;
+                    const kelasRajal = this.#KelasRawat.find((k) => k.kelas.toLowerCase() == "rawat jalan");
+                    if (!kelasRajal) return showErrorAlertNoRefresh("Kelas rawat jalan tidak ditemukan!");
 
-                    // get "group_penjamin_id" which is in Penjamin object
-                    // with id equals to "penjamin_id" which is in Registration object
-                    const Penjamin = this.#Penjamins.find((p) => p.id == this.#Registration?.penjamin_id);
-                    if (Penjamin) {
-                        EqualGroupPenjaminId = t.group_penjamin_id == Penjamin.group_penjamin_id;
+                    if (this.#Registration) {
+                        console.log("Calculating cost with registration");
+                        EqualKelasRawatId = this.#Registration.registration_type == "rawat-jalan"
+                            ? (t.kelas_rawat_id == kelasRajal.id)
+                            : (t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1));
+
+                        // get "group_penjamin_id" which is in Penjamin object
+                        // with id equals to "penjamin_id" which is in Registration object
+                        const Penjamin = this.#Penjamins.find((p) => p.id == this.#Registration?.penjamin_id);
+                        if (Penjamin) {
+                            EqualGroupPenjaminId = t.group_penjamin_id == Penjamin.group_penjamin_id;
+                        }
+                    }
+                    if (EqualParameterId && EqualKelasRawatId && EqualGroupPenjaminId) return t;
+                });
+
+                if (!Tarif) {
+                    console.error("Tarif belum di set atau tidak ditemukan! ID Parameter: " + parameter.id);
+                    showErrorAlertNoRefresh("Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!");
+                }
+                else {
+                    const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}']`));
+                    if (parseInt(jumlah.value) < 1) {
+                        jumlah.value = String(1);
                     }
 
-                }
+                    let Price = Tarif.total;
+                    if (this.#CITO) {
+                        Price += (Price * 30 / 100);
+                    }
 
-                if (
-                    EqualParameterId && EqualKelasRawatId && EqualGroupPenjaminId
-                ) return t;
-            });
-            if (!Tarif) {
-                return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameter.id);
+                    parameters.push({ id: parameter.id, qty: parseInt(jumlah.value), price: Price });
+                }
             }
-            let Price = Tarif.total;
-            if (this.#CITO) {
-                Price += (Price * 30 / 100);
-            }
-            parameters.push({ id: parameter.id, qty: parameter.qty, price: Price });
-        }
+        })
+
         formData.append('parameters', JSON.stringify(parameters));
 
         for (let [key, value] of formData.entries()) {

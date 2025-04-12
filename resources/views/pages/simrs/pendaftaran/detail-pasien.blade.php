@@ -326,7 +326,7 @@
                                                         </li>
                                                     </a>
                                                 </div>
-                                                {{-- <div class="col-md-4">
+                                                <div class="col-md-4">
                                                     <a class="nav-link" href="/patients/{{ $patient->id }}/radiologi">
                                                         <li class="menu-layanan purple-box" data-layanan="reg_rad">
                                                             <div
@@ -336,7 +336,7 @@
                                                             <span>Radiologi</span>
                                                         </li>
                                                     </a>
-                                                </div> --}}
+                                                </div>
                                                 <div class="col-md-4">
                                                     <a class="nav-link" href="/patients/{{ $patient->id }}/hemodialisa">
                                                         <li class="menu-layanan brown-box" data-layanan="reg_hemo">

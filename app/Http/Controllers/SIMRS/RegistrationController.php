@@ -31,6 +31,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -171,6 +172,12 @@ class RegistrationController extends Controller
 
         $penjamins = Penjamin::all();
 
+        // get group penjamin with name "Standar"
+        $grupPenjaminStandar = GroupPenjamin::where('name', 'like', '%standar%')->first();
+
+        // get kelas rawat with name "Rawat Jalan"
+        $kelasRawatRajal = KelasRawat::where('kelas', 'like', '%rawat jalan%')->first();
+
         switch ($registrasi) {
             case 'rawat-jalan':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
@@ -257,7 +264,10 @@ class RegistrationController extends Controller
                     'title' => "Radiologi",
                     'doctors' => Doctor::all(),
                     'radiology_categories' => KategoriRadiologi::all(),
-                    'tarifs' => TarifParameterRadiologi::all(),
+                    'penjamin_standar_id' => $groupPenjaminStandarId,
+                    'tarifs' => TarifParameterRadiologi::where('kelas_rawat_id', $kelasRawatRajal->id)
+                        ->where('group_penjamin_id', $grupPenjaminStandar->id)
+                        ->get(),
                     'case' => 'radiologi',
                     'patient' => $patient,
                     'age' => $age
@@ -291,9 +301,9 @@ class RegistrationController extends Controller
                 'employee_id' => 'required',
                 'doctor_id' => 'required',
                 'registration_type' => 'required',
-                'poliklinik' => 'nullable|string',
                 'penjamin_id' => 'required',
                 'rujukan' => 'required|string',
+                'poliklinik' => 'nullable|string',
                 'dokter_perujuk' => 'nullable|integer',
                 'tipe_rujukan' => 'nullable|string',
                 'igd_type' => 'nullable|string',
@@ -376,7 +386,7 @@ class RegistrationController extends Controller
                 foreach ($registrationFees as $fee) {
                     if ($fee->harga_tarif->isNotEmpty()) {
                         $harga = $fee->harga_tarif->first()->harga;
-                        TagihanPasien::create([
+                        $tagihanPasien = TagihanPasien::create([
                             'user_id' => auth()->user()->id,
                             'bilingan_id' => $billing->id,
                             'registration_id' => $registration->id,
@@ -473,6 +483,7 @@ class RegistrationController extends Controller
             'groupPenjaminId' => $groupPenjaminId,
             'radiology_categories' => KategoriRadiologi::all(),
             'tarifs' => TarifParameterRadiologi::all(),
+            'kelas_rawats' => KelasRawat::all(),
             'registration' => $registration,
             'patient' => $patient,
             'departements' => $departements,

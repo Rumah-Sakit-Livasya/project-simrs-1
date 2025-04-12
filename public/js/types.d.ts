@@ -345,3 +345,24 @@ interface TarifRadiologi {
     created_at: string;
     updated_at: string;
 }
+
+interface KategoriRadiologi {
+    id: number;
+    nama_kategori: string;
+    status: number;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+    parameter_radiologi: ParameterRadiologi[];
+}
+
+interface KelasRawat {
+    id: number;
+    kelas: string;
+    urutan: string;
+    keterangan: string;
+    isICU: number;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+}

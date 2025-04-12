@@ -7652,8 +7652,9 @@
             }
         }
     </style>
-    @foreach ( $order->order_parameter_radiologi as $parameter )
-        <meta hidden class="parameter" id="{{ $parameter->id }}" content="{{ $parameter->load(['parameter_radiologi'])->toJson() }}">
+    @foreach ($order->order_parameter_radiologi as $parameter)
+        <meta hidden class="parameter" id="{{ $parameter->id }}"
+            content="{{ $parameter->load(['parameter_radiologi'])->toJson() }}">
     @endforeach
 </head>
 
@@ -7719,61 +7720,114 @@
 
         <div class="trigger" style="float:right; cursor: pointer;">X</div>
         <table width="98%" border="0">
-            <tbody>
-                <tr>
-                    <td style="width:35%"><span class="head_label">Nama Pasien</span></td>
-                    <td style="width:65%"><span class="head_anak">: <b>{{ $order->registration->patient->name }}
-                                ({{ substr($order->registration->patient->gender, 0, 1) }})</b></span></td>
-                </tr>
-                <tr>
-                    <td><span class="head_label">No RM</span></td>
-                    <td><span class="head_anak">:
-                            <b>{{ $order->registration->patient->medical_record_number }}</b></span></td>
-                </tr>
-
-                <tr>
-                    <td><span class="head_label">Tanggal Lahir</span></td>
-                    <td><span class="head_anak">:
-                            <b>{{ \Carbon\Carbon::parse($order->registration->patient->date_of_birth)->format('d M Y') }}</b></span>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td><span class="head_label">Jenis Pemeriksaan</span></td>
-                    <td><span class="head_anak" id="parameter-name">:
-                            {{ $order->order_parameter_radiologi[0]->parameter_radiologi->parameter }}</span></td>
-                </tr>
-
-                <tr>
-                    <td><span class="head_label">Tgl Periksa / Jam</span></td>
-                    @if ($order->inspection_date)
+            @if ($order->registration)
+                <tbody>
+                    <tr>
+                        <td style="width:35%"><span class="head_label">Nama Pasien</span></td>
+                        <td style="width:65%"><span class="head_anak">: <b>{{ $order->registration->patient->name }}
+                                    ({{ substr($order->registration->patient->gender, 0, 1) }})</b></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="head_label">No RM</span></td>
                         <td><span class="head_anak">:
-                                {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('d M Y') : '-' }}
-                                /
-                                {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('H:i') : '-' }}</span>
-                        </td>
-                    @else
-                        <td><span class="head_anak">: -</span></td>
-                    @endif
-                </tr>
+                                <b>{{ $order->registration->patient->medical_record_number }}</b></span></td>
+                    </tr>
 
-                <tr>
-                    <td><span class="head_label">Asal Ruangan</span></td>
-                    <td><span class="head_anak">:
-                            @if ($order->registration->registration_type != 'rawat-inap')
-                                {{ $order->registration->poliklinik }}
-                            @elseif(isset($order->registration->kelas_rawat))
-                                {{ $order->registration->kelas_rawat->room->ruangan }}
-                            @else
-                                -
-                            @endif
-                        </span></td>
-                </tr>
-                <tr>
-                    <td><span class="head_label">Dokter Perujuk</span></td>
-                    <td><span class="head_anak">: {{ $order->doctor->employee->fullname }}</span></td>
-                </tr>
-            </tbody>
+                    <tr>
+                        <td><span class="head_label">Tanggal Lahir</span></td>
+                        <td><span class="head_anak">:
+                                <b>{{ \Carbon\Carbon::parse($order->registration->patient->date_of_birth)->format('d M Y') }}</b></span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="head_label">Jenis Pemeriksaan</span></td>
+                        <td><span class="head_anak" id="parameter-name">:
+                                {{ $order->order_parameter_radiologi[0]->parameter_radiologi->parameter }}</span></td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="head_label">Tgl Periksa / Jam</span></td>
+                        @if ($order->inspection_date)
+                            <td><span class="head_anak">:
+                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('d M Y') : '-' }}
+                                    /
+                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('H:i') : '-' }}</span>
+                            </td>
+                        @else
+                            <td><span class="head_anak">: -</span></td>
+                        @endif
+                    </tr>
+
+                    <tr>
+                        <td><span class="head_label">Asal Ruangan</span></td>
+                        <td><span class="head_anak">:
+                                @if ($order->registration->registration_type != 'rawat-inap')
+                                    {{ $order->registration->poliklinik }}
+                                @elseif(isset($order->registration->kelas_rawat))
+                                    {{ $order->registration->kelas_rawat->room->ruangan }}
+                                @else
+                                    -
+                                @endif
+                            </span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="head_label">Dokter Perujuk</span></td>
+                        <td><span class="head_anak">: {{ $order->doctor->employee->fullname }}</span></td>
+                    </tr>
+                </tbody>
+            @else
+                {{-- otc --}}
+                <tbody>
+                    <tr>
+                        <td style="width:35%"><span class="head_label">Nama Pasien</span></td>
+                        <td style="width:65%"><span class="head_anak">: <b>{{ $order->registration_otc->nama_pasien }}
+                                    ({{ substr($order->registration_otc->jenis_kelamin, 0, 1) }})</b></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="head_label">No RM</span></td>
+                        <td><span class="head_anak">:
+                                <b>OTC</b></span></td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="head_label">Tanggal Lahir</span></td>
+                        <td><span class="head_anak">:
+                                <b>{{ \Carbon\Carbon::parse($order->registration_otc->date_of_birth)->format('d M Y') }}</b></span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="head_label">Jenis Pemeriksaan</span></td>
+                        <td><span class="head_anak" id="parameter-name">:
+                                {{ $order->order_parameter_radiologi[0]->parameter_radiologi->parameter }}</span></td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="head_label">Tgl Periksa / Jam</span></td>
+                        @if ($order->inspection_date)
+                            <td><span class="head_anak">:
+                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('d M Y') : '-' }}
+                                    /
+                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('H:i') : '-' }}</span>
+                            </td>
+                        @else
+                            <td><span class="head_anak">: -</span></td>
+                        @endif
+                    </tr>
+
+                    <tr>
+                        <td><span class="head_label">Asal Ruangan</span></td>
+                        <td><span class="head_anak">:
+                                {{ $order->registration_otc->poly_ruang ?? ' - ' }}
+                            </span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="head_label">Dokter Perujuk</span></td>
+                        <td><span class="head_anak">: {{ $order->doctor->employee->fullname }}</span></td>
+                    </tr>
+                </tbody>
+            @endif
         </table>
 
     </div>
@@ -7794,13 +7848,13 @@
                 var parameterValue = $(this).attr('content');
                 var parameterObject = JSON.parse(parameterValue);
                 console.log(parameterObject);
-                
+
                 parameter[parameterObject.id] = parameterObject
             });
-        console.log(parameter);
+            console.log(parameter);
         });
 
-        
+
 
         function toggleParameter(event) {
             var parameterId = $(event.target).val();

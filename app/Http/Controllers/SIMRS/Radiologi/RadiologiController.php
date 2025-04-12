@@ -11,6 +11,7 @@ use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\GrupParameterRadiologi;
 use App\Models\SIMRS\KategoriRadiologi;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\SIMRS\Registration;
@@ -71,6 +72,7 @@ class RadiologiController extends Controller
         return view('pages.simrs.radiologi.order', [
             'radiologyDoctors' => $radiologyDoctors,
             'penjamins' => Penjamin::all(),
+            'kelas_rawats' => KelasRawat::all(),
             'radiology_categories' => KategoriRadiologi::all(),
             'tarifs' => TarifParameterRadiologi::all(),
         ]);
@@ -87,6 +89,7 @@ class RadiologiController extends Controller
     public function hasilOrder($id)
     {
         $order = OrderRadiologi::findOrFail($id);
+        $order->load(['registration', 'registration_otc', 'registration_otc.doctor']);
         return view('pages.simrs.radiologi.partials.hasil-order', [
             'order' => $order
         ]);
@@ -95,6 +98,7 @@ class RadiologiController extends Controller
     public function labelOrder($id)
     {
         $order = OrderRadiologi::findOrFail($id);
+        $order->load(['registration', 'registration_otc', 'registration_otc.doctor']);
         return view('pages.simrs.radiologi.partials.label-order', [
             'order' => $order
         ]);
@@ -211,6 +215,8 @@ class RadiologiController extends Controller
         return view('pages.simrs.radiologi.simulasi-harga', [
             'radiology_categories' => KategoriRadiologi::all(),
             'tarifs' => TarifParameterRadiologi::all(),
+            'group_penjamins' => GroupPenjamin::all(),
+            'kelas_rawats' => KelasRawat::all()
         ]);
     }
 

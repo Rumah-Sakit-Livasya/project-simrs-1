@@ -637,26 +637,50 @@
             </span>
         </h2>
 
-        <div id="hhr" class="hlf" style="font-size:.9em; margin-bottom:0px;">
-            <ul>
-                <li><span>Nama</span>: {{ $order->registration->patient->name }} </li>
-                <li><span>Jenis Kelamin</span>: {{ $order->registration->patient->gender }}</li>
-                <li><span>Tgl Lahir / Umur</span>: {{ $order->registration->patient->date_of_birth }} /
-                    {{ displayAge($order->registration->patient->date_of_birth) }}</li>
-                <li><span>No telp</span>: {{ $order->registration->patient->mobile_phone_number }}</li>
-                <li><span>Alamat</span>: {{ $order->registration->patient->address }}</li>
-            </ul>
-        </div>
-        <div id="hhr" class="hrt" style="font-size:.9em; margin-bottom:0px;">
-            <ul>
-                <li><span>No RM / No Registrasi</span>: {{ $order->registration->patient->medical_record_number }} /
-                    {{ $order->registration->registration_number }}</li>
-                <li><span>Dokter</span>: {{ $order->doctor->employee->fullname }}</li>
-                <li><span>Disiapkan Oleh</span>: {{ $order->user->employee->fullname }}</li>
-                <li><span>Poly/Ruang</span>: {{ $order->registration->poliklinik }}</li>
-                <li><span>Penjamin</span>: {{ $order->registration->penjamin->nama_perusahaan }}</li>
-            </ul>
-        </div>
+        @if ($order->registration)
+            <div id="hhr" class="hlf" style="font-size:.9em; margin-bottom:0px;">
+                <ul>
+                    <li><span>Nama</span>: {{ $order->registration->patient->name }} </li>
+                    <li><span>Jenis Kelamin</span>: {{ $order->registration->patient->gender }}</li>
+                    <li><span>Tgl Lahir / Umur</span>: {{ $order->registration->patient->date_of_birth }} /
+                        {{ displayAge($order->registration->patient->date_of_birth) }}</li>
+                    <li><span>No telp</span>: {{ $order->registration->patient->mobile_phone_number }}</li>
+                    <li><span>Alamat</span>: {{ $order->registration->patient->address }}</li>
+                </ul>
+            </div>
+            <div id="hhr" class="hrt" style="font-size:.9em; margin-bottom:0px;">
+                <ul>
+                    <li><span>No RM / No Registrasi</span>: {{ $order->registration->patient->medical_record_number }}
+                        /
+                        {{ $order->registration->registration_number }}</li>
+                    <li><span>Dokter</span>: {{ $order->doctor->employee->fullname }}</li>
+                    <li><span>Disiapkan Oleh</span>: {{ $order->user->employee->fullname }}</li>
+                    <li><span>Poly/Ruang</span>: {{ $order->registration->poliklinik }}</li>
+                    <li><span>Penjamin</span>: {{ $order->registration->penjamin->nama_perusahaan }}</li>
+                </ul>
+            </div>
+        @else
+            <div id="hhr" class="hlf" style="font-size:.9em; margin-bottom:0px;">
+                <ul>
+                    <li><span>Nama</span>: {{ $order->registration_otc->nama_pasien }} </li>
+                    <li><span>Jenis Kelamin</span>: {{ $order->registration_otc->jenis_kelamin }}</li>
+                    <li><span>Tgl Lahir / Umur</span>: {{ $order->registration_otc->date_of_birth }} /
+                        {{ displayAge($order->registration_otc->date_of_birth) }}</li>
+                    <li><span>No telp</span>: {{ $order->registration_otc->no_telp }}</li>
+                    <li><span>Alamat</span>: {{ $order->registration_otc->alamat }}</li>
+                </ul>
+            </div>
+            <div id="hhr" class="hrt" style="font-size:.9em; margin-bottom:0px;">
+                <ul>
+                    <li><span>No RM / No Registrasi</span>: OTC / {{ $order->registration_otc->registration_number }}
+                    </li>
+                    <li><span>Dokter</span>: {{ $order->doctor->employee->fullname }}</li>
+                    <li><span>Disiapkan Oleh</span>: {{ $order->user->employee->fullname }}</li>
+                    <li><span>Poly/Ruang</span>: {{ $order->registration_otc->poly_ruang ?? ' - ' }}</li>
+                    <li><span>Penjamin</span>: {{ $order->registration_otc->penjamin->nama_perusahaan }}</li>
+                </ul>
+            </div>
+        @endif
 
         <table width="100%" class="bdr4 pad" style="margin-top:0px;">
             <thead>

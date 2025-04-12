@@ -599,7 +599,7 @@
                     <option selected>ALL</option>
                     @foreach ($order->order_parameter_radiologi as $parameter)
                         <option value="{{ $parameter->id }}">
-                          {{ $loop->iteration }}.  {{ $parameter->parameter_radiologi->parameter }}</option>
+                            {{ $loop->iteration }}. {{ $parameter->parameter_radiologi->parameter }}</option>
                     @endforeach
                 </select>
             </li>
@@ -630,29 +630,55 @@
 
         <div id="lhd">
         </div>
-        <div id="hhr" class="hlf">
-            <ul style="line-height:1em">
-                <li><span>No RM </span>: {{ $order->registration->patient->medical_record_number }}</li>
-                <li><span>No Radiologi </span>: {{ $order->no_order }}</li>
-                <li><span>Nama Pasien</span>: {{ $order->registration->patient->name }}</li>
-                <li><span>Tgl Lahir / Umur</span>: {{ $order->registration->patient->date_of_birth }} /
-                    {{ displayAge($order->registration->patient->date_of_birth) }}</li>
-                <li><span>Jenis Kelamin</span>: {{ $order->registration->patient->gender }}</li>
-                <li><span>Tgl Pemeriksaan</span>: {{ $order->inspection_date }}</li>
-                <li>
-                    <div style="clear:both"></div>
-                </li>
-            </ul>
-        </div>
-        <div id="hhr" class="hrt">
-            <ul style="line-height:1em">
-                <li><span>No Registrasi</span>: {{ $order->registration->registration_number }}</li>
-                <li><span>Dokter Pengirim</span>: {{ $order->registration->doctor->employee->fullname }}</li>
-                <li><span>Ruangan Pengirim</span>: {{ $order->registration->poliklinik }}</li>
-                <li><span>Dokter Radiologi</span>: {{ $order->doctor->employee->fullname }}</li>
-                <li><span>Diagnosa Klinis</span>: {{ $order->diagnosa_klinis }}</li>
-            </ul>
-        </div>
+        @if ($order->registration)
+            <div id="hhr" class="hlf">
+                <ul style="line-height:1em">
+                    <li><span>No RM </span>: {{ $order->registration->patient->medical_record_number }}</li>
+                    <li><span>No Radiologi </span>: {{ $order->no_order }}</li>
+                    <li><span>Nama Pasien</span>: {{ $order->registration->patient->name }}</li>
+                    <li><span>Tgl Lahir / Umur</span>: {{ $order->registration->patient->date_of_birth }} /
+                        {{ displayAge($order->registration->patient->date_of_birth) }}</li>
+                    <li><span>Jenis Kelamin</span>: {{ $order->registration->patient->gender }}</li>
+                    <li><span>Tgl Pemeriksaan</span>: {{ $order->inspection_date }}</li>
+                    <li>
+                        <div style="clear:both"></div>
+                    </li>
+                </ul>
+            </div>
+            <div id="hhr" class="hrt">
+                <ul style="line-height:1em">
+                    <li><span>No Registrasi</span>: {{ $order->registration->registration_number }}</li>
+                    <li><span>Dokter Pengirim</span>: {{ $order->registration->doctor->employee->fullname }}</li>
+                    <li><span>Ruangan Pengirim</span>: {{ $order->registration->poliklinik }}</li>
+                    <li><span>Dokter Radiologi</span>: {{ $order->doctor->employee->fullname }}</li>
+                    <li><span>Diagnosa Klinis</span>: {{ $order->diagnosa_klinis }}</li>
+                </ul>
+            </div>
+        @else
+            <div id="hhr" class="hlf">
+                <ul style="line-height:1em">
+                    <li><span>No RM </span>: OTC</li>
+                    <li><span>No Radiologi </span>: {{ $order->no_order }}</li>
+                    <li><span>Nama Pasien</span>: {{ $order->registration_otc->nama_pasien }}</li>
+                    <li><span>Tgl Lahir / Umur</span>: {{ $order->registration_otc->date_of_birth }} /
+                        {{ displayAge($order->registration_otc->date_of_birth) }}</li>
+                    <li><span>Jenis Kelamin</span>: {{ $order->registration_otc->jenis_kelamin }}</li>
+                    <li><span>Tgl Pemeriksaan</span>: {{ $order->inspection_date }}</li>
+                    <li>
+                        <div style="clear:both"></div>
+                    </li>
+                </ul>
+            </div>
+            <div id="hhr" class="hrt">
+                <ul style="line-height:1em">
+                    <li><span>No Registrasi</span>: {{ $order->registration_otc->registration_number }}</li>
+                    <li><span>Dokter Pengirim</span>: {{ $order->registration_otc->doctor->employee->fullname }}</li>
+                    <li><span>Ruangan Pengirim</span>: {{ $order->registration_otc->poly_ruang ?? ' - ' }}</li>
+                    <li><span>Dokter Radiologi</span>: {{ $order->doctor->employee->fullname }}</li>
+                    <li><span>Diagnosa Klinis</span>: {{ $order->diagnosa_klinis }}</li>
+                </ul>
+            </div>
+        @endif
         <div style="clear:both"></div>
 
         <style type="text/css">
@@ -714,7 +740,8 @@
                 var selectedValue = this.value;
                 var rows = document.querySelectorAll('tr[name^="parameter-"]');
                 rows.forEach(function(row) {
-                    if (selectedValue === 'ALL' || row.getAttribute('name') === 'parameter-' + selectedValue) {
+                    if (selectedValue === 'ALL' || row.getAttribute('name') === 'parameter-' +
+                        selectedValue) {
                         row.style.display = '';
                     } else {
                         row.style.display = 'none';
