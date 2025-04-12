@@ -342,105 +342,113 @@
 @section('plugin-pembayaran-tagihan')
     <script>
         $(document).ready(function() {
-            $('#bilinganTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: '/simrs/kasir/bilingan/data/{{ $bilingan->id }}',
-                    type: 'GET',
-                    dataSrc: function(json) {
-                        return json && json.data ? json.data : [];
-                    }
-                },
-                columns: [{
-                        data: 'tanggal',
-                        name: 'tanggal',
-                        className: 'tanggal',
-                        render: function(data, type, row) {
-                            return '<input readonly type="text" class="form-control edit-input" value="' +
-                                data + '" data-column="tanggal" data-id="' + row.id +
-                                '" style="width: auto; max-width: 100%; white-space: nowrap;">';
+            if ($('#bilinganTable').length) {
+                $('#bilinganTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: '/simrs/kasir/bilingan/data/{{ $bilingan->id }}',
+                        type: 'GET',
+                        dataSrc: function(json) {
+                            return json && json.data ? json.data : [];
                         }
                     },
-                    {
-                        data: 'total_tagihan',
-                        name: 'total_tagihan',
-                        className: 'total-tagihan',
-                        render: function(data, type, row) {
-                            return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="total_tagihan" data-id="' + row.id + '">';
+                    columns: [{
+                            data: 'tanggal',
+                            name: 'tanggal',
+                            className: 'tanggal',
+                            render: function(data, type, row) {
+                                return '<input readonly type="text" class="form-control edit-input" value="' +
+                                    data + '" data-column="tanggal" data-id="' + row.id +
+                                    '" style="width: auto; max-width: 100%; white-space: nowrap;">';
+                            }
+                        },
+                        {
+                            data: 'total_tagihan',
+                            name: 'total_tagihan',
+                            className: 'total-tagihan',
+                            render: function(data, type, row) {
+                                return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
+                                    (data !== null ? parseFloat(data).toLocaleString('id-ID') :
+                                        '0') +
+                                    '" data-column="total_tagihan" data-id="' + row.id + '">';
+                            }
+                        },
+                        {
+                            data: 'jaminan',
+                            name: 'jaminan',
+                            className: 'jaminan',
+                            render: function(data, type, row) {
+                                return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
+                                    (data !== null ? parseFloat(data).toLocaleString('id-ID') :
+                                        '0') +
+                                    '" data-column="jaminan" data-id="' + row.id + '">';
+                            }
+                        },
+                        {
+                            data: 'tagihan_pasien',
+                            name: 'tagihan_pasien',
+                            className: 'tagihan-pasien',
+                            render: function(data, type, row) {
+                                return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
+                                    (data !== null ? parseFloat(data).toLocaleString('id-ID') :
+                                        '0') +
+                                    '" data-column="tagihan_pasien" data-id="' + row.id + '">';
+                            }
+                        },
+                        {
+                            data: 'jumlah_terbayar',
+                            name: 'jumlah_terbayar',
+                            className: 'jumlah-terbayar',
+                            render: function(data, type, row) {
+                                return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
+                                    (data !== null ? parseFloat(data).toLocaleString('id-ID') :
+                                        '0') +
+                                    '" data-column="jumlah_terbayar" data-id="' + row.id + '">';
+                            }
+                        },
+                        {
+                            data: 'sisa_tagihan',
+                            name: 'sisa_tagihan',
+                            className: 'sisa-tagihan',
+                            render: function(data, type, row) {
+                                return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
+                                    (data !== null ? parseFloat(data).toLocaleString('id-ID') :
+                                        '0') +
+                                    '" data-column="sisa_tagihan" data-id="' + row.id + '">';
+                            }
+                        },
+                        {
+                            data: 'kembalian',
+                            name: 'kembalian',
+                            className: 'kembalian',
+                            render: function(data, type, row) {
+                                return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
+                                    (data !== null ? parseFloat(data).toLocaleString('id-ID') :
+                                        '0') +
+                                    '" data-column="kembalian" data-id="' + row.id + '">';
+                            }
+                        },
+                        {
+                            data: 'print',
+                            name: 'print',
+                            className: 'no-wrap',
+                            render: function(data, type, row) {
+                                return '<div style="white-space: nowrap;">' + data + '</div>';
+                            }
                         }
+                    ],
+                    language: {
+                        emptyTable: "Tidak ada data yang tersedia"
                     },
-                    {
-                        data: 'jaminan',
-                        name: 'jaminan',
-                        className: 'jaminan',
-                        render: function(data, type, row) {
-                            return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="jaminan" data-id="' + row.id + '">';
-                        }
-                    },
-                    {
-                        data: 'tagihan_pasien',
-                        name: 'tagihan_pasien',
-                        className: 'tagihan-pasien',
-                        render: function(data, type, row) {
-                            return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="tagihan_pasien" data-id="' + row.id + '">';
-                        }
-                    },
-                    {
-                        data: 'jumlah_terbayar',
-                        name: 'jumlah_terbayar',
-                        className: 'jumlah-terbayar',
-                        render: function(data, type, row) {
-                            return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="jumlah_terbayar" data-id="' + row.id + '">';
-                        }
-                    },
-                    {
-                        data: 'sisa_tagihan',
-                        name: 'sisa_tagihan',
-                        className: 'sisa-tagihan',
-                        render: function(data, type, row) {
-                            return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="sisa_tagihan" data-id="' + row.id + '">';
-                        }
-                    },
-                    {
-                        data: 'kembalian',
-                        name: 'kembalian',
-                        className: 'kembalian',
-                        render: function(data, type, row) {
-                            return '<input readonly type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="kembalian" data-id="' + row.id + '">';
-                        }
-                    },
-                    {
-                        data: 'print',
-                        name: 'print',
-                        className: 'no-wrap',
-                        render: function(data, type, row) {
-                            return '<div style="white-space: nowrap;">' + data + '</div>';
-                        }
-                    }
-                ],
-                language: {
-                    emptyTable: "Tidak ada data yang tersedia"
-                },
-                autoWidth: false,
-                responsive: true,
-                pagingType: "simple",
-                lengthMenu: [5, 10, 25, 50],
-                pageLength: 5,
-                className: 'table-sm'
-            });
+                    autoWidth: false,
+                    responsive: true,
+                    pagingType: "simple",
+                    lengthMenu: [5, 10, 25, 50],
+                    pageLength: 5,
+                    className: 'table-sm'
+                });
+            }
 
             $('#pembayaranTagihan').on('submit', function(e) {
                 e.preventDefault();
@@ -471,7 +479,6 @@
                 formData +=
                     `&bilingan_id=${bilinganId}&user_id=${userId}&jumlah_terbayar=${jumlahTerbayar}&total_tagihan=${totalTagihan}&tagihan_pasien=${tagihanPasien}&kembalian=${kembalian}&sisa_tagihan=${sisaTagihan}&bill_notes=${billNotes}`;
 
-
                 $.ajax({
                     url: '/simrs/kasir/pembayaran-tagihan',
                     type: 'POST',
@@ -481,30 +488,38 @@
                     },
                     dataType: 'json',
                     success: function(response) {
-                        alert('Pembayaran berhasil disimpan.');
-                        if (response.redirect_url) {
-                            window.location.href = response.redirect_url;
-                        } else {
-                            $('#pembayaranTagihan')[0].reset();
-                        }
+                        showSuccessAlert('Pembayaran berhasil disimpan.');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
                     },
                     error: function(xhr) {
                         let message = 'Terjadi kesalahan saat menyimpan data.';
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             message = xhr.responseJSON.message;
                         }
-                        alert(message);
+                        showErrorAlertNoRefresh(message);
                     }
                 });
             });
 
             $(document).on('click', '.btn-print-bill', function(e) {
                 e.preventDefault();
-                // Ambil data billing id dari atribut data jika tersedia
                 let billingId = $(this).data('billing-id');
                 let url = billingId ? `/simrs/kasir/print-bill/${billingId}` : '/simrs/kasir/print-bill';
-                // Buka popup windows dengan ukuran dan opsi yang ditentukan
-                window.open(url, 'popupWindow', 'width=800,height=600,scrollbars=yes,resizable=yes');
+                window.open(url, 'popupWindow',
+                    'toolbar=yes,scrollbars=yes,resizable=yes,fullscreen=yes,top=0,left=0,width=' +
+                    screen.width + ',height=' + screen.height);
+            });
+
+            $(document).on('click', '.btn-print-kwitansi', function(e) {
+                e.preventDefault();
+                let billingId = $(this).data('billing-id');
+                let url = billingId ? `/simrs/kasir/print-kwitansi/${billingId}` :
+                    '/simrs/kasir/print-kwitansi';
+                window.open(url, 'popupWindow',
+                    'toolbar=yes,scrollbars=yes,resizable=yes,fullscreen=yes,top=0,left=0,width=' +
+                    screen.width + ',height=' + screen.height);
             });
         });
     </script>
