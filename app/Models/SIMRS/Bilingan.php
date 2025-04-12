@@ -27,7 +27,7 @@ class Bilingan extends Model implements AuditableContract
 
     public function down_payment()
     {
-        return $this->hasOne(DownPayment::class);
+        return $this->hasMany(DownPayment::class);
     }
 
     public function tagihan_pasien()

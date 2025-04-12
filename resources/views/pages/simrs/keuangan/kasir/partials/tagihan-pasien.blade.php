@@ -29,8 +29,10 @@
 
     <div class="mb-3">
         <button class="btn btn-success" id="save-final">Save Final</button>
-        <button class="btn btn-warning" id="save-draft">Save Draft</button>
-        <button class="btn btn-info" id="save-partial">Save Partial</button>
+        @if ($bilingan->status !== 'final')
+            <button class="btn btn-warning" id="save-draft">Save Draft</button>
+        @endif
+        {{-- <button class="btn btn-info" id="save-partial">Save Partial</button> --}}
         <button class="btn btn-secondary" id="reload-tagihan">Reload Tagihan</button>
         <button class="btn btn-primary" id="add-tagihan">Tambah Tagihan</button>
     </div>
@@ -487,97 +489,6 @@
                 className: 'smaller-table'
             });
 
-            $('#bilinganTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: '/simrs/kasir/bilingan/data/{{ $bilingan->id }}',
-                    type: 'GET',
-                    dataSrc: function(json) {
-                        return json && json.data ? json.data : [];
-                    }
-                },
-                columns: [{
-                        data: 'tanggal',
-                        name: 'tanggal',
-                        className: 'tanggal',
-                        render: function(data, type, row) {
-                            return '<input type="text" class="form-control edit-input" value="' +
-                                data + '" data-column="tanggal" data-id="' + row.id +
-                                '" style="width: auto; max-width: 100%; white-space: nowrap;">';
-                        }
-                    },
-                    {
-                        data: 'total_tagihan',
-                        name: 'total_tagihan',
-                        className: 'total-tagihan',
-                        render: function(data, type, row) {
-                            return '<input type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="total_tagihan" data-id="' + row.id + '">';
-                        }
-                    },
-                    {
-                        data: 'jaminan',
-                        name: 'jaminan',
-                        className: 'jaminan',
-                        render: function(data, type, row) {
-                            return '<input type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="jaminan" data-id="' + row.id + '">';
-                        }
-                    },
-                    {
-                        data: 'tagihan_pasien',
-                        name: 'tagihan_pasien',
-                        className: 'tagihan-pasien',
-                        render: function(data, type, row) {
-                            return '<input type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="tagihan_pasien" data-id="' + row.id + '">';
-                        }
-                    },
-                    {
-                        data: 'jumlah_terbayar',
-                        name: 'jumlah_terbayar',
-                        className: 'jumlah-terbayar',
-                        render: function(data, type, row) {
-                            return '<input type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="jumlah_terbayar" data-id="' + row.id + '">';
-                        }
-                    },
-                    {
-                        data: 'sisa_tagihan',
-                        name: 'sisa_tagihan',
-                        className: 'sisa-tagihan',
-                        render: function(data, type, row) {
-                            return '<input type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="sisa_tagihan" data-id="' + row.id + '">';
-                        }
-                    },
-                    {
-                        data: 'kembalian',
-                        name: 'kembalian',
-                        className: 'kembalian',
-                        render: function(data, type, row) {
-                            return '<input type="text" class="form-control edit-input format-currency" value="' +
-                                (data !== null ? parseFloat(data).toLocaleString('id-ID') : '0') +
-                                '" data-column="kembalian" data-id="' + row.id + '">';
-                        }
-                    }
-                ],
-                language: {
-                    emptyTable: "Tidak ada data yang tersedia"
-                },
-                autoWidth: false,
-                responsive: true,
-                pagingType: "simple",
-                lengthMenu: [5, 10, 25, 50],
-                pageLength: 5,
-                className: 'smaller-table'
-            });
 
             runDatePicker();
 
@@ -654,6 +565,9 @@
                             showConfirmButton: false,
                             timer: 3000
                         });
+                        setTimeout(function() {
+                            location.reload();
+                        }, 3000);
                     },
                     error: function(xhr) {
                         Swal.fire({
@@ -686,9 +600,9 @@
                             showConfirmButton: false,
                             timer: 3000
                         });
-                        // Refresh the DataTable and switch to the #pembayaran-tagihan tab
-                        $('#tagihanTable').DataTable().ajax.reload();
-                        $('.nav-tabs a[href="#pembayaran-tagihan"]').tab('show');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 3000);
                     },
                     error: function(xhr) {
                         Swal.fire({
@@ -721,6 +635,9 @@
                             showConfirmButton: false,
                             timer: 3000
                         });
+                        setTimeout(function() {
+                            location.reload();
+                        }, 3000);
                     },
                     error: function(xhr) {
                         Swal.fire({

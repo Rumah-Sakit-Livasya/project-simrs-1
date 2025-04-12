@@ -28,10 +28,10 @@
             <div class="col">
                 <label>Metode Pembayaran:</label>
                 <select class="form-control select2" name="metode_pembayaran">
-                    <option value="cash">Cash</option>
-                    <option value="credit_card">Credit Card</option>
-                    <option value="debit_card">Debit Card</option>
-                    <option value="transfer">Transfer</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="Transfer">Transfer</option>
                 </select>
             </div>
             <div class="col">
@@ -40,7 +40,8 @@
             </div>
             <div class="col">
                 <label>Keterangan:</label>
-                <input type="text" class="form-control" name="keterangan" placeholder="Masukkan Keterangan">
+                <input type="text" class="form-control" name="keterangan" placeholder="Masukkan Keterangan"
+                    value="DP Pasien">
             </div>
             <div class="col">
                 <label>Total DP:</label>
@@ -75,6 +76,7 @@
                         <th>Tipe</th>
                         <th>User Input</th>
                         <th>Keterangan</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -88,6 +90,7 @@
 @section('plugin-down-payment')
     <script>
         $(document).ready(function() {
+
             $('#DownPaymentTable').DataTable({
                 processing: true,
                 serverSide: true,
@@ -121,6 +124,16 @@
                     {
                         data: 'keterangan',
                         name: 'keterangan'
+                    },
+                    {
+                        data: 'aksi',
+                        name: 'aksi',
+                        render: function(data, type, row) {
+                            return '<button class="btn btn-danger btn-delete" data-id="' + row.id +
+                                '"><i class="fal fa-trash"></i></button>';
+                        },
+                        orderable: false,
+                        searchable: false
                     }
                 ],
                 language: {
@@ -131,6 +144,63 @@
                 pagingType: "simple",
                 lengthMenu: [5, 10, 25, 50],
                 pageLength: 5
+            });
+
+            $('#downPaymentForm').on('submit', function(e) {
+                e.preventDefault();
+                let formData = $(this).serialize();
+                const bilinganId = '{{ $bilingan->id }}';
+                const userId = '{{ auth()->user()->id }}';
+                formData += `&bilingan_id=${bilinganId}&user_id=${userId}`;
+                // Send the form data to the server
+                // using AJAX
+                $.ajax({
+                    url: '/simrs/kasir/down-payment',
+                    type: 'POST',
+                    data: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        alert('Down payment saved successfully.');
+                        // Optionally update the Total DP field and refresh the DataTable if needed.
+                    },
+                    error: function(xhr) {
+                        alert('Error saving down payment.');
+                    }
+                });
+            });
+
+            $(document).on('click', '.btn-delete', function() {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: 'Anda yakin?',
+                    text: "Anda yakin ingin menghapus data ini?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/simrs/kasir/down-payment/' + id,
+                            type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                Swal.fire('Deleted!', 'Data berhasil dihapus.',
+                                    'success');
+                                $('#DownPaymentTable').DataTable().ajax.reload();
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Error!', 'Gagal menghapus data.', 'error');
+                            }
+                        });
+                    }
+                });
             });
         });
     </script>

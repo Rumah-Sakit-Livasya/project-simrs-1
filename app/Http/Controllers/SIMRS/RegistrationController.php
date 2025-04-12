@@ -7,6 +7,7 @@ use App\Models\OrderRadiologi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\SIMRS\Bed;
 use App\Models\SIMRS\Bilingan;
+use App\Models\SIMRS\BilinganTagihanPasien;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
@@ -160,24 +161,17 @@ class RegistrationController extends Controller
             $query->where('name', 'like', '%UGD%');
         })->get();
 
-<<<<<<< HEAD
-=======
-
->>>>>>> rajal
         // dd($doctorsIGD);
 
-        $doctorsLAB = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
-            $query->where('name', 'like', '%Laboratorium%');
-        })->get();
+        // $doctorsLAB = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
+        //     $query->where('name', 'like', '%Laboratorium%');
+        // })->get();
 
-<<<<<<< HEAD
         $doctorsLAB = Doctor::with('employee', 'departements')->whereHas('department_from_doctors', function ($query) {
             $query->where('name', 'like', '%LABORATORIUM%');
         })->get();
 
         $penjamins = Penjamin::all();
-=======
->>>>>>> rajal
 
         switch ($registrasi) {
             case 'rawat-jalan':
@@ -395,6 +389,12 @@ class RegistrationController extends Controller
                     'total' => $hargaTarifAdmin
                 ]);
             }
+
+            // Simpan relasi bilingan-tagihan pasien
+            BilinganTagihanPasien::create([
+                'tagihan_pasien_id' => $tagihanPasien->id,
+                'bilingan_id' => $billing->id,
+            ]);
 
             return redirect("/daftar-registrasi-pasien/$registration->id")
                 ->with('success', 'Registrasi berhasil ditambahkan!');

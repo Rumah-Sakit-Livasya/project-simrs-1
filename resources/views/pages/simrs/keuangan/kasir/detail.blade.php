@@ -67,4 +67,5 @@
     @yield('plugin-add-tagihan')
     @yield('plugin-tagihan-pasien')
     @yield('plugin-down-payment')
+    @yield('plugin-pembayaran-tagihan')
 @endsection
