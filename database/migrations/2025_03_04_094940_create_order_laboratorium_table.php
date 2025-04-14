@@ -13,20 +13,19 @@ return new class extends Migration
     {
         Schema::create('order_laboratorium', function (Blueprint $table) {
             $table->id();
-            $table->date('tanggal_order');
-            $table->unsignedBigInteger('registration_id');
-            $table->foreign('registration_id')->references('id')->on('registrations')->onDelete('cascade');
-            $table->unsignedBigInteger('doctor_id');
-            $table->foreign('doctor_id')->references('id')->on('doctors')->onDelete('cascade');
-            $table->unsignedBigInteger('patient_id');
-            $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
-            $table->boolean('is_billed');
-            $table->boolean('is_cito');
-            $table->string('nama_pasien', 100);
-            $table->text('diagnosa_klinis')->nullable();
-            $table->enum('tipe_pasien', ['rawat-jalan', 'rawat-inap', 'oct']); // 1. rajal 2. ranap 3 otc
-            $table->string('entry_by', 70);
-            $table->string('modify_by', 70)->nullable();
+            $table->foreignId('registration_id')->nullable()->constrained('registrations')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('otc_id')->nullable()->constrained('registration_otc')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('dokter_laboratorium_id')->constrained('employees')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->date('order_date');
+            $table->dateTime('inspection_date')->nullable();
+            $table->date('pickup_date')->nullable();
+            $table->string('no_order');
+            $table->enum('tipe_order', ['normal', 'cito'])->default('normal');
+            $table->string('tipe_pasien');
+            $table->string('diagnosa_klinis');
+            $table->tinyInteger('status_isi_hasil')->default(0);
+            $table->boolean('status_billed')->default(false);
             $table->softDeletes();
             $table->timestamps();
         });

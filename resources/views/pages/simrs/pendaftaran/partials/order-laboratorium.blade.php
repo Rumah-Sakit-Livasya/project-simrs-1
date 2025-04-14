@@ -33,7 +33,7 @@
             border-bottom: none;
         }
 
-        .parameter_radiologi_number {
+        .parameter_laboratorium_number {
             width: 60px;
             margin-left: 10px;
         }
@@ -41,10 +41,10 @@
     <div class="panel-hdr border-top">
         <h2 class="text-light">
             <i class="fas fa-address-card mr-3 ml-2 text-primary" style="transform: scale(2.1)"></i>
-            <span class="text-primary">Order Radiologi</span>
+            <span class="text-primary">Order Laboratorium</span>
         </h2>
     </div>
-    <form id="form-radiologi">
+    <form id="form-laboratorium">
         @csrf
         <input type="hidden" name="patient_id" value="{{ $patient->id }}">
         <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
@@ -74,13 +74,13 @@
                 <div class="form-group">
                     <div class="row align-items-center">
                         <div class="col-xl-4 text-right">
-                            <label class="form-label" for="doctor_id">Dokter Radiologi</label>
+                            <label class="form-label" for="doctor_id">Dokter Laboratorium</label>
                         </div>
                         <div class="col-xl-8">
                             <div class="form-group">
                                 <select class="select2 form-control w-100" id="doctor_id" name="doctor_id">
                                     <option value=""></option>
-                                    @foreach ($radiologyDoctors as $doctor)
+                                    @foreach ($laboratoriumDoctors as $doctor)
                                         <option value="{{ $doctor->id }}">
                                             {{ $doctor->employee->fullname }}
                                         </option>
@@ -155,22 +155,22 @@
 
             <div class="col-xl-12">
                 <div class="form-group">
-                    <input type="text" class="form-control mb-3" id="searchRadiology" placeholder="Cari tindakan...">
+                    <input type="text" class="form-control mb-3" id="searchLaboratorium" placeholder="Cari tindakan...">
                     <div class="grid">
-                        @foreach ($radiology_categories as $category)
+                        @foreach ($laboratorium_categories as $category)
                             <div class="card">
                                 <h3>{{ $category->nama_kategori }}</h3>
-                                @foreach ($category->parameter_radiologi as $parameter)
-                                    <div class="item parameter_radiologi">
+                                @foreach ($category->parameter_laboratorium as $parameter)
+                                    <div class="item parameter_laboratorium">
                                         <input type="checkbox" value="{{ $parameter->id }}"
-                                            class="parameter_radiologi_checkbox"
-                                            id="parameter_radiologi_{{ $parameter->id }}"> <label>
+                                            class="parameter_laboratorium_checkbox"
+                                            id="parameter_laboratorium_{{ $parameter->id }}"> <label>
                                             <span class="form-check-label">{{ $parameter->parameter }}</span>(<span
-                                                id="harga_parameter_radiologi_{{ $parameter->id }}">{{ rp(0) }}</span>)
+                                                id="harga_parameter_laboratorium_{{ $parameter->id }}">{{ rp(0) }}</span>)
                                         </label>
 
                                         <input type="number" value="1"
-                                            class="form-control parameter_radiologi_number"
+                                            class="form-control parameter_laboratorium_number"
                                             id="jumlah_{{ $parameter->id }}">
                                     </div>
                                 @endforeach
@@ -191,10 +191,10 @@
                         </a>
                     </div>
                     <div class="col-xl-6 text-right">
-                        <h3 class="text-success"> <i class="fa fa-calculator"></i> <span id="radiologi-total">Rp
+                        <h3 class="text-success"> <i class="fa fa-calculator"></i> <span id="laboratorium-total">Rp
                                 0</span>
                         </h3>
-                        <button type="submit" id="radiologi-submit"
+                        <button type="submit" id="laboratorium-submit"
                             class="btn btn-lg btn-primary waves-effect waves-themed">
                             <span class="fal fa-save mr-1"></span>
                             Simpan
@@ -205,13 +205,13 @@
         </div>
     </form>
 
-    @section('script-radiologi')
+    @section('script-laboratorium')
         <script>
-            window._kategoriRadiologi = @json($radiology_categories);
-            window._tarifRadiologi = @json($radiology_tarifs);
+            window._kategoriLaboratorium = @json($laboratorium_categories);
+            window._tarifLaboratorium = @json($laboratorium_tarifs);
             window._registration = @json($registration);
             window._groupPenjaminId = @json($groupPenjaminId);
             window._kelasRawats = @json($kelas_rawats);
         </script>
-        <script src="{{ asset('js/simrs/form-radiologi.js') }}?v={{ time() }}"></script>
+        <script src="{{ asset('js/simrs/form-laboratorium.js') }}?v={{ time() }}"></script>
     @endsection

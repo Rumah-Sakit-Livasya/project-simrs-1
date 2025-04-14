@@ -120,7 +120,7 @@
                                 <div class="form-group">
                                     <label for="sub_parameter">Sub Parameter
                                     </label>
-                                    <select class="form-control select2 w-100" id="sub_parameter"
+                                    <select class="select2 form-control w-100" id="sub_parameter"
                                         name="sub_parameter[]" multiple="multiple">
                                         @foreach ($parameter as $p)
                                             @if (!$p->is_order && $p->is_hasil)
