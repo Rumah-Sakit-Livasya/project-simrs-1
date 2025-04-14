@@ -88,7 +88,7 @@ class KepustakaanController extends Controller
         $file = Kepustakaan::where('id', $id)->firstOrFail();
 
         $path = $file->file;
-        
+
         // dd($path);
         if (!Storage::disk('private')->exists($path)) {
             abort(404, 'File not found');
@@ -110,6 +110,7 @@ class KepustakaanController extends Controller
         ]);
 
         $organization = Organization::where('id', $request->organization_id)->first();
+        return dd($organization->name);
 
         if (request()->hasFile('file')) {
             $file = request()->file('file');
@@ -151,7 +152,7 @@ class KepustakaanController extends Controller
             $id = Crypt::decrypt($encryptedId);
             $file = Kepustakaan::where('id', $id)->firstOrFail();
 
-            if($request->has('parent_id')) {
+            if ($request->has('parent_id')) {
                 $file->parent_id = $request->parent_id;
             } else {
                 $file->name = $request->name;
