@@ -12,6 +12,7 @@ use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\ShiftController;
 use App\Http\Controllers\API\BankEmployeeController;
 use App\Http\Controllers\API\DayOffRequestController;
+use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\API\KPIController;
 use App\Http\Controllers\API\StructureController;
 use App\Http\Controllers\API\UserController;
@@ -41,6 +42,7 @@ use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\AttendanceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\EmployeeLeaveController;
 
 /*
 |--------------------------------------------------------------------------
@@ -353,5 +355,10 @@ Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContra
 
 // Keuangan
 Route::get('get-kategori/{jenis}', [CategoryController::class, 'getKategori']);
+
+Route::apiResource('events', EventController::class);
+Route::get('/employee-birthdays', [EventController::class, 'getEmployeeBirthdays']);
+
+Route::get('/employee-leaves/{id}', [AttendanceController::class, 'getDayOffs']);
 
 require __DIR__ . '/api-simrs.php';

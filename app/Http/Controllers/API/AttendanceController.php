@@ -13,6 +13,7 @@ use App\Models\Shift;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -1048,5 +1049,30 @@ class AttendanceController extends Controller
         }
 
         return response()->json(['success' => true, 'data' => $attendance, 'nama' => $employeeName], 200);
+    }
+
+    public function getDayOffs($id)
+    {
+        // Ambil data attendance dengan is_day_off = 1 untuk pegawai tertentu
+        $attendances = Attendance::with(['employees', 'shift', 'attendance_code'])
+            ->where('is_day_off', 1)
+            ->where('employee_id', $id)
+            ->get();
+
+        // Format data untuk FullCalendar
+        $events = $attendances->map(function ($attendance) {
+            $attendanceCode = $attendance->attendance_code;
+            $shift = $attendance->shift;
+            $code = $attendanceCode ? $attendanceCode->description : '';
+            $shiftName = $shift ? ucfirst($shift->name) : '';
+            return [
+                'id'    => $attendance->id,
+                'title' => $shiftName . ($code ? ' (' . $code . ')' : ($shiftName ? '' : 'Absensi')),
+                'start' => $attendance->date,
+                'color' => ($code === 'Cuti' ? '#dc3545' : ($code ? '#3498db' : '')),
+            ];
+        });
+
+        return response()->json($events);
     }
 }
