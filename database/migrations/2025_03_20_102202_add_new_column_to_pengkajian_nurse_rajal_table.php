@@ -13,35 +13,35 @@ return new class extends Migration
     {
         Schema::table('pengkajian_nurse_rajal', function (Blueprint $table) {
             // Cek dan hapus kolom kondisi_khusus1 hingga kondisi_khusus8
-            for ($i = 1; $i <= 8; $i++) {
-                if (Schema::hasColumn('pengkajian_nurse_rajal', "kondisi_khusus$i")) {
-                    $table->dropColumn("kondisi_khusus$i");
-                }
-            }
+            // for ($i = 1; $i <= 8; $i++) {
+            //     if (Schema::hasColumn('pengkajian_nurse_rajal', "kondisi_khusus$i")) {
+            //         $table->dropColumn("kondisi_khusus$i");
+            //     }
+            // }
 
             // Cek dan hapus kolom imunisasi_dasar1 hingga imunisasi_dasar5
-            for ($i = 1; $i <= 5; $i++) {
-                if (Schema::hasColumn('pengkajian_nurse_rajal', "imunisasi_dasar$i")) {
-                    $table->dropColumn("imunisasi_dasar$i");
-                }
-            }
+            // for ($i = 1; $i <= 5; $i++) {
+            //     if (Schema::hasColumn('pengkajian_nurse_rajal', "imunisasi_dasar$i")) {
+            //         $table->dropColumn("imunisasi_dasar$i");
+            //     }
+            // }
 
             // Cek dan hapus kolom resiko_jatuh1 hingga resiko_jatuh3
-            for ($i = 1; $i <= 3; $i++) {
-                if (Schema::hasColumn('pengkajian_nurse_rajal', "resiko_jatuh$i")) {
-                    $table->dropColumn("resiko_jatuh$i");
-                }
-            }
+            // for ($i = 1; $i <= 3; $i++) {
+            //     if (Schema::hasColumn('pengkajian_nurse_rajal', "resiko_jatuh$i")) {
+            //         $table->dropColumn("resiko_jatuh$i");
+            //     }
+            // }
 
             // Tambahkan kolom baru
-            $table->json('kondisi_khusus')->nullable();
-            $table->json('imunisasi_dasar')->nullable();
-            $table->json('resiko_jatuh')->nullable();
+            // $table->json('kondisi_khusus')->nullable();
+            // $table->json('imunisasi_dasar')->nullable();
+            // $table->json('resiko_jatuh')->nullable();
 
-            $table->string('lingkar_kepala', 20)->nullable()->after('sp02');
-            $table->string('ket_alergi_obat', 20)->nullable()->after('alergi_obat');
-            $table->string('ket_alergi_makanan', 20)->nullable()->after('alergi_makanan');
-            $table->string('ket_alergi_lainnya', 20)->nullable()->after('alergi_lainnya');
+            // $table->string('lingkar_kepala', 20)->nullable()->after('sp02');
+            // $table->string('ket_alergi_obat', 20)->nullable()->after('alergi_obat');
+            // $table->string('ket_alergi_makanan', 20)->nullable()->after('alergi_makanan');
+            // $table->string('ket_alergi_lainnya', 20)->nullable()->after('alergi_lainnya');
 
             $table->string('hasil_resiko_jatuh')->nullable()->after('resiko_jatuh');
             $table->string('status_psikologis')->nullable()->after('hasil_resiko_jatuh');
@@ -63,10 +63,10 @@ return new class extends Migration
             $table->string('kognitif')->nullable()->after('sensorik');
             $table->json('motorik')->nullable()->after('kognitif');
 
-            $table->unsignedBigInteger('created_by');
-            $table->foreign('created_by')->references('id')->on('users');
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->unsignedBigInteger('modified_by')->nullable();
-            $table->foreign('modified_by')->references('id')->on('users');
+            $table->foreign('modified_by')->references('id')->on('users')->onDelete('set null');
         });
     }
 
@@ -74,33 +74,33 @@ return new class extends Migration
     {
         Schema::table('pengkajian_nurse_rajal', function (Blueprint $table) {
             // Tambahkan kembali kolom kondisi_khusus1 hingga kondisi_khusus8
-            for ($i = 1; $i <= 8; $i++) {
-                if (!Schema::hasColumn('pengkajian_nurse_rajal', "kondisi_khusus$i")) {
-                    $table->string("kondisi_khusus$i")->nullable();
-                }
-            }
+            // for ($i = 1; $i <= 8; $i++) {
+            //     if (!Schema::hasColumn('pengkajian_nurse_rajal', "kondisi_khusus$i")) {
+            //         $table->string("kondisi_khusus$i")->nullable();
+            //     }
+            // }
 
             // Tambahkan kembali kolom imunisasi_dasar1 hingga imunisasi_dasar5
-            for ($i = 1; $i <= 5; $i++) {
-                if (!Schema::hasColumn('pengkajian_nurse_rajal', "imunisasi_dasar$i")) {
-                    $table->string("imunisasi_dasar$i")->nullable();
-                }
-            }
+            // for ($i = 1; $i <= 5; $i++) {
+            //     if (!Schema::hasColumn('pengkajian_nurse_rajal', "imunisasi_dasar$i")) {
+            //         $table->string("imunisasi_dasar$i")->nullable();
+            //     }
+            // }
 
             // Tambahkan kembali kolom resiko_jatuh1 hingga resiko_jatuh3
-            for ($i = 1; $i <= 3; $i++) {
-                if (!Schema::hasColumn('pengkajian_nurse_rajal', "resiko_jatuh$i")) {
-                    $table->string("resiko_jatuh$i")->nullable();
-                }
-            }
+            // for ($i = 1; $i <= 3; $i++) {
+            //     if (!Schema::hasColumn('pengkajian_nurse_rajal', "resiko_jatuh$i")) {
+            //         $table->string("resiko_jatuh$i")->nullable();
+            //     }
+            // }
 
             // Hapus kolom baru yang ditambahkan
-            $table->dropColumn('kondisi_khusus');
-            $table->dropColumn('imunisasi_dasar');
-            $table->dropColumn('resiko_jatuh');
+            // $table->dropColumn('kondisi_khusus');
+            // $table->dropColumn('imunisasi_dasar');
+            // $table->dropColumn('resiko_jatuh');
 
-            $table->dropColumn('lingkar_kepala');
-            $table->dropColumn('ket_alergi_obat');
+            // $table->dropColumn('lingkar_kepala');
+            // $table->dropColumn('ket_alergi_obat');
             $table->dropColumn('ket_alergi_makanan');
             $table->dropColumn('ket_alergi_lainnya');
 

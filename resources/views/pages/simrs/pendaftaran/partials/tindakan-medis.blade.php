@@ -318,13 +318,11 @@
                             // Reset form
                             $('#store-form')[0].reset();
                             $('#store-form select').val(null).trigger('change');
-                            $('#modal-tambah-tindakan').modal('hide');
                             showSuccessAlert('Tindakan medis berhasil ditambahkan!');
-                        } else {
                             $('#modal-tambah-tindakan').modal('hide');
+                        } else {
                             showErrorAlertNoRefresh('Gagal menambahkan tindakan medis: ' +
-                                response
-                                .message);
+                                response.message);
                         }
                     },
                     error: function(xhr) {

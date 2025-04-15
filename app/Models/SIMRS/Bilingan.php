@@ -12,7 +12,7 @@ class Bilingan extends Model implements AuditableContract
 {
     use HasFactory, SoftDeletes, Auditable;
 
-    protected $fillable = ['registration_id', 'status', 'is_paid', 'wajib_bayar'];
+    protected $guarded = ['id'];
     protected $table = 'bilingan';
 
     public function registration()

@@ -367,12 +367,6 @@ class RegistrationController extends Controller
                 $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $request->penjamin_id)
                     ->where('tarif_registrasi_id', 1)
                     ->first()->harga;
-                // Get registration fees associated with this department
-                // $registrationFees = $department->tarif_registrasi()
-                //     ->with(['harga_tarif' => function ($query) use ($request) {
-                //         $query->where('group_penjamin_id', $request->penjamin_id);
-                //     }])
-                //     ->get();
 
                 // Add registration fee to billing details
                 $tagihanPasien = TagihanPasien::create([
@@ -387,13 +381,14 @@ class RegistrationController extends Controller
                     'harga' => $hargaTarifAdmin,
                     'total' => $hargaTarifAdmin
                 ]);
+
+                BilinganTagihanPasien::create([
+                    'tagihan_pasien_id' => $tagihanPasien->id,
+                    'bilingan_id' => $billing->id,
+                ]);
             }
 
             // Simpan relasi bilingan-tagihan pasien
-            BilinganTagihanPasien::create([
-                'tagihan_pasien_id' => $tagihanPasien->id,
-                'bilingan_id' => $billing->id,
-            ]);
 
             return redirect("/daftar-registrasi-pasien/$registration->id")
                 ->with('success', 'Registrasi berhasil ditambahkan!');

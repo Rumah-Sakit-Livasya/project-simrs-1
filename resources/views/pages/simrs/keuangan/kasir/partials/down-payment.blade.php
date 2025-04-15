@@ -162,11 +162,13 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
-                        alert('Down payment saved successfully.');
+                        showSuccessAlert('Down payment saved successfully.');
+                        $('#DownPaymentTable').DataTable().ajax.reload();
                         // Optionally update the Total DP field and refresh the DataTable if needed.
                     },
                     error: function(xhr) {
-                        alert('Error saving down payment.');
+                        showErrorAlert('Error saving down payment.');
+                        $('#DownPaymentTable').DataTable().ajax.reload();
                     }
                 });
             });

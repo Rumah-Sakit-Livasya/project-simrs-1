@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 
 <head>
@@ -9,28 +8,28 @@
     <meta name="msapplication-TileColor" content="#00bcd4">
     <title>@medic Information System</title>
 
-    <link type="text/css" rel="stylesheet" href="http://192.168.1.253/testing/include/styles/ma/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="http://192.168.1.253/real/include/styles/ma/bootstrap.css">
     <link type="text/css" rel="stylesheet"
-        href="http://192.168.1.253/testing/include/js/jqgrid5/css/ui.jqgrid-bootstrap.css">
-    <link rel="stylesheet" href="http://192.168.1.253/testing/include/js/jqwidgets3.6/jqwidgets/styles/jqx.base.css"
+        href="http://192.168.1.253/real/include/js/jqgrid5/css/ui.jqgrid-bootstrap.css">
+    <link rel="stylesheet" href="http://192.168.1.253/real/include/js/jqwidgets3.6/jqwidgets/styles/jqx.base.css"
         type="text/css">
-    <link type="text/css" rel="stylesheet" href="http://192.168.1.253/testing/include/styles/ma/materialadmin.css">
-    <link href="http://192.168.1.253/testing/include/font/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="http://192.168.1.253/testing/include/styles/ma/materialdesignicons.min.css" media="all"
-        rel="stylesheet" type="text/css">
+    <link type="text/css" rel="stylesheet" href="http://192.168.1.253/real/include/styles/ma/materialadmin.css">
+    <link href="http://192.168.1.253/real/include/font/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="http://192.168.1.253/real/include/styles/ma/materialdesignicons.min.css" media="all" rel="stylesheet"
+        type="text/css">
     <link type="text/css" rel="stylesheet"
-        href="http://192.168.1.253/testing/include/styles/ma/plugins/node-waves/waves.min.css">
+        href="http://192.168.1.253/real/include/styles/ma/plugins/node-waves/waves.min.css">
     <link
-        href="http://192.168.1.253/testing/include/styles/ma/plugins/bootstrap-datepicker/bootstrap-datetimepicker.min.css"
+        href="http://192.168.1.253/real/include/styles/ma/plugins/bootstrap-datepicker/bootstrap-datetimepicker.min.css"
         rel="stylesheet">
     <link type="text/css" rel="stylesheet"
-        href="http://192.168.1.253/testing/include/styles/ma/plugins/select2/select2.css">
+        href="http://192.168.1.253/real/include/styles/ma/plugins/select2/select2.css">
     <link type="text/css" rel="stylesheet"
-        href="http://192.168.1.253/testing/include/styles/ma/plugins/perfect-scrollbar-1.5.5/perfect-scrollbar.css">
+        href="http://192.168.1.253/real/include/styles/ma/plugins/perfect-scrollbar-1.5.5/perfect-scrollbar.css">
     <link type="text/css" rel="stylesheet"
-        href="http://192.168.1.253/testing/include/styles/ma/plugins/bootstrap-tagsinput/bootstrap-tagsinput.css">
-    <script type="text/javascript"
-        src="http://192.168.1.253/testing/include/styles/ma/plugins/swal2/sweetalert2.all.min.js?2"></script>
+        href="http://192.168.1.253/real/include/styles/ma/plugins/bootstrap-tagsinput/bootstrap-tagsinput.css">
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/swal2/sweetalert2.all.min.js?2">
+    </script>
     <style>
         .swal2-popup.swal2-toast {
             box-sizing: border-box;
@@ -1732,47 +1731,57 @@
             left: auto
         }
     </style>
-    <link type="text/css" rel="stylesheet" href="http://192.168.1.253/testing/include/styles/ma/custom_style.css?7">
+    <link type="text/css" rel="stylesheet" href="http://192.168.1.253/real/include/styles/ma/custom_style.css?7">
 
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/js/jquery-2.2.4.min.js"></script>
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/styles/ma/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/js/jquery-2.2.4.min.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/js/bootstrap.min.js"></script>
 
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/js/jqgrid5/js/i18n/grid.locale-id.js"></script>
-    <script src="http://192.168.1.253/testing/include/js/jqgrid5/js/jquery.jqGrid.min.js?v2"></script>
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/js/jqwidgets3.6/jqwidgets/jqxcore.js"></script>
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/js/jqwidgets3.6/jqwidgets/jqx-all.js"></script>
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/styles/ma/plugins/node-waves/waves.min.js">
+    <script type="text/javascript" src="http://192.168.1.253/real/include/js/jqgrid5/js/i18n/grid.locale-id.js"></script>
+    <script src="http://192.168.1.253/real/include/js/jqgrid5/js/jquery.jqGrid.min.js?v2"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/js/jqwidgets3.6/jqwidgets/jqxcore.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/js/jqwidgets3.6/jqwidgets/jqx-all.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/node-waves/waves.min.js">
     </script>
     <script type="text/javascript"
-        src="http://192.168.1.253/testing/include/styles/ma/plugins/bootstrap-datepicker/moment.min.js"></script>
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/styles/ma/plugins/bootstrap-datepicker/id.js">
+        src="http://192.168.1.253/real/include/styles/ma/plugins/bootstrap-datepicker/moment.min.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/bootstrap-datepicker/id.js">
     </script>
     <script type="text/javascript"
-        src="http://192.168.1.253/testing/include/styles/ma/plugins/bootstrap-datepicker/bootstrap-datetimepicker.min.js">
+        src="http://192.168.1.253/real/include/styles/ma/plugins/bootstrap-datepicker/bootstrap-datetimepicker.min.js">
     </script>
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/styles/ma/plugins/select2/select2.full.min.js">
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/select2/select2.full.min.js">
     </script>
     <script type="text/javascript"
-        src="http://192.168.1.253/testing/include/styles/ma/plugins/perfect-scrollbar-1.5.5/perfect-scrollbar.min.js">
-    </script>
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/styles/ma/plugins/spin.js/spin.min.js">
-    </script>
+        src="http://192.168.1.253/real/include/styles/ma/plugins/perfect-scrollbar-1.5.5/perfect-scrollbar.min.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/spin.js/spin.min.js"></script>
     <style type="text/css"></style>
     <script type="text/javascript"
-        src="http://192.168.1.253/testing/include/styles/ma/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js">
+        src="http://192.168.1.253/real/include/styles/ma/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/toastr/toastr.min.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/bootbox.min.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/styles/ma/plugins/jquery.inputmask.bundle.min.js">
     </script>
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/styles/ma/plugins/toastr/toastr.min.js">
-    </script>
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/styles/ma/plugins/bootbox.min.js"></script>
-    <script type="text/javascript"
-        src="http://192.168.1.253/testing/include/styles/ma/plugins/jquery.inputmask.bundle.min.js"></script>
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/js/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="http://192.168.1.253/testing/include/js/standard_lib.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="http://192.168.1.253/real/include/js/standard_lib.js"></script>
     <script type="text/javascript">
         function base_url() {
-            return 'http://192.168.1.253/testing/';
+            return 'http://192.168.1.253/real/';
         }
     </script>
+    <style type="text/css">
+        @font-face {
+            font-family: 'Atlassian Sans';
+            font-style: normal;
+            font-weight: 400 653;
+            font-display: swap;
+            src:
+                local('AtlassianSans'),
+                local('Atlassian Sans Text'),
+                url('chrome-extension://liecbddmkiiihnedobmlmillhodjkdmb/fonts/AtlassianSans-latin.woff2') format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+                U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+    </style>
 </head>
 
 <body class="loaded">
@@ -1795,412 +1804,163 @@
                 </div>
                 <div class="modal-body" id="bodycx2"></div>
             </div>
+
         </div>
     </div>
     <div class="container-fluid">
         <style>
-            .print_function {
-                margin: 0;
+            .print h1 div {
+                color: #000;
+                font-size: .7em;
+                font-weight: bold;
+                border: 1px solid #000;
+                padding: 0 0 0 5px;
+                background: #eee;
+                margin-top: -7px;
             }
 
-            .print {
-                font-size: 1.1em;
-                letter-spacing: 7px;
+            .print h1 div span {
+                font-size: .7em;
+                font-weight: normal;
+                border-left: 1px solid #000;
+                display: inline-block;
+                background: #fff;
+                padding: 5px;
+                margin-left: 5px;
+            }
 
-                .print .kop {
-                    overflow: hidden;
-                    line-height: 1em;
-                }
+            .print table {
+                border-collapse: collapse;
+            }
 
-                .print .kop .hif {
-                    padding: 10px;
-                    padding-top: 0;
-                    font-family: Arial;
-                }
+            .print table td {
+                padding: 10px;
+                font-size: .8em;
+            }
 
-                .print .kop .lbr {
-                    float: right;
-                    font-family: Arial;
-                    font-size: .5em;
-                    margin: 5px 0;
-                }
+            textarea {
+                border: none;
+            }
 
-                .print .kop img {
-                    max-width: 100px;
-                    float: left;
-                    margin-right: 10px;
-                }
+            #pembayar {
+                border: none;
+                font-weight: bold;
+                font-size: 1em;
+                color: #333;
+            }
 
-                .print .kop span {
-                    display: block;
-                }
+            .print .kop {
+                overflow: hidden;
+                line-height: 1em;
+            }
 
-                .print .kop span.tit {
-                    font-size: .7em;
-                    letter-spacing: 1px;
-                }
+            .print .kop .hif {
+                padding: 10px;
+                padding-top: 6px;
+                font-family: Arial;
+            }
 
-                .print .kop span.hnm {
-                    font-size: 1em;
-                    letter-spacing: 1px;
-                }
+            .print .kop .lbr {
+                float: right;
+                font-family: Arial;
+                font-size: .8em;
+                margin: 5px 0;
+            }
 
-                .print .kop span.addr {
-                    font-size: .6em;
-                    line-height: 1em;
-                    margin-left: 20px;
-                }
+            .print .kop img {
+                max-width: 100px;
+                float: left;
+                margin-right: 10px;
+            }
 
-                .print h1 {
-                    font-family: Arial;
-                    font-size: 0.8em;
-                    border-bottom: 3px double #000;
-                    margin-top: 0;
-                    padding: 5px 0;
-                }
+            .print .kop span {
+                display: block;
+            }
 
-                .print h1 span {
-                    font-size: .5em;
-                }
+            .print .kop span.tit {
+                font-size: .7em;
+                letter-spacing: 1px;
+            }
 
-                .print h1 div {
-                    color: #000;
-                    font-size: .6em;
-                    font-weight: bold;
-                    border: 1px solid #000;
-                    padding: 0 0 0 5px;
-                    background: #eee;
-                    margin-top: -7px;
-                    float: right;
-                }
+            .print .kop span.hnm {
+                font-size: 1.2em;
+                letter-spacing: 2px;
+            }
 
-                .print h1 div span {
-                    font-size: 1em;
-                    font-weight: normal;
-                    border-left: 1px solid #000;
-                    display: inline-block;
-                    background: #fff;
-                    padding: 5px;
-                    margin-left: 5px;
-                }
+            .print .kop span.addr {
+                font-size: .8em;
+                line-height: 2em;
+                margin-left: 20px;
+            }
 
-                .print .pat {
-                    font-family: Arial, sans-serif;
-                    font-size: 1em;
-                }
-
-                .print .pat span {
-                    display: block;
-                    font-size: .6em;
-                    padding-bottom: 10px;
-                    margin-bottom: 5px;
-                    border-bottom: 1px solid #ccc;
-                    text-transform: uppercase;
-                }
-
-                .print .pat span.kls {
-                    font-size: .6em;
-                    border-bottom: none;
-                    padding: 5px 0;
-                    color: #666;
-                }
-
-                .print .pat .mrn {
-                    font-size: .6em;
-                    float: right;
-                    text-align: right;
-                    text-transform: uppercase;
-                }
-
-                .print .pat .mrn span {
-                    font-size: 1.8em;
-                    border-bottom: none;
-                    padding-top: 15px;
-                }
-
-                .print .cleared td {
-                    padding: 2px;
-                }
-
-                .print table {
-                    border-collapse: collapse;
-                }
-
-                .label {
-                    border-bottom: none !important;
-                }
-
-                .print #list thead {
-                    border-top: 3px double #000 !important;
-                    border-bottom: 3px double #000 !important;
-                }
-
-                .print #list tr {}
-
-                .print #list th {
-                    padding: 4px;
-                    background: #eee;
-                    color: #000;
-                    font-size: 0.6em;
-                }
-
-                .print #list td {
-                    padding: 2px;
-                    font-size: 0.6em;
-                }
-
-                .print #list td span {
-                    font-size: 1em;
-                }
-
-                body {
-                    background: #fff;
-                }
+            body {
+                background: #fff;
+            }
         </style>
-        <script type="text/javascript">
-            function printPage() {
-                document.getElementById('divButtons').style.display = 'none';
-                window.print();
-                document.getElementById('divButtons').style.display = '';
-                return false;
-            }
-
-            function show_setting() {
-                if (document.getElementById('id_show').value == 'n') {
-                    document.getElementById('id_show').value = 'y';
-                    document.getElementById('dsetting').style.display = '';
-                } else {
-                    document.getElementById('id_show').value = 'n';
-                    document.getElementById('dsetting').style.display = 'none';
-                }
-            }
-        </script>
-        <div class="print_function" id="divButtons">
-            <input type="button" value="Print" onclick="printPage();">
-            <input type="button" value="Close" onclick="JavaScript:window.close();">
-            <input name="id_show" id="id_show" type="hidden" value="n">
-            <input id="bsetting" name="bsetting" type="button" value="Show/Hide Settings" onclick="show_setting();">
-        </div>
-        <div class="setfloat" id="dsetting" style="display:none;">
-            <form style="width:30%;" class="cxform" id="frm" name="frm" method="post">
-                @csrf
-                <div class="tableTitle frm">Print Settings</div>
-                <table width="100%">
-                    <tbody>
-                        <tr>
-                            <td class="label">Rekap OK</td>
-                            <td>
-                                <input name="rekap_ok" type="radio" value="yes" checked="checked"> Ya
-                                <input name="rekap_ok" type="radio" value="no"> Tidak
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">Rekap VK</td>
-                            <td>
-                                <input name="rekap_vk" type="radio" value="yes" checked="checked"> Ya
-                                <input name="rekap_vk" type="radio" value="no"> Tidak
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">Rekap ALL</td>
-                            <td>
-                                <input name="rekap_all" type="radio" value="yes"> Ya
-                                <input name="rekap_all" type="radio" value="no" checked="checked"> Tidak
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <input name="submit" type="submit" value="Reload">
-            </form>
-        </div>
         <div class="print">
+            <div id="divButtons" class="print_function">
+                <input type="button" onclick="printPage();" value="Print">
+                <input type="button" onclick="JavaScript:window.close();" value="Close">
+            </div>
+
             <div class="kop">
+                <img src="http://192.168.1.253/real/include/images/logocx.png" style="width:60px; height:60px;">
                 <div class="hif">
-                    <span class="hnm" style="letter-spacing:8px"><strong>Rumah Sakit Livasya</strong></span>
-                    <span class="addr"><br>Kab. Majalengka Jawa Barat - Indonesia <br>Telepon: 081211151300</span>
+                    <span class="hnm"><strong>Rumah Sakit Livasya</strong></span>
+                    <span class="addr">Kab. Majalengka Jawa Barat - Indonesia <br>Telepon: 081211151300</span>
                 </div>
             </div>
-            <h1>
-                <div>
-                    INV NUMBER
-                    <span><strong>{{ $bilingan->invoice_number }}</strong></span>
+
+            <h1 style="margin:auto;text-align:center; text-decoration: underline;">
+                KWITANSI
+                <div style="float:right;">
+                    No.
+                    <span>250011764</span>
                 </div>
-                {{ $bilingan->registration_type == 'rawat-jalan' ? 'INVOICE RAWAT JALAN' : 'INVOICE PEMBAYARAN' }}
-                <input name="vprint" id="vprint" type="text" align="right" value="(ASLI)"
-                    style="border:none;font-size: 1em" size="6">
             </h1>
-            <table width="100%" class="cleared" style="margin-top: 0px; font-size: 0.8em;">
+            <table width="100%" class="table">
                 <tbody>
                     <tr>
-                        <td width="17%"><strong>Tanggal Reg</strong></td>
-                        <td width="27%">: {{ \Carbon\Carbon::parse($bilingan->registration_date)->format('d M Y') }}
-                        </td>
-                        <td width="18%"><strong>Nama Pasien</strong></td>
-                        <td width="38%">: {{ $bilingan->registration->patient->name }}</td>
+                        <td>Sudah Terima Dari</td>
+                        <td><input type="text" name="pembayar" id="pembayar"
+                                value="{{ $bilingan->registration->patient->name }}" style="width:100%"></td>
                     </tr>
                     <tr>
-                        <td><strong>Tanggal Keluar</strong></td>
-                        <td>: {{ \Carbon\Carbon::parse($bilingan->discharge_date)->format('d M Y') }}</td>
-                        <td><strong>No. RM/No. Registrasi</strong></td>
-                        <td>: {{ $bilingan->registration->patient->medical_record_number }} /
-                            {{ $bilingan->registration->registration_number }}</td>
+                        <td>Nama Pasien</td>
+                        <td><strong>{{ $bilingan->registration->patient->name }}</strong></td>
                     </tr>
                     <tr>
-                        <td><strong>Penjamin</strong></td>
-                        <td>: {{ $bilingan->registration->penjamin->nama_perusahaan }}</td>
-                        <td><strong>Dokter Penanggung Jawab</strong></td>
-                        <td>: {{ $bilingan->registration->doctor->employee->fullname }}</td>
+                        <td>Nominal *</td>
+                        <td><strong>{{ rp($bilingan->wajib_bayar) }}</strong></td>
                     </tr>
                     <tr>
-                        <td><strong>{{ $bilingan->registration->registration_type === 'rawat-jalan' ? 'KLINIK' : 'KELAS' }}</strong>
-                        </td>
-                        <td>:
-                            {{ $bilingan->registration->registration_type === 'rawat-jalan' ? $bilingan->registration->departement->name : $bilingan->registration->kelas_rawat->kelas }}
-                        </td>
-                        </td>
-                        <td><strong></strong></td>
-                        <td></td>
+                        <td>Terbilang</td>
+                        <td><strong style="text-transform: uppercase;"> {{ terbilangRp($bilingan->wajib_bayar) }}
+                            </strong></td>
                     </tr>
-                </tbody>
-            </table>
-            <table width="100%" id="list" style="margin-top: 10px;">
-                <thead>
                     <tr>
-                        <th colspan="4">KETERANGAN</th>
-                        <th width="10%">JML</th>
-                        <th width="15%" align="center">HARGA</th>
-                        <th width="15%" align="right">SUBTOTAL</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($bilingan->tagihan_pasien as $item)
-                        <tr style="font-size:1.3em; font-weight: bold;">
-                            @if (strpos($item->tagihan, 'Biaya Administrasi') !== false)
-                                <td colspan="6">&nbsp;&nbsp;Administrasi</td>
-                            @elseif (strpos($item->tagihan, 'Tindakan Medis') !== false)
-                                <td colspan="6">&nbsp;&nbsp;Biaya Tindakan Medis</td>
-                            @else
-                                <td colspan="6">&nbsp;&nbsp;{{ $item->tagihan }}</td>
-                            @endif
-                            <td align="right"><a style="display:none"></a></td>
-                            </td>
-                        </tr>
-                        <tr font-size:1.3em;">
-                            <td colspan="4">
-                                <span style="display: block;"> &nbsp; &nbsp;{{ $item->tagihan }}</span>
-                            </td>
-                            <td align="center" style="letter-spacing: 2px;">{{ $item->quantity }}</td>
-                            <td align="right" style="letter-spacing: 2px;">
-                                {{ number_format($item->nominal_awal, 0, ',', '.') }}</td>
-                            <td align="right" style="letter-spacing: 2px;">
-                                {{ number_format($item->nominal, 0, ',', '.') }}</td>
-                        </tr>
-                        <tr style="font-size:1.2em; font-weight: bold; text-align:right;">
-                            <td colspan="6">Subtotal</td>
-                            <td style="letter-spacing: 2px;">{{ number_format($item->nominal, 0, ',', '.') }}
-                            </td>
-                        </tr>
-                    @endforeach
-                    <tr style="border-top: 3px double #000;">
-                        <td colspan="8" style="padding:1px;"></td>
-                    </tr>
-                    <tr style="font-size:1.2em; font-weight: bold; letter-spacing: 4px;">
-                        <td colspan="4">&nbsp;</td>
-                        <td colspan="2" style="letter-spacing: 2px;">Total Tagihan :</td>
-                        <td align="right" style="letter-spacing: 2px;">
-                            {{ number_format($bilingan->wajib_bayar, 0, ',', '.') }}</td>
-                    </tr>
-                    <tr style="font-size:1.2em; font-weight: bold; letter-spacing: 4px;">
-                        <td colspan="4">&nbsp;</td>
-                        <td colspan="2">Deposit :</td>
+                        <td valign="top">Untuk Pembayaran</td>
                         <td>
-                        </td>
-                    </tr>
-                    @foreach ($bilingan->down_payment as $deposit)
-                        <tr style="text-align: right; font-size: 1.2em; letter-spacing: 4px;">
-                            <td colspan="4">&nbsp;</td>
-                            <td style="text-align: left;" colspan="2">
-                                <span
-                                    style="font-size: 0.9em;">&nbsp;&nbsp;&nbsp;&nbsp;[{{ \Carbon\Carbon::parse($deposit->created_at)->format('d M Y H:i') }}]</span>
-                                {{ $deposit->metode_pembayaran }}
-                            </td>
-                            <td style="font-weight: bold;">
-                                {{ number_format($deposit->nominal, 0, ',', '.') }}
-                            </td>
-                        </tr>
-                    @endforeach
-                    <tr style="font-size:1.2em; font-weight: bold; letter-spacing: 4px;">
-                        <td colspan="4">&nbsp;</td>
-                        <td colspan="2">Pembayaran :</td>
-                        <td></td>
-                    </tr>
-                    <tr style="text-align: right; font-size: 1.2em; letter-spacing: 4px;">
-                        <td colspan="4">&nbsp;</td>
-                        <td style="text-align: left;" colspan="2">
-                            <span
-                                style="font-size: 0.9em;">&nbsp;&nbsp;&nbsp;&nbsp;[{{ \Carbon\Carbon::parse($bilingan->pembayaran_tagihan->created_at)->format('d M Y H:i') }}]</span>
-                            Tunai
-                            {{-- {{ $bilingan->pembayaran_tagihan->metode_pembayaran }} --}}
-                        </td>
-                        <td style="font-weight: bold;">
-                            {{ number_format($bilingan->pembayaran_tagihan->jumlah_terbayar, 0, ',', '.') }}
-                        </td>
-                    </tr>
-                    <tr style="text-align: right; font-size: 1.2em; letter-spacing: 4px;">
-                        <td colspan="4">&nbsp;</td>
-                        <td style="text-align: left;" colspan="2">
-                            @if ($bilingan->down_payment->isNotEmpty())
-                                <span
-                                    style="font-size: 0.9em;">&nbsp;&nbsp;&nbsp;&nbsp;[{{ \Carbon\Carbon::parse($bilingan->down_payment->first()->created_at)->format('d M Y H:i') }}]</span>
-                                Dengan DP
-                                {{-- {{ $bilingan->down_payment->first()->metode_pembayaran }} --}}
-                            @endif
-                        </td>
-                        <td style="font-weight: bold;">
-                            {{ number_format($bilingan->down_payment ? ($bilingan->down_payment->isNotEmpty() ? $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') : 0) : 0, 0, ',', '.') }}
-                        </td>
-                    </tr>
-                    <tr style="font-size:1.2em; font-weight: bold; letter-spacing: 4px;">
-                        <td colspan="4">&nbsp;</td>
-                        <td colspan="2">Sisa Tagihan :</td>
-                        <td align="right">{{ number_format($bilingan->sisa_tagihan, 0, ',', '.') }}</td>
-                    </tr>
-                    <tr style="font-size:1.2em; font-weight: bold; letter-spacing: 4px;">
-                        <td colspan="4">&nbsp;</td>
-                        <td colspan="2">Kembalian :</td>
-                        <td align="right">{{ number_format($bilingan->pembayaran_tagihan->kembalian, 0, ',', '.') }}
+                            <textarea name="ket" id="ket2" cols="45" rows="5" style="width:100%;"
+                                onchange="document.getElementById('ket').value = document.getElementById('ket2').value;">{{ $bilingan->keterangan }}</textarea>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="7"></td>
-                    </tr>
-                    <tr style="border-top: 3px double #000; font-size: 1em;">
-                        <td colspan="7" style="font-style: italic;">Dicetak Oleh :
-                            {{ auth()->user()->employee->fullname }},
-                            {{ \Carbon\Carbon::parse($bilingan->printed_at)->format('d M Y H:i') }}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="7">
-                            <table width="100%" style="font-size: 1em;">
+                        <td colspan="2" valign="top">
+                            <table width="100%" style=" border:none;">
                                 <tbody>
                                     <tr>
-                                        <td align="center">
-                                            {{ $bilingan->location }},
-                                            {{ \Carbon\Carbon::parse($bilingan->location_date)->format('d M Y') }}
+                                        <td align="center" width="70%">&nbsp;</td>
+                                        <td align="center" style="font-size: 12px;">
+                                            Kab. Majalengka,
+                                            <input type="text" value="{{ \Carbon\Carbon::now()->format('d M Y') }}"
+                                                style="border: none; font-size: 12px;">
                                             <span style="display: block; height: 40px;"></span>
-                                            <span style="white-space: nowrap!important">
+                                            <span style="white-space:   nowrap!important">
                                                 <div>({{ auth()->user()->employee->fullname }})</div>
                                             </span>
                                             <div>PETUGAS</div>
-                                        </td>
-                                        <td align="center">
-                                            {{ $bilingan->location }},
-                                            {{ \Carbon\Carbon::parse($bilingan->location_date)->format('d M Y') }}
-                                            <span style="display: block; height: 40px;"></span>
-                                            <span style="white-space: nowrap!important">
-                                                <div>({{ $bilingan->registration->patient->name }})</div>
-                                            </span>
-                                            <div>PASIEN</div>
+
                                         </td>
                                     </tr>
                                 </tbody>
@@ -2210,8 +1970,19 @@
                 </tbody>
             </table>
         </div>
+        <script type="text/javascript">
+            function printPage() {
+                document.getElementById('divButtons').style.display = 'none';
+                window.print();
+                document.getElementById('divButtons').style.display = '';
+                return false;
+            }
+        </script>
+
     </div>
-    <script src="{{ asset('testing/include/styles/ma/js/App.js') }}"></script>
+    <script src="http://192.168.1.253/real/include/styles/ma/js/App.js?7"></script>
+
+
     <div style="width: 100%; height: 2px; z-index: 9999; top: 0px; float: left; position: fixed;">
         <div
             style="background-color: rgb(123, 31, 162); width: 0px; height: 100%; clear: both; transition: height 0.3s; float: left;">
@@ -2222,6 +1993,9 @@
         <div class="device-sm visible-sm" data-breakpoint="sm"></div>
         <div class="device-md visible-md" data-breakpoint="md"></div>
         <div class="device-lg visible-lg" data-breakpoint="lg"></div>
+    </div>
+    <div id="loom-companion-mv3" ext-id="liecbddmkiiihnedobmlmillhodjkdmb">
+        <div id="shadow-host-companion"></div>
     </div>
 </body>
 

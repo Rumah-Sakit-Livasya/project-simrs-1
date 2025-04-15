@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\DownPayment;
 use App\Models\SIMRS\PembayaranTagihan;
+use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
+use App\Models\SIMRS\TutupKunjungan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -15,10 +19,19 @@ class BilinganController extends Controller
     public function getData($id)
     {
         try {
-            $data = Bilingan::where('id', $id)->get()->map(function ($item) {
-                // Add a 'del' column for delete actions
-                // Add additional fields to the item
+            // Eager load pembayaran_tagihan supaya relasi tidak dipanggil berulang
+            $dataQuery = Bilingan::with('pembayaran_tagihan')->where('id', $id)->get();
+            if ($dataQuery->first()->pembayaran_tagihan === null) {
+                return response()->json([
+                    'data' => [],
+                    'recordsTotal' => 0,
+                    'recordsFiltered' => 0,
+                ]);
+            }
+
+            $data = $dataQuery->map(function ($item) {
                 $item->tanggal = $item->created_at ? $item->created_at->format('Y-m-d H:i') : null;
+                // Karena pembayaran_tagihan sudah di eager load, properti ini langsung tersedia
                 $item->total_tagihan = $item->pembayaran_tagihan->total_tagihan;
                 $item->jaminan = $item->pembayaran_tagihan->jaminan;
                 $item->tagihan_pasien = $item->pembayaran_tagihan->tagihan_pasien;
@@ -36,19 +49,10 @@ class BilinganController extends Controller
                 'data' => $data,
                 'recordsTotal' => $data->count(),
                 'recordsFiltered' => $data->count(),
-            ]); // Return data in the expected format for DataTables
-
-            // Log the data for debugging
-            Log::info('Data fetched for DataTables:', $data->toArray());
-
-            return response()->json([
-                'data' => $data,
-                'recordsTotal' => $data->count(),
-                'recordsFiltered' => $data->count(),
-            ]); // Return data in the expected format for DataTables
+            ]);
         } catch (\Exception $e) {
             Log::error('Error fetching data for DataTables: ' . $e->getMessage());
-            return response()->json(['error' => 'Data could not be retrieved: ' . $e->getMessage()], 500); // Return error response with detailed message
+            return response()->json(['error' => 'Data could not be retrieved: ' . $e->getMessage()], 500);
         }
     }
 
@@ -132,6 +136,32 @@ class BilinganController extends Controller
             } else {
                 return response()->json(['error' => 'Record not found.'], 404);
             }
+
+            if ($validatedData['status'] == 'final') {
+                // Find the registration record
+                $registration = Registration::findOrFail($bilingan->registration->id);
+
+                if ($registration['registration_type'] == 'rawat-inap') {
+                    $registrationController = new RegistrationController();
+                    $registrationController->removePatientFromBed($registration->patient->bed->id, $registration->patient->id);
+                }
+
+                // Create a new BatalRegister entry
+                TutupKunjungan::create([
+                    'registration_id' => $registration->id,
+                    'user_id' => auth()->user()->id,
+                    'alasan_keluar' => "Sembuh",
+                    'lp_manual' => '',
+                    'proses_keluar' => "Perintah Dokter",
+                ]);
+
+                // Update the status of the registration
+                $registration->update([
+                    'status' => 'tutup_kunjungan',
+                    'registration_close_date' => Carbon::now()
+                ]);
+            }
+
             return response()->json(['success' => 'Data updated successfully.']);
         } catch (\Exception $e) {
             Log::error('Error updating data: ' . $e->getMessage());
@@ -150,6 +180,7 @@ class BilinganController extends Controller
             'jumlah_terbayar'   => 'required|numeric',
             'sisa_tagihan'      => 'required|numeric',
             'kembalian'         => 'nullable|numeric',
+            'keterangan'         => 'nullable|string',
             'bill_notes'        => 'nullable|string',
         ]);
         $validatedData['jaminan'] = $validatedData['jaminan'] ?? 0;
@@ -157,10 +188,14 @@ class BilinganController extends Controller
         try {
             $pembayaranTagihan = PembayaranTagihan::create($validatedData);
 
-            // Update the related bilingan record to mark as paid
+            // Update the related bilingan record to mark as paid and store keterangan
             $bilingan = Bilingan::find($validatedData['bilingan_id']);
             if ($bilingan) {
-                $bilingan->update(['is_paid' => 1]);
+                $updateData = ['is_paid' => 1];
+                if (isset($validatedData['keterangan'])) {
+                    $updateData['keterangan'] = $validatedData['keterangan'];
+                }
+                $bilingan->update($updateData);
             }
 
             return response()->json([
@@ -177,12 +212,12 @@ class BilinganController extends Controller
 
     public function printBill($id)
     {
-        // try {
         $bilingan = Bilingan::with('pembayaran_tagihan')->findOrFail($id);
         return view('pages.simrs.keuangan.kasir.partials.print-bill', compact('bilingan'));
-        // } catch (\Exception $e) {
-        //     Log::error('Error printing bill: ' . $e->getMessage());
-        //     return redirect()->back()->with('error', 'Bill not found.');
-        // }
+    }
+    public function printKwitansi($id)
+    {
+        $bilingan = Bilingan::with('pembayaran_tagihan')->findOrFail($id);
+        return view('pages.simrs.keuangan.kasir.partials.print-kwitansi', compact('bilingan'));
     }
 }
