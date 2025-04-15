@@ -12,7 +12,7 @@ use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\ShiftController;
 use App\Http\Controllers\API\BankEmployeeController;
 use App\Http\Controllers\API\DayOffRequestController;
-use App\Http\Controllers\Api\EventController;
+use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\KPIController;
 use App\Http\Controllers\API\StructureController;
 use App\Http\Controllers\API\UserController;
