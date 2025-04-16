@@ -12,6 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->web([
+            // tambahkan di sini
+            \App\Http\Middleware\LastSeenUser::class,
+            \App\Http\Middleware\TrackOnlineUser::class,
+        ]);
 
         $middleware->alias([
             'superadmin' => \App\Http\Middleware\SuperAdminMiddleware::class,

@@ -343,7 +343,6 @@ class RegistrationController extends Controller
             $validatedData['departement_id'] = $this->getDepartmentId($validatedData);
 
             // Update bed if rawat inap
-            // Update bed if rawat inap
             if ($validatedData['registration_type'] == 'rawat-inap') {
                 Bed::findOrFail($request->bed_id)->update(['patient_id' => $request->patient_id]);
                 $this->assignBedToPatient($request);

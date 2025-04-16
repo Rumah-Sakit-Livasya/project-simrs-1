@@ -43,7 +43,7 @@ return new class extends Migration
             // $table->string('ket_alergi_makanan', 20)->nullable()->after('alergi_makanan');
             // $table->string('ket_alergi_lainnya', 20)->nullable()->after('alergi_lainnya');
 
-            $table->string('hasil_resiko_jatuh')->nullable()->after('resiko_jatuh');
+            $table->string('hasil_resiko_jatuh')->nullable();
             $table->string('status_psikologis')->nullable()->after('hasil_resiko_jatuh');
             $table->string('status_spiritual')->nullable()->after('status_psikologis');
             $table->string('masalah_prilaku')->nullable()->after('status_spiritual');
