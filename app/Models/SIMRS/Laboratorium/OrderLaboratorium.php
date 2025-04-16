@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\SIMRS\Laboratorium;
 
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;

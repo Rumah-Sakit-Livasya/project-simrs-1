@@ -70,7 +70,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::delete('delete-medical-action/{id}', [OrderTindakanMedis::class, 'destroy'])->name('medical.action.destroy');
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
 
-    
+
     Route::post('order-radiologi/', [OrderRadiologiController::class, 'store'])->name('order.radiologi.store');
     Route::post('order-radiologi-otc/', [OrderRadiologiController::class, 'storeOTC'])->name('order.radiologi.store-otc');
     Route::post('edit-order-radiologi/', [OrderRadiologiController::class, 'editOrderRadiologi'])->name('order.radiologi.edit-order');
@@ -82,7 +82,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::post('simpan-template-radiologi/{id}', [RadiologiController::class, 'simpanTemplateHasil'])->name('radiologi.template.simpan');
     Route::post('delete-template-radiologi/{id}', [RadiologiController::class, 'deleteTemplate'])->name('radiologi.template.delete');
 
-    Route::prefix('laboratorium')->group(function(){
+    Route::prefix('laboratorium')->group(function () {
         Route::post('/order', [OrderLaboratoriumController::class, 'store'])->name('order.laboratorium.store');
     });
 
@@ -140,7 +140,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
 
     Route::prefix('master-data')->group(function () {
-        Route::prefix('penjamin')->group(function(){
+        Route::prefix('penjamin')->group(function () {
             Route::post('/', [PenjaminController::class, 'store'])->name('master-data.penjamin.store');
         });
         Route::get('/group-penjamin', [GroupPenjaminController::class, 'index']);
@@ -220,8 +220,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post('store', [FormBuilderController::class, 'store']);
             });
 
-            Route::prefix('ethnics')->group(function(){
-                Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');
+            Route::prefix('ethnics')->group(function () {
+                Route::post('create', [EthnicController::class, 'create'])->name('master-data.post');
             });
         });
 

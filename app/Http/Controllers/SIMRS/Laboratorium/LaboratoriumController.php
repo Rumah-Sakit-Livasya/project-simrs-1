@@ -8,6 +8,6 @@ class LaboratoriumController extends Controller
 {
     public function index()
     {
-        return view('laboratorium.index');
+        return view('pages.simrs.laboratorium.list-order');
     }
 }

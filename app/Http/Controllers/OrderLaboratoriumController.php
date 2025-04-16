@@ -2,24 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrderLaboratorium;
 use App\Models\OrderParameterLaboratorium;
 use App\Models\RegistrationOTC;
 use App\Models\SIMRS\Departement;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Penjamin;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class OrderLaboratoriumController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
     private function generate_order_number()
     {
         $date = Carbon::now();

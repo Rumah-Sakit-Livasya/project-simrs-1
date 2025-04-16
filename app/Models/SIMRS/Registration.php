@@ -4,7 +4,7 @@ namespace App\Models\SIMRS;
 
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
-use App\Models\OrderLaboratorium;
+use App\Models\SIMRS\OrderLaboratorium;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\Keuangan\Kasir;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
@@ -46,7 +46,7 @@ class Registration extends Model implements AuditableContract
     {
         return $this->hasOne(PengkajianNurseRajal::class, 'registration_id');
     }
-    
+
     public function pengkajian_lanjutan()
     {
         return $this->hasOne(PengkajianLanjutan::class, 'registration_id');
