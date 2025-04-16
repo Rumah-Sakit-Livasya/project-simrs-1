@@ -7,17 +7,6 @@ use Illuminate\Http\Request;
 
 class OrderLaboratoriumController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         return response()->json($request->all());
@@ -33,12 +22,12 @@ class OrderLaboratoriumController extends Controller
             'tipe_pasien' => 'required|string'
         ]);
 
-        try{
+        try {
             OrderLaboratorium::create($validatedData);
             return response()->json([
                 'message' => 'Order Laboratorium berhasil dibuat'
             ], 201);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Order Laboratorium gagal dibuat',
                 'error' => $e->getMessage()
