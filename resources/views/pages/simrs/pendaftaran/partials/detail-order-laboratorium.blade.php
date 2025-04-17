@@ -8,7 +8,7 @@
         </tr>
     </thead>
     <tbody>
-        {{-- @foreach ($order->order_parameter_laboratorium as $orderParameter)
+        @foreach ($order->order_parameter_laboratorium as $orderParameter)
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $orderParameter->parameter_laboratorium->parameter }}</td>
@@ -16,6 +16,6 @@
                 </td>
                 <td>{{ $orderParameter->catatan }}</td>
             </tr>
-        @endforeach --}}
+        @endforeach
     </tbody>
 </table>

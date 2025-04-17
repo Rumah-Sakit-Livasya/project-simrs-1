@@ -58,13 +58,13 @@ class NilaiNormalLaboratoriumController extends Controller
             'tahun_2' => 'required|integer',
             'bulan_2' => 'required|integer',
             'hari_2' => 'required|integer',
-            'min' => 'required|numeric',
-            'max' => 'required|numeric',
-            'nilai_normal' => 'required|string',
-            'hasil' => 'required|string',
-            'keterangan' => 'required|string',
-            'min_kritis' => 'required|numeric',
-            'max_kritis' => 'required|numeric',
+            'min' => 'nullable|numeric',
+            'max' => 'nullable|numeric',
+            'nilai_normal' => 'nullable|string',
+            'hasil' => 'nullable|string',
+            'keterangan' => 'nullable|string',
+            'min_kritis' => 'nullable|numeric',
+            'max_kritis' => 'nullable|numeric',
         ]);
 
         $validatedData['dari_umur'] = $validatedData['tahun_1'] . '-' . $validatedData['bulan_1'] . '-' . $validatedData['hari_1'];

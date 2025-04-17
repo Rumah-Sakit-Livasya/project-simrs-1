@@ -115,8 +115,8 @@
 </script>
 
 <script>
-    const list = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-    list.map((el) => {
+    let listPopoverRadiologi = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    listPopoverRadiologi.map((el) => {
         let opts = {
             animation: true,
         }

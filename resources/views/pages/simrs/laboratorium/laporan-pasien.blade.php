@@ -1,12 +1,8 @@
 @extends('inc.layout')
-@section('title', 'List Order Laboratorium')
+@section('title', 'Laporan Order Laboratorium per Pasien')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-
-        @include('pages.simrs.laboratorium.partials.list-order-form')
-
-        @include('pages.simrs.laboratorium.partials.list-order-datatable')
-
+        @include('pages.simrs.laboratorium.partials.laporan-pasien-form')
     </main>
 @endsection
 @section('plugin')
@@ -20,6 +16,7 @@
     <script src="/js/dependency/moment/moment.js"></script>
     <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 
+    
     <script>
         var controls = {
             leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
@@ -148,6 +145,4 @@
             input.value = formattedValue;
         }
     </script>
-
-    <script src="{{ asset('js/simrs/list-order-laboratorium.js') }}?v={{ time() }}"></script>
 @endsection

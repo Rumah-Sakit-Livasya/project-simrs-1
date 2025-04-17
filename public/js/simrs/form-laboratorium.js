@@ -3,15 +3,16 @@
 /// <reference path="../types.d.ts" />
 
 class LaboratoriumForm {
-    /**
-     * @type {ParameterLaboratorium[]}
-     */
-    #ParameterLaboratorium;
 
     /**
-     * @type {TarifLaboratorium[]}
+     * @type {KategoriLaboratorium[]}
      */
-    #TarifLaboratorium;
+    #KategoriLaboratorium;
+
+    /**
+     * @type {KelasRawat[]}
+     */
+    #KelasRawat;
 
     /**
     * @type {number}
@@ -19,15 +20,16 @@ class LaboratoriumForm {
     #GroupPenjaminId;
 
     /**
-    * @type {number}
-    */
-    #KelasRawatId;
+     * @type {TarifLaboratorium[]}
+     */
+    #TarifLaboratorium;
 
     /**
-     * @type {number}
+     * @type {Registration}
      */
-    #totalHarga = 0;
+    #Registration;
 
+    #totalHarga = 0;
     /**
      * @type {HTMLElement | undefined}
      */
@@ -42,18 +44,39 @@ class LaboratoriumForm {
 
     constructor() {
         // @ts-ignore
-        this.#ParameterLaboratorium = window._parameterLaboratorium;
+        this.#KategoriLaboratorium = window._kategoriLaboratorium;
         // @ts-ignore
         this.#TarifLaboratorium = window._tarifLaboratorium;
         // @ts-ignore
+        this.#Registration = window._registration;
+        // @ts-ignore
         this.#GroupPenjaminId = window._groupPenjaminId;
         // @ts-ignore
-        this.#KelasRawatId = window._kelasRawatId;
+        this.#KelasRawat = window._kelasRawats;
 
         document.addEventListener("DOMContentLoaded", this.#init.bind(this));
     }
 
     #init() {
+        // Harga
+        this.#elementHarga = document.getElementById("laboratorium-total") || undefined;
+
+        // Order Type Radio
+        const orderType = document.querySelectorAll("input[type='radio'][name='order_type']");
+        if (orderType) {
+            orderType.forEach((radio) => {
+                radio.addEventListener("change", this.#orderTypeChange.bind(this));
+            });
+        }
+
+        // Form
+        const form = document.querySelector("form#form-laboratorium");
+        if (form) {
+            this.#elementForm = /** @type {HTMLFormElement} */ (form);
+            form.addEventListener("submit", this.#submit.bind(this));
+        }
+
+
         // Select all checkboxes inside the Blade-generated form
         const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_laboratorium_checkbox");
         checkboxes.forEach((checkbox) => {
@@ -72,23 +95,57 @@ class LaboratoriumForm {
             searchBar.addEventListener("keyup", this.#handleSearchBarChange.bind(this));
         }
 
-        // Harga
-        this.#elementHarga = document.getElementById("laboratorium-total") || undefined;
+        this.#updateCost();
+    }
 
-        // Order Type Radio
-        const orderType = document.querySelectorAll("input[type='radio'][name='order_type']");
-        if (orderType) {
-            orderType.forEach((radio) => {
-                radio.addEventListener("change", this.#orderTypeChange.bind(this));
-            });
+    /**
+       * Handle search bar changes
+       * @param {Event} event 
+       */
+    #handleSearchBarChange(event) {
+        const _target = event.target;
+        if (!_target) return;
+
+        const searchBar = /** @type {HTMLInputElement} */ (_target);
+        const searchQuery = searchBar.value.toLowerCase();
+        if (searchQuery == "") {
+            this.#showAllParameters();
+            return;
         }
 
-        // Form
-        const form = document.querySelector("form#form-laboratorium");
-        if (form) {
-            this.#elementForm = /** @type {HTMLFormElement} */ (form);
-            form.addEventListener("submit", this.#submit.bind(this));
-        }
+        const parameters = document.querySelectorAll(".parameter_laboratorium");
+        parameters.forEach((parameter) => {
+            const parameterNameElement = parameter.querySelector(".form-check-label");
+            if (!parameterNameElement) return;
+            const parameterName = parameterNameElement.textContent;
+            if (!parameterName) return;
+
+            if (parameterName.toLowerCase().includes(searchQuery)) {
+                // @ts-ignore
+                parameter.style.display = "inherit";
+            } else {
+                // @ts-ignore
+                parameter.style.display = "none";
+            }
+        });
+    }
+
+    #showAllParameters() {
+        const parameters = document.querySelectorAll(".parameter_laboratorium");
+        parameters.forEach((parameter) => {
+            // @ts-ignore
+            parameter.style.display = "inherit";
+        });
+    }
+
+    /**
+     * Handles checkbox state changes
+     * @param {Event} event
+     */
+    #handleCheckboxChange(event) {
+        const _target = event.target;
+        if (!_target) return;
+        this.#calculateCost();
     }
 
     /**
@@ -123,39 +180,55 @@ class LaboratoriumForm {
          */
         let parameters = /** @type {Parameter[]} */ ([]);
         const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_laboratorium_checkbox");
+        console.log(checkboxes);
+
         checkboxes.forEach((_checkbox) => {
             const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
             const isChecked = checkbox.checked;
-            const parameterId = parseInt(checkbox.value);
-            if (isChecked) {
-                const QtyElement = /** @type {HTMLInputElement} */ (document.querySelector("input#jumlah_" + parameterId));
-                const Qty = parseInt(QtyElement.value);
+            const parameterId = checkbox.value;
+            const kelasRajal = this.#KelasRawat.find((k) => k.kelas.toLowerCase() == "rawat jalan");
+            if (!kelasRajal) return showErrorAlertNoRefresh("Kelas rawat jalan tidak ditemukan!");
+
+            /** @type {ParameterLaboratorium | undefined} */
+            let parameter;
+
+            for (const nama_kategori in this.#KategoriLaboratorium) {
+                const parameters = this.#KategoriLaboratorium[nama_kategori].parameter_laboratorium;
+                parameter = parameters.find((p) => p.id == parseInt(parameterId));
+            }
+
+            console.log(isChecked, parameter);
+
+
+            if (isChecked && parameter) {
+                console.log("checked " + parameter.id);
+
                 const Tarif = this.#TarifLaboratorium.find((t) => {
+                    const EqualParameterId = t.parameter_laboratorium_id == parameter.id;
+                    const EqualKelasRawatId = this.#Registration.registration_type == "rawat-jalan"
+                        ? (t.kelas_rawat_id == kelasRajal.id)
+                        : (t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1));
+                    const EqualGroupPenjaminId = t.group_penjamin_id == (this.#GroupPenjaminId ?? -1);
                     if (
-                        t.parameter_laboratorium_id == parameterId
-                        &&
-                        t.kelas_rawat_id == (this.#KelasRawatId ?? -1)
-                        &&
-                        t.group_penjamin_id == (this.#GroupPenjaminId ?? -1)
+                        EqualParameterId && EqualKelasRawatId && EqualGroupPenjaminId
                     ) return t;
                 });
-                
                 if (!Tarif) {
-                    return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameterId);
+                    return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameter.id);
                 }
                 let Price = Tarif.total;
                 if (this.#CITO) {
                     Price += (Price * 30 / 100);
                 }
-
-                parameters.push({ id: parameterId, qty: Qty, price: Price });
+                const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}'].parameter_laboratorium_number`));
+                if (parseInt(jumlah.value) < 1) {
+                    jumlah.value = String(1);
+                }
+                parameters.push({ id: parameter.id, qty: parseInt(jumlah.value), price: Price });
             }
         })
         formData.append('parameters', JSON.stringify(parameters));
-
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
-        }
+        formData.append('registration_id', String(this.#Registration.id));
 
         fetch('/api/simrs/laboratorium/order', {
             method: 'POST',
@@ -165,8 +238,6 @@ class LaboratoriumForm {
             }
         })
             .then(async (data) => {
-                console.log(await data.json());
-                return;
                 console.log(data.url);
                 console.log(await data.text())
                 if (data.status != 200) {
@@ -183,36 +254,47 @@ class LaboratoriumForm {
 
     #calculateCost() {
         this.#totalHarga = 0;
+
         const checkboxes = document.querySelectorAll("input[type='checkbox'].parameter_laboratorium_checkbox");
+        const kelasRajal = this.#KelasRawat.find((k) => k.kelas.toLowerCase() == "rawat jalan");
+        if (!kelasRajal) return showErrorAlertNoRefresh("Kelas rawat jalan tidak ditemukan!");
         checkboxes.forEach((_checkbox) => {
             const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
             const isChecked = checkbox.checked;
             const parameterId = checkbox.value;
-            const parameter = this.#ParameterLaboratorium.find((p) => p.id == parseInt(parameterId));
+            /** @type {ParameterLaboratorium | undefined} */
+            let parameter;
+
+            for (const nama_kategori in this.#KategoriLaboratorium) {
+                const parameters = this.#KategoriLaboratorium[nama_kategori].parameter_laboratorium;
+                parameter = parameters.find((p) => p.id == parseInt(parameterId));
+            }
+
 
             if (isChecked && parameter) {
-                const tarif = this.#TarifLaboratorium.find((t) => {
-                    if (
-                        t.parameter_laboratorium_id == parameter.id
-                        &&
-                        t.kelas_rawat_id == (this.#KelasRawatId ?? -1)
-                        &&
-                        t.group_penjamin_id == (this.#GroupPenjaminId ?? -1)
-                    ) return t;
+                const Tarif = this.#TarifLaboratorium.find((t) => {
+                    const EqualParameterId = t.parameter_laboratorium_id == parameter.id;
+                    const EqualKelasRawatId = this.#Registration.registration_type == "rawat-jalan"
+                        ? (t.kelas_rawat_id == kelasRajal.id)
+                        : (t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1));
+                    const EqualGroupPenjaminId = t.group_penjamin_id == (this.#GroupPenjaminId ?? -1);
+                    if (EqualParameterId && EqualKelasRawatId && EqualGroupPenjaminId) return t;
                 });
-                if (tarif) {
-                    const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}']`));
-                    if (parseInt(jumlah.value) < 1) {
-                        jumlah.value = String(1);
-                    }
-                    this.#totalHarga += tarif.total * parseInt(jumlah.value);
-
-                    if (this.#CITO) {
-                        this.#totalHarga += (this.#totalHarga * 30 / 100);
-                    }
+                if (!Tarif) {
+                    return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameter.id);
                 }
+                const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}'].parameter_laboratorium_number`));
+                if (parseInt(jumlah.value) < 1) {
+                    jumlah.value = String(1);
+                }
+
+                let Price = Tarif.total * parseInt(jumlah.value);
+                if (this.#CITO) {
+                    Price += (Price * 30 / 100);
+                }
+                this.#totalHarga += Price;
             }
-        });
+        })
 
         if (this.#elementHarga) {
             this.#elementHarga.textContent = this.#totalHarga.toLocaleString("id-ID", {
@@ -220,56 +302,44 @@ class LaboratoriumForm {
                 currency: "IDR",
             });
         }
+
+        return this.#totalHarga;
     }
 
-    /**
-     * Handle search bar changes
-     * @param {Event} event 
-     */
-    #handleSearchBarChange(event) {
-        const _target = event.target;
-        if (!_target) return;
+    #updateCost() {
+        const kelasRajal = this.#KelasRawat.find((k) => k.kelas.toLowerCase() == "rawat jalan");
+        if (!kelasRajal) return showErrorAlertNoRefresh("Kelas rawat jalan tidak ditemukan!");
+        for (let i = 0; i < this.#KategoriLaboratorium.length; i++) {
+            const KategoriLaboratorium = this.#KategoriLaboratorium[i];
+            for (let ii = 0; ii < KategoriLaboratorium.parameter_laboratorium.length; ii++) {
+                const ParameterLaboratorium = KategoriLaboratorium.parameter_laboratorium[ii];
 
-        const searchBar = /** @type {HTMLInputElement} */ (_target);
-        const searchQuery = searchBar.value.toLowerCase();
-        if (searchQuery == "") {
-            this.#showAllParameters();
-            return;
-        }
+                // get span with id "harga_parameter_laboratorium_${ParameterLaboratorium.id}"
+                const hargaParameterLaboratorium = document.getElementById(`harga_parameter_laboratorium_${ParameterLaboratorium.id}`);
+                if (hargaParameterLaboratorium == null) continue;
 
-        const parameters = document.querySelectorAll(".parameter_laboratorium");
-        parameters.forEach((parameter) => {
-            const parameterNameElement = parameter.querySelector(".form-check-label");
-            if (!parameterNameElement) return;
-            const parameterName = parameterNameElement.textContent;
-            if (!parameterName) return;
+                // get tarif from #TarifLaboratorium with equal parameter_laboratorium_id, group_penjamin_id and kelas_rawat_id
+                const tarif = this.#TarifLaboratorium.find((t) => {
+                    const EqualParameterId = t.parameter_laboratorium_id == ParameterLaboratorium.id;
+                    const EqualKelasRawatId = this.#Registration.registration_type == "rawat-jalan"
+                        ? (t.kelas_rawat_id == kelasRajal.id)
+                        : (t.kelas_rawat_id == (this.#Registration.kelas_rawat_id ?? -1));
+                    const EqualGroupPenjaminId = t.group_penjamin_id == (this.#GroupPenjaminId ?? -1);
+                    if (EqualParameterId && EqualKelasRawatId && EqualGroupPenjaminId) return t;
+                });
 
-            if (parameterName.toLowerCase().includes(searchQuery)) {
-                // @ts-ignore
-                parameter.style.display = "block";
-            } else {
-                // @ts-ignore
-                parameter.style.display = "none";
+                if (tarif) {
+                    hargaParameterLaboratorium.textContent = tarif.total.toLocaleString("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                    });
+                } else {
+                    console.error("Tarif belum di set atau tidak ditemukan! ID Parameter: " + ParameterLaboratorium.id);
+                    showErrorAlertNoRefresh("Tarif tidak ditemukan atau belum di set! Mohon laporkan ke management. Cek log console!");
+                }
+
             }
-        });
-    }
-
-    #showAllParameters() {
-        const parameters = document.querySelectorAll(".parameter_laboratorium");
-        parameters.forEach((parameter) => {
-            // @ts-ignore
-            parameter.style.display = "block";
-        });
-    }
-
-    /**
-     * Handles checkbox state changes
-     * @param {Event} event
-     */
-    #handleCheckboxChange(event) {
-        const _target = event.target;
-        if (!_target) return;
-        this.#calculateCost();
+        }
     }
 
     /**

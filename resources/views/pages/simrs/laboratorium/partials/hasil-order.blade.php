@@ -1,11 +1,10 @@
+<!DOCTYPE html>
 <html>
 
 <head>
     <title>Print</title>
     <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-    <script src="{{ asset('js/jquery.js') }}"></script>
-
-    <style type="text/css" media="all">
+    <style>
         /*  Document Reset */
         @charset "utf-8";
 
@@ -593,6 +592,7 @@
 
         }
     </style>
+    <script src="{{ asset('js/jquery.js') }}"></script>
     <style type="text/css" media="all" id="less:testing-include-styles-print">
         /*  Document Reset */
         @charset "utf-8";
@@ -707,7 +707,7 @@
 
         @font-face {
             font-family: 'Open Sans';
-            src: url('https://cdn.jsdelivr.net/fontsource/fonts/open-sans:vf@latest/latin-wght-normal.woff2');
+            src: url('http://192.168.1.253/testing/include/styles/opensans.ttf');
         }
 
         body {
@@ -1159,6 +1159,17 @@
             font-size: .8em;
         }
 
+        .watermark {
+            background-image: url(http://192.168.1.253/testing/include/styles/../images/logocx.png);
+            background-position: center center;
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.1;
+            position: absolute;
+            min-height: 80%;
+            min-width: 80%;
+        }
+
         @media print {
             #functions {
                 display: none;
@@ -1169,216 +1180,268 @@
             }
         }
     </style>
-    @foreach ($order->order_parameter_radiologi as $parameter)
-        <meta hidden class="parameter" id="{{ $parameter->id }}"
-            content="{{ $parameter->load(['parameter_radiologi'])->toJson() }}">
-    @endforeach
 </head>
 
 <body>
     <style type="text/css">
-        table {
-            //	margin:1%;
-        }
-
-        .head_label {
-            font-size: 0.3cm;
-        }
-
-        .head_anak {
-            font-size: 0.3cm;
-        }
-
-        table tr td {
-            height: 0.6cm;
-            font-size: 0.3cm;
-        }
-
-        #blok {
-            width: 10cm;
-            height: 4cm;
-            margin-top: 0.5cm;
-            margin-left: 1cm;
-        }
-
-        .trigger {
-            font-size: 20px;
-            color: red !important;
-            font-weight: 1000;
-        }
-
-
         @media print {
-            .trigger {
-                display: none !important;
+            input#pj {
+                border: none;
             }
+
         }
     </style>
-
-
-    <div id="printdiv" style="height:100px; width:100px; display:none"></div>
-
-
     <div id="functions">
         <ul>
             <li><a href="#" onclick="window.print();">Print</a></li>
             <li><a href="index-fancy.html" onclick="window.close()">Close</a></li>
-            <li><select name="parameter_id" size="1" id="parameter_id" onchange="toggleParameter(event)">
-                    @foreach ($order->order_parameter_radiologi as $parameter)
-                        <option value="{{ $parameter->id }}">
-                            {{ $loop->iteration }}. {{ $parameter->parameter_radiologi->parameter }}</option>
-                    @endforeach
-                </select>
-            </li>
         </ul>
     </div>
+    <!-- E: Functions -->
 
-    <div id="blok">
+    <!-- B: Print View -->
+    <div id="previews" style="margin-bottom:0px; margin-top:-10px">
 
-        <div class="trigger" style="float:right; cursor: pointer;">X</div>
-        <table width="98%" border="0">
-            @if ($order->registration)
-                <tbody>
-                    <tr>
-                        <td style="width:35%"><span class="head_label">Nama Pasien</span></td>
-                        <td style="width:65%"><span class="head_anak">: <b>{{ $order->registration->patient->name }}
-                                    ({{ substr($order->registration->patient->gender, 0, 1) }})</b></span></td>
-                    </tr>
-                    <tr>
-                        <td><span class="head_label">No RM</span></td>
-                        <td><span class="head_anak">:
-                                <b>{{ $order->registration->patient->medical_record_number }}</b></span></td>
-                    </tr>
+        <div style="float:left; width:40%; border-bottom:none">
+            <div class="lgo_persen" style=" width:100%; height:120px;"><img
+                    src="http://192.168.1.253/testing/include/images/logocx.png" style="height:60%; margin-top:3%">
+            </div>
+        </div>
 
-                    <tr>
-                        <td><span class="head_label">Tanggal Lahir</span></td>
-                        <td><span class="head_anak">:
-                                <b>{{ \Carbon\Carbon::parse($order->registration->patient->date_of_birth)->format('d M Y') }}</b></span>
-                        </td>
-                    </tr>
+        <div
+            style="width:50%; text-align:right; border-left:1px solid #666; height:100px; float:right; margin-right:2%; padding-top:2%">
+            <span style="font-size:.8em; font-family:'Arial Black', Gadget, sans-serif; line-height:1.3em">
+                Rumah Sakit Livasya Kab. Majalengka<br>
+                Jawa Barat - Indonesia<br>
+                Telp : 081211151300<br>
+                Fax : <br>
+                Email : rslivasya@gmail.com<br>
+                https://livasya.com/<br>
+            </span>
+        </div>
 
-                    <tr>
-                        <td><span class="head_label">Jenis Pemeriksaan</span></td>
-                        <td><span class="head_anak" id="parameter-name">:
-                                {{ $order->order_parameter_radiologi[0]->parameter_radiologi->parameter }}</span></td>
-                    </tr>
+        <div style="margin-bottom: 3cm;"></div>
+        <h2 class="bdr">
+            <span class="rgt"><span class="til">NO Order #</span><span>{{ $order->no_order }}</span></span>
+            Hasil Laboratorium
+        </h2>
 
-                    <tr>
-                        <td><span class="head_label">Tgl Periksa / Jam</span></td>
-                        @if ($order->inspection_date)
-                            <td><span class="head_anak">:
-                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('d M Y') : '-' }}
-                                    /
-                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('H:i') : '-' }}</span>
-                            </td>
-                        @else
-                            <td><span class="head_anak">: -</span></td>
-                        @endif
-                    </tr>
+        @if ($order->registration)
+            <div id="hhr" class="hlf">
+                <ul style="line-height:1.5em">
+                    <li><span>No RM / No Registrasi</span>: {{ $order->registration->patient->medical_record_number }} /
+                        {{ $order->registration->registration_number }}</li>
+                    <li><span>Nama </span>: {{ $order->registration->patient->name }}</li>
+                    <li><span>Jenis Kelamin</span>: {{ $order->registration->patient->gender }}</li>
+                    <li><span>Tgl Lahir / Umur</span>: {{ $order->registration->patient->date_of_birth }} /
+                        {{ displayAge($order->registration->patient->date_of_birth) }}</li>
+                    <li style="width:100%;">
+                        <span style="float:left;">Alamat</span><span style="float:left; width:5px">:</span>
+                        <div style="float:; width:50%">{{ $order->registration->patient->address }} </div>
+                        <div style="clear:both"></div>
+                    </li>
+                    <li><span>No telp / Hp</span>: {{ $order->registration->patient->mobile_phone_number }}</li>
+                    <li><span>Penjamin</span>: {{ $order->registration->penjamin->nama_perusahaan }}</li>
+                </ul>
+            </div>
+            <div id="hhr" class="hrt">
+                <ul style="line-height:1.5em">
+                    <li><span>Tgl Order</span>: {{ $order->order_date }}</li>
+                    <li><span>Dokter Perujuk</span>: {{ $order->registration->doctor->employee->fullname }}</li>
+                    <li><span>Poly/Ruang</span>: {{ $order->registration->poliklinik }}</li>
+                    <li><span>Dokter Penanggung Jawab</span>: {{ $order->doctor->employee->fulname }}</li>
+                    <li><span>Tanggal / jam Sampel</span>: {{ $order->inspection_date }}</li>
+                    <li><span>Tanggal / jam Hasil</span>: {{ $order->result_date }}</li>
+                    <li><span>Analis</span>: {{ $order->diagnosa_klinis }}</li>
+                </ul>
+            </div>
+        @else
+            {{-- OTC --}}
+            <div id="hhr" class="hlf">
+                <ul style="line-height:1.5em">
+                    <li><span>No RM / No Registrasi</span>: OTC
+                        /
+                        {{ $order->registration_otc->registration_number }}</li>
+                    <li><span>Nama </span>: {{ $order->registration_otc->nama_pasien }}</li>
+                    <li><span>Jenis Kelamin</span>: {{ $order->registration_otc->jenis_kelamin }}</li>
+                    <li><span>Tgl Lahir / Umur</span>: {{ $order->registration_otc->date_of_birth }} /
+                        {{ displayAge($order->registration_otc->date_of_birth) }}</li>
+                    <li style="width:100%;">
+                        <span style="float:left;">Alamat</span><span style="float:left; width:5px">:</span>
+                        <div style="float:; width:50%">{{ $order->registration_otc->alamat }} </div>
+                        <div style="clear:both"></div>
+                    </li>
+                    <li><span>No telp / Hp</span>: {{ $order->registration_otc->no_telp }}</li>
+                    <li><span>Penjamin</span>: Pasien Umum</li>
+                </ul>
+            </div>
+            <div id="hhr" class="hrt">
+                <ul style="line-height:1.5em">
+                    <li><span>Tgl Order</span>: {{ $order->order_date }}</li>
+                    <li><span>Dokter Perujuk</span>: {{ $order->registration_otc->doctor->employee->fullname }}</li>
+                    <li><span>Poly/Ruang</span>: {{ $order->registration_otc->poly_ruang }}</li>
+                    <li><span>Dokter Penanggung Jawab</span>: {{ $order->doctor->employee->fulname }}</li>
+                    <li><span>Tanggal / jam Sampel</span>: {{ $order->inspection_date }}</li>
+                    <li><span>Tanggal / jam Hasil</span>: {{ $order->result_date }}</li>
+                    <li><span>Analis</span>: {{ $order->diagnosa_klinis }}</li>
+                </ul>
+            </div>
+        @endif
+        <table width="100%" class="bdr2 pad">
+            <thead>
+                <tr>
+                    <th width="5%">No</th>
+                    <th>Pemeriksaan</th>
+                    <th width="10%">Hasil</th>
+                    <th width="10%">Nilai Rujukan</th>
+                    <th width="15%">Satuan</th>
+                    <th width="15%">Metode</th>
+                    <th width="15%">Keterangan</th>
+                </tr>
+            </thead>
+            <tbody>
 
-                    <tr>
-                        <td><span class="head_label">Asal Ruangan</span></td>
-                        <td><span class="head_anak">:
-                                @if ($order->registration->registration_type != 'rawat-inap')
-                                    {{ $order->registration->poliklinik }}
-                                @elseif(isset($order->registration->kelas_rawat))
-                                    {{ $order->registration->kelas_rawat->room->ruangan }}
+                @foreach ($order->order_parameter_laboratorium as $parameter)
+                        <tr>
+                            <td align="center">{{ $loop->iteration }}</td>
+                            <td>{{ $parameter->parameter_laboratorium->parameter }}</td>
+                            @php
+                                $is_kritis = false;
+                                $is_abnormal = false;
+                                $nilai_normal_parameter = null;
+
+                                if ($order->registration) {
+                                    $dob = $order->registration->patient->date_of_birth;
+                                    $jenis_kelamin = $order->registration->patient->gender;
+                                } else { // otc
+                                    $dob = $order->registration_otc->date_of_birth;
+                                    $jenis_kelamin = $order->registration_otc->jenis_kelamin;
+                                }
+
+                                foreach ($nilai_normals as $nilai_normal) {
+                                    if (
+                                        $nilai_normal->parameter_laboratorium_id ==
+                                        $parameter->parameter_laboratorium_id
+                                    ) {
+                                        if (
+                                            isWithinAgeRange(
+                                                $dob,
+                                                $nilai_normal->dari_umur,
+                                                $nilai_normal->sampai_umur,
+                                            ) &&
+                                            ($nilai_normal->jenis_kelamin == $jenis_kelamin ||
+                                                $nilai_normal->jenis_kelamin == 'Semuanya')
+                                        ) {
+                                            $nilai_normal_parameter = $nilai_normal;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (
+                                    $nilai_normal_parameter != null &&
+                                    $parameter->parameter_laboratorium->tipe_hasil == 'Angka'
+                                ) {
+                                    // check if abnormal
+                                    if (
+                                        $parameter->hasil < $nilai_normal_parameter->min ||
+                                        $parameter->hasil > $nilai_normal_parameter->max
+                                    ) {
+                                        $is_abnormal = true;
+                                        // check if critical
+                                        if (
+                                            $parameter->hasil < $nilai_normal_parameter->min_kritis ||
+                                            $parameter->hasil > $nilai_normal_parameter->max_kritis
+                                        ) {
+                                            $is_kritis = true;
+                                        }
+                                    }
+                                }
+                            @endphp
+
+                            <td align="center">
+                                @if ($is_abnormal && !$is_kritis)
+                                    <p style="font-weight: bold;"> {{ $parameter->hasil }}*</p>
+                                @elseif ($is_kritis)
+                                    <p style="color:#FF0000; font-weight: bold;"> {{ $parameter->hasil }}**</p>
                                 @else
-                                    -
+                                    <p>{{ $parameter->hasil }}</p>
                                 @endif
-                            </span></td>
-                    </tr>
-                    <tr>
-                        <td><span class="head_label">Dokter Perujuk</span></td>
-                        <td><span class="head_anak">: {{ $order->doctor->employee->fullname }}</span></td>
-                    </tr>
-                </tbody>
-            @else
-                {{-- otc --}}
-                <tbody>
-                    <tr>
-                        <td style="width:35%"><span class="head_label">Nama Pasien</span></td>
-                        <td style="width:65%"><span class="head_anak">: <b>{{ $order->registration_otc->nama_pasien }}
-                                    ({{ substr($order->registration_otc->jenis_kelamin, 0, 1) }})</b></span></td>
-                    </tr>
-                    <tr>
-                        <td><span class="head_label">No RM</span></td>
-                        <td><span class="head_anak">:
-                                <b>OTC</b></span></td>
-                    </tr>
-
-                    <tr>
-                        <td><span class="head_label">Tanggal Lahir</span></td>
-                        <td><span class="head_anak">:
-                                <b>{{ \Carbon\Carbon::parse($order->registration_otc->date_of_birth)->format('d M Y') }}</b></span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td><span class="head_label">Jenis Pemeriksaan</span></td>
-                        <td><span class="head_anak" id="parameter-name">:
-                                {{ $order->order_parameter_radiologi[0]->parameter_radiologi->parameter }}</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><span class="head_label">Tgl Periksa / Jam</span></td>
-                        @if ($order->inspection_date)
-                            <td><span class="head_anak">:
-                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('d M Y') : '-' }}
-                                    /
-                                    {{ $order->inspection_date ? \Carbon\Carbon::parse($order->inspection_date)->format('H:i') : '-' }}</span>
                             </td>
-                        @else
-                            <td><span class="head_anak">: -</span></td>
-                        @endif
-                    </tr>
-
-                    <tr>
-                        <td><span class="head_label">Asal Ruangan</span></td>
-                        <td><span class="head_anak">:
-                                {{ $order->registration_otc->poly_ruang ?? ' - ' }}
-                            </span></td>
-                    </tr>
-                    <tr>
-                        <td><span class="head_label">Dokter Perujuk</span></td>
-                        <td><span class="head_anak">: {{ $order->doctor->employee->fullname }}</span></td>
-                    </tr>
-                </tbody>
-            @endif
+                            <td align="center">
+                                @if ($nilai_normal_parameter)
+                                    @if ($parameter->parameter_laboratorium->tipe_hasil == 'Angka')
+                                        {{ $nilai_normal_parameter->min }} - {{ $nilai_normal_parameter->max }}
+                                    @else
+                                        {{ $nilai_normal_parameter->nilai_normal }}
+                                    @endif
+                                @endif
+                            </td>
+                            <td align="center">{{ $parameter->parameter_laboratorium->satuan }}</td>
+                            <td align="center">{{ $parameter->parameter_laboratorium->metode }}</td>
+                            <td align="center">{{ $parameter->catatan }}</td>
+                        </tr>
+                @endforeach
+            </tbody>
         </table>
+        <div id="ftr" class="tp1">
+            <div class="wpr">
+                <div class="npm">
+                    <p><b>Tanda *</b> : Menunjukkan hasil dibawah atau diatas nilai rujukan</p>
+                    <p><b style="color:#FF0000;">Tanda **</b> : Menunjukkan nilai kritis</p>
+                    <p>
+                        Catatan :
+                    </p>
+                </div>
+            </div>
+        </div>
 
-    </div>
+        <div id="ftr" class="tp1" style="float:left; margin-left: 20px;">
+            <div class="wpr">
+                <div class="npm">
+                    <p align="center">
+                        Penanggung Jawab Laboratorium,
+                        <br>
+                        <!-- <br />
+                        <br />
+                        <br />
+                        <br />
+                        <br /> -->
+                        <img src="http://192.168.1.253/testing/include/ttd_pegawai/pid_908_66e1117c67628.png"
+                            style="width: 2.65cm; height: 2.6cm">
+                        <!--			<img src="http://192.168.1.253/testing/include/ttd/ttd_dok_lab.jpg" style="width: 2.65cm; height: 2.6cm"> -->
+                        <br>
+                        dr. Dillar Gunalar Sp.Pk
+                    </p>
 
-    <script type="text/javascript">
-        const parameter = {};
+                </div>
+            </div>
+        </div>
 
-        $(document).ready(function() {
+        <div id="ftr" class="tp1" style="float:right; margin-right: 20px;">
+            <div class="wpr">
+                <div class="npm">
+                    <p align="center">
+                        User {{ auth()->user()->employee->fullname }}, <br>Tanggal Print : {{ date('d-m-Y h:i') }}
+                        <!--
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                        <input class="form-control" style="text-align:center; font-weight: normal; font-size: 1em;" type="text" name="pj" id="pj" value="Adib Mangaraja" />
+-->
+                    </p>
+                    <!--			<span  style="margin:1%">Tanggal Print : 14-04-2025</span> -->
+                </div>
+            </div>
+        </div>
+        <div style="clear:both"></div>
+        <div {{-- style="width:100%; height:30px; background:url(http://192.168.1.253/testing/include/image_assets/foot.png)"> --}} </div>
+        </div>
 
-            $(".toggle_container").show();
 
-            $(".trigger").click(function() {
-                $(this).toggleClass("active").next().fadeOut("fast");
-                $(this).fadeOut("fast");
-            });
-
-            $("meta.parameter").each(function() {
-                var parameterValue = $(this).attr('content');
-                var parameterObject = JSON.parse(parameterValue);
-                console.log(parameterObject);
-
-                parameter[parameterObject.id] = parameterObject
-            });
-            console.log(parameter);
-        });
-
-
-
-        function toggleParameter(event) {
-            var parameterId = $(event.target).val();
-
-            $('#parameter-name').text(': ' + parameter[parameterId].parameter_radiologi.parameter);
-        }
-    </script>
 </body>
 
 </html>

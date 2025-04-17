@@ -2,22 +2,80 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrderLaboratorium;
 use App\Models\OrderParameterLaboratorium;
 use App\Models\RegistrationOTC;
+use App\Models\RelasiParameterLaboratorium;
 use App\Models\SIMRS\Departement;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Penjamin;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class OrderLaboratoriumController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function verificate(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'id' => 'required|integer',
+            'verifikator_id' => 'required|integer',
+            'verifikasi_date' => 'required|date'
+        ]);
+
+        OrderParameterLaboratorium::where('id', $validatedData['id'])
+            ->update([
+                'verifikator_id' => $validatedData['verifikator_id'],
+                'verifikasi_date' => $validatedData['verifikasi_date']
+            ]);
+
+        return response('ok');
+    }
+
+    public function deleteParameter(Request $request)
+    {
+        $validatedData = $request->validate([
+            'order_parameter_id' => 'required|integer',
+            'order_id' => 'required|integer'
+        ]);
+
+        // first, get the order
+        $order = OrderLaboratorium::findOrFail( $validatedData['order_id']);
+
+        // second, get all parameters of the order
+        $parameters = $order->order_parameter_laboratorium;
+
+        // third, get the parameter of the deleted parameter order
+        $parameter_to_delete = OrderParameterLaboratorium::where('id', $validatedData['order_parameter_id'])
+            ->where('order_laboratorium_id', $validatedData['order_id'])
+            ->first();
+
+        // finally, get relation of the deleted parameter
+        $relations = RelasiParameterLaboratorium::where('main_parameter_id', $parameter_to_delete->parameter_laboratorium->id)->get();
+
+        foreach ($parameters as $parameter) {
+            // don't delete parameters with id that's smaller
+            // than id of parameter that's going to be deleted
+            if($parameter->id <= $parameter_to_delete->id) continue;
+
+            // if the next parameter can be ordered
+            // it means there's no more sub parameter
+            if($parameter->parameter_laboratorium->is_order) break;
+
+            // check if this parameter, as "sub_parameter_id"
+            // is related to the parameter to delete, as "main_parameter_id"
+            // from $relations
+            $isRelated = $relations->contains(function ($relation) use ($parameter) {
+                return $relation->sub_parameter_id === $parameter->parameter_laboratorium->id;
+            });
+
+            if ($isRelated) {
+                $parameter->delete();
+            }
+        }
+
+        $parameter_to_delete->delete();
+        return response()->json([
+            'success' => true,
+        ]);
     }
 
     private function generate_order_number()
@@ -156,6 +214,21 @@ class OrderLaboratoriumController extends Controller
                     'parameter_laboratorium_id' => $parameter['id'],
                     'nominal_rupiah' => $parameter['price'],
                 ]);
+
+                // from table relasi_parameter_laboratorium, get all columns
+                // where main_parameter_id equals parameter['id']
+                $parameterLaboratorium = RelasiParameterLaboratorium::where('main_parameter_id', $parameter['id'])->get();
+
+                // check if $parameterLaboratorium has length
+                if (count($parameterLaboratorium) > 0) {
+                    foreach ($parameterLaboratorium as $relasi) {
+                        OrderParameterLaboratorium::create([
+                            'order_laboratorium_id' => $orderLaboratoriumId,
+                            'parameter_laboratorium_id' => $relasi->sub_parameter_id,
+                            'nominal_rupiah' => 0,
+                        ]);
+                    }
+                }
             }
         }
 
@@ -164,27 +237,58 @@ class OrderLaboratoriumController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(OrderLaboratorium $orderLaboratorium)
+    public function confirmPayment(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'id' => 'required|integer'
+        ]);
+
+        OrderLaboratorium::where('id', $validatedData['id'])
+            ->update(['status_billed' => 1]);
+
+        return response("ok");
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, OrderLaboratorium $orderLaboratorium)
+    public function editOrderLaboratorium(Request $request)
     {
-        //
-    }
+        // BELUM READY
+        $validatedData = $request->validate([
+            'order_id' => 'required|integer',
+            'diagnosa_klinis' => 'required|string',
+            'inspection_date' => 'required|date',
+            'result_date' => 'required|date',
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(OrderLaboratorium $orderLaboratorium)
-    {
-        //
+        try {
+            $order = OrderLaboratorium::find($validatedData['order_id']);
+            $order->update([
+                'diagnosa_klinis' => $validatedData['diagnosa_klinis'],
+                'inspection_date' => $validatedData['inspection_date'],
+                'result_date' => $validatedData['result_date'],
+            ]);
+
+            foreach ($order->order_parameter_laboratorium as $parameter) {
+                $id = $parameter->id;
+                if ($request->get('catatan_' . $id)) {
+                    OrderParameterLaboratorium::find($id)
+                        ->update([
+                            'catatan' => $request->get('catatan_' . $id),
+                        ]);
+                }
+                if ($request->get('hasil_' . $id)) {
+                    OrderParameterLaboratorium::find($id)
+                        ->update([
+                            'hasil' => $request->get('hasil_' . $id),
+                        ]);
+                }
+            }
+
+            return "<script>window.close()</script>";
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getLine()
+            ]);
+        }
     }
 }

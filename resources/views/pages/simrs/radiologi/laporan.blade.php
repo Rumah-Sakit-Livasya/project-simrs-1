@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'List Order Radiologi')
+@section('title', 'Laporan Order Radiologi')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         @include('pages.simrs.radiologi.partials.laporan-form')

@@ -184,7 +184,13 @@ class RadiologiForm {
             const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
             const isChecked = checkbox.checked;
             const parameterId = checkbox.value;
-            const parameter = this.#KategoriRadiologi.find((p) => p.id == parseInt(parameterId));
+            /** @type {ParameterRadiologi | undefined} */
+            let parameter;
+
+            for (const nama_kategori in this.#KategoriRadiologi) {
+                const parameters = this.#KategoriRadiologi[nama_kategori].parameter_radiologi;
+                parameter = parameters.find((p) => p.id == parseInt(parameterId));
+            }
             const kelasRajal = this.#KelasRawat.find((k) => k.kelas.toLowerCase() == "rawat jalan");
             if (!kelasRajal) return showErrorAlertNoRefresh("Kelas rawat jalan tidak ditemukan!");
 
@@ -206,7 +212,7 @@ class RadiologiForm {
                 if (this.#CITO) {
                     Price += (Price * 30 / 100);
                 }
-                const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}']`));
+                const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}'].parameter_radiologi_number`));
                 if (parseInt(jumlah.value) < 1) {
                     jumlah.value = String(1);
                 }
@@ -248,7 +254,13 @@ class RadiologiForm {
             const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
             const isChecked = checkbox.checked;
             const parameterId = checkbox.value;
-            const parameter = this.#KategoriRadiologi.find((p) => p.id == parseInt(parameterId));
+            /** @type {ParameterRadiologi | undefined} */
+            let parameter;
+
+            for (const nama_kategori in this.#KategoriRadiologi) {
+                const parameters = this.#KategoriRadiologi[nama_kategori].parameter_radiologi;
+                parameter = parameters.find((p) => p.id == parseInt(parameterId));
+            }
 
 
             if (isChecked && parameter) {
@@ -263,7 +275,7 @@ class RadiologiForm {
                 if (!Tarif) {
                     return showErrorAlertNoRefresh('Tarif tidak ditemukan! Mohon laporkan ke managemen. Parameter id: ' + parameter.id);
                 }
-                const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}']`));
+                const jumlah = /** @type {HTMLInputElement} */ (document.querySelector(`input[id='jumlah_${parameter.id}'].parameter_radiologi_number`));
                 if (parseInt(jumlah.value) < 1) {
                     jumlah.value = String(1);
                 }

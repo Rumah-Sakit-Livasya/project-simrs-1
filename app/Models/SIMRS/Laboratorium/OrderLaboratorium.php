@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\SIMRS\Laboratorium;
 
+use App\Models\OrderParameterLaboratorium;
+use App\Models\RegistrationOTC;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use App\Models\SIMRS\Registration;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 

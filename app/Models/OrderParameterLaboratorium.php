@@ -6,6 +6,8 @@ use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
+
 
 class OrderParameterLaboratorium extends Model
 {
@@ -22,7 +24,7 @@ class OrderParameterLaboratorium extends Model
 
     public function parameter_laboratorium()
     {
-        return $this->belongsTo(ParameterLaboratorium::class);
+        return $this->belongsTo(ParameterLaboratorium::class, 'parameter_laboratorium_id');
     }
 
     public function radiografer()

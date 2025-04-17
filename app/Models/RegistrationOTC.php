@@ -20,6 +20,11 @@ class RegistrationOTC extends Model
         return $this->hasOne(OrderRadiologi::class, 'otc_id');
     }
 
+    public function order_laboratorium()
+    {
+        return $this->hasOne(OrderLaboratorium::class, 'otc_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, "user_id");

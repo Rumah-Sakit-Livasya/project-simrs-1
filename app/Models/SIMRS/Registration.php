@@ -4,8 +4,8 @@ namespace App\Models\SIMRS;
 
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
-use App\Models\OrderLaboratorium;
 use App\Models\OrderRadiologi;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Keuangan\Kasir;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;

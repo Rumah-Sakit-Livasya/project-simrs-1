@@ -159,7 +159,13 @@ class RadiologiRegistrasiForm {
             const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
             const isChecked = checkbox.checked;
             const parameterId = checkbox.value;
-            const parameter = this.#KategoriRadiologi.find((p) => p.id == parseInt(parameterId));
+            /** @type {ParameterRadiologi | undefined} */
+            let parameter;
+
+            for (const nama_kategori in this.#KategoriRadiologi) {
+                const parameters = this.#KategoriRadiologi[nama_kategori].parameter_radiologi;
+                parameter = parameters.find((p) => p.id == parseInt(parameterId));
+            }
 
             if (isChecked && parameter) {
                 const Tarif = this.#TarifRadiologi.find((t) => t.parameter_radiologi_id == parameter.id);
@@ -291,7 +297,13 @@ class RadiologiRegistrasiForm {
             const checkbox = /** @type {HTMLInputElement} */ (_checkbox);
             const isChecked = checkbox.checked;
             const parameterId = checkbox.value;
-            const parameter = this.#KategoriRadiologi.find((p) => p.id == parseInt(parameterId));
+            /** @type {ParameterRadiologi | undefined} */
+            let parameter;
+
+            for (const nama_kategori in this.#KategoriRadiologi) {
+                const parameters = this.#KategoriRadiologi[nama_kategori].parameter_radiologi;
+                parameter = parameters.find((p) => p.id == parseInt(parameterId));
+            }
 
             if (isChecked && parameter) {
                 const Tarif = this.#TarifRadiologi.find((t) => t.parameter_radiologi_id == parameter.id);

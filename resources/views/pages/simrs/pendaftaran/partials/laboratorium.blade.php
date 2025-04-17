@@ -46,10 +46,10 @@
                                             <button type="button" class="btn btn-sm btn-primary"
                                                 data-bs-placement="top" data-bs-toggle="popover"
                                                 data-bs-title="Detail Order Laboratorium" data-bs-html="true"
-                                                data-bs-content-id="popover-content-{{ $order->id }}">
+                                                data-bs-content-id="popover-lab-content-{{ $order->id }}">
                                                 <i class="fas fa-list text-light" style="transform: scale(1.8)"></i>
                                             </button>
-                                            <div class="display-none" id="popover-content-{{ $order->id }}">
+                                            <div class="display-none" id="popover-lab-content-{{ $order->id }}">
                                                 @include(
                                                     'pages.simrs.pendaftaran.partials.detail-order-laboratorium',
                                                     ['order' => $order]
@@ -115,8 +115,8 @@
 </script>
 
 <script>
-    const list = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-    list.map((el) => {
+    let listPopoverLaboratorium = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    listPopoverLaboratorium.map((el) => {
         let opts = {
             animation: true,
         }

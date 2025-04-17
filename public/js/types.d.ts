@@ -366,3 +366,25 @@ interface KelasRawat {
     created_at: string;
     updated_at: string;
 }
+
+interface OrderLaboratorium {
+    id: number;
+    registration_id: number;
+    otc_id: number | null;
+    dokter_laboratorium_id: number;
+    user_id: number;
+    order_date: string;
+    inspection_date: string | null;
+    result_date: string | null;
+    no_order: string;
+    tipe_order: string;
+    tipe_pasien: string;
+    diagnosa_klinis: string;
+    status_isi_hasil: string;
+    status_billed: string;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+type PatientType = "rajal" | "ranap" | "otc";

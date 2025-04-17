@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
-use App\Models\OrderLaboratorium;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\SIMRS\Bed;
@@ -472,7 +472,7 @@ class RegistrationController extends Controller
 
         $laboratoriumOrders = [];
 
-        OrderLaboratorium::where('registration_id', $registration->id)->with('registration')
+        OrderLaboratorium::where('registration_id', $registration->id)
             ->get()
             ->each(function ($order) use (&$laboratoriumOrders) {
                 // dd($order->registration);

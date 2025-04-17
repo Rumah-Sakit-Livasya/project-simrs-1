@@ -42,9 +42,11 @@
                                         name="parameter_laboratorium_id">
                                         <option value=""></option>
                                         @foreach ($parameter as $row)
-                                            <option value="{{ $row->id }}">
-                                                {{ $row->parameter }}
-                                            </option>
+                                            @if ($row->is_hasil)
+                                                <option value="{{ $row->id }}">
+                                                    {{ $row->parameter }}
+                                                </option>
+                                            @endif
                                         @endforeach
                                     </select>
                                 </div>

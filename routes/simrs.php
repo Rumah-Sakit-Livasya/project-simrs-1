@@ -269,7 +269,7 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('laporan', [RadiologiController::class, 'report'])->name('radiologi.report');
             Route::get('laporan-view/{fromDate}/{endDate}/{tipe_rawat}/{group_parameter}/{penjamin}/{radiografer}', [RadiologiController::class, 'reportView'])->name('radiologi.report.view');
             Route::get('nota-order/{id}', [RadiologiController::class, 'notaOrder'])->name('radiologi.nota-order');
-            Route::get('hasil-order/{id}', [RadiologiController::class, 'hasilOrder'])->name('radiologi.hasiil-order');
+            Route::get('hasil-order/{id}', [RadiologiController::class, 'hasilOrder'])->name('radiologi.hasil-order');
             Route::get('label-order/{id}', [RadiologiController::class, 'labelOrder'])->name('radiologi.label-order');
             Route::get('edit-order/{id}', [RadiologiController::class, 'editOrder'])->name('radiologi.edit-order');
             Route::get('edit-hasil-parameter/{id}', [RadiologiController::class, 'editHasilParameter'])->name('radiologi.edit-hasil-parameter');
@@ -279,12 +279,18 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('laboratorium')->group(function () {
             Route::get('list-order', [LaboratoriumController::class, 'index'])->name('laboratorium.list-order');
-            Route::prefix('reports')->group(function () {
-                Route::get('laboratorium', [LaboratoriumController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
-                Route::get('laboratorium', [LaboratoriumController::class, 'pasienPerPemeriksaan'])->name('laboratorium.psdirn-per-permintaan');
-                Route::get('laboratorium', [LaboratoriumController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
-            });
-            Route::get('simulasi-harga', [IGDController::class, 'simulasiHarga'])->name('laboratorium.simulasi-harga');
+            Route::get('label-order/{id}', [LaboratoriumController::class, 'labelOrder'])->name('laboratorium.label-order');
+            Route::get('hasil-order/{id}', [LaboratoriumController::class, 'hasilOrder'])->name('laboratorium.hasil-order');
+            Route::get('edit-order/{id}', [LaboratoriumController::class, 'editOrder'])->name('laboratorium.edit-order');
+            Route::get('nota-order/{id}', [LaboratoriumController::class, 'notaOrder'])->name('laboratorium.nota-order');
+            Route::get('simulasi-harga', [LaboratoriumController::class, 'simulasiHarga'])->name('laboratorium.simulasi-harga');
+            Route::get("order", [LaboratoriumController::class, 'order'])->name('laboratorium.order');
+            Route::get('laporan/parameter-pemeriksaan', [LaboratoriumController::class, 'reportParameter'])->name('laboratorium.report.parameter');
+            Route::get('laporan/pasien-per-pemeriksaan', [LaboratoriumController::class, 'reportPatient'])->name('laboratorium.report.patient');
+            Route::get("popup/pilih-pasien/{poli}", [LaboratoriumController::class, 'popupPilihPasien'])->name('laboratorium.popup.pilih-pasien');
+            Route::get('laporan-parameter-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}', [LaboratoriumController::class, 'reportParameterView'])->name('laboratorium.report-parameter.view');
+            Route::get('laporan-pasien-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}/{parameter}', [LaboratoriumController::class, 'reportPatientView'])->name('laboratorium.report-patient.view');
+
         });
 
         Route::prefix('dokter')->group(function () {

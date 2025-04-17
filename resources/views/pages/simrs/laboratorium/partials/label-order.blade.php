@@ -4,7 +4,6 @@
     <title>Print</title>
     <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
     <script src="{{ asset('js/jquery.js') }}"></script>
-
     <style type="text/css" media="all">
         /*  Document Reset */
         @charset "utf-8";
@@ -1169,9 +1168,9 @@
             }
         }
     </style>
-    @foreach ($order->order_parameter_radiologi as $parameter)
+    @foreach ($order->order_parameter_laboratorium as $parameter)
         <meta hidden class="parameter" id="{{ $parameter->id }}"
-            content="{{ $parameter->load(['parameter_radiologi'])->toJson() }}">
+            content="{{ $parameter->load(['parameter_laboratorium'])->toJson() }}">
     @endforeach
 </head>
 
@@ -1223,13 +1222,6 @@
         <ul>
             <li><a href="#" onclick="window.print();">Print</a></li>
             <li><a href="index-fancy.html" onclick="window.close()">Close</a></li>
-            <li><select name="parameter_id" size="1" id="parameter_id" onchange="toggleParameter(event)">
-                    @foreach ($order->order_parameter_radiologi as $parameter)
-                        <option value="{{ $parameter->id }}">
-                            {{ $loop->iteration }}. {{ $parameter->parameter_radiologi->parameter }}</option>
-                    @endforeach
-                </select>
-            </li>
         </ul>
     </div>
 
@@ -1258,12 +1250,6 @@
                     </tr>
 
                     <tr>
-                        <td><span class="head_label">Jenis Pemeriksaan</span></td>
-                        <td><span class="head_anak" id="parameter-name">:
-                                {{ $order->order_parameter_radiologi[0]->parameter_radiologi->parameter }}</span></td>
-                    </tr>
-
-                    <tr>
                         <td><span class="head_label">Tgl Periksa / Jam</span></td>
                         @if ($order->inspection_date)
                             <td><span class="head_anak">:
@@ -1274,23 +1260,6 @@
                         @else
                             <td><span class="head_anak">: -</span></td>
                         @endif
-                    </tr>
-
-                    <tr>
-                        <td><span class="head_label">Asal Ruangan</span></td>
-                        <td><span class="head_anak">:
-                                @if ($order->registration->registration_type != 'rawat-inap')
-                                    {{ $order->registration->poliklinik }}
-                                @elseif(isset($order->registration->kelas_rawat))
-                                    {{ $order->registration->kelas_rawat->room->ruangan }}
-                                @else
-                                    -
-                                @endif
-                            </span></td>
-                    </tr>
-                    <tr>
-                        <td><span class="head_label">Dokter Perujuk</span></td>
-                        <td><span class="head_anak">: {{ $order->doctor->employee->fullname }}</span></td>
                     </tr>
                 </tbody>
             @else
@@ -1315,12 +1284,6 @@
                     </tr>
 
                     <tr>
-                        <td><span class="head_label">Jenis Pemeriksaan</span></td>
-                        <td><span class="head_anak" id="parameter-name">:
-                                {{ $order->order_parameter_radiologi[0]->parameter_radiologi->parameter }}</span></td>
-                    </tr>
-
-                    <tr>
                         <td><span class="head_label">Tgl Periksa / Jam</span></td>
                         @if ($order->inspection_date)
                             <td><span class="head_anak">:
@@ -1331,17 +1294,6 @@
                         @else
                             <td><span class="head_anak">: -</span></td>
                         @endif
-                    </tr>
-
-                    <tr>
-                        <td><span class="head_label">Asal Ruangan</span></td>
-                        <td><span class="head_anak">:
-                                {{ $order->registration_otc->poly_ruang ?? ' - ' }}
-                            </span></td>
-                    </tr>
-                    <tr>
-                        <td><span class="head_label">Dokter Perujuk</span></td>
-                        <td><span class="head_anak">: {{ $order->doctor->employee->fullname }}</span></td>
                     </tr>
                 </tbody>
             @endif
@@ -1376,7 +1328,7 @@
         function toggleParameter(event) {
             var parameterId = $(event.target).val();
 
-            $('#parameter-name').text(': ' + parameter[parameterId].parameter_radiologi.parameter);
+            $('#parameter-name').text(': ' + parameter[parameterId].parameter_laboratorium.parameter);
         }
     </script>
 </body>

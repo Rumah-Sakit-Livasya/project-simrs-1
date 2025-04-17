@@ -46,7 +46,7 @@
     <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
     <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
     <input type="hidden" name="registration_type" value="rawat-jalan">
-    <input type="hidden" name="poliklinik" value="RADIOLOGI">
+    <input type="hidden" name="poliklinik" value="LABORATORIUM">
     <input type="hidden" name="rujukan" value="inisiatif pribadi">
     <input type="hidden" name="penjamin_id" value="{{ $penjamin_standar_id }}">
     <div class="row">

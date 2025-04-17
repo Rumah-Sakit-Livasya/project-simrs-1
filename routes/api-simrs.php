@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Models\OrderParameterLaboratorium;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\SIMRS\BedController;
@@ -50,6 +51,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Support\Facades\Storage;
 
@@ -70,7 +72,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::delete('delete-medical-action/{id}', [OrderTindakanMedis::class, 'destroy'])->name('medical.action.destroy');
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
 
-    
+
     Route::post('order-radiologi/', [OrderRadiologiController::class, 'store'])->name('order.radiologi.store');
     Route::post('order-radiologi-otc/', [OrderRadiologiController::class, 'storeOTC'])->name('order.radiologi.store-otc');
     Route::post('edit-order-radiologi/', [OrderRadiologiController::class, 'editOrderRadiologi'])->name('order.radiologi.edit-order');
@@ -82,8 +84,12 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::post('simpan-template-radiologi/{id}', [RadiologiController::class, 'simpanTemplateHasil'])->name('radiologi.template.simpan');
     Route::post('delete-template-radiologi/{id}', [RadiologiController::class, 'deleteTemplate'])->name('radiologi.template.delete');
 
-    Route::prefix('laboratorium')->group(function(){
+    Route::prefix('laboratorium')->group(function () {
         Route::post('/order', [OrderLaboratoriumController::class, 'store'])->name('order.laboratorium.store');
+        Route::post('/pay', [OrderLaboratoriumController::class, 'confirmPayment'])->name('order.laboratorium.confirm-payment');
+        Route::post('/edit-order', [OrderLaboratoriumController::class, 'editOrderLaboratorium'])->name('order.laboratorium.edit-order');
+        Route::post('/parameter-verify', [OrderLaboratoriumController::class, 'verificate'])->name('order.laboratorium.verificate');
+        Route::post('/parameter-delete', [OrderLaboratoriumController::class, 'deleteParameter'])->name('order.laboratorium.delete-parameter');
     });
 
 
@@ -140,7 +146,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
 
     Route::prefix('master-data')->group(function () {
-        Route::prefix('penjamin')->group(function(){
+        Route::prefix('penjamin')->group(function () {
             Route::post('/', [PenjaminController::class, 'store'])->name('master-data.penjamin.store');
         });
         Route::get('/group-penjamin', [GroupPenjaminController::class, 'index']);
@@ -220,7 +226,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post('store', [FormBuilderController::class, 'store']);
             });
 
-            Route::prefix('ethnics')->group(function(){
+            Route::prefix('ethnics')->group(function () {
                 Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');
             });
         });
