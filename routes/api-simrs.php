@@ -73,6 +73,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::post('order-tindakan-medis/', [OrderTindakanMedisController::class, 'store'])->name('tindakan.medis.store');
 
 
+
     Route::post('order-radiologi/', [OrderRadiologiController::class, 'store'])->name('order.radiologi.store');
     Route::post('order-radiologi-otc/', [OrderRadiologiController::class, 'storeOTC'])->name('order.radiologi.store-otc');
     Route::post('edit-order-radiologi/', [OrderRadiologiController::class, 'editOrderRadiologi'])->name('order.radiologi.edit-order');
@@ -227,7 +228,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             });
 
             Route::prefix('ethnics')->group(function () {
-                Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');
+                Route::post('create', [EthnicController::class, 'create'])->name('master-data.post');
             });
         });
 

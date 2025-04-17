@@ -17,6 +17,7 @@ use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
 use App\Models\SIMRS\ParameterRadiologi;
 use App\Models\SIMRS\Patient;

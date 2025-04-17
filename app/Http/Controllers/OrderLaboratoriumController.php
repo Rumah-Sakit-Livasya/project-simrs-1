@@ -7,6 +7,7 @@ use App\Models\RegistrationOTC;
 use App\Models\RelasiParameterLaboratorium;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Penjamin;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
