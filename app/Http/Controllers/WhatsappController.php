@@ -63,6 +63,10 @@ class WhatsappController extends Controller
         curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.100:3001/send-message');
         curl_setopt($curl, CURLOPT_TIMEOUT, 30);
         curl_setopt($curl, CURLOPT_POST, 1);
+        if (isset($dbData['file'])) {
+            $filePath = storage_path('app/public/lampiran/whatsapp/' . $dbData['file']);
+            $httpData['file_dikirim'] = new \CURLFile($filePath);
+        }
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
