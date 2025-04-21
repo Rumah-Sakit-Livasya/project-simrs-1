@@ -117,10 +117,10 @@ if (!function_exists('set_active_mainmenu')) {
 if (!function_exists('formatNomorIndo')) {
     function formatNomorIndo($nomor)
     {
-        // Cek apakah nomor diawali dengan '62'
-        if (substr($nomor, 0, 2) === '62') {
-            // Ganti '62' dengan '0'
-            $nomor = '0' . substr($nomor, 2);
+        // Cek apakah nomor diawali dengan '0'
+        if (substr($nomor, 0, 1) === '0') {
+            // Ganti '0' dengan '62'
+            $nomor = '62' . substr($nomor, 1);
         }
 
         return $nomor;

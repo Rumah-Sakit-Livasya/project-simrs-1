@@ -18,6 +18,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SurveiKebersihanKamarController;
 use App\Http\Controllers\SwitchUserController;
+use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UrlShortenerController;
 use App\Http\Controllers\WhatsappController;
 use Illuminate\Support\Facades\Artisan;
@@ -125,6 +126,9 @@ Route::middleware([LastSeenUser::class])->group(function () {
             Route::get("/management-shift/edit/{id}", [DashboardController::class, 'editManagementShift'])->name("edit-management-shift");
             Route::get('/edit-profil/{id}', [UpdateProfileController::class, 'show'])->name('get.image');
             Route::post('/update-profil/{id}', [UpdateProfileController::class, 'update'])->name('update.image');
+            // web.php
+            Route::get('/team', [TeamController::class, 'index'])->name('team.index');
+            Route::get('/team/search', [TeamController::class, 'search'])->name('team.search');
         });
         /* END PEGAWAI ----------------------------------------------------------------------------*/
 

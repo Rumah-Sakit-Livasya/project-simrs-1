@@ -662,6 +662,24 @@ class DashboardController extends Controller
         return view('pages.pegawai.daftar-pegawai.index', compact('employees', 'employees_non_aktif', 'jobLevel', 'organizations', 'departements', 'jobPosition', 'locations', 'bank', 'company', 'getNotify'));
     }
 
+    public function getDataEmployeesTeam()
+    {
+        // Mengambil data karyawan yang aktif dan memiliki penanda team
+        $employees = Employee::where('is_active', 1)
+            ->whereNull('resign_date')
+            ->whereNotNull('organization_id')
+            ->get();
+
+        // Ambil semua data team dari model Team (pastikan model Team sudah ada dan di-import)
+        $organizations = Organization::all();
+
+        // Mendapatkan notifikasi
+        $getNotify = $this->getNotify();
+
+        // Mengembalikan view dengan data employees dan organizations
+        return view('pages.pegawai.team.index', compact('employees', 'organizations', 'getNotify'));
+    }
+
     public function pegawaiNonAktifList(Request $request)
     {
         try {
