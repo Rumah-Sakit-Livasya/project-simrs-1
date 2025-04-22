@@ -156,10 +156,10 @@ if (!function_exists('set_active_mainmenu')) {
 if (!function_exists('formatNomorIndo')) {
     function formatNomorIndo($nomor)
     {
-        // Cek apakah nomor diawali dengan '62'
-        if (substr($nomor, 0, 2) === '62') {
-            // Ganti '62' dengan '0'
-            $nomor = '0' . substr($nomor, 2);
+        // Cek apakah nomor diawali dengan '0'
+        if (substr($nomor, 0, 1) === '0') {
+            // Ganti '0' dengan '62'
+            $nomor = '62' . substr($nomor, 1);
         }
 
         return $nomor;
@@ -348,6 +348,33 @@ function rp($amount)
     $formattedAmount = 'Rp ' . number_format($amount, 0, ',', '.');
 
     return $formattedAmount;
+}
+
+function terbilangRp($angka, $withSuffix = true)
+{
+    $satuan = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
+
+    if ($angka < 12) {
+        $result = $satuan[$angka];
+    } elseif ($angka < 20) {
+        $result = $satuan[$angka - 10] . " belas";
+    } elseif ($angka < 100) {
+        $result = terbilangRp(intval($angka / 10), false) . " puluh" . (($angka % 10 != 0) ? " " . terbilangRp($angka % 10, false) : "");
+    } elseif ($angka < 200) {
+        $result = "seratus" . (($angka != 100) ? " " . terbilangRp($angka - 100, false) : "");
+    } elseif ($angka < 1000) {
+        $result = terbilangRp(intval($angka / 100), false) . " ratus" . (($angka % 100 != 0) ? " " . terbilangRp($angka % 100, false) : "");
+    } elseif ($angka < 2000) {
+        $result = "seribu" . (($angka != 1000) ? " " . terbilangRp($angka - 1000, false) : "");
+    } elseif ($angka < 1000000) {
+        $result = terbilangRp(intval($angka / 1000), false) . " ribu" . (($angka % 1000 != 0) ? " " . terbilangRp($angka % 1000, false) : "");
+    } elseif ($angka < 1000000000) {
+        $result = terbilangRp(intval($angka / 1000000), false) . " juta" . (($angka % 1000000 != 0) ? " " . terbilangRp($angka % 1000000, false) : "");
+    } else {
+        $result = "angka terlalu besar";
+    }
+
+    return $withSuffix ? $result . " rupiah" : $result;
 }
 
 function rp2($amount)

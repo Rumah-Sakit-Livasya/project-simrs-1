@@ -9,6 +9,7 @@ use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Contracts\Permission;
@@ -122,5 +123,20 @@ class User extends Authenticatable implements Auditable
     public function order_radiologi()
     {
         return $this->hasMany(OrderRadiologi::class);
+    }
+
+    public function links()
+    {
+        return $this->hasMany(Link::class);
+    }
+
+    public function isOnline()
+    {
+        return Cache::has('user-is-online-' . $this->id);
+    }
+
+    public function lastSeenHuman()
+    {
+        return $this->last_seen ? \Carbon\Carbon::parse($this->last_seen)->diffForHumans() : 'Belum pernah online';
     }
 }

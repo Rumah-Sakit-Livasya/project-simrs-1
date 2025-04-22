@@ -267,4 +267,24 @@ class TindakanMedisController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function getTindakanByDepartementAndKelas(Request $request)
+    {
+        $tindakan = TindakanMedis::whereHas('grup_tindakan_medis', function ($query) use ($request) {
+            $query->where('departement_id', $request->departement_id);
+        })->get();
+        return response()->json($tindakan);
+    }
+
+    public function getTarifTindakan(Request $request)
+    {
+        $tarif = TarifTindakanMedis::where('tindakan_medis_id', $request->tindakan_id)
+            ->where('group_penjamin_id', $request->group_penjamin_id)
+            ->where('kelas_rawat_id', $request->kelas_rawat_id)
+            ->first();
+
+        return response()->json([
+            'harga' => $tarif ? $tarif->total : 0
+        ]);
+    }
 }

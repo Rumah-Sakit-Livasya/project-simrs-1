@@ -88,6 +88,7 @@ class Registration extends Model implements AuditableContract
     {
         return $this->belongsTo(Employee::class);
     }
+    
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);

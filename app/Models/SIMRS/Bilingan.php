@@ -12,7 +12,7 @@ class Bilingan extends Model implements AuditableContract
 {
     use HasFactory, SoftDeletes, Auditable;
 
-    protected $fillable = ['registration_id', 'status', 'is_paid'];
+    protected $guarded = ['id'];
     protected $table = 'bilingan';
 
     public function registration()
@@ -27,7 +27,7 @@ class Bilingan extends Model implements AuditableContract
 
     public function down_payment()
     {
-        return $this->hasOne(DownPayment::class);
+        return $this->hasMany(DownPayment::class);
     }
 
     public function tagihan_pasien()

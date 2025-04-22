@@ -313,7 +313,7 @@ class PatientController extends Controller
                 $lastRanapRegistration['penjamin_id'] == $grupPenjaminBPJS->id && // ranap dengan BPJS
                 \Carbon\Carbon::parse($lastRanapRegistration['registration_date'])->diffInDays() <= 30; // dalam 30 hari / 1 bulan
         }
-        
+
         switch ($registrasi) {
             case 'rawat-jalan':
                 return view('pages.simrs.pendaftaran.form-registrasi', [

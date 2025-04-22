@@ -371,7 +371,7 @@
                         className: 'btn-outline-primary btn-sm'
                     }
                 ]
-            });
+            }).addClass('table-sm');
 
         });
 

@@ -13,7 +13,7 @@ class BotMessageController extends Controller
 {
     public function processMessage(Request $request)
     {
-        
+
         // Cek apakah metode POST
         if ($request->getMethod() !== 'POST') {
             return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
@@ -354,12 +354,11 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        if($msg == 'test_string') {
+        if ($msg == 'test_string') {
             $response = [
                 'message_type' => 'string',
                 'data' => 'Halo String'
             ];
-
         } else if ($msg == 'test_array') {
             $response =  [
                 'message_type' => 'array',
@@ -392,7 +391,7 @@ class BotMessageController extends Controller
                     ]
                 ]
             ];
-            
+
             // Bagian pilihan jadwal poliklinik
 
         } else if ($msg == '/jadwal_praktek') {
@@ -472,7 +471,7 @@ class BotMessageController extends Controller
                     ]
                 ]
             ];
-            
+
             // Bagian informasi pendaftaran
 
         } else if ($msg == '/info_pendaftaran') {
@@ -523,25 +522,22 @@ class BotMessageController extends Controller
 
             // Isi Respon Menu Pendaftaran
 
-        } else if($msg == '/info_bpjs_asuransi') {
+        } else if ($msg == '/info_bpjs_asuransi') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Informasi BPJS* \n\nSaat ini rumah sakit livasya menyediakan layanan rawat inap dan rawat jalan khusus peserta BPJS/JKN/KIS mulai dari :\n\n▪️ Spesialis Anak\n▪️ Spesialis kandungan\n▪️ Spesialis bedah\n▪️ Spesialis penyakit dalam\n▪️ Spesialis THT"
             ];
-
-        }  else if($msg == '/syarat') {
+        } else if ($msg == '/syarat') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Syarat pendaftaran*\n\n*Syarat pendaftaran rawat jalan*\n▪️ khusus peserta penjamin umum cukup membawa data diri/kartu berobat\n▪️ khusus peserta BPJS/JKN/KIS cukup membawa rujukan faskes 1 dan data diri\n▪️ khusus peserta asuransi swasta cukup membawa karru asuransi dan data diri\n\n*Syarat pendaftaran rawat inap*\n▪️ khusus peserta penjamin umum cukup membawa identitas diri\n▪️ khusus peserta penjamin BPJS/JKN/KIS Cukup membawa kartu identitas ,KK,KTP dan kartu BPJS (Bila ada)\n▪️ khusus peserta asuransi swasta cukup membawa kartu asuransi dan data diri"
             ];
-
-        } else if($msg == '/info_dafol') {
+        } else if ($msg == '/info_dafol') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Pendafataran online khusus penjamin JKN/BPJS silahkan bapak/ibu akses melalui Aplikasi MOBILE JKN* \n\nPendafataran online khusus penjamin Umum/asuransi silahkan bapak/ibu akses melalui link website berikut :  https://dafol.livasya.com/ \n\n*Note* : \n▪️ Pendaftaran online By link website dapat diakses H-3 atau paling lambat H-1 sebelum tanggal kunjungan\n▪️ Pendafataran online By Mobile JKN(BPJS) dapat diakses H-30 dan paling lambat di hari H sebelum jam praktek poliklinik"
             ];
-
-        } else if($msg == '/info_usg') {
+        } else if ($msg == '/info_usg') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Biaya USG*\n\n- *USG 2D* 195k\n- *USG 3D* 265k\n- *USG 4D* 325k\n- *TRANSVAGINAL* 350k+-\n\n*Note* : berikut kisaran estimasi include Konsul dokter + usg +print usg dan admin"
@@ -549,7 +545,7 @@ class BotMessageController extends Controller
 
             // Bagian Prosedur
 
-        } else if($msg == '/prosedur') {
+        } else if ($msg == '/prosedur') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Prosedur pendaftaran*\n\nLayanan pendaftaran poliklinik  bisa diakses melalui online maupun onsite sesuai dengan jam praktek poliklinik"
@@ -557,7 +553,7 @@ class BotMessageController extends Controller
 
             // Bagian Medical Checkup
 
-        } else if($msg == '/info_persalinan') {
+        } else if ($msg == '/info_persalinan') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Biaya Persalinan*\n\n*Biaya Persalinan Normal*\n- *Superior* : Mulai dari 6,5t\n- *Deluxe 2* : Mulai dari 7jt\n- *Deluxe 1* : Mulai dari 8,5jt\n- *VIP* : Mulai dari 9 jt\n\n*Biaya Persalinan Caesar*\n- *Superior* : Mulai dari 12jt\n- *Deluxe 2* : Mulai dari 14jt\n- *Deluxe 1* : Mulai dari 16jt\n- *VIP* : Mulai dari 18jt\n\n*Fasilitas yang diberikan* : Vaksin Hb + Polio, Foto Baby setelah melahirkan, dan bingkisan.\n*Fasilitas tambahan* : Foto Maternity dan Video Partus Moment (video persalinan khusus VIP), namun harus booking terlebih dahulu min. 1bulan sebelum HPL\n\n*NOTE* : Biaya tsb hanya sbg perkiraan total. Biaya total bisa kurang/lebih dari daftar diatas."
@@ -565,7 +561,7 @@ class BotMessageController extends Controller
 
             // Bagian Medical Checkup
 
-        } else if($msg == '/info_cs') {
+        } else if ($msg == '/info_cs') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Costumer Service*\n\nSalam sehat, terima kasih sudah menghubungi kontak Customer Care Rumah Sakit Livasya Majalengka.\n\nJam Operasional\nIGD 24 Jam\nPoliklinik Senin - Sabtu 08:00 - 21:00\n\nUntuk layanan telepon anda dapat menghubungi nomor kami di:\nhotline +622338668019\nwhatsapp: +6281211151300\n\nKunjungi website kami di www.livasya.co.id untuk mendapatkan informasi lengkap mengenai rumah sakit dan jadwal dokter"
@@ -573,7 +569,7 @@ class BotMessageController extends Controller
 
             // Bagian Rawat Inap
 
-        } else if($msg == '/info_medical') {
+        } else if ($msg == '/info_medical') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Medical Check - Up*\n\n*Paket Silver*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Pemeriksaan gula darah\n- Pemeriksaan kolesterol\n- Pemeriksaan asam urat\n\n*Biaya : Rp. 150.000*\n\n*Paket Gold*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Hematologi rutin\n- Gula darah puasa\n- Kolesterol\n- Trigliserida\n- Asam urat\n- Ureum\n- Kreatinin\n- SGOT\n- Urine lengkap\n\n*Biaya : Rp. 700.000*\n\n*Paket Diamond*\n\n- Pemeriksaan fisik dan buta warna oleh dokter umum\n- Hematologi rutin\n- Gula darah puasa\n- Kolesterol\n- Trigliserida\n- Asam urat\n- Ureum\n- Kreatinin\n- SGOT\n- SGPT\n- Urine lengkap\n- EKG\n- Rontgen thorax\n\n*Biaya : Rp. 920.000*"
@@ -581,7 +577,7 @@ class BotMessageController extends Controller
 
             // Bagian Rawat Inap
 
-        } else if($msg == '/igd') {
+        } else if ($msg == '/igd') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Instalasi Gawat Darurat - IGD*\n\nPelayanan IGD (Instalasi Gawat Darurat) 24 jam di Rumah Sakit Livasya adalah salah satu fasilitas krusial yang menyediakan layanan medis mendesak sepanjang hari, tujuh hari seminggu. Berikut adalah penjelasan singkat tentang IGD 24 jam Rumah Sakit Livasya:\n\n- *Aksesibilitas* : IGD Rumah Sakit Livasya buka 24 jam setiap hari, sehingga siap menerima pasien yang membutuhkan perawatan medis mendesak kapan pun dibutuhkan. Ini memastikan bahwa pasien dapat mengakses perawatan medis dengan cepat, tanpa harus menunggu jam kerja normal.\n- *Tim Medis Siap Sedia* : IGD Rumah Sakit Livasya dilengkapi dengan tim medis yang terlatih dan siap sedia untuk menangani berbagai jenis keadaan darurat. Tim ini terdiri dari dokter, perawat, dan tenaga medis lainnya yang memiliki pengalaman dan keterampilan dalam menangani situasi medis yang mendesak.\n- *Peralatan dan Fasilitas Medis* : Instalasi Gawat Darurat Rumah Sakit Livasya dilengkapi dengan peralatan medis canggih dan fasilitas pendukung yang diperlukan untuk menangani berbagai kondisi medis darurat. Ini termasuk peralatan resusitasi, ruang operasi darurat, ruang observasi, dan fasilitas pencitraan medis seperti X-ray\n- *Penanganan Kasus Mendesak* : IGD Rumah Sakit Livasya menerima berbagai kasus medis mendesak, termasuk kecelakaan, cedera, dan keadaan darurat lainnya. Tim medis di sini terlatih untuk menangani kasus-kasus ini dengan cepat dan efektif, memberikan perawatan yang tepat sesuai dengan kondisi pasien.\n- *Prioritas pada Kepedulian dan Kehati-hatian* : Meskipun memberikan perawatan medis yang cepat, tim medis IGD Rumah Sakit Livasya tetap menjaga kehati-hatian dan memastikan bahwa setiap langkah yang diambil sesuai dengan standar keamanan dan kualitas yang tinggi. Kepedulian terhadap kebutuhan dan kondisi pasien juga menjadi prioritas utama dalam setiap tindakan yang dilakukan.\n- *Koordinasi dengan Unit Perawatan Lanjutan* : Setelah mendapatkan perawatan di IGD, pasien yang membutuhkan perawatan lebih lanjut akan dirujuk ke unit perawatan lanjutan di Rumah Sakit Livasya atau di fasilitas kesehatan lainnya, jika diperlukan. Koordinasi yang baik antara tim medis di IGD dan unit perawatan lanjutan penting untuk memastikan kelancaran proses perawatan pasien.\n\nDengan pelayanan IGD 24 jam yang komprehensif, tim medis yang terlatih, dan fasilitas medis yang lengkap, Rumah Sakit Livasya berkomitmen untuk memberikan perawatan medis berkualitas tinggi kepada setiap pasien yang membutuhkan bantuan medis mendesak, kapan pun diperlukan.*"
@@ -589,7 +585,7 @@ class BotMessageController extends Controller
 
             // Bagian Rawat Inap
 
-        } else if($msg == '/rawat_inap') {
+        } else if ($msg == '/rawat_inap') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Fasilitas Rawat Inap*\n\n*VIP Room*\nNikmati kenyamanan maksimal dengan fasilitas eksklusif dalam ruangan pribadi yang dirancang untuk memberikan privasi dan ketenangan:\n- Bed pasien (1 pasien per ruangan)\n- Box bayi\n- Sofa bed untuk pendamping\n- Kamar mandi dalam\n- Nakas\n- Meja Mayo & Meja Crandenza\n- TV LED\n- AC untuk kesejukan optimal\n- Dispenser untuk kemudahan akses air minum\n- Lemari es untuk menyimpan makanan & minuman\n\n*Deluxe 1*\nKombinasi kenyamanan dan efisiensi dalam ruangan yang tetap memberikan privasi:\n- Bed pasien (1 ruangan berkapasitas 2 pasien)\n- Kursi tunggu untuk keluarga/pengunjung\n- Box bayi\n- Kamar mandi dalam\n- Nakas\n- Meja Mayo & Meja Crandenza\n- TV LED\n- AC\n- Lemari es\n\n*Deluxe 2*\nPilihan ideal dengan fasilitas lengkap untuk kenyamanan pasien dan pendamping:\n- Bed pasien (1 ruangan berkapasitas 2 pasien)\n- Kursi tunggu untuk pendamping\n- Box bayi\n- Kamar mandi dalam\n- Nakas\n- Meja Mayo & Meja Crandenza\n- TV LED\n- AC\n\n*Superior Room*\nKamar dengan fasilitas standar terbaik untuk mendukung pemulihan pasien:\n- Bed pasien (1 ruangan berkapasitas 2 pasien)\n- Kursi tunggu untuk pendamping\n- Box bayi\n- Kamar mandi dalam\n- Nakas\n- Meja Mayo & Meja Crandenza\n- TV LED\n- AC\n\nSetiap kamar di RS Livasya dirancang untuk memberikan kenyamanan, keamanan, dan kemudahan bagi pasien serta keluarga."
@@ -613,7 +609,7 @@ class BotMessageController extends Controller
                         'id' => '/jadwal_praktek',
                         'title' => 'Rawat Jalan'
                     ],
-                    
+
                     [
                         'id' => '/layanan_vaksin',
                         'title' => 'Layanan Vaksin'
@@ -624,81 +620,80 @@ class BotMessageController extends Controller
                     ],
                 ]
             ];
-            
-        } else if($msg == '/layanan_vaksin') {
+        } else if ($msg == '/layanan_vaksin') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Imunisasi dasar dan tambahan*\n- vaxigrip/influenza: 570.265\n- Influvac/influenza :  549.497\n- Rotarix / Rotavirus: 829.864\n- Synflorix / pcv: 1.710.510\n- prevenar Injc 13 /PCV : 1.349.224\n- PCV dinkes : 28.585\n- Varivax / varicella: 943.764\n- BCG  dinkes : 28.585\n- DPT Pentabio Dinkes (Demam) : 28.585\n- DPT Hexaxim (Tanpa demam) : 2.018.424\n- DPT Infanrix (Tanpa Demam) :  2.098.524\n- MR/Campak dinkes : 28.585\n- MMR 2 : 677.481\n- TYPHIM /thypoid: 571.337\n- Rotavac Dinkes /rotavirus : 28.585\n- Havrix 720 Junior : 834.388\n- Polio tetes (Dinkes) : 28.585\n- Polio Injek ( Dinkes) : 28.585\n- HB 0 : 28.585\n- Cervarix : 1.105.443\n- Gardasil 4' INJ : 1.584.959\n- Gardasil 9' INJ : 3.177.340\n- Imojev : 977.919\n- TD : 28.585\n\n*Note:*\n1. Harga belum termasuk Konsul dokter +Admin+embalase\n2. Beberapa vaksin mengikuti Sistem PO ,konfirmasi ketersediaan terlebih dahulu\n3. Khusus vaksin yang mengikuti sistem PO akan dikenakan biaya Deposit sebelum pemesanan\n4. Deposit pemesanan tidak dapat dikembalikan bila sewaktu cancel / tidak jadi vaksinasi\n5. Khusus vaksin dalam PO, kedatangan vaksin tidak bisa diestimasikan"
             ];
-        } else if($msg == '/klinik_obgyn') {
+        } else if ($msg == '/klinik_obgyn') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Jadwal praktek poliklinik Obgyn*\n\n*dr Dindaadi kusuma Sp.OG*\nSenin-kamis : 08.30-13.00\nJumat-sabtu : 13.00-15.00\n\n*dr H Mohammad Taufiq Sp.OG*\nJumat dan sabtu : 8.30-10.30\nSenin- sabtu : 16.00-18.00\nNote : hari libur/tanggal merah tidak ada praktek"
             ];
-        } else if($msg == '/klinik_anak') {
+        } else if ($msg == '/klinik_anak') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*JADWAL POLI ANAK*\n\n- Pasien umum\n\n*Dr. Tina Restu Sp.A*\nSenin-sabtu Pukul : 07.00-09.00\n\n*Dr. Ratih Sp.A*\nSenin, Rabu Pukul : 14.30 - Selesai\nSelasa,kamis Jumat Pukul :15.30 - Selesai\n- Pasien BPJS dengan Rujukan faskes 1\n\n*Dr. Tina Restu Sp.A*\nSenin - Jumat  Pukul : 13.00 - Selesai\n\n*Dr. Ratih Sp.A*\nSenin,Rabu  Pukul : 14.30 - Selesai\nSelasa , kamis dan jumat  Pukul : 15.30-Selesai\n\nHari libur/tanggal merah tidak praktek"
             ];
-        } else if($msg == '/klinik_tht') {
+        } else if ($msg == '/klinik_tht') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*JADWAL POLIKLINIK THT*\n\nPasien umum,Asuransi,BPJS\n\n*dr. H.M.Nuruddin Zainudin, Sp.THT-KL*\n\nSelasa & Kamis\nPukul : 12.00-Selesai"
             ];
-        } else if($msg == '/klinik_dalam') {
+        } else if ($msg == '/klinik_dalam') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*JADWAL POLIKLINIK PENYAKIT DALAM*\n\n Pasien umum,asuransi,BPJS\n\n*dr. Zikry Aulia Hidayat, Sp.PD*\n\nSenin,rabu,Jumat\nPukul 16.00-Selesai\n\n*dr. Jansen budiono Sp.PD*\n\nSelasa dan Kamis\nPukul 15.00-Selesai"
             ];
-        } else if($msg == '/klinik_bedah') {
+        } else if ($msg == '/klinik_bedah') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Jadwal Poliklinik Bedah Umum*\n\n*dr. Rizky Baihaqi Sp.B*\n\nSenin-Sabtu\nPukul 08.00-12.00\n\nJumat\nPukul 08.00-11.00\n\nMelayani peserta JKN/BPJS,Umum dan Asuransi Swasta"
             ];
-        } else if($msg == '/klinik_paru') {
+        } else if ($msg == '/klinik_paru') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Jadwal Poliklinik spesialis Paru*\n\n*dr Tania libristina ambun Sp.P*\n\nSelasa, Rabu, Kamis\nPkl 15.00-17.00\n\nBerlaku dengan reservasi H-1"
             ];
-        } else if($msg == '/klinik_jiwa') {
+        } else if ($msg == '/klinik_jiwa') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Jadwal Poliklinik Spesialis Kedokteran Jiwa*\n\n*dr Agri Mohammad iqbal Sp.KJ*\n\nSenin,Rabu,Jumat\nPkl. 08.00-10.00\n\nBerlaku dengan reservasi H-1"
             ];
-        } else if($msg == '/klinik_gigi') {
+        } else if ($msg == '/klinik_gigi') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Jadwal Poliklinik Gigi*\n\n*drg. Viki Dwi prananda*\n\nSenin-Jumat\nPkl . 08.00-15.00\n\nSabtu\nPkl 08.00-12.00"
             ];
-        } else if($msg == '/klinik_jantung') {
+        } else if ($msg == '/klinik_jantung') {
             $response = [
                 'message_type' => 'string',
                 'data' => "Jadwal belum ada"
             ];
-            
+
             // Bagian Fasilitas unggulan
 
-        } else if($msg == '/foto_bayi') {
+        } else if ($msg == '/foto_bayi') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Baby Newborn Photoshoot*\n\nRS Livasya di Majalengka menawarkan layanan fotografi bayi baru lahir (newborn baby photography) yang bertujuan mengabadikan momen berharga si kecil. Layanan ini mencakup berbagai genre fotografi, seperti:\n\nFocusing: Memotret bayi tanpa tambahan aksesoris, menonjolkan keaslian dan kemurnian.\nLifestyle: Mengabadikan interaksi keluarga dengan bayi di rumah sakit atau saat membawa pulang bayi.\nKomersial: Foto yang digunakan untuk promosi produk bayi atau keperluan komeRSl lainnya.\n\n*Biaya untuk Baby Newborn Photoshoot*\nRp 200.000\n(dapat 1 file dan 1 cetak foto + figura)\nRp 50.000\n(untuk menambah file)\nRp 200.000\n(untuk penambahan foto cetak)\n\nUntuk informasi lebih lanjut mengenai layanan ini, Anda dapat mengunjungi situs resmi RS Livasya di https://livasya.com/fasilitas/newborn-baby-photography.\n\nSelain itu, RS Livasya juga menyediakan layanan fotografi maternity shoot untuk mengabadikan momen kehamilan.\n\nInformasi lebih lanjut dapat ditemukan di\nhttps://www.livasya.co.id/fasilitas/photography-maternity-shoot.\nUntuk melihat contoh hasil fotografi bayi baru lahir di RS Livasya, Anda dapat menonton video berikut:"
             ];
-        } else if($msg == '/baby_spa') {
+        } else if ($msg == '/baby_spa') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Baby Spa and Swim*\n\nRS Livasya di Majalengka menyediakan layanan Baby Spa yang terdiri dari hidroterapi dan pijat bayi. Layanan ini tersedia setiap hari mulai pukul 09.00 hingga 15.00. Sebagai promo, setiap kunjungan akan mendapatkan voucher gratis; kumpulkan 10 voucher untuk mendapatkan 1 kali pijat bayi gratis.\n\nAlamat RS Livasya: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453. Untuk informasi lebih lanjut, Anda dapat menghubungi nomor telepon (0233) 8668019 atau WhatsApp di 0812-1115-1300.\n\nSebelum membawa si kecil untuk sesi Baby Spa, pastikan untuk memeriksa kebersihan fasilitas dan bahan yang digunakan guna menghindari risiko alergi atau iritasi pada kulit bayi.\n\n*Biaya untuk Baby Newborn Photoshoot*\n\n*1 Paket Baby Spa*\nRp 150.000\n*Baby Message*\nRp 60.000\n*Baby Swim*\nRp 60.000\n*Foto Bayi (Baby Spa)*\nRp 60.000\n*Tindik Bayi*\nRp 65.000"
             ];
-        } else if($msg == '/maternity') {
+        } else if ($msg == '/maternity') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Foto Maternity*\n\nRS Livasya di Majalengka menyediakan layanan Photography Maternity Shoot untuk mengabadikan momen kehamilan Anda. Layanan ini dirancang khusus bagi ibu hamil yang ingin mendokumentasikan masa kehamilan mereka melalui sesi pemotretan profesional.\n\n*Biaya untuk Partus Moment*\nRp 300.000."
             ];
-        } else if($msg == '/partus_moment') {
+        } else if ($msg == '/partus_moment') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Partus Moment*\n\RS Livasya di Majalengka menyediakan layanan Partus Moment, yaitu dokumentasi profesional selama proses persalinan untuk mengabadikan momen berharga kelahiran buah hati Anda. Layanan ini dirancang untuk menangkap setiap detik penting dan emosi yang terjadi selama proses persalinan, sehingga menjadi kenangan yang tak terlupakan bagi keluarga.\n\n*Biaya Partus Moment*\nRp 2.000.000\n\nUntuk melihat contoh dari layanan Partus Moment, Anda dapat mengunjungi kanal YouTube resmi RS Livasya, di mana terdapat berbagai video dokumentasi persalinan yang telah diabadikan sebelumnya. Salah satunya adalah video persalinan normal Ny. Devi & Tn. Dani yang dapat Anda saksikan melalui tautan berikut:\n\nJika Anda tertarik untuk memanfaatkan layanan ini atau memerlukan informasi lebih lanjut, silakan menghubungi RS Livasya melalui nomor telepon (0233) 8668019 atau WhatsApp di 0812-1115-1300. Alamat RS Livasya: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453.\n\nRS Livasya berkomitmen untuk memberikan pelayanan terbaik dalam setiap momen berharga Anda dan keluarga."
             ];
-        } else if($msg == '/senam_hamil') {
+        } else if ($msg == '/senam_hamil') {
             $response = [
                 'message_type' => 'string',
                 'data' => "*Senam Hamil*\n\nRS Livasya di Majalengka menyediakan layanan senam hamil yang dirancang khusus untuk membantu ibu hamil mempersiapkan diri secara fisik dan mental menjelang persalinan. Program ini bertujuan untuk meningkatkan kebugaran, mengurangi ketidaknyamanan selama kehamilan, serta mempersiapkan tubuh untuk proses persalinan yang lancar.\n\n*Biaya untuk Senam Hamil\nRp 50.000\n\n*Manfaat Senam Hamil di RS Livasya:*\n\nMeningkatkan Kebugaran Fisik: Latihan terstruktur membantu menjaga stamina dan kekuatan otot selama kehamilan.\nMengurangi Ketidaknyamanan: Gerakan senam dapat membantu mengurangi nyeri punggung, kram kaki, dan pembengkakan.\nPersiapan Persalinan: Melatih teknik pernapasan dan relaksasi yang berguna saat proses persalinan.\nDukungan Emosional: Bertemu dengan sesama ibu hamil dapat memberikan dukungan dan berbagi pengalaman.\nInformasi Tambahan:\n\nBiaya: Biaya senam hamil di rumah sakit swasta di Indonesia umumnya berkisar antara Rp 25.000 hingga lebih dari Rp 200.000 per sesi. Untuk informasi tarif spesifik di RS Livasya, disarankan menghubungi langsung pihak rumah sakit.\nALODOKTER\nJadwal: Jadwal senam hamil dapat berbeda-beda. Sebaiknya Anda menghubungi RS Livasya untuk mendapatkan informasi terkini mengenai jadwal kelas.\nKontak RS Livasya:\n\nAlamat: Jl. Raya Timur III No.875, Dawuan, Kec. Dawuan, Kabupaten Majalengka, Jawa Barat 45453\nTelepon: (0233) 8668019\nWhatsApp: 0812-1115-1300\nEmail: contact@livasya.com\nUntuk informasi lebih lanjut mengenai layanan senam hamil dan fasilitas lainnya, Anda dapat mengunjungi situs resmi RS Livasya di https://www.livasya.com/.\n\nRS Livasya berkomitmen untuk mendukung kesehatan ibu dan anak melalui berbagai layanan yang komprehensif dan profesional.."
@@ -803,7 +798,7 @@ class BotMessageController extends Controller
 
                     // Mengirim request HTTP menggunakan cURL
                     $curl = curl_init();
-                    curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.131:3001/send-message');
+                    curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.100:3001/send-message');
                     curl_setopt($curl, CURLOPT_TIMEOUT, 30);
                     curl_setopt($curl, CURLOPT_POST, 1);
                     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -832,7 +827,7 @@ class BotMessageController extends Controller
 
                 // Mengirim request HTTP menggunakan cURL
                 $curl = curl_init();
-                curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.131:3001/send-message');
+                curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.100:3001/send-message');
                 curl_setopt($curl, CURLOPT_TIMEOUT, 30);
                 curl_setopt($curl, CURLOPT_POST, 1);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);

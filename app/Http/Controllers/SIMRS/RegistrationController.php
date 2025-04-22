@@ -8,6 +8,7 @@ use App\Models\OrderRadiologi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\SIMRS\Bed;
 use App\Models\SIMRS\Bilingan;
+use App\Models\SIMRS\BilinganTagihanPasien;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
@@ -24,6 +25,7 @@ use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\Setup\HargaTarifRegistrasi;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
 use App\Models\SIMRS\TutupKunjungan;
@@ -164,9 +166,9 @@ class RegistrationController extends Controller
 
         // dd($doctorsIGD);
 
-        $doctorsLAB = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
-            $query->where('name', 'like', '%Laboratorium%');
-        })->get();
+        // $doctorsLAB = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
+        //     $query->where('name', 'like', '%Laboratorium%');
+        // })->get();
 
         $doctorsLAB = Doctor::with('employee', 'departements')->whereHas('department_from_doctors', function ($query) {
             $query->where('name', 'like', '%LABORATORIUM%');
@@ -364,7 +366,6 @@ class RegistrationController extends Controller
             $validatedData['departement_id'] = $this->getDepartmentId($validatedData);
 
             // Update bed if rawat inap
-            // Update bed if rawat inap
             if ($validatedData['registration_type'] == 'rawat-inap') {
                 Bed::findOrFail($request->bed_id)->update(['patient_id' => $request->patient_id]);
                 $this->assignBedToPatient($request);
@@ -386,34 +387,31 @@ class RegistrationController extends Controller
 
             // Add registration fee for outpatient visits
             if ($validatedData['registration_type'] == 'rawat-jalan') {
-                $department = Departement::find($validatedData['departement_id']);
-
-                // Get registration fees associated with this department
-                $registrationFees = $department->tarif_registrasi()
-                    ->with(['harga_tarif' => function ($query) use ($request) {
-                        $query->where('group_penjamin_id', $request->penjamin_id);
-                    }])
-                    ->get();
+                $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $request->penjamin_id)
+                    ->where('tarif_registrasi_id', 1)
+                    ->first()->harga;
 
                 // Add registration fee to billing details
-                foreach ($registrationFees as $fee) {
-                    if ($fee->harga_tarif->isNotEmpty()) {
-                        $harga = $fee->harga_tarif->first()->harga;
-                        $tagihanPasien = TagihanPasien::create([
-                            'user_id' => auth()->user()->id,
-                            'bilingan_id' => $billing->id,
-                            'registration_id' => $registration->id,
-                            'date' => Carbon::now(),
-                            'tagihan' => "[Biaya Administrasi] Rawat Jalan",
-                            'detail_tagihan' => $fee->nama_tarif,
-                            'nominal' => $harga,
-                            'quantity' => 1,
-                            'harga' => $harga,
-                            'total' => $harga
-                        ]);
-                    }
-                }
+                $tagihanPasien = TagihanPasien::create([
+                    'user_id' => auth()->user()->id,
+                    'bilingan_id' => $billing->id,
+                    'registration_id' => $registration->id,
+                    'date' => Carbon::now(),
+                    'tagihan' => "[Biaya Administrasi] Rawat Jalan",
+                    // 'detail_tagihan' => $fee->nama_tarif,
+                    'nominal' => $hargaTarifAdmin,
+                    'quantity' => 1,
+                    'harga' => $hargaTarifAdmin,
+                    'total' => $hargaTarifAdmin
+                ]);
+
+                BilinganTagihanPasien::create([
+                    'tagihan_pasien_id' => $tagihanPasien->id,
+                    'bilingan_id' => $billing->id,
+                ]);
             }
+
+            // Simpan relasi bilingan-tagihan pasien
 
             return redirect("/daftar-registrasi-pasien/$registration->id")
                 ->with('success', 'Registrasi berhasil ditambahkan!');

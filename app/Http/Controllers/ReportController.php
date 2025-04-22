@@ -1084,6 +1084,18 @@ class ReportController extends Controller
                     }
                 }
             }
+
+            $day_off['ct'] = $absensi_pegawai->filter(function ($attendance) {
+                if ($attendance->attendance_code_id == 3) {
+                    return true;
+                }
+
+                if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 3) {
+                    return true;
+                }
+                return false;
+            })->count();
+
             // Push data ke dalam array attendances
             $attendances[] = [
                 'employee_id' => $employee->id,
@@ -1092,6 +1104,7 @@ class ReportController extends Controller
                 'total_izin' => $total_izin,
                 'total_sakit' => $total_sakit,
                 'total_cuti' => $total_cuti,
+                'sisa_ct' => 12 - $day_off['ct'],
             ];
         }
 

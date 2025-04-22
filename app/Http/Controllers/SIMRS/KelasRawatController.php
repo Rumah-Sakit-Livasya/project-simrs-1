@@ -49,6 +49,11 @@ class KelasRawatController extends Controller
         }
     }
 
+    public function getKelasRawat()
+    {
+        $kelasRawats = KelasRawat::all();
+        return response()->json($kelasRawats);
+    }
 
     public function getKelas($id)
     {

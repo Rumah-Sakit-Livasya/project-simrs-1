@@ -501,4 +501,16 @@ class EmployeeController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function getDoctors()
+    {
+        $doctors = Employee::where('is_doctor', true)
+            ->get(['id', 'fullname']);
+        return response()->json($doctors->map(function ($doctor) {
+            return [
+                'id' => $doctor->id,
+                'text' => $doctor->fullname
+            ];
+        }));
+    }
 }

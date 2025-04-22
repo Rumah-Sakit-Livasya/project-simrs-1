@@ -189,43 +189,41 @@
                 </div>
             </div> --}}
 
-            <div class="col-lg-12">
+            @php
+                $cuti = $day_off->filter(function ($item) {
+                    $desc =
+                        $item->day_off->attendance_code->description ??
+                        ($item->attendance_code->description ?? 'Libur');
+                    return stripos($desc, 'cuti') !== false;
+                });
+                $libur = $day_off->filter(function ($item) {
+                    $desc =
+                        $item->day_off->attendance_code->description ??
+                        ($item->attendance_code->description ?? 'Libur');
+                    return stripos($desc, 'cuti') === false;
+                });
+            @endphp
+
+            <div class="col-lg-8">
                 <div id="panel-1" class="panel">
+                    <div class="panel-hdr">
+                        <h2>Kalender</h2>
+                    </div>
                     <div class="panel-container show">
-                        <h2 class="panel-heading">Daftar Pegawai yang Libur</h2>
-                        <div class="panel-content pt-0" style="overflow-x: auto; white-space: nowrap;">
-                            @foreach ($day_off as $item)
-                                <a type="button" href="#" data-backdrop="static" data-keyboard="false"
-                                    class="btn-show-day-off" data-id="{{ $item->id }}"
-                                    title="{{ $item->day_off->attendance_code->description ?? ($item->attendance_code->description ?? 'Libur') }}">
-                                    <div class="daftar-pegawai text-center d-inline-block ml-1 mr-1">
-                                        @if ($item->employees->foto != null && Storage::exists('employee/profile/' . $item->employees->foto))
-                                            <img src="{{ asset('storage/employee/profile/' . $item->employees->foto) }}"
-                                                class="rounded-circle mr-2" alt=""
-                                                style="width: 60px; height: 60px; object-fit: cover; z-index: 100;">
-                                        @else
-                                            <img src="{{ $item->employees->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
-                                                class="rounded-circle mr-2" alt=""
-                                                style="width: 60px; z-index: 100;">
-                                        @endif
-                                        <div class="name mt-2">{{ Str::limit($item->employees->fullname, 15) }}</div>
-                                    </div>
-                                </a>
-                            @endforeach
+                        <div class="panel-content">
+                            <div id="calendar"></div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row g-5 d-flex chart" style="overflow-x: auto;">
-            <div class="col-lg-6 mt-0 mb-2">
-                <div id="panel-1" class="panel h-100">
+            <div class="col-lg-4 ">
+                <div id="panel-1" class="panel">
                     <div>
                         <h2 class="panel-heading">Daftar Pegawai yang Ulang Tahun Hari Ini</h2>
                     </div>
                     <div class="panel-container show">
-                        <div class="panel-content pt-3" style="overflow-y: auto; max-height: 300px; white-space: nowrap;">
+                        <div class="panel-content pt-3" style="height: 45rem; overflow-x: auto; white-space: normal;">
                             @if ($birthdays->isEmpty())
                                 <p class="text-center">Tidak ada pegawai yang ulang tahun hari ini.</p>
                             @else
@@ -309,6 +307,116 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="row g-5 d-flex chart" style="overflow-x: auto;">
+            <div class="col-lg-6 mt-0 mb-2">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div id="panel-cuti-libur" class="panel">
+                            <div class="panel-container show">
+                                <h2 class="panel-heading">Daftar Pegawai Cuti & Libur</h2>
+                                <div class="panel-content pt-0 d-flex flex-column"
+                                    style="overflow-y: auto; max-height: 300px; white-space: nowrap;">
+                                    <div class="flex-fill mb-4">
+                                        <h4 class="mb-2">Cuti</h4>
+                                        <div class="d-flex flex-column">
+                                            @foreach ($cuti as $item)
+                                                <a href="#" data-backdrop="static" data-keyboard="false"
+                                                    class="btn-show-day-off mb-3" data-id="{{ $item->id }}"
+                                                    title="{{ $item->day_off->attendance_code->description ?? ($item->attendance_code->description ?? 'Cuti') }}">
+                                                    <div
+                                                        class="daftar-pegawai d-flex align-items-center p-2 border rounded">
+                                                        @if ($item->employees->foto != null && Storage::exists('employee/profile/' . $item->employees->foto))
+                                                            <img src="{{ asset('storage/employee/profile/' . $item->employees->foto) }}"
+                                                                class="rounded-circle mr-3" alt=""
+                                                                style="width: 60px; height: 60px; object-fit: cover;">
+                                                        @else
+                                                            <img src="{{ $item->employees->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
+                                                                class="rounded-circle mr-3" alt=""
+                                                                style="width: 60px;">
+                                                        @endif
+                                                        <div>
+                                                            <div class="name mb-1">
+                                                                {{ $item->employees->fullname }}
+                                                            </div>
+                                                            <div>
+                                                                <small class="badge badge-info">
+                                                                    {{ $item->day_off->attendance_code->description ?? ($item->attendance_code->description ?? 'Cuti') }}
+                                                                </small>
+                                                            </div>
+                                                            <div>
+                                                                @if ($item->employees->user->isOnline())
+                                                                    <span
+                                                                        class="text-green-600 font-semibold">Online</span>
+                                                                @else
+                                                                    <span class="text-gray-500 text-sm">
+                                                                        {{ $item->employees->user->lastSeenHuman() }}
+                                                                    </span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            @endforeach
+                                            @if ($cuti->isEmpty())
+                                                <p class="text-center">Tidak ada pegawai yang sedang cuti.</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="flex-fill">
+                                        <h4 class="mb-2">Libur</h4>
+                                        <div class="d-flex flex-column">
+                                            @foreach ($libur as $item)
+                                                <a href="#" data-backdrop="static" data-keyboard="false"
+                                                    class="btn-show-day-off mb-3" data-id="{{ $item->id }}"
+                                                    title="{{ $item->day_off->attendance_code->description ?? ($item->attendance_code->description ?? 'Libur') }}">
+                                                    <div
+                                                        class="daftar-pegawai d-flex align-items-center p-2 border rounded">
+                                                        @if ($item->employees->foto != null && Storage::exists('employee/profile/' . $item->employees->foto))
+                                                            <img src="{{ asset('storage/employee/profile/' . $item->employees->foto) }}"
+                                                                class="rounded-circle mr-3" alt=""
+                                                                style="width: 60px; height: 60px; object-fit: cover;">
+                                                        @else
+                                                            <img src="{{ $item->employees->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
+                                                                class="rounded-circle mr-3" alt=""
+                                                                style="width: 60px;">
+                                                        @endif
+                                                        <div>
+                                                            <div class="name mb-1">
+                                                                {{ $item->employees->fullname }}
+                                                            </div>
+                                                            <div>
+                                                                <small class="badge badge-info">
+                                                                    {{ $item->day_off->attendance_code->description ?? ($item->attendance_code->description ?? 'Libur') }}
+                                                                </small>
+                                                            </div>
+                                                            <div>
+                                                                @if ($item->employees->user->isOnline())
+                                                                    <span
+                                                                        class="text-green-600 font-semibold">Online</span>
+                                                                @else
+                                                                    <span class="text-gray-500 text-sm">
+                                                                        {{ $item->employees->user->lastSeenHuman() }}
+                                                                    </span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            @endforeach
+                                            @if ($libur->isEmpty())
+                                                <p class="text-center">Tidak ada pegawai yang sedang libur.</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-lg-6 mt-0 mb-2">
                 <div id="panel-2" class="panel h-100">
                     <div>
@@ -379,6 +487,101 @@
                 </div>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">URL Shortener</h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Form Create Short URL -->
+                        <form id="shortenForm" method="POST" action="{{ route('dashboard.url_shortener.store') }}">
+                            @csrf
+                            <div class="form-row">
+                                <div class="col-md-8 mb-3">
+                                    <label for="original_url">URL Asli</label>
+                                    <input type="url" class="form-control" id="original_url" name="original_url"
+                                        required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="custom_code">Kode Kustom (opsional)</label>
+                                    <input type="text" class="form-control" id="custom_code" name="custom_code">
+                                </div>
+                                <div class="col-md-1 mb-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary">Buat</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Hasil Short URL -->
+                        @if (session('short_url'))
+                            <div class="alert alert-success mt-3">
+                                <p>Short URL berhasil dibuat:</p>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" value="{{ session('short_url') }}"
+                                        id="shortUrlInput" readonly>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            onclick="copyShortUrl()">
+                                            <i class="fas fa-copy"></i> Salin
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Daftar Link -->
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Daftar Link Saya</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="linksTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>URL Asli</th>
+                                        <th>Short URL</th>
+                                        <th>Kode</th>
+                                        <th>Klik</th>
+                                        <th>Dibuat</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($links as $link)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td class="text-truncate" style="max-width: 200px;">
+                                                <a href="{{ $link->original_url }}"
+                                                    target="_blank">{{ $link->original_url }}</a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ url('/links/' . $link->short_code) }}" target="_blank">
+                                                    {{ url('/links/' . $link->short_code) }}
+                                                </a>
+                                            </td>
+                                            <td>{{ $link->short_code }}</td>
+                                            <td>{{ $link->clicks }}</td>
+                                            <td>{{ $link->created_at->format('d/m/Y H:i') }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-danger delete-link"
+                                                    data-id="{{ $link->id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-5 d-flex chart">
             <div class="col-lg-4 mt-0 mb-2">
                 <!--Default-->
@@ -746,6 +949,172 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ambil employee id dari user yang sedang login
+            var employeeId = "{{ auth()->user()->employee->id }}";
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                editable: true,
+                selectable: true,
+                eventColor: '#dc3545', // Warna danger untuk employee-leaves
+                events: '/api/employee-leaves/' + employeeId,
+                dayCellDidMount: function(info) {
+                    // Perbesar ukuran tanggal di setiap sel
+                    var dayNumberEl = info.el.querySelector('.fc-daygrid-day-number');
+                    if (dayNumberEl) {
+                        dayNumberEl.style.fontSize = '20px';
+                    }
+
+                    // Tambahkan pin khusus di sel hari ini (bukan pada event)
+                    var today = new Date();
+                    if (info.date.toDateString() === today.toDateString()) {
+                        var pin = document.createElement('span');
+                        pin.innerHTML = '📌';
+                        pin.style.position = 'absolute';
+                        pin.style.top = '2px';
+                        pin.style.left = '2px';
+                        pin.style.fontSize = '24px';
+                        info.el.style.position = 'relative';
+                        info.el.appendChild(pin);
+                    }
+                },
+                eventDidMount: function(info) {
+                    // Center-kan teks pada event dan atur white-space
+                    info.el.style.textAlign = 'center';
+                    info.el.style.whiteSpace = 'normal';
+                    // Jika event adalah ulang tahun, hanya perbesar mahkota dan biarkan nama pegawai kecil
+                    if (info.event.extendedProps.eventType === 'birthday') {
+                        info.el.innerHTML =
+                            '<div style="display: flex; flex-direction: column; align-items: center;">' +
+                            '<span style="font-size: 15pt;">🎂</span>' +
+                            '</div>';
+                    }
+                },
+                eventDrop: function(info) {
+                    updateEvent(info.event);
+                },
+                eventResize: function(info) {
+                    updateEvent(info.event);
+                },
+                select: function(info) {
+                    Swal.fire({
+                        title: 'Masukkan judul acara:',
+                        input: 'text',
+                        inputAttributes: {
+                            style: 'height:40px; font-size:9px;'
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'Simpan',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.value) {
+                            createEvent(result.value, info.startStr, info.endStr);
+                        }
+                        calendar.unselect();
+                    });
+                },
+                eventClick: function(info) {
+                    // Tampilkan info acara terlebih dahulu
+                    Swal.fire({
+                        title: info.event.title,
+                        text: `Tanggal: ${info.event.start.toLocaleDateString()}`,
+                        icon: 'info',
+                        showDenyButton: true,
+                        confirmButtonText: 'Tutup',
+                        denyButtonText: 'Hapus acara'
+                    }).then((result) => {
+                        if (result.isDenied) {
+                            Swal.fire({
+                                title: 'Hapus acara ini?',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Ya',
+                                cancelButtonText: 'Tidak'
+                            }).then((deleteResult) => {
+                                if (deleteResult.isConfirmed) {
+                                    deleteEvent(info.event.id);
+                                    info.event.remove();
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Ambil data ulang tahun dan tambahkan ke kalender sebagai event
+            fetch('/api/employee-birthdays')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(function(employee) {
+                        calendar.addEvent({
+                            id: employee.id,
+                            title: employee.title,
+                            start: employee.start,
+                            allDay: true,
+                            backgroundColor: employee.color,
+                            borderColor: employee.color,
+                            extendedProps: {
+                                eventType: 'birthday'
+                            }
+                        });
+                    });
+                });
+
+            calendar.render();
+
+            // Fungsi untuk membuat acara
+            function createEvent(title, start, end) {
+                fetch('/api/events', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            title: title,
+                            start: start,
+                            end: end,
+                            employee_id: employeeId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(event => calendar.addEvent(event));
+            }
+
+            // Fungsi untuk mengupdate acara
+            function updateEvent(event) {
+                fetch(`/api/events/${event.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: event.title,
+                        start: event.start.toISOString(),
+                        end: event.end ? event.end.toISOString() : null,
+                        employee_id: employeeId
+                    })
+                });
+            }
+
+            // Fungsi untuk menghapus acara
+            function deleteEvent(id) {
+                fetch(`/api/events/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+            }
+        });
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1074,6 +1443,45 @@
             radarChart();
             pieChart();
             doughnutChart();
+        });
+    </script>
+
+    {{-- Shortlink --}}
+    <script>
+        // Inisialisasi DataTable
+        $(document).ready(function() {
+            $('#linksTable').DataTable({
+                responsive: true
+            });
+        });
+
+        // Fungsi Copy URL
+        function copyShortUrl() {
+            const copyText = document.getElementById("shortUrlInput");
+            copyText.select();
+            document.execCommand("copy");
+            alert("URL berhasil disalin: " + copyText.value);
+        }
+
+        // Delete Link
+        $('.delete-link').click(function() {
+            const linkId = $(this).data('id');
+
+            if (confirm('Apakah Anda yakin ingin menghapus link ini?')) {
+                $.ajax({
+                    url: "{{ route('dashboard.url_shortener.delete', '') }}/" + linkId,
+                    type: 'DELETE',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert('Gagal menghapus link');
+                    }
+                });
+            }
         });
     </script>
 @endsection

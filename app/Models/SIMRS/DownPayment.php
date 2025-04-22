@@ -24,4 +24,9 @@ class DownPayment extends Model implements AuditableContract
     {
         return $this->belongsTo(User::class);
     }
+
+    public function isNotEmpty()
+    {
+        return $this->exists;
+    }
 }
