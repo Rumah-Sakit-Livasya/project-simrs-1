@@ -449,6 +449,10 @@
                         {{-- Radiologi --}}
                         @include('pages.simrs.pendaftaran.partials.radiologi')
                     </div>
+                    <div id="laboratorium" style="display: none;">
+                        {{-- Laboratorium --}}
+                        @include('pages.simrs.pendaftaran.partials.laboratorium')
+                    </div>
                 </div>
             </div>
         </div>
@@ -495,6 +499,9 @@
                         break;
                     case 'radiologi':
                         $('#radiologi').show();
+                        break;
+                    case 'laboratorium':
+                        $('#laboratorium').show();
                         break;
                 }
 

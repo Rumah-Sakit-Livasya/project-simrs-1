@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\SIMRS\Bed;
@@ -33,6 +34,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -173,6 +175,12 @@ class RegistrationController extends Controller
 
         $penjamins = Penjamin::all();
 
+        // get group penjamin with name "Standar"
+        $grupPenjaminStandar = GroupPenjamin::where('name', 'like', '%standar%')->first();
+
+        // get kelas rawat with name "Rawat Jalan"
+        $kelasRawatRajal = KelasRawat::where('kelas', 'like', '%rawat jalan%')->first();
+
         switch ($registrasi) {
             case 'rawat-jalan':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
@@ -241,14 +249,25 @@ class RegistrationController extends Controller
 
             case 'laboratorium':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
+                    // 'title' => "Laboratorium",
+                    // 'laboratorium_categories' => KategoriLaboratorium::all(),
+                    // 'tarifs' => TarifParameterLaboratorium::all(),
+                    // 'doctors' => $doctorsLAB,
+                    // 'penjamins' => $penjamins,
+                    // 'case' => 'laboratorium',
+                    // 'groupPenjaminId' => $groupPenjaminStandarId,
+                    // 'kelasRawatId' => $kelasRawatRajalId,
+                    // 'patient' => $patient,
+                    // 'age' => $age
+
                     'title' => "Laboratorium",
+                    'doctors' => Doctor::all(),
                     'laboratorium_categories' => KategoriLaboratorium::all(),
-                    'tarifs' => TarifParameterLaboratorium::all(),
-                    'doctors' => $doctorsLAB,
-                    'penjamins' => $penjamins,
+                    'penjamin_standar_id' => $groupPenjaminStandarId,
+                    'tarifs' => TarifParameterLaboratorium::where('kelas_rawat_id', $kelasRawatRajal->id)
+                        ->where('group_penjamin_id', $grupPenjaminStandar->id)
+                        ->get(),
                     'case' => 'laboratorium',
-                    'groupPenjaminId' => $groupPenjaminStandarId,
-                    'kelasRawatId' => $kelasRawatRajalId,
                     'patient' => $patient,
                     'age' => $age
                 ]);
@@ -259,7 +278,10 @@ class RegistrationController extends Controller
                     'title' => "Radiologi",
                     'doctors' => Doctor::all(),
                     'radiology_categories' => KategoriRadiologi::all(),
-                    'tarifs' => TarifParameterRadiologi::all(),
+                    'penjamin_standar_id' => $groupPenjaminStandarId,
+                    'tarifs' => TarifParameterRadiologi::where('kelas_rawat_id', $kelasRawatRajal->id)
+                        ->where('group_penjamin_id', $grupPenjaminStandar->id)
+                        ->get(),
                     'case' => 'radiologi',
                     'patient' => $patient,
                     'age' => $age
@@ -293,9 +315,9 @@ class RegistrationController extends Controller
                 'employee_id' => 'required',
                 'doctor_id' => 'required',
                 'registration_type' => 'required',
-                'poliklinik' => 'nullable|string',
                 'penjamin_id' => 'required',
                 'rujukan' => 'required|string',
+                'poliklinik' => 'nullable|string',
                 'dokter_perujuk' => 'nullable|integer',
                 'tipe_rujukan' => 'nullable|string',
                 'igd_type' => 'nullable|string',
@@ -442,6 +464,19 @@ class RegistrationController extends Controller
             $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
         }
 
+        $laboratoriumDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%laboratorium%');
+        })->get();
+
+        $laboratoriumOrders = [];
+
+        OrderLaboratorium::where('registration_id', $registration->id)
+            ->get()
+            ->each(function ($order) use (&$laboratoriumOrders) {
+                // dd($order->registration);
+                $laboratoriumOrders[$order->id] = $order;
+            });
+
         $radiologyDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
             $query->where('name', 'like', '%radiologi%');
         })->get();
@@ -464,13 +499,18 @@ class RegistrationController extends Controller
 
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
             'kelasRawat' => $kelasRawat,
-            'groupPenjaminId' => $groupPenjaminId,
             'penjamin' => $penjamin,
             'groupedDoctors' => $groupedDoctors,
             'radiologyDoctors' => $radiologyDoctors,
             'radiologiOrders' => $radiologiOrders,
+            'laboratoriumDoctors' => $laboratoriumDoctors,
+            'laboratoriumOrders' => $laboratoriumOrders,
+            'groupPenjaminId' => $groupPenjaminId,
+            'laboratorium_categories' => KategoriLaboratorium::all(),
+            'laboratorium_tarifs' => TarifParameterLaboratorium::all(),
             'radiology_categories' => KategoriRadiologi::all(),
-            'tarifs' => TarifParameterRadiologi::all(),
+            'radiology_tarifs' => TarifParameterRadiologi::all(),
+            'kelas_rawats' => KelasRawat::all(),
             'registration' => $registration,
             'patient' => $patient,
             'departements' => $departements,

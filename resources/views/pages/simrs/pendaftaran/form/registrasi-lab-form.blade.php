@@ -1,12 +1,56 @@
-<form id="form-laboratorium">
-    @method('post')
+@section('extended-css')
+    <style>
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+        }
+
+        .card h3 {
+            background-color: #cc33cc;
+            color: white;
+            padding: 10px;
+            margin: -15px -15px 10px -15px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .parameter_laboratorium_number {
+            width: 60px;
+            margin-left: 10px;
+        }
+    </style>
+@endsection
+<form action="{{ route('simpan.registrasi') }}" method="post" name="form-laboratorium" id="form-laboratorium">
     @csrf
     <input type="hidden" name="patient_id" value="{{ $patient->id }}">
     <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
     <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
-    <input type="hidden" name="registration_type" value="laboratorium">
+    <input type="hidden" name="registration_type" value="rawat-jalan">
+    <input type="hidden" name="poliklinik" value="LABORATORIUM">
+    <input type="hidden" name="rujukan" value="inisiatif pribadi">
+    <input type="hidden" name="penjamin_id" value="{{ $penjamin_standar_id }}">
     <div class="row">
-        <div class="col-xl-5">
+        <div class="col-xl-6">
             <div class="form-group">
                 <div class="row align-items-center">
                     <div class="col-xl-4 text-right">
@@ -41,134 +85,135 @@
                                 @endforeach
                             </select>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row align-items-center">
+                    <div class="col-xl-4 text-right">
+                        <label class="form-label" for="doctor_id">Tipe Order</label>
+                    </div>
+                    <div class="col-xl-8">
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="order_type" id="order_type_normal"
+                                    value="normal" checked>
+                                <label class="form-check-label" for="order_type_normal">
+                                    Normal
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="order_type" id="order_type_cito"
+                                    value="cito">
+                                <label class="form-check-label" for="order_type_cito">
+                                    CITO (naik 30%)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            {{-- <div class="form-group">
+                <div class="row align-items-center">
+                    <div class="col-xl-4 text-right">
+                        <label class="form-label" for="registration_date">
+                            Dokter Perujuk
+                        </label>
+                    </div>
+                    <div class="col-xl-8">
+                        <div class="form-group">
+                            <select class="select2 form-control w-100" id="doctor_id" name="doctor_id">
+                                <option value=""></option>
+                                @foreach ($doctors as $doctor)
+                                    <option value="{{ $doctor->id }}">
+                                        {{ $doctor->employee->fullname }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div> --}}
 
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-7">
             <div class="form-group">
                 <div class="row align-items-center">
                     <div class="col-xl-4 text-right">
-                        <label class="form-label" for="">
-                            Rujukan
+                        <label class="form-label" for="diagnosa_awal">
+                            Diagnosa*
                         </label>
                     </div>
                     <div class="col-xl-8">
-                        <div class="custom-control custom-checkbox">
-                            <div class="frame-wrap">
-                                <div class="custom-control custom-radio custom-control-inline p-0">
-                                    <input type="radio" class="custom-control-input" id="inisiatif_pribadi"
-                                        name="rujukan" value="inisiatif pribadi">
-                                    <label class="custom-control-label" for="inisiatif_pribadi">Inisiatif
-                                        Pribadi</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" id="dalam_rs" name="rujukan"
-                                        value="dalam rs">
-                                    <label class="custom-control-label" for="dalam_rs">Dalam RS</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" id="luar_rs" name="rujukan"
-                                        value="luar rs">
-                                    <label class="custom-control-label" for="luar_rs">Luar RS</label>
-                                </div>
-                            </div>
-                        </div>
+                        <textarea class="form-control" id="diagnosa_awal" name="diagnosa_awal" rows="5"></textarea>
+                        @error('diagnosa_awal')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
             </div>
+
             <div class="form-group">
                 <div class="row align-items-center">
                     <div class="col-xl-4 text-right">
-                        <label class="form-label" for="">
-                            Tipe Order
+                        <label class="form-label" for="catatan">
+                            Catatan
                         </label>
                     </div>
                     <div class="col-xl-8">
-                        <div class="custom-control custom-checkbox">
-                            <div class="frame-wrap">
-                                <div class="custom-control custom-radio custom-control-inline p-0">
-                                    <input type="radio" class="custom-control-input" id="normal" name="order_type"
-                                        value="normal">
-                                    <label class="custom-control-label" for="normal">Normal</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" id="cito" name="order_type"
-                                        value="cito">
-                                    <label class="custom-control-label" for="cito">CITO</label>
-                                </div>
-                            </div>
-                        </div>
+                        <textarea class="form-control" id="catatan" name="catatan" rows="5"></textarea>
+                        @error('catatan')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
             </div>
-            <br>
         </div>
-        <div class="col-xl-6">
-            <h3>Parameter Laboratorium</h3>
-        </div>
-        <div class="col-xl-6">
-            <h3 class="text-success" style="text-align: right"> <i class="fa fa-calculator"></i> <span
-                    id="laboratorium-total">Rp 0</span>
-            </h3>
-        </div>
-        <div class="col-xl-2"></div>
-        <div class="col-xl-8">
+
+        <br>&nbsp;
+
+        <div class="col-xl-12">
             <div class="form-group">
                 <input type="text" class="form-control mb-3" id="searchLaboratorium"
-                    placeholder="Cari parameter...">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Jumlah</th>
-                        </tr>
-                    </thead>
-                    <tbody id="laboratoriumTable">
-                        @foreach ($laboratorium_categories as $category)
-                            <tr class="table-info">
-                                <td colspan="2">
-                                    <h4 style="text-align: center">{{ $category->nama_kategori }}</h4>
-                                </td>
-                            </tr>
+                    placeholder="Cari tindakan...">
+                <div class="grid">
+                    @foreach ($laboratorium_categories as $category)
+                        <div class="card">
+                            <h3>{{ $category->nama_kategori }}</h3>
                             @foreach ($category->parameter_laboratorium as $parameter)
                                 @if ($parameter->is_order)
-                                    <tr class="parameter_laboratorium">
-                                        <td>
-                                            <div class="form-check">
-                                                <input class="form-check-input parameter_laboratorium_checkbox"
-                                                    type="checkbox" value="{{ $parameter->id }}"
-                                                    id="parameter_laboratorium_{{ $parameter->id }}">
-                                                <label class="form-check-label"
-                                                    for="parameter_laboratorium_{{ $parameter->id }}">
-                                                    {{ $parameter->parameter }}
-                                                </label>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <input type="number" value="1"
-                                                class="form-control parameter_laboratorium_number"
-                                                id="jumlah_{{ $parameter->id }}">
-                                        </td>
-                                    </tr>
+                                    <div class="item parameter_laboratorium">
+                                        <input type="checkbox" value="{{ $parameter->id }}"
+                                            class="parameter_laboratorium_checkbox"
+                                            id="parameter_laboratorium_{{ $parameter->id }}"> <label>
+                                            <span class="form-check-label">{{ $parameter->parameter }}</span>(<span
+                                                id="harga_parameter_laboratorium_{{ $parameter->id }}">{{ rp(0) }}</span>)
+                                        </label>
+
+                                        <input type="number" value="1"
+                                            class="form-control parameter_laboratorium_number"
+                                            id="jumlah_{{ $parameter->id }}">
+                                    </div>
                                 @endif
                             @endforeach
-                        @endforeach
-                    </tbody>
-                </table>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
-        <div class="col-xl-2"></div>
         <div class="col-xl-12 mt-5">
             <div class="row">
                 <div class="col-xl-6">
+                    <h3>&nbsp;</h3>
                     <a href="/patients/{{ $patient->id }}" class="btn btn-lg btn-default waves-effect waves-themed">
                         <span class="fal fa-arrow-left mr-1 text-primary"></span>
                         <span class="text-primary">Kembali</span>
                     </a>
                 </div>
                 <div class="col-xl-6 text-right">
+                    <h3 class="text-success"> <i class="fa fa-calculator"></i> <span id="laboratorium-total">Rp
+                            0</span>
+                    </h3>
                     <button type="submit" class="btn btn-lg btn-primary waves-effect waves-themed">
                         <span class="fal fa-save mr-1"></span>
                         Simpan
@@ -179,11 +224,10 @@
     </div>
 </form>
 
-
-<script>
-    window._parameterLaboratorium = @json($laboratorium_categories);
-    window._tarifLaboratorium = @json($tarifs);
-    window._groupPenjaminId = @json($groupPenjaminId);
-    window._kelasRawatId = @json($kelasRawatId);
-</script>
-<script src="{{ asset('js/simrs/form-laboratorium.js') }}?v={{ time() }}"></script>
+@section('plugin')
+    <script>
+        window._kategoriLaboratorium = @json($laboratorium_categories);
+        window._tarifLaboratorium = @json($tarifs);
+    </script>
+    <script src="{{ asset('js/simrs/form-laboratorium-registrasi.js') }}?v={{ time() }}"></script>
+@endsection

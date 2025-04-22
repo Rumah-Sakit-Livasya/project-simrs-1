@@ -79,15 +79,15 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label class="d-block">Status</label>
-                                    <div class="custom-control custom-checkbox custom-control-inline">
-                                        <input type="checkbox" name="is_hasil" class="custom-control-input"
+                                    <div>
+                                        <input type="checkbox" name="is_hasil"
                                             id="is_hasil">
-                                        <label class="custom-control-label" for="is_hasil">Isi Hasil</label>
+                                        <label for="is_hasil">Isi Hasil</label>
                                     </div>
-                                    <div class="custom-control custom-checkbox custom-control-inline">
-                                        <input type="checkbox" class="custom-control-input" name="is_order"
-                                            id="is_order" checked="">
-                                        <label class="custom-control-label" for="is_order">Bisa Di Order</label>
+                                    <div>
+                                        <input type="checkbox" name="is_order"
+                                            id="is_order">
+                                        <label for="is_order">Bisa Di Order</label>
                                     </div>
                                 </div>
                             </div>

@@ -3,6 +3,45 @@
 use Illuminate\Support\Facades\Request;
 use Carbon\Carbon;
 
+/**
+ * Determines if a given date of birth (DOB) falls within a specified age range.
+ *
+ * @param string $dob The date of birth in a valid date format (e.g., 'YYYY-MM-DD').
+ * @param string $minAgeStr The minimum age range in the format 'years-months-days' (e.g., '18-0-0' for 18 years).
+ * @param string $maxAgeStr The maximum age range in the format 'years-months-days' (e.g., '65-0-0' for 65 years).
+ * 
+ * @return bool Returns true if the date of birth is within the specified age range, otherwise false.
+ * 
+ * @example
+ * // Example usage:
+ * $dob = '2000-01-01';
+ * $minAgeStr = '18-0-0'; // Minimum age: 18 years
+ * $maxAgeStr = '65-0-0'; // Maximum age: 65 years
+ * 
+ * $isWithinRange = isWithinAgeRange($dob, $minAgeStr, $maxAgeStr);
+ * if ($isWithinRange) {
+ *     echo "The DOB is within the specified age range.";
+ * } else {
+ *     echo "The DOB is outside the specified age range.";
+ * }
+ */
+function isWithinAgeRange($dob, $minAgeStr, $maxAgeStr)
+{
+    // Parse the minimum age string
+    list($minYears, $minMonths, $minDays) = explode('-', $minAgeStr);
+    $minAge = new Age((int)$minYears, (int)$minMonths, (int)$minDays);
+
+    // Parse the maximum age string
+    list($maxYears, $maxMonths, $maxDays) = explode('-', $maxAgeStr);
+    $maxAge = new Age((int)$maxYears, (int)$maxMonths, (int)$maxDays);
+
+    // Create an AgeComparison object
+    $ageComparison = new AgeComparison($minAge, $maxAge);
+
+    // Check if the date of birth is within the age range
+    return $ageComparison->isAgeWithinRange($dob);
+}
+
 function displayAge($birthdate)
 {
     $now = Carbon::now();

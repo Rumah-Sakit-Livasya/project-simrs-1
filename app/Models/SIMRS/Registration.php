@@ -5,6 +5,7 @@ namespace App\Models\SIMRS;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
 use App\Models\OrderRadiologi;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Keuangan\Kasir;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
@@ -45,7 +46,7 @@ class Registration extends Model implements AuditableContract
     {
         return $this->hasOne(PengkajianNurseRajal::class, 'registration_id');
     }
-    
+
     public function pengkajian_lanjutan()
     {
         return $this->hasOne(PengkajianLanjutan::class, 'registration_id');
@@ -130,6 +131,11 @@ class Registration extends Model implements AuditableContract
     public function order_radiologi()
     {
         return $this->hasMany(OrderRadiologi::class, 'registration_id');
+    }
+
+    public function order_laboratorium()
+    {
+        return $this->hasMany(OrderLaboratorium::class, 'registration_id');
     }
 
     // public function generateNomorRegistrasi()

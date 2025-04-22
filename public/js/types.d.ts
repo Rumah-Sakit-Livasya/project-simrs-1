@@ -2,6 +2,47 @@ declare function showErrorAlert(message: string): void;
 declare function showSuccessAlert(message: string): void;
 declare function showErrorAlertNoRefresh(message: string): void;
 
+interface GroupPenjamin {
+    id: number;
+    name: string;
+    code: string;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+interface Penjamin {
+    id: number;
+    group_penjamin_id: number;
+    mulai_kerjasama: string;
+    akhir_kerjasama: string | null;
+    tipe_perusahaan: string;
+    kode_perusahaan: string | null;
+    nama_perusahaan: string;
+    alamat_surat: string | null;
+    alamat_email: string | null;
+    direktur: string | null;
+    nama_kontak: string | null;
+    diskon: string;
+    jabatan: string | null;
+    termasuk_penjamin: number;
+    fax_kontak: string | null;
+    alamat: string | null;
+    alamat_tagihan: string | null;
+    telepon_kontak: string | null;
+    email_kontak: string | null;
+    kota: string | null;
+    status: number;
+    kode_pos: string | null;
+    jenis_kerjasama: string;
+    jenis_kontrak: string;
+    pasien_otc: number;
+    keterangan: string | null;
+    deleted_at: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+}
+
 interface TarifLaboratorium {
     id: number;
     parameter_laboratorium_id: number;
@@ -304,3 +345,46 @@ interface TarifRadiologi {
     created_at: string;
     updated_at: string;
 }
+
+interface KategoriRadiologi {
+    id: number;
+    nama_kategori: string;
+    status: number;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+    parameter_radiologi: ParameterRadiologi[];
+}
+
+interface KelasRawat {
+    id: number;
+    kelas: string;
+    urutan: string;
+    keterangan: string;
+    isICU: number;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+interface OrderLaboratorium {
+    id: number;
+    registration_id: number;
+    otc_id: number | null;
+    dokter_laboratorium_id: number;
+    user_id: number;
+    order_date: string;
+    inspection_date: string | null;
+    result_date: string | null;
+    no_order: string;
+    tipe_order: string;
+    tipe_pasien: string;
+    diagnosa_klinis: string;
+    status_isi_hasil: string;
+    status_billed: string;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+type PatientType = "rajal" | "ranap" | "otc";

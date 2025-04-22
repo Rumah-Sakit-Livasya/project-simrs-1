@@ -59,203 +59,263 @@
                                         </div>
                                     </td>
                                     <td>
-                                        @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
-                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
-                                                <a
-                                                    href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
-                                                    {{ $order->order_date }}
-                                                </a>
-                                            @else
-                                                <a
-                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                    {{ $order->order_date }}
-                                                </a>
-                                            @endif
-                                        @else
-                                            <a
-                                                href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                        @if ($order->registration_otc)
+                                            <a>
                                                 {{ $order->order_date }}
                                             </a>
+                                        @else
+                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                    <a
+                                                        href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                        {{ $order->order_date }}
+                                                    </a>
+                                                @else
+                                                    <a
+                                                        href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                        {{ $order->order_date }}
+                                                    </a>
+                                                @endif
+                                            @else
+                                                <a
+                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                    {{ $order->order_date }}
+                                                </a>
+                                            @endif
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
-                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                        @if ($order->registration_otc)
+                                            <a>
+                                                OTC
+                                            </a>
+                                        @else
+                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                    <a
+                                                        href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                        {{ $order->registration->patient->medical_record_number }}
+                                                    </a>
+                                                @else
+                                                    <a
+                                                        href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                        {{ $order->registration->patient->medical_record_number }}
+                                                    </a>
+                                                @endif
+                                            @else
                                                 <a
-                                                    href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                     {{ $order->registration->patient->medical_record_number }}
                                                 </a>
-                                            @else
-                                                <a
-                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                    {{ $order->registration->patient->medical_record_number }}
-                                                </a>
                                             @endif
-                                        @else
-                                            <a
-                                                href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                {{ $order->registration->patient->medical_record_number }}
-                                            </a>
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
-                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
-                                                <a
-                                                    href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
-                                                    {{ $order->registration->registration_number }}
-                                                </a>
+                                        @if ($order->registration_otc)
+                                            <a>
+                                                {{ $order->registration_otc->registration_number }}
+                                            </a>
+                                        @else
+                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                    <a
+                                                        href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                        {{ $order->registration->registration_number }}
+                                                    </a>
+                                                @else
+                                                    <a
+                                                        href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                        {{ $order->registration->registration_number }}
+                                                    </a>
+                                                @endif
                                             @else
                                                 <a
                                                     href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                     {{ $order->registration->registration_number }}
                                                 </a>
                                             @endif
-                                        @else
-                                            <a
-                                                href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                {{ $order->registration->registration_number }}
-                                            </a>
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
-                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
-                                                <a
-                                                    href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
-                                                    {{ $order->no_order }}
-                                                </a>
-                                            @else
-                                                <a
-                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                    {{ $order->no_order }}
-                                                </a>
-                                            @endif
-                                        @else
-                                            <a
-                                                href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                        @if ($order->registration_otc)
+                                            <a>
                                                 {{ $order->no_order }}
                                             </a>
+                                        @else
+                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                    <a
+                                                        href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                        {{ $order->no_order }}
+                                                    </a>
+                                                @else
+                                                    <a
+                                                        href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                        {{ $order->no_order }}
+                                                    </a>
+                                                @endif
+                                            @else
+                                                <a
+                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                    {{ $order->no_order }}
+                                                </a>
+                                            @endif
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
-                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                        @if ($order->registration_otc)
+                                            <a>
+                                                {{ $order->registration_otc->nama_pasien }}
+                                            </a>
+                                        @else
+                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                    <a
+                                                        href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                        {{ $order->registration->patient->name }}
+                                                    </a>
+                                                @else
+                                                    <a
+                                                        href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                        {{ $order->registration->patient->name }}
+                                                    </a>
+                                                @endif
+                                            @else
                                                 <a
-                                                    href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                     {{ $order->registration->patient->name }}
                                                 </a>
-                                            @else
-                                                <a
-                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                    {{ $order->registration->patient->name }}
-                                                </a>
                                             @endif
-                                        @else
-                                            <a
-                                                href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                {{ $order->registration->patient->name }}
-                                            </a>
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
-                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                        @if ($order->registration_otc)
+                                            <a>
+                                                {{ $order->registration_otc->poly_ruang }}
+                                            </a>
+                                        @else
+                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                    <a
+                                                        href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                        {{ $order->registration->poliklinik }}
+                                                    </a>
+                                                @else
+                                                    <a
+                                                        href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                        {{ $order->registration->poliklinik }}
+                                                    </a>
+                                                @endif
+                                            @else
                                                 <a
-                                                    href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                     {{ $order->registration->poliklinik }}
                                                 </a>
-                                            @else
-                                                <a
-                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                    {{ $order->registration->poliklinik }}
-                                                </a>
                                             @endif
-                                        @else
-                                            <a
-                                                href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                {{ $order->registration->poliklinik }}
-                                            </a>
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
-                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
-                                                <a
-                                                    href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
-                                                    {{ $order->registration->patient->penjamin->name ?? '-' }}
-                                                </a>
+                                        @if ($order->registration_otc)
+                                            <a>
+                                                {{ $order->registration_otc->penjamin->name ?? '-' }}
+                                            </a>
+                                        @else
+                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                    <a
+                                                        href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                        {{ $order->registration->patient->penjamin->name ?? '-' }}
+                                                    </a>
+                                                @else
+                                                    <a
+                                                        href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                        {{ $order->registration->patient->penjamin->name ?? '-' }}
+                                                    </a>
+                                                @endif
                                             @else
                                                 <a
                                                     href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                     {{ $order->registration->patient->penjamin->name ?? '-' }}
                                                 </a>
                                             @endif
-                                        @else
-                                            <a
-                                                href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                {{ $order->registration->patient->penjamin->name ?? '-' }}
-                                            </a>
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
-                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
-                                                <a
-                                                    href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
-                                                    {{ $order->doctor->employee->fullname }}
-                                                </a>
-                                            @else
-                                                <a
-                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                    {{ $order->doctor->employee->fullname }}
-                                                </a>
-                                            @endif
-                                        @else
-                                            <a
-                                                href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                        @if ($order->registration_otc)
+                                            <a>
                                                 {{ $order->doctor->employee->fullname }}
                                             </a>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
-                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
-                                                <a
-                                                    href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
-                                                    {{ $order->status_isi_hasil == 1 ? 'Finished' : 'Ongoing' }}
-                                                </a>
+                                        @else
+                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                    <a
+                                                        href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                        {{ $order->doctor->employee->fullname }}
+                                                    </a>
+                                                @else
+                                                    <a
+                                                        href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                        {{ $order->doctor->employee->fullname }}
+                                                    </a>
+                                                @endif
                                             @else
                                                 <a
                                                     href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                    {{ $order->status_isi_hasil == 1 ? 'Finished' : 'Ongoing' }}
+                                                    {{ $order->doctor->employee->fullname }}
                                                 </a>
                                             @endif
-                                        @else
-                                            <a
-                                                href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($order->registration_otc)
+                                            <a>
                                                 {{ $order->status_isi_hasil == 1 ? 'Finished' : 'Ongoing' }}
                                             </a>
+                                        @else
+                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                    <a
+                                                        href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                        {{ $order->status_isi_hasil == 1 ? 'Finished' : 'Ongoing' }}
+                                                    </a>
+                                                @else
+                                                    <a
+                                                        href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                        {{ $order->status_isi_hasil == 1 ? 'Finished' : 'Ongoing' }}
+                                                    </a>
+                                                @endif
+                                            @else
+                                                <a
+                                                    href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                    {{ $order->status_isi_hasil == 1 ? 'Finished' : 'Ongoing' }}
+                                                </a>
+                                            @endif
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
-                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
-                                                <a
-                                                    href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
-                                                    {{ $order->status_billed == 1 ? 'Billed' : 'Not Billed' }}
-                                                </a>
+                                        @if ($order->registration_otc)
+                                            <a>
+                                                {{ $order->status_billed == 1 ? 'Billed' : 'Not Billed' }}
+                                            </a>
+                                        @else
+                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                                @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
+                                                    <a
+                                                        href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">
+                                                        {{ $order->status_billed == 1 ? 'Billed' : 'Not Billed' }}
+                                                    </a>
+                                                @else
+                                                    <a
+                                                        href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
+                                                        {{ $order->status_billed == 1 ? 'Billed' : 'Not Billed' }}
+                                                    </a>
+                                                @endif
                                             @else
                                                 <a
                                                     href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
                                                     {{ $order->status_billed == 1 ? 'Billed' : 'Not Billed' }}
                                                 </a>
                                             @endif
-                                        @else
-                                            <a
-                                                href="{{ route('detail.pendaftaran.pasien', $order->registration->patient->id) }}">
-                                                {{ $order->status_billed == 1 ? 'Billed' : 'Not Billed' }}
-                                            </a>
                                         @endif
                                     </td>
                                     <td>

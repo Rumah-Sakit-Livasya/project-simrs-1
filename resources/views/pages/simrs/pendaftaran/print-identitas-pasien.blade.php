@@ -15,7 +15,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="msapplication-TileColor" content="#00bcd4">
-    <title>@medic Information System</title>
+    <title>Patient Identity</title>
 
     <link type="text/css" rel="stylesheet" href="http://192.168.1.253/real/include/styles/ma/bootstrap.css">
     <link type="text/css" rel="stylesheet"

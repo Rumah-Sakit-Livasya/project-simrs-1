@@ -281,9 +281,9 @@
                                         @include('pages.simrs.pendaftaran.form.registrasi-lab-form')
                                     @break
 
-                                    {{-- @case('radiologi')
+                                    @case('radiologi')
                                         @include('pages.simrs.pendaftaran.form.registrasi-radiologi-form')
-                                    @break --}}
+                                    @break
                                     @case('hemodialisa')
                                         <div class="row">
                                             <div class="col-xl-6">

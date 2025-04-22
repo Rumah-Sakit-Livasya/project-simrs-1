@@ -41,7 +41,7 @@
                         <span>Obat/Alkes</span>
                     </li>
                     <li>
-                        <div class="circle-menu waves-effect purple menu-layanan" data-layanan="order_lab/list_order/1">
+                        <div class="circle-menu waves-effect purple menu-layanan" data-layanan="laboratorium">
                             <i class="mdi mdi-flask-outline"></i>
                         </div>
                         <span>Laboratorium</span>

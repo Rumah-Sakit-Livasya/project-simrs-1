@@ -6,10 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\OrderParameterRadiologi;
 use App\Models\OrderRadiologi;
+use App\Models\RegistrationOTC;
+use App\Models\SIMRS\Doctor;
+use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\GrupParameterRadiologi;
 use App\Models\SIMRS\KategoriRadiologi;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
+use App\Models\SIMRS\Registration;
 use App\Models\TemplateHasilRadiologi;
 use Illuminate\Http\Request;
 
@@ -17,7 +22,7 @@ class RadiologiController extends Controller
 {
     public function index(Request $request)
     {
-        $query = OrderRadiologi::query()->with('registration');
+        $query = OrderRadiologi::query()->with(['registration', 'registration_otc', 'registration_otc.doctor']);
         $filters = ['medical_record_number', 'registration_number', 'no_order'];
         $filterApplied = false;
 
@@ -59,6 +64,20 @@ class RadiologiController extends Controller
         ]);
     }
 
+    public function order()
+    {
+        $radiologyDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'like', '%radiologi%');
+        })->get();
+        return view('pages.simrs.radiologi.order', [
+            'radiologyDoctors' => $radiologyDoctors,
+            'penjamins' => Penjamin::all(),
+            'kelas_rawats' => KelasRawat::all(),
+            'radiology_categories' => KategoriRadiologi::all(),
+            'tarifs' => TarifParameterRadiologi::all(),
+        ]);
+    }
+
     public function notaOrder($id)
     {
         $order = OrderRadiologi::findOrFail($id);
@@ -70,6 +89,7 @@ class RadiologiController extends Controller
     public function hasilOrder($id)
     {
         $order = OrderRadiologi::findOrFail($id);
+        $order->load(['registration', 'registration_otc', 'registration_otc.doctor']);
         return view('pages.simrs.radiologi.partials.hasil-order', [
             'order' => $order
         ]);
@@ -78,6 +98,7 @@ class RadiologiController extends Controller
     public function labelOrder($id)
     {
         $order = OrderRadiologi::findOrFail($id);
+        $order->load(['registration', 'registration_otc', 'registration_otc.doctor']);
         return view('pages.simrs.radiologi.partials.label-order', [
             'order' => $order
         ]);
@@ -194,6 +215,8 @@ class RadiologiController extends Controller
         return view('pages.simrs.radiologi.simulasi-harga', [
             'radiology_categories' => KategoriRadiologi::all(),
             'tarifs' => TarifParameterRadiologi::all(),
+            'group_penjamins' => GroupPenjamin::all(),
+            'kelas_rawats' => KelasRawat::all()
         ]);
     }
 
@@ -213,24 +236,29 @@ class RadiologiController extends Controller
     public function reportView($fromDate, $endDate, $tipe_rawat, $group_parameter, $penjamin, $radiografer)
     {
 
-        $query = OrderParameterRadiologi::query()->with(['order_radiologi', 'registration']);
+        $query = OrderParameterRadiologi::query()->with(['order_radiologi', 'registration', 'registration_otc', 'registration_otc.doctor']);
         $query->whereHas('order_radiologi', function ($q) use ($fromDate, $endDate) {
             $q->whereBetween('order_radiologi.order_date', [$fromDate, $endDate]);
         });
 
-        $query->whereHas('registration', function ($q) use ($tipe_rawat) {
-            switch ($tipe_rawat) {
-                case 'rajal':
-                    $q->where('registration_type', 'rawat-jalan');
-                    break;
-                case 'ranap':
-                    $q->where('registration_type', 'rawat-inap');
-                    break;
-                case 'otc':
-                    $q->where('registration_type', 'odc');
-                    break;
-            }
-        });
+        if ($tipe_rawat != "otc" && $tipe_rawat != "-") {
+            $query->whereHas('registration', function ($q) use ($tipe_rawat) {
+                switch ($tipe_rawat) {
+                    case 'rajal':
+                        $q->where('registration_type', 'rawat-jalan');
+                        break;
+                    case 'ranap':
+                        $q->where('registration_type', 'rawat-inap');
+                        break;
+                }
+            });
+        }
+
+        if ($tipe_rawat == "otc") {
+            $query->whereHas('order_radiologi', function ($q) {
+                $q->where("otc_id", "!=", null);
+            });
+        }
 
         if ($group_parameter && $group_parameter != '-') {
             $query->whereHas('grup_parameter_radiologi', function ($q) use ($group_parameter) {
@@ -252,11 +280,67 @@ class RadiologiController extends Controller
 
         $orders = $query->get();
 
-
         return view('pages.simrs.radiologi.partials.laporan-view', [
             'orders' => $orders,
             'startDate' => $fromDate,
             'endDate' => $endDate
         ]);
+    }
+
+    public function popupPilihPasien(Request $request, $poli)
+    {
+        $query = Registration::query()->with(['patient', 'departement']);
+        $filters = ['registration_number'];
+        $filterApplied = false;
+
+        // active only
+        $query->where('status', 'aktif');
+
+        if ($poli == 'rajal') {
+            $query->where('registration_type', 'rawat-jalan');
+        } elseif ($poli == 'ranap') {
+            $query->where('registration_type', 'rawat-inap');
+        }
+        foreach ($filters as $filter) {
+            if ($request->filled($filter)) {
+                $query->where($filter, 'like', '%' . $request->$filter . '%');
+                $filterApplied = true;
+            }
+        }
+
+        // Filter by date range
+        if ($request->filled('registration_date')) {
+            $dateRange = explode(' - ', $request->registration_date);
+            if (count($dateRange) === 2) {
+                $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
+                $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
+                $query->whereBetween('registration_date', [$startDate, $endDate]);
+            }
+            $filterApplied = true;
+        }
+
+        if ($request->filled('name')) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%');
+            });
+            $filterApplied = true;
+        }
+
+        if ($request->filled('medical_record_number')) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('medical_record_number', 'like', '%' . $request->medical_record_number . '%');
+            });
+            $filterApplied = true;
+        }
+
+        // Get the filtered results if any filter is applied
+        if ($filterApplied) {
+            $registrations = $query->orderBy('registration_date', 'asc')->get();
+        } else {
+            // Return empty collection if no filters applied
+            $registrations = collect();
+        }
+
+        return view('pages.simrs.radiologi.partials.popup-pilih-pasien', compact("registrations", "poli"));
     }
 }

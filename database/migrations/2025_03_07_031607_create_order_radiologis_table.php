@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('order_radiologi', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('registration_id')->constrained('registrations')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('registration_id')->nullable()->constrained('registrations')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('otc_id')->nullable()->constrained('registration_otc')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('dokter_radiologi_id')->constrained('employees')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->date('order_date');
@@ -23,7 +24,7 @@ return new class extends Migration
             $table->enum('tipe_order', ['normal', 'cito'])->default('normal');
             $table->string('tipe_pasien');
             $table->string('diagnosa_klinis');
-            $table->tinyInteger('status_isi_hasil')->default(0);
+            $table->tinyInteger('status_isi_hasil')->default(0);    
             $table->boolean('status_billed')->default(false);
             $table->softDeletes();
             $table->timestamps();

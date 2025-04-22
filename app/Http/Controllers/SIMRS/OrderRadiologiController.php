@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\OrderParameterRadiologi;
 use App\Models\OrderRadiologi;
+use App\Models\RegistrationOTC;
+use App\Models\SIMRS\Departement;
+use App\Models\SIMRS\Penjamin;
 use Carbon\Carbon;
 
 class OrderRadiologiController extends Controller
@@ -23,48 +26,119 @@ class OrderRadiologiController extends Controller
         return 'RAD' . $year . $month . $day . $count;
     }
 
+    function generate_otc_registration_number()
+    {
+        $date = Carbon::now();
+        $year = $date->format('y');
+        $month = $date->format('m');
+        $day = $date->format('d');
+
+        $count = RegistrationOTC::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = str_pad($count, 4, '0', STR_PAD_LEFT);
+
+        return "OTC" . $year . $month . $day . $count;
+    }
+
     // Store a newly created resource in storage.
     public function store(Request $request)
     {
         $request->merge(['parameters' => json_decode($request->parameters, true)]);
 
-        $validatedData = $request->validate([
-            'patient_id' => 'required|integer',
-            'user_id' => 'required|integer',
-            'employee_id' => 'required|integer',
-            'registration_type' => 'required|string',
-            'poliklinik' => 'required|string',
-            'registration_date' => 'required|date',
-            'registration_id' => 'required|integer',
-            'doctor_id' => 'required|integer',
-            'order_type' => 'required|string',
-            'diagnosa_awal' => 'required|string',
-            'parameters' => 'required|array',
-        ]);
-
-
         try {
-            $orderRadiologi = OrderRadiologi::create([
-                'user_id' => $validatedData['user_id'],
-                'registration_id' => $validatedData['registration_id'],
-                'dokter_radiologi_id' => $validatedData['doctor_id'],
-                'order_date' => Carbon::now(),
-                'no_order' => $this->generate_order_number(),
-                'tipe_order' => $validatedData['order_type'],
-                'tipe_pasien' => $validatedData['registration_type'],
-                'diagnosa_klinis' => $validatedData['diagnosa_awal'],
-                'status_isi_hasil' => 0,
-                'status_billed' => 0
+            $validatedData = $request->validate([
+                'user_id' => 'required|integer',
+                'employee_id' => 'required|integer',
+                'registration_type' => 'string',
+                'registration_id' => 'integer',
+                'doctor_id' => 'required|integer',
+                'order_type' => 'required|string',
+                'diagnosa_awal' => 'required|string',
+                'parameters' => 'required|array',
             ]);
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
-            ]);
+                'errors' => $e->errors(),
+            ], 422);
         }
 
-        $orderRadiologiId = $orderRadiologi->id;
+        $no_order = $this->generate_order_number();
 
+        if ($request->filled('is_otc')) {
+            try {
+                $validatedData['registration_type'] = 'otc';
+
+                // get department id with department name "RADIOLOGI"
+                $department = Departement::where('name', 'RADIOLOGI')->first();
+                $validatedData['departement_id'] = $department->id;
+
+                // get penjamin id with nama_perusahaan "Standar"
+                $penjamin = Penjamin::where('nama_perusahaan', 'Standar')->first();
+                $validatedData['penjamin_id'] = $penjamin->id;
+
+                $registrationOTCid = RegistrationOTC::create([
+                    'user_id' => $validatedData['user_id'],
+                    'employee_id' => $validatedData['employee_id'],
+                    'penjamin_id' => $validatedData['penjamin_id'],
+                    'departement_id' => $validatedData['departement_id'],
+                    'tipe_pasien' => $validatedData['registration_type'],
+                    'nama_pasien' => $request->get('nama_pasien'),
+                    'date_of_birth' => $request->get('date_of_birth'),
+                    'no_telp' => $request->get('no_telp'),
+                    'poly_ruang' => "RADIOLOGI",
+                    'jenis_kelamin' => $request->get('jenis_kelamin'),
+                    'order_date' => Carbon::now(),
+                    'registration_number' => $this->generate_otc_registration_number(),
+                    'order_rad' => $no_order,
+                    'order_type' => $validatedData['order_type'],
+                    'doctor' => $request->get('doctor'),
+                    'doctor_id' => $validatedData['doctor_id'],
+                    'alamat' => $request->get('alamat'),
+                    'diagnosa_klinis' => $validatedData['diagnosa_awal']
+                ])->id;
+
+                $orderRadiologi = OrderRadiologi::create([
+                    'user_id' => $validatedData['user_id'],
+                    'otc_id' => $registrationOTCid,
+                    'dokter_radiologi_id' => $validatedData['doctor_id'],
+                    'order_date' => Carbon::now(),
+                    'no_order' => $no_order,
+                    'tipe_order' => $validatedData['order_type'],
+                    'tipe_pasien' => $validatedData['registration_type'],
+                    'diagnosa_klinis' => $validatedData['diagnosa_awal'],
+                    'status_isi_hasil' => 0,
+                    'status_billed' => 0
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 500);
+            }
+        } else { // normal / not OTC
+            try {
+                $orderRadiologi = OrderRadiologi::create([
+                    'user_id' => $validatedData['user_id'],
+                    'registration_id' => $validatedData['registration_id'],
+                    'dokter_radiologi_id' => $validatedData['doctor_id'],
+                    'order_date' => Carbon::now(),
+                    'no_order' => $no_order,
+                    'tipe_order' => $validatedData['order_type'],
+                    'tipe_pasien' => $validatedData['registration_type'],
+                    'diagnosa_klinis' => $validatedData['diagnosa_awal'],
+                    'status_isi_hasil' => 0,
+                    'status_billed' => 0
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+            }
+        }
+
+
+        $orderRadiologiId = $orderRadiologi->id;
         foreach ($validatedData['parameters'] as $parameter) {
             for ($i = 0; $i < $parameter['qty']; $i++) {
                 OrderParameterRadiologi::create([
@@ -74,7 +148,6 @@ class OrderRadiologiController extends Controller
                 ]);
             }
         }
-
 
         return response()->json([
             'success' => true,

@@ -177,12 +177,16 @@
                 $('#modal-tambah-parameter-laboratorium').modal('show');
             });
 
-            $('#modal-tambah-parameter-laboratorium .select2').select2({
-                dropdownParent: $('#modal-tambah-parameter-laboratorium')
+            $('#modal-tambah-parameter-laboratorium').on('shown.bs.modal', function() {
+                $(this).find('.select2').select2({
+                    dropdownParent: $(this)
+                });
             });
 
-            $('#modal-edit-parameter-laboratorium .select2').select2({
-                dropdownParent: $('#modal-edit-parameter-laboratorium')
+            $('#modal-edit-parameter-laboratorium').on('shown.bs.modal', function() {
+                $(this).find('.select2').select2({
+                    dropdownParent: $(this)
+                });
             });
 
             $('.btn-tarif').click(function() {
@@ -191,7 +195,7 @@
                     .replace(':id', id_param);
                 const popupWidth = 900;
                 const popupHeight = 600;
-                const left = (screen.width - popupWidth) / 2;
+            const left = (screen.width - popupWidth) / 2;
                 const top = (screen.height - popupHeight) / 2;
 
                 window.open(
