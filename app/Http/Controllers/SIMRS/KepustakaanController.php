@@ -24,8 +24,9 @@ class KepustakaanController extends Controller
 
         $organizations = Organization::all();
         $breadcrumbs = collect();
+        $view = 'parent';
 
-        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'organizations', 'childrenFolder'));
+        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'organizations', 'childrenFolder', 'view'));
     }
 
     public function showFolder($encryptedId)
@@ -66,7 +67,8 @@ class KepustakaanController extends Controller
             $organizations = Organization::where('id', auth()->user()->employee->organization_id)->first();
         }
 
-        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'folder', 'organizations', 'childrenFolder'));
+        $view = 'child';
+        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'folder', 'organizations', 'childrenFolder', 'view'));
     }
 
     public function getKepustakaan($encryptedId)
@@ -110,7 +112,7 @@ class KepustakaanController extends Controller
         ]);
 
         $organization = Organization::where('id', $request->organization_id)->first();
-        return dd($organization->name);
+        // return dd($organization->name);
 
         if (request()->hasFile('file')) {
             $file = request()->file('file');

@@ -547,6 +547,47 @@
                 wajibBayar = totalNominal;
             });
 
+            $(document).on('click', '.delete-btn', function(e) {
+                e.preventDefault();
+                const tagihanId = $(this).data('id');
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: 'Data tagihan pasien akan dihapus.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/simrs/kasir/tagihan-pasien/' + tagihanId,
+                            type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Terhapus!',
+                                    text: 'Data tagihan pasien telah dihapus.'
+                                });
+                                $('#tagihanTable').DataTable().ajax.reload();
+                            },
+                            error: function(xhr) {
+                                console.error('Error deleting tagihan:', xhr
+                                    .responseText);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: 'Terjadi kesalahan saat menghapus data.'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
             $('#save-final').on('click', function() {
                 $.ajax({
                     url: '/simrs/kasir/bilingan/update-status/{{ $bilingan->id }}',
@@ -662,6 +703,46 @@
 
             $('#tagihanTable').on('init.dt', function() {
                 $('.select2').select2();
+            });
+
+            $(document).on('change', '.select2[data-column="tipe_diskon"]', function() {
+                var $row = $(this).closest('tr');
+                var tipeDiskon = $(this).val();
+                const tagihanId = $(this).data('id');
+
+                // Jika tipe diskon adalah Dokter, set disc menjadi 0 dan lakukan ajax untuk memproses hasil 
+                $.ajax({
+                    url: '/simrs/kasir/tagihan-pasien/update-disc/' + tagihanId,
+                    type: 'PUT',
+                    data: {
+                        id: $row.find('.edit-input').first().data('id'),
+                        disc: 0,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Discount updated successfully',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Error: ' + xhr.responseJSON.error,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                });
+
+                // Perbarui wajib bayar setelah perubahan
+                $row.find('.input-quantity').trigger('input');
             });
         });
     </script>

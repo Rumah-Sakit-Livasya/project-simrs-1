@@ -7,8 +7,10 @@ use App\Models\Employee;
 use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
+use App\Models\TarifTindakanMedis;
 use Illuminate\Http\Request;
 
 class TagihanPasienController extends Controller
@@ -185,5 +187,20 @@ class TagihanPasienController extends Controller
             \Log::error('Error updating data: ' . $e->getMessage());
             return response()->json(['error' => 'Data could not be updated. Reason: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function updateDisc($id)
+    {
+        $tagihan = TagihanPasien::find($id);
+        $bilingan = Bilingan::find($tagihan->bilingan_id);
+        $registration = Registration::find($bilingan->registration_id);
+        // $registration = $tagihan->bilingan->registration;
+        // $tarif = TarifTindakanMedis::get();
+        return response()->json($tagihan->tindakan);
+        // try {
+        // } catch (\Exception $e) {
+        //     \Log::error('Error fetching tagihan: ' . $e->getMessage());
+        //     return response()->json(['error' => 'Data could not be retrieved.'], 500);
+        // }
     }
 }

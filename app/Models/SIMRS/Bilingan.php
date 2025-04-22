@@ -17,7 +17,7 @@ class Bilingan extends Model implements AuditableContract
 
     public function registration()
     {
-        return $this->belongsTo(Registration::class);
+        return $this->belongsTo(Registration::class, 'registration_id');
     }
 
     public function pembayaran_tagihan()

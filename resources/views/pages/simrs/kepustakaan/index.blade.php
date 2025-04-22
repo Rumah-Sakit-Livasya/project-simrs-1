@@ -105,20 +105,64 @@
             height: 35px;
         }
     </style>
+
+    {{-- Card CSS --}}
+    <style>
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .card-hover::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -4px;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.1);
+            filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-hover:hover::after {
+            opacity: 1;
+        }
+    </style>
+
 @endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
 
         @if (auth()->user()->hasRole('super admin') || auth()->user()->can('master kepustakaan'))
-            <div class="row mb-5">
-                <div class="col-xl-12 pl-0">
-                    <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
-                        id="btn-tambah-kepustakaan">
-                        <span class="fal fa-plus-circle mr-1"></span>
-                        Tambah Folder / File
-                    </button>
+            @if ($view == 'parent')
+                <div class="row mb-5">
+                    <div class="col-xl-12 pl-0">
+                        <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
+                            id="btn-tambah-departement">
+                            <span class="fal fa-plus-circle mr-1"></span>
+                            Tambah Departement
+                        </button>
+                    </div>
                 </div>
-            </div>
+            @else
+                <div class="row mb-5">
+                    <div class="col-xl-12 pl-0">
+                        <button type="button" class="btn btn-primary waves-effect waves-themed btn-ajukan"
+                            id="btn-tambah-kepustakaan">
+                            <span class="fal fa-plus-circle mr-1"></span>
+                            Tambah Folder / File
+                        </button>
+                    </div>
+                </div>
+            @endif
         @else
             @if (
                 (count($breadcrumbs) > 1 && auth()->user()->organization_id != $folder->organization_id) ||
@@ -135,125 +179,164 @@
             @endif
         @endif
 
-        <div class="row">
-            <div class="col-xl-12 pl-0">
-                <div class="demo-v-spacing mb-4">
-                    <ol class="breadcrumb breadcrumb-seperator-1">
-                        <li class="breadcrumb-item">
-                            <a href="{{ route('kepustakaan.index') }}" class="text-info">/kepustakaan</a>
-                        </li>
-
-                        @if (empty($breadcrumbs))
-                            <!-- Jika tidak ada breadcrumbs (Root folder) -->
-                            <li class="breadcrumb-item active">Root Folder</li>
-                        @else
-                            <!-- Jika ada breadcrumbs -->
-                            @foreach ($breadcrumbs as $crumb)
-                                <li class="breadcrumb-item">
-                                    <a href="{{ route('kepustakaan.folder', Crypt::encrypt($crumb->id)) }}"
-                                        class="text-info">{{ $crumb->name }}</a>
-                                </li>
-                            @endforeach
-                        @endif
-                    </ol>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="frame-wrap w-100">
-            <div class="accordion" id="js_demo_accordion-4">
-
-                <div class="row bg-light font-weight-bold p-2">
-                    <div class="col-6">Nama</div>
-                    <div class="col-3 text-center">File Size</div>
-                    <div class="col-3 text-center">Last Modified</div>
-                </div>
-
-                @foreach ($kepustakaan as $item)
-                    @if (
-                        $item->organization_id == auth()->user()->employee->organization_id ||
-                            $item->organization_id == null ||
-                            auth()->user()->hasRole('super admin') ||
-                            auth()->user()->can('master kepustakaan') ||
-                            (in_array($item->organization_id, [26, 27, 25]) &&
-                                in_array(auth()->user()->employee->organization_id, [26, 27, 25])))
-                        <div class="card">
-                            <div class="card-header p-0 bg-white">
-                                <div class="row align-items-center py-2">
-                                    <div class="col-6 d-flex justify-content-between" style="height: 15px">
-                                        <div class="folder-wrapper d-flex align-items-center">
-                                            @php
-                                                // Mendapatkan tanggal created_at dari item
-                                                $createdAt = \Carbon\Carbon::parse($item->created_at);
-                                                // Tentukan batas tanggal untuk 'created_at'
-                                                $dateLimit =
-                                                    $createdAt->day > 5 && $createdAt->day < 15
-                                                        ? true // 5 hari setelah tanggal pertama bulan depan
-                                                        : false; // 5 hari bulan saat ini
-                                            @endphp
-                                            @if ($item->type == 'folder')
-                                                <i class="fas fa-folder text-success fs-xl mr-2"></i>
-                                                <a href="{{ route('kepustakaan.folder', Crypt::encrypt($item->id)) }}"
-                                                    class="card-title">
-                                                    {{ $item->name }}
+        @if ($view == 'parent')
+            <!-- Parent Structure (Initial View) -->
+            <div class="row">
+                <div class="col-xl-12">
+                    <div id="panel-1" class="panel">
+                        <div class="panel-hdr">
+                            <h2>
+                                <a href="{{ route('kepustakaan.index') }}" class="text-info">
+                                    Kepustakaan
+                                </a>
+                            </h2>
+                        </div>
+                        <div class="panel-container show">
+                            <div class="panel-content">
+                                <div class="row">
+                                    @foreach ($kepustakaan as $item)
+                                        @if (
+                                            $item->organization_id == auth()->user()->employee->organization_id ||
+                                                $item->organization_id == null ||
+                                                auth()->user()->hasRole('super admin') ||
+                                                auth()->user()->can('master kepustakaan') ||
+                                                (in_array($item->organization_id, [26, 27, 25]) &&
+                                                    in_array(auth()->user()->employee->organization_id, [26, 27, 25])))
+                                            <div class="col-xl-3 col-m d-6 mb-4">
+                                                <a
+                                                    href="{{ $item->type == 'folder' ? route('kepustakaan.folder', Crypt::encrypt($item->id)) : route('kepustakaan.download', Crypt::encrypt($item->id)) }}">
+                                                    <div class="card m-auto border p-5 card-hover d-flex flex-column justify-content-between"
+                                                        style="border-radius: 11px; height: 300px;">
+                                                        <div class="card-body text-center">
+                                                            <img src="{{ asset('/img/logo.png') }}" class="d-block m-auto"
+                                                                alt="Livasya" aria-roledescription="logo"
+                                                                style="width: 100px">
+                                                            <p class="mt-3"
+                                                                style="font-size: 11px; overflow-wrap: break-word;">RUMAH
+                                                                SAKIT LIVASYA</p>
+                                                        </div>
+                                                        <div class="card-footer">
+                                                            <h5 class="card-text font-weight-bold text-center"
+                                                                style="font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                                {{ strtoupper($item->name) }}
+                                                            </h5>
+                                                        </div>
+                                                    </div>
                                                 </a>
-                                            @else
-                                                <i class="fas fa-file text-primary fs-xl mr-2"></i>
-                                                <a href="{{ route('kepustakaan.download', Crypt::encrypt($item->id)) }}"
-                                                    class="card-title {{ $dateLimit == true ? 'text-danger' : '' }}">{{ $item->name . '.' . pathinfo($item->file, PATHINFO_EXTENSION) }}</a>
-                                            @endif
-                                        </div>
-                                        <div class="action-kepustakaan float-right">
-                                            @if ($item->type == 'folder' || $item->type == 'file')
-                                                @if (auth()->user()->can('edit kepustakaan') &&
-                                                        ($item->organization_id == auth()->user()->employee->organization_id ||
-                                                            (in_array($item->organization_id, [26, 27, 25]) &&
-                                                                in_array(auth()->user()->employee->organization_id, [26, 27, 25]))))
-                                                    <i class="btn-action btn-edit fas fa-pencil text-warning fs-xl mr-2"
-                                                        data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
-                                                        data-id="{{ Crypt::encrypt($item->id) }}"></i>
-                                                    @if ($item->type == 'file')
-                                                        <i class="btn-action btn-cut fas fa-cut text-success fs-xl mr-2"
-                                                            data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
-                                                            data-id="{{ Crypt::encrypt($item->id) }}"></i>
-                                                    @endif
-                                                @endif
-                                            @endif
-
-
-                                            @if (auth()->user()->can('delete kepustakaan') &&
-                                                    ($item->organization_id == auth()->user()->employee->organization_id ||
-                                                        (in_array($item->organization_id, [26, 27, 25]) &&
-                                                            in_array(auth()->user()->employee->organization_id, [26, 27, 25]))))
-                                                <i class="btn-action btn-delete fas fa-trash text-danger fs-xl mr-2"
-                                                    data-url="{{ route('kepustakaan.delete', Crypt::encrypt($item->id)) }}"
-                                                    data-type="{{ $item->type }}"></i>
-                                            @endif
-
-                                        </div>
-                                    </div>
-                                    <div class="col-3 text-center file-info">
-                                        {{ $item->size > 0 ? number_format($item->size / 1024, 2) . ' KB' : '-' }}
-                                    </div>
-                                    <div class="col-3 text-center file-info">
-                                        {{ $item->updated_at ? $item->updated_at->format('d M Y') : '--' }}
-                                    </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
-                    @endif
-
-                @endforeach
-
+                    </div>
+                </div>
             </div>
-        </div>
+        @else
+            <!-- Child Structure (Inside a Parent) -->
+            <div class="row">
+                <div class="col-xl-12">
+                    <div id="panel-1" class="panel">
+                        <div class="panel-hdr">
+                            <h2>
+                                Kepustakaan
+                            </h2>
+                        </div>
+                        <div class="panel-container show">
+                            <div class="panel-content">
+                                <div class="accordion" id="js_demo_accordion-4">
+                                    <div class="row bg-light font-weight-bold p-2">
+                                        <div class="col-6">Nama</div>
+                                        <div class="col-3 text-center">File Size</div>
+                                        <div class="col-3 text-center">Last Modified</div>
+                                    </div>
+
+                                    @foreach ($kepustakaan as $item)
+                                        @if (
+                                            $item->organization_id == auth()->user()->employee->organization_id ||
+                                                $item->organization_id == null ||
+                                                auth()->user()->hasRole('super admin') ||
+                                                auth()->user()->can('master kepustakaan') ||
+                                                (in_array($item->organization_id, [26, 27, 25]) &&
+                                                    in_array(auth()->user()->employee->organization_id, [26, 27, 25])))
+                                            <div class="card">
+                                                <div class="card-header p-0 bg-white">
+                                                    <div class="row align-items-center py-2">
+                                                        <div class="col-6 d-flex justify-content-between"
+                                                            style="height: 15px">
+                                                            <div class="folder-wrapper d-flex align-items-center">
+                                                                @php
+                                                                    $createdAt = \Carbon\Carbon::parse(
+                                                                        $item->created_at,
+                                                                    );
+                                                                    $dateLimit =
+                                                                        $createdAt->day > 5 && $createdAt->day < 15;
+                                                                @endphp
+                                                                @if ($item->type == 'folder')
+                                                                    <i class="fas fa-folder text-success fs-xl mr-2"></i>
+                                                                    <a href="{{ route('kepustakaan.folder', Crypt::encrypt($item->id)) }}"
+                                                                        class="card-title">
+                                                                        {{ $item->name }}
+                                                                    </a>
+                                                                @else
+                                                                    <i class="fas fa-file text-primary fs-xl mr-2"></i>
+                                                                    <a href="{{ route('kepustakaan.download', Crypt::encrypt($item->id)) }}"
+                                                                        class="card-title {{ $dateLimit ? 'text-danger' : '' }}">
+                                                                        {{ $item->name . '.' . pathinfo($item->file, PATHINFO_EXTENSION) }}
+                                                                    </a>
+                                                                @endif
+                                                            </div>
+                                                            <div class="action-kepustakaan float-right">
+                                                                @if ($item->type == 'folder' || $item->type == 'file')
+                                                                    @if (auth()->user()->can('edit kepustakaan') &&
+                                                                            ($item->organization_id == auth()->user()->employee->organization_id ||
+                                                                                (in_array($item->organization_id, [26, 27, 25]) &&
+                                                                                    in_array(auth()->user()->employee->organization_id, [26, 27, 25]))))
+                                                                        <i class="btn-action btn-edit fas fa-pencil text-warning fs-xl mr-2"
+                                                                            data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
+                                                                            data-id="{{ Crypt::encrypt($item->id) }}"></i>
+                                                                        @if ($item->type == 'file')
+                                                                            <i class="btn-action btn-cut fas fa-cut text-success fs-xl mr-2"
+                                                                                data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
+                                                                                data-id="{{ Crypt::encrypt($item->id) }}"></i>
+                                                                        @endif
+                                                                    @endif
+                                                                @endif
+                                                                @if (auth()->user()->can('delete kepustakaan') &&
+                                                                        ($item->organization_id == auth()->user()->employee->organization_id ||
+                                                                            (in_array($item->organization_id, [26, 27, 25]) &&
+                                                                                in_array(auth()->user()->employee->organization_id, [26, 27, 25]))))
+                                                                    <i class="btn-action btn-delete fas fa-trash text-danger fs-xl mr-2"
+                                                                        data-url="{{ route('kepustakaan.delete', Crypt::encrypt($item->id)) }}"
+                                                                        data-type="{{ $item->type }}"></i>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-3 text-center file-info">
+                                                            {{ $item->size > 0 ? number_format($item->size / 1024, 2) . ' KB' : '-' }}
+                                                        </div>
+                                                        <div class="col-3 text-center file-info">
+                                                            {{ $item->updated_at ? $item->updated_at->format('d M Y') : '--' }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
 
 
     </main>
     {{-- @if (auth()->user()->can('master kepustakaan'))
         @include('pages.simrs.kepustakaan.partials.create')
     @else --}}
+    @include('pages.simrs.kepustakaan.partials.create-departement')
     @include('pages.simrs.kepustakaan.partials.create-for-employee')
     @include('pages.simrs.kepustakaan.partials.edit')
     @include('pages.simrs.kepustakaan.partials.pindah-file')
@@ -300,8 +383,17 @@
                 placeholder: 'Jangan dipilih jika tidak ada'
             });
 
+            $('#modal-tambah-departement .select2').select2({
+                dropdownParent: $('#modal-tambah-departement'),
+                placeholder: 'Jangan dipilih jika tidak ada'
+            });
+
             $('#btn-tambah-kepustakaan').click(function() {
                 $('#modal-tambah-kepustakaan').modal('show');
+            });
+
+            $('#btn-tambah-departement').click(function() {
+                $('#modal-tambah-departement').modal('show');
             });
 
             $('.btn-edit').click(function() {
@@ -516,6 +608,7 @@
                     },
                     success: function(response) {
                         $('#modal-tambah-kepustakaan').modal('hide');
+                        $('#modal-tambah-departement').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -533,9 +626,11 @@
                             });
 
                             $('#modal-tambah-kepustakaan').modal('hide');
+                            $('#modal-tambah-departement').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' + errorMessages);
                         } else {
                             $('#modal-tambah-kepustakaan').modal('hide');
+                            $('#modal-tambah-departement').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }

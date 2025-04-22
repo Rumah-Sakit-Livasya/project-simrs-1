@@ -23,6 +23,7 @@ class TindakanMedis extends Model
     {
         return $this->belongsTo(GrupTindakanMedis::class);
     }
+
     public function tarifTindakanMedis($groupPenjaminId, $kelasRawatId)
     {
         return TarifTindakanMedis::where('tindakan_medis_id', $this->id)
