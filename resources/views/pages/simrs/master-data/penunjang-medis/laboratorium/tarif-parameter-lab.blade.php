@@ -43,7 +43,7 @@
                                             <tr>
                                                 <th>Nama Kelas</th>
                                                 <th>Share Dr</th>
-                                                <th>Share Dr</th>
+                                                <th>Share Rs</th>
                                                 <th>Prasarana</th>
                                                 <th>BHP</th>
                                                 <th>Total</th>
@@ -65,27 +65,32 @@
                                                     <td>
                                                         <input type="text" name="share_dr[{{ $row->id }}]"
                                                             value="{{ $tarif->share_dr ?? 0 }}"
-                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
+                                                            data-id="{{ $row->id }}"
+                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2 tarif-dr">
                                                     </td>
                                                     <td>
                                                         <input type="text" name="share_rs[{{ $row->id }}]"
                                                             value="{{ $tarif->share_rs ?? 0 }}"
-                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
+                                                            data-id="{{ $row->id }}"
+                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2 tarif-rs">
                                                     </td>
                                                     <td>
                                                         <input type="text" name="bhp[{{ $row->id }}]"
                                                             value="{{ $tarif->bhp ?? 0 }}"
-                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
+                                                            data-id="{{ $row->id }}"
+                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2 tarif-bhp">
                                                     </td>
                                                     <td>
                                                         <input type="text" name="prasarana[{{ $row->id }}]"
                                                             value="{{ $tarif->prasarana ?? 0 }}"
-                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
+                                                            data-id="{{ $row->id }}"
+                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2 tarif-prasarana">
                                                     </td>
                                                     <td>
                                                         <input type="text" name="total[{{ $row->id }}]"
                                                             value="{{ $tarif->total ?? 0 }}"
-                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2">
+                                                            data-id="{{ $row->id }}" readonly
+                                                            class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0 mr-2 tarif-total">
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -110,6 +115,25 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            $('.tarif-dr, .tarif-rs, .tarif-bhp, .tarif-prasarana').on('input', function() {
+                const rowId = $(this).data('id'); // Get the row ID
+                const drInput = $(`.tarif-dr[data-id="${rowId}"]`);
+                const rsInput = $(`.tarif-rs[data-id="${rowId}"]`);
+                const bhpInput = $(`.tarif-bhp[data-id="${rowId}"]`);
+                const prasaranaInput = $(`.tarif-prasarana[data-id="${rowId}"]`);
+                const totalInput = $(`.tarif-total[data-id="${rowId}"]`);
+
+                // Parse values as numbers and calculate the total
+                const drValue = parseInt(drInput.val()) || 0;
+                const rsValue = parseInt(rsInput.val()) || 0;
+                const bhpValue = parseInt(bhpInput.val()) || 0;
+                const prasaranaValue = parseInt(prasaranaInput.val()) || 0;
+                const totalValue = drValue + rsValue + bhpValue + prasaranaValue;
+
+                // Update the total input
+                totalInput.val(totalValue); // Format to 2 decimal places
+            });
+
             let parameterId = null;
             $('#loading-spinner').show();
 
