@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Penjamin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
