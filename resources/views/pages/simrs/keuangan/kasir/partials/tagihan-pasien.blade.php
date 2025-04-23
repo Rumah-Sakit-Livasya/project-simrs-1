@@ -719,7 +719,13 @@
                         disc: 0,
                         _token: '{{ csrf_token() }}'
                     },
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                            'content') // Pastikan CSRF token tersedia
+                    },
                     success: function(response) {
+                        console.log(response);
+
                         Swal.fire({
                             toast: true,
                             position: 'top-end',

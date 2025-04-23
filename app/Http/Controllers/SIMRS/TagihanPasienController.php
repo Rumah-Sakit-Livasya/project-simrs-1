@@ -41,8 +41,16 @@ class TagihanPasienController extends Controller
             });
         }
 
+        // Format Date
+        $registrationDate = old('registration_date') ?? request('registration_date');
+        $startDate = $endDate = now()->format('Y-m-d');
+
+        if ($registrationDate && strpos($registrationDate, ' - ') !== false) {
+            [$startDate, $endDate] = explode(' - ', $registrationDate);
+        }
+
         $tagihan_pasien = $query->get();
-        return view('pages.simrs.keuangan.kasir.index', compact('tagihan_pasien'));
+        return view('pages.simrs.keuangan.kasir.index', compact('tagihan_pasien', 'startDate', 'endDate', 'registrationDate'));
     }
 
     public function store(Request $request)
@@ -60,9 +68,12 @@ class TagihanPasienController extends Controller
             'registration_id' => 'required|integer',
             'user_id' => 'required|integer',
         ]);
+
         $tindakan = TindakanMedis::where('id', $request->tindakan_id)->first();
         if ($validatedData['tipe_tagihan'] == "Biaya Tindakan Medis") {
             $validatedData['tagihan'] =  "[Tindakan Medis] " . $tindakan->nama_tindakan;
+            $validatedData['type'] = "Tindakan Medis";
+            $validatedData['tindakan_medis_id'] = $tindakan->id;
         }
 
         try {
@@ -189,15 +200,32 @@ class TagihanPasienController extends Controller
         }
     }
 
+
     public function updateDisc($id)
     {
-        $tagihan = TagihanPasien::find($id);
-        $bilingan = Bilingan::find($tagihan->bilingan_id);
-        $registration = Registration::find($bilingan->registration_id);
-        // $registration = $tagihan->bilingan->registration;
-        // $tarif = TarifTindakanMedis::get();
-        return response()->json($tagihan->tindakan);
         // try {
+        // $tagihan = TagihanPasien::with('bilingan')->find($id);
+        $tagihan = TagihanPasien::findOrFail($id);
+        $tindakan = $tagihan->tindakan_medis;
+        $group_penjamin_id = $tagihan->registration->penjamin->group_penjamin_id;
+        $kelas_id = $tagihan->registration->kelas_rawat_id;
+
+        $tarif = $tagihan->tindakan_medis->tarifTindakanMedis($group_penjamin_id, $kelas_id);
+
+        return dd($tarif);
+        // Pastikan bilingan ditemukan
+        if (!$bilingan) {
+            return response()->json(['error' => 'Data bilingan tidak ditemukan'], 404);
+        }
+
+        // Ambil data registrasi jika diperlukan
+        $registration = $bilingan->registration;
+
+        return response()->json([
+            'bilingan' => $bilingan,
+            'registration' => $registration,
+            // 'share_dokter' => $tarif
+        ]);
         // } catch (\Exception $e) {
         //     \Log::error('Error fetching tagihan: ' . $e->getMessage());
         //     return response()->json(['error' => 'Data could not be retrieved.'], 500);

@@ -87,7 +87,7 @@ class Registration extends Model implements AuditableContract
     {
         return $this->belongsTo(Employee::class);
     }
-    
+
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);
@@ -137,6 +137,7 @@ class Registration extends Model implements AuditableContract
     {
         return $this->hasMany(OrderLaboratorium::class, 'registration_id');
     }
+
 
     // public function generateNomorRegistrasi()
     // {
