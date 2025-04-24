@@ -417,6 +417,7 @@ class DashboardController extends Controller
                 ->orderBy('employee_id')
                 ->get();
         } else if (auth()->user()->hasRole('pj') || auth()->user()->hasRole('manager')) {
+
             //list organisasi berdasarkan jabatan
             $organizations = [];
             $organizations[] = auth()->user()->employee->organization->id;

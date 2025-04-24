@@ -49,11 +49,42 @@ class KepustakaanController extends Controller
                 ->orderByRaw("CASE WHEN type = 'folder' THEN 1 ELSE 2 END")
                 ->orderBy('name', 'asc')
                 ->get();
+
+            $organizationFolder = Organization::pluck('id')
+                ->toArray();
+            $organizations = Organization::all();
         } else {
+            $organizations = Organization::where('id', auth()->user()->employee->organization_id)->get();
+            // Ambil semua organisasi anak secara rekursif
+            function getChildOrganizationIds($organization)
+            {
+                $ids = [];
+
+                foreach ($organization->child_structures as $childStructure) {
+                    $childOrg = $childStructure->organization;
+                    if ($childOrg) {
+                        $ids[] = $childOrg->id;
+                        $ids = array_merge($ids, getChildOrganizationIds($childOrg)); // Rekursif
+                    }
+                }
+
+                return $ids;
+            }
+
+            // Inisialisasi array organisasi
+            $organizationFolder = [];
+
+            // Organisasi utama dari user
+            $currentOrganization = auth()->user()->employee->organization;
+            $organizationFolder[] = $currentOrganization->id;
+
+            // Tambahkan semua anak organisasi (rekursif)
+            $organizationFolder = array_merge($organizationFolder, getChildOrganizationIds($currentOrganization));
+            // Query kepustakaan
             $kepustakaan = Kepustakaan::where('parent_id', $folder->id)
-                ->where(function ($query) {
-                    $query->where('organization_id', auth()->user()->employee->organization_id)
-                        ->orWhere('organization_id', null)
+                ->where(function ($query) use ($organizationFolder) {
+                    $query->whereNull('organization_id')
+                        ->orWhereIn('organization_id', $organizationFolder)
                         ->orWhereIn('organization_id', [25, 26, 27]);
                 })
                 ->orderByRaw("CASE WHEN type = 'folder' THEN 1 ELSE 2 END")
@@ -61,14 +92,9 @@ class KepustakaanController extends Controller
                 ->get();
         }
 
-        if (auth()->user()->hasRole('super admin') || auth()->user()->can('master kepustakaan')) {
-            $organizations = Organization::all();
-        } else {
-            $organizations = Organization::where('id', auth()->user()->employee->organization_id)->first();
-        }
 
         $view = 'child';
-        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'folder', 'organizations', 'childrenFolder', 'view'));
+        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'organizations', 'organizationFolder', 'folder', 'childrenFolder', 'view'));
     }
 
     public function getKepustakaan($encryptedId)

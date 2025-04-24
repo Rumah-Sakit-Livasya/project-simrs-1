@@ -1,7 +1,7 @@
 <div class="modal fade" id="modal-tambah-departement" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl" role="document"> <!-- Menggunakan kelas modal-xl untuk ukuran ekstra besar -->
         <div class="modal-content">
-            <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="store-form"
+            <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="store-form-departement"
                 enctype="multipart/form-data">
                 @method('post')
                 @csrf

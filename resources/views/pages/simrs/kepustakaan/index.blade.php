@@ -252,13 +252,18 @@
                                     </div>
 
                                     @foreach ($kepustakaan as $item)
+                                        @php
+                                            $allowedOrganizations = $organizationFolder ?? [];
+                                        @endphp
+
                                         @if (
                                             $item->organization_id == auth()->user()->employee->organization_id ||
                                                 $item->organization_id == null ||
                                                 auth()->user()->hasRole('super admin') ||
                                                 auth()->user()->can('master kepustakaan') ||
-                                                (in_array($item->organization_id, [26, 27, 25]) &&
-                                                    in_array(auth()->user()->employee->organization_id, [26, 27, 25])))
+                                                (in_array($item->organization_id, [25, 26, 27]) &&
+                                                    in_array(auth()->user()->employee->organization_id, [25, 26, 27])) ||
+                                                in_array($item->organization_id, $allowedOrganizations))
                                             <div class="card">
                                                 <div class="card-header p-0 bg-white">
                                                     <div class="row align-items-center py-2">
@@ -287,25 +292,27 @@
                                                                 @endif
                                                             </div>
                                                             <div class="action-kepustakaan float-right">
-                                                                @if ($item->type == 'folder' || $item->type == 'file')
-                                                                    @if (auth()->user()->can('edit kepustakaan') &&
-                                                                            ($item->organization_id == auth()->user()->employee->organization_id ||
-                                                                                (in_array($item->organization_id, [26, 27, 25]) &&
-                                                                                    in_array(auth()->user()->employee->organization_id, [26, 27, 25]))))
-                                                                        <i class="btn-action btn-edit fas fa-pencil text-warning fs-xl mr-2"
+                                                                @if (in_array($item->type, ['folder', 'file']) &&
+                                                                        auth()->user()->can('edit kepustakaan') &&
+                                                                        ($item->organization_id == auth()->user()->employee->organization_id ||
+                                                                            (in_array($item->organization_id, [25, 26, 27]) &&
+                                                                                in_array(auth()->user()->employee->organization_id, [25, 26, 27])) ||
+                                                                            in_array($item->organization_id, $allowedOrganizations)))
+                                                                    <i class="btn-action btn-edit fas fa-pencil text-warning fs-xl mr-2"
+                                                                        data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
+                                                                        data-id="{{ Crypt::encrypt($item->id) }}"></i>
+                                                                    @if ($item->type == 'file')
+                                                                        <i class="btn-action btn-cut fas fa-cut text-success fs-xl mr-2"
                                                                             data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
                                                                             data-id="{{ Crypt::encrypt($item->id) }}"></i>
-                                                                        @if ($item->type == 'file')
-                                                                            <i class="btn-action btn-cut fas fa-cut text-success fs-xl mr-2"
-                                                                                data-url="{{ route('kepustakaan.get', Crypt::encrypt($item->id)) }}"
-                                                                                data-id="{{ Crypt::encrypt($item->id) }}"></i>
-                                                                        @endif
                                                                     @endif
                                                                 @endif
+
                                                                 @if (auth()->user()->can('delete kepustakaan') &&
                                                                         ($item->organization_id == auth()->user()->employee->organization_id ||
-                                                                            (in_array($item->organization_id, [26, 27, 25]) &&
-                                                                                in_array(auth()->user()->employee->organization_id, [26, 27, 25]))))
+                                                                            (in_array($item->organization_id, [25, 26, 27]) &&
+                                                                                in_array(auth()->user()->employee->organization_id, [25, 26, 27])) ||
+                                                                            in_array($item->organization_id, $allowedOrganizations)))
                                                                     <i class="btn-action btn-delete fas fa-trash text-danger fs-xl mr-2"
                                                                         data-url="{{ route('kepustakaan.delete', Crypt::encrypt($item->id)) }}"
                                                                         data-type="{{ $item->type }}"></i>
@@ -323,6 +330,7 @@
                                             </div>
                                         @endif
                                     @endforeach
+
                                 </div>
                             </div>
                         </div>
@@ -578,65 +586,61 @@
                 });
             });
 
-            $('#store-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
+            function handleFormSubmit(formId, modalId) {
+                $(`#${formId}`).on('submit', function(e) {
+                    e.preventDefault();
 
-                // Pastikan elemen ini adalah form HTML
-                var formElement = document.getElementById('store-form');
+                    var formElement = document.getElementById(formId);
+                    var formData = new FormData(formElement);
 
-                // Menggunakan FormData dengan benar
-                var formData = new FormData(formElement);
-
-                var fileInput = $('#customFile')[0]; // Mengambil input file
-                if (fileInput.files.length > 0) {
-                    var file = fileInput.files[0]; // Mengambil file yang dipilih
-                    // Mendapatkan ukuran file dalam byte
-                    var fileSize = file.size;
-                    // Menambahkan ukuran file ke FormData
-                    formData.append('size', fileSize);
-                }
-
-                $.ajax({
-                    url: "{{ route('kepustakaan.store') }}",
-                    type: 'POST',
-                    data: formData,
-                    processData: false, // Tidak memproses data menjadi string
-                    contentType: false, // Tidak menetapkan tipe konten secara otomatis
-                    beforeSend: function() {
-                        $('#store-form').find('.ikon-tambah').hide();
-                        $('#store-form').find('.spinner-text').removeClass('d-none');
-                    },
-                    success: function(response) {
-                        $('#modal-tambah-kepustakaan').modal('hide');
-                        $('#modal-tambah-departement').modal('hide');
-                        showSuccessAlert(response.message);
-
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
-                    },
-                    error: function(xhr, status, error) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += value + '\n';
-                            });
-
-                            $('#modal-tambah-kepustakaan').modal('hide');
-                            $('#modal-tambah-departement').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' + errorMessages);
-                        } else {
-                            $('#modal-tambah-kepustakaan').modal('hide');
-                            $('#modal-tambah-departement').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
-                        }
+                    var fileInput = $(formElement).find('input[type="file"]')[0];
+                    if (fileInput && fileInput.files.length > 0) {
+                        var file = fileInput.files[0];
+                        formData.append('size', file.size);
                     }
+
+                    $.ajax({
+                        url: "{{ route('kepustakaan.store') }}",
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function() {
+                            $(`#${formId}`).find('.ikon-tambah').hide();
+                            $(`#${formId}`).find('.spinner-text').removeClass('d-none');
+                        },
+                        success: function(response) {
+                            $(`#${modalId}`).modal('hide');
+                            showSuccessAlert(response.message);
+
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        },
+                        error: function(xhr, status, error) {
+                            $(`#${modalId}`).modal('hide');
+
+                            if (xhr.status === 422) {
+                                var errors = xhr.responseJSON.errors;
+                                var errorMessages = '';
+
+                                $.each(errors, function(key, value) {
+                                    errorMessages += value + '\n';
+                                });
+
+                                showErrorAlert('Terjadi kesalahan:\n' + errorMessages);
+                            } else {
+                                showErrorAlert('Terjadi kesalahan: ' + error);
+                                console.log(error);
+                            }
+                        }
+                    });
                 });
-            });
+            }
+
+            // Inisialisasi kedua form
+            handleFormSubmit('store-form-kepustakaan', 'modal-tambah-kepustakaan');
+            handleFormSubmit('store-form-departement', 'modal-tambah-departement');
 
             // initialize datatable
             $('#dt-basic-example').DataTable({
