@@ -172,10 +172,15 @@
                                                     {{ \Carbon\Carbon::parse($row->date)->translatedFormat('D, j M Y') }}
                                                 </td>
                                                 <td style="white-space: nowrap" style="vertical-align: middle !important;">
+                                                    @php
+                                                        $shiftName = optional($row->shift)->name;
+                                                    @endphp
+
                                                     <span
-                                                        class="badge {{ isset($row->shift) && ($row->shift->name == 'dayoff' || $row->shift->name == 'National Holiday') ? 'badge-danger' : 'badge-secondary' }} badge-pill">
-                                                        {{ $row->shift->name ?? '-' }}
+                                                        class="badge {{ in_array($shiftName, ['dayoff', 'National Holiday']) ? 'badge-danger' : 'badge-secondary' }} badge-pill">
+                                                        {{ $shiftName ?? '-' }}
                                                     </span>
+
                                                 </td>
                                                 <td style="white-space: nowrap" style="vertical-align: middle;">
                                                     {{ $row->shift->time_in ?? '-' }}
