@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\BilinganController;
+use App\Http\Controllers\KategoriGiziController;
+use App\Http\Controllers\MakananGiziController;
+use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\BedController;
@@ -309,9 +312,9 @@ Route::group(['middleware' => ['auth']], function () {
             });
 
             Route::prefix('master-data')->group(function () {
-                Route::get('kategori-menu', [GiziController::class, 'kategoriMenu'])->name('gizi.master-data.kategori-menu');
-                Route::get('daftar-makanan', [GiziController::class, 'daftarMakanan'])->name('gizi.master-data.daftar-makanan');
-                Route::get('daftar-menu', [GiziController::class, 'daftarMenu'])->name('gizi.master-data.daftar-menu');
+                Route::get('kategori-menu', [KategoriGiziController::class, 'index'])->name('gizi.master-data.kategori-menu');
+                Route::get('daftar-makanan', [MakananGiziController::class, 'index'])->name('gizi.master-data.daftar-makanan');
+                Route::get('daftar-menu', [MenuGiziController::class, 'index'])->name('gizi.master-data.daftar-menu');
             });
         });
 

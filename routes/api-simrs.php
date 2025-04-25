@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\API\EmployeeController;
+use App\Http\Controllers\KategoriGiziController;
+use App\Http\Controllers\MakananGiziController;
+use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
 use App\Models\OrderParameterLaboratorium;
 use Illuminate\Support\Facades\Route;
@@ -94,6 +97,26 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::post('/edit-order', [OrderLaboratoriumController::class, 'editOrderLaboratorium'])->name('order.laboratorium.edit-order');
         Route::post('/parameter-verify', [OrderLaboratoriumController::class, 'verificate'])->name('order.laboratorium.verificate');
         Route::post('/parameter-delete', [OrderLaboratoriumController::class, 'deleteParameter'])->name('order.laboratorium.delete-parameter');
+    });
+
+    Route::prefix('gizi')->group(function () {
+        Route::prefix('kategori')->group(function () {
+            Route::post('/store', [KategoriGiziController::class, 'store'])->name('kategori.gizi.store');
+            Route::put('/update/{id}/', [KategoriGiziController::class, 'update'])->name('kategori.gizi.update');
+            Route::delete('/destroy/{id}/', [KategoriGiziController::class, 'destroy'])->name('kategori.gizi.destroy');
+        });
+
+        Route::prefix('makanan')->group(function () {
+            Route::post('/store', [MakananGiziController::class, 'store'])->name('makanan.gizi.store');
+            Route::put('/update/{id}/', [MakananGiziController::class, 'update'])->name('makanan.gizi.update');
+            Route::delete('/destroy/{id}/', [MakananGiziController::class, 'destroy'])->name('makanan.gizi.destroy');
+        });
+
+        Route::prefix('menu')->group(function () {
+            Route::post('/store', [MenuGiziController::class, 'store'])->name('menu.gizi.store');
+            Route::put('/update/{id}/', [MenuGiziController::class, 'update'])->name('menu.gizi.update');
+            Route::delete('/destroy/{id}/', [MenuGiziController::class, 'destroy'])->name('menu.gizi.destroy');
+        });
     });
 
 

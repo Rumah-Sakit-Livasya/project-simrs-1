@@ -387,4 +387,13 @@ interface OrderLaboratorium {
     updated_at: string;
 }
 
+interface MakananGizi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    nama: string;
+    harga: number;
+    aktif: number;
+}
+
 type PatientType = "rajal" | "ranap" | "otc";
