@@ -52,7 +52,7 @@ class BilinganController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching data for DataTables: ' . $e->getMessage());
-            return response()->json(['error' => 'Data could not be retrieved: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Data could not be retrieved 1: ' . $e->getMessage()], 500);
         }
     }
 
@@ -80,7 +80,7 @@ class BilinganController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching billing list data: ' . $e->getMessage());
-            return response()->json(['error' => 'Data could not be retrieved: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Data could not be retrieved 2: ' . $e->getMessage()], 500);
         }
     }
 

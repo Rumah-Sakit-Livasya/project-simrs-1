@@ -342,6 +342,64 @@
                 }
             });
 
+            $(document).on('change', '.select2[data-column="tipe_diskon"]', function() {
+                var $row = $(this).closest('tr');
+                var tipeDiskon = $(this).val();
+                const tagihanId = $(this).data('id');
+
+                // Jika tipe diskon adalah Dokter, set disc menjadi 0 dan lakukan ajax untuk memproses hasil 
+                $.ajax({
+                    url: '/simrs/kasir/tagihan-pasien/update-disc/' + tagihanId,
+                    type: 'PUT',
+                    data: {
+                        tipe_diskon: tipeDiskon, // Mengirimkan tipe diskon
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        console.log(response);
+
+
+                        var quantity = $row.find('.input-quantity').first().val();
+                        var totalTagihan = $row.find('.input-nominal').first().val();
+
+                        var diskon = response.diskon * quantity;
+
+                        totalTagihan = totalTagihan.replace(/\./g, '');
+                        totalTagihan = parseInt(totalTagihan);
+
+                        var wajibBayar = totalTagihan - diskon;
+
+                        $row.find('.input-diskon-rp').first().val(diskon);
+                        $row.find('.input-wajib-bayar').first().val(wajibBayar);
+
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Discount updated successfully',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Error: ' + xhr.responseJSON.error,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                });
+
+                // Perbarui wajib bayar setelah perubahan
+                $row.find('.input-quantity').trigger('input');
+            });
+
             // Trigger save on Enter key press
 
             $('#tagihanTable').DataTable({
@@ -703,52 +761,6 @@
 
             $('#tagihanTable').on('init.dt', function() {
                 $('.select2').select2();
-            });
-
-            $(document).on('change', '.select2[data-column="tipe_diskon"]', function() {
-                var $row = $(this).closest('tr');
-                var tipeDiskon = $(this).val();
-                const tagihanId = $(this).data('id');
-
-                // Jika tipe diskon adalah Dokter, set disc menjadi 0 dan lakukan ajax untuk memproses hasil 
-                $.ajax({
-                    url: '/simrs/kasir/tagihan-pasien/update-disc/' + tagihanId,
-                    type: 'PUT',
-                    data: {
-                        id: $row.find('.edit-input').first().data('id'),
-                        disc: 0,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                            'content') // Pastikan CSRF token tersedia
-                    },
-                    success: function(response) {
-                        console.log(response);
-
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'success',
-                            title: 'Discount updated successfully',
-                            showConfirmButton: false,
-                            timer: 3000
-                        });
-                    },
-                    error: function(xhr) {
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'error',
-                            title: 'Error: ' + xhr.responseJSON.error,
-                            showConfirmButton: false,
-                            timer: 3000
-                        });
-                    }
-                });
-
-                // Perbarui wajib bayar setelah perubahan
-                $row.find('.input-quantity').trigger('input');
             });
         });
     </script>

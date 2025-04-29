@@ -12,6 +12,7 @@ use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
 use App\Models\TarifTindakanMedis;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TagihanPasienController extends Controller
 {
@@ -155,7 +156,7 @@ class TagihanPasienController extends Controller
             ]); // Return data in the expected format for DataTables
         } catch (\Exception $e) {
             \Log::error('Error fetching data for DataTables: ' . $e->getMessage());
-            return response()->json(['error' => 'Data could not be retrieved.'], 500); // Return error response
+            return response()->json(['error' => 'Data could not be retrieved 10000.'], 500); // Return error response
         }
     }
 
@@ -203,32 +204,70 @@ class TagihanPasienController extends Controller
 
     public function updateDisc($id)
     {
-        // try {
-        // $tagihan = TagihanPasien::with('bilingan')->find($id);
-        $tagihan = TagihanPasien::findOrFail($id);
-        $tindakan = $tagihan->tindakan_medis;
-        $group_penjamin_id = $tagihan->registration->penjamin->group_penjamin_id;
-        $kelas_id = $tagihan->registration->kelas_rawat_id;
+        try {
+            // Ambil tipe diskon yang dikirimkan dari frontend
+            $tipeDiskon = request()->input('tipe_diskon');
 
-        $tarif = $tagihan->tindakan_medis->tarifTindakanMedis($group_penjamin_id, $kelas_id);
+            // Ambil tagihan berdasarkan ID
+            $tagihan = TagihanPasien::findOrFail($id);
 
-        return dd($tarif);
-        // Pastikan bilingan ditemukan
-        if (!$bilingan) {
-            return response()->json(['error' => 'Data bilingan tidak ditemukan'], 404);
+            // Ambil informasi tindakan medis
+            $tindakan = $tagihan->tindakan_medis;
+            $group_penjamin_id = $tagihan->registration->penjamin->group_penjamin_id;
+            $kelas_id = $tagihan->registration->kelas_rawat_id;
+
+            // Dapatkan tarif tindakan medis
+            $tarif = $tindakan->tarifTindakanMedis($group_penjamin_id, $kelas_id);
+
+            // Inisialisasi diskon berdasarkan tarif yang didapat
+            $disc = [
+                'share_rs' => $tarif['share_rs'],
+                'share_dr' => $tarif['share_dr'],
+                'total' => $tarif['total'],
+            ];
+
+            // Tentukan diskon berdasarkan tipe diskon
+            $quantity = $tagihan->quantity; // Pastikan ada quantity yang relevan
+            $diskon = 0;
+            if ($tipeDiskon === 'Dokter') {
+                $diskon = $disc['share_dr'];
+            } elseif ($tipeDiskon === 'Rumah Sakit') {
+                $diskon = $disc['share_rs'];
+            } elseif ($tipeDiskon === 'All') {
+                $diskon = $disc['total'];
+            } else {
+                $diskon = 0; // Default jika tidak ada tipe yang cocok
+            }
+
+            // Ambil data registrasi dan bilingannya
+            $registration = $tagihan->registration;
+            $bilingan = $tagihan->bilingan;
+
+            // Hitung total tagihan dan wajib bayar
+            $nominal = $tagihan->nominal_awal; // Ganti dengan metode yang sesuai
+            $totalTagihan = $tagihan->total_tagihan; // Ganti dengan metode yang sesuai
+            $totalTagihanWithQuantity = $totalTagihan; // Total tagihan setelah dikalikan quantity
+            $wajibBayar = $totalTagihanWithQuantity - $diskon;
+
+
+            // Update data tagihan dengan diskon baru
+            $tagihan->update([
+                'tipe_diskon' => $tipeDiskon,
+                'diskon' => $diskon,
+                'wajib_bayar' => $wajibBayar,
+            ]);
+
+            // Kembalikan data ke frontend
+            return response()->json([
+                'bilingan' => $bilingan,
+                'registration' => $registration,
+                'disc' => $disc,
+                'wajib_bayar' => $wajibBayar,
+                'diskon' => $diskon
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching tagihan: ' . $e->getMessage());
+            return response()->json(['error' => 'Data could not be retrieved.'], 500);
         }
-
-        // Ambil data registrasi jika diperlukan
-        $registration = $bilingan->registration;
-
-        return response()->json([
-            'bilingan' => $bilingan,
-            'registration' => $registration,
-            // 'share_dokter' => $tarif
-        ]);
-        // } catch (\Exception $e) {
-        //     \Log::error('Error fetching tagihan: ' . $e->getMessage());
-        //     return response()->json(['error' => 'Data could not be retrieved.'], 500);
-        // }
     }
 }

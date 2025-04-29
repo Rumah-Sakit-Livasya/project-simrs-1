@@ -362,7 +362,7 @@ class RegistrationController extends Controller
             $validatedData['status'] = 'aktif';
 
             if ($request->registration_type == 'rawat-jalan') {
-                $kelas_rawat = KelasRawat::where('name', 'like', '%Rawat Jalan%')->first();
+                $kelas_rawat = KelasRawat::where('kelas', 'like', '%Rawat Jalan%')->first();
                 if ($kelas_rawat) {
                     $validatedData['kelas_rawat_id'] = $kelas_rawat->id;
                 }
