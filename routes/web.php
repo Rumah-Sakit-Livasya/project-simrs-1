@@ -347,6 +347,10 @@ Route::middleware([LastSeenUser::class])->group(function () {
             Route::get('/laporan-internal-list', [LaporanInternalController::class, 'list']);
             Route::delete('/laporan-internal/{id}', [LaporanInternalController::class, 'destroy']);
             Route::post('/laporan-internal/complete/{id}', [LaporanInternalController::class, 'complete']);
+            Route::get('/laporan-internal/export-harian', [LaporanInternalController::class, 'exportHarian'])
+                ->name('laporan.internal.export.harian');
+            Route::get('/laporan-internal/export-word-harian', [LaporanInternalController::class, 'exportWordHarian'])
+                ->name('laporan.internal.export.word');
         });
         // routes/web.php
         Route::middleware(['auth'])->group(function () {
