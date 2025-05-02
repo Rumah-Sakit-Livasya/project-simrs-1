@@ -10,6 +10,7 @@ use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
+use App\Http\Controllers\LaporanInternalController;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\Pages\DashboardController;
 use App\Http\Controllers\Pages\UpdateProfileController;
@@ -340,6 +341,12 @@ Route::middleware([LastSeenUser::class])->group(function () {
             Route::get('/', [ChecklistHarianController::class, 'index'])->name('checklist.index');
         });
 
+        Route::middleware(['auth'])->group(function () {
+            Route::get('/laporan-internal', [LaporanInternalController::class, 'index']);
+            Route::post('/laporan-internal', [LaporanInternalController::class, 'store']);
+            Route::get('/laporan-internal-list', [LaporanInternalController::class, 'list']);
+            Route::delete('/laporan-internal/{id}', [LaporanInternalController::class, 'destroy']);
+        });
         // routes/web.php
         Route::middleware(['auth'])->group(function () {
             Route::prefix('dashboard')->group(function () {
