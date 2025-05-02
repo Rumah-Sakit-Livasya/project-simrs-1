@@ -31,7 +31,7 @@
                                 <th>T. Tidur</th>
                                 <th>No. Registrasi</th>
                                 <th>Tgl. Reg</th>
-                                <th>Nama Lengkap</th>
+                                <th>[MRN] Nama Lengkap</th>
                                 <th>Dokter</th>
                                 <th>Diagnosa Awal</th>
                                 <th>Asuransi</th>
@@ -39,38 +39,45 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($orders as $order)
+                            @foreach ($registrations as $registration)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>
-                                        {{ $order->kelas_rawat->kelas }}
+                                        {{ $registration->kelas_rawat->kelas }}
                                     </td>
                                     <td>
-                                      {{ $order->patient->bed->room->ruangan }}
+                                        {{ $registration->patient->bed->room->ruangan }}
                                     </td>
                                     <td>
-                                       {{ $order->patient->bed->nama_tt }}
+                                        {{ $registration->patient->bed->nama_tt }}
                                     </td>
                                     <td>
-                                      {{ $order->registration_number }}
+                                        {{ $registration->registration_number }}
                                     </td>
                                     <td>
-                                      {{ $order->date }}
+                                        {{ $registration->date }}
                                     </td>
                                     <td>
-                                       {{ $order->patient->name }}
+                                        [{{ $registration->patient->medical_record_number }}]
+                                        {{ $registration->patient->name }}
                                     </td>
                                     <td>
-                                        {{ $order->doctor->employee->fullname }}
+                                        {{ $registration->doctor->employee->fullname }}
                                     </td>
                                     <td>
-                                     {{ $order->diagnosa_awal }}
+                                        {{ $registration->diagnosa_awal }}
                                     </td>
                                     <td>
-                                      {{ $order->penjamin->penjamin ?? '-' }}
+                                        {{ $registration->penjamin->penjamin ?? '-' }}
                                     </td>
                                     <td>
-                                       
+                                        <a class="mdi mdi-silverware pointer mdi-24px text-success"
+                                            onclick="orderPasien({{ $registration->id }})" title="Order makanan pasien"
+                                            data-id="{{ $registration->id }}"></a>
+                                        <a class="mdi mdi-account-group pointer mdi-24px text-info"
+                                            onclick="orderKeluarga({{ $registration->id }})"
+                                            title="Order makanan keluarga pasien"
+                                            data-id="{{ $registration->id }}"></a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -83,7 +90,7 @@
                                 <th>T. Tidur</th>
                                 <th>No. Registrasi</th>
                                 <th>Tgl. Reg</th>
-                                <th>Nama Lengkap</th>
+                                <th>[MRN] Nama Lengkap</th>
                                 <th>Dokter</th>
                                 <th>Diagnosa Awal</th>
                                 <th>Asuransi</th>
@@ -115,4 +122,32 @@
         }
         new bootstrap.Popover(el, opts);
     })
+
+    function orderPasien(id) {
+        let url = "/simrs/gizi/popup/order/pasien/" + id;
+        let width = screen.width / 2;
+        let height = screen.height / 2
+        let left = width - (width / 2);
+        let top = height - (height / 2);
+        window.open(
+            url,
+            "popupWindow_orderGiziPasien_" + id,
+            "width=" + width + ",height=" + height +
+            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+        );
+    }
+
+    function orderKeluarga(id) {
+        let url = "/simrs/gizi/popup/order/keluarga/" + id;
+        let width = screen.width / 2;
+        let height = screen.height / 2
+        let left = width - (width / 2);
+        let top = height - (height / 2);
+        window.open(
+            url,
+            "popupWindow_orderGiziKeluarga_" + id,
+            "width=" + width + ",height=" + height +
+            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+        );
+    }
 </script>

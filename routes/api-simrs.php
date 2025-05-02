@@ -4,7 +4,9 @@ use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
+use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\SIMRS\Gizi\GiziController;
 use App\Models\OrderParameterLaboratorium;
 use Illuminate\Support\Facades\Route;
 
@@ -100,6 +102,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
 
     Route::prefix('gizi')->group(function () {
+
+        Route::prefix("order")->group(function () {
+            Route::get("/store", [OrderGiziController::class, 'store'])->name('order.gizi.store');
+            Route::post("/update/status", [OrderGiziController::class,"update_status"])->name("order.gizi.update.status");
+            Route::post("/update", [OrderGiziController::class, 'update'])->name('order.gizi.update');
+        });
+
         Route::prefix('kategori')->group(function () {
             Route::post('/store', [KategoriGiziController::class, 'store'])->name('kategori.gizi.store');
             Route::put('/update/{id}/', [KategoriGiziController::class, 'update'])->name('kategori.gizi.update');

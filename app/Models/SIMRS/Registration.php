@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\OrderGizi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
 use App\Models\OrderRadiologi;
@@ -136,6 +137,11 @@ class Registration extends Model implements AuditableContract
     public function order_laboratorium()
     {
         return $this->hasMany(OrderLaboratorium::class, 'registration_id');
+    }
+
+    public function order_gizi()
+    {
+        return $this->hasMany(OrderGizi::class,'registration_id');
     }
 
     // public function generateNomorRegistrasi()

@@ -116,6 +116,7 @@ class MenuGiziController extends Controller
                 "aktif" => isset($validatedData['foods_status'][$index]) ? $validatedData['foods_status'][$index] : false,
             ]);
         }
+        return redirect()->back()->with('success', 'Menu berhasil diedit!');
     }
 
     /**

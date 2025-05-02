@@ -1,13 +1,8 @@
 @extends('inc.layout')
-@section('title', 'List Menu')
+@section('title', 'Laporan Order Gizi')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-
-        @include('pages.simrs.gizi.partials.menu-form')
-
-        @include('pages.simrs.gizi.partials.menu-datatable')
-
-        @include('pages.simrs.gizi.partials.add-menu-modal')
+        @include('pages.simrs.gizi.partials.laporan-form')
     </main>
 @endsection
 @section('plugin')
@@ -20,8 +15,8 @@
     {{-- Datepicker Range --}}
     <script src="/js/dependency/moment/moment.js"></script>
     <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
-    <script src="/js/bootstrap.js"></script>
 
+    
     <script>
         var controls = {
             leftArrow: '<i class="fal fa-angle-left" style="font-size: 1.25rem"></i>',
@@ -40,33 +35,22 @@
         }
 
         $(document).ready(function() {
-            console.log("ready");
-
 
             // Datepciker
             runDatePicker();
 
             // Select 2
-            // $(".edit-modal #search-food").each(function() {
-            //     $(this).select2({
-            //         dropdownParent: $(this).closest("td")
-            //     });
-            // });
-            // $("#addModal #search-food").each(function() {
-            //     $(this).select2({
-            //         dropdownParent: $(this).closest("td")
-            //     });
-            // });
+            $(function() {
+                $('.select2').select2({
+                    dropdownCssClass: "move-up"
+                });
+                $(".select2").on("select2:open", function() {
+                    // Mengambil elemen kotak pencarian
+                    var searchField = $(".select2-search__field");
 
-            // $(".select2").select2({
-            //     dropdownParent: $(this).closest(".modal")
-            // });
-            $(".select2").on("select2:open", function() {
-                // Mengambil elemen kotak pencarian
-                var searchField = $(".select2-search__field");
-
-                // Mengubah urutan elemen untuk memindahkannya ke atas
-                searchField.insertBefore(searchField.prev());
+                    // Mengubah urutan elemen untuk memindahkannya ke atas
+                    searchField.insertBefore(searchField.prev());
+                });
             });
 
             /// Get the current date and time
@@ -145,18 +129,20 @@
         });
 
 
+        // Input RM
         function formatAngka(input) {
             var value = input.value.replace(/\D/g, '');
             var formattedValue = '';
 
-            formattedValue = value.replace(/\B(?=(\d{3})+(?!\d))/g, '');
+            if (value.length > 6) {
+                value = value.substr(0, 6);
+            }
+
+            if (value.length > 0) {
+                formattedValue = value.match(/.{1,2}/g).join('-');
+            }
 
             input.value = formattedValue;
         }
     </script>
-
-    <script>
-        window._foods = @json($foods);
-    </script>
-    <script src="{{ asset('js/simrs/menu-gizi.js') }}?v={{ time() }}"></script>
 @endsection

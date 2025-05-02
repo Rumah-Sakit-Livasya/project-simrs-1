@@ -26,20 +26,19 @@ class ModalMenuGiziHandler {
         this.#FormElement = $(form_selector);
         this.#FormSelector = form_selector;
 
-        // @ts-ignore
-        this.#FormElement.find('select').select2({
-            dropdownParent: this.#FormElement
+        this.#FormElement.closest(".modal").on("hidden.bs.modal", () => {
+            location.reload();
         });
 
-        this.#FormElement.find('select').on('select2:select', (e) => {
-            // @ts-ignore
-            const id = parseInt(e.params.data.id);
+        this.#FormElement.find('select').on('change', (e) => {
+            const id = parseInt(e.target.value);
+            if (!isNaN(id)) {
             this.#onFoodSelect(id);
 
             this.#FormElement.find('select')
-                // @ts-ignore
-                .val(null)
+                .val('')
                 .trigger('change');
+            }
         });
     }
 
