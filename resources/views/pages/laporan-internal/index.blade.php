@@ -36,7 +36,7 @@
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="container-fluid py-4">
-            <div class="row">
+            <div class="row mb-3">
                 <div class="col-12">
                     <div id="panel-1" class="panel">
                         <div class="panel-hdr">
@@ -53,12 +53,14 @@
                                     <table class="table table-bordered table-hover table-striped w-100" id="laporanTable">
                                         <thead class="bg-primary-50">
                                             <tr>
+                                                <th>No</th>
                                                 <th>Tanggal</th>
                                                 <th>Jenis</th>
                                                 <th>Uraian</th>
                                                 <th>Status</th>
                                                 <th>Jam Masuk</th>
-                                                <th>Jam Selesai</th>
+                                                <th>Jam Diproses</th>
+                                                <th>Respon Time</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
@@ -87,7 +89,7 @@
                             @csrf
                             <input type="hidden" name="user_id" value="{{ auth()->id() }}">
 
-                            <div class="row">
+                            <div class="row mb-3">
                                 <!-- Tanggal -->
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -108,8 +110,10 @@
                                         </select>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Organization Field (Hidden by default) -->
+                            <!-- Organization Field (Hidden by default) -->
+                            <div class="row mb-3">
                                 <div class="col-12" id="organization-field" style="display: none;">
                                     <div class="form-group">
                                         <label for="organization" class="font-weight-bold">Organisasi Terkait</label>
@@ -122,8 +126,10 @@
                                         <small class="text-muted">Hanya untuk laporan kegiatan</small>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Uraian -->
+                            <!-- Uraian -->
+                            <div class="row mb-3">
                                 <div class="col-12">
                                     <div class="form-group">
                                         <label for="kegiatan" class="font-weight-bold">Uraian Lengkap</label>
@@ -131,22 +137,30 @@
                                             placeholder="Deskripsikan laporan secara detail"></textarea>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Status -->
+                            <!-- Status -->
+                            <div class="row mb-3">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="status" class="font-weight-bold">Status</label>
-                                        <select class="form-control" id="status" name="status" required>
+                                        <select class="form-control select2" id="status" name="status" required>
                                             <option value="" disabled selected>Pilih Status</option>
-                                            <option value="Baru">Baru</option>
-                                            <option value="Diproses">Diproses</option>
-                                            <option value="Selesai">Selesai</option>
-                                            <option value="Ditunda">Ditunda</option>
+                                            <option value="selesai">Selesai</option>
+                                            <option value="diproses">Diproses</option>
+                                            <option value="ditunda">Ditunda</option>
+                                            <option value="ditolak">Ditolak</option>
                                         </select>
+                                    </div>
+                                    <!-- Keterangan -->
+
+                                    <div class="form-group" id="keterangan-field" style="display: none;">
+                                        <label for="keterangan" class="font-weight-bold">Keterangan</label>
+                                        <textarea class="form-control" id="keterangan" name="keterangan" rows="4" required
+                                            placeholder="Deskripsikan keterangan status secara detail"></textarea>
                                     </div>
                                 </div>
 
-                                <!-- Waktu -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="font-weight-bold">Timeline</label>
@@ -156,12 +170,6 @@
                                                     <span class="input-group-text bg-light">Masuk</span>
                                                 </div>
                                                 <input type="time" class="form-control" name="jam_masuk">
-                                            </div>
-                                            <div class="input-group mb-2">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-light">Diterima</span>
-                                                </div>
-                                                <input type="time" class="form-control" name="jam_diterima">
                                             </div>
                                             <div class="input-group mb-2">
                                                 <div class="input-group-prepend">
@@ -230,7 +238,7 @@
 
             // Show/hide organization field based on jenis selection
             $('#jenis').change(function() {
-                if ($(this).val() === 'kegiatan') {
+                if ($(this).val() === 'kendala') {
                     $('#organization-field').show();
                     $('#organization').prop('required', true);
                     $('input[name="organization_id"]').remove();
@@ -244,6 +252,15 @@
                             value: '{{ auth()->user()->employee->organization_id }}'
                         }).appendTo('form');
                     }
+                }
+            });
+
+            // Show/hide keterangan field based on status selection
+            $('#status').change(function() {
+                if ($(this).val() === 'ditunda' || $(this).val() === 'ditolak') {
+                    $('#keterangan-field').show();
+                } else {
+                    $('#keterangan-field').hide();
                 }
             });
 
@@ -270,14 +287,32 @@
                     }
                 },
                 columns: [{
+                        data: null,
+                        name: 'no',
+                        orderable: false,
+                        render: function(data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    {
                         data: 'tanggal',
-                        name: 'tanggal'
+                        name: 'tanggal',
+                        render: function(data) {
+                            return new Date(data).toLocaleDateString('id-ID', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+                        }
                     },
                     {
                         data: 'jenis',
                         name: 'jenis',
                         render: function(data) {
-                            return `<span class="badge ${data === 'kegiatan' ? 'bg-success' : 'bg-warning'}">${data}</span>`;
+                            const badgeClass = data === 'kegiatan' ? 'bg-success' : 'bg-warning';
+                            const displayText = data === 'kegiatan' ? 'Kegiatan' : 'Kendala';
+                            return `<span class="badge ${badgeClass}">${displayText}</span>`;
                         }
                     },
                     {
@@ -286,20 +321,80 @@
                     },
                     {
                         data: 'status',
-                        name: 'status'
+                        name: 'status',
+                        render: function(data) {
+                            let badgeClass = 'bg-secondary';
+                            if (data === 'Selesai') badgeClass = 'bg-success';
+                            if (data === 'Diproses') badgeClass = 'bg-primary';
+                            if (data === 'Baru') badgeClass = 'bg-info';
+                            if (data === 'Ditolak') badgeClass = 'bg-danger';
+                            return `<span class="badge ${badgeClass}">${data}</span>`;
+                        }
                     },
                     {
                         data: 'jam_masuk',
                         name: 'jam_masuk',
                         render: function(data) {
-                            return data || '-';
+                            if (!data) return '-';
+                            try {
+                                // Jika format waktu sudah HH:MM:SS
+                                if (typeof data === 'string' && data.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                                    return data;
+                                }
+                                // Jika format timestamp
+                                return new Date(data).toLocaleTimeString('id-ID', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit',
+                                    hour12: false
+                                });
+                            } catch (e) {
+                                return '<span class="text-warning">Invalid</span>';
+                            }
                         }
                     },
                     {
-                        data: 'jam_selesai',
-                        name: 'jam_selesai',
+                        data: 'jam_diproses',
+                        name: 'jam_diproses',
                         render: function(data) {
-                            return data || '-';
+                            if (!data) return '-';
+                            try {
+                                if (typeof data === 'string' && data.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                                    return data;
+                                }
+                                return new Date(data).toLocaleTimeString('id-ID', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit',
+                                    hour12: false
+                                });
+                            } catch (e) {
+                                return '<span class="text-warning">Invalid</span>';
+                            }
+                        }
+                    },
+                    {
+                        data: null,
+                        name: 'respon_time',
+                        render: function(data, type, row) {
+                            // Hitung waktu respon dari jam_masuk ke jam_diproses
+                            if (row.jam_masuk && row.jam_diproses) {
+                                try {
+                                    const start = this.parseTime(row.jam_masuk);
+                                    const respon = this.parseTime(row.jam_diproses);
+
+                                    if (respon < start) {
+                                        return '<span class="text-danger">Invalid</span>';
+                                    }
+
+                                    const diff = Math.abs(respon - start);
+                                    return this.formatDuration(diff);
+                                } catch (e) {
+                                    console.error('Error calculating response time:', e);
+                                    return '<span class="text-warning">Error</span>';
+                                }
+                            }
+                            return '-';
                         }
                     },
                     {
@@ -309,18 +404,46 @@
                         searchable: false,
                         render: function(data) {
                             return `
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(${data})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            `;
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(${data})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
                         }
                     }
                 ],
+                // Tambahkan fungsi helper di luar columns
+                createdRow: function(row, data, dataIndex) {
+                    // Helper functions untuk digunakan dalam render
+                    $.fn.dataTable.render.formatDuration = function(diff) {
+                        const hours = Math.floor(diff / (1000 * 60 * 60));
+                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                        let durationText = '';
+                        if (hours > 0) durationText += `${hours} jam `;
+                        if (minutes > 0) durationText += `${minutes} menit `;
+                        if (seconds > 0 || (hours === 0 && minutes === 0)) durationText +=
+                            `${seconds} detik`;
+
+                        return durationText.trim();
+                    };
+
+                    $.fn.dataTable.render.parseTime = function(timeStr) {
+                        // Handle both timestamp and HH:MM:SS format
+                        if (typeof timeStr === 'string' && timeStr.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                            const [hours, minutes, seconds] = timeStr.split(':');
+                            const date = new Date();
+                            date.setHours(hours, minutes, seconds);
+                            return date;
+                        }
+                        return new Date(timeStr);
+                    };
+                },
                 language: {
                     "decimal": "",
                     "emptyTable": "Tidak ada data yang tersedia",
@@ -343,6 +466,7 @@
                 },
                 responsive: true
             });
+
 
             // Form submission
             $('#form-laporan').on('submit', function(e) {
@@ -418,6 +542,31 @@
                     });
                 }
             });
+        }
+
+        // Definisikan fungsi helper di luar DataTables
+        function parseTime(timeStr) {
+            // Handle both timestamp and HH:MM:SS format
+            if (typeof timeStr === 'string' && timeStr.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                const [hours, minutes, seconds] = timeStr.split(':');
+                const date = new Date();
+                date.setHours(hours, minutes, seconds);
+                return date;
+            }
+            return new Date(timeStr);
+        }
+
+        function formatDuration(diff) {
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            let durationText = '';
+            if (hours > 0) durationText += `${hours} jam `;
+            if (minutes > 0) durationText += `${minutes} menit `;
+            if (seconds > 0 || (hours === 0 && minutes === 0)) durationText += `${seconds} detik`;
+
+            return durationText.trim();
         }
     </script>
 @endsection

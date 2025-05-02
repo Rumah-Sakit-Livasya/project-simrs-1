@@ -19,6 +19,7 @@ return new class extends Migration
             $table->enum('jenis', ['kendala', 'kegiatan']);
             $table->text('kegiatan');
             $table->string('status');
+            $table->text('keterangan')->nullable();
             $table->time('jam_masuk')->nullable();
             $table->time('jam_diterima')->nullable();
             $table->time('jam_diproses')->nullable();
