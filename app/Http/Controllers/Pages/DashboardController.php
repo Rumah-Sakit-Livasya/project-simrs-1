@@ -810,10 +810,10 @@ class DashboardController extends Controller
         } else if (auth()->user()->hasRole('pj')) {
             $employees = Employee::where('company_id', auth()->user()->employee->company_id)->where('is_active', 1)->where('organization_id', auth()->user()->employee->organization_id)->get();
             $organizations = [];
-        } else if (auth()->user()->hasRole('manager')){
-		$employees = Employee::where('is_active', 1)->get();
-		$organization = Organization::all();	
-	} else {
+        } else if (auth()->user()->hasRole('manager')) {
+            $employees = Employee::where('is_active', 1)->get();
+            $organizations = Organization::all();
+        } else {
             $employees = Employee::where('company_id', auth()->user()->employee->company_id)->where('is_active', 1)->get();
             $organizations = [];
         }

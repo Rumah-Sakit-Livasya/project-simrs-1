@@ -36,29 +36,30 @@
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="container-fluid py-4">
-            <div class="row">
+            <div class="row mb-3">
                 <div class="col-12">
                     <div id="panel-1" class="panel">
                         <div class="panel-hdr">
                             <h2>Laporan Internal IT</h2>
-                            <div class="panel-toolbar">
-                                <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#tambah-data">
-                                    <i class="fas fa-plus me-1"></i> Tambah Laporan
-                                </button>
-                            </div>
                         </div>
                         <div class="panel-container show">
                             <div class="panel-content">
+                                <button class="btn btn-primary btn-sm my-3" data-toggle="modal" data-target="#tambah-data">
+                                    <i class="fas fa-plus me-1"></i> Tambah Laporan
+                                </button>
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover table-striped w-100" id="laporanTable">
                                         <thead class="bg-primary-50">
                                             <tr>
+                                                <th>No</th>
                                                 <th>Tanggal</th>
                                                 <th>Jenis</th>
                                                 <th>Uraian</th>
                                                 <th>Status</th>
+                                                {{-- <th>Dokumentasi</th> --}}
                                                 <th>Jam Masuk</th>
-                                                <th>Jam Selesai</th>
+                                                <th>Jam Diproses</th>
+                                                <th>Respon Time</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
@@ -82,12 +83,12 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form id="form-laporan">
+                    <form id="form-laporan" enctype="multipart/form-data">
                         <div class="modal-body">
                             @csrf
                             <input type="hidden" name="user_id" value="{{ auth()->id() }}">
 
-                            <div class="row">
+                            <div class="row mb-3">
                                 <!-- Tanggal -->
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -108,8 +109,10 @@
                                         </select>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Organization Field (Hidden by default) -->
+                            <!-- Organization Field (Hidden by default) -->
+                            <div class="row mb-3">
                                 <div class="col-12" id="organization-field" style="display: none;">
                                     <div class="form-group">
                                         <label for="organization" class="font-weight-bold">Organisasi Terkait</label>
@@ -122,8 +125,10 @@
                                         <small class="text-muted">Hanya untuk laporan kegiatan</small>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Uraian -->
+                            <!-- Uraian -->
+                            <div class="row mb-3">
                                 <div class="col-12">
                                     <div class="form-group">
                                         <label for="kegiatan" class="font-weight-bold">Uraian Lengkap</label>
@@ -131,22 +136,30 @@
                                             placeholder="Deskripsikan laporan secara detail"></textarea>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Status -->
+                            <!-- Status -->
+                            <div class="row mb-3">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="status" class="font-weight-bold">Status</label>
-                                        <select class="form-control" id="status" name="status" required>
+                                        <select class="form-control select2" id="status" name="status" required>
                                             <option value="" disabled selected>Pilih Status</option>
-                                            <option value="Baru">Baru</option>
-                                            <option value="Diproses">Diproses</option>
-                                            <option value="Selesai">Selesai</option>
-                                            <option value="Ditunda">Ditunda</option>
+                                            <option value="selesai">Selesai</option>
+                                            <option value="diproses">Diproses</option>
+                                            <option value="ditunda">Ditunda</option>
+                                            <option value="ditolak">Ditolak</option>
                                         </select>
+                                    </div>
+                                    <!-- Keterangan -->
+
+                                    <div class="form-group" id="keterangan-field" style="display: none;">
+                                        <label for="keterangan" class="font-weight-bold">Keterangan</label>
+                                        <textarea class="form-control" id="keterangan" name="keterangan" rows="4"
+                                            placeholder="Deskripsikan keterangan status secara detail"></textarea>
                                     </div>
                                 </div>
 
-                                <!-- Waktu -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="font-weight-bold">Timeline</label>
@@ -156,12 +169,6 @@
                                                     <span class="input-group-text bg-light">Masuk</span>
                                                 </div>
                                                 <input type="time" class="form-control" name="jam_masuk">
-                                            </div>
-                                            <div class="input-group mb-2">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-light">Diterima</span>
-                                                </div>
-                                                <input type="time" class="form-control" name="jam_diterima">
                                             </div>
                                             <div class="input-group mb-2">
                                                 <div class="input-group-prepend">
@@ -179,6 +186,27 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    {{-- <div class="form-group mb-0">
+                                        <label class="form-label">File (Browser)</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="customFile">
+                                            <label class="custom-file-label" for="customFile">Choose file</label>
+                                        </div>
+                                    </div> --}}
+
+                                    <div class="form-group">
+                                        <label for="dokumentasi" class="form-label">Dokumentasi (Opsional)</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="dokumentasi"
+                                                name="dokumentasi" accept=".jpg,.jpeg,.png,.pdf">
+                                            <label class="custom-file-label" for="customFile">Choose file</label>
+                                        </div>
+                                        <small class="text-muted">Format: JPG, PNG, PDF (Max 2MB)</small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">
@@ -189,6 +217,45 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for showing documentation -->
+        <div class="modal fade" id="dokumentasiModal" tabindex="-1" role="dialog"
+            aria-labelledby="dokumentasiModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dokumentasiModalLabel">Dokumentasi</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div id="noDocument" class="py-5" style="display: none;">
+                            <i class="fas fa-file-excel fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Tidak ada dokumentasi tersedia</p>
+                        </div>
+                        <div id="unsupportedFormat" class="py-5" style="display: none;">
+                            <i class="fas fa-file-excel fa-3x text-danger mb-3"></i>
+                            <p class="text-danger">Format file tidak didukung. Hanya JPG, PNG, dan PDF yang bisa
+                                ditampilkan.</p>
+                        </div>
+                        <img id="dokumentasiImage" src="" class="img-fluid"
+                            style="max-height: 70vh; display: none;" alt="Dokumentasi">
+                        <div id="dokumentasiPdf" class="w-100" style="height: 70vh; display: none;">
+                            <iframe id="pdfViewer" src=""
+                                style="width: 100%; height: 100%; border: none;"></iframe>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                        <a id="downloadDokumentasi" href="#" class="btn btn-primary" download
+                            style="display: none;">
+                            <i class="fas fa-download"></i> Unduh
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -230,7 +297,7 @@
 
             // Show/hide organization field based on jenis selection
             $('#jenis').change(function() {
-                if ($(this).val() === 'kegiatan') {
+                if ($(this).val() === 'kendala') {
                     $('#organization-field').show();
                     $('#organization').prop('required', true);
                     $('input[name="organization_id"]').remove();
@@ -244,6 +311,15 @@
                             value: '{{ auth()->user()->employee->organization_id }}'
                         }).appendTo('form');
                     }
+                }
+            });
+
+            // Show/hide keterangan field based on status selection
+            $('#status').change(function() {
+                if ($(this).val() === 'ditunda' || $(this).val() === 'ditolak') {
+                    $('#keterangan-field').show();
+                } else {
+                    $('#keterangan-field').hide();
                 }
             });
 
@@ -270,14 +346,32 @@
                     }
                 },
                 columns: [{
+                        data: null,
+                        name: 'no',
+                        orderable: false,
+                        render: function(data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    {
                         data: 'tanggal',
-                        name: 'tanggal'
+                        name: 'tanggal',
+                        render: function(data) {
+                            return new Date(data).toLocaleDateString('id-ID', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+                        }
                     },
                     {
                         data: 'jenis',
                         name: 'jenis',
                         render: function(data) {
-                            return `<span class="badge ${data === 'kegiatan' ? 'bg-success' : 'bg-warning'}">${data}</span>`;
+                            const badgeClass = data === 'kegiatan' ? 'bg-success' : 'bg-warning';
+                            const displayText = data === 'kegiatan' ? 'Kegiatan' : 'Kendala';
+                            return `<span class="badge ${badgeClass}">${displayText}</span>`;
                         }
                     },
                     {
@@ -286,20 +380,80 @@
                     },
                     {
                         data: 'status',
-                        name: 'status'
+                        name: 'status',
+                        render: function(data) {
+                            let badgeClass = 'bg-secondary';
+                            if (data === 'Selesai') badgeClass = 'bg-success';
+                            if (data === 'Diproses') badgeClass = 'bg-primary';
+                            if (data === 'Baru') badgeClass = 'bg-info';
+                            if (data === 'Ditolak') badgeClass = 'bg-danger';
+                            return `<span class="badge ${badgeClass}">${data}</span>`;
+                        }
                     },
                     {
                         data: 'jam_masuk',
                         name: 'jam_masuk',
                         render: function(data) {
-                            return data || '-';
+                            if (!data) return '-';
+                            try {
+                                // Jika format waktu sudah HH:MM:SS
+                                if (typeof data === 'string' && data.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                                    return data;
+                                }
+                                // Jika format timestamp
+                                return new Date(data).toLocaleTimeString('id-ID', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit',
+                                    hour12: false
+                                });
+                            } catch (e) {
+                                return '<span class="text-warning">Invalid</span>';
+                            }
                         }
                     },
                     {
-                        data: 'jam_selesai',
-                        name: 'jam_selesai',
+                        data: 'jam_diproses',
+                        name: 'jam_diproses',
                         render: function(data) {
-                            return data || '-';
+                            if (!data) return '-';
+                            try {
+                                if (typeof data === 'string' && data.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                                    return data;
+                                }
+                                return new Date(data).toLocaleTimeString('id-ID', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit',
+                                    hour12: false
+                                });
+                            } catch (e) {
+                                return '<span class="text-warning">Invalid</span>';
+                            }
+                        }
+                    },
+                    {
+                        data: null,
+                        name: 'respon_time',
+                        render: function(data, type, row) {
+                            // Hitung waktu respon dari jam_masuk ke jam_diproses
+                            if (row.jam_masuk && row.jam_diproses) {
+                                try {
+                                    const start = this.parseTime(row.jam_masuk);
+                                    const respon = this.parseTime(row.jam_diproses);
+
+                                    if (respon < start) {
+                                        return '<span class="text-danger">Invalid</span>';
+                                    }
+
+                                    const diff = Math.abs(respon - start);
+                                    return this.formatDuration(diff);
+                                } catch (e) {
+                                    console.error('Error calculating response time:', e);
+                                    return '<span class="text-warning">Error</span>';
+                                }
+                            }
+                            return '-';
                         }
                     },
                     {
@@ -307,20 +461,70 @@
                         name: 'action',
                         orderable: false,
                         searchable: false,
-                        render: function(data) {
-                            return `
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(${data})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            `;
+                        render: function(data, type, row) {
+                            // Tombol default (edit dan delete)
+                            let buttons = `
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(${data})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                        `;
+
+                            // Tambahkan tombol dokumentasi jika ada
+                            if (row.dokumentasi && !isNumeric(row.dokumentasi)) {
+                                buttons += `
+                                            <button class="btn btn-sm btn-icon btn-info btn-show-dokumentasi" 
+                                                    data-file="${row.dokumentasi.startsWith('http') ? row.dokumentasi : assetUrl(row.dokumentasi)}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        `;
+                            }
+
+                            // Tambahkan tombol checklist jika status Diproses atau Ditolak
+                            if (row.status === 'Diproses' || row.status === 'Ditolak') {
+                                buttons += `
+                                            <button class="btn btn-sm btn-icon btn-success" onclick="completeLaporan(${data})" title="Tandai Selesai">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        `;
+                            }
+
+                            buttons += `</div>`;
+                            return buttons;
                         }
                     }
                 ],
+                // Tambahkan fungsi helper di luar columns
+                createdRow: function(row, data, dataIndex) {
+                    // Helper functions untuk digunakan dalam render
+                    $.fn.dataTable.render.formatDuration = function(diff) {
+                        const hours = Math.floor(diff / (1000 * 60 * 60));
+                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                        let durationText = '';
+                        if (hours > 0) durationText += `${hours} jam `;
+                        if (minutes > 0) durationText += `${minutes} menit `;
+                        if (seconds > 0 || (hours === 0 && minutes === 0)) durationText +=
+                            `${seconds} detik`;
+
+                        return durationText.trim();
+                    };
+
+                    $.fn.dataTable.render.parseTime = function(timeStr) {
+                        // Handle both timestamp and HH:MM:SS format
+                        if (typeof timeStr === 'string' && timeStr.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                            const [hours, minutes, seconds] = timeStr.split(':');
+                            const date = new Date();
+                            date.setHours(hours, minutes, seconds);
+                            return date;
+                        }
+                        return new Date(timeStr);
+                    };
+                },
                 language: {
                     "decimal": "",
                     "emptyTable": "Tidak ada data yang tersedia",
@@ -344,16 +548,38 @@
                 responsive: true
             });
 
-            // Form submission
+            // Helper function to check if value is numeric
+            function isNumeric(n) {
+                return !isNaN(parseFloat(n)) && isFinite(n);
+            }
+
+            // Helper function to get asset URL
+            function assetUrl(path) {
+                return path.startsWith('/') ? path : '/' + path;
+            }
+
+
+            // Form submission with file upload support
             $('#form-laporan').on('submit', function(e) {
                 e.preventDefault();
                 const btn = $(this).find('button[type="submit"]');
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...');
 
+                // Create FormData object to handle file upload
+                const formData = new FormData(this);
+
+                // Get CSRF token from meta tag
+                const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
                 $.ajax({
                     url: '/laporan-internal',
                     method: 'POST',
-                    data: $(this).serialize(),
+                    data: formData,
+                    processData: false, // Important for file upload
+                    contentType: false, // Important for file upload
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
                     success: function(response) {
                         showToast(response.message);
                         $('#form-laporan')[0].reset();
@@ -364,6 +590,15 @@
                         const errorMessage = xhr.responseJSON?.message ||
                             'Gagal menyimpan data';
                         showToast(errorMessage, 'error');
+
+                        // If there are validation errors, display them
+                        if (xhr.responseJSON?.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            for (const field in errors) {
+                                const errorMessage = errors[field][0];
+                                $(`#${field}-error`).text(errorMessage).show();
+                            }
+                        }
                     },
                     complete: function() {
                         btn.prop('disabled', false).html(
@@ -381,12 +616,120 @@
             });
         });
 
+        // Show Dokumentasi
+        $(document).on('click', '.btn-show-dokumentasi', function() {
+            const rawFileUrl = $(this).data('file');
+
+            // Reset modal state
+            $('#noDocument').hide();
+            $('#dokumentasiImage').hide().attr('src', '');
+            $('#dokumentasiPdf').hide();
+            $('#pdfViewer').attr('src', '');
+            $('#downloadDokumentasi').hide().attr('href', '#');
+            $('#unsupportedFormat').hide();
+            $('#invalidUrl').hide();
+
+            // Validasi dasar URL
+            if (!rawFileUrl || typeof rawFileUrl !== 'string' || rawFileUrl.trim() === '') {
+                $('#noDocument').show();
+                $('#dokumentasiModal').modal('show');
+                return;
+            }
+
+            try {
+                let fileUrl;
+                let extension;
+
+                // Coba parse sebagai URL lengkap
+                try {
+                    const url = new URL(rawFileUrl);
+                    fileUrl = url.toString();
+                    const pathname = url.pathname;
+                    extension = pathname.split('.').pop().toLowerCase().split(/[#?]/)[0];
+                }
+                // Jika gagal, anggap sebagai path relatif
+                catch (e) {
+                    // Handle relative paths
+                    if (rawFileUrl.startsWith('storage/') || rawFileUrl.startsWith('/storage/')) {
+                        fileUrl = assetUrl(rawFileUrl);
+                    } else {
+                        fileUrl = assetUrl('storage/' + rawFileUrl);
+                    }
+
+                    // Extract extension from relative path
+                    const pathParts = rawFileUrl.split('.');
+                    extension = pathParts.length > 1 ? pathParts.pop().toLowerCase().split(/[#?]/)[0] : '';
+                }
+
+                // Validasi ekstensi file
+                const supportedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
+                if (!supportedExtensions.includes(extension)) {
+                    $('#unsupportedFormat').show();
+                    $('#dokumentasiModal').modal('show');
+                    return;
+                }
+
+                // Tampilkan viewer sesuai tipe file
+                if (extension === 'pdf') {
+                    $('#pdfViewer').attr('src', fileUrl);
+                    $('#dokumentasiPdf').show();
+                } else {
+                    $('#dokumentasiImage').attr('src', fileUrl).show();
+                }
+
+                $('#downloadDokumentasi').attr('href', fileUrl).show();
+                $('#dokumentasiModal').modal('show');
+            } catch (e) {
+                console.error('Error showing documentation:', e);
+                $('#invalidUrl').show();
+                $('#dokumentasiModal').modal('show');
+            }
+        });
+
+        // Helper function untuk path relatif
+        function assetUrl(path) {
+            // Hapus slash di awal jika ada
+            const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+            return window.location.origin + '/' + cleanPath;
+        }
+
         function editLaporan(id) {
             Swal.fire({
                 title: 'Edit Laporan',
                 text: 'Fitur edit akan segera tersedia!',
                 icon: 'info',
                 confirmButtonText: 'OK'
+            });
+        }
+
+        function completeLaporan(id) {
+            Swal.fire({
+                title: 'Ubah Status Laporan?',
+                text: "Laporan akan di ubah statusnya menjadi selesai!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/laporan-internal/complete/' + id,
+                        method: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            status: 'Selesai'
+                        },
+                        success: function() {
+                            showToast('Data laporan berhasil dihapus');
+                            $('#laporanTable').DataTable().ajax.reload();
+                        },
+                        error: function() {
+                            showToast('Gagal menghapus data laporan', 'error');
+                        }
+                    });
+                }
             });
         }
 
@@ -418,6 +761,31 @@
                     });
                 }
             });
+        }
+
+        // Definisikan fungsi helper di luar DataTables
+        function parseTime(timeStr) {
+            // Handle both timestamp and HH:MM:SS format
+            if (typeof timeStr === 'string' && timeStr.match(/^\d{2}:\d{2}:\d{2}$/)) {
+                const [hours, minutes, seconds] = timeStr.split(':');
+                const date = new Date();
+                date.setHours(hours, minutes, seconds);
+                return date;
+            }
+            return new Date(timeStr);
+        }
+
+        function formatDuration(diff) {
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            let durationText = '';
+            if (hours > 0) durationText += `${hours} jam `;
+            if (minutes > 0) durationText += `${minutes} menit `;
+            if (seconds > 0 || (hours === 0 && minutes === 0)) durationText += `${seconds} detik`;
+
+            return durationText.trim();
         }
     </script>
 @endsection
