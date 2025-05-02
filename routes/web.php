@@ -346,6 +346,7 @@ Route::middleware([LastSeenUser::class])->group(function () {
             Route::post('/laporan-internal', [LaporanInternalController::class, 'store']);
             Route::get('/laporan-internal-list', [LaporanInternalController::class, 'list']);
             Route::delete('/laporan-internal/{id}', [LaporanInternalController::class, 'destroy']);
+            Route::post('/laporan-internal/complete/{id}', [LaporanInternalController::class, 'complete']);
         });
         // routes/web.php
         Route::middleware(['auth'])->group(function () {
