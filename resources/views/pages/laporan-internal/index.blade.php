@@ -44,9 +44,26 @@
                         </div>
                         <div class="panel-container show">
                             <div class="panel-content">
-                                <button class="btn btn-primary btn-sm my-3" data-toggle="modal" data-target="#tambah-data">
-                                    <i class="fas fa-plus me-1"></i> Tambah Laporan
-                                </button>
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <button class="btn btn-primary btn-sm" data-toggle="modal"
+                                            data-target="#tambah-data">
+                                            <i class="fas fa-plus me-1"></i> Tambah Laporan
+                                        </button>
+                                        <!-- Button trigger modal -->
+                                        <button type="button" class="btn btn-success btn-sm" data-toggle="modal"
+                                            data-target="#exportModal">
+                                            <i class="fas fa-file-excel mr-2"></i>Download Harian
+                                        </button>
+
+                                        <!-- Tombol Export Word Harian -->
+                                        <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal"
+                                            data-target="#exportWordModal">
+                                            <i class="fas fa-file-word mr-2"></i> Download Word Harian
+                                        </button>
+
+                                    </div>
+                                </div>
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover table-striped w-100" id="laporanTable">
                                         <thead class="bg-primary-50">
@@ -60,6 +77,7 @@
                                                 <th>Jam Masuk</th>
                                                 <th>Jam Diproses</th>
                                                 <th>Respon Time</th>
+                                                <th>User</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
@@ -259,6 +277,83 @@
                 </div>
             </div>
         </div>
+
+        <!-- Export Word Modal -->
+        <div class="modal fade" id="exportWordModal" tabindex="-1" role="dialog"
+            aria-labelledby="exportWordModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exportWordModalLabel">Download Laporan Word Harian</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="exportWordForm" action="{{ route('laporan.internal.export.word') }}" method="GET">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="exportWordTanggal">Tanggal Laporan</label>
+                                <input type="date" class="form-control" id="exportWordTanggal" name="tanggal"
+                                    required value="{{ date('Y-m-d') }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="exportWordJenis">Jenis Laporan</label>
+                                <select class="form-control" id="exportWordJenis" name="jenis">
+                                    <option value="">Semua Jenis</option>
+                                    <option value="kegiatan">Kegiatan</option>
+                                    <option value="kendala">Kendala</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-secondary">
+                                <i class="fas fa-download mr-2"></i>Download Word
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Export Modal -->
+        <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exportModalLabel">Download Laporan Harian</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="exportForm" action="{{ route('laporan.internal.export.harian') }}" method="GET">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="exportTanggal">Tanggal Laporan</label>
+                                <input type="date" class="form-control" id="exportTanggal" name="tanggal" required
+                                    value="{{ date('Y-m-d') }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="exportJenis">Jenis Laporan</label>
+                                <select class="form-control" id="exportJenis" name="jenis">
+                                    <option value="">Semua Jenis</option>
+                                    <option value="kegiatan">Kegiatan</option>
+                                    <option value="kendala">Kendala</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-download mr-2"></i>Download
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </main>
 @endsection
 
@@ -454,6 +549,13 @@
                                 }
                             }
                             return '-';
+                        }
+                    },
+                    {
+                        data: 'fullname',
+                        name: 'fullname',
+                        render: function(data) {
+                            return data ?? '-';
                         }
                     },
                     {
@@ -684,6 +786,30 @@
                 $('#invalidUrl').show();
                 $('#dokumentasiModal').modal('show');
             }
+        });
+
+        // Export Word form submission
+        $('#exportWordForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const url = form.attr('action') + '?' + form.serialize();
+
+            window.open(url, '_blank');
+            $('#exportWordModal').modal('hide');
+        });
+
+
+        // Export form submission
+        $('#exportForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const url = form.attr('action') + '?' + form.serialize();
+
+            // Open download in new tab
+            window.open(url, '_blank');
+
+            // Close modal
+            $('#exportModal').modal('hide');
         });
 
         // Helper function untuk path relatif

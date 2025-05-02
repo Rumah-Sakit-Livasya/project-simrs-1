@@ -30,6 +30,11 @@ class Organization extends Model
         return $this->hasMany(Employee::class);
     }
 
+    public function laporan_internal()
+    {
+        return $this->hasMany(LaporanInternal::class);
+    }
+
     public function targets()
     {
         return $this->hasMany(Target::class);

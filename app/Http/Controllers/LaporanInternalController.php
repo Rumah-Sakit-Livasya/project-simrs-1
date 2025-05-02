@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LaporanHarianExport;
 use App\Models\LaporanInternal;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\IOFactory;
 
 class LaporanInternalController extends Controller
 {
@@ -50,9 +55,12 @@ class LaporanInternalController extends Controller
 
     public function list(Request $request)
     {
-        $query = LaporanInternal::query();
+        $query = LaporanInternal::with('user.employee');
 
         return DataTables::of($query)
+            ->addColumn('fullname', function ($item) {
+                return optional($item->user->employee)->fullname ?? '-';
+            })
             ->addColumn('action', function ($item) {
                 return '
                     <div class="btn-group">
@@ -106,6 +114,83 @@ class LaporanInternalController extends Controller
                 'message' => 'Gagal mengubah status laporan: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function exportHarian(Request $request)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+            'jenis' => 'nullable|in:kegiatan,kendala'
+        ]);
+
+        $tanggal = Carbon::parse($request->tanggal)->format('Y-m-d');
+        $jenis = $request->jenis;
+
+        $filename = 'Laporan_' . ($jenis ? ucfirst($jenis) : 'All') . '_' . $tanggal . '.xlsx';
+
+        return Excel::download(new LaporanHarianExport($tanggal, $jenis), $filename);
+    }
+
+
+    public function exportWordHarian(Request $request)
+    {
+        $tanggal = $request->input('tanggal');
+        $jenis = $request->input('jenis');
+
+        $query = LaporanInternal::with('organization', 'user')
+            ->whereDate('tanggal', $tanggal);
+
+        if ($jenis) {
+            $query->where('jenis', $jenis);
+        }
+
+        $laporans = $query->get();
+
+        $phpWord = new PhpWord();
+        $section = $phpWord->addSection();
+
+        // Judul
+        $section->addText('Laporan Harian IT', ['bold' => true, 'size' => 16]);
+        $section->addText("Tanggal: " . date('d-m-Y', strtotime($tanggal)));
+        $section->addText("Anggota: Dimas Candra Pebriyanto, Tiyas Frahesta, Elsa Ramadini, Muhammad Adib, Ricky Ahmad");
+        $section->addTextBreak(1);
+
+        // Tabel Header
+        $table = $section->addTable([
+            'borderSize' => 6,
+            'borderColor' => '999999',
+            'cellMargin' => 10,
+        ]);
+
+        $table->addRow();
+        $table->addCell(500)->addText('No', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+        $table->addCell(1500)->addText('Unut', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+        $table->addCell(1500)->addText('User', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+        $table->addCell(1000)->addText('Jenis', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+        $table->addCell(3000)->addText('Kegiatan', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+        $table->addCell(1000)->addText('Status', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+        $table->addCell(1500)->addText('Masuk/Mulai', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+        $table->addCell(1500)->addText('Selesai', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+
+        $no = 1;
+        foreach ($laporans as $laporan) {
+            $table->addRow();
+            $table->addCell(500)->addText($no++);
+            $table->addCell(1500)->addText(optional($laporan->organization)->name ?? '-');
+            $table->addCell(1500)->addText(optional($laporan->user)->name ?? '-');
+            $table->addCell(1000)->addText($laporan->jenis);
+            $table->addCell(3000)->addText($laporan->kegiatan);
+            $table->addCell(1000)->addText($laporan->status);
+            $table->addCell(1500)->addText($laporan->jam_masuk ?? '-');
+            $table->addCell(1500)->addText($laporan->jam_selesai ?? '-');
+        }
+
+        $fileName = 'laporan_internal_' . $tanggal . '.docx';
+        $tempFile = tempnam(sys_get_temp_dir(), 'word');
+        $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
+        $objWriter->save($tempFile);
+
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 
     public function destroy($id)
