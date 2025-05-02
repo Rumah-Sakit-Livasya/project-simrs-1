@@ -88,12 +88,23 @@ class LaporanInternalController extends Controller
     {
         try {
             $laporan = LaporanInternal::findOrFail($id);
-            $laporan->status = 'Selesai';
-            $laporan->save();
 
-            return response()->json(['success' => true]);
+            // Update status dan waktu selesai
+            $laporan->update([
+                'status' => 'Selesai',
+                'jam_selesai' => now()->format('H:i:s'), // Format waktu sekarang
+                'updated_at' => now() // Update timestamp
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Laporan berhasil ditandai sebagai selesai'
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengubah status laporan: ' . $e->getMessage()
+            ], 500);
         }
     }
 

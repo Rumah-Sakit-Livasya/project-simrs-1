@@ -464,32 +464,32 @@
                         render: function(data, type, row) {
                             // Tombol default (edit dan delete)
                             let buttons = `
-                                            <div class="btn-group">
-                                                <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(${data})">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                        `;
+            <div class="btn-group">
+                <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(${data})">
+                    <i class="fas fa-trash"></i>
+                </button>
+        `;
 
                             // Tambahkan tombol dokumentasi jika ada
                             if (row.dokumentasi && !isNumeric(row.dokumentasi)) {
                                 buttons += `
-                                            <button class="btn btn-sm btn-icon btn-info btn-show-dokumentasi" 
-                                                    data-file="${row.dokumentasi.startsWith('http') ? row.dokumentasi : assetUrl(row.dokumentasi)}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        `;
+                <button class="btn btn-sm btn-icon btn-info btn-show-dokumentasi" 
+                        data-file="${row.dokumentasi.startsWith('http') ? row.dokumentasi : assetUrl(row.dokumentasi)}">
+                    <i class="fas fa-eye"></i>
+                </button>
+            `;
                             }
 
                             // Tambahkan tombol checklist jika status Diproses atau Ditolak
-                            if (row.status === 'Diproses' || row.status === 'Ditolak') {
+                            if (row.status === 'diproses') {
                                 buttons += `
-                                            <button class="btn btn-sm btn-icon btn-success" onclick="completeLaporan(${data})" title="Tandai Selesai">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        `;
+                <button class="btn btn-sm btn-icon btn-success" onclick="completeLaporan(${data})" title="Tandai Selesai">
+                    <i class="fas fa-check"></i>
+                </button>
+            `;
                             }
 
                             buttons += `</div>`;
@@ -710,7 +710,7 @@
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Hapus!',
+                confirmButtonText: 'Ya, Selesai!',
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
