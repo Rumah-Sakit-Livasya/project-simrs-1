@@ -1,0 +1,7 @@
+#RewriteEngine On
+#RewriteCond %{HTTPS}  !=on
+#RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
+
+#RewriteEngine On
+#RewriteCond %{REQUEST_URI} ^/
+#RewriteRule ^(.*)$ http://intlivasyabaru/$1 [P,E=Proxy-Host:internal.livasya.com,L]
