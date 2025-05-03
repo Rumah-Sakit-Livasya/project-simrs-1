@@ -26,7 +26,7 @@
                                 }
                                 $foods_json = json_encode($foods);
                             @endphp
-                            <tr class="pointer" onclick="MainClass.menuSelect({{ $foods_json }})" data-bs-dismiss="modal">
+                            <tr class="pointer" onclick="PopupOrderGiziClass.menuSelect({{ $foods_json }})" data-bs-dismiss="modal">
                                 <td class="align-middle menu-name">{{ $menu->nama }}</td>
                                 <td class="align-middle">{{ rp($menu->harga) }}</td>
                                 <td class="align-middle">

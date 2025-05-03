@@ -146,12 +146,12 @@ class PopupOrderGiziHandler {
                     <td>
                         <input type="hidden" data-key="${key}" name="foods_id[${key}]" value="${food.id}">
                         <input type="number" data-key="${key}" name="qty[${key}]" value="${qty}" class="qty"
-                            onchange="MainClass.quantityChange(event)">
+                            onchange="PopupOrderGiziClass.quantityChange(event)">
                     </td>
                     <td id="harga${key}">Rp ${food.harga.toLocaleString('id-ID')}</td>
                     <td>
                         <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                            title="Hapus" onclick="MainClass.deleteFood(${key})"></a>
+                            title="Hapus" onclick="PopupOrderGiziClass.deleteFood(${key})"></a>
                     </td>
                 </tr>
             `;
