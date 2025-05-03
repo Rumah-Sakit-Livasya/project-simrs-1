@@ -636,6 +636,10 @@
             </thead>
             <tbody>
 
+                @php
+                    $count = 0;
+                @endphp
+
                 @foreach ($orders as $order)
                     @php
                         $counted_foods = [];
@@ -660,7 +664,7 @@
 
                     @foreach ($counted_foods as $food)
                         <tr>
-                            <td align="center">{{ $loop->iteration }}</td>
+                            <td align="center">{{ ++$count }}</td>
                             <td align="center">{{ \Carbon\Carbon::parse($order->tanggal_order)->format('d M Y') }}</td>
                             <td>{{ $order->registration->patient->name }}</td>
                             <td>{{ $order->nama_pemesan }}</td>
