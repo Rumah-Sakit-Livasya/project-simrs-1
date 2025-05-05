@@ -384,18 +384,20 @@ class RegistrationController extends Controller
             // Create registration
             $registration = Registration::create($validatedData);
 
-            // Create billing
-            $billing = Bilingan::create([
-                'registration_id' => $registration->id,
-                'patient_id' => $request->patient_id,
-                'status' => 'belum final'
-            ]);
 
             // Add registration fee for outpatient visits
             if ($validatedData['registration_type'] == 'rawat-jalan') {
                 $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $request->penjamin_id)
                     ->where('tarif_registrasi_id', 1)
                     ->first()->harga;
+
+                // Create billing
+                $billing = Bilingan::create([
+                    'registration_id' => $registration->id,
+                    'patient_id' => $request->patient_id,
+                    'status' => 'belum final',
+                    'wajib_bayar' => $hargaTarifAdmin
+                ]);
 
                 // Add registration fee to billing details
                 $tagihanPasien = TagihanPasien::create([
@@ -408,8 +410,9 @@ class RegistrationController extends Controller
                     'nominal' => $hargaTarifAdmin,
                     'quantity' => 1,
                     'harga' => $hargaTarifAdmin,
-                    'total' => $hargaTarifAdmin
+                    'wajib_bayar' => $hargaTarifAdmin
                 ]);
+
 
                 BilinganTagihanPasien::create([
                     'tagihan_pasien_id' => $tagihanPasien->id,

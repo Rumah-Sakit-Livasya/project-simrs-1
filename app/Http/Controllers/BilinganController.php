@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\SIMRS\RegistrationController;
+use App\Models\PembayaranCreditCard;
+use App\Models\PembayaranTransfer;
 use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\DownPayment;
 use App\Models\SIMRS\PembayaranTagihan;
@@ -171,6 +173,9 @@ class BilinganController extends Controller
 
     public function storePembayaranTagihan(Request $request)
     {
+        // Cek request
+        // return dd($request->all());
+
         $validatedData = $request->validate([
             'user_id'           => 'required|integer',
             'bilingan_id'       => 'required|integer',
@@ -180,15 +185,43 @@ class BilinganController extends Controller
             'jumlah_terbayar'   => 'required|numeric',
             'sisa_tagihan'      => 'required|numeric',
             'kembalian'         => 'nullable|numeric',
-            'keterangan'         => 'nullable|string',
+            'keterangan'        => 'nullable|string',
             'bill_notes'        => 'nullable|string',
         ]);
+
         $validatedData['jaminan'] = $validatedData['jaminan'] ?? 0;
 
         try {
+            // Simpan pembayaran utama
             $pembayaranTagihan = PembayaranTagihan::create($validatedData);
 
-            // Update the related bilingan record to mark as paid and store keterangan
+            // Simpan data kartu kredit
+            if ($request->has('bank_perusahaan_id_cc')) {
+                foreach ($request->bank_perusahaan_id_cc as $index => $bankId) {
+                    PembayaranCreditCard::create([
+                        'pembayaran_tagihan_id' => $pembayaranTagihan->id,
+                        'bank_perusahaan_id'    => $bankId,
+                        'tipe'                  => $request->tipe_cc[$index] ?? null,
+                        'cc_number'             => $request->cc_number_cc[$index] ?? null,
+                        'auth_number'           => $request->auth_number_cc[$index] ?? null,
+                        'batch'                 => $request->batch_cc[$index] ?? null,
+                        'nominal'               => $request->nominal_cc[$index] ?? 0,
+                    ]);
+                }
+            }
+
+            // Simpan data transfer
+            if ($request->filled('bank_perusahaan_id_tf') && $request->filled('nominal_tf')) {
+                PembayaranTransfer::create([
+                    'pembayaran_tagihan_id' => $pembayaranTagihan->id,
+                    'bank_perusahaan_id'    => $request->bank_perusahaan_id_tf,
+                    'bank_pengirim'         => $request->bank_pengirim_tf,
+                    'norek_pengirim'        => $request->norek_pengirim_tf,
+                    'nominal'               => $request->nominal_tf,
+                ]);
+            }
+
+            // Update status pembayaran di tabel Bilingan
             $bilingan = Bilingan::find($validatedData['bilingan_id']);
             if ($bilingan) {
                 $updateData = ['is_paid' => 1];
