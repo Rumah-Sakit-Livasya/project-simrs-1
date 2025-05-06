@@ -1065,6 +1065,7 @@ class ReportController extends Controller
                 }
             ])
                 ->where('is_active', 1)
+                ->orderBy('fullname')
                 ->chunk(100, function ($employees) use (&$attendances, $startDate, $endDate) {
                     foreach ($employees as $employee) {
                         $total_izin = 0;
