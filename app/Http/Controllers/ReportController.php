@@ -1051,7 +1051,7 @@ class ReportController extends Controller
             $endDate = Carbon::create($currentYear, 12, 25);
 
             // Eager loading attendance dan organization
-            $employees = Employee::with(['attendance.dayOff', 'organization'])->where('is_active', 1)->get();
+            $employees = Employee::with(['attendance.day_off', 'organization'])->where('is_active', 1)->get();
 
             $attendances = [];
 
