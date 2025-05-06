@@ -1042,10 +1042,12 @@ class ReportController extends Controller
     public function dayOffReqReports(Request $request)
     {
         try {
+            ini_set('memory_limit', '512M'); // opsional, bisa dihapus jika sudah efisien
             date_default_timezone_set('Asia/Jakarta');
             Carbon::setLocale('id');
 
             $currentYear = $request->input('tahun', Carbon::now()->year);
+
             $startDate = Carbon::create($currentYear - 1, 12, 26);
             $endDate = Carbon::create($currentYear, 12, 25);
 
@@ -1053,61 +1055,73 @@ class ReportController extends Controller
             $employees = Employee::with(['attendances.day_off', 'organization'])->where('is_active', 1)->get();
             $attendances = [];
 
-            foreach ($employees as $employee) {
-                $total_izin = 0;
-                $total_cuti = 0;
-                $total_sakit = 0;
+            // Ambil data dalam chunk kecil untuk efisiensi memori
+            Employee::with([
+                'organization',
+                'attendance' => function ($query) use ($startDate, $endDate) {
+                    $query->where('is_day_off', 1)
+                        ->whereBetween('date', [$startDate->toDateString(), $endDate])
+                        ->with('day_off'); // eager load day_off per attendance
+                }
+            ])
+                ->where('is_active', 1)
+                ->chunk(100, function ($employees) use (&$attendances, $startDate, $endDate) {
+                    foreach ($employees as $employee) {
+                        $total_izin = 0;
+                        $total_cuti = 0;
+                        $total_sakit = 0;
 
-                $absensi_pegawai = $employee->attendances
-                    ->where('is_day_off', 1)
-                    ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()]);
+                        foreach ($employee->attendance as $absensi) {
+                            $attendance_code_id = $absensi->attendance_code_id;
+                            $day_off = $absensi->day_off;
 
-                foreach ($absensi_pegawai as $absensi) {
-                    $attendance_code_id = $absensi->attendance_code_id;
-                    $day_off = $absensi->day_off;
-
-                    if ($attendance_code_id !== null || $absensi->day_off_request_id !== null) {
-                        if ($attendance_code_id == 1) {
-                            $total_izin++;
-                        } elseif ($attendance_code_id == 2) {
-                            $total_sakit++;
-                        } elseif (!in_array($attendance_code_id, [1, 2]) && $attendance_code_id !== null) {
-                            $total_cuti++;
-                        } elseif ($attendance_code_id === null && $day_off) {
-                            if ($day_off->attendance_code_id == 1) {
-                                $total_izin++;
-                            } elseif ($day_off->attendance_code_id == 2) {
-                                $total_sakit++;
-                            } else {
-                                $total_cuti++;
+                            if ($attendance_code_id !== null || $absensi->day_off_request_id !== null) {
+                                if ($attendance_code_id == 1) {
+                                    $total_izin++;
+                                } elseif ($attendance_code_id == 2) {
+                                    $total_sakit++;
+                                } elseif (!in_array($attendance_code_id, [1, 2])) {
+                                    $total_cuti++;
+                                } elseif ($attendance_code_id === null && $day_off) {
+                                    if ($day_off->attendance_code_id == 1) {
+                                        $total_izin++;
+                                    } elseif ($day_off->attendance_code_id == 2) {
+                                        $total_sakit++;
+                                    } else {
+                                        $total_cuti++;
+                                    }
+                                }
                             }
                         }
+
+                        // Hitung sisa CT (cuti tahunan) berdasarkan kode 3
+                        $ct_count = collect($employee->attendance)->filter(function ($attendance) {
+                            if ($attendance->attendance_code_id == 3) {
+                                return true;
+                            }
+
+                            if (
+                                is_null($attendance->attendance_code_id) &&
+                                $attendance->day_off &&
+                                $attendance->day_off->attendance_code_id == 3
+                            ) {
+                                return true;
+                            }
+
+                            return false;
+                        })->count();
+
+                        $attendances[] = [
+                            'employee_id' => $employee->id,
+                            'employee_name' => $employee->fullname,
+                            'organization_name' => optional($employee->organization)->name ?? '-',
+                            'total_izin' => $total_izin,
+                            'total_sakit' => $total_sakit,
+                            'total_cuti' => $total_cuti,
+                            'sisa_ct' => 12 - $ct_count,
+                        ];
                     }
-                }
-
-                // Hitung cuti tahunan (ct)
-                $total_ct = $absensi_pegawai->filter(function ($attendance) {
-                    if ($attendance->attendance_code_id == 3) {
-                        return true;
-                    }
-
-                    if (is_null($attendance->attendance_code_id) && $attendance->day_off && $attendance->day_off->attendance_code_id == 3) {
-                        return true;
-                    }
-
-                    return false;
-                })->count();
-
-                $attendances[] = [
-                    'employee_id' => $employee->id,
-                    'employee_name' => $employee->fullname,
-                    'organization_name' => optional($employee->organization)->name ?? '-',
-                    'total_izin' => $total_izin,
-                    'total_sakit' => $total_sakit,
-                    'total_cuti' => $total_cuti,
-                    'sisa_ct' => 12 - $total_ct,
-                ];
-            }
+                });
 
             return view('pages.laporan.daftar-cuti.index', compact('currentYear', 'attendances'));
         } catch (\Throwable $e) {
@@ -1119,8 +1133,6 @@ class ReportController extends Controller
             return response()->view('errors.500', ['message' => 'Terjadi kesalahan saat memproses data.'], 500);
         }
     }
-
-
 
     public function dayOffReqReportDetail(Request $request, $id, $tahun)
     {
