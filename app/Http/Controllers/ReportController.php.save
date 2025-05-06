@@ -1041,9 +1041,10 @@ class ReportController extends Controller
 
     public function dayOffReqReports(Request $request)
     {
-        try {
+        //try {
             date_default_timezone_set('Asia/Jakarta');
-            Carbon::setLocale('id');
+            
+	Carbon::setLocale('id');
 
             $currentYear = $request->input('tahun', Carbon::now()->year) ?? Carbon::now()->year;
 
@@ -1112,14 +1113,14 @@ class ReportController extends Controller
             }
 
             return view('pages.laporan.daftar-cuti.index', compact('currentYear', 'attendances'));
-        } catch (\Throwable $e) {
-            \Log::error('Error in dayOffReqReports: ' . $e->getMessage(), [
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return response()->view('errors.500', ['message' => 'Terjadi kesalahan saat memproses data.'], 500);
-        }
+        //} catch (\Throwable $e) {
+          //  \Log::error('Error in dayOffReqReports: ' . $e->getMessage(), [
+            //    'file' => $e->getFile(),
+              //  'line' => $e->getLine(),
+                //'trace' => $e->getTraceAsString(),
+            //]);
+            //return response()->view('errors.500', ['message' => 'Terjadi kesalahan saat memproses data.'], 500);
+        //}
     }
 
 
