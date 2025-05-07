@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\API\EmployeeController;
+use App\Http\Controllers\JamMakanGiziController;
+use App\Http\Controllers\DietGiziController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
@@ -105,7 +107,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
         Route::prefix("order")->group(function () {
             Route::get("/store", [OrderGiziController::class, 'store'])->name('order.gizi.store');
-            Route::post("/update/status", [OrderGiziController::class,"update_status"])->name("order.gizi.update.status");
+            Route::post("/update/status", [OrderGiziController::class, "update_status"])->name("order.gizi.update.status");
             Route::post("/update", [OrderGiziController::class, 'update'])->name('order.gizi.update');
         });
 
@@ -125,6 +127,18 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::post('/store', [MenuGiziController::class, 'store'])->name('menu.gizi.store');
             Route::put('/update/{id}/', [MenuGiziController::class, 'update'])->name('menu.gizi.update');
             Route::delete('/destroy/{id}/', [MenuGiziController::class, 'destroy'])->name('menu.gizi.destroy');
+        });
+
+        Route::prefix('jam-makan')->group(function () {
+            Route::post('/store', [JamMakanGiziController::class, 'store'])->name('jam-makan.gizi.store');
+            Route::put('/update/{id}/', [JamMakanGiziController::class, 'update'])->name('jam-makan.gizi.update');
+            Route::delete('/destroy/{id}/', [JamMakanGiziController::class, 'destroy'])->name('jam-makan.gizi.destroy');
+        });
+
+        Route::prefix('auto-diet')->group(function () {
+            Route::get('/store', [DietGiziController::class, 'store'])->name('auto-diet.gizi.store');
+            Route::put('/update/{id}/', [DietGiziController::class, 'update'])->name('auto-diet.gizi.update');
+            Route::delete('/destroy/{id}/', [DietGiziController::class, 'destroy'])->name('auto-diet.gizi.destroy');
         });
     });
 

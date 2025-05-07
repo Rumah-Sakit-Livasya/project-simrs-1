@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS\CPPT;
 
+use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Auditable;
@@ -12,4 +13,8 @@ class CPPT extends Model implements AuditableContract
     use HasFactory, Auditable;
 
     protected $table = 'cppt', $guarded = ['id'];
+
+    public function registration(){
+        return $this->belongsTo(Registration::class);
+    }
 }

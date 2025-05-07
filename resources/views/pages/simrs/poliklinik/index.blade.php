@@ -146,7 +146,7 @@
 
                 {{-- content start --}}
 
-                @if (isset($registration) || $registration != null)
+                @if ((isset($registration) || $registration != null) && $pengkajian)
                     <div class="tab-content p-3">
                         <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
                             <form action="javascript:void(0)" id="pengkajian_perawat_form" method="POST">
@@ -984,49 +984,55 @@
                                 <header class="text-danger">
                                     <h4 class="mt-5 font-weight-bold">Sensorik</h4>
                                 </header>
-                                <div class="row mt-3">
-                                    @php
-                                        $data = json_decode($pengkajian->sensorik, true);
+                                    <div class="row mt-3">
+                                        @php
+                                            $data = json_decode($pengkajian->sensorik, true);
 
-                                        $opsi = [
-                                            'sensorik_penglihatan' => ['Normal', 'Kabur', 'Kaca Mata', 'Lensa Kontak'],
-                                            'sensorik_penciuman' => ['Normal', 'Tidak'],
-                                            'sensorik_pendengaran' => [
-                                                'Normal',
-                                                'Tuli Ka / Ki',
-                                                'Ada alat bantu dengar ka/ki',
-                                            ],
-                                        ];
+                                            $opsi = [
+                                                'sensorik_penglihatan' => [
+                                                    'Normal',
+                                                    'Kabur',
+                                                    'Kaca Mata',
+                                                    'Lensa Kontak',
+                                                ],
+                                                'sensorik_penciuman' => ['Normal', 'Tidak'],
+                                                'sensorik_pendengaran' => [
+                                                    'Normal',
+                                                    'Tuli Ka / Ki',
+                                                    'Ada alat bantu dengar ka/ki',
+                                                ],
+                                            ];
 
-                                    @endphp
-                                    <table class="table">
-                                        <tbody>
-                                            @foreach ($opsi as $kategori => $listOpsional)
-                                                <tr>
-                                                    <td>{{ Str::of($kategori)->after('sensorik_')->ucfirst() }}</td>
-                                                    @foreach ($listOpsional as $i => $opsiValue)
-                                                        <td
-                                                            {{ $loop->remaining < 3 - count($listOpsional) ? 'colspan=2' : '' }}>
-                                                            <div class="custom-control custom-radio custom-control-inline">
-                                                                <input name="{{ $kategori }}"
-                                                                    id="{{ $kategori . $i }}"
-                                                                    value="{{ $opsiValue }}"
-                                                                    data-skor="{{ $i }}"
-                                                                    class="custom-control-input" type="radio"
-                                                                    @checked(($data[$kategori] ?? '') == $opsiValue)>
-                                                                <label class="custom-control-label"
-                                                                    for="{{ $kategori . $i }}">
-                                                                    {{ $opsiValue }}
-                                                                </label>
-                                                            </div>
-                                                        </td>
-                                                    @endforeach
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                                        @endphp
+                                        <table class="table">
+                                            <tbody>
+                                                @foreach ($opsi as $kategori => $listOpsional)
+                                                    <tr>
+                                                        <td>{{ Str::of($kategori)->after('sensorik_')->ucfirst() }}</td>
+                                                        @foreach ($listOpsional as $i => $opsiValue)
+                                                            <td
+                                                                {{ $loop->remaining < 3 - count($listOpsional) ? 'colspan=2' : '' }}>
+                                                                <div
+                                                                    class="custom-control custom-radio custom-control-inline">
+                                                                    <input name="{{ $kategori }}"
+                                                                        id="{{ $kategori . $i }}"
+                                                                        value="{{ $opsiValue }}"
+                                                                        data-skor="{{ $i }}"
+                                                                        class="custom-control-input" type="radio"
+                                                                        @checked(($data[$kategori] ?? '') == $opsiValue)>
+                                                                    <label class="custom-control-label"
+                                                                        for="{{ $kategori . $i }}">
+                                                                        {{ $opsiValue }}
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+                                                        @endforeach
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
 
-                                </div>
+                                    </div>
 
                                 <header class="text-danger">
                                     <h4 class="mt-5 font-weight-bold">Kognitif</h4>
@@ -1101,31 +1107,31 @@
                                     <table class="table">
                                         <tbody>
                                             @foreach ($opsiMotorik as $kategori => $opsiList)
-                                            <tr>
-                                                <td>{{ Str::of($kategori)->after('motorik_')->replace('_', ' ')->ucfirst() }}</td>
-                                                @foreach ($opsiList as $i => $opsiValue)
-                                                    <td @if($loop->last && $loop->count < 4) colspan="{{ 5 - $loop->count }}" @endif>
-                                                        <div class="custom-control custom-radio">
-                                                            <input 
-                                                                name="{{ $kategori }}" 
-                                                                id="{{ $kategori . $i }}" 
-                                                                value="{{ $opsiValue }}" 
-                                                                data-skor="{{ $i }}" 
-                                                                class="custom-control-input" 
-                                                                type="radio"
-                                                                @checked(($data[$kategori] ?? '') == $opsiValue)
-                                                            >
-                                                            <label class="custom-control-label text-primary" for="{{ $kategori . $i }}">
-                                                                {{ $opsiValue }}
-                                                            </label>
-                                                        </div>
+                                                <tr>
+                                                    <td>{{ Str::of($kategori)->after('motorik_')->replace('_', ' ')->ucfirst() }}
                                                     </td>
-                                                @endforeach
-                                            </tr>
+                                                    @foreach ($opsiList as $i => $opsiValue)
+                                                        <td
+                                                            @if ($loop->last && $loop->count < 4) colspan="{{ 5 - $loop->count }}" @endif>
+                                                            <div class="custom-control custom-radio">
+                                                                <input name="{{ $kategori }}"
+                                                                    id="{{ $kategori . $i }}"
+                                                                    value="{{ $opsiValue }}"
+                                                                    data-skor="{{ $i }}"
+                                                                    class="custom-control-input" type="radio"
+                                                                    @checked(($data[$kategori] ?? '') == $opsiValue)>
+                                                                <label class="custom-control-label text-primary"
+                                                                    for="{{ $kategori . $i }}">
+                                                                    {{ $opsiValue }}
+                                                                </label>
+                                                            </div>
+                                                        </td>
+                                                    @endforeach
+                                                </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
-                                    
+
                                 </div>
 
                                 <div class="row mt-5">

@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->string('nama_pemesan');
             $table->enum('untuk', ['pasien','keluarga'])->default('pasien');
             $table->dateTime('tanggal_order');
-            $table->enum('waktu_makan', ['pagi','siang','sore'])->nullable();
+            $table->string('waktu_makan')->nullable();
             $table->boolean('ditagihkan')->default(true);
             $table->boolean('digabung')->default(true);
             $table->integer('total_harga');
