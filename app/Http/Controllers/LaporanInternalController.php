@@ -135,63 +135,87 @@ class LaporanInternalController extends Controller
     public function exportWordHarian(Request $request)
     {
         $tanggal = $request->input('tanggal');
-        $jenis = $request->input('jenis');
 
         $query = LaporanInternal::with('organization', 'user')
-            ->whereDate('tanggal', $tanggal);
-
-        if ($jenis) {
-            $query->where('jenis', $jenis);
-        }
+            ->whereDate('tanggal', $tanggal)
+            ->orderBy('jenis');
 
         $laporans = $query->get();
 
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
 
+        // Mengatur margin halaman
+        $section->getStyle()->setMarginRight(600);  // Mengurangi margin kanan
+        $section->getStyle()->setMarginLeft(600);   // Mengurangi margin kiri
+
         // Judul
-        $section->addText('Laporan Harian IT', ['bold' => true, 'size' => 16]);
-        $section->addText("Tanggal: " . date('d-m-Y', strtotime($tanggal)));
-        $section->addText("Anggota: Dimas Candra Pebriyanto, Tiyas Frahesta, Elsa Ramadini, Muhammad Adib, Ricky Ahmad");
+        $section->addText('LAPORAN HARIAN IT', ['bold' => true, 'size' => 16], ['alignment' => 'center']);
+        $section->addText('Hari/Tanggal: ' . Carbon::parse($tanggal)->translatedFormat('l, d F Y'), ['size' => 12], ['alignment' => 'center']);
+        $section->addText('Anggota:', ['size' => 10], ['alignment' => 'center']);
+        $section->addText('Dimas, Tiyas, Elsa, Adib, Ricky', ['size' => 10], ['alignment' => 'center']);
         $section->addTextBreak(1);
 
-        // Tabel Header
+        // Header Tabel
         $table = $section->addTable([
             'borderSize' => 6,
             'borderColor' => '999999',
-            'cellMargin' => 10,
+            'cellMargin' => 100, // Memperbesar jarak antara sel
+            'alignment' => 'center'
         ]);
 
-        $table->addRow();
-        $table->addCell(500)->addText('No', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
-        $table->addCell(1500)->addText('Unut', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
-        $table->addCell(1500)->addText('User', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
-        $table->addCell(1000)->addText('Jenis', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
-        $table->addCell(3000)->addText('Kegiatan', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
-        $table->addCell(1000)->addText('Status', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
-        $table->addCell(1500)->addText('Masuk/Mulai', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
-        $table->addCell(1500)->addText('Selesai', ['bold' => true, 'size' => 9],  ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+        $headerStyle = ['bold' => true, 'size' => 10];
+        $rowStyle = ['bold' => false, 'size' => 10];
 
+        // Header Tabel
+        $table->addRow();
+        $table->addCell(1500)->addText('No', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(3500)->addText('Jenis', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(4500)->addText('Unit', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(7000)->addText('Kegiatan', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(4500)->addText('PIC', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(3500)->addText('Status', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(4500)->addText('Masuk/Mulai', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(3500)->addText('Selesai', $headerStyle, ['alignment' => 'center']);
+
+        // Data Baris
         $no = 1;
         foreach ($laporans as $laporan) {
             $table->addRow();
-            $table->addCell(500)->addText($no++);
-            $table->addCell(1500)->addText(optional($laporan->organization)->name ?? '-');
-            $table->addCell(1500)->addText(optional($laporan->user)->name ?? '-');
-            $table->addCell(1000)->addText($laporan->jenis);
-            $table->addCell(3000)->addText($laporan->kegiatan);
-            $table->addCell(1000)->addText($laporan->status);
-            $table->addCell(1500)->addText($laporan->jam_masuk ?? '-');
-            $table->addCell(1500)->addText($laporan->jam_selesai ?? '-');
+            $table->addCell(1000)->addText($no++, $rowStyle, ['alignment' => 'center']);
+            $table->addCell(2500)->addText(ucfirst($laporan->jenis), $rowStyle, ['alignment' => 'center']);
+            if ($laporan->jenis === "kegiatan") {
+                $table->addCell(3000)->addText('Internal', $rowStyle, ['alignment' => 'center']);
+            } else {
+                $table->addCell(3000)->addText(optional($laporan->organization)->name ?? '-', $rowStyle, ['alignment' => 'center']);
+            }
+            $table->addCell(5000)->addText($laporan->kegiatan);
+            $table->addCell(3000)->addText(
+                optional($laporan->user)->id == 231 ? 'IT Support SIMRS' : (optional($laporan->user)->id == 14 ? 'IT Hardware Networking' : 'IT Programmer Developer'),
+                $rowStyle,
+                ['alignment' => 'center']
+            );
+            $table->addCell(2500)->addText(ucfirst($laporan->status), $rowStyle, ['alignment' => 'center']);
+            $table->addCell(3000)->addText($laporan->jam_masuk ?? '-', $rowStyle, ['alignment' => 'center']);
+            $table->addCell(2000)->addText($laporan->jam_selesai ?? '-', $rowStyle, ['alignment' => 'center']);
         }
 
-        $fileName = 'laporan_internal_' . $tanggal . '.docx';
-        $tempFile = tempnam(sys_get_temp_dir(), 'word');
-        $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
-        $objWriter->save($tempFile);
+        // Save as Word
+        $fileName = 'Daily_Report_IT_' . $tanggal . '.docx';
+        header("Content-Description: File Transfer");
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        header('Content-Transfer-Encoding: binary');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Expires: 0');
 
-        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+        $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
+        ob_clean();
+        flush();
+        $objWriter->save("php://output");
+        exit;
     }
+
 
     public function destroy($id)
     {
