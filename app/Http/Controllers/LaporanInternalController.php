@@ -137,13 +137,17 @@ class LaporanInternalController extends Controller
         $tanggal = $request->input('tanggal');
 
         $query = LaporanInternal::with('organization', 'user')
-            ->whereDate('tanggal', $tanggal);
+            ->whereDate('tanggal', $tanggal)
+            ->orderBy('jenis');
 
-        // dd(optional($query->user)->id == 231 ? 'IT Support & SIMRS' : (optional($query->user)->id == 14 ? 'IT Hardware & Networking' : 'IT Programmer & Developer'));
         $laporans = $query->get();
 
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
+
+        // Mengatur margin halaman
+        $section->getStyle()->setMarginRight(600);  // Mengurangi margin kanan
+        $section->getStyle()->setMarginLeft(600);   // Mengurangi margin kiri
 
         // Judul
         $section->addText('LAPORAN HARIAN IT', ['bold' => true, 'size' => 16], ['alignment' => 'center']);
@@ -156,44 +160,44 @@ class LaporanInternalController extends Controller
         $table = $section->addTable([
             'borderSize' => 6,
             'borderColor' => '999999',
-            'cellMargin' => 80,
+            'cellMargin' => 100, // Memperbesar jarak antara sel
             'alignment' => 'center'
         ]);
 
         $headerStyle = ['bold' => true, 'size' => 10];
         $rowStyle = ['bold' => false, 'size' => 10];
 
+        // Header Tabel
         $table->addRow();
-        $table->addCell(800)->addText('No', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(2200)->addText('Jenis', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(2800)->addText('Unit', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(5000)->addText('Kegiatan', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(3000)->addText('PIC', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(2200)->addText('Status', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(2600)->addText('Masuk/Mulai', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(2200)->addText('Selesai', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(1500)->addText('No', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(3500)->addText('Jenis', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(4500)->addText('Unit', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(7000)->addText('Kegiatan', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(4500)->addText('PIC', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(3500)->addText('Status', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(4500)->addText('Masuk/Mulai', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(3500)->addText('Selesai', $headerStyle, ['alignment' => 'center']);
 
         // Data Baris
         $no = 1;
         foreach ($laporans as $laporan) {
             $table->addRow();
-            $table->addCell(600)->addText($no++, $rowStyle, ['alignment' => 'center']); // No
-            $table->addCell(1500)->addText(ucfirst($laporan->jenis), $rowStyle, ['alignment' => 'center']); // Jenis
+            $table->addCell(1000)->addText($no++, $rowStyle, ['alignment' => 'center']);
+            $table->addCell(2500)->addText(ucfirst($laporan->jenis), $rowStyle, ['alignment' => 'center']);
             if ($laporan->jenis === "kegiatan") {
-                $table->addCell(1800)->addText('Internal', $rowStyle, ['alignment' => 'center']);
+                $table->addCell(3000)->addText('Internal', $rowStyle, ['alignment' => 'center']);
             } else {
-                $table->addCell(1800)->addText(optional($laporan->organization)->name ?? '-', $rowStyle, ['alignment' => 'center']);
+                $table->addCell(3000)->addText(optional($laporan->organization)->name ?? '-', $rowStyle, ['alignment' => 'center']);
             }
-            $table->addCell(3500)->addText($laporan->kegiatan);
-            // $table->addCell(2500)->addText("IT Support dan SIMRS");
-            $table->addCell(800)->addText(
+            $table->addCell(5000)->addText($laporan->kegiatan);
+            $table->addCell(3000)->addText(
                 optional($laporan->user)->id == 231 ? 'IT Support SIMRS' : (optional($laporan->user)->id == 14 ? 'IT Hardware Networking' : 'IT Programmer Developer'),
                 $rowStyle,
                 ['alignment' => 'center']
             );
-            $table->addCell(1500)->addText(ucfirst($laporan->status), $rowStyle, ['alignment' => 'center']);
-            $table->addCell(1800)->addText($laporan->jam_masuk ?? '-', $rowStyle, ['alignment' => 'center']);
-            $table->addCell(1000)->addText($laporan->jam_selesai ?? '-', $rowStyle, ['alignment' => 'center']);
+            $table->addCell(2500)->addText(ucfirst($laporan->status), $rowStyle, ['alignment' => 'center']);
+            $table->addCell(3000)->addText($laporan->jam_masuk ?? '-', $rowStyle, ['alignment' => 'center']);
+            $table->addCell(2000)->addText($laporan->jam_selesai ?? '-', $rowStyle, ['alignment' => 'center']);
         }
 
         // Save as Word
@@ -211,6 +215,7 @@ class LaporanInternalController extends Controller
         $objWriter->save("php://output");
         exit;
     }
+
 
     public function destroy($id)
     {
