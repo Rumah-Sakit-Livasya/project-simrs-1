@@ -67,6 +67,7 @@ use App\Http\Controllers\SIMRS\Warehouse\RevaluasiStokController;
 use App\Http\Controllers\SIMRS\Warehouse\StockRequestController;
 use App\Http\Controllers\SIMRS\Warehouse\UnitCostController;
 use App\Http\Controllers\SIMRS\Warehouse\WarehouseController;
+use App\Http\Controllers\WarehouseKelompokBarangController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\SIMRS\Registration;
@@ -236,6 +237,7 @@ Route::group(['middleware' => ['auth']], function () {
             Route::prefix('master-data')->group(function () {
                 Route::get('zat-aktif', [WarehouseZatAktifController::class, 'index'])->name('warehouse.master-data.zat-aktif');
                 Route::get('satuan-barang', [WarehouseSatuanBarangController::class, 'index'])->name('warehouse.master-data.satuan-barang');
+                Route::get('kelompok-barang', [WarehouseKelompokBarangController::class, 'index'])->name('warehouse.master-data.kelompok-barang');
             });
         });
 
