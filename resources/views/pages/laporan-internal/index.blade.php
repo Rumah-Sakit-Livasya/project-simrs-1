@@ -44,6 +44,112 @@
                         </div>
                         <div class="panel-container show">
                             <div class="panel-content">
+                                <form id="filter-form" method="POST" action="{{ route('laporan-internal.filter') }}">
+                                    @csrf
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <label class="form-label mb-1 font-weight-normal"
+                                                    for="datepicker-modal-2">Tanggal<i class="text-danger">*</i></label>
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text fs-xl"><i
+                                                                class="fal fa-calendar"></i></span>
+                                                    </div>
+                                                    <input type="text" id="datepicker-modal-2"
+                                                        class="form-control datepicker @error('tanggal') is-invalid @enderror"
+                                                        placeholder="Select a date" name="tanggal">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group mb-3">
+                                                <label for="jenis">Jenis</label>
+                                                <!-- Mengubah input menjadi select3 -->
+                                                <select class="select3 form-control @error('jenis') is-invalid @enderror"
+                                                    name="jenis" id="jenis">
+                                                    <option value="">Pilih Jenis</option>
+                                                    <!-- Placeholder option -->
+                                                    <option value="kendala"
+                                                        {{ (old('jenis') ?? request('jenis')) == 'kendala' ? 'selected' : '' }}>
+                                                        Kendala</option>
+                                                    <option value="kegiatan"
+                                                        {{ (old('jenis') ?? request('jenis')) == 'kegiatan' ? 'selected' : '' }}>
+                                                        Kegiatan</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group mb-3">
+                                                <label for="user">User</label>
+                                                <select class="select3 form-control @error('user') is-invalid @enderror"
+                                                    name="user[]" id="user" multiple>
+                                                    @foreach (App\Models\Employee::where('is_active', 1)->whereHas('organization', function ($query) {
+                $query->where('name', 'like', '%Informasi Teknologi (IT)%');
+            })->get() as $employee)
+                                                        <option value="{{ $employee->id }}">
+                                                            {{ old('user', $employee->fullname) }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group mb-3">
+                                                <label for="status">Status</label>
+                                                <!-- Mengubah input menjadi select3 -->
+                                                <select class="select3 form-control @error('status') is-invalid @enderror"
+                                                    name="status" id="status">
+                                                    <option value="">Pilih Status</option>
+                                                    <!-- Placeholder option -->
+                                                    <option value="selesai"
+                                                        {{ (old('status') ?? request('status')) == 'selesai' ? 'selected' : '' }}>
+                                                        Selesai</option>
+                                                    <option value="diproses"
+                                                        {{ (old('status') ?? request('status')) == 'diproses' ? 'selected' : '' }}>
+                                                        Diproses</option>
+                                                    <option value="ditunda"
+                                                        {{ (old('status') ?? request('status')) == 'ditunda' ? 'selected' : '' }}>
+                                                        Ditunda</option>
+                                                    <option value="ditolak"
+                                                        {{ (old('status') ?? request('status')) == 'ditolak' ? 'selected' : '' }}>
+                                                        Ditolak</option>
+                                                </select>
+
+                                                @error('status')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <label class="form-label" for="">&nbsp</label>
+                                            <button type="submit" class="btn btn-primary btn-block w-100">
+                                                <div class="ikon-tambah">
+                                                    <span class="fal fa-search mr-1"></span>Cari
+                                                </div>
+                                                <div class="span spinner-text d-none">
+                                                    <span class="spinner-border spinner-border-sm" role="status"
+                                                        aria-hidden="true"></span>
+                                                    Loading...
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div id="panel-2" class="panel">
+                        <div class="panel-hdr">
+                            <h2>Laporan Internal IT</h2>
+                        </div>
+                        <div class="panel-container show">
+                            <div class="panel-content">
                                 <div class="row mb-3">
                                     <div class="col">
                                         <button class="btn btn-primary btn-sm" data-toggle="modal"
@@ -111,8 +217,8 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="tanggal" class="font-weight-bold">Tanggal Laporan</label>
-                                        <input type="text" class="form-control datepicker" id="tanggal" name="tanggal"
-                                            required>
+                                        <input type="text" class="form-control datepicker" id="tanggal"
+                                            name="tanggal" required>
                                     </div>
                                 </div>
 
@@ -316,7 +422,6 @@
             </div>
         </div>
 
-
         <!-- Export Modal -->
         <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModalLabel"
             aria-hidden="true">
@@ -390,6 +495,10 @@
                 dropdownParent: $('#tambah-data')
             });
 
+            $(function() {
+                $('.select3').select2();
+            });
+
             // Show/hide organization field based on jenis selection
             $('#jenis').change(function() {
                 if ($(this).val() === 'kendala') {
@@ -435,6 +544,12 @@
                 ajax: {
                     url: '/laporan-internal-list',
                     type: 'GET',
+                    data: function(d) {
+                        // Tambahkan data filter ke request
+                        d.jenis = $('#jenis').val();
+                        d.status = $('#status').val();
+                        d.tanggal = $('#datepicker-modal-2').val();
+                    },
                     error: function(xhr) {
                         console.error('DataTables error:', xhr.responseText);
                         showToast('Gagal memuat data laporan', 'error');
@@ -566,32 +681,32 @@
                         render: function(data, type, row) {
                             // Tombol default (edit dan delete)
                             let buttons = `
-            <div class="btn-group">
-                <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(${data})">
-                    <i class="fas fa-trash"></i>
-                </button>
-        `;
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(${data})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                        `;
 
                             // Tambahkan tombol dokumentasi jika ada
                             if (row.dokumentasi && !isNumeric(row.dokumentasi)) {
                                 buttons += `
-                <button class="btn btn-sm btn-icon btn-info btn-show-dokumentasi" 
-                        data-file="${row.dokumentasi.startsWith('http') ? row.dokumentasi : assetUrl(row.dokumentasi)}">
-                    <i class="fas fa-eye"></i>
-                </button>
-            `;
+                                            <button class="btn btn-sm btn-icon btn-info btn-show-dokumentasi" 
+                                                    data-file="${row.dokumentasi.startsWith('http') ? row.dokumentasi : assetUrl(row.dokumentasi)}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        `;
                             }
 
                             // Tambahkan tombol checklist jika status Diproses atau Ditolak
                             if (row.status === 'diproses') {
                                 buttons += `
-                <button class="btn btn-sm btn-icon btn-success" onclick="completeLaporan(${data})" title="Tandai Selesai">
-                    <i class="fas fa-check"></i>
-                </button>
-            `;
+                                                <button class="btn btn-sm btn-icon btn-success" onclick="completeLaporan(${data})" title="Tandai Selesai">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            `;
                             }
 
                             buttons += `</div>`;
@@ -606,7 +721,6 @@
                         const hours = Math.floor(diff / (1000 * 60 * 60));
                         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
                         let durationText = '';
                         if (hours > 0) durationText += `${hours} jam `;
                         if (minutes > 0) durationText += `${minutes} menit `;
@@ -659,6 +773,14 @@
             function assetUrl(path) {
                 return path.startsWith('/') ? path : '/' + path;
             }
+
+            $('#filter-form').on('submit', function(e) {
+                e.preventDefault(); // Mencegah pengiriman form default
+
+                // Reload DataTable dengan filter
+                table.ajax
+                    .reload(); // Ini akan memanggil URL yang ditentukan di ajax.url dan mengirimkan data filter
+            });
 
 
             // Form submission with file upload support

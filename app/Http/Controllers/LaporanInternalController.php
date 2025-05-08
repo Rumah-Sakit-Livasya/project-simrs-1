@@ -14,10 +14,30 @@ use PhpOffice\PhpWord\IOFactory;
 
 class LaporanInternalController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if ($request) {
+            $query = LaporanInternal::query();
+
+            // Filter berdasarkan jenis
+            if ($request->filled('jenis')) {
+                $query->where('jenis', $request->jenis);
+            }
+
+            // Filter berdasarkan status
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            // Filter berdasarkan tanggal
+            if ($request->filled('tanggal')) {
+                $query->whereDate('tanggal', $request->tanggal);
+            }
+        }
+
         return view('pages.laporan-internal.index');
     }
+
 
     public function store(Request $request)
     {
@@ -57,36 +77,39 @@ class LaporanInternalController extends Controller
     {
         $query = LaporanInternal::with('user.employee');
 
+        // Apply filters based on request
+        if ($request->filled('jenis')) {
+            $query->where('jenis', $request->jenis);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal', $request->tanggal);
+        }
+
+        // Filter by user if provided
+        if ($request->filled('user')) {
+            $query->whereIn('user_id', $request->user);
+        }
+
         return DataTables::of($query)
             ->addColumn('fullname', function ($item) {
                 return optional($item->user->employee)->fullname ?? '-';
             })
             ->addColumn('action', function ($item) {
                 return '
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(' . $item->id . ')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(' . $item->id . ')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                ';
-            })
-            ->addColumn('dokumentasi', function ($item) {
-                if (!$item->dokumentasi || is_numeric($item->dokumentasi)) {
-                    return '<span class="text-muted">Tidak ada</span>';
-                }
-
-                // Check if it's already a full URL
-                if (filter_var($item->dokumentasi, FILTER_VALIDATE_URL)) {
-                    $fileUrl = $item->dokumentasi;
-                } else {
-                    // Handle relative paths
-                    $fileUrl = $item->dokumentasi;
-                }
-
-                return e($fileUrl);
+            <div class="btn-group">
+                <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(' . $item->id . ')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(' . $item->id . ')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        ';
             })
             ->rawColumns(['action'])
             ->make(true);
