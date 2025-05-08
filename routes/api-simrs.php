@@ -9,6 +9,7 @@ use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
+use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\OrderParameterLaboratorium;
 use Illuminate\Support\Facades\Route;
 
@@ -139,6 +140,16 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::get('/store', [DietGiziController::class, 'store'])->name('auto-diet.gizi.store');
             Route::put('/update/{id}/', [DietGiziController::class, 'update'])->name('auto-diet.gizi.update');
             Route::delete('/destroy/{id}/', [DietGiziController::class, 'destroy'])->name('auto-diet.gizi.destroy');
+        });
+    });
+
+    Route::prefix("warehouse")->group(function () {
+        Route::prefix("master-data")->group(function () {
+            Route::prefix("zat-aktif")->group(function () {
+                Route::post('/store', [WarehouseZatAktifController::class, 'store'])->name('warehouse.master-data.zat-aktif.store');
+                Route::put('/update/{id}/', [WarehouseZatAktifController::class, 'update'])->name('warehouse.master-data.zat-aktif.update');
+                Route::delete('/destroy/{id}/', [WarehouseZatAktifController::class, 'destroy'])->name('warehouse.master-data.zat-aktif.destroy');
+            });
         });
     });
 

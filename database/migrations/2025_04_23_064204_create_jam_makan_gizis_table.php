@@ -17,6 +17,7 @@ return new class extends Migration
     {
         Schema::create('jam_makan_gizi', function (Blueprint $table) {
             $table->id();
+            $table->softDeletes();
             $table->timestamps();
             $table->time('jam');
             $table->string('waktu_makan');

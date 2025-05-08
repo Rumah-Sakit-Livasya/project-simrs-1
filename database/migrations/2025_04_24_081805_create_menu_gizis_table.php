@@ -1,10 +1,13 @@
 <?php
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    use SoftDeletes;
+
     /**
      * Run the migrations.
      */
@@ -12,6 +15,7 @@ return new class extends Migration {
     {
         Schema::create('menu_gizi', function (Blueprint $table) {
             $table->id();
+            $table->softDeletes();
             $table->timestamps();
             $table->foreignId("kategori_id")->constrained('kategori_gizi')->onDelete('cascade');
             $table->string('nama');

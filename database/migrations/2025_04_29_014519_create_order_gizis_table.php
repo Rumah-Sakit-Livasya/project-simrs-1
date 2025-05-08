@@ -16,6 +16,7 @@ return new class extends Migration {
     {
         Schema::create('order_gizi', function (Blueprint $table) {
             $table->id();
+            $table->softDeletes();
             $table->timestamps();
             $table->foreignId('registration_id')->constrained("registrations")->onDelete("cascade");
             $table->foreignId('kategori_id')->constrained(table: 'kategori_gizi')->onDelete('cascade');
