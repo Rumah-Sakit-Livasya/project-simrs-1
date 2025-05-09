@@ -5,7 +5,7 @@
 // @ts-ignore
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
-class GolonganBarangHandler {
+class PabrikHandler {
     constructor(){
         this.#addEventListeners('.delete-btn', this.#handleDeleteButtonClick);
     }
@@ -34,7 +34,7 @@ class GolonganBarangHandler {
         if (!id) return;
 
         Swal.fire({
-            title: 'Hapus golongan barang?',
+            title: 'Hapus pabrik?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -57,7 +57,7 @@ class GolonganBarangHandler {
         formData.append('id', String(id));
         formData.append('csrf-token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
 
-        fetch('/api/simrs/warehouse/master-data/golongan-barang/destroy/' + id, {
+        fetch('/api/simrs/warehouse/master-data/pabrik/destroy/' + id, {
             method: 'DELETE',
             body: formData,
             headers: {
@@ -78,4 +78,4 @@ class GolonganBarangHandler {
     }
 }
 
-const GolonganBarangClass = new GolonganBarangHandler();
+const PabrikClass = new PabrikHandler();

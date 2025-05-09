@@ -69,6 +69,7 @@ use App\Http\Controllers\SIMRS\Warehouse\UnitCostController;
 use App\Http\Controllers\SIMRS\Warehouse\WarehouseController;
 use App\Http\Controllers\WarehouseGolonganBarangController;
 use App\Http\Controllers\WarehouseKelompokBarangController;
+use App\Http\Controllers\WarehousePabrikController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\SIMRS\Registration;
@@ -240,6 +241,7 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('satuan-barang', [WarehouseSatuanBarangController::class, 'index'])->name('warehouse.master-data.satuan-barang');
                 Route::get('kelompok-barang', [WarehouseKelompokBarangController::class, 'index'])->name('warehouse.master-data.kelompok-barang');
                 Route::get('golongan-barang', [WarehouseGolonganBarangController::class, 'index'])->name('warehouse.master-data.golongan-barang');
+                Route::get('pabrik', [WarehousePabrikController::class, 'index'])->name('warehouse.master-data.pabrik');
             });
         });
 

@@ -10,10 +10,29 @@ class WarehouseSatuanBarangController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $query = WarehouseSatuanBarang::query();
+        $filters = ['nama', 'kode', 'aktif'];
+        $filterApplied = false;
+
+        foreach ($filters as $filter) {
+            if ($request->filled($filter)) {
+                $query->where($filter, 'like', '%' . $request->$filter . '%');
+                $filterApplied = true;
+            }
+        }
+
+        // Get the filtered results if any filter is applied
+        if ($filterApplied) {
+            $satuans = $query->orderBy('created_at', 'asc')->get();
+        } else {
+            // Return all data if no filter is applied
+            $satuans = WarehouseSatuanBarang::all();
+        }
+
         return view("pages.simrs.warehouse.master-data.satuan-barang", [
-            "satuans" => WarehouseSatuanBarang::all()
+            "satuans" => $satuans
         ]);
     }
 

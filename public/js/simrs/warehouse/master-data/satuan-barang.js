@@ -43,7 +43,7 @@ class SatuanBarangHandler {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                this.#deleteZat(id);
+                this.#deleteItem(id);
             }
         });
     }
@@ -52,7 +52,7 @@ class SatuanBarangHandler {
      * Delete zat after confirmation
      * @param {number} id 
      */
-    #deleteZat(id) {
+    #deleteItem(id) {
         const formData = new FormData();
         formData.append('id', String(id));
         formData.append('csrf-token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');

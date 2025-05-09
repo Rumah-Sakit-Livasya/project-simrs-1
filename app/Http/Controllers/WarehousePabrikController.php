@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\WarehouseZatAktif;
+use App\Models\WarehousePabrik;
 use Illuminate\Http\Request;
 
-class WarehouseZatAktifController extends Controller
+class WarehousePabrikController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = WarehouseZatAktif::query();
-        $filters = ['nama', 'kode', 'aktif'];
+        $query = WarehousePabrik::query();
+        $filters = ['nama', 'alamat', 'telp', 'contact_person', 'contact_person_phone', 'aktif'];
         $filterApplied = false;
 
         foreach ($filters as $filter) {
@@ -25,14 +25,14 @@ class WarehouseZatAktifController extends Controller
 
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
-            $zats = $query->orderBy('created_at', 'asc')->get();
+            $pabriks = $query->orderBy('created_at', 'asc')->get();
         } else {
             // Return all data if no filter is applied
-            $zats = WarehouseZatAktif::all();
+            $pabriks = WarehousePabrik::all();
         }
 
-        return view("pages.simrs.warehouse.master-data.zat-aktif", [
-            "zats" => $zats
+        return view("pages.simrs.warehouse.master-data.pabrik", [
+            "pabriks" => $pabriks
         ]);
     }
 
@@ -51,18 +51,21 @@ class WarehouseZatAktifController extends Controller
     {
         $validatedData = $request->validate([
             'nama' => 'required|string|max:255',
-            'aktif' => 'required|boolean',
-            'kode' => 'required|string|max:255'
+            'alamat' => 'nullable|string',
+            'telp' => 'nullable|string',
+            'contact_person' => 'nullable|string',
+            'contact_person_phone' => 'nullable|string',
+            'aktif' => 'required|boolean'
         ]);
 
-        WarehouseZatAktif::create($validatedData);
-        return redirect()->back()->with('success', 'Zat berhasil ditambahkan!');
+        WarehousePabrik::create($validatedData);
+        return redirect()->back()->with('success', 'Pabrik berhasil ditambahkan!');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(WarehouseZatAktif $warehouseZatAktif)
+    public function show(WarehousePabrik $warehousePabrik)
     {
         //
     }
@@ -70,7 +73,7 @@ class WarehouseZatAktifController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(WarehouseZatAktif $warehouseZatAktif)
+    public function edit(WarehousePabrik $warehousePabrik)
     {
         //
     }
@@ -78,31 +81,34 @@ class WarehouseZatAktifController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, WarehouseZatAktif $warehouseZatAktif)
+    public function update(Request $request, WarehousePabrik $warehousePabrik)
     {
         $validatedData = $request->validate([
             'id' => 'required|integer',
             'nama' => 'required|string|max:255',
-            'kode' => 'required|string|max:255',
-            'aktif' => 'required|boolean',
+            'alamat' => 'nullable|string',
+            'telp' => 'nullable|string',
+            'contact_person' => 'nullable|string',
+            'contact_person_phone' => 'nullable|string',
+            'aktif' => 'required|boolean'
         ]);
 
-        $warehouseZatAktif
+        $warehousePabrik
             ->where("id", $validatedData['id'])
             ->update($validatedData);
-        return redirect()->back()->with('success', 'Zat berhasil diupdate');
+        return redirect()->back()->with('success', 'Pabrik berhasil diupdate');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(WarehouseZatAktif $warehouseZatAktif, $id)
+    public function destroy(WarehousePabrik $warehousePabrik, $id)
     {
         try {
-            $warehouseZatAktif::destroy($id);
+            $warehousePabrik::destroy($id);
             return response()->json([
                 'success' => true,
-                'message' => 'Zat berhasil dihapus!'
+                'message' => 'Pabrik berhasil dihapus!'
             ]);
         } catch (\Exception $e) {
             return response()->json([

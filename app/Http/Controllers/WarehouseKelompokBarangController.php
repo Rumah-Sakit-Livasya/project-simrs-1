@@ -10,10 +10,29 @@ class WarehouseKelompokBarangController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $query = WarehouseKelompokBarang::query();
+        $filters = ['nama', 'aktif'];
+        $filterApplied = false;
+
+        foreach ($filters as $filter) {
+            if ($request->filled($filter)) {
+                $query->where($filter, 'like', '%' . $request->$filter . '%');
+                $filterApplied = true;
+            }
+        }
+
+        // Get the filtered results if any filter is applied
+        if ($filterApplied) {
+            $kelompoks = $query->orderBy('created_at', 'asc')->get();
+        } else {
+            // Return all data if no filter is applied
+            $kelompoks = WarehouseKelompokBarang::all();
+        }
+
         return view("pages.simrs.warehouse.master-data.kelompok-barang", [
-            "kelompoks" => WarehouseKelompokBarang::all()
+            "kelompoks" => $kelompoks
         ]);
     }
 
