@@ -10,12 +10,14 @@ use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
 use App\Http\Controllers\WarehouseGolonganBarangController;
+use App\Http\Controllers\WarehouseKategoriBarangController;
 use App\Http\Controllers\WarehouseKelompokBarangController;
 use App\Http\Controllers\WarehousePabrikController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseSupplierController;
 use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\OrderParameterLaboratorium;
+use App\Models\WarehouseKategoriBarang;
 use App\Models\WarehouseKelompokBarang;
 use Illuminate\Support\Facades\Route;
 
@@ -167,6 +169,12 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post('/store', [WarehouseKelompokBarangController::class, 'store'])->name('warehouse.master-data.kelompok-barang.store');
                 Route::put('/update/{id}/', [WarehouseKelompokBarangController::class, 'update'])->name('warehouse.master-data.kelompok-barang.update');
                 Route::delete('/destroy/{id}/', [WarehouseKelompokBarangController::class, 'destroy'])->name('warehouse.master-data.kelompok-barang.destroy');
+            });
+
+            Route::prefix("kategori-barang")->group(function () {
+                Route::post('/store', [WarehouseKategoriBarangController::class, 'store'])->name('warehouse.master-data.kategori-barang.store');
+                Route::put('/update/{id}/', [WarehouseKategoriBarangController::class, 'update'])->name('warehouse.master-data.kategori-barang.update');
+                Route::delete('/destroy/{id}/', [WarehouseKategoriBarangController::class, 'destroy'])->name('warehouse.master-data.kategori-barang.destroy');
             });
 
             Route::prefix("golongan-barang")->group(function () {

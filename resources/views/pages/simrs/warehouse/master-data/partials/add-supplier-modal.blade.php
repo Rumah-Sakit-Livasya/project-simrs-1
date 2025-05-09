@@ -111,7 +111,7 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-xl-3 text-end">
-                                        <label class="form-label" for="contact_person">Contact Person</label>
+                                        <label class="form-label" for="contact_person">Contact Person (CP)</label>
                                     </div>
                                     <div class="col-xl">
                                         <input type="text" value="{{ request('contact_person') }}" class="form-control" id="contact_person" name="contact_person">

@@ -88,7 +88,7 @@ class WarehouseKelompokBarangController extends Controller
         $warehouseKelompokBarang
             ->where("id", $validatedData['id'])
             ->update($validatedData);
-        return redirect()->back()->with('success', 'Satuan Barang berhasil diupdate');
+        return redirect()->back()->with('success', 'Kelompok Barang berhasil diupdate');
     }
 
     /**
