@@ -7,7 +7,7 @@
                 <input type="hidden" name="id" value="{{ $pabrik->id }}">
                 <div class="modal-header">
                     
-                    <h1 class="modal-title fs-5" id="editModalLabel">Tambah Pabrik</h1>
+                    <h1 class="modal-title fs-5" id="editModalLabel">Edit Pabrik</h1>
                 </div>
                 <div class="modal-body">
 

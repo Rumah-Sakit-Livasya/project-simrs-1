@@ -13,6 +13,7 @@ use App\Http\Controllers\WarehouseGolonganBarangController;
 use App\Http\Controllers\WarehouseKelompokBarangController;
 use App\Http\Controllers\WarehousePabrikController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
+use App\Http\Controllers\WarehouseSupplierController;
 use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\OrderParameterLaboratorium;
 use App\Models\WarehouseKelompokBarang;
@@ -178,6 +179,12 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post('/store', [WarehousePabrikController::class, 'store'])->name('warehouse.master-data.pabrik.store');
                 Route::put('/update/{id}/', [WarehousePabrikController::class, 'update'])->name('warehouse.master-data.pabrik.update');
                 Route::delete('/destroy/{id}/', [WarehousePabrikController::class, 'destroy'])->name('warehouse.master-data.pabrik.destroy');
+            });
+
+            Route::prefix("supplier")->group(function () {
+                Route::post('/store', [WarehouseSupplierController::class, 'store'])->name('warehouse.master-data.supplier.store');
+                Route::put('/update/{id}/', [WarehouseSupplierController::class, 'update'])->name('warehouse.master-data.supplier.update');
+                Route::delete('/destroy/{id}/', [WarehouseSupplierController::class, 'destroy'])->name('warehouse.master-data.supplier.destroy');
             });
         });
     });
