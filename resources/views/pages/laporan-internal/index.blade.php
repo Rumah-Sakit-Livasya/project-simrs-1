@@ -491,7 +491,7 @@
 
         $(document).ready(function() {
             // Initialize select2
-            $('.select2').select2({
+            $('#form-laporan .select2').select2({
                 dropdownParent: $('#tambah-data')
             });
 
