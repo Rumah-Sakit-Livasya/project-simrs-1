@@ -297,7 +297,7 @@
                             },
                             success: function(response) {
                                 let quantity = parseInt($('#quantity').val()) || 1;
-                                let total = response.harga * quantity;
+                                let total = response.harga;
                                 $('#nominal').val(total.toLocaleString('id-ID'));
                             },
                             error: function(xhr) {

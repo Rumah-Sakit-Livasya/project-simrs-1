@@ -117,10 +117,6 @@ class Registration extends Model implements AuditableContract
     protected static function boot()
     {
         parent::boot();
-
-        // static::creating(function ($model) {
-        //     $model->registrasi = $model->generateNomorRegistrasi();
-        // });
     }
 
 

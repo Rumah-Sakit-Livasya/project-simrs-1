@@ -197,7 +197,7 @@ class PayrollApiController extends Controller
                     ->whereNull('is_day_off')
                     ->count();
 
-                    // dd($startPeriod, $endPeriodHariKerja);
+                // dd($startPeriod, $endPeriodHariKerja);
 
                 // Jika ada catatan kehadiran yang memenuhi syarat, tambahkan potongan absensi sebesar 99000
 
@@ -249,10 +249,10 @@ class PayrollApiController extends Controller
                     $potonganIzinValue = $totalAllowance ?? 0;
                     $potonganIzinValue = $potonganIzinValue + $basicSalary;
 
-                    if($employee->organization->id == 34 && $basicSalary < 1700000) {
-                        $potonganIzinValue = ($potonganIzinValue * $izin)  / 30;
+                    if ($employee->organization->id == 34 && $basicSalary < 1700000) {
+                        $potonganIzinValue = $potonganIzinValue / 25 * $izin;
                     } else {
-                        $potonganIzinValue = ($potonganIzinValue * $izin)  / 25;
+                        $potonganIzinValue = $potonganIzinValue / 25 * $izin;
                     }
                 }
                 $totalDeduction = $potonganKeterlambatanValue + $potonganIzinValue + $potonganSakitValue + $simpananPokok + $potonganKoperasiValue + $potonganAbsensiValue + $potonganBPJSKesehatanValue + $potonganBPJSKetenagakerjaanValue + $potonganPajakValue;

@@ -321,6 +321,7 @@
                             showSuccessAlert('Tindakan medis berhasil ditambahkan!');
                             $('#modal-tambah-tindakan').modal('hide');
                         } else {
+                            $('#modal-tambah-tindakan').modal('hide');
                             showErrorAlertNoRefresh('Gagal menambahkan tindakan medis: ' +
                                 response.message);
                         }

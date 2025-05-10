@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Kepustakaan')
+@se
 @section('extended-css')
     <style>
         hr {
@@ -136,7 +136,6 @@
             opacity: 1;
         }
     </style>
-
 @endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
