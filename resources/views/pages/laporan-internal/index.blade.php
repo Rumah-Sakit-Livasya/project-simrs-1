@@ -64,10 +64,10 @@
                                         </div>
                                         <div class="col">
                                             <div class="form-group mb-3">
-                                                <label for="jenis">Jenis</label>
+                                                <label for="filter-jenis">Jenis</label>
                                                 <!-- Mengubah input menjadi select3 -->
                                                 <select class="select3 form-control @error('jenis') is-invalid @enderror"
-                                                    name="jenis" id="jenis">
+                                                    name="jenis" id="filter-jenis">
                                                     <option value="">Pilih Jenis</option>
                                                     <!-- Placeholder option -->
                                                     <option value="kendala"
@@ -96,10 +96,10 @@
                                         </div>
                                         <div class="col">
                                             <div class="form-group mb-3">
-                                                <label for="status">Status</label>
+                                                <label for="filter-status">Status</label>
                                                 <!-- Mengubah input menjadi select3 -->
                                                 <select class="select3 form-control @error('status') is-invalid @enderror"
-                                                    name="status" id="status">
+                                                    name="status" id="filter-status">
                                                     <option value="">Pilih Status</option>
                                                     <!-- Placeholder option -->
                                                     <option value="selesai"
