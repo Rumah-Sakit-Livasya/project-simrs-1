@@ -4,6 +4,7 @@ namespace App\Models\SIMRS;
 
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
+use App\Models\Keuangan\KonfirmasiAsuransi;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Keuangan\Kasir;
@@ -136,6 +137,11 @@ class Registration extends Model implements AuditableContract
     public function order_laboratorium()
     {
         return $this->hasMany(OrderLaboratorium::class, 'registration_id');
+    }
+
+    public function konfirmasi_asuransi()
+    {
+        return $this->hasMany(KonfirmasiAsuransi::class, 'registration_id');
     }
 
 

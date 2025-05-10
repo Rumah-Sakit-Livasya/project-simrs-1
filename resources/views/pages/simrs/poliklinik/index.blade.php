@@ -643,8 +643,7 @@
                                                         <input name="kondisi_khusus[]"
                                                             id="kondisi_khusus{{ $index + 1 }}"
                                                             value="{{ $kondisi }}" type="checkbox"
-                                                            class="custom-control-input"
-                                                            {{ in_array($kondisi, $kondisi_khusus_terpilih) ? 'checked' : '' }}>
+                                                            class="custom-control-input" {{-- {{ in_array($kondisi, $kondisi_khusus_terpilih) ? 'checked' : '' }} --}}>
                                                         <span
                                                             class="custom-control-label text-primary">{{ $kondisi }}</span>
                                                     </label>
@@ -673,8 +672,7 @@
                                                         <input name="imunisasi_dasar[]"
                                                             id="imunisasi_dasar{{ $index + 1 }}"
                                                             value="{{ $imunisasi }}" type="checkbox"
-                                                            class="custom-control-input"
-                                                            {{ in_array($imunisasi, $imunisasi_dasar_terpilih) ? 'checked' : '' }}>
+                                                            class="custom-control-input" {{-- {{ in_array($imunisasi, $imunisasi_dasar_terpilih) ? 'checked' : '' }} --}}>
                                                         <span
                                                             class="custom-control-label text-primary">{{ $imunisasi }}</span>
                                                     </label>
@@ -710,8 +708,7 @@
                                                         <input onclick="resiko_jatuh()" name="resiko_jatuh[]"
                                                             id="resiko_jatuh{{ $index + 1 }}"
                                                             value="{{ $resiko }}" type="checkbox"
-                                                            class="custom-control-input"
-                                                            {{ in_array($resiko, $resiko_jatuh_terpilih) ? 'checked' : '' }}>
+                                                            class="custom-control-input" {{-- {{ in_array($resiko, $resiko_jatuh_terpilih) ? 'checked' : '' }} --}}>
                                                         <span
                                                             class="custom-control-label text-primary">{{ $resiko }}</span>
                                                     </label>
@@ -900,7 +897,7 @@
                                                         <input class="custom-control-input" name="hambatan_belajar[]"
                                                             id="hambatan_belajar{{ $key + 1 }}"
                                                             value="{{ $option }}" type="checkbox"
-                                                            {{ in_array($option, $hambatan_belajar_terpilih) ? 'checked' : '' }}>
+                                                            {{-- {{ in_array($option, $hambatan_belajar_terpilih) ? 'checked' : '' }} --}}>
                                                         <label for="hambatan_belajar{{ $key + 1 }}"
                                                             class="custom-control-label text-primary">{{ $option }}</label>
                                                     </div>
@@ -955,7 +952,7 @@
                                                             name="kebutuhan_pembelajaran[]"
                                                             id="kebutuhan_pembelajaran{{ $key + 1 }}"
                                                             value="{{ $option }}" type="checkbox"
-                                                            {{ in_array($option, $kebutuhan_pembelajaran_terpilih) ? 'checked' : '' }}>
+                                                            {{-- {{ in_array($option, $kebutuhan_pembelajaran_terpilih) ? 'checked' : '' }} --}}>
                                                         <label for="kebutuhan_pembelajaran{{ $key + 1 }}"
                                                             class="custom-control-label text-primary">{{ $option }}</label>
                                                     </div>
@@ -986,7 +983,11 @@
                                 </header>
                                 <div class="row mt-3">
                                     @php
-                                        $data = json_decode($pengkajian->sensorik, true);
+                                        $data = [];
+
+                                        if (isset($pengkajian) && $pengkajian->sensorik) {
+                                            $data = json_decode($pengkajian->sensorik, true);
+                                        }
 
                                         $opsi = [
                                             'sensorik_penglihatan' => ['Normal', 'Kabur', 'Kaca Mata', 'Lensa Kontak'],
@@ -997,7 +998,6 @@
                                                 'Ada alat bantu dengar ka/ki',
                                             ],
                                         ];
-
                                     @endphp
                                     <table class="table">
                                         <tbody>
@@ -1082,7 +1082,11 @@
                                 </header>
                                 <div class="row mt-3">
                                     @php
-                                        $data = json_decode($pengkajian->motorik, true);
+                                        $data = [];
+
+                                        if (isset($pengkajian) && $pengkajian->motorik) {
+                                            $data = json_decode($pengkajian->motorik, true);
+                                        }
 
                                         $opsiMotorik = [
                                             'motorik_aktifitas' => [
@@ -1098,34 +1102,35 @@
                                             ],
                                         ];
                                     @endphp
+
                                     <table class="table">
                                         <tbody>
                                             @foreach ($opsiMotorik as $kategori => $opsiList)
-                                            <tr>
-                                                <td>{{ Str::of($kategori)->after('motorik_')->replace('_', ' ')->ucfirst() }}</td>
-                                                @foreach ($opsiList as $i => $opsiValue)
-                                                    <td @if($loop->last && $loop->count < 4) colspan="{{ 5 - $loop->count }}" @endif>
-                                                        <div class="custom-control custom-radio">
-                                                            <input 
-                                                                name="{{ $kategori }}" 
-                                                                id="{{ $kategori . $i }}" 
-                                                                value="{{ $opsiValue }}" 
-                                                                data-skor="{{ $i }}" 
-                                                                class="custom-control-input" 
-                                                                type="radio"
-                                                                @checked(($data[$kategori] ?? '') == $opsiValue)
-                                                            >
-                                                            <label class="custom-control-label text-primary" for="{{ $kategori . $i }}">
-                                                                {{ $opsiValue }}
-                                                            </label>
-                                                        </div>
+                                                <tr>
+                                                    <td>{{ Str::of($kategori)->after('motorik_')->replace('_', ' ')->ucfirst() }}
                                                     </td>
-                                                @endforeach
-                                            </tr>
+                                                    @foreach ($opsiList as $i => $opsiValue)
+                                                        <td
+                                                            @if ($loop->last && $loop->count < 4) colspan="{{ 5 - $loop->count }}" @endif>
+                                                            <div class="custom-control custom-radio">
+                                                                <input name="{{ $kategori }}"
+                                                                    id="{{ $kategori . $i }}"
+                                                                    value="{{ $opsiValue }}"
+                                                                    data-skor="{{ $i }}"
+                                                                    class="custom-control-input" type="radio"
+                                                                    @checked(($data[$kategori] ?? '') == $opsiValue)>
+                                                                <label class="custom-control-label text-primary"
+                                                                    for="{{ $kategori . $i }}">
+                                                                    {{ $opsiValue }}
+                                                                </label>
+                                                            </div>
+                                                        </td>
+                                                    @endforeach
+                                                </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
-                                    
+
                                 </div>
 
                                 <div class="row mt-5">
@@ -1234,7 +1239,6 @@
                 $('#js-slide-left').removeClass('slide-on-mobile-left-show');
                 $(this).removeClass('show');
             });
-
         });
     </script>
     @include('pages.simrs.poliklinik.partials.js-filter')

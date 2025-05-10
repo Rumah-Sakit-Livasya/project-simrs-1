@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(GroupCOASeeders::class);
+        // $this->call(GroupCOASeeders::class);
         // $this->call(EthnicSeeder::class);
         // Target::factory()->count(100)->create();
         // $this->call(RolePermissionSeeder::class);
@@ -41,5 +41,7 @@ class DatabaseSeeder extends Seeder
         //     ['id' => 1, 'nama' => 'Pemasukan', 'created_at' => now(), 'updated_at' => now()],
         //     ['id' => 2, 'nama' => 'Pengeluaran', 'created_at' => now(), 'updated_at' => now()],
         // ]);
+
+        $this->call(AccountReceivableSeeder::class);
     }
 }

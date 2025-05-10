@@ -36,31 +36,32 @@ class PoliklinikController extends Controller
         $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
         $registration = Registration::where('registration_number', $noRegist)->first();
 
-
         $query = Registration::whereDate('registration_date', Carbon::today());
 
-        $query->when(isset($registration->departement_id), function ($q) use ($registration) {
-            return $q->where('departement_id', $registration->departement_id);
-        });
+        if ($registration) {
+            $query->when($registration->departement_id, function ($q) use ($registration) {
+                return $q->where('departement_id', $registration->departement_id);
+            });
 
-        $query->when(isset($registration->doctor_id), function ($q) use ($registration) {
-            return $q->where('doctor_id', $registration->doctor_id);
-        });
+            $query->when($registration->doctor_id, function ($q) use ($registration) {
+                return $q->where('doctor_id', $registration->doctor_id);
+            });
+        }
 
         $registrations = $query->get();
-        
+
         if ($menu && $noRegist) {
-            // Render partial view sebagai HTML
             $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
 
             $menuResponse = $this->poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration);
             if ($menuResponse) {
                 return $menuResponse;
             }
-        } else {
-            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration', 'registrations'));
         }
+
+        return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration', 'registrations'));
     }
+
 
     private function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration)
     {
@@ -97,7 +98,6 @@ class PoliklinikController extends Controller
             $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
 
             return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian'));
-        
         } elseif ($menu == 'cppt_farmasi') {
             return view('pages.simrs.poliklinik.farmasi.cppt', compact('registration', 'departements', 'jadwal_dokter'));
         } elseif ($menu == 'pengkajian_resep') {
