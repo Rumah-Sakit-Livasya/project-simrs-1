@@ -407,6 +407,8 @@
                         </button>
                     </div>
                     <form id="exportWordForm" action="{{ route('laporan.internal.export.word') }}" method="GET">
+                        <input type="hidden" name="organization_id"
+                            value="{{ auth()->user()->employee->organization_id }}">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label for="exportWordTanggal">Tanggal Laporan</label>
@@ -420,6 +422,23 @@
                                     <option value="kegiatan">Kegiatan</option>
                                     <option value="kendala">Kendala</option>
                                 </select>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="pic">PIC (Person In Charge) <i class="fas fa-info-circle text-primary"
+                                        data-template="<div class='tooltip' role='tooltip'><div class='tooltip-inner bg-primary-500'></div></div>"
+                                        data-toggle="tooltip"
+                                        title="Orang yang bertanggungjawab atas target ini"></i></label>
+                                <!-- Mengubah input menjadi select2 -->
+                                <select class="select2 form-control @error('pic') is-invalid @enderror" name="pic[]"
+                                    id="pic" multiple>
+                                    @foreach ($employeeUnit as $employee)
+                                        <option value="{{ $employee->id }}">{{ old('pic', $employee->fullname) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('pic')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -508,6 +527,11 @@
 
             $(function() {
                 $('.select3').select2();
+                $('#pic').select2({
+                    placeholder: 'Pilih data berikut',
+                    dropdownParent: $('#exportWordModal'),
+                    allowClear: true
+                });
             });
 
             // Show/hide organization field based on jenis selection

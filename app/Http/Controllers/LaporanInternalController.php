@@ -58,7 +58,11 @@ class LaporanInternalController extends Controller
                 ->get();
         }
 
-        return view('pages.laporan-internal.index', compact('umum'));
+        $employeeUnit = Employee::where('organization_id', auth()->user()->employee->organization_id)
+            ->where('is_active', 1)
+            ->get();
+
+        return view('pages.laporan-internal.index', compact('umum', 'employeeUnit'));
     }
 
 
@@ -183,7 +187,30 @@ class LaporanInternalController extends Controller
     {
         $tanggal = $request->input('tanggal');
 
+        $organizationId = $request->organization_id;
+        $organizationName = Organization::find($organizationId)->name;
+
+
+        if ($request->has('pic') && is_array($request->input('pic'))) {
+            // Jika input 'pic' ada dan berupa array, ambil datanya berdasarkan array ID
+            $employees = Employee::whereIn('id', $request->input('pic'))
+                ->where('is_active', 1)
+                ->get();
+        } else {
+            // Jika tidak ada input 'pic', ambil semua employee berdasarkan organization_id
+            $employees = Employee::where('organization_id', $organizationId)
+                ->where('is_active', 1)
+                ->get();
+        }
+
+        // Mengubah menjadi array nama lengkap
+        $member = $employees->pluck('fullname')->toArray();
+
+        // Menggabungkan array menjadi string, dipisahkan dengan koma
+        $result = implode(', ', $member);
+
         $query = LaporanInternal::with('organization', 'user')
+            ->where('organization_id', $organizationId)
             ->whereDate('tanggal', $tanggal)
             ->orderBy('jenis');
 
@@ -197,10 +224,10 @@ class LaporanInternalController extends Controller
         $section->getStyle()->setMarginLeft(600);   // Mengurangi margin kiri
 
         // Judul
-        $section->addText('LAPORAN HARIAN IT', ['bold' => true, 'size' => 16], ['alignment' => 'center']);
+        $section->addText('LAPORAN HARIAN ' . strtoupper($organizationName), ['bold' => true, 'size' => 16], ['alignment' => 'center']);
         $section->addText('Hari/Tanggal: ' . Carbon::parse($tanggal)->translatedFormat('l, d F Y'), ['size' => 12], ['alignment' => 'center']);
-        $section->addText('Anggota:', ['size' => 10], ['alignment' => 'center']);
-        $section->addText('Dimas, Tiyas, Elsa, Adib, Ricky', ['size' => 10], ['alignment' => 'center']);
+        $section->addText('Anggota:', ['size' => 8], ['alignment' => 'center']);
+        $section->addText($result, ['size' => 8], ['alignment' => 'center']);
         $section->addTextBreak(1);
 
         // Header Tabel
@@ -211,19 +238,23 @@ class LaporanInternalController extends Controller
             'alignment' => 'center'
         ]);
 
-        $headerStyle = ['bold' => true, 'size' => 10];
-        $rowStyle = ['bold' => false, 'size' => 10];
+        $headerStyle = ['bold' => true, 'size' => 8];
+        $rowStyle = ['bold' => false, 'size' => 8];
 
         // Header Tabel
         $table->addRow();
-        $table->addCell(1500)->addText('No', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(1000)->addText('No', $headerStyle, ['alignment' => 'center']);
         $table->addCell(3500)->addText('Jenis', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(4500)->addText('Unit', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(7000)->addText('Kegiatan', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(4500)->addText('PIC', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(3500)->addText('Unit', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(6000)->addText('Kegiatan', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(3500)->addText('PIC', $headerStyle, ['alignment' => 'center']);
         $table->addCell(3500)->addText('Status', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(4500)->addText('Masuk/Mulai', $headerStyle, ['alignment' => 'center']);
-        $table->addCell(3500)->addText('Selesai', $headerStyle, ['alignment' => 'center']);
+        $table->addCell(3500)->addText('Keterangan', $headerStyle, ['alignment' => 'center']);
+        if ($organizationName == 'Informasi Teknologi (IT)') {
+            $table->addCell(4500)->addText('Masuk/Mulai', $headerStyle, ['alignment' => 'center']);
+            $table->addCell(3500)->addText('Selesai', $headerStyle, ['alignment' => 'center']);
+        }
+        $table->addCell(6500)->addText('Dokumentasi', $headerStyle, ['alignment' => 'center']);
 
         // Data Baris
         $no = 1;
@@ -234,21 +265,41 @@ class LaporanInternalController extends Controller
             if ($laporan->jenis === "kegiatan") {
                 $table->addCell(3000)->addText('Internal', $rowStyle, ['alignment' => 'center']);
             } else {
-                $table->addCell(3000)->addText(optional($laporan->organization)->name ?? '-', $rowStyle, ['alignment' => 'center']);
+                $table->addCell(3000)->addText(Organization::find($laporan->unit_terkait)->name ?? '-', $rowStyle, ['alignment' => 'center']);
             }
-            $table->addCell(5000)->addText($laporan->kegiatan);
+            $table->addCell(5000)->addText($laporan->kegiatan, $rowStyle);
             $table->addCell(3000)->addText(
-                optional($laporan->user)->id == 231 ? 'IT Support SIMRS' : (optional($laporan->user)->id == 14 ? 'IT Hardware Networking' : 'IT Programmer Developer'),
+                // Cek apakah organisasi user adalah "Informasi Teknologi (IT)"
+                optional($laporan->user->organization)->name == 'Informasi Teknologi (IT)'
+                    ? (
+                        $laporan->user->id == 231 ? 'IT Support SIMRS' : ($laporan->user->id == 14 ? 'IT Hardware Networking' : 'IT Programmer Developer')
+                    )
+                    : optional($laporan->user->employee)->fullname, // Jika bukan, tampilkan nama lengkap
                 $rowStyle,
                 ['alignment' => 'center']
             );
             $table->addCell(2500)->addText(ucfirst($laporan->status), $rowStyle, ['alignment' => 'center']);
-            $table->addCell(3000)->addText($laporan->jam_masuk ?? '-', $rowStyle, ['alignment' => 'center']);
-            $table->addCell(2000)->addText($laporan->jam_selesai ?? '-', $rowStyle, ['alignment' => 'center']);
+            $table->addCell(2500)->addText(ucfirst($laporan->keterangan), $rowStyle, ['alignment' => 'center']);
+            if (optional($laporan->user->employee->organization)->name == 'Informasi Teknologi (IT)') {
+                $table->addCell(3000)->addText($laporan->jam_masuk ?? '-', $rowStyle, ['alignment' => 'center']);
+                $table->addCell(2000)->addText($laporan->jam_selesai ?? '-', $rowStyle, ['alignment' => 'center']);
+            }
+            // **Menampilkan Gambar di Kolom Dokumentasi**
+            $imageCell = $table->addCell(2500, ['alignment' => 'center']);
+
+            if (!empty($laporan->dokumentasi) && file_exists(public_path($laporan->dokumentasi))) {
+                $imageCell->addImage(public_path($laporan->dokumentasi), [
+                    'width' => 100,    // lebar gambar dalam Word
+                    'height' => 100,   // tinggi gambar dalam Word
+                    'alignment' => 'center',
+                ]);
+            } else {
+                $imageCell->addText('Tidak ada gambar', $rowStyle, ['alignment' => 'center']);
+            }
         }
 
         // Save as Word
-        $fileName = 'Daily_Report_IT_' . $tanggal . '.docx';
+        $fileName = 'Daily_Report_' . $organizationName . '_' . $tanggal . '.docx';
         header("Content-Description: File Transfer");
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
         header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
