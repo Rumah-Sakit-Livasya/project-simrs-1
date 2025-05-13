@@ -65,6 +65,35 @@ class LaporanInternalController extends Controller
         return view('pages.laporan-internal.index', compact('umum', 'employeeUnit'));
     }
 
+    public function getLaporan($id)
+    {
+        try {
+            // Logika untuk mengambil data laporan dari database atau sumber lain
+            // Misalkan menggunakan model Laporan untuk mengambil data
+            $laporan = LaporanInternal::find($id);
+
+            // Jika data ditemukan, kembalikan dalam bentuk response JSON
+            if ($laporan) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $laporan
+                ], 200); // Status 200 menandakan OK
+            } else {
+                // Jika data tidak ditemukan
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data laporan tidak ditemukan'
+                ], 404); // Status 404 untuk not found
+            }
+        } catch (\Exception $e) {
+            // Jika terjadi kesalahan pada proses
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500); // Status 500 untuk internal server error
+        }
+    }
+
 
     public function store(Request $request)
     {

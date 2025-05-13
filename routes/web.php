@@ -343,6 +343,7 @@ Route::middleware([LastSeenUser::class])->group(function () {
 
         Route::middleware(['auth'])->group(function () {
             Route::get('/laporan-internal', [LaporanInternalController::class, 'index'])->name('laporan-internal')->middleware('can:view laporan internal');
+            Route::get('/laporan-internal/get/{id}', [LaporanInternalController::class, 'getLaporan'])->name('laporan-internal')->middleware('can:view laporan internal');
             Route::post('/laporan-internal-filter', [LaporanInternalController::class, 'index'])->name('laporan-internal.filter');
             Route::post('/laporan-internal', [LaporanInternalController::class, 'store']);
             Route::get('/laporan-internal-list', [LaporanInternalController::class, 'list']);
