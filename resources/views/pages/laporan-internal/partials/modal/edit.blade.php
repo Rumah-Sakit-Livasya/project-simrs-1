@@ -11,9 +11,9 @@
             <form id="edit-form-laporan" enctype="multipart/form-data">
                 <div class="modal-body">
                     @csrf
-                    <input type="hidden" name="user_id" value="{{ auth()->id() }}">
-                    <input type="hidden" name="organization_id"
-                        value="{{ auth()->user()->employee->organization_id }}">
+                    <input type="hidden" id="edit-laporan-id" name="laporan">
+                    <input type="hidden" id="edit-user-id" name="user_id">
+                    <input type="hidden" id="edit-organization-id" name="organization_id">
 
                     <div class="row mb-3">
                         <!-- Input Tanggal Laporan -->
@@ -101,21 +101,21 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text bg-light">Masuk</span>
                                             </div>
-                                            <input type="time" class="form-control" id="create-jam-masuk"
+                                            <input type="time" class="form-control" id="edit-jam-masuk"
                                                 name="jam_masuk">
                                         </div>
                                         <div class="input-group mb-2">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text bg-light">Diproses</span>
                                             </div>
-                                            <input type="time" class="form-control" id="create-jam-diproses"
+                                            <input type="time" class="form-control" id="edit-jam-diproses"
                                                 name="jam_diproses">
                                         </div>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text bg-light">Selesai</span>
                                             </div>
-                                            <input type="time" class="form-control" id="create-jam-selesai"
+                                            <input type="time" class="form-control" id="edit-jam-selesai"
                                                 name="jam_selesai">
                                         </div>
                                     </div>

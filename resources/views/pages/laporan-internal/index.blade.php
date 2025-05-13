@@ -223,7 +223,10 @@
                     url: '/laporan-internal-list',
                     type: 'GET',
                     data: function(d) {
+                        console.log(d);
+
                         // Tambahkan data filter ke request
+                        d.user_id = $('#filter-user').val();
                         d.jenis = $('#filter-jenis').val();
                         d.status = $('#filter-status').val();
                         d.tanggal = $('#filter-tanggal').val();
@@ -519,37 +522,48 @@
                     }
                 });
             });
+
             $('#edit-form-laporan').on('submit', function(e) {
                 e.preventDefault();
                 const btn = $(this).find('button[type="submit"]');
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...');
 
-                // Create FormData object to handle file upload
-                const formData = new FormData(this);
+                // Ambil ID laporan
+                const laporanId = $('#edit-laporan-id').val();
+                console.log("Laporan ID: " + laporanId);
 
-                // Get CSRF token from meta tag
+                // Buat FormData objek untuk menangani file upload
+                const formData = new FormData(this); // this refers to the form element
+
+                // Debugging: Periksa semua data yang ada di FormData
+                for (let pair of formData.entries()) {
+                    console.log(pair[0] + ": " + pair[1]);
+                }
+
+                // Ambil CSRF token dari meta tag
                 const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
                 $.ajax({
-                    url: '/laporan-internal',
-                    method: 'PUT',
+                    url: `/laporan-internal/${laporanId}`, // URL untuk PUT dengan ID di URL
+                    method: 'POST',
                     data: formData,
-                    processData: false, // Important for file upload
-                    contentType: false, // Important for file upload
+                    processData: false, // Jangan proses data
+                    contentType: false, // Jangan set contentType, biar FormData mengatur sendiri
                     headers: {
                         'X-CSRF-TOKEN': csrfToken
                     },
                     success: function(response) {
                         showToast(response.message);
-                        $('#edit-data').modal('hide');
+                        $('#ubah-data').modal('hide');
                         table.ajax.reload();
                     },
                     error: function(xhr) {
+                        $('#ubah-data').modal('hide');
                         const errorMessage = xhr.responseJSON?.message ||
                             'Gagal menyimpan data';
                         showToast(errorMessage, 'error');
 
-                        // If there are validation errors, display them
+                        // Jika ada error validasi, tampilkan pesan kesalahan
                         if (xhr.responseJSON?.errors) {
                             const errors = xhr.responseJSON.errors;
                             for (const field in errors) {
@@ -560,7 +574,7 @@
                     },
                     complete: function() {
                         btn.prop('disabled', false).html(
-                            '<i class="fas fa-save me-1"></i> Simpan Laporan');
+                            '<i class="fas fa-save mr-1"></i> Simpan Laporan');
                     }
                 });
             });
@@ -699,11 +713,14 @@
                         $('#ubah-data').find('#edit-unit-terkait').val(response.data.unit_terkait).trigger(
                             'change');
                         $('#ubah-data').find('#edit-kegiatan').val(response.data.kegiatan);
-                        $('#create-jam-masuk').val(formatTime(response.data.jam_masuk));
-                        $('#create-jam-diproses').val(formatTime(response.data.jam_diproses));
-                        $('#create-jam-selesai').val(formatTime(response.data.jam_selesai));
+                        $('#ubah-data').find('#edit-jam-masuk').val(formatTime(response.data.jam_masuk));
+                        $('#ubah-data').find('#edit-jam-diproses').val(formatTime(response.data.jam_diproses));
+                        $('#ubah-data').find('#edit-jam-selesai').val(formatTime(response.data.jam_selesai));
                         $('#ubah-data').find('#edit-status').val(response.data.status).trigger('change');
                         $('#ubah-data').find('#edit-jenis').val(response.data.jenis).trigger('change');
+                        $('#ubah-data').find('#edit-user-id').val(response.data.user_id);
+                        $('#ubah-data').find('#edit-laporan-id').val(response.data.id);
+                        $('#ubah-data').find('#edit-organization-id').val(response.data.organization_id);
 
                         // Hanya menampilkan nama file (tidak bisa mengubah nilai file input)
                         $('#ubah-data').find('#edit-dokumentasi').val(

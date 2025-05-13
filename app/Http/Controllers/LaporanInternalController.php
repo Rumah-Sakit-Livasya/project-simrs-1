@@ -130,10 +130,61 @@ class LaporanInternalController extends Controller
         ]);
     }
 
+    public function update(Request $request, $id)
+    {
+        // Validasi input
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'organization_id' => 'required|exists:organizations,id',
+            'unit_terkait' => 'required|exists:organizations,id',
+            'tanggal' => 'required|date',
+            'jenis' => 'required|in:kendala,kegiatan',
+            'kegiatan' => 'required|string',
+            'status' => 'required|in:diproses,selesai,ditunda,ditolak',
+            'keterangan' => 'required_if:status,ditunda,ditolak|nullable|string',
+            'jam_masuk' => 'nullable',
+            'jam_diterima' => 'nullable',
+            'jam_diproses' => 'nullable',
+            'jam_selesai' => 'nullable',
+            'dokumentasi' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // 2MB max
+        ]);
+
+        // Temukan laporan yang akan diupdate
+        $laporan = LaporanInternal::findOrFail($id);
+
+        // Jika ada file dokumentasi baru
+        if ($request->hasFile('dokumentasi')) {
+            // Hapus file lama jika ada
+            if ($laporan->dokumentasi) {
+                // Ambil path file lama
+                $oldFilePath = public_path('storage/' . $laporan->dokumentasi);
+                if (file_exists($oldFilePath)) {
+                    unlink($oldFilePath); // Hapus file lama
+                }
+            }
+
+            // Simpan file dokumentasi baru
+            $file = $request->file('dokumentasi');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('dokumentasi', $fileName);
+            $validated['dokumentasi'] = Storage::url($path);
+        }
+
+        // Update laporan dengan data yang valid
+        $laporan->update($validated);
+
+        return response()->json([
+            'message' => 'Laporan berhasil diperbarui.',
+            'data' => $laporan
+        ]);
+    }
+
+
     public function list(Request $request)
     {
         $query = LaporanInternal::with('user.employee')->where('organization_id', $request->organization);
-
+        // return dd($query->whereIn('user_id', [0 => 2])->count());
+        // return dd($request->user_id);
         // Apply filters based on request
         if ($request->filled('jenis')) {
             $query->where('jenis', $request->jenis);
@@ -148,8 +199,8 @@ class LaporanInternalController extends Controller
         }
 
         // Filter by user if provided
-        if ($request->filled('user')) {
-            $query->whereIn('user_id', $request->user);
+        if ($request->filled('user_id')) {
+            $query->whereIn('user_id', $request->user_id);
         }
 
         return DataTables::of($query)

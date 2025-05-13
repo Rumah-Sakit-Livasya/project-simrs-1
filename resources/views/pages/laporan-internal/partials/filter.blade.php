@@ -43,11 +43,11 @@
                                 </div>
                                 <div class="col">
                                     <div class="form-group mb-3">
-                                        <label for="user">User</label>
+                                        <label for="filter-user">User</label>
                                         <select class="select3 form-control @error('user') is-invalid @enderror"
-                                            name="user[]" id="user" multiple>
+                                            name="user[]" id="filter-user" multiple>
                                             @foreach ($umum as $employee)
-                                                <option value="{{ $employee->id }}">
+                                                <option value="{{ $employee->user->id }}">
                                                     {{ old('user', $employee->fullname) }}
                                                 </option>
                                             @endforeach
