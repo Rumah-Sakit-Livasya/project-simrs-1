@@ -182,7 +182,6 @@ class LaporanInternalController extends Controller
         return Excel::download(new LaporanHarianExport($tanggal, $jenis), $filename);
     }
 
-
     public function exportWordHarian(Request $request)
     {
         $tanggal = $request->input('tanggal');
@@ -270,7 +269,7 @@ class LaporanInternalController extends Controller
             $table->addCell(5000)->addText($laporan->kegiatan, $rowStyle);
             $table->addCell(3000)->addText(
                 // Cek apakah organisasi user adalah "Informasi Teknologi (IT)"
-                optional($laporan->user->organization)->name == 'Informasi Teknologi (IT)'
+                $organizationName == 'Informasi Teknologi (IT)'
                     ? (
                         $laporan->user->id == 231 ? 'IT Support SIMRS' : ($laporan->user->id == 14 ? 'IT Hardware Networking' : 'IT Programmer Developer')
                     )
@@ -280,7 +279,7 @@ class LaporanInternalController extends Controller
             );
             $table->addCell(2500)->addText(ucfirst($laporan->status), $rowStyle, ['alignment' => 'center']);
             $table->addCell(2500)->addText(ucfirst($laporan->keterangan), $rowStyle, ['alignment' => 'center']);
-            if (optional($laporan->user->employee->organization)->name == 'Informasi Teknologi (IT)') {
+            if ($organizationName == 'Informasi Teknologi (IT)') {
                 $table->addCell(3000)->addText($laporan->jam_masuk ?? '-', $rowStyle, ['alignment' => 'center']);
                 $table->addCell(2000)->addText($laporan->jam_selesai ?? '-', $rowStyle, ['alignment' => 'center']);
             }
