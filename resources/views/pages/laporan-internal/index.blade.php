@@ -737,7 +737,7 @@
                                             <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            @can('delete laporan interal')
+                                            @can('delete laporan internal')
                                                 <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(${data})">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
