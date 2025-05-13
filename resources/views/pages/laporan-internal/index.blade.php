@@ -40,7 +40,7 @@
                 <div class="col-12">
                     <div id="panel-1" class="panel">
                         <div class="panel-hdr">
-                            <h2>Laporan Internal IT</h2>
+                            <h2>Filter Laporan</h2>
                         </div>
                         <div class="panel-container show">
                             <div class="panel-content">
@@ -84,9 +84,7 @@
                                                 <label for="user">User</label>
                                                 <select class="select3 form-control @error('user') is-invalid @enderror"
                                                     name="user[]" id="user" multiple>
-                                                    @foreach (App\Models\Employee::where('is_active', 1)->whereHas('organization', function ($query) {
-                $query->where('name', 'like', '%Informasi Teknologi (IT)%');
-            })->get() as $employee)
+                                                    @foreach ($umum as $employee)
                                                         <option value="{{ $employee->id }}">
                                                             {{ old('user', $employee->fullname) }}
                                                         </option>
@@ -179,10 +177,13 @@
                                                 <th>Jenis</th>
                                                 <th>Uraian</th>
                                                 <th>Status</th>
+                                                <th>Keterangan</th>
                                                 {{-- <th>Dokumentasi</th> --}}
-                                                <th>Jam Masuk</th>
-                                                <th>Jam Diproses</th>
-                                                <th>Respon Time</th>
+                                                @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)')
+                                                    <th>Jam Masuk</th>
+                                                    <th>Jam Diproses</th>
+                                                    <th>Respon Time</th>
+                                                @endif
                                                 <th>User</th>
                                                 <th>Aksi</th>
                                             </tr>
@@ -200,30 +201,40 @@
         <!-- Tambah Laporan Modal -->
         <div class="modal fade" id="tambah-data" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Tambah Laporan Baru</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title">Tambah Laporan Baru</h5>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
                     <form id="form-laporan" enctype="multipart/form-data">
                         <div class="modal-body">
                             @csrf
                             <input type="hidden" name="user_id" value="{{ auth()->id() }}">
+                            <input type="hidden" name="organization_id"
+                                value="{{ auth()->user()->employee->organization_id }}">
 
                             <div class="row mb-3">
-                                <!-- Tanggal -->
-                                <div class="col-md-6">
+                                <!-- Input Tanggal Laporan -->
+                                <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="tanggal" class="font-weight-bold">Tanggal Laporan</label>
-                                        <input type="text" class="form-control datepicker" id="tanggal"
-                                            name="tanggal" required>
+                                        <label class="form-label mb-1 font-weight-normal" for="datepicker-modal-2">Tanggal
+                                            Laproan<i class="text-danger">*</i></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text fs-xl"><i
+                                                        class="fal fa-calendar"></i></span>
+                                            </div>
+                                            <input type="text" id="datepicker-modal-2"
+                                                class="form-control datepicker @error('tanggal') is-invalid @enderror"
+                                                placeholder="Select a date" name="tanggal">
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Jenis Laporan -->
-                                <div class="col-md-6">
+                                <!-- Pilih Jenis Laporan -->
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="jenis" class="font-weight-bold">Jenis Laporan</label>
                                         <select class="form-control select2" id="jenis" name="jenis" required>
@@ -233,14 +244,12 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Organization Field (Hidden by default) -->
-                            <div class="row mb-3">
-                                <div class="col-12" id="organization-field" style="display: none;">
+                                <!-- Pilih Unit (Organisasi) -->
+                                <div class="col-md-4" id="organization-field" style="display: none">
                                     <div class="form-group">
-                                        <label for="organization" class="font-weight-bold">Organisasi Terkait</label>
-                                        <select class="form-control select2" id="organization" name="organization_id">
+                                        <label for="unit_terkait" class="font-weight-bold">Unit</label>
+                                        <select class="form-control select2" id="unit_terkait" name="unit_terkait">
                                             <option value="" selected disabled>Pilih Organisasi</option>
                                             @foreach (\App\Models\Organization::all() as $org)
                                                 <option value="{{ $org->id }}">{{ $org->name }}</option>
@@ -284,31 +293,33 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="font-weight-bold">Timeline</label>
-                                        <div class="timeline-inputs">
-                                            <div class="input-group mb-2">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-light">Masuk</span>
+                                @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)')
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Timeline</label>
+                                            <div class="timeline-inputs">
+                                                <div class="input-group mb-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-light">Masuk</span>
+                                                    </div>
+                                                    <input type="time" class="form-control" name="jam_masuk">
                                                 </div>
-                                                <input type="time" class="form-control" name="jam_masuk">
-                                            </div>
-                                            <div class="input-group mb-2">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-light">Diproses</span>
+                                                <div class="input-group mb-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-light">Diproses</span>
+                                                    </div>
+                                                    <input type="time" class="form-control" name="jam_diproses">
                                                 </div>
-                                                <input type="time" class="form-control" name="jam_diproses">
-                                            </div>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-light">Selesai</span>
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-light">Selesai</span>
+                                                    </div>
+                                                    <input type="time" class="form-control" name="jam_selesai">
                                                 </div>
-                                                <input type="time" class="form-control" name="jam_selesai">
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
                             <div class="row mt-3">
                                 <div class="col">
@@ -504,14 +515,14 @@
                 if ($(this).val() === 'kendala') {
                     $('#organization-field').show();
                     $('#organization').prop('required', true);
-                    $('input[name="organization_id"]').remove();
+                    $('input[name="unit_terkait"]').remove();
                 } else {
                     $('#organization-field').hide();
                     $('#organization').prop('required', false);
-                    if (!$('input[name="organization_id"]').length) {
+                    if (!$('input[name="unit_terkait"]').length) {
                         $('<input>').attr({
                             type: 'hidden',
-                            name: 'organization_id',
+                            name: 'unit_terkait',
                             value: '{{ auth()->user()->employee->organization_id }}'
                         }).appendTo('form');
                     }
@@ -549,6 +560,7 @@
                         d.jenis = $('#jenis').val();
                         d.status = $('#status').val();
                         d.tanggal = $('#datepicker-modal-2').val();
+                        d.organization = {{ auth()->user()->employee->organization->id }};
                     },
                     error: function(xhr) {
                         console.error('DataTables error:', xhr.responseText);
@@ -593,80 +605,88 @@
                         name: 'status',
                         render: function(data) {
                             let badgeClass = 'bg-secondary';
-                            if (data === 'Selesai') badgeClass = 'bg-success';
-                            if (data === 'Diproses') badgeClass = 'bg-primary';
-                            if (data === 'Baru') badgeClass = 'bg-info';
-                            if (data === 'Ditolak') badgeClass = 'bg-danger';
+                            if (data == 'selesai') badgeClass = 'bg-success';
+                            if (data == 'diproses') badgeClass = 'bg-primary';
+                            if (data == 'baru') badgeClass = 'bg-info';
+                            if (data == 'ditolak') badgeClass = 'bg-danger';
                             return `<span class="badge ${badgeClass}">${data}</span>`;
                         }
                     },
                     {
-                        data: 'jam_masuk',
-                        name: 'jam_masuk',
+                        data: 'keterangan',
+                        name: 'keterangan',
                         render: function(data) {
-                            if (!data) return '-';
-                            try {
-                                // Jika format waktu sudah HH:MM:SS
-                                if (typeof data === 'string' && data.match(/^\d{2}:\d{2}:\d{2}$/)) {
-                                    return data;
-                                }
-                                // Jika format timestamp
-                                return new Date(data).toLocaleTimeString('id-ID', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    second: '2-digit',
-                                    hour12: false
-                                });
-                            } catch (e) {
-                                return '<span class="text-warning">Invalid</span>';
-                            }
+                            return data ?? '-';
                         }
                     },
-                    {
-                        data: 'jam_diproses',
-                        name: 'jam_diproses',
-                        render: function(data) {
-                            if (!data) return '-';
-                            try {
-                                if (typeof data === 'string' && data.match(/^\d{2}:\d{2}:\d{2}$/)) {
-                                    return data;
-                                }
-                                return new Date(data).toLocaleTimeString('id-ID', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    second: '2-digit',
-                                    hour12: false
-                                });
-                            } catch (e) {
-                                return '<span class="text-warning">Invalid</span>';
-                            }
-                        }
-                    },
-                    {
-                        data: null,
-                        name: 'respon_time',
-                        render: function(data, type, row) {
-                            // Hitung waktu respon dari jam_masuk ke jam_diproses
-                            if (row.jam_masuk && row.jam_diproses) {
+                    @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)')
+                        {
+                            data: 'jam_masuk',
+                            name: 'jam_masuk',
+                            render: function(data) {
+                                if (!data) return '-';
                                 try {
-                                    const start = this.parseTime(row.jam_masuk);
-                                    const respon = this.parseTime(row.jam_diproses);
-
-                                    if (respon < start) {
-                                        return '<span class="text-danger">Invalid</span>';
+                                    // Jika format waktu sudah HH:MM:SS
+                                    if (typeof data === 'string' && data.match(
+                                            /^\d{2}:\d{2}:\d{2}$/)) {
+                                        return data;
                                     }
-
-                                    const diff = Math.abs(respon - start);
-                                    return this.formatDuration(diff);
+                                    // Jika format timestamp
+                                    return new Date(data).toLocaleTimeString('id-ID', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                        hour12: false
+                                    });
                                 } catch (e) {
-                                    console.error('Error calculating response time:', e);
-                                    return '<span class="text-warning">Error</span>';
+                                    return '<span class="text-warning">Invalid</span>';
                                 }
                             }
-                            return '-';
-                        }
-                    },
-                    {
+                        }, {
+                            data: 'jam_diproses',
+                            name: 'jam_diproses',
+                            render: function(data) {
+                                if (!data) return '-';
+                                try {
+                                    if (typeof data === 'string' && data.match(
+                                            /^\d{2}:\d{2}:\d{2}$/)) {
+                                        return data;
+                                    }
+                                    return new Date(data).toLocaleTimeString('id-ID', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                        hour12: false
+                                    });
+                                } catch (e) {
+                                    return '<span class="text-warning">Invalid</span>';
+                                }
+                            }
+                        }, {
+                            data: null,
+                            name: 'respon_time',
+                            render: function(data, type, row) {
+                                // Hitung waktu respon dari jam_masuk ke jam_diproses
+                                if (row.jam_masuk && row.jam_diproses) {
+                                    try {
+                                        const start = this.parseTime(row.jam_masuk);
+                                        const respon = this.parseTime(row.jam_diproses);
+
+                                        if (respon < start) {
+                                            return '<span class="text-danger">Invalid</span>';
+                                        }
+
+                                        const diff = Math.abs(respon - start);
+                                        return this.formatDuration(diff);
+                                    } catch (e) {
+                                        console.error('Error calculating response time:', e);
+                                        return '<span class="text-warning">Error</span>';
+                                    }
+                                }
+                                return '-';
+                            }
+                        },
+                    @endif {
                         data: 'fullname',
                         name: 'fullname',
                         render: function(data) {

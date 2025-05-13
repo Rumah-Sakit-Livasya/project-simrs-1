@@ -156,7 +156,9 @@ class RegistrationController extends Controller
         // Group doctors by department
         $groupedDoctors = [];
         foreach ($doctors as $doctor) {
-            $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
+            if ($doctor->department_from_doctors->name !== 'UGD') {
+                $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
+            }
         }
 
         $doctorsIGD = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
@@ -389,6 +391,38 @@ class RegistrationController extends Controller
             if ($validatedData['registration_type'] == 'rawat-jalan') {
                 $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $request->penjamin_id)
                     ->where('tarif_registrasi_id', 1)
+                    ->first()->harga;
+
+                // Create billing
+                $billing = Bilingan::create([
+                    'registration_id' => $registration->id,
+                    'patient_id' => $request->patient_id,
+                    'status' => 'belum final',
+                    'wajib_bayar' => $hargaTarifAdmin
+                ]);
+
+                // Add registration fee to billing details
+                $tagihanPasien = TagihanPasien::create([
+                    'user_id' => auth()->user()->id,
+                    'bilingan_id' => $billing->id,
+                    'registration_id' => $registration->id,
+                    'date' => Carbon::now(),
+                    'tagihan' => "[Biaya Administrasi] Rawat Jalan",
+                    // 'detail_tagihan' => $fee->nama_tarif,
+                    'nominal' => $hargaTarifAdmin,
+                    'quantity' => 1,
+                    'harga' => $hargaTarifAdmin,
+                    'wajib_bayar' => $hargaTarifAdmin
+                ]);
+
+
+                BilinganTagihanPasien::create([
+                    'tagihan_pasien_id' => $tagihanPasien->id,
+                    'bilingan_id' => $billing->id,
+                ]);
+            } else if ($validatedData['registration_type'] == 'igd') {
+                $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $request->penjamin_id)
+                    ->where('tarif_registrasi_id', 2) // Masih Statis
                     ->first()->harga;
 
                 // Create billing

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Exports\LaporanHarianExport;
+use App\Models\Employee;
 use App\Models\LaporanInternal;
+use App\Models\Organization;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -35,7 +37,28 @@ class LaporanInternalController extends Controller
             }
         }
 
-        return view('pages.laporan-internal.index');
+        // Ambil parent "Sub Bagian Umum"
+        $parentOrganization = Organization::where('name', 'like', '%Sub Bagian Umum%')->first();
+
+        $umum = [];
+
+        if ($parentOrganization) {
+            // Ambil ID parent dan semua child-nya dalam bentuk asosiatif
+            $units = array_merge(
+                [['id' => $parentOrganization->id, 'name' => $parentOrganization->name]],
+                $parentOrganization->getAllChildAssociative()
+            );
+
+            // Ambil hanya ID saja dari array tersebut
+            $organizationIds = collect($units)->pluck('id')->toArray();
+
+            // Query ke Employee berdasarkan organization_id
+            $umum = Employee::whereIn('organization_id', $organizationIds)
+                ->where('is_active', 1)
+                ->get();
+        }
+
+        return view('pages.laporan-internal.index', compact('umum'));
     }
 
 
@@ -44,6 +67,7 @@ class LaporanInternalController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'organization_id' => 'required|exists:organizations,id',
+            'unit_terkait' => 'required|exists:organizations,id',
             'tanggal' => 'required|date',
             'jenis' => 'required|in:kendala,kegiatan',
             'kegiatan' => 'required|string',
@@ -75,7 +99,7 @@ class LaporanInternalController extends Controller
 
     public function list(Request $request)
     {
-        $query = LaporanInternal::with('user.employee');
+        $query = LaporanInternal::with('user.employee')->where('organization_id', $request->organization);
 
         // Apply filters based on request
         if ($request->filled('jenis')) {
