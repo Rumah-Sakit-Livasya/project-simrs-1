@@ -264,9 +264,9 @@ class LaporanInternalController extends Controller
             if ($laporan->jenis === "kegiatan") {
                 $table->addCell(3000)->addText('Internal', $rowStyle, ['alignment' => 'center']);
             } else {
-                $table->addCell(3000)->addText(Organization::find($laporan->unit_terkait)->name ?? '-', $rowStyle, ['alignment' => 'center']);
+                $table->addCell(3000)->addText($this->convertSymbolsToWords($laporan->getUnitTerkaitName()), $rowStyle, ['alignment' => 'center']);
             }
-            $table->addCell(5000)->addText($laporan->kegiatan, $rowStyle);
+            $table->addCell(5000)->addText($this->convertSymbolsToWords($laporan->kegiatan), $rowStyle);
             $table->addCell(3000)->addText(
                 // Cek apakah organisasi user adalah "Informasi Teknologi (IT)"
                 $organizationName == 'Informasi Teknologi (IT)'
@@ -278,7 +278,7 @@ class LaporanInternalController extends Controller
                 ['alignment' => 'center']
             );
             $table->addCell(2500)->addText(ucfirst($laporan->status), $rowStyle, ['alignment' => 'center']);
-            $table->addCell(2500)->addText(ucfirst($laporan->keterangan), $rowStyle, ['alignment' => 'center']);
+            $table->addCell(2500)->addText(ucfirst($this->convertSymbolsToWords($laporan->keterangan)), $rowStyle, ['alignment' => 'center']);
             if ($organizationName == 'Informasi Teknologi (IT)') {
                 $table->addCell(3000)->addText($laporan->jam_masuk ?? '-', $rowStyle, ['alignment' => 'center']);
                 $table->addCell(2000)->addText($laporan->jam_selesai ?? '-', $rowStyle, ['alignment' => 'center']);
@@ -296,7 +296,6 @@ class LaporanInternalController extends Controller
                 $imageCell->addText('Tidak ada gambar', $rowStyle, ['alignment' => 'center']);
             }
         }
-
         // Save as Word
         $fileName = 'Daily_Report_' . $organizationName . '_' . $tanggal . '.docx';
         header("Content-Description: File Transfer");
@@ -327,5 +326,77 @@ class LaporanInternalController extends Controller
         $laporan->delete();
 
         return response()->json(['message' => 'Laporan berhasil dihapus']);
+    }
+
+
+    /**
+     * Method untuk mengganti simbol dengan kata
+     */
+    private function convertSymbolsToWords($text)
+    {
+        // Daftar simbol yang akan diganti dengan kata
+        $symbolReplacements = [
+            '&' => 'dan',
+            '>' => 'lebih besar dari',
+            '<' => 'lebih kecil dari',
+            '=' => 'sama dengan',
+            '-' => 'minus',
+            '+' => 'plus',
+            '*' => 'kali',
+            '/' => 'dibagi',
+            '%' => 'persen',
+            '^' => 'pangkat',
+            '√' => 'akar kuadrat',
+            '∞' => 'tak terhingga',
+            '≈' => 'perkiraan',
+            '≠' => 'tidak sama dengan',
+            '≤' => 'lebih kecil atau sama dengan',
+            '≥' => 'lebih besar atau sama dengan',
+            '±' => 'plus-minus',
+            '≡' => 'identik',
+            '∑' => 'jumlah',
+            'π' => 'pi',
+            '€' => 'Euro',
+            '$' => 'Dollar',
+            '£' => 'Pound',
+            '¥' => 'Yen',
+            '₹' => 'Rupee',
+            '°' => 'derajat',
+            '✔' => 'centang',
+            '✘' => 'silang',
+            '♠' => 'Pik',
+            '♥' => 'Hati',
+            '♦' => 'Wajik',
+            '♣' => 'Kelopak',
+            '✈' => 'Pesawat',
+            '★' => 'Bintang',
+            '☀' => 'Matahari',
+            '☁' => 'Awan',
+            '☂' => 'Payung',
+            '⚡' => 'Petir',
+            '✿' => 'Bunga',
+            '☃' => 'Salju',
+            '♪' => 'Musik',
+            '♫' => 'Notasi Musik',
+            '☠' => 'Tengkorak',
+            '♻' => 'Daur Ulang',
+            '⚙' => 'Gear',
+            '⚖' => 'Keadilan',
+            '⚔' => 'Pedang',
+            '⚰' => 'Peti Mati',
+            '✉' => 'Surat',
+            '✂' => 'Gunting',
+            '⚒' => 'Palang',
+            '⚓' => 'Jangkar',
+            '⚔' => 'Pertempuran',
+            '✏' => 'Pensil',
+            '✍' => 'Menulis',
+            '☮' => 'Damai',
+            '☯' => 'Yin Yang',
+            '✡' => 'Bintang David',
+        ];
+
+        // Ganti simbol-simbol di dalam teks dengan kata yang sesuai
+        return strtr($text, $symbolReplacements);
     }
 }
