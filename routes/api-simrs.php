@@ -9,6 +9,7 @@ use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
+use App\Http\Controllers\WarehouseBarangNonFarmasiController;
 use App\Http\Controllers\WarehouseGolonganBarangController;
 use App\Http\Controllers\WarehouseKategoriBarangController;
 use App\Http\Controllers\WarehouseKelompokBarangController;
@@ -200,6 +201,12 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post('/store', [WarehouseSupplierController::class, 'store'])->name('warehouse.master-data.supplier.store');
                 Route::put('/update/{id}/', [WarehouseSupplierController::class, 'update'])->name('warehouse.master-data.supplier.update');
                 Route::delete('/destroy/{id}/', [WarehouseSupplierController::class, 'destroy'])->name('warehouse.master-data.supplier.destroy');
+            });
+
+            Route::prefix("barang-non-farmasi")->group(function () {
+                Route::post('/store', [WarehouseBarangNonFarmasiController::class, 'store'])->name('warehouse.master-data.barang-non-farmasi.store');
+                Route::put('/update/{id}/', [WarehouseBarangNonFarmasiController::class, 'update'])->name('warehouse.master-data.barang-non-farmasi.update');
+                Route::delete('/destroy/{id}/', [WarehouseBarangNonFarmasiController::class, 'destroy'])->name('warehouse.master-data.barang-non-farmasi.destroy');
             });
         });
     });

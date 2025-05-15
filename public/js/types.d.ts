@@ -426,4 +426,14 @@ interface OrderGizi {
     foods: OrderMakananGizi[];
 }
 
+interface Satuan {
+    id: number;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+    kode: string;
+    nama: string;
+    aktif: number;
+}
+
 type PatientType = "rajal" | "ranap" | "otc";
