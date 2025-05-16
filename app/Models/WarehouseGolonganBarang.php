@@ -18,4 +18,9 @@ class WarehouseGolonganBarang extends Model implements AuditableContract
     {
         return $this->hasMany(WarehouseBarangNonFarmasi::class, "golongan_id", "id");
     }
+
+        public function barang_farmasi()
+    {
+        return $this->hasMany(WarehouseBarangFarmasi::class, "golongan_id", "id");
+    }
 }

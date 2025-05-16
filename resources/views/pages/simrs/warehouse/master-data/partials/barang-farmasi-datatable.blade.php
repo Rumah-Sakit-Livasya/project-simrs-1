@@ -15,7 +15,7 @@
         <div id="panel-1" class="panel">
             <div class="panel-hdr">
                 <h2>
-                    Daftar <span class="fw-300"><i>Barang Non Farmasi</i></span>
+                    Daftar <span class="fw-300"><i>Barang Farmasi</i></span>
                 </h2>
             </div>
             <div class="panel-container show">

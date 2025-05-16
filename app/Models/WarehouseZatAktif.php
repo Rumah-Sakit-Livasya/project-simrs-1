@@ -13,4 +13,9 @@ class WarehouseZatAktif extends Model implements AuditableContract
 
     protected $table = "warehouse_zat_aktif";
     protected $guarded = ["id"];
+
+    public function zat_barang_farmasi()
+    {
+        return $this->hasMany(WarehouseZatAktifBarangFarmasi::class, "zat_id", "id");
+    }
 }

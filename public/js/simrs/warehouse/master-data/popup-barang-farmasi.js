@@ -5,7 +5,7 @@
 // @ts-ignore
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
-class PopupBarangNonFarmasiHandler {
+class PopupBarangFarmasiHandler {
 
     /**
      * @type {Satuan[]}
@@ -20,7 +20,7 @@ class PopupBarangNonFarmasiHandler {
     /**
      * @type {JQuery<HTMLElement>}
      */
-    #PPNPrev;    
+    #PPNPrev;
 
     /**
      * @type {number[]}
@@ -50,7 +50,7 @@ class PopupBarangNonFarmasiHandler {
      * On Harga Beli input change
      * @param {Event} event 
      */
-    #onHNAChange(event){
+    #onHNAChange(event) {
         const input = /** @type {HTMLInputElement} */ (event.target);
         this.HNA = parseInt(input.value);
         this.calculatePPNPrev();
@@ -60,13 +60,13 @@ class PopupBarangNonFarmasiHandler {
      * On PPN input change
      * @param {Event} event 
      */
-    #onPPNChange(event){
+    #onPPNChange(event) {
         const input = /** @type {HTMLInputElement} */ (event.target);
         this.PPN = parseInt(input.value);
         this.calculatePPNPrev();
     }
 
-    calculatePPNPrev(){
+    calculatePPNPrev() {
         const Prev = this.HNA + (this.HNA * this.PPN / 100);
         this.#PPNPrev.val(Prev);
     }
@@ -133,7 +133,7 @@ class PopupBarangNonFarmasiHandler {
                 </td>
                 <td>
                     <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                        title="Hapus" onclick="PopupBarangNonFarmasiClass.deleteSatuanTambahan(${key})"></a>
+                        title="Hapus" onclick="PopupBarangFarmasiClass.deleteSatuanTambahan(${key})"></a>
                 </td>
             </tr>
         `.trim();
@@ -168,7 +168,7 @@ class PopupBarangNonFarmasiHandler {
      * Appends options on satuan tambahan select
      * @param {{value: number, text: string}[]} options 
      */
-    #appendOptionsToSatuanTambahanSelect(options){
+    #appendOptionsToSatuanTambahanSelect(options) {
         this.#SatuanTambahanSelect.find('option:not(:first)').remove();
         const SelectElement = this.#SatuanTambahanSelect;
         $.each(options, function (index, option) {
@@ -216,4 +216,4 @@ class PopupBarangNonFarmasiHandler {
 
 }
 
-const PopupBarangNonFarmasiClass = new PopupBarangNonFarmasiHandler();
+const PopupBarangFarmasiClass = new PopupBarangFarmasiHandler();

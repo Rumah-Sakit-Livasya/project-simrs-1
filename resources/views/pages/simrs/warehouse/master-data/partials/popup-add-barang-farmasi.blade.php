@@ -1,5 +1,5 @@
 @extends('inc.layout-no-side')
-@section('title', 'Edit barang non farmasi')
+@section('title', 'Tambah barang farmasi')
 @section('extended-css')
     <style>
         .display-none {
@@ -34,17 +34,14 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Edit barang non farmasi
+                            Tambah barang farmasi
                         </h2>
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form
-                                action="{{ route('warehouse.master-data.barang-non-farmasi.update', ['id' => $barang->id]) }}"
-                                method="post">
+                            <form action="{{ route('warehouse.master-data.barang-farmasi.store') }}" method="post">
                                 @csrf
-                                @method('put')
-                                <input type="hidden" name="id" value="{{ $barang->id }}">
+                                @method('post')
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
                                         <div class="form-group">
@@ -60,9 +57,7 @@
                                                         <option value="" selected disabled hidden>Pilih Kategori
                                                         </option>
                                                         @foreach ($kategoris as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ $barang->kategori_id == $item->id ? 'selected' : '' }}>
-                                                                {{ $item->nama }}</option>
+                                                            <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -79,7 +74,7 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->hna }}"
+                                                    <input type="text" value="{{ old('hna') ? old('hna') : 0 }}"
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="hna" name="hna"
                                                         onkeyup="formatInputToNumber(this)" required>
@@ -102,7 +97,7 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->kode }}"
+                                                    <input type="text" value="{{ old('kode') }}"
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="kode" name="kode" required>
                                                 </div>
@@ -119,7 +114,7 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl-2">
-                                                    <input type="text" value="{{ $barang->ppn }}"
+                                                    <input type="text" value="{{ old('ppn') ? old('ppn') : 0 }}"
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="ppn" name="ppn"
                                                         onkeyup="formatInputToNumber(this)">
@@ -147,12 +142,125 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->nama }}"
+                                                    <input type="text" value="{{ old('nama') }}"
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="nama" name="nama" required>
                                                     @error('nama')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="ppn_rajal">
+                                                        PPN Jual Rawat Jalan (%)
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <input type="text"
+                                                        value="{{ old('ppn_rajal') ? old('ppn_rajal') : 0 }}"
+                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
+                                                        class="form-control" id="ppn_rajal" name="ppn_rajal"
+                                                        onkeyup="formatInputToNumber(this)">
+                                                    @error('ppn_rajal')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row justify-content-center">
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="golongan_id">
+                                                        Golongan*
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <select name="golongan_id" id="golongan_id" class="form-control">
+                                                        <option value="" selected disabled hidden>Pilih Golongan
+                                                        </option>
+                                                        @foreach ($golongans as $item)
+                                                            <option value="{{ $item->id }}">{{ $item->nama }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="ppn_ranap">
+                                                        PPN Jual Rawat Inap (%)
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <input type="text"
+                                                        value="{{ old('ppn_ranap') ? old('ppn_ranap') : 0 }}"
+                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
+                                                        class="form-control" id="ppn_ranap" name="ppn_ranap"
+                                                        onkeyup="formatInputToNumber(this)">
+                                                    @error('ppn_ranap')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row justify-content-center">
+                                    <div class="col-xl-6">
+                                        {{-- /// --}}
+                                    </div>
+
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="tipe">
+                                                        Tipe Barang*
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <select name="tipe" id="tipe" class="form-control" required>
+                                                        <option value="" selected disabled hidden>Pilih tipe barang
+                                                        </option>
+                                                        <option value="FN">Formularium Nasional</option>
+                                                        <option value="NFN">Non Formularium Nasional</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row justify-content-center">
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="principal">
+                                                        Principal
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <input type="text" value="{{ old('principal') }}"
+                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
+                                                        class="form-control" id="principal" name="principal">
                                                 </div>
                                             </div>
                                         </div>
@@ -186,8 +294,56 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="exp">
+                                                        Info expired
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <select name="exp" id="exp" class="form-control">
+                                                        <option value="" selected hidden disabled>Pilih info expired
+                                                        </option>
+                                                        <option value="1w">1 minggu</option>
+                                                        <option value="2w">2 minggu</option>
+                                                        <option value="3w">3 minggu</option>
+                                                        <option value="1mo">1 bulan</option>
+                                                        <option value="2mo">2 bulan</option>
+                                                        <option value="3mo">3 bulan</option>
+                                                        <option value="6mo">6 bulan</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="zat_aktif">
+                                                        Zat Aktif
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <select class="form-control select2 w-100" id="zat_aktif"
+                                                        name="zat_aktif[]" multiple="multiple">
+                                                        @foreach ($zats as $zat)
+                                                            <option value="{{ $zat->id }}">{{ $zat->nama }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row justify-content-center">
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
                                                     <label class="form-label text-end" for="satuan_id">
-                                                        Satuan Default
+                                                        Satuan Default*
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
@@ -196,9 +352,7 @@
                                                         <option value="" selected disabled hidden>Pilih Satuan
                                                         </option>
                                                         @foreach ($satuans as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ $barang->satuan_id == $item->id ? 'selected' : '' }}>
-                                                                {{ $item->nama }}
+                                                            <option value="{{ $item->id }}">{{ $item->nama }}
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -211,20 +365,14 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="golongan_id">
-                                                        Golongan
+                                                    <label class="form-label text-end" for="aktif">
+                                                        Aktif?
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select name="golongan_id" id="golongan_id" class="form-control">
-                                                        <option value="" selected disabled hidden>Pilih Golongan
-                                                        </option>
-                                                        @foreach ($golongans as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ $item->id == $barang->golongan_id ? 'selected' : '' }}>
-                                                                {{ $item->nama }}
-                                                            </option>
-                                                        @endforeach
+                                                    <select name="aktif" id="aktif" class="form-control">
+                                                        <option value="1" selected>Aktif</option>
+                                                        <option value="0">Non Aktif</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -262,83 +410,10 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody id="table-satuan">
-                                                            <script>
-                                                                const tempIds = [];
-                                                            </script>
-                                                            @foreach ($barang->satuan_tambahan as $satuan)
-                                                                <script>
-                                                                    tempIds.push({{ $satuan->satuan->id }})
-                                                                </script>
-                                                                <tr id="satuan{{ $loop->iteration }}"
-                                                                    data-index={{ $loop->iteration - 1 }}>
-                                                                    <td>{{ $satuan->satuan->nama }}</td>
-                                                                    <td>
-                                                                        <input type="hidden"
-                                                                            name="satuans_id[{{ $loop->iteration }}]"
-                                                                            value="{{ $satuan->satuan->id }}">
-                                                                        <input type="number"
-                                                                            name="satuans_jumlah[{{ $loop->iteration }}]"
-                                                                            value="{{ $satuan->isi }}"
-                                                                            class="form-control" min="1">
-                                                                    </td>
-                                                                    <td>
-                                                                        <input type="checkbox"
-                                                                            name="satuans_status[{{ $loop->iteration }}]"
-                                                                            value="1" title="Aktif?" checked>
-                                                                    </td>
-                                                                    <td>
-                                                                        <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                                                                            title="Hapus"
-                                                                            onclick="PopupBarangNonFarmasiClass.deleteSatuanTambahan({{ $loop->iteration }})"></a>
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
+
                                                         </tbody>
                                                     </table>
 
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="aktif">
-                                                        Aktif?
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="aktif" id="aktif" class="form-control">
-                                                        <option value="1"
-                                                            {{ $barang->aktif == 1 ? 'selected' : '' }}>Aktif</option>
-                                                        <option value="0"
-                                                            {{ $barang->aktif == 0 ? 'selected' : '' }}>Non Aktif</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row justify-content-center">
-                                    <div class="col-xl-6">
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="jual_pasien">
-                                                        Bisa dijual ke pasien?
-                                                    </label>
-                                                </div>
-                                                <div class="col-xl">
-                                                    <select name="jual_pasien" id="jual_pasien" class="form-control">
-                                                        <option value="1"
-                                                            {{ $barang->jual_pasien == 1 ? 'selected' : '' }}>Bisa</option>
-                                                        <option value="0"
-                                                            {{ $barang->jual_pasien == 0 ? 'selected' : '' }}>Tidak
-                                                        </option>
-                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -353,7 +428,95 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <textarea name="keterangan" class="form-control" id="keterangan">{{ $barang->keterangan }}</textarea>
+                                                    <textarea name="keterangan" class="form-control" id="keterangan">{{ old('keterangan') }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row justify-content-center">
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="harga_principal">
+                                                        Harga Principal
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <input type="text"
+                                                        value="{{ old('harga_principal') ? old('harga_principal') : 0 }}"
+                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
+                                                        class="form-control" id="harga_principal" name="harga_principal"
+                                                        onkeyup="formatInputToNumber(this)">
+                                                    @error('harga_principal')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="diskon_principal">
+                                                        Diskon Principal (%)
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <input type="text"
+                                                        value="{{ old('diskon_principal') ? old('diskon_principal') : 0 }}"
+                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
+                                                        class="form-control" id="diskon_principal"
+                                                        name="diskon_principal" onkeyup="formatInputToNumber(this)">
+                                                    @error('diskon_principal')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row justify-content-center">
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="jenis_obat">
+                                                        Jenis Obat
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <select name="jenis_obat" id="jenis_obat" class="form-control">
+                                                        <option value="" selected disabled hidden>Pilih Jenis Obat
+                                                        </option>
+                                                        <option value="generik">Generik</option>
+                                                        <option value="paten">Paten</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xl-6">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="formularium">
+                                                        Formularium
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <select name="formularium" id="formularium" class="form-control">
+                                                        <option value="" selected disabled hidden>Pilih Formularium
+                                                        </option>
+                                                        <option value="RS">Formularium Rumah Sakit</option>
+                                                        <option value="NRS">Formularium Non Rumah Sakit</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -401,14 +564,5 @@
             $("select").select2();
         });
     </script>
-    <script src="{{ asset('js/simrs/warehouse/master-data/popup-barang-non-farmasi.js') }}?v={{ time() }}">
-    </script>
-    <script>
-        PopupBarangNonFarmasiClass.SelectedSatuanId = {{ $barang->satuan_id }};
-        PopupBarangNonFarmasiClass.HNA = {{ $barang->hna }};
-        PopupBarangNonFarmasiClass.PPN = {{ $barang->ppn }};
-        PopupBarangNonFarmasiClass.calculatePPNPrev();
-        PopupBarangNonFarmasiClass.SelectedSatuanTambahanIds = [...tempIds];
-        PopupBarangNonFarmasiClass.refreshSatuanTambahanSelect();
-    </script>
+    <script src="{{ asset('js/simrs/warehouse/master-data/popup-barang-farmasi.js') }}?v={{ time() }}"></script>
 @endsection

@@ -67,6 +67,7 @@ use App\Http\Controllers\SIMRS\Warehouse\RevaluasiStokController;
 use App\Http\Controllers\SIMRS\Warehouse\StockRequestController;
 use App\Http\Controllers\SIMRS\Warehouse\UnitCostController;
 use App\Http\Controllers\SIMRS\Warehouse\WarehouseController;
+use App\Http\Controllers\WarehouseBarangFarmasiController;
 use App\Http\Controllers\WarehouseBarangNonFarmasiController;
 use App\Http\Controllers\WarehouseGolonganBarangController;
 use App\Http\Controllers\WarehouseKategoriBarangController;
@@ -254,6 +255,12 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('/', [WarehouseBarangNonFarmasiController::class, 'index'])->name('warehouse.master-data.barang-non-farmasi');
                     Route::get('/create', [WarehouseBarangNonFarmasiController::class, 'create'])->name('warehouse.master-data.barang-non-farmasi.create');
                     Route::get('/edit/{id}', [WarehouseBarangNonFarmasiController::class, 'edit'])->name('warehouse.master-data.barang-non-farmasi.edit');
+                });
+
+                Route::prefix('barang-farmasi')->group(function () {
+                    Route::get('/', [WarehouseBarangFarmasiController::class, 'index'])->name('warehouse.master-data.barang-farmasi');
+                    Route::get('/create', [WarehouseBarangFarmasiController::class, 'create'])->name('warehouse.master-data.barang-farmasi.create');
+                    Route::get('/edit/{id}', [WarehouseBarangFarmasiController::class, 'edit'])->name('warehouse.master-data.barang-farmasi.edit');
                 });
             });
         });
