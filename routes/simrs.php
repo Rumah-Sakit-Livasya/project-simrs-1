@@ -75,6 +75,7 @@ use App\Http\Controllers\WarehouseKelompokBarangController;
 use App\Http\Controllers\WarehouseMasterGudangController;
 use App\Http\Controllers\WarehousePabrikController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
+use App\Http\Controllers\WarehouseSetupMinMaxStockController;
 use App\Http\Controllers\WarehouseSupplierController;
 use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\SIMRS\Registration;
@@ -262,6 +263,8 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('/create', [WarehouseBarangFarmasiController::class, 'create'])->name('warehouse.master-data.barang-farmasi.create');
                     Route::get('/edit/{id}', [WarehouseBarangFarmasiController::class, 'edit'])->name('warehouse.master-data.barang-farmasi.edit');
                 });
+                Route::get('setup-min-max-stock', [WarehouseSetupMinMaxStockController::class, 'index'])->name('warehouse.master-data.setup-min-max-stock');
+                Route::get('setup-min-max-stock/setup', [WarehouseSetupMinMaxStockController::class, 'create'])->name('warehouse.master-data.setup-min-max-stock.create');
             });
         });
 

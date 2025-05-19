@@ -18,19 +18,28 @@ class WarehouseBarangNonFarmasi extends Model implements AuditableContract
         return $this->belongsTo(WarehouseSatuanBarang::class, "satuan_id", "id");
     }
 
-    public function kategori(){
-        return $this->belongsTo(WarehouseKategoriBarang::class,"kategori_id","id");
+    public function kategori()
+    {
+        return $this->belongsTo(WarehouseKategoriBarang::class, "kategori_id", "id");
     }
 
-    public function golongan(){
-        return $this->belongsTo(WarehouseGolonganBarang::class,"golongan_id","id");
+    public function golongan()
+    {
+        return $this->belongsTo(WarehouseGolonganBarang::class, "golongan_id", "id");
     }
 
-    public function kelompok(){
-        return $this->belongsTo(WarehouseKelompokBarang::class,"kelompok_id","id");
+    public function kelompok()
+    {
+        return $this->belongsTo(WarehouseKelompokBarang::class, "kelompok_id", "id");
     }
 
-    public function satuan_tambahan(){
-        return $this->hasMany(WarehouseSatuanTambahanBarangNonFarmasi::class,"barang_id","id");
+    public function satuan_tambahan()
+    {
+        return $this->hasMany(WarehouseSatuanTambahanBarangNonFarmasi::class, "barang_id", "id");
+    }
+
+    public function smms()
+    {
+        return $this->hasMany(WarehouseSetupMinMaxStock::class, "barang_nf_id", "id");
     }
 }

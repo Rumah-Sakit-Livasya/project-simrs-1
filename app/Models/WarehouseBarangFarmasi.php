@@ -42,4 +42,9 @@ class WarehouseBarangFarmasi extends Model implements AuditableContract
     {
         return $this->hasMany(WarehouseZatAktifBarangFarmasi::class, "barang_id", "id");
     }
+
+    public function smms()
+    {
+        return $this->hasMany(WarehouseSetupMinMaxStock::class, "barang_f_id", "id");
+    }
 }

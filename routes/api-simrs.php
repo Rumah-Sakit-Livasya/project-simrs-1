@@ -17,6 +17,7 @@ use App\Http\Controllers\WarehouseKelompokBarangController;
 use App\Http\Controllers\WarehouseMasterGudangController;
 use App\Http\Controllers\WarehousePabrikController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
+use App\Http\Controllers\WarehouseSetupMinMaxStockController;
 use App\Http\Controllers\WarehouseSupplierController;
 use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\OrderParameterLaboratorium;
@@ -214,6 +215,16 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post('/store', [WarehouseBarangFarmasiController::class, 'store'])->name('warehouse.master-data.barang-farmasi.store');
                 Route::put('/update/{id}/', [WarehouseBarangFarmasiController::class, 'update'])->name('warehouse.master-data.barang-farmasi.update');
                 Route::delete('/destroy/{id}/', [WarehouseBarangFarmasiController::class, 'destroy'])->name('warehouse.master-data.barang-farmasi.destroy');
+            });
+
+            Route::prefix("setup-min-max-stock")->group(function () {
+                Route::post('/store', [WarehouseSetupMinMaxStockController::class, 'store'])->name('warehouse.master-data.setup-min-max-stock.store');
+                // Route::put('/update/{id}/', [WarehouseSetupMinMaxStockController::class, 'update'])->name('warehouse.master-data.setup-min-max-stock.update');
+                // Route::delete('/destroy/{id}/', [WarehouseSetupMinMaxStockController::class, 'destroy'])->name('warehouse.master-data.setup-min-max-stock.destroy');
+
+                Route::prefix("get")->group(function () {
+                    Route::get('/gudang/{id}/', [WarehouseSetupMinMaxStockController::class, 'get_gudang'])->name('warehouse.master-data.setup-min-max-stock.get.gudang');
+                });
             });
         });
     });

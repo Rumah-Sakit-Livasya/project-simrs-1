@@ -436,4 +436,72 @@ interface Satuan {
     aktif: number;
 }
 
+interface BarangFarmasi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    kode: string;
+    keterangan: string | null;
+    hna: number;
+    ppn: number;
+    ppn_rajal: number;
+    ppn_ranap: number;
+    tipe: "FN" | "NFN";
+    formularium: "RS" | "NRS";
+    jenis_obat: "paten" | "generik" | null;
+    exp: "1w" | "2w" | "3w" | "1mo" | "2mo" | "3mo" | "6mo" | null;
+    aktif: boolean;
+    kategori_id: number;
+    golongan_id: number | null;
+    kelompok_id: number | null;
+    satuan_id: number;
+    principal: string | null;
+    harga_principal: number | null;
+    diskon_principal: number | null;
+}
+
+interface BarangNonFarmasi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    kode: string;
+    keterangan: string | null;
+    hna: number;
+    ppn: number;
+    aktif: boolean;
+    jual_pasien: boolean;
+    kategori_id: number;
+    golongan_id: number | null;
+    kelompok_id: number | null;
+    satuan_id: number;
+}
+
+interface MasterGudang {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    cost_center: string;
+    apotek: boolean;
+    warehouse: boolean;
+    aktif: boolean;
+}
+
+interface MinMaxStock {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    barang_f_id: number;
+    barang_nf_id: number;
+    gudang_id: number;
+    min: number;
+    max: number;
+}
+
 type PatientType = "rajal" | "ranap" | "otc";

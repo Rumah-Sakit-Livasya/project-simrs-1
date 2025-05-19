@@ -13,4 +13,8 @@ class WarehouseMasterGudang extends Model implements AuditableContract
 
     protected $table = "warehouse_master_gudang";
     protected $guarded = ['id'];
+
+    public function smms(){
+        return $this->hasMany(WarehouseSetupMinMaxStock::class, 'gudang_id','id');
+    }
 }
