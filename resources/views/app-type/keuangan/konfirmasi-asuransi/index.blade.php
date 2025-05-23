@@ -296,13 +296,13 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Detail</th>
-                                        <th>Tgl</th>
+                                        <th>Tgl. AR</th>
                                         <th>No. Invoice</th>
                                         <th>Penjamin</th>
                                         <th>Jumlah</th>
                                         <th>Discount</th>
                                         <th>Keterangan</th>
-                                        <th>Aksi</th>
+                                        <th>fungsi</th>
                                     </tr>
                                 </thead>
                                 <!-- Pastikan struktur HTML memiliki format yang benar: parent row diikuti langsung oleh child row -->
@@ -311,12 +311,15 @@
                                         <tr class="parent-row" data-id="{{ $konfirmasi->id }}">
                                             <td class="text-center">{{ $loop->iteration }}</td>
                                             <td class="control-details">
-                                                <i class='bx bxs-down-arrow'></i>
+                                                <button type="button" class="btn btn-sm btn-outline-primary toggle-detail">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </button>
                                             </td>
-                                            <td>{{ $konfirmasi->tanggal->format('d/m/Y') }}</td>
+                                            <td>{{ $konfirmasi->tanggal }}</td>
                                             <td>{{ $konfirmasi->invoice }}</td>
                                             <td>{{ $konfirmasi->penjamin->nama_perusahaan }}</td>
-                                            <td class="text-right">{{ number_format($konfirmasi->jumlah, 0, ',', '.') }}
+                                            <td class="text-right">
+                                                {{ 'Rp ' . number_format($konfirmasi->jumlah ?? 0, 2, ',', '.') }}
                                             </td>
                                             <td class="text-right">{{ number_format($konfirmasi->discount, 0, ',', '.') }}
                                             </td>
@@ -340,18 +343,26 @@
                                                     <i class="fal fa-file-alt"></i>
                                                 </a>
 
-                                                <button type="button" class="btn btn-danger btn-xs delete-btn"
-                                                    data-id="{{ $konfirmasi->id }}" data-toggle="tooltip"
-                                                    title="Hapus">
-                                                    <i class="fal fa-trash"></i>
-                                                </button>
+                                                <form
+                                                    action="{{ route('keuangan.konfirmasi-asuransi.destroy', $konfirmasi->id) }}"
+                                                    method="POST"
+                                                    onsubmit="return confirm('Yakin ingin menghapus data konfirmasi ini?')"
+                                                    style="display: inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                        title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+
                                             </td>
                                         </tr>
                                         <tr class="child-row text-center" data-parent="{{ $konfirmasi->id }}">
                                             <td colspan="9">
                                                 <div>
-                                                    <table class="table table-sm table-bordered child-table">
-                                                        <thead>
+                                                    <table class="table table-sm table-bordered bg-light child-table">
+                                                        <thead class="thead-light">
                                                             <tr>
                                                                 <th>No. RM</th>
                                                                 <th>Nama Pasien</th>
@@ -380,12 +391,14 @@
                                                                     </td>
 
                                                                     <td class="text-right">
-                                                                        {{ number_format($konfirmasi->jumlah, 0, ',', '.') }}
+                                                                        {{ 'Rp ' . number_format($konfirmasi->jumlah ?? 0, 2, ',', '.') }}
                                                                     </td>
+
                                                                     <td>
-                                                                        <a href="#" target="_blank"
-                                                                            class="btn btn-xs btn-primary">
-                                                                            <i class="fal fa-print"></i> Cetak Klaim
+                                                                        <a href="{{ route('cetak-klaim', $konfirmasi->id) }}"
+                                                                            class="btn btn-xs btn-primary" target="_blank"
+                                                                            data-toggle="tooltip" title="Cetak Klaim">
+                                                                            <i class="fal fa-print"></i>
                                                                         </a>
                                                                     </td>
                                                                 </tr>
@@ -588,80 +601,6 @@
 
 
             // Delete confirmation handler
-            $(document).ready(function() {
-                // Inisialisasi lainnya...
-
-                // Fungsi Delete yang sudah dijamin bekerja
-                $(document).on('click', '.delete-btn', function(e) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation(); // Menghentikan semua event lainnya
-
-                    const id = $(this).data('id');
-                    const url = "{{ route('keuangan.konfirmasi-asuransi.destroy', ':id') }}"
-                        .replace(':id', id);
-
-                    Swal.fire({
-                        title: 'Apakah Anda yakin?',
-                        text: "Data konfirmasi asuransi akan dihapus!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'Ya, hapus!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Tampilkan loading
-                            Swal.fire({
-                                title: 'Menghapus...',
-                                allowOutsideClick: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
-                                }
-                            });
-
-                            // AJAX Delete
-                            $.ajax({
-                                url: url,
-                                type: 'POST',
-                                data: {
-                                    _method: 'DELETE',
-                                    _token: '{{ csrf_token() }}'
-                                },
-                                success: function(response) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Berhasil!',
-                                        text: response.success ||
-                                            'Data berhasil dihapus',
-                                        timer: 1500,
-                                        showConfirmButton: false
-                                    }).then(() => {
-                                        location.reload();
-                                    });
-                                },
-                                error: function(xhr) {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Gagal!',
-                                        text: xhr.responseJSON?.error ||
-                                            'Terjadi kesalahan'
-                                    });
-                                }
-                            });
-                        }
-                    });
-                });
-
-                // Pastikan event handler toggle child-row tidak mengganggu
-                $(document).on('click', 'td.control-details', function(e) {
-                    if ($(e.target).hasClass('delete-btn') || $(e.target).closest('.delete-btn')
-                        .length) {
-                        return;
-                    }
-                    // Kode toggle child-row yang sudah ada...
-                });
-            });
 
 
 

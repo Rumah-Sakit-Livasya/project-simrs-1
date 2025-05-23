@@ -11,8 +11,8 @@
         </div>
         <div class="report-info">
             Penjamin:
-            @if (request('penjamin_id') && $query->isNotEmpty())
-                {{ optional($query->first()->penjamin)->nama_perusahaan ?? '-' }}
+            @if (request('penjamin_id') && $data->isNotEmpty())
+                {{ optional($data->first()->penjamin)->nama_perusahaan ?? '-' }}
             @else
                 Semua Penjamin
             @endif
@@ -36,7 +36,9 @@
             </tr>
         </thead>
         <tbody>
-            @forelse ($query as $index => $item)
+            @php $total = 0; @endphp
+            @forelse ($data as $index => $item)
+                @php $total += $item->jumlah; @endphp
                 <tr>
                     <td class="center">{{ $index + 1 }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
@@ -57,5 +59,11 @@
                 </tr>
             @endforelse
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="10" class="right"><strong>Total Seluruh Tagihan</strong></td>
+                <td class="right"><strong>{{ number_format($total, 0, ',', '.') }}</strong></td>
+            </tr>
+        </tfoot>
     </table>
 @endsection

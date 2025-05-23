@@ -28,13 +28,20 @@ class TindakanMedis extends Model
         return $this->belongsTo(GrupTindakanMedis::class);
     }
 
+    public function tarifTindakan()
+    {
+        return $this->hasMany(TarifTindakanMedis::class);
+    }
+
     public function tarifTindakanMedis($groupPenjaminId, $kelasRawatId)
     {
-        return TarifTindakanMedis::where('tindakan_medis_id', $this->id)
+        return $this->tarifTindakan()
             ->where('group_penjamin_id', $groupPenjaminId)
             ->where('kelas_rawat_id', $kelasRawatId)
             ->first();
     }
+
+
 
     public function getTotalTarif($groupPenjaminId, $kelasRawatId)
     {

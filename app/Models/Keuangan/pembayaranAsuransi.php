@@ -3,6 +3,7 @@
 namespace App\Models\Keuangan;
 
 use App\Models\Keuangan\PembayaranAsuransiDetail;
+use App\Models\PembayaranAsuransiDetail as ModelsPembayaranAsuransiDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -15,6 +16,7 @@ class PembayaranAsuransi extends Model
     protected $fillable = [
         'nomor_transaksi',
         'tanggal',
+        'tanggal_jurnal',
         'penjamin_id',
         'bank_id',
         'jumlah',
@@ -52,5 +54,10 @@ class PembayaranAsuransi extends Model
     public function details()
     {
         return $this->hasMany(PembayaranAsuransiDetail::class, 'pembayaran_asuransi_id');
+    }
+
+    public function konfirmasiAsuransi()
+    {
+        return $this->hasMany(KonfirmasiAsuransi::class, 'pembayaran_id');
     }
 }

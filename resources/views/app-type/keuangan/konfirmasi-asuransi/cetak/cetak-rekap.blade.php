@@ -1,21 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('app-type.keuangan.konfirmasi-asuransi.cetak.template')
 
-<head>
-    <meta charset="UTF-8">
-    <title>Laporan Rekap Konfirmasi Asuransi</title>
+@section('title', 'Laporan Rekap Konfirmasi Asuransi')
+
+@section('style')
     <style>
-        @page {
-            size: landscape;
-            margin: 1cm;
-        }
-
-        body {
-            font-family: sans-serif;
-            font-size: 12px;
-            color: #000;
-        }
-
         .header-container {
             position: relative;
             display: flex;
@@ -36,8 +24,8 @@
 
         .invoice-number {
             position: absolute;
-            top: 0;
-            right: 0;
+            top: 20px;
+            right: 30px;
             text-align: right;
         }
 
@@ -66,7 +54,6 @@
             line-height: 1.2;
         }
 
-        h2,
         h4 {
             text-align: center;
             margin: 0;
@@ -102,19 +89,6 @@
             margin-top: 10px;
         }
 
-        .signature {
-            width: 100%;
-            text-align: right;
-            margin-top: 15px;
-        }
-
-        .invoice-number {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            text-align: right;
-        }
-
         .note-section {
             margin-top: 25px;
             font-size: 11px;
@@ -137,12 +111,11 @@
             margin-bottom: 5px;
         }
     </style>
-</head>
+@endsection
 
-<body>
-
+@section('content')
     <div class="header-container">
-        <img src="http://192.168.1.253/testing/include/images/logocx.png" class="logo">
+        <img src="/img/logo.png" class="logo">
         <div class="header-info">
             <div class="hospital-name">Rumah Sakit Livasya</div>
             <div class="hospital-address">
@@ -157,22 +130,19 @@
         </div>
     </div>
 
-
-    <h4>Rekapitulasi Tagihan {{ $data->first()->registration->registration_type ?? 'Tagihan Asuransi' }}</h4>
+    <h4>Rekapitulasi Tagihan</h4>
 
     <div class="info">
         <p><strong>Periode:</strong>
-            @if (request('tanggal_awal') && request('tanggal_akhir'))
-                {{ \Carbon\Carbon::parse(request('tanggal_awal'))->format('d M Y') }} -
-                {{ \Carbon\Carbon::parse(request('tanggal_akhir'))->format('d M Y') }}
+            @if (!empty($period_start) && !empty($period_end))
+                {{ \Carbon\Carbon::parse($period_start)->format('d M Y') }} -
+                {{ \Carbon\Carbon::parse($period_end)->format('d M Y') }}
             @else
                 Semua Periode
             @endif
         </p>
         @if ($penjamin)
-            <p><strong>Penjamin:</strong>
-                <td>{{ $item->penjamin->nama_perusahaan ?? '-' }}</td>
-            </p>
+            <p><strong>Penjamin:</strong> {{ $penjamin->nama_perusahaan ?? '-' }}</p>
         @endif
     </div>
 
@@ -181,47 +151,33 @@
             <tr>
                 <th>No</th>
                 <th>Tanggal</th>
-                <th>No Registrasi</th>
                 <th>Nama Pasien</th>
-                <th>Penjamin</th>
-                <th>Jumlah (Rp)</th>
-                <th>Diskon (Rp)</th>
-                <th>Jatuh Tempo</th>
-                <th>Keterangan</th>
+                <th>Dokter</th>
+                <th>Total Tagihan (Rp)</th>
             </tr>
         </thead>
         <tbody>
+            @php $totalKeseluruhan = 0; @endphp
+
             @forelse ($data as $index => $item)
-                @if (is_object($item) && isset($item->tanggal))
-                    <tr class="text-center">
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
-                        <td>{{ $item->registration->registration_number ?? '-' }}</td>
-                        <td>{{ $item->registration->patient->name ?? '-' }}</td>
-                        <td>{{ $item->penjamin->nama_perusahaan ?? '-' }}</td>
-                        <td class="text-right">{{ number_format($item->jumlah, 0, ',', '.') }}</td>
-                        <td class="text-right">{{ number_format($item->discount, 0, ',', '.') }}</td>
-                        <td>{{ $item->jatuh_tempo ? \Carbon\Carbon::parse($item->jatuh_tempo)->format('d-m-Y') : '-' }}
-                        </td>
-                        <td>{{ $item->keterangan ?? '-' }}</td>
-                    </tr>
-                @endif
+                @php
+                    $tagihan = $item->jumlah ?? 0;
+                    $totalKeseluruhan += $tagihan;
+                @endphp
+                <tr class="text-center">
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
+                    <td>{{ $item->registration->patient->name ?? '-' }}</td>
+                    <td>{{ $item->registration->doctor->employee->fullname ?? '-' }}</td>
+                    <td> Rp. {{ number_format($tagihan, 0, ',', '.') }}</td>
+                </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="text-center">Tidak ada data</td>
+                    <td colspan="5" class="text-center">Tidak ada data</td>
                 </tr>
             @endforelse
-
-
-            @if ($data->count())
-                <tr class="footer-total">
-                    <td colspan="6" class="text-center">TOTAL</td>
-                    <td class="text-right">{{ number_format($data->sum('jumlah'), 0, ',', '.') }}</td>
-                    <td class="text-right">{{ number_format($data->sum('diskon'), 0, ',', '.') }}</td>
-                    <td colspan="2"></td>
-                </tr>
-            @endif
         </tbody>
+
     </table>
 
     <div class="note-section">
@@ -244,8 +200,4 @@
             </tr>
         </table>
     </div>
-
-
-</body>
-
-</html>
+@endsection

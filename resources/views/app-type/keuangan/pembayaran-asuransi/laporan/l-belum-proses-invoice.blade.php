@@ -62,6 +62,21 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="form-group row">
+                                            <label class="col-xl-4 text-center col-form-label">Departemen</label>
+                                            <div class="col-xl-8">
+                                                <select class="form-control select2 w-100" name="departement_id"
+                                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0">
+                                                    <option value="">Semua</option>
+                                                    @foreach ($departments as $department)
+                                                        <option value="{{ $department->id }}"
+                                                            {{ request('departement_id') == $department->id ? 'selected' : '' }}>
+                                                            {{ $department->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row justify-content-end mt-3">
@@ -93,23 +108,7 @@
     <script>
         $(document).ready(function() {
             $('.select2').select2({
-                placeholder: "Pilih Penjamin",
-                allowClear: true,
-                width: 'resolve'
-            });
-
-            $('.datepicker').datepicker({
-                format: 'yyyy-mm-dd',
-                todayHighlight: true,
-                autoclose: true,
-                orientation: "bottom auto"
-            });
-        });
-
-
-        $(document).ready(function() {
-            $('.select2').select2({
-                placeholder: "Pilih Penjamin",
+                placeholder: "Pilih",
                 allowClear: true,
                 width: 'resolve'
             });

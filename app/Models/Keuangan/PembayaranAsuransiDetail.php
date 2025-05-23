@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Keuangan;
 
 use App\Models\Keuangan\PembayaranAsuransi;
 use Illuminate\Database\Eloquent\Model;
@@ -26,8 +26,8 @@ class PembayaranAsuransiDetail extends Model
     }
 
     // Relasi ke konfirmasi asuransi (tagihan)
-    public function konfirmasi()
+    public function konfirmasiAsuransi()
     {
-        return $this->belongsTo(\App\Models\Keuangan\KonfirmasiAsuransi::class, 'konfirmasi_asuransi_id');
+        return $this->belongsTo(KonfirmasiAsuransi::class, 'konfirmasi_asuransi_id');
     }
 }

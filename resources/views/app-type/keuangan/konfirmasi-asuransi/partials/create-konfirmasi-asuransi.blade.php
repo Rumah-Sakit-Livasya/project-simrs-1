@@ -1,6 +1,10 @@
 @extends('inc.layout')
 @section('title', 'Tambah Konfirmasi Asuransi')
 @section('content')
+
+    @push('style')
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    @endpush
     <style>
         .form-control {
             border: 0;
@@ -58,7 +62,20 @@
             color: white;
             font-size: 2rem;
         }
+
+        /* Highlighted row style */
+        .table-active {
+            background-color: rgba(0, 123, 255, 0.1) !important;
+        }
     </style>
+
+    <!-- Loading overlay div -->
+    <div class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fa fa-spinner fa-spin"></i> Memproses...
+        </div>
+    </div>
+
     <main id="js-page-content" role="main" class="page-content">
         <div class="row justify-content-center">
             <div class="col-xl-12">
@@ -68,10 +85,8 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form id="search-form" action="{{ route('keuangan.konfirmasi-asuransi.index') }}"
-                                method="get">
+                            <form id="search-form">
                                 @csrf
-
                                 <!-- Baris Pertama: Periode, Status, Penjamin -->
                                 <div class="row mb-4">
                                     <!-- Tanggal Periode (Dari - Sampai) -->
@@ -184,7 +199,7 @@
                                     </div>
 
                                     <!-- Tipe Pasien -->
-                                    <div class="col-md-4">
+                                    {{-- <div class="col-md-4">
                                         <div class="form-group row align-items-center">
                                             <label for="tipe_pasien" class="col-md-5 col-form-label text-md-right">
                                                 Tipe Pasien
@@ -203,7 +218,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
 
                                 <!-- Tombol Cari dan Reset -->
@@ -214,11 +229,8 @@
                                             <span class="fal fa-undo mr-2"></span>
                                             Reset
                                         </button>
-                                        <button type="button" id="btn-cari"
-                                            class="btn btn-primary waves-effect waves-themed">
-                                            <span class="fal fa-search mr-2"></span>
-                                            Cari Data
-                                        </button>
+                                        <button type="submit" class="btn btn-primary">Cari</button>
+
                                     </div>
                                 </div>
                             </form>
@@ -251,42 +263,42 @@
                                         <th>Total Tagihan</th>
                                         <th>Diskon</th>
                                         <th>Aksi</th>
-                                        <th><input type="checkbox" id="select-all"></th>
+                                        <th class="text-center"><input type="checkbox" id="select-all"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($query as $item)
-                                        <tr data-id="{{ $item->id }}">
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $item->no_rm }}</td>
-                                            <td>{{ $item->patient->nama ?? '-' }}</td>
-                                            <td>{{ $item->bill }}</td>
-                                            <td>{{ $item->no_reg }}</td>
-                                            <td>{{ $item->tanggal_keluar ? \Carbon\Carbon::parse($item->tanggal_keluar)->format('d/m/Y') : '-' }}
+                                    @forelse ($query as $index => $item)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $item->registration->patient->medical_record_number ?? '-' }}</td>
+                                            <td>{{ $item->patient->name ?? '-' }}</td>
+                                            <td>{{ $item->bill ?? '-' }}</td>
+                                            <td>{{ $item->registration->registration_number ?? '-' }}</td>
+                                            <td>{{ $item->registration->registration_close_date ? \Carbon\Carbon::parse($item->registration->registration_close_date)->format('d/m/Y') : '-' }}
                                             </td>
-                                            <td class="text-right">Rp
-                                                {{ number_format($item->total_tagihan, 0, ',', '.') }}</td>
-                                            <td class="text-right">Rp {{ number_format($item->diskon, 0, ',', '.') }}</td>
+                                            <td class="text-right">
+                                                {{ $item->jumlah ? 'Rp ' . number_format($item->jumlah, 0, ',', '.') : 'Rp 0' }}
+                                            </td>
+                                            <td class="text-right">
+                                                {{ $item->diskon ? 'Rp ' . number_format($item->diskon, 0, ',', '.') : 'Rp 0' }}
+                                            </td>
                                             <td>
-                                                <a href="{{ route('keuangan.konfirmasi-asuransi.edit', $item->id) }}"
-                                                    class="btn btn-icon btn-sm btn-info" title="Edit">
-                                                    <i class="fal fa-edit"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-icon btn-sm btn-danger del-btn"
-                                                    data-id="{{ $item->id }}" title="Hapus">
-                                                    <i class="fal fa-trash"></i>
-                                                </button>
+                                                <button type="button" class="btn btn-sm btn-danger del-btn"
+                                                    data-id="{{ $item->id }}"><i class="fal fa-trash"></i></button>
                                             </td>
-                                            <td><input type="checkbox" class="row-checkbox" name="selected[]"
-                                                    value="{{ $item->id }}">
+                                            <td class="text-center">
+                                                {{-- <input type="checkbox" class="row-check" name="selected_invoices[]"
+                                                    value="{{ $item->id }}"> --}}
+                                                <input type="checkbox" class="row-checkbox" value="{{ $item->id }}">
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="10" class="text-center">Tidak ada data tersedia</td>
+                                            <td colspan="10" class="text-center text-muted">Tidak ada data tersedia</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
+
                                 <tfoot>
                                     <tr>
                                         <th colspan="6" class="text-center">
@@ -366,113 +378,85 @@
             </div>
         </div>
     </main>
-
-    <!-- Loading overlay div -->
-    <div class="loading-overlay">
-        <div class="loading-spinner">
-            <i class="fal fa-spinner fa-spin"></i> Memproses...
-        </div>
-    </div>
 @endsection
-@section('plugin')
-    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
-    <script src="/js/formplugins/select2/select2.bundle.js"></script>
-    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-    <script src="/js/dependency/moment/moment.js"></script>
-    <link rel="stylesheet" href="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.css">
 
 @section('plugin')
-    <link rel="stylesheet" href="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.css">
-    <script src="/js/dependency/moment/moment.js"></script>
-    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-    <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script src="/js/dependency/moment/moment.js"></script>
+    <link rel="stylesheet" href="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.css">
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('[Init] DOM Loaded');
 
             // === DATEPICKER ===
-            if ($().datepicker) {
-                $('.datepicker').datepicker({
-                    format: 'yyyy-mm-dd',
-                    autoclose: true,
-                    todayHighlight: true,
-                    clearBtn: true,
-                    language: 'id',
-                    orientation: 'bottom auto',
-                    todayBtn: 'linked'
-                });
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true,
+                clearBtn: true,
+                language: 'id',
+                orientation: 'bottom auto',
+                todayBtn: 'linked'
+            }).datepicker('setDate', null); // <-- Ini membuat default value kosong
 
-                // Set default tanggal
-                if (!$('#tanggal_awal').val()) {
-                    $('#tanggal_awal').datepicker('setDate', moment().subtract(7, 'days').toDate());
-                }
-                if (!$('#tanggal_akhir').val()) {
-                    $('#tanggal_akhir').datepicker('setDate', new Date());
-                }
-            } else {
-                console.warn('[datepicker] Plugin not loaded');
-            }
 
             // === SELECT2 ===
-            if ($().select2) {
-                $('.select2').select2({
-                    dropdownCssClass: "move-up",
-                    width: '100%'
-                });
-            } else {
-                console.warn('[select2] Plugin not loaded');
-            }
+            $('.select2').select2({
+                dropdownCssClass: "move-up",
+                width: '100%'
+            });
 
-            // === DATATABLE ===
-            if ($.fn.DataTable) {
-                $('#dt-basic-example').DataTable({
-                    responsive: true,
-                    lengthChange: false,
-                    dom: "<'row mb-3'<'col-md-6'f><'col-md-6 text-right'B>>" +
-                        "<'row'<'col-sm-12'tr>>" +
-                        "<'row'<'col-md-5'i><'col-md-7'p>>",
-                    buttons: [{
-                            extend: 'pdfHtml5',
-                            className: 'btn-outline-danger btn-sm mr-1',
-                            title: 'Daftar Konfirmasi Asuransi',
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6, 7]
-                            }
-                        },
-                        {
-                            extend: 'excelHtml5',
-                            className: 'btn-outline-success btn-sm mr-1',
-                            title: 'Daftar Konfirmasi Asuransi',
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6, 7]
-                            }
-                        },
-                        {
-                            extend: 'print',
-                            className: 'btn-outline-primary btn-sm',
-                            title: 'Daftar Konfirmasi Asuransi',
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6, 7]
-                            }
+            // === INISIALISASI DATATABLE ===
+            const table = $('#dt-basic-example').DataTable({
+                responsive: true,
+                lengthChange: false,
+                dom: "<'row mb-3'<'col-md-6'><'col-md-6 text-right'B>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-md-5'i><'col-md-7'p>>",
+                buttons: [{
+                        extend: 'pdfHtml5',
+                        className: 'btn-outline-danger btn-sm mr-1',
+                        title: 'Daftar Konfirmasi Asuransi',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7]
                         }
-                    ],
-                    language: {
-                        emptyTable: "Tidak ada data tersedia"
                     },
-                    columnDefs: [{
-                        orderable: false,
-                        targets: [8, 9]
-                    }],
-                    drawCallback: function() {
-                        $('.loading-overlay').hide();
-                        calculateTotals();
+                    {
+                        extend: 'excelHtml5',
+                        className: 'btn-outline-success btn-sm mr-1',
+                        title: 'Daftar Konfirmasi Asuransi',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                        }
+                    },
+                    {
+                        // extend: 'print',
+                        // className: 'btn-outline-primary btn-sm',
+                        // title: 'Daftar Konfirmasi Asuransi',
+                        // exportOptions: {
+                        //     columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                        // }
                     }
-                });
-            }
+                ],
+                language: {
+                    emptyTable: "Tidak ada data tersedia",
+                    zeroRecords: "Tidak ada data yang cocok dengan pencarian Anda"
+                },
+                columnDefs: [{
+                    orderable: false,
+                    targets: [8, 9]
+                }],
+                drawCallback: function() {
+                    calculateTotals();
+                }
+            });
 
-            // === TOTAL TAGIHAN ===
+            // === HITUNG TOTAL TAGIHAN ===
             function calculateTotals() {
                 let total = 0;
                 $('#dt-basic-example tbody tr').each(function() {
@@ -482,7 +466,72 @@
                 $('#total-tagihan').text(total.toLocaleString('id-ID'));
             }
 
-            // === RESET FORM ===
+            // === FILTER DATA (CARI) ===
+            $('#search-form').on('submit', function(e) {
+                e.preventDefault();
+
+                // Tampilkan loading overlay
+                $('.loading-overlay').css('display', 'flex');
+
+                $.ajax({
+                    url: window.location.href,
+                    type: 'GET',
+                    data: {
+                        tanggal_awal: $('#tanggal_awal').val(),
+                        tanggal_akhir: $('#tanggal_akhir').val(),
+                        penjamin_id: $('#penjamin_id').val(),
+                        tagihan_ke: $('#tagihan_ke').val(),
+                        status: $('#status').val(),
+                        // tipe_pasien: $('#tipe_pasien').val()
+                    },
+                    success: function(data) {
+                        updateTable(data);
+                        $('.loading-overlay').hide();
+                    },
+                    error: function(xhr) {
+                        $('.loading-overlay').hide();
+                        toastr.error('Gagal mengambil data');
+                        console.error(xhr);
+                    }
+                });
+            });
+
+            // === UPDATE TABEL DENGAN DATATABLE API ===
+            function updateTable(data) {
+                table.clear();
+
+                if (data.length > 0) {
+                    $.each(data, function(i, item) {
+                        const tgl = item.registration?.registration_close_date ?
+                            moment(item.registration.registration_close_date).format('DD/MM/YYYY') :
+                            '-';
+
+                        const total = item.jumlah ? 'Rp ' + Number(item.jumlah)
+                            .toLocaleString('id-ID') : 'Rp 0';
+                        const diskon = item.diskon ? 'Rp ' + Number(item.diskon).toLocaleString('id-ID') :
+                            'Rp 0';
+
+                        table.row.add([
+                            i + 1,
+                            item.registration?.patient?.medical_record_number || '-',
+                            item.patient?.name || item.registration?.patient?.name || '-',
+                            item.bill || '-',
+                            item.registration?.registration_number || '-',
+                            tgl,
+                            total,
+                            diskon,
+                            `<a href="/keuangan/konfirmasi-asuransi/${item.id}/edit" class="btn btn-sm btn-info"><i class="fal fa-edit"></i></a>
+                             <button type="button" class="btn btn-sm btn-danger del-btn" data-id="${item.id}"><i class="fal fa-trash"></i></button>`,
+                            `<input type="checkbox" class="row-checkbox" value="${item.id}">`
+                        ]);
+                    });
+                }
+
+                table.draw();
+                calculateTotals();
+            }
+
+            // === RESET FORM FILTER ===
             $('#btn-reset').on('click', function(e) {
                 e.preventDefault();
                 $('#tanggal_awal').datepicker('setDate', moment().subtract(7, 'days').toDate());
@@ -491,152 +540,19 @@
                 console.log('[Reset] Filter direset');
             });
 
-            // === FILTER DATA ===
-            $('#btn-cari').on('click', function(e) {
-                e.preventDefault();
-
-                const params = {
-                    tanggal_awal: $('#tanggal_awal').val(),
-                    tanggal_akhir: $('#tanggal_akhir').val(),
-                    penjamin_id: $('#penjamin_id').val(),
-                    tagihan_ke: $('#tagihan_ke').val(),
-                    status: $('#status').val(),
-                    tipe_pasien: $('#tipe_pasien').val()
-                };
-
-                if (!params.penjamin_id) {
-                    toastr.error('Penjamin wajib dipilih');
-                    return;
-                }
-
-                $('.loading-overlay').show();
-                $.get('{{ route('keuangan.konfirmasi-asuransi.search-tambah') }}', params, function(data) {
-                    updateTable(data);
-                    $('.loading-overlay').hide();
-                }).fail(function() {
-                    $('.loading-overlay').hide();
-                    toastr.error('Gagal mengambil data');
-                });
-            });
-
-            // === UPDATE TABEL SETELAH FILTER ===
-            function updateTable(data) {
-                const tbody = $('#dt-basic-example tbody');
-                tbody.empty();
-
-                if (data.length > 0) {
-                    $.each(data, function(i, d) {
-                        const tgl = d.tanggal_keluar ? moment(d.tanggal_keluar).format('DD/MM/YYYY') : '-';
-                        const total = d.total_tagihan ? parseFloat(d.total_tagihan).toLocaleString(
-                            'id-ID') : '0';
-                        const diskon = d.diskon ? parseFloat(d.diskon).toLocaleString('id-ID') : '0';
-
-                        tbody.append(`
-                            <tr>
-                                <td>${i+1}</td>
-                                <td>${d.no_rm || '-'}</td>
-                                <td>${d.patient?.nama || '-'}</td>
-                                <td>${d.bill || '-'}</td>
-                                <td>${d.no_reg || '-'}</td>
-                                <td>${tgl}</td>
-                                <td class="text-right">Rp ${total}</td>
-                                <td class="text-right">Rp ${diskon}</td>
-                                <td>
-                                    <a href="/keuangan/konfirmasi-asuransi/${d.id}/edit" class="btn btn-sm btn-info"><i class="fal fa-edit"></i></a>
-                                    <button type="button" class="btn btn-sm btn-danger del-btn" data-id="${d.id}"><i class="fal fa-trash"></i></button>
-                                </td>
-                                <td><input type="checkbox" class="row-checkbox" value="${d.id}"></td>
-                            </tr>
-                        `);
-                    });
-                } else {
-                    tbody.append(`<tr><td colspan="10" class="text-center">Tidak ada data ditemukan</td></tr>`);
-                }
-
-                calculateTotals();
-            }
-
-            // === BUAT TAGIHAN ===
-            $('#buat-tagihan').on('click', function() {
-                const ids = $('.row-checkbox:checked').map(function() {
-                    return $(this).val();
-                }).get();
-
-                if (ids.length === 0) {
-                    toastr.error('Pilih data terlebih dahulu');
-                    return;
-                }
-
-                $.ajax({
-                    url: '{{ route('keuangan.konfirmasi-asuransi.create-invoice') }}',
-                    type: 'POST',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        selected_ids: ids,
-                        jatuh_tempo: $('#jatuh_tempo').val(),
-                        keterangan: $('#keterangan').val()
-                    },
-                    beforeSend: function() {
-                        $('.loading-overlay').show();
-                    },
-                    success: function(res) {
-                        $('.loading-overlay').hide();
-                        if (res.success) {
-                            toastr.success('Tagihan berhasil dibuat');
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            toastr.error(res.message || 'Gagal membuat tagihan');
-                        }
-                    },
-                    error: function() {
-                        $('.loading-overlay').hide();
-                        toastr.error('Terjadi kesalahan');
-                    }
-                });
-            });
-
-            // === CETAK REKAP ===
-            $('#cetak-rekap').on('click', function() {
-                const ids = $('.row-checkbox:checked').map(function() {
-                    return $(this).val();
-                }).get();
-
-                if (ids.length === 0) {
-                    toastr.error('Pilih data terlebih dahulu');
-                    return;
-                }
-
-                const form = $('<form>', {
-                    method: 'POST',
-                    action: '{{ route('keuangan.konfirmasi-asuransi.print-recap') }}',
-                    target: '_blank'
-                });
-
-                form.append($('<input>', {
-                    type: 'hidden',
-                    name: '_token',
-                    value: $('meta[name="csrf-token"]').attr('content')
-                }));
-                ids.forEach(id => {
-                    form.append($('<input>', {
-                        type: 'hidden',
-                        name: 'selected_ids[]',
-                        value: id
-                    }));
-                });
-
-                $('body').append(form);
-                form.submit();
-                form.remove();
-            });
-
             // === SELECT ALL CHECKBOX ===
             $('#select-all').on('change', function() {
                 $('.row-checkbox').prop('checked', this.checked);
                 highlightRows();
             });
 
-            $(document).on('change', '.row-checkbox', highlightRows);
+            $(document).on('change', '.row-checkbox', function() {
+                highlightRows();
+
+                // Check if all checkboxes are checked
+                const allChecked = $('.row-checkbox:not(:checked)').length === 0;
+                $('#select-all').prop('checked', allChecked);
+            });
 
             function highlightRows() {
                 $('tbody tr').each(function() {
@@ -649,25 +565,182 @@
                 const id = $(this).data('id');
                 if (!confirm('Yakin ingin menghapus data ini?')) return;
 
-                $('.loading-overlay').show();
+                $('.loading-overlay').css('display', 'flex');
+
                 $.ajax({
                     url: `/keuangan/konfirmasi-asuransi/${id}`,
                     type: 'DELETE',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content')
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(res) {
                         $('.loading-overlay').hide();
-                        if (res.success) location.reload();
-                        else toastr.error(res.message || 'Gagal menghapus data');
+                        if (res.success) {
+                            toastr.success('Data berhasil dihapus');
+                            location.reload();
+                        } else {
+                            toastr.error(res.message || 'Gagal menghapus data');
+                        }
                     },
-                    error: function() {
+                    error: function(xhr) {
                         $('.loading-overlay').hide();
                         toastr.error('Gagal menghapus data');
+                        console.error(xhr);
                     }
                 });
             });
 
+            // === BUAT TAGIHAN BUTTON ===
+            $('#buat-tagihan').on('click', function() {
+                const selectedIds = $('.row-checkbox:checked').map(function() {
+                    return $(this).val();
+                }).get();
+
+                if (selectedIds.length === 0) {
+                    toastr.error('Silakan pilih data terlebih dahulu');
+                    return;
+                }
+
+                const jatuhTempo = $('#jatuh_tempo').val();
+                const keterangan = $('#keterangan').val();
+
+                if (!jatuhTempo || !keterangan) {
+                    toastr.warning('Jatuh tempo dan keterangan wajib diisi');
+                    return;
+                }
+
+                $('.loading-overlay').css('display', 'flex');
+
+                $.ajax({
+                    url: '/keuangan/konfirmasi-asuransi/create-invoice',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: {
+                        selected_ids: selectedIds,
+                        jatuh_tempo: jatuhTempo,
+                        keterangan: keterangan
+                    },
+                    success: function(res) {
+                        $('.loading-overlay').hide();
+
+                        if (res.success) {
+                            toastr.success(res.message || 'Tagihan berhasil dibuat');
+
+                            // Sembunyikan baris yang sudah dibuat tagihan
+                            selectedIds.forEach(id => {
+                                $('input.row-checkbox[value="' + id + '"]').closest(
+                                    'tr').remove();
+                            });
+
+                            // Refresh datatable berdasarkan filter aktif
+                            const filterData = {
+                                tanggal_awal: $('#tanggal_awal').val(),
+                                tanggal_akhir: $('#tanggal_akhir').val(),
+                                penjamin_id: $('#penjamin_id').val(),
+                                tagihan_ke: $('#tagihan_ke').val(),
+                                status: $('#status').val(),
+                                tipe_pasien: $('#tipe_pasien').val()
+                            };
+
+                            $.ajax({
+                                url: window.location.href,
+                                type: 'GET',
+                                data: filterData,
+                                success: function(data) {
+                                    updateTable(
+                                        data); // fungsi update isi datatable
+                                    $('#select-all').prop('checked', false);
+                                    $('#keterangan').val('');
+                                    calculateTotals(); // update total bawah
+                                },
+                                error: function(xhr) {
+                                    toastr.error('Gagal me-refresh data tabel');
+                                    console.error(xhr);
+                                }
+                            });
+                        } else {
+                            toastr.error(res.message || 'Gagal membuat tagihan');
+                        }
+                    },
+                    error: function(xhr) {
+                        $('.loading-overlay').hide();
+                        toastr.error('Terjadi kesalahan saat membuat tagihan');
+                        console.error(xhr);
+                    }
+                });
+            });
+
+
+            // === CETAK REKAP BUTTON ===
+            $('#cetak-rekap').on('click', function() {
+                const selectedIds = $('.row-checkbox:checked').map(function() {
+                    return $(this).val();
+                }).get();
+
+                if (selectedIds.length === 0) {
+                    toastr.error('Silakan pilih data terlebih dahulu');
+                    return;
+                }
+
+                // Redirect to print page with selected IDs
+                const url = '/keuangan/konfirmasi-asuransi/print-rekap?ids=' + selectedIds.join(',');
+                window.open(url, '_blank');
+            });
+
+            // Call calculateTotals on initial load
+            calculateTotals();
         });
+
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "3000"
+        };
+
+
+        // === HITUNG TOTAL TERPILIH ===
+        function updateSelectedTotal() {
+            let total = 0;
+            $('.row-checkbox:checked').each(function() {
+                const row = $(this).closest('tr');
+                const nilai = parseFloat(row.find('td:eq(6)').text().replace(/[^\d]/g, '')) || 0;
+                total += nilai;
+            });
+
+            $('#total-tagihan').text(total.toLocaleString('id-ID')); // Format ke Rupiah
+        }
+
+        // === UPDATE TOTAL SAAT CHECKBOX BERUBAH ===
+        $(document).on('change', '.row-checkbox, #select-all', function() {
+            if ($(this).attr('id') === 'select-all') {
+                $('.row-checkbox').prop('checked', this.checked);
+            }
+            updateSelectedTotal();
+            highlightRows();
+        });
+
+        // === HIGHLIGHT ROW ===
+        function highlightRows() {
+            $('tbody tr').each(function() {
+                $(this).toggleClass('table-active', $(this).find('.row-checkbox').is(':checked'));
+            });
+        }
+
+        // === RESET TANGGAL (optional untuk tombol reset) ===
+        $('#btn-reset').on('click', function() {
+            $('#tanggal_awal').val('');
+            $('#tanggal_akhir').val('');
+            $('#tagihan_ke, #penjamin_id, #status, #tipe_pasien').val('').trigger('change');
+            updateSelectedTotal();
+        });
+
+        // Panggil sekali saat halaman pertama dimuat
+        updateSelectedTotal(); // ⬅️ Ini memastikan awalnya Rp 0
+        highlightRows();
     </script>
+
+
 @endsection

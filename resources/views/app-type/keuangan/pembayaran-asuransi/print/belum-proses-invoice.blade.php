@@ -115,8 +115,8 @@
         </div>
         <div class="report-info">
             Penjamin:
-            @if (request('penjamin_id') && $query->isNotEmpty())
-                {{ optional($query->first()->penjamin)->nama_perusahaan ?? '-' }}
+            @if (request('penjamin_id') && $data->isNotEmpty())
+                {{ optional($data->first()->penjamin)->nama_perusahaan ?? '-' }}
             @else
                 Semua Penjamin
             @endif
@@ -129,6 +129,7 @@
         <thead>
             <tr>
                 <th>No</th>
+                <th>Poliklinik</th>
                 <th>Tgl. Bill</th>
                 <th>No. Bill</th>
                 <th>No. Reg</th>
@@ -140,9 +141,10 @@
         </thead>
         <tbody>
             @php $total = 0; @endphp
-            @forelse ($query as $index => $item)
+            @forelse ($data as $index => $item)
                 <tr>
                     <td class="center">{{ $index + 1 }}</td>
+                    <td> {{ $item->registration->departement->name ?? '_' }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</td>
                     <td>{{ $item->no_bill ?? '-' }}</td>
                     <td>{{ $item->registration->registration_number ?? '-' }}</td>
@@ -160,7 +162,7 @@
         </tbody>
         <tfoot>
             <tr class="total-row">
-                <td colspan="7" style="text-align: right;">Total :</td>
+                <td colspan="8" style="text-align: right;">Total :</td>
                 <td class="right">{{ number_format($total, 0, ',', '.') }}</td>
             </tr>
         </tfoot>

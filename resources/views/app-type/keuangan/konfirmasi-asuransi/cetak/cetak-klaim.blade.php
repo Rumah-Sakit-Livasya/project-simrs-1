@@ -1,19 +1,9 @@
-<!DOCTYPE HTML>
-<html>
+@extends('app-type.keuangan.konfirmasi-asuransi.cetak.template')
 
-<head>
-    <title>Kwitansi {{ $konfirmasi->invoice }}</title>
-    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+@section('title', 'Cetak Klaim Tagihan')
+
+@section('style')
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
-            color: #000;
-            margin: 10px;
-            padding: 15px;
-        }
-
         .header-container {
             position: relative;
             display: flex;
@@ -103,26 +93,42 @@
         }
 
         .bank-info p {
-            font-size: 12px margin: 0;
+            font-size: 12px;
+            margin: 0;
         }
 
         .bank-info strong {
             display: block;
+            margin-bottom: 5px;
         }
 
-        .bank-info-row {
+        .bank-info .form-row {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-top: 8px;
+            gap: 10px;
+            margin: 5px 0;
         }
 
-        .signature-area {
-            float: right;
-            width: 30%;
-            text-align: center;
-            margin-top: 30px;
+        .bank-info label {
+            font-weight: bold;
+            width: 80px;
         }
+
+        .bank-info .value {
+            border: 1px solid #ccc;
+            padding: 3px 6px;
+            font-size: 12px;
+            min-width: 180px;
+            background-color: #f9f9f9;
+        }
+
+
+        .signature-area {
+            text-align: right;
+            margin-top: 40px;
+            width: 100%;
+        }
+
 
         .signature-space {
             height: 60px;
@@ -180,13 +186,65 @@
             min-width: 180px;
             background-color: #f9f9f9;
         }
+
+        .recipient-address {
+            width: 30%;
+            min-height: 50px;
+            padding: 5px;
+            font-size: 12px;
+            border: 1px solid #000;
+            resize: both;
+            /* aktifkan resize ke atas-bawah */
+        }
+
+
+        .recipient-address-print {
+            display: none;
+            white-space: pre-wrap;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            min-height: 50px;
+            overflow: auto;
+            box-sizing: border-box;
+        }
+
+
+
+        @media print {
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            * {
+                page-break-inside: avoid;
+                page-break-before: auto;
+                page-break-after: auto;
+            }
+
+            .no-break {
+                page-break-inside: avoid;
+            }
+
+            .recipient-address {
+                display: none !important;
+            }
+
+            .recipient-address-print {
+                display: block !important;
+            }
+        }
     </style>
-</head>
+@endsection
 
-<body>
-
+@section('content')
     <div class="header-container">
-        <img src="http://192.168.1.253/testing/include/images/logocx.png" class="logo">
+        <img src="/img/logo.png" class="logo">
         <div class="header-info">
             <div class="hospital-name">Rumah Sakit Livasya</div>
             <div class="hospital-address">
@@ -197,10 +255,9 @@
         </div>
         <div class="invoice-number">
             <div class="invoice-label">No. Invoice</div>
-            <div class="invoice-value">{{ $konfirmasi->first()->invoice ?? '-' }}</div>
+            <div class="invoice-value">{{ $konfirmasi->invoice ?? '-' }}</div>
         </div>
     </div>
-
 
     <div class="document-info">
         <table>
@@ -216,7 +273,11 @@
             Kepada Yth,<br>
             <strong>{{ $konfirmasi->penjamin->nama_perusahaan }}</strong><br>
             <strong>Up. Claim Department</strong><br>
-            <textarea class="recipient-address" cols="50" rows="3"></textarea>
+        <div class="recipient-address-wrapper">
+            <textarea id="alamatInput" class="recipient-address" placeholder=""></textarea>
+            <div id="alamatText" class="recipient-address-print"></div>
+        </div>
+
         </p>
     </div>
 
@@ -260,45 +321,30 @@
             PJ Keuangan
         </p>
     </div>
+@endsection
 
-    <script type="text/javascript">
-        function save_new_inv() {
-            var newinv = document.getElementById('newinv').value;
-            if (!newinv) {
-                alert('Masukkan nomor invoice terlebih dahulu');
-                return;
-            }
+@section('script')
+    <script>
+        const textarea = document.getElementById('alamatInput');
+        const textDiv = document.getElementById('alamatText');
 
-            $.ajax({
-                url: 'http://192.168.1.253/testing/ar/save_new_inv',
-                data: {
-                    "newinv": newinv,
-                    "iarid": "{{ $konfirmasi->id ?? '' }}"
-                },
-                type: 'POST',
-                dataType: 'JSON',
-                success: function(hasil) {
-                    if (hasil[0].status == 0) {
-                        alert('Nomor invoice berhasil diperbarui');
-                    } else {
-                        alert('Gagal memperbarui nomor invoice');
-                    }
-                    window.location.reload();
-                },
-                error: function() {
-                    alert('Terjadi kesalahan saat menyimpan');
-                }
-            });
+        function syncPrintDiv() {
+            textDiv.innerText = textarea.value;
+            textDiv.style.width = `${textarea.offsetWidth}px`;
+            textDiv.style.height = `${textarea.offsetHeight}px`;
         }
 
-        function printPage() {
-            document.getElementById('functions').style.display = 'none';
-            window.print();
-            setTimeout(function() {
-                document.getElementById('functions').style.display = '';
-            }, 500);
-        }
+        textarea.addEventListener('input', syncPrintDiv);
+
+        window.onbeforeprint = function() {
+            syncPrintDiv();
+            textarea.style.display = 'none';
+            textDiv.style.display = 'block';
+        };
+
+        window.onafterprint = function() {
+            textDiv.style.display = 'none';
+            textarea.style.display = 'block';
+        };
     </script>
-</body>
-
-</html>
+@endsection

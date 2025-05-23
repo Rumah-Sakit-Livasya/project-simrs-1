@@ -10,7 +10,7 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form action="{{ route('laporan.l-rekap-pembayaran-asuransi.print') }}" method="get"
+                            <form action="{{ route('laporan.l-pembayaran-asuransi.print') }}" method="get"
                                 target="_blank">
                                 @csrf
                                 <div class="row">

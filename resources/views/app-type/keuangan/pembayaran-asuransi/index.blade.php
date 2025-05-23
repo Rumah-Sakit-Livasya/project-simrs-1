@@ -171,7 +171,7 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form action="{{ route('keuangan.konfirmasi-asuransi.index') }}" method="get">
+                            <form action="{{ route('keuangan.pembayaran-asuransi.index') }}" method="get">
                                 @csrf
                                 <div class="row">
                                     <div class="col-xl-6">
@@ -273,27 +273,98 @@
                                 <thead class="bg-primary-600">
                                     <tr>
                                         <th>#</th>
-                                        <th>Tgl.transaksi</th>
+                                        <th class="control-details"></th>
+                                        <th>Tgl Transaksi</th>
                                         <th>No. Transaksi</th>
                                         <th>Penjamin</th>
                                         <th>Jumlah</th>
                                         <th>Bank</th>
+                                        <th>Keterangan</th>
                                         <th>Fungsi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($pembayaranAsuransi as $Pembayaran)
-                                        <tr>
-                                            <td> {{ $loop->iteration }}</td>
+                                    @foreach ($pembayaranAsuransi as $pembayaran)
+                                        <tr class="parent-row">
+                                            <td class="text-center">{{ $loop->iteration }}</td>
+                                            <td class="control-details text-center">
+                                                <button type="button" class="btn btn-sm btn-outline-primary toggle-detail">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </button>
+                                            </td>
+                                            <td>{{ \Carbon\Carbon::parse($pembayaran->tanggal)->format('d-m-Y') }}</td>
+                                            <td>{{ $pembayaran->nomor_transaksi }}</td>
+                                            <td>{{ $pembayaran->penjamin->nama_perusahaan ?? '-' }}</td>
+                                            <td class="text-right">{{ number_format($pembayaran->jumlah, 2, ',', '.') }}
+                                            </td>
+                                            <td>{{ $pembayaran->bank->name ?? 'KAS' }}</td>
+                                            <td>{{ $pembayaran->keterangan ?? '-' }}</td>
+                                            <td class="text-center">
+                                                <form
+                                                    action="{{ route('keuangan.pembayaran-asuransi.destroy', $pembayaran->id) }}"
+                                                    method="POST"
+                                                    onsubmit="return confirm('Yakin ingin menghapus pembayaran ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-sm btn-outline-danger" title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
                                         </tr>
-                                    @empty
-                                    @endforelse
+
+                                        {{-- CHILD ROW --}}
+                                        <tr class="child-row" style="display: none;">
+                                            <td colspan="9" class="bg-light">
+                                                <div class="p-3">
+                                                    <table class="child-table table table-sm table-bordered w-75 mx-auto">
+                                                        <thead class="thead-light">
+                                                            <tr>
+                                                                <th>No RM</th>
+                                                                <th>Nama Pasien</th>
+                                                                <th>No Reg</th>
+                                                                <th>Tgl AR</th>
+                                                                <th>No Invoice</th>
+                                                                <th>Tagihan</th>
+                                                                <th>Pelunasan</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach ($pembayaran->details as $detail)
+                                                                @php $konfirmasi = $detail->konfirmasiasuransi; @endphp
+                                                                <tr>
+                                                                    <td>{{ $konfirmasi->registration->patient->medical_record_number ?? '-' }}
+                                                                    </td>
+                                                                    <td>{{ $konfirmasi->registration->patient->name ?? '-' }}
+                                                                    </td>
+                                                                    <td>{{ $konfirmasi->registration->registration_number ?? '-' }}
+                                                                    </td>
+                                                                    <td>{{ \Carbon\Carbon::parse($konfirmasi->tanggal)->format('d-m-Y') }}
+                                                                    </td>
+                                                                    <td>{{ $konfirmasi->invoice ?? '-' }}</td>
+                                                                    <td class="text-right">
+                                                                        {{ number_format($konfirmasi->jumlah ?? 0, 2, ',', '.') }}
+                                                                    </td>
+                                                                    <td class="text-right">
+                                                                        {{ number_format($pembayaran->jumlah ?? 0, 2, ',', '.') }}
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
+
                             </table>
                         </div>
                     </div>
+
                 </div>
             </div>
+        </div>
         </div>
     </main>
 @endsection
@@ -343,7 +414,6 @@
                     "sInfo": "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
                     "sInfoEmpty": "Menampilkan 0 sampai 0 dari 0 entri",
                     "sInfoFiltered": "(disaring dari _MAX_ entri keseluruhan)",
-                    "sSearch": "Cari:",
                     "oPaginate": {
                         "sFirst": "Pertama",
                         "sPrevious": "Sebelumnya",
@@ -408,6 +478,25 @@
 
             // Tooltip jika diperlukan
             $('[data-toggle="tooltip"]').tooltip();
+        });
+
+        $('#dt-basic-example').on('click', '.toggle-detail', function() {
+            var $btn = $(this);
+            var $icon = $btn.find('i');
+            var $row = $btn.closest('tr');
+            var $childRow = $row.next('.child-row');
+
+            if ($childRow.is(':visible')) {
+                $childRow.hide();
+                $icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+            } else {
+                // Tutup semua dulu
+                $('.child-row').hide();
+                $('.toggle-detail i').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+
+                $childRow.show();
+                $icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+            }
         });
     </script>
 @endsection

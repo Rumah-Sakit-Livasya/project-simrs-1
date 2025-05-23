@@ -74,10 +74,18 @@ class Registration extends Model implements AuditableContract
         return $this->belongsTo(Departement::class);
     }
 
+    // public function penjamin()
+    // {
+    //     return $this->belongsTo(Penjamin::class);
+    // }
+
     public function penjamin()
     {
-        return $this->belongsTo(Penjamin::class);
+        return $this->belongsTo(Penjamin::class, 'penjamin_id');
     }
+
+
+
 
     public function user()
     {
@@ -139,6 +147,21 @@ class Registration extends Model implements AuditableContract
     {
         return $this->hasMany(KonfirmasiAsuransi::class, 'registration_id');
     }
+
+    public function getDoctorFullnameAttribute()
+    {
+        return $this->doctor->employee->fullname ?? null;
+    }
+
+    public function tagihan_pasien()
+    {
+        return $this->hasMany(TagihanPasien::class, 'registration_id');
+    }
+
+
+
+
+
 
 
     // public function generateNomorRegistrasi()

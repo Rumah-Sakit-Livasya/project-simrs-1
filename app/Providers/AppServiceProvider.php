@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
+use Illuminate\Filesystem\Filesystem;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,7 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton('files', function ($app) {
+            return new Filesystem;
+        });
     }
 
     /**

@@ -29,7 +29,19 @@
                 </tr>
             </thead>
             <tbody>
-
+                @foreach ($rekap as $nama_penjamin => $baris)
+                    <tr>
+                        <td>{{ $nama_penjamin }}</td>
+                        <td class="text-end">{{ number_format($baris['saldo_awal'], 0, ',', '.') }}</td>
+                        @foreach ($baris['detail'] as $bulanData)
+                            <td class="text-end">{{ number_format($bulanData['saldo_awal'], 0, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format($bulanData['piutang'], 0, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format($bulanData['pembayaran'], 0, ',', '.') }}</td>
+                            <td class="text-end">{{ number_format($bulanData['saldo_akhir'], 0, ',', '.') }}</td>
+                        @endforeach
+                        <td class="text-end">{{ number_format($baris['saldo_akhir'], 0, ',', '.') }}</td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
     </div>

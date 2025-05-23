@@ -6,7 +6,8 @@
     <title>@yield('title', 'Laporan')</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Open Sans';
+            src: url('opensans.ttf');
             font-size: 10pt;
             margin: 20px;
             padding: 0;

@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\keuangan\APNonGRController;
+use App\Http\Controllers\keuangan\APSupplierController;
+use App\Http\Controllers\keuangan\JasaDokterController;
 use App\Http\Controllers\Keuangan\BankController;
 use App\Http\Controllers\Keuangan\CategoryController;
 use App\Http\Controllers\Keuangan\GroupChartOfAccountController;
@@ -9,7 +12,11 @@ use App\Http\Controllers\Keuangan\KonfirmasiAsuransiController;
 use App\Http\Controllers\Keuangan\PiutangController;
 use App\Http\Controllers\Keuangan\TransaksiController;
 use App\Http\Controllers\Keuangan\LPembayaranAsuransiController;
+use App\Http\Controllers\keuangan\PembayaranAPSupplierController;
 use App\Http\Controllers\Keuangan\PembayaranAsuransiController;
+use App\Http\Controllers\Keuangan\PembayaranJasaDokterController;
+use App\Http\Controllers\keuangan\ReportAPDokterController;
+use App\Http\Controllers\keuangan\ReportAPSupplierController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -135,6 +142,9 @@ Route::group(['middleware' => ['auth']], function () {
 
             // Create Invoice
             Route::post('/create-invoice', [KonfirmasiAsuransiController::class, 'createInvoice'])->name('keuangan.konfirmasi-asuransi.create-invoice');
+
+            Route::get('/keuangan/konfirmasi-asuransi/search-create', [KonfirmasiAsuransiController::class, 'searchCreate'])
+                ->name('keuangan.konfirmasi-asuransi.search-create');
         });
 
 
@@ -144,10 +154,11 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name('keuangan.pembayaran-asuransi.index');
             Route::get('/create', [PembayaranAsuransiController::class, 'create'])
                 ->name('keuangan.pembayaran-asuransi.create');
-            Route::get('/store', [PembayaranAsuransiController::class, 'store'])
+            Route::post('/store', [PembayaranAsuransiController::class, 'store'])
                 ->name('keuangan.pembayaran-asuransi.store');
-            Route::get('/keuangan/pembayaran-asuransi/tagihan', [PembayaranAsuransiController::class, 'getTagihan'])->name('keuangan.pembayaran-asuransi.getTagihan');
-            Route::get('/tagihan', [PembayaranAsuransiController::class, 'getTagihan'])->name('keuangan.pembayaran-asuransi.getTagihan');
+            Route::get('/tagihan', [PembayaranAsuransiController::class, 'create'])->name('keuangan.pembayaran-asuransi.get-tagihan');
+            Route::delete('/{id}', [PembayaranAsuransiController::class, 'destroy'])
+                ->name('keuangan.pembayaran-asuransi.destroy');
         });
 
 
@@ -167,6 +178,69 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/laporan/print-pembayaran-asuransi', [LPembayaranAsuransiController::class, 'printPembayaranAsuransi'])->name('laporan.l-pembayaran-asuransi.print');
             Route::get('/laporan/print-rekap-pembayaran-asuransi', [LPembayaranAsuransiController::class, 'printRekapPembayaranAsuransi'])->name('laporan.l-rekap-pembayaran-asuransi.print');
             Route::get('/laporan/print-rekap-piutang-penjamin', [LPembayaranAsuransiController::class, 'printRekapPiutangPenjamin'])->name('laporan.l-rekap-piutang-penjamin.print');
+        });
+
+        Route::prefix('jasa-dokter')->middleware(['can:view account payable jasa dokter'])->group(function () {
+            Route::get('/', [JasaDokterController::class, 'index'])
+                ->name('keuangan.jasa-dokter.index');
+        });
+
+
+        Route::prefix('pembayaran-jasa-dokter')->middleware(['can:view account payable pembayaran jasa dokter'])->group(function () {
+            Route::get('/', [PembayaranJasaDokterController::class, 'index'])
+                ->name('keuangan.pembayaran-jasa-dokter.index');
+            Route::get('/create', [PembayaranJasaDokterController::class, 'create'])
+                ->name('keuangan.pembayaran-jasa-dokter.create');
+            Route::post('/store', [PembayaranJasaDokterController::class, 'store'])
+                ->name('keuangan.pembayaran-jasa-dokter.store');
+        });
+
+        Route::prefix('report-ap-dokter')->middleware(['can:view account payable report-ap-dokter'])->group(function () {
+            Route::get('/jasa-dokter-belum-diproses', [ReportAPDokterController::class, 'indexBelumDiproses'])
+                ->name('keuangan.report-ap-dokter.belum-diproses');
+
+            Route::get('/jasa-dokter-belum-dibayarkan', [ReportAPDokterController::class, 'indexBelumDibayarkan'])
+                ->name('keuangan.report-ap-dokter.belum-dibayarkan');
+        });
+
+        route::prefix('ap-supplier')->middleware(['can:view account payable ap-supplier'])->group(function () {
+            Route::get('/', [APSupplierController::class, 'index'])
+                ->name('keuangan.ap-supplier.index');
+            Route::get('/create', [APSupplierController::class, 'create'])
+                ->name('keuangan.ap-supplier.create');
+            Route::post('/store', [APSupplierController::class, 'store'])
+                ->name('keuangan.ap-supplier.store');
+        });
+
+        route::prefix('ap-non-gr')->middleware(['can:view account payable ap-non-gr'])->group(function () {
+            Route::get('/', [APNonGRController::class, 'index'])
+                ->name('keuangan.ap-non-gr.index');
+            Route::get('/edit', [APNonGRController::class, 'edit'])
+                ->name('keuangan.ap-non-gr.edit');
+            Route::post('/store', [APNonGRController::class, 'store'])
+                ->name('keuangan.ap-non-gr.store');
+        });
+
+        route::prefix('pembayaran-ap-supplier')->middleware(['can:view account payable pembayaran-ap-supplier'])->group(function () {
+            Route::get('/', [PembayaranAPSupplierController::class, 'index'])
+                ->name('keuangan.pembayaran-ap-supplier.index');
+            Route::get('/create', [PembayaranAPSupplierController::class, 'create'])
+                ->name('keuangan.pembayaran-ap-supplier.create');
+            Route::get('/details', [PembayaranAPSupplierController::class, 'details'])
+                ->name('keuangan.pembayaran-ap-supplier.details');
+            Route::post('/store', [PembayaranAPSupplierController::class, 'store'])
+                ->name('keuangan.pembayaran-ap-supplier.store');
+            Route::post('/show', [PembayaranAPSupplierController::class, 'show'])
+                ->name('keuangan.pembayaran-ap-supplier.show');
+        });
+
+        route::prefix('report-ap-supplier/')->middleware(['can:view account receivable konfirmasi asuransi'])->group(function () {
+            Route::get('/belum-tukar-faktur', [ReportAPSupplierController::class, 'belumTukarFaktur'])
+                ->name('keuangan.report-ap-supplier.belum-tukar-faktur');
+            Route::get('/aging-ap-supplier', [ReportAPSupplierController::class, 'agingApSupplier'])
+                ->name('keuangan.report-ap-supplier.aging-ap-supplier');
+            Route::get('/laporan-jatuh-tempo', [ReportAPSupplierController::class, 'laporanJatuhTempo'])
+                ->name('keuangan.report-ap-supplier.laporan-jatuh-tempo');
         });
     });
 });

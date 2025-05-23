@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS;
 
+use App\Events\BillingFinalized;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,6 +15,15 @@ class Bilingan extends Model implements AuditableContract
 
     protected $guarded = ['id'];
     protected $table = 'bilingan';
+
+    protected static function booted()
+    {
+        static::updated(function ($billing) {
+            if ($billing->isDirty('status') && strtolower($billing->status) === 'final') {
+                event(new BillingFinalized($billing));
+            }
+        });
+    }
 
     public function registration()
     {

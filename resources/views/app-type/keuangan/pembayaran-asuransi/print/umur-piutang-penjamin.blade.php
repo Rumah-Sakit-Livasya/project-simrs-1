@@ -3,23 +3,17 @@
 @section('content')
 
     <div class="report-header">
-        <div class="report-title">@yield('report_title', 'LAPORAN UMUR PIUTANG PINJAMAN')</div>
+        <div class="report-title">LAPORAN UMUR PIUTANG PENJAMIN</div>
         <div class="report-period">
             PERIODE TGL {{ \Carbon\Carbon::parse($period_start)->format('d-m-Y') ?? '-' }} s/d
             {{ \Carbon\Carbon::parse($period_end)->format('d-m-Y') ?? '-' }}
         </div>
-        <div class="report-info">
-            Penjamin:
-            @if (request('penjamin_id') && $query->isNotEmpty())
-                {{ optional($query->first()->penjamin)->nama_perusahaan ?? '-' }}
-            @else
-                Semua Penjamin
-            @endif
-        </div>
+        <div class="report-info">Tanggal Cetak: {{ $print_date ?? now()->format('d-m-Y H:i') }}</div>
     </div>
 
-    <div class="container-fluid">
-        <h4 class="mb-4">Laporan Umur Piutang Penjamin</h4>
+    <div class="container-fluid mt-4">
+        <h5 class="mb-3">Laporan Umur Piutang Penjamin</h5>
+
         <table class="table table-bordered table-sm">
             <thead class="thead-dark text-center align-middle">
                 <tr>
@@ -33,7 +27,8 @@
                     <th rowspan="2">Jatuh Tempo</th>
                     <th rowspan="2">Total Tagihan</th>
                     <th rowspan="2">Jumlah Bayar</th>
-                    <th colspan="4">Sisa Tagihan</th>
+                    <th rowspan="2">Sisa Tagihan</th>
+                    <th colspan="4">Umur Piutang</th>
                 </tr>
                 <tr>
                     <th>&le; 30 Hari</th>
@@ -43,49 +38,45 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($query as $item)
-                    @php
-                        $jatuhTempo = \Carbon\Carbon::parse($item->jatuh_tempo);
-                        $tglInvoice = \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y');
-                        $tglKirim = \Carbon\Carbon::parse($item->tanggal_kirim)->format('d-m-Y');
-                        $jatuhTempoFormatted = $jatuhTempo->format('d-m-Y');
-                        $umurHari = \Carbon\Carbon::now()->diffInDays($jatuhTempo, false);
-                        $sisaTagihan = $item->jumlah - $item->jumlah_bayar;
-                        $umur30 = $umur60 = $umur90 = $umurOver = 0;
-
-                        if ($umurHari <= 30) {
-                            $umur30 = $sisaTagihan;
-                        } elseif ($umurHari <= 60) {
-                            $umur60 = $sisaTagihan;
-                        } elseif ($umurHari <= 90) {
-                            $umur90 = $sisaTagihan;
-                        } else {
-                            $umurOver = $sisaTagihan;
-                        }
-                    @endphp
+                @forelse ($data as $item)
                     <tr>
                         <td class="text-center">{{ $loop->iteration }}</td>
-                        <td>{{ $tglInvoice }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal ?? now())->format('d-m-Y') }}</td>
                         <td>{{ $item->invoice ?? '-' }}</td>
                         <td>{{ $item->penjamin->nama_perusahaan ?? '-' }}</td>
                         <td>{{ $item->registration->registration_number ?? '-' }}</td>
                         <td>{{ $item->registration->patient->name ?? '-' }}</td>
-                        <td>{{ $tglKirim ?? '-' }}</td>
-                        <td>{{ $jatuhTempoFormatted }}</td>
-                        <td class="text-right">{{ number_format($item->jumlah ?? 0) }}</td>
-                        <td class="text-right">{{ number_format($item->jumlah_bayar ?? 0) }}</td>
-                        <td class="text-right">{{ number_format($umur30) }}</td>
-                        <td class="text-right">{{ number_format($umur60) }}</td>
-                        <td class="text-right">{{ number_format($umur90) }}</td>
-                        <td class="text-right">{{ number_format($umurOver) }}</td>
+                        <td>{{ $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') : '-' }}
+                        </td>
+                        <td>{{ $item->jatuh_tempo ? \Carbon\Carbon::parse($item->jatuh_tempo)->format('d-m-Y') : '-' }}
+                        </td>
+                        <td class="text-end">{{ number_format($item->jumlah, 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($item->jumlah_bayar ?? 0, 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($item->sisa_tagihan ?? 0, 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($item->umur_30, 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($item->umur_60, 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($item->umur_90, 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($item->umur_over, 0, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="14" class="text-center">Tidak ada data tersedia</td>
+                        <td colspan="15" class="text-center text-danger">Tidak ada data tersedia</td>
                     </tr>
                 @endforelse
-            </tbody>
 
+                @if ($data->isNotEmpty())
+                    <tr class="fw-bold bg-light">
+                        <td colspan="8" class="text-end">TOTAL</td>
+                        <td class="text-end">{{ number_format($periodTotals['tagihan'], 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($periodTotals['bayar'], 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($periodTotals['sisa'], 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($periodTotals['umur_30'], 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($periodTotals['umur_60'], 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($periodTotals['umur_90'], 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($periodTotals['umur_over'], 0, ',', '.') }}</td>
+                    </tr>
+                @endif
+            </tbody>
         </table>
     </div>
 @endsection

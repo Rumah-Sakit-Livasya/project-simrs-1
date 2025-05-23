@@ -1,70 +1,68 @@
-<!DOCTYPE HTML>
-<html>
+@extends('app-type.keuangan.konfirmasi-asuransi.cetak.template')
 
-<head>
-    <title>Klaim Kwitansi</title>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+@section('title', 'Cetak Kwitansi Pembayaran')
+
+@section('style')
     <style>
-        @page {
-            size: A4 landscape;
-            margin: 1.5cm;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        .print-actions {
-            margin-bottom: 20px;
-        }
-
-        .print-actions a {
-            text-decoration: none;
-            color: #06c;
-            margin-right: 15px;
-        }
-
-        .header {
+        .header-container {
+            position: relative;
             display: flex;
             align-items: center;
             margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #000;
         }
 
-        .header img {
-            max-width: 80px;
-            margin-right: 20px;
+        .logo {
+            width: 100px;
+            margin-right: 15px;
         }
 
-        .hospital-info h2 {
-            margin: 0 0 5px 0;
-            font-size: 1.3em;
+        .header-info {
+            flex-grow: 1;
+        }
+
+        .hospital-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 3px;
         }
 
         .hospital-address {
-            font-size: 0.9em;
-            color: #555;
-        }
-
-        .title {
-            text-align: center;
-            margin: 10px 0 20px 0;
-            position: relative;
-        }
-
-        .title h1 {
-            text-decoration: underline;
-            margin: 0;
-            font-size: 1.4em;
+            font-size: 12px;
+            line-height: 1.3;
         }
 
         .invoice-number {
             position: absolute;
-            right: 0;
-            top: 0;
+            top: 20px;
+            right: 30px;
+            text-align: right;
+        }
+
+        .invoice-label {
+            font-size: 12px;
             font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .invoice-value {
+            font-size: 15px;
+            font-weight: bold;
+            border: 1px solid #000;
+            padding: 5px 10px;
+            display: inline-block;
+        }
+
+        .title {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .title h1 {
+            text-decoration: underline;
+            font-size: 18px;
+            margin: 0;
         }
 
         table.receipt-details {
@@ -74,32 +72,47 @@
         }
 
         .receipt-details td {
-            border: 1px solid #ccc;
+            border: 1px solid #aaa;
             padding: 8px;
             vertical-align: top;
+            font-size: 12px;
         }
 
         .label {
             width: 30%;
             font-weight: bold;
-            background: #f9f9f9;
+            background: #f3f3f3;
         }
 
-        .amount-in-words {
-            font-style: italic;
-            margin: 10px 0;
+        .keterangan-cell {
+            padding: 0 !important;
         }
 
-        .description {
-            margin: 15px 0;
+        .keterangan-wrapper {
+            display: block;
+            height: 80px;
+            padding: 8px;
         }
 
-        textarea {
+        textarea.keterangan-input {
             width: 100%;
-            height: 60px;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
+            height: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
             resize: none;
+            font-size: 12px;
+            font-family: Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .keterangan-print {
+            display: none;
+            white-space: pre-wrap;
+            font-size: 12px;
+            height: 100%;
         }
 
         .signature {
@@ -114,120 +127,83 @@
         }
 
         .signature .position {
-            font-size: 0.9em;
+            font-size: 11px;
         }
 
         @media print {
-
-            .print-actions,
-            textarea {
-                display: none;
+            textarea.keterangan-input {
+                display: none !important;
             }
 
-            #keterangan-text {
-                display: block;
-                white-space: pre-wrap;
+            .keterangan-print {
+                display: block !important;
             }
-        }
-
-        #keterangan-text {
-            display: none;
         }
     </style>
-</head>
+@endsection
 
-<body>
-
-    <!-- Print Actions -->
-    {{-- <div class="print-actions">
-        <a href="#" onclick="preparePrint()">Print</a>
-        <a href="#" onclick="window.close()">Close</a>
-    </div> --}}
-
-    <!-- Receipt Content -->
-    <div class="receipt">
-        <!-- Header -->
-        <div class="header">
-            <img src="http://192.168.1.253/testing/include/images/logocx.png" alt="Hospital Logo" />
-            <div class="hospital-info">
-                <h2>Rumah Sakit Livasya</h2>
-                <div class="hospital-address">
-                    Jl. Raya Timur III Dawuan No. 875 Kab. Majalengka<br>
-                    Telp. 081211151300 Fax. Kab. Majalengka, Jawa Barat, Indonesia
-                </div>
+@section('content')
+    <div class="header-container">
+        <img src="/img/logo.png" class="logo">
+        <div class="header-info">
+            <div class="hospital-name">Rumah Sakit Livasya</div>
+            <div class="hospital-address">
+                Jl. Raya Timur III Dawuan No. 875 Kab. Majalengka<br>
+                Telp. 081211151300 - Jawa Barat, Indonesia
             </div>
         </div>
-
-        <!-- Title -->
-        <div class="title">
-            <h1>KWITANSI</h1>
-            <div class="invoice-number">
-                No. {{ $konfirmasi->first()->invoice ?? '-' }}
-            </div>
-        </div>
-
-        <!-- Receipt Details -->
-        <table class="receipt-details">
-            <tr>
-                <td class="label">Sudah Terima Dari</td>
-                <td>{{ $konfirmasi->penjamin->nama_perusahaan }}</td>
-            </tr>
-            <tr>
-                <td class="label">Nominal</td>
-                <td><strong>Rp. {{ number_format($konfirmasi->jumlah, 0, ',', '.') }}</strong></td>
-            </tr>
-            <tr>
-                <td class="label">Uang Sejumlah</td>
-                <td><strong>{{ ucwords(terbilangRp($konfirmasi->jumlah)) }} </strong></td>
-            </tr>
-            <tr>
-                <td class="label">Untuk Pembayaran</td>
-                <strong>
-                    <textarea id="keterangan-input">{{ $konfirmasi->keterangan }}</textarea>
-                    <div id="keterangan-text"></div>
-                </strong>
-
-            </tr>
-        </table>
-
-        <!-- Amount in words -->
-
-        <!-- Signature -->
-        <div class="signature">
-            <div>Kab. Majalengka, {{ \Carbon\Carbon::now()->format('d M Y') }}</div>
-            <div class="name">Ghina Harunnita Sukma, S.Ak</div>
-            <div class="position">PJ Keuangan</div>
+        <div class="invoice-number">
+            <div class="invoice-label">No. Invoice</div>
+            <div class="invoice-value">{{ $konfirmasi->invoice ?? '-' }}</div>
         </div>
     </div>
+
+    <div class="title">
+        <h1>KWITANSI</h1>
+    </div>
+
+    <table class="receipt-details">
+        <tr>
+            <td class="label">Sudah Terima Dari</td>
+            <td>{{ $konfirmasi->penjamin->nama_perusahaan }}</td>
+        </tr>
+        <tr>
+            <td class="label">Nominal</td>
+            <td><strong>Rp. {{ number_format($konfirmasi->jumlah, 0, ',', '.') }}</strong></td>
+        </tr>
+        <tr>
+            <td class="label">Uang Sejumlah</td>
+            <td><strong>{{ ucwords(terbilangRp($konfirmasi->jumlah)) }}</strong></td>
+        </tr>
+        <tr>
+            <td class="label">Untuk Pembayaran</td>
+            <td class="keterangan-cell">
+                <div class="keterangan-wrapper">
+                    <textarea id="keteranganInput" class="keterangan-input">{{ $konfirmasi->keterangan }}</textarea>
+                    <div id="keteranganPrint" class="keterangan-print"></div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="signature">
+        <div>Kab. Majalengka, {{ \Carbon\Carbon::now()->format('d M Y') }}</div>
+        <div class="name">Ghina Harunnita Sukma, S.Ak</div>
+        <div class="position">PJ Keuangan</div>
+    </div>
+@endsection
+
+@section('script')
     <script>
-        // Simpan perubahan keterangan ke localStorage
-        const textarea = document.getElementById('keterangan-input');
-        const textDiv = document.getElementById('keterangan-text');
+        const textarea = document.getElementById('keteranganInput');
+        const textDiv = document.getElementById('keteranganPrint');
 
-        // Load dari localStorage kalau ada
-        if (localStorage.getItem('keteranganKwitansi')) {
-            textarea.value = localStorage.getItem('keteranganKwitansi');
+        function syncText() {
+            textDiv.innerText = textarea.value;
         }
 
-        // Update localStorage setiap kali user mengetik
-        textarea.addEventListener('input', function() {
-            localStorage.setItem('keteranganKwitansi', this.value);
-        });
+        textarea.addEventListener('input', syncText);
 
-        function preparePrint() {
-            const text = textarea.value;
-            textDiv.innerText = text;
-            textarea.style.display = 'none';
-            textDiv.style.display = 'block';
-            window.print();
-        }
-
-        // Kosongkan localStorage saat halaman ditutup agar data tidak terus tersimpan
-        window.addEventListener('beforeunload', () => {
-            localStorage.removeItem('keteranganKwitansi');
-        });
+        window.onbeforeprint = syncText;
     </script>
-
-</body>
-
-</html>
+@endsection
