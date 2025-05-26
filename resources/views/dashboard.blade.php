@@ -437,6 +437,7 @@
                                                         <div class="card-body">
                                                             <h5 class="card-title">
                                                                 {{ $employees->firstWhere('organization_id', $organizationId)->organization->name }}
+                                                                {{ $organizationId }}
                                                             </h5>
                                                             <p class="card-text">
                                                                 {{ $employees->where('organization_id', $organizationId)->count() }}
@@ -454,6 +455,7 @@
                                                                     <h5 class="modal-title"
                                                                         id="organizationModalLabel{{ $organizationId }}">
                                                                         {{ $employees->firstWhere('organization_id', $organizationId)->organization->name }}
+                                                                        {}
                                                                     </h5>
                                                                     <button type="button" class="close"
                                                                         data-dismiss="modal" aria-label="Close">
