@@ -8,11 +8,16 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\CPPT\CPPTController;
 use App\Http\Controllers\SIMRS\DepartementController;
+use App\Http\Controllers\SIMRS\ERMController;
 use App\Http\Controllers\SIMRS\EthnicController;
+use App\Http\Controllers\SIMRS\EWSAnakController;
+use App\Http\Controllers\SIMRS\EWSDewasaController;
+use App\Http\Controllers\SIMRS\EWSObstetriController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\HargaJual\MarginHargaJualController;
+use App\Http\Controllers\SIMRS\IGD\IGDController;
 use App\Http\Controllers\SIMRS\JadwalDokter\JadwalDokterController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
@@ -132,7 +137,32 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         });
     });
 
+    Route::prefix('igd')->group(function () {
+        Route::post('/filter-pasien', [IGDController::class, 'index'])->name('igd.filter-pasien');
+    });
+    Route::prefix('erm')->group(function () {
+        Route::post('/filter-pasien', [ERMController::class, 'filterPasien'])->name('erm.filter-pasien');
 
+        Route::prefix('ews-anak')->group(function () {
+            Route::post('/', [EWSAnakController::class, 'store'])->name('erm.ews-anak.store');
+            Route::get('/{id}', [EWSAnakController::class, 'getData'])->name('erm.ews-anak.store');
+        });
+
+        Route::prefix('ews-dewasa')->group(function () {
+            Route::post('/', [EWSDewasaController::class, 'store'])->name('erm.ews-dewasa.store');
+            Route::get('/{id}', [EWSDewasaController::class, 'getData'])->name('erm.ews-dewasa.store');
+        });
+
+        Route::prefix('ews-obstetri')->group(function () {
+            Route::post('/', [EWSObstetriController::class, 'store'])->name('erm.ews-obstetri.store');
+            Route::get('/{id}', [EWSObstetriController::class, 'getData'])->name('erm.ews-obstetri.store');
+        });
+
+        Route::prefix('assesment-keperawatan-gadar')->group(function () {
+            Route::post('/', [Assesment::class, 'store'])->name('erm.assesment-keperawatan-gadar.store');
+            Route::get('/{id}', [Assesment::class, 'getData'])->name('erm.assesment-keperawatan-gadar.store');
+        });
+    });
     Route::prefix('poliklinik')->group(function () {
         Route::post('/filter-pasien', [PoliklinikController::class, 'filterPasien'])->name('poliklinik.filter-pasien');
     });

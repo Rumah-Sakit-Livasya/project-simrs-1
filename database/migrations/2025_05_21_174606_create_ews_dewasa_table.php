@@ -1,0 +1,43 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateEwsDewasaTable extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('ews_dewasa', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('registration_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->date('tgl');
+            $table->time('jam');
+            $table->string('laju_respirasi');
+            $table->string('saturasi');
+            $table->string('suplemen')->nullable();
+            $table->string('tekanan_darah');
+            $table->string('laju_jantung');
+            $table->string('kesadaran');
+            $table->string('temperatur');
+            $table->integer('skor_total');
+            $table->string('gds')->nullable();
+            $table->string('skor_nyeri')->nullable();
+            $table->string('urin_output')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('ews_dewasa');
+    }
+}

@@ -439,7 +439,7 @@ class RegistrationController extends Controller
                     'bilingan_id' => $billing->id,
                     'registration_id' => $registration->id,
                     'date' => Carbon::now(),
-                    'tagihan' => "[Biaya Administrasi] Rawat Jalan",
+                    'tagihan' => "[Biaya Administrasi] UGD",
                     // 'detail_tagihan' => $fee->nama_tarif,
                     'nominal' => $hargaTarifAdmin,
                     'quantity' => 1,
@@ -607,6 +607,7 @@ class RegistrationController extends Controller
         ]);
 
         $credentials = $request->only('email', 'password');
+
         // Attempt Zimbra login if local authentication fails
         if ($this->zimbraLogin($credentials['email'], $credentials['password'])) {
             // Zimbra authentication successful
@@ -615,15 +616,31 @@ class RegistrationController extends Controller
             if ($user == null) {
                 return back()->with('error', 'User tidak ditemukan!');
             }
+
             // Find the registration record
             $registration = Registration::findOrFail($id);
 
-            // Kosongkan Bed
+            // Cek apakah ada bilingan dan tagihan pasien
+            if ($registration->bilingan) {
+                $bilingan = $registration->bilingan;
+
+                // Hapus semua tagihan pasien yang terkait dengan bilingan
+                if ($bilingan->tagihan_pasien) {
+                    foreach ($bilingan->tagihan_pasien as $tagihan) {
+                        $tagihan->delete();
+                    }
+                }
+
+                // Hapus data biling jika semua tagihan telah terhapus
+                $bilingan->delete();
+            }
+
+            // Kosongkan Bed jika rawat inap
             if ($registration['registration_type'] == 'rawat-inap') {
                 $this->removePatientFromBed($registration->patient->bed->id, $registration->patient->id);
             }
 
-            // Create a new BatalRegister entry
+            // Buat entri baru untuk pembatalan pendaftaran
             BatalRegister::create([
                 'registration_id' => $registration->id,
                 'user_id' => auth()->user()->id,
@@ -631,16 +648,14 @@ class RegistrationController extends Controller
                 'alasan' => $request->alasan,
             ]);
 
-            // // Delete the registration record and its related data
-            // $registration->delete();
-
-            // Update the status of the registration
+            // Update status registrasi menjadi "batal"
             $registration->update([
                 'status' => 'batal',
                 'registration_close_date' => Carbon::now()
             ]);
 
-            return redirect()->route('detail.pendaftaran.pasien', $registration->patient->id)->with('success', 'Registration has been cancelled successfully.');
+            return redirect()->route('detail.pendaftaran.pasien', $registration->patient->id)
+                ->with('success', 'Registration has been cancelled successfully.');
         } else {
             return back()->with('error', 'Email atau Password salah!');
         }

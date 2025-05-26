@@ -9,6 +9,7 @@ use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
+use App\Models\SIMRS\Pelayanan\Triage;
 use App\Models\SIMRS\Pengkajian\FormKategori;
 use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
@@ -23,186 +24,138 @@ class IGDController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Registration::query();
-        $menu = request()->menu;
-        $noRegist = request()->registration;
+        $query = Registration::query()
+            ->where('registration_type', 'igd');
 
-        $filters = ['medical_record_number', 'registration_number', 'registration_name'];
-        $filterApplied = false;
+        $hasFilter = false;
 
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
-                $filterApplied = true;
+        $simpleFilters = [
+            'registration_number' => $request->registration_number,
+        ];
+
+        // Filter langsung
+        foreach ($simpleFilters as $column => $value) {
+            if (!empty($value)) {
+                $query->where($column, 'like', '%' . $value . '%');
+                $hasFilter = true;
             }
         }
 
-        // Filter by date range
+        // Filter berdasarkan relasi patient
+        if (!empty($request->medical_record_number)) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('medical_record_number', 'like', '%' . $request->medical_record_number . '%');
+            });
+            $hasFilter = true;
+        }
+
+        // Filter berdasarkan nama pasien (relasi)
+        if (!empty($request->name)) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%');
+            });
+            $hasFilter = true;
+        }
+
+        // Filter berdasarkan rentang tanggal
         if ($request->filled('registration_date')) {
             $dateRange = explode(' - ', $request->registration_date);
             if (count($dateRange) === 2) {
                 $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
                 $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
                 $query->whereBetween('registration_date', [$startDate, $endDate]);
-                $filterApplied = true;
+                $hasFilter = true;
             }
         }
 
-
+        // Filter berdasarkan status
         if ($request->filled('status') && $request->status !== 'all') {
-            $query->where('status', $request->status == 'aktif' ? 'aktif' : 'tutup_kunjungan');
-            $filterApplied = true;
+            $query->where('status', $request->status === 'aktif' ? 'aktif' : 'tutup_kunjungan');
+            $hasFilter = true;
         }
 
-        // Get the filtered results if any filter is applied
-        if ($filterApplied) {
-            $registration = $query->orderBy('date', 'asc')
-                ->where('registration_type', 'igd')
-                ->get();
-        } else {
-            // Return empty collection if no filters applied
-            $registration = collect();
-        }
-
-        if ($menu && $noRegist) {
-            $query = Registration::where('date', now()->format('Y-m-d'));
-            $registration = Registration::where('registration_number', $noRegist)->first();
-            $departements = Departement::latest()->get();
-            $hariIni = Carbon::now()->translatedFormat('l');
-            $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
-
-            $query->when($registration->departement_id, function ($q) use ($registration) {
-                return $q->where('departement_id', $registration->departement_id);
-            });
-
-            $query->when($registration->doctor_id, function ($q) use ($registration) {
-                return $q->where('doctor_id', $registration->doctor_id);
-            });
-
-            $registrations = $query->get();
-
-            // Render partial view sebagai HTML
-            $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
-
-            $menuResponse = $this->poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration);
-            if ($menuResponse) {
-                return $menuResponse;
-            }
-        } else {
-            return view('pages.simrs.igd.daftar-pasien', [
-                'registrations' => $registration
+        // Default: jika tidak ada filter aktif, ambil data hari ini
+        if (!$hasFilter) {
+            $today = now()->format('Y-m-d');
+            $query->whereBetween('registration_date', [
+                $today . ' 00:00:00',
+                $today . ' 23:59:59',
             ]);
         }
+
+        $registrations = $query->orderBy('date', 'asc')->get();
+
+        return view('pages.simrs.igd.daftar-pasien', [
+            'registrations' => $registrations,
+        ]);
     }
 
-    // public function index()
-    // {
-    //     $menu = request()->menu;
-    //     $noRegist = request()->registration;
-
-    //     $departements = Departement::latest()->get();
-    //     $hariIni = Carbon::now()->translatedFormat('l');
-    //     $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
-    //     $registration = Registration::where('registration_number', $noRegist)->first();
-
-    //     if ($menu && $noRegist) {
-    //         $query = Registration::where('date', now()->format('Y-m-d'));
-
-    //         $query->when($registration->departement_id, function ($q) use ($registration) {
-    //             return $q->where('departement_id', $registration->departement_id);
-    //         });
-
-    //         $query->when($registration->doctor_id, function ($q) use ($registration) {
-    //             return $q->where('doctor_id', $registration->doctor_id);
-    //         });
-
-    //         $registrations = $query->get();
-
-    //         // Render partial view sebagai HTML
-    //         $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
-
-    //         $menuResponse = $this->poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration);
-    //         if ($menuResponse) {
-    //             return $menuResponse;
-    //         }
-    //     } else {
-    //         return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration'));
-    //     }
-    // }
-
-    private function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration)
+    public function getTriage($id)
     {
-        Carbon::setLocale('id');
+        $registration = Registration::find($id);
+        $triage = Triage::where('registration_id', $registration->id)->first();
 
-        // $doctors = Doctor::with('employee', 'departement')->get();
-        // $groupedDoctors = [];
-        // foreach ($doctors as $doctor) {
-        //     $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
-        // }
-
-        if ($menu == 'pengkajian_perawat') {
-            $pengkajian = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
-            return view('pages.simrs.poliklinik.index', compact('registration', 'departements', 'jadwal_dokter', 'pengkajian'));
-        } elseif ($menu == 'cppt_perawat') {
-            $perawat = Employee::whereHas('organization', function ($query) {
-                $query->where('name', 'Rawat Jalan');
-            })->get();
-            return view('pages.simrs.poliklinik.perawat.cppt', compact('registration', 'departements', 'jadwal_dokter', 'perawat'));
-        } elseif ($menu == 'transfer_pasien_perawat') {
-            return view('pages.simrs.poliklinik.perawat.transfer_pasien_perawat', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'pengkajian_dokter') {
-            return view('pages.simrs.poliklinik.dokter.pengkajian', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'cppt_dokter') {
-            return view('pages.simrs.poliklinik.dokter.cppt', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'resume_medis_rajal') {
-            return view('pages.simrs.poliklinik.dokter.resume_medis', compact('registration', 'departements', 'jadwal_dokter'));
-        } else if ($menu == 'profil_ringkas_rajal') {
-            return view('pages.simrs.poliklinik.dokter.resume_medis', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'pengkajian_gizi') {
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'cppt_farmasi') {
-            return view('pages.simrs.poliklinik.farmasi.cppt', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'pengkajian_resep') {
-            return view('pages.simrs.poliklinik.farmasi.pengkajian_resep', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'rekonsiliasi_obat') {
-            return view('pages.simrs.poliklinik.farmasi.rekonsiliasi_obat', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'pengkajian_lanjutan') {
-            $form = FormKategori::all();
-            $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
-
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian'));
-        } elseif ($menu == 'tindakan_medis') {
-            $tindakan_medis = TindakanMedis::all();
-            $doctors = Doctor::with('employee', 'departement')->get();
-            // Group doctors by department
-            $groupedDoctors = [];
-            foreach ($doctors as $doctor) {
-                $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
-            }
-            $tindakan_medis_yang_dipakai = OrderTindakanMedis::where('registration_id', $registration->id)->get();
-            return view('pages.simrs.poliklinik.layanan.tindakan_medis', compact('groupedDoctors', 'registration', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai'));
-        } elseif ($menu == 'pemakaian_alat') {
-            $list_peralatan = Peralatan::all();
-            $alat_medis_yang_dipakai = OrderAlatMedis::where('registration_id', $registration->id)->get();
-            $doctors = Doctor::with('employee')
-                ->whereHas('employee')
-                ->orderBy(Employee::select('fullname')->whereColumn('employees.id', 'doctors.employee_id'))
-                ->get();
-
-
-            return view('pages.simrs.poliklinik.layanan.pemakaian_alat', compact('registration', 'departements', 'jadwal_dokter', 'list_peralatan', 'alat_medis_yang_dipakai', 'doctors'));
-        } else if ($menu == 'patologi_klinik') {
-            $order_lab = OrderLaboratorium::where('registration_id', $registration->id)->get();
-            return view('pages.simrs.poliklinik.layanan.patologi_klinik', compact('order_lab', 'registration', 'departements', 'jadwal_dokter'));
-        } else {
-            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
+        if (!$triage) {
+            return response()->json([
+                'message' => 'Data Triage tidak ditemukan.'
+            ], 404);
         }
 
-        return null; // Jika menu tidak cocok
+        return response()->json([
+            'message' => 'Data Triage ditemukan.',
+            'data' => $triage
+        ], 200);
     }
 
-    public function catatanMedis()
+    public function store(Request $request)
     {
-        return view('pages.simrs.igd.catatan-medis');
+        // Validasi jika diperlukan
+        $request->validate([
+            'tgl_masuk' => 'required|date',
+            'jam_masuk' => 'required',
+            'jam_dilayani' => 'required',
+            'pr' => 'nullable|integer',
+            'bp' => 'nullable|string',
+        ]);
+
+        // Simpan ke database
+        $triage = \App\Models\SIMRS\Pelayanan\Triage::updateOrCreate(
+            ['registration_id' => $request->registration_id], // Kondisi pencarian
+            [
+                'tgl_masuk' => $request->tgl_masuk,
+                'jam_masuk' => $request->jam_masuk,
+                'jam_dilayani' => $request->jam_dilayani,
+                'pr' => $request->pr,
+                'bp' => $request->bp,
+                'body_height' => $request->body_height,
+                'bmi' => $request->bmi,
+                'lingkar_dada' => $request->lingkar_dada,
+                'sp02' => $request->sp02,
+                'rr' => $request->rr,
+                'temperatur' => $request->temperatur,
+                'body_weight' => $request->body_weight,
+                'kat_bmi' => $request->kat_bmi,
+                'lingkar_perut' => $request->lingkar_perut,
+                'auto_anamnesa' => $request->has('auto_anamnesa'),
+                'allo_anamnesa' => $request->has('allo_anamnesa'),
+                'airway_merah' => json_encode($request->airway_merah),
+                'airway_kuning' => json_encode($request->airway_kuning),
+                'airway_hijau' => json_encode($request->airway_hijau),
+                'breathing_merah' => json_encode($request->breathing_merah),
+                'breathing_kuning' => json_encode($request->breathing_kuning),
+                'breathing_hijau' => json_encode($request->breathing_hijau),
+                'circulation_merah' => json_encode($request->circulation_merah),
+                'circulation_kuning' => json_encode($request->circulation_kuning),
+                'circulation_hijau' => json_encode($request->circulation_hijau),
+                'disability' => json_encode($request->disability),
+                'kesimpulan' => json_encode($request->kesimpulan),
+                'daa_hitam' => $request->has('daa_hitam')
+            ]
+        );
+
+        return response()->json([
+            'message' => 'Data berhasil disimpan',
+            'data' => $triage
+        ], 201);
     }
 }

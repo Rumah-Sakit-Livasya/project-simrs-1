@@ -1,5 +1,6 @@
-<div class="modal fade" id="modal-tambah-tindakan" tabindex="-1" aria-hidden="true" data-id="{{$registration->id}}">
-    <div class="modal-dialog modal-xl">
+<div class="modal fade" id="modal-tambah-tindakan" tabindex="-1" role="dialog" aria-hidden="true"
+    data-id="{{ $registration->id }}">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary">
                 <h5 class="modal-title text-white">Tambah Tindakan Medis</h5>
@@ -7,21 +8,25 @@
                     <span aria-hidden="true"><i class="fal fa-times"></i></span>
                 </button>
             </div>
-            <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="store-form">
+
+            <form id="store-form" method="post" action="javascript:void(0)" autocomplete="off" novalidate>
                 @csrf
                 @method('post')
                 <input type="hidden" id="registration" value="{{ $registration->id }}">
+
                 <div class="modal-body">
-                    <div class="row mb-3">
+                    <div class="form-group row">
                         <label for="tglTindakan" class="col-sm-3 col-form-label">Tgl Tindakan</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="tglTindakan" placeholder="Pilih tanggal">
+                            <input type="text" class="form-control" id="tglTindakan" name="tgl_tindakan"
+                                placeholder="Pilih tanggal">
                         </div>
                     </div>
-                    <div class="row mb-3">
+
+                    <div class="form-group row">
                         <label for="dokterPerawat" class="col-sm-3 col-form-label">Dokter/Perawat</label>
                         <div class="col-sm-9">
-                            <select class="form-select" id="dokterPerawat" style="width: 100%;">
+                            <select class="form-select" id="dokterPerawat" name="doctor_id" style="width: 100%;">
                                 <option value=""></option>
                                 @foreach ($groupedDoctors as $department => $doctors)
                                     <optgroup label="{{ $department }}">
@@ -35,10 +40,11 @@
                             </select>
                         </div>
                     </div>
-                    <div class="row mb-3">
-                        <label for="poliklinik" class="col-sm-3 col-form-label">Poliklinik</label>
+
+                    <div class="form-group row">
+                        <label for="departement" class="col-sm-3 col-form-label">Poliklinik</label>
                         <div class="col-sm-9">
-                            <select class="form-select" id="departement" style="width: 100%;">
+                            <select class="form-select" id="departement" name="departement_id" style="width: 100%;">
                                 @foreach ($departements as $departement)
                                     <option value="{{ $departement->id }}"
                                         data-groups="{{ $departement->grup_tindakan_medis ? json_encode($departement->grup_tindakan_medis->toArray()) : '[]' }}">
@@ -48,47 +54,53 @@
                             </select>
                         </div>
                     </div>
-                    <div class="row mb-3">
+
+                    <div class="form-group row">
                         <label for="kelas" class="col-sm-3 col-form-label">Kelas</label>
                         <div class="col-sm-9">
-                            <select class="form-select" id="kelas" style="width: 100%;">
+                            <select class="form-select" id="kelas" name="kelas" style="width: 100%;">
                                 <option value="" selected>Pilih Kelas</option>
                                 <option value="rawat-jalan">RAWAT JALAN</option>
                                 <option value="rawat-inap">RAWAT INAP</option>
                             </select>
                         </div>
                     </div>
-                    <div class="row mb-3">
+
+                    <div class="form-group row">
                         <label for="tindakanMedis" class="col-sm-3 col-form-label">Tindakan Medis</label>
                         <div class="col-sm-9">
-                            <select class="form-select" id="tindakanMedis" style="width: 100%;">
+                            <select class="form-select" id="tindakanMedis" name="tindakan_medis_id"
+                                style="width: 100%;">
                                 <option value="" selected>Pilih Tindakan Medis</option>
-                                {{-- @dd($tindakan_medis) --}}
                                 @foreach ($tindakan_medis as $item)
-                                    <option value="{{$item->id}}">{{$item->nama_tindakan}}</option>
+                                    <option value="{{ $item->id }}">{{ $item->nama_tindakan }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
-                    <div class="row mb-3">
+
+                    <div class="form-group row">
                         <label for="qty" class="col-sm-3 col-form-label">Qty</label>
                         <div class="col-sm-9">
-                            <input type="number" class="form-control" id="qty" value="1">
+                            <input type="number" class="form-control" id="qty" name="qty" value="1"
+                                min="1">
                         </div>
                     </div>
-                    <div class="row mb-3">
+
+                    <div class="form-group row">
                         <label for="diskonDokter" class="col-sm-3 col-form-label">Diskon Dokter</label>
                         <div class="col-sm-9">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="diskonDokter">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="diskonDokter" name="foc">
                                 <label class="form-check-label" for="diskonDokter">Ya</label>
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> <!-- /.modal-body -->
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Tindakan</button>
                 </div>
             </form>
         </div>
