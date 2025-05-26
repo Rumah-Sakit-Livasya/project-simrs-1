@@ -225,6 +225,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         Route::post('/deduction/export', [EmployeeController::class, 'exportDeduction'])->name('deduction.export');
         Route::post('/deduction/import', [EmployeeController::class, 'importDeduction'])->name('deduction.import');
         Route::get('/getByOrganization', [EmployeeController::class, 'getEmployeesByOrganization'])->name('getEmployeesByOrganization');
+        Route::post('/toggle-management/{id}', [EmployeeController::class, 'toggleManagement'])->name('toggleManagement');
     });
 
     Route::prefix('attendances')->group(function () {

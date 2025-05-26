@@ -1030,6 +1030,40 @@
                 todayHighlight: true,
                 format: "yyyy-mm-dd"
             });
+
+            // IS MANAGEMENT BUTTON
+            $('.btn-toggle-management').on('click', function() {
+                let button = $(this);
+                let employeeId = button.data('id');
+                let currentStatus = button.data('status');
+                let newStatus = currentStatus === 1 ? 0 : 1;
+
+                button.prop('disabled', true);
+
+                $.ajax({
+                    url: '/api/dashboard/employee/toggle-management/' + employeeId,
+                    type: 'POST',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        is_management: newStatus
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            button.data('status', newStatus);
+                            showSuccessAlert('Status berhasil diperbarui');
+
+                        } else {
+                            showErrorAlertNoRefresh('Gagal memperbarui status');
+                        }
+                    },
+                    error: function() {
+                        showErrorAlertNoRefresh('Terjadi kesalahan saat memproses');
+                    },
+                    complete: function() {
+                        button.prop('disabled', false);
+                    }
+                });
+            });
         });
     </script>
 @endsection
