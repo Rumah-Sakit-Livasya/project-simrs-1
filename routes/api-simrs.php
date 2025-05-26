@@ -1,8 +1,28 @@
 <?php
 
 use App\Http\Controllers\API\EmployeeController;
+use App\Http\Controllers\JamMakanGiziController;
+use App\Http\Controllers\DietGiziController;
+use App\Http\Controllers\KategoriGiziController;
+use App\Http\Controllers\MakananGiziController;
+use App\Http\Controllers\MenuGiziController;
+use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\SIMRS\Gizi\GiziController;
+use App\Http\Controllers\WarehouseBarangFarmasiController;
+use App\Http\Controllers\WarehouseBarangNonFarmasiController;
+use App\Http\Controllers\WarehouseGolonganBarangController;
+use App\Http\Controllers\WarehouseKategoriBarangController;
+use App\Http\Controllers\WarehouseKelompokBarangController;
+use App\Http\Controllers\WarehouseMasterGudangController;
+use App\Http\Controllers\WarehousePabrikController;
+use App\Http\Controllers\WarehouseSatuanBarangController;
+use App\Http\Controllers\WarehouseSetupMinMaxStockController;
+use App\Http\Controllers\WarehouseSupplierController;
+use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\OrderParameterLaboratorium;
+use App\Models\WarehouseKategoriBarang;
+use App\Models\WarehouseKelompokBarang;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\SIMRS\BedController;
@@ -94,6 +114,119 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::post('/edit-order', [OrderLaboratoriumController::class, 'editOrderLaboratorium'])->name('order.laboratorium.edit-order');
         Route::post('/parameter-verify', [OrderLaboratoriumController::class, 'verificate'])->name('order.laboratorium.verificate');
         Route::post('/parameter-delete', [OrderLaboratoriumController::class, 'deleteParameter'])->name('order.laboratorium.delete-parameter');
+    });
+
+    Route::prefix('gizi')->group(function () {
+
+        Route::prefix("order")->group(function () {
+            Route::get("/store", [OrderGiziController::class, 'store'])->name('order.gizi.store');
+            Route::post("/update/status", [OrderGiziController::class, "update_status"])->name("order.gizi.update.status");
+            Route::post("/update", [OrderGiziController::class, 'update'])->name('order.gizi.update');
+        });
+
+        Route::prefix('kategori')->group(function () {
+            Route::post('/store', [KategoriGiziController::class, 'store'])->name('kategori.gizi.store');
+            Route::put('/update/{id}/', [KategoriGiziController::class, 'update'])->name('kategori.gizi.update');
+            Route::delete('/destroy/{id}/', [KategoriGiziController::class, 'destroy'])->name('kategori.gizi.destroy');
+        });
+
+        Route::prefix('makanan')->group(function () {
+            Route::post('/store', [MakananGiziController::class, 'store'])->name('makanan.gizi.store');
+            Route::put('/update/{id}/', [MakananGiziController::class, 'update'])->name('makanan.gizi.update');
+            Route::delete('/destroy/{id}/', [MakananGiziController::class, 'destroy'])->name('makanan.gizi.destroy');
+        });
+
+        Route::prefix('menu')->group(function () {
+            Route::post('/store', [MenuGiziController::class, 'store'])->name('menu.gizi.store');
+            Route::put('/update/{id}/', [MenuGiziController::class, 'update'])->name('menu.gizi.update');
+            Route::delete('/destroy/{id}/', [MenuGiziController::class, 'destroy'])->name('menu.gizi.destroy');
+        });
+
+        Route::prefix('jam-makan')->group(function () {
+            Route::post('/store', [JamMakanGiziController::class, 'store'])->name('jam-makan.gizi.store');
+            Route::put('/update/{id}/', [JamMakanGiziController::class, 'update'])->name('jam-makan.gizi.update');
+            Route::delete('/destroy/{id}/', [JamMakanGiziController::class, 'destroy'])->name('jam-makan.gizi.destroy');
+        });
+
+        Route::prefix('auto-diet')->group(function () {
+            Route::get('/store', [DietGiziController::class, 'store'])->name('auto-diet.gizi.store');
+            Route::put('/update/{id}/', [DietGiziController::class, 'update'])->name('auto-diet.gizi.update');
+            Route::delete('/destroy/{id}/', [DietGiziController::class, 'destroy'])->name('auto-diet.gizi.destroy');
+        });
+    });
+
+    Route::prefix("warehouse")->group(function () {
+        Route::prefix("master-data")->group(function () {
+            Route::prefix("zat-aktif")->group(function () {
+                Route::post('/store', [WarehouseZatAktifController::class, 'store'])->name('warehouse.master-data.zat-aktif.store');
+                Route::put('/update/{id}/', [WarehouseZatAktifController::class, 'update'])->name('warehouse.master-data.zat-aktif.update');
+                Route::delete('/destroy/{id}/', [WarehouseZatAktifController::class, 'destroy'])->name('warehouse.master-data.zat-aktif.destroy');
+            });
+
+            Route::prefix("satuan-barang")->group(function () {
+                Route::post('/store', [WarehouseSatuanBarangController::class, 'store'])->name('warehouse.master-data.satuan-barang.store');
+                Route::put('/update/{id}/', [WarehouseSatuanBarangController::class, 'update'])->name('warehouse.master-data.satuan-barang.update');
+                Route::delete('/destroy/{id}/', [WarehouseSatuanBarangController::class, 'destroy'])->name('warehouse.master-data.satuan-barang.destroy');
+            });
+
+            Route::prefix("kelompok-barang")->group(function () {
+                Route::post('/store', [WarehouseKelompokBarangController::class, 'store'])->name('warehouse.master-data.kelompok-barang.store');
+                Route::put('/update/{id}/', [WarehouseKelompokBarangController::class, 'update'])->name('warehouse.master-data.kelompok-barang.update');
+                Route::delete('/destroy/{id}/', [WarehouseKelompokBarangController::class, 'destroy'])->name('warehouse.master-data.kelompok-barang.destroy');
+            });
+
+            Route::prefix("kategori-barang")->group(function () {
+                Route::post('/store', [WarehouseKategoriBarangController::class, 'store'])->name('warehouse.master-data.kategori-barang.store');
+                Route::put('/update/{id}/', [WarehouseKategoriBarangController::class, 'update'])->name('warehouse.master-data.kategori-barang.update');
+                Route::delete('/destroy/{id}/', [WarehouseKategoriBarangController::class, 'destroy'])->name('warehouse.master-data.kategori-barang.destroy');
+            });
+
+            Route::prefix("golongan-barang")->group(function () {
+                Route::post('/store', [WarehouseGolonganBarangController::class, 'store'])->name('warehouse.master-data.golongan-barang.store');
+                Route::put('/update/{id}/', [WarehouseGolonganBarangController::class, 'update'])->name('warehouse.master-data.golongan-barang.update');
+                Route::delete('/destroy/{id}/', [WarehouseGolonganBarangController::class, 'destroy'])->name('warehouse.master-data.golongan-barang.destroy');
+            });
+
+            Route::prefix("master-gudang")->group(function () {
+                Route::post('/store', [WarehouseMasterGudangController::class, 'store'])->name('warehouse.master-data.master-gudang.store');
+                Route::put('/update/{id}/', [WarehouseMasterGudangController::class, 'update'])->name('warehouse.master-data.master-gudang.update');
+                Route::delete('/destroy/{id}/', [WarehouseMasterGudangController::class, 'destroy'])->name('warehouse.master-data.master-gudang.destroy');
+            });
+
+            Route::prefix("pabrik")->group(function () {
+                Route::post('/store', [WarehousePabrikController::class, 'store'])->name('warehouse.master-data.pabrik.store');
+                Route::put('/update/{id}/', [WarehousePabrikController::class, 'update'])->name('warehouse.master-data.pabrik.update');
+                Route::delete('/destroy/{id}/', [WarehousePabrikController::class, 'destroy'])->name('warehouse.master-data.pabrik.destroy');
+            });
+
+            Route::prefix("supplier")->group(function () {
+                Route::post('/store', [WarehouseSupplierController::class, 'store'])->name('warehouse.master-data.supplier.store');
+                Route::put('/update/{id}/', [WarehouseSupplierController::class, 'update'])->name('warehouse.master-data.supplier.update');
+                Route::delete('/destroy/{id}/', [WarehouseSupplierController::class, 'destroy'])->name('warehouse.master-data.supplier.destroy');
+            });
+
+            Route::prefix("barang-non-farmasi")->group(function () {
+                Route::post('/store', [WarehouseBarangNonFarmasiController::class, 'store'])->name('warehouse.master-data.barang-non-farmasi.store');
+                Route::put('/update/{id}/', [WarehouseBarangNonFarmasiController::class, 'update'])->name('warehouse.master-data.barang-non-farmasi.update');
+                Route::delete('/destroy/{id}/', [WarehouseBarangNonFarmasiController::class, 'destroy'])->name('warehouse.master-data.barang-non-farmasi.destroy');
+            });
+
+            Route::prefix("barang-farmasi")->group(function () {
+                Route::post('/store', [WarehouseBarangFarmasiController::class, 'store'])->name('warehouse.master-data.barang-farmasi.store');
+                Route::put('/update/{id}/', [WarehouseBarangFarmasiController::class, 'update'])->name('warehouse.master-data.barang-farmasi.update');
+                Route::delete('/destroy/{id}/', [WarehouseBarangFarmasiController::class, 'destroy'])->name('warehouse.master-data.barang-farmasi.destroy');
+            });
+
+            Route::prefix("setup-min-max-stock")->group(function () {
+                Route::post('/store', [WarehouseSetupMinMaxStockController::class, 'store'])->name('warehouse.master-data.setup-min-max-stock.store');
+                // Route::put('/update/{id}/', [WarehouseSetupMinMaxStockController::class, 'update'])->name('warehouse.master-data.setup-min-max-stock.update');
+                // Route::delete('/destroy/{id}/', [WarehouseSetupMinMaxStockController::class, 'destroy'])->name('warehouse.master-data.setup-min-max-stock.destroy');
+
+                Route::prefix("get")->group(function () {
+                    Route::get('/gudang/{id}/', [WarehouseSetupMinMaxStockController::class, 'get_gudang'])->name('warehouse.master-data.setup-min-max-stock.get.gudang');
+                });
+            });
+        });
     });
 
 

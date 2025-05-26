@@ -146,7 +146,7 @@
 
                 {{-- content start --}}
 
-                @if (isset($registration) || $registration != null)
+                @if ((isset($registration) || $registration != null) && $pengkajian)
                     <div class="tab-content p-3">
                         <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
                             <form action="javascript:void(0)" id="pengkajian_perawat_form" method="POST">
@@ -981,13 +981,10 @@
                                 <header class="text-danger">
                                     <h4 class="mt-5 font-weight-bold">Sensorik</h4>
                                 </header>
+
                                 <div class="row mt-3">
                                     @php
-                                        $data = [];
-
-                                        if (isset($pengkajian) && $pengkajian->sensorik) {
-                                            $data = json_decode($pengkajian->sensorik, true);
-                                        }
+                                        $data = json_decode($pengkajian->sensorik, true);
 
                                         $opsi = [
                                             'sensorik_penglihatan' => ['Normal', 'Kabur', 'Kaca Mata', 'Lensa Kontak'],
@@ -998,6 +995,7 @@
                                                 'Ada alat bantu dengar ka/ki',
                                             ],
                                         ];
+
                                     @endphp
                                     <table class="table">
                                         <tbody>

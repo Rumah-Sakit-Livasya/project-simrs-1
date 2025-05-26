@@ -8,7 +8,7 @@
     <meta name="msapplication-TileColor" content="#00bcd4">
     <title>Report View</title>
 
-    <link type="text/css" rel="stylesheet" href="{{ asset('css/bootstrap.css.js') }}">
+    <link type="text/css" rel="stylesheet" href="{{ asset('css/bootstrap.css') }}">
     <style>
         *,
         *::before,

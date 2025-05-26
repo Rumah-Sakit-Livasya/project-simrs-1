@@ -387,4 +387,121 @@ interface OrderLaboratorium {
     updated_at: string;
 }
 
+interface MakananGizi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    nama: string;
+    harga: number;
+    aktif: number;
+}
+
+interface OrderMakananGizi{
+    id: number;
+    created_at: string;
+    updated_at: string;
+    order_id: number;
+    makanan_id: number;
+    harga: number;
+    persentase_habis: number;
+    food: MakananGizi;
+}
+
+interface OrderGizi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    registration_id: number;
+    kategori_id: number;
+    untuk: string;
+    tanggal_order: string;
+    waktu_makan: string;
+    ditagihkan: number;
+    digabung: number;
+    total_harga: number;
+    status_payment: number;
+    status_order: number;
+    nama_pemesan: string;
+    registration: Registration;
+    foods: OrderMakananGizi[];
+}
+
+interface Satuan {
+    id: number;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+    kode: string;
+    nama: string;
+    aktif: number;
+}
+
+interface BarangFarmasi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    kode: string;
+    keterangan: string | null;
+    hna: number;
+    ppn: number;
+    ppn_rajal: number;
+    ppn_ranap: number;
+    tipe: "FN" | "NFN";
+    formularium: "RS" | "NRS";
+    jenis_obat: "paten" | "generik" | null;
+    exp: "1w" | "2w" | "3w" | "1mo" | "2mo" | "3mo" | "6mo" | null;
+    aktif: boolean;
+    kategori_id: number;
+    golongan_id: number | null;
+    kelompok_id: number | null;
+    satuan_id: number;
+    principal: string | null;
+    harga_principal: number | null;
+    diskon_principal: number | null;
+}
+
+interface BarangNonFarmasi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    kode: string;
+    keterangan: string | null;
+    hna: number;
+    ppn: number;
+    aktif: boolean;
+    jual_pasien: boolean;
+    kategori_id: number;
+    golongan_id: number | null;
+    kelompok_id: number | null;
+    satuan_id: number;
+}
+
+interface MasterGudang {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    cost_center: string;
+    apotek: boolean;
+    warehouse: boolean;
+    aktif: boolean;
+}
+
+interface MinMaxStock {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    barang_f_id: number;
+    barang_nf_id: number;
+    gudang_id: number;
+    min: number;
+    max: number;
+}
+
 type PatientType = "rajal" | "ranap" | "otc";
