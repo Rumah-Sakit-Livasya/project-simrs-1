@@ -58,14 +58,11 @@
                         <div id="loading-page"></div>
                         <div class="panel-content">
                             <form id="form-pr" name="form-pr"
-                                action="{{ route('procurement.purchase-request.pharmacy.update', ['id' => $pr->id]) }}"
-                                method="post">
+                                action="{{ route('procurement.purchase-request.non-pharmacy.store') }}" method="post">
                                 @csrf
-                                @method('PUT')
+                                @method('post')
                                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
-                                <input type="hidden" name="id" value="{{ $pr->id }}">
-                                <input type="hidden" name="kode_pr" value="{{ $pr->kode_pr }}">
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
@@ -97,11 +94,11 @@
                                                     <select name="tipe" class="form-control" required>
                                                         {{-- normal, urgent --}}
                                                         <option value="normal"
-                                                            {{ $pr->tipe == 'normal' ? 'selected' : '' }}>
+                                                            {{ !old('status') || old('status') == 'normal' ? 'selected' : '' }}>
                                                             Normal
                                                         </option>
                                                         <option value="urgent"
-                                                            {{ $pr->tipe == 'urgent' ? 'selected' : '' }}>Urgent
+                                                            {{ old('status') == 'urgent' ? 'selected' : '' }}>Urgent
                                                         </option>
                                                     </select>
                                                 </div>
@@ -124,9 +121,7 @@
                                                         <option value="" disabled selected hidden>Pilih Gudang
                                                         </option>
                                                         @foreach ($gudangs as $gudang)
-                                                            <option value="{{ $gudang->id }}"
-                                                                {{ $pr->gudang_id == $gudang->id ? 'selected' : '' }}>
-                                                                {{ $gudang->nama }}</option>
+                                                            <option value="{{ $gudang->id }}">{{ $gudang->nama }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -143,8 +138,7 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" class="form-control" name="keterangan"
-                                                        value="{{ $pr->keterangan }}">
+                                                    <input type="text" class="form-control" name="keterangan">
                                                 </div>
                                             </div>
                                         </div>
@@ -152,7 +146,7 @@
                                 </div>
 
                                 <hr>
-
+                                
                                 <div class="row justify-content-center">
                                     <table class="table table-bordered table-hover table-striped w-100">
                                         <thead class="bg-primary-600">
@@ -168,45 +162,7 @@
                                             </tr>
                                         </thead>
                                         <tbody id="tableItems">
-                                            @foreach ($pr->items as $item)
-                                                <tr id="item{{ $loop->iteration }}">
-                                                    <input type="hidden" name="item_id[{{ $loop->iteration }}]"
-                                                        value="{{ $item->id }}">
-                                                    <td>{{ $item->barang->kode }}
-                                                        <input type="hidden" name="kode_barang[{{ $loop->iteration }}]"
-                                                            value="{{ $item->barang->kode }}">
-                                                    </td>
-                                                    <td>{{ $item->barang->nama }}
-                                                        <input type="hidden" name="nama_barang[{{ $loop->iteration }}]"
-                                                            value="{{ $item->barang->nama }}">
-                                                        <input type="hidden" name="barang_id[{{ $loop->iteration }}]"
-                                                            value="{{ $item->barang->id }}">
-                                                    </td>
-                                                    <td>{{ $item->satuan->nama }}
-                                                        <input type="hidden" name="unit_barang[{{ $loop->iteration }}]"
-                                                            value="{{ $item->satuan->nama }}">
-                                                        <input type="hidden" name="satuan_id[{{ $loop->iteration }}]"
-                                                            value="{{ $item->satuan->id }}">
-                                                    </td>
-                                                    <td><input type="text"
-                                                            name="keterangan_item[{{ $loop->iteration }}]"
-                                                            class="form-control" value="{{ $item->keterangan }}"></td>
-                                                    <td><input type="number" name="qty[{{ $loop->iteration }}]"
-                                                            min="0" step="1" class="form-control"
-                                                            value="{{ $item->qty }}"
-                                                            onkeyup="PopupPRPharmacyClass.refreshTotal()"
-                                                            onchange="PopupPRPharmacyClass.refreshTotal()"></td>
-                                                    <td>{{ rp($item->barang->hna) }}
-                                                        <input type="hidden" name="hna[{{ $loop->iteration }}]"
-                                                            value="{{ $item->barang->hna }}">
-                                                    </td>
-                                                    <td class="subtotal">{{ rp($item->barang->hna * $item->qty) }}</td>
-                                                    <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                                                            title="Hapus"
-                                                            onclick="PopupPRPharmacyClass.deleteItem({{ $loop->iteration }})"></a>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
+
                                         </tbody>
                                         <tfoot>
                                             <tr>
@@ -219,9 +175,9 @@
                                                     @include('pages.simrs.procurement.purchase-request.partials.modal-add-item')
                                                 </td>
                                                 <td class="text-right">Total
-                                                    <input type="hidden" value="{{ $pr->nominal }}" name="nominal">
+                                                    <input type="hidden" value="0" name="nominal">
                                                 </td>
-                                                <td colspan="2" id="harga-display">{{ rp($pr->nominal) }}</td>
+                                                <td colspan="2" id="harga-display">Rp. 0</td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -237,21 +193,16 @@
                                             </a>
                                         </div>
                                         <div class="col-xl text-right">
-                                            @if ($pr->status == 'draft')
-                                                <button type="submit" id="order-submit-draft"
-                                                    class="btn btn-lg btn-primary waves-effect waves-themed">
-                                                    <span class="fal fa-save mr-1"></span>
-                                                    Simpan Draft
-                                                </button>
-                                                <button type="submit" id="order-submit-final"
-                                                    class="btn btn-lg btn-success waves-effect waves-themed">
-                                                    <span class="fal fa-save mr-1"></span>
-                                                    Simpan Final
-                                                </button>
-                                            @else
-                                                <h1 style="color: red">Data sudah final</h1>
-                                                <p>Tidak dapat diubah lagi</p>
-                                            @endif
+                                            <button type="submit" id="order-submit-draft"
+                                                class="btn btn-lg btn-primary waves-effect waves-themed">
+                                                <span class="fal fa-save mr-1"></span>
+                                                Simpan Draft
+                                            </button>
+                                            <button type="submit" id="order-submit-final"
+                                                class="btn btn-lg btn-success waves-effect waves-themed">
+                                                <span class="fal fa-save mr-1"></span>
+                                                Simpan Final
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -270,5 +221,5 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
     <script src="{{ asset('js/jquery.js') }}"></script>
-    <script src="{{ asset('js/simrs/procurement/purchase-request/popup-pharmacy.js') }}"></script>
+    <script src="{{ asset('js/simrs/procurement/purchase-request/popup-non-pharmacy.js') }}"></script>
 @endsection

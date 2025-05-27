@@ -8,6 +8,7 @@ use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
 use App\Http\Controllers\WarehouseBarangFarmasiController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\WarehouseSetupMinMaxStockController;
 use App\Http\Controllers\WarehouseSupplierController;
 use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\OrderParameterLaboratorium;
+use App\Models\ProcurementPurchaseRequestNonPharmacy;
 use App\Models\ProcurementPurchaseRequestPharmacy;
 use App\Models\WarehouseKategoriBarang;
 use App\Models\WarehouseKelompokBarang;
@@ -236,7 +238,15 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::prefix("pharmacy")->group(function () {
                 Route::post("/store", [ProcurementPurchaseRequestPharmacyController::class, 'store'])->name('procurement.purchase-request.pharmacy.store');
                 Route::put("/update/{id}", [ProcurementPurchaseRequestPharmacyController::class, 'update'])->name('procurement.purchase-request.pharmacy.update');
+                Route::delete("/destroy/{id}", [ProcurementPurchaseRequestPharmacyController::class, 'destroy'])->name('procurement.purchase-request.pharmacy.delete');
                 Route::get("/get/item-gudang/{gudang_id}", [ProcurementPurchaseRequestPharmacyController::class, 'get_item_gudang'])->name('procurement.purchase-request.pharmacy.get.item-gudang');
+            });
+
+            Route::prefix("non-pharmacy")->group(function () {
+                Route::post("/store", [ProcurementPurchaseRequestNonPharmacyController::class, 'store'])->name('procurement.purchase-request.non-pharmacy.store');
+                Route::put("/update/{id}", [ProcurementPurchaseRequestNonPharmacyController::class, 'update'])->name('procurement.purchase-request.non-pharmacy.update');
+                Route::delete("/destroy/{id}", [ProcurementPurchaseRequestNonPharmacyController::class, 'destroy'])->name('procurement.purchase-request.non-pharmacy.delete');
+                Route::get("/get/item-gudang/{gudang_id}", [ProcurementPurchaseRequestNonPharmacyController::class, 'get_item_gudang'])->name('procurement.purchase-request.non-pharmacy.get.item-gudang');
             });
         });
     });

@@ -58,7 +58,7 @@
                         <div id="loading-page"></div>
                         <div class="panel-content">
                             <form id="form-pr" name="form-pr"
-                                action="{{ route('procurement.purchase-request.pharmacy.update', ['id' => $pr->id]) }}"
+                                action="{{ route('procurement.purchase-request.non-pharmacy.update', ['id' => $pr->id]) }}"
                                 method="post">
                                 @csrf
                                 @method('PUT')
@@ -194,8 +194,8 @@
                                                     <td><input type="number" name="qty[{{ $loop->iteration }}]"
                                                             min="0" step="1" class="form-control"
                                                             value="{{ $item->qty }}"
-                                                            onkeyup="PopupPRPharmacyClass.refreshTotal()"
-                                                            onchange="PopupPRPharmacyClass.refreshTotal()"></td>
+                                                            onkeyup="PopupPRNPharmacyClass.refreshTotal()"
+                                                            onchange="PopupPRNPharmacyClass.refreshTotal()"></td>
                                                     <td>{{ rp($item->barang->hna) }}
                                                         <input type="hidden" name="hna[{{ $loop->iteration }}]"
                                                             value="{{ $item->barang->hna }}">
@@ -203,7 +203,7 @@
                                                     <td class="subtotal">{{ rp($item->barang->hna * $item->qty) }}</td>
                                                     <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
                                                             title="Hapus"
-                                                            onclick="PopupPRPharmacyClass.deleteItem({{ $loop->iteration }})"></a>
+                                                            onclick="PopupPRNPharmacyClass.deleteItem({{ $loop->iteration }})"></a>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -270,5 +270,5 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
     <script src="{{ asset('js/jquery.js') }}"></script>
-    <script src="{{ asset('js/simrs/procurement/purchase-request/popup-pharmacy.js') }}"></script>
+    <script src="{{ asset('js/simrs/procurement/purchase-request/popup-non-pharmacy.js') }}"></script>
 @endsection

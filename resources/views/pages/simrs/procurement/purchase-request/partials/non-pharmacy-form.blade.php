@@ -9,7 +9,7 @@
             <div class="panel-container show">
                 <div class="panel-content">
 
-                    <form action="{{ route('procurement.purchase-request.pharmacy') }}" method="get">
+                    <form action="{{ route('procurement.purchase-request.non-pharmacy') }}" method="get">
                         @csrf
 
                         <div class="row justify-content-center">

@@ -5,7 +5,7 @@
 // @ts-ignore
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
-class PRPharmacyHandler {
+class PRNPharmacyHandler {
     constructor() {
         this.#addEventListeners('.delete-btn', this.#handleDeleteButtonClick);
         this.#addEventListeners('.print-btn', this.#handlePrintButtonClick);
@@ -23,14 +23,14 @@ class PRPharmacyHandler {
         const id = parseInt(button.getAttribute("data-id") || "0");
         if (!id) return;
 
-        const url = "/simrs/procurement/purchase-request/pharmacy/edit/" + id;
+        const url = "/simrs/procurement/purchase-request/non-pharmacy/edit/" + id;
         const width = screen.width;
         const height = screen.height;
         const left = width - (width / 2);
         const top = height - (height / 2);
         window.open(
             url,
-            "popupWindow_editPRFarmasi" + id,
+            "popupWindow_editPRNonFarmasi" + id,
             "width=" + width + ",height=" + height +
             ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
         );
@@ -46,14 +46,14 @@ class PRPharmacyHandler {
         const id = parseInt(button.getAttribute("data-id") || "0");
         if (!id) return;
 
-        const url = "/simrs/procurement/purchase-request/pharmacy/print/" + id;
+        const url = "/simrs/procurement/purchase-request/non-pharmacy/print/" + id;
         const width = screen.width;
         const height = screen.height;
         const left = width - (width / 2);
         const top = height - (height / 2);
         window.open(
             url,
-            "popupWindow_printPRFarmasi",
+            "popupWindow_printPRNonFarmasi",
             "width=" + width + ",height=" + height +
             ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
         );
@@ -78,14 +78,14 @@ class PRPharmacyHandler {
      */
     #handleTambahButtonClick(event) {
         event.preventDefault();
-        const url = "/simrs/procurement/purchase-request/pharmacy/create";
+        const url = "/simrs/procurement/purchase-request/non-pharmacy/create";
         const width = screen.width;
         const height = screen.height;
         const left = width - (width / 2);
         const top = height - (height / 2);
         window.open(
             url,
-            "popupWindow_addPRFarmasi",
+            "popupWindow_addPRNonFarmasi",
             "width=" + width + ",height=" + height +
             ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
         );
@@ -125,7 +125,7 @@ class PRPharmacyHandler {
         formData.append('id', String(id));
         formData.append('csrf-token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
 
-        fetch('/api/simrs/procurement/purchase-request/pharmacy/destroy/' + id, {
+        fetch('/api/simrs/procurement/purchase-request/non-pharmacy/destroy/' + id, {
             method: 'DELETE',
             body: formData,
             headers: {
@@ -137,6 +137,7 @@ class PRPharmacyHandler {
                 if (!data.success) {
                     throw new Error(data.message);
                 }
+
                 showSuccessAlert('Data berhasil dihapus!');
                 setTimeout(() => window.location.reload(), 2000);
             })
@@ -147,4 +148,4 @@ class PRPharmacyHandler {
     }
 }
 
-const PRPharmacyClass = new PRPharmacyHandler();
+const PRNPharmacyClass = new PRNPharmacyHandler();

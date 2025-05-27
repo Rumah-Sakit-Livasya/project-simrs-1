@@ -172,7 +172,7 @@
                                                         <span class="fal fa-plus mr-1"></span>
                                                         Tambah Item
                                                     </button>
-                                                    @include('pages.simrs.procurement.purchase-request.partials.modal-add-item-farmasi')
+                                                    @include('pages.simrs.procurement.purchase-request.partials.modal-add-item')
                                                 </td>
                                                 <td class="text-right">Total
                                                     <input type="hidden" value="0" name="nominal">
