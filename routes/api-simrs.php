@@ -8,6 +8,7 @@ use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
 use App\Http\Controllers\WarehouseBarangFarmasiController;
 use App\Http\Controllers\WarehouseBarangNonFarmasiController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\WarehouseSetupMinMaxStockController;
 use App\Http\Controllers\WarehouseSupplierController;
 use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\OrderParameterLaboratorium;
+use App\Models\ProcurementPurchaseRequestPharmacy;
 use App\Models\WarehouseKategoriBarang;
 use App\Models\WarehouseKelompokBarang;
 use Illuminate\Support\Facades\Route;
@@ -225,6 +227,16 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::prefix("get")->group(function () {
                     Route::get('/gudang/{id}/', [WarehouseSetupMinMaxStockController::class, 'get_gudang'])->name('warehouse.master-data.setup-min-max-stock.get.gudang');
                 });
+            });
+        });
+    });
+
+    Route::prefix("procurement")->group(function () {
+        Route::prefix("purchase-request")->group(function () {
+            Route::prefix("pharmacy")->group(function () {
+                Route::post("/store", [ProcurementPurchaseRequestPharmacyController::class, 'store'])->name('procurement.purchase-request.pharmacy.store');
+                Route::put("/update/{id}", [ProcurementPurchaseRequestPharmacyController::class, 'update'])->name('procurement.purchase-request.pharmacy.update');
+                Route::get("/get/item-gudang/{gudang_id}", [ProcurementPurchaseRequestPharmacyController::class, 'get_item_gudang'])->name('procurement.purchase-request.pharmacy.get.item-gudang');
             });
         });
     });

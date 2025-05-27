@@ -139,4 +139,8 @@ class User extends Authenticatable implements Auditable
     {
         return $this->last_seen ? \Carbon\Carbon::parse($this->last_seen)->diffForHumans() : 'Belum pernah online';
     }
+
+    public function pr_pharmacy(){
+        return $this->hasMany(ProcurementPurchaseRequestPharmacy::class, 'user_id');
+    }
 }

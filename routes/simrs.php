@@ -6,6 +6,7 @@ use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
+use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
 use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\BedController;
@@ -78,6 +79,7 @@ use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseSetupMinMaxStockController;
 use App\Http\Controllers\WarehouseSupplierController;
 use App\Http\Controllers\WarehouseZatAktifController;
+use App\Models\ProcurementPurchaseRequestPharmacy;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\WarehouseKategoriBarang;
@@ -265,6 +267,17 @@ Route::group(['middleware' => ['auth']], function () {
                 });
                 Route::get('setup-min-max-stock', [WarehouseSetupMinMaxStockController::class, 'index'])->name('warehouse.master-data.setup-min-max-stock');
                 Route::get('setup-min-max-stock/setup', [WarehouseSetupMinMaxStockController::class, 'create'])->name('warehouse.master-data.setup-min-max-stock.create');
+            });
+        });
+
+        Route::prefix("procurement")->group(function () {
+            Route::prefix("purchase-request")->group(function () {
+                Route::prefix("pharmacy")->group(function () {
+                    Route::get("/", [ProcurementPurchaseRequestPharmacyController::class, "index"])->name("procurement.purchase-request.pharmacy");
+                    Route::get("/create", [ProcurementPurchaseRequestPharmacyController::class, "create"])->name("procurement.purchase-request.pharmacy.create");
+                    Route::get("/print/{id}", [ProcurementPurchaseRequestPharmacyController::class, "print"])->name("procurement.purchase-request.pharmacy.print");
+                    Route::get("/edit/{id}", [ProcurementPurchaseRequestPharmacyController::class, "edit"])->name("procurement.purchase-request.pharmacy.edit");
+                });
             });
         });
 

@@ -33,4 +33,8 @@ class WarehouseSatuanBarang extends Model implements AuditableContract
     {
         return $this->hasMany(WarehouseSatuanTambahanBarangFarmasi::class, "satuan_id", "id");
     }
+
+    public function pr_pharmacy_items(){
+        return $this->hasMany(ProcurementPurchaseRequestPharmacyItems::class, "satuan_id", "id");
+    }
 }

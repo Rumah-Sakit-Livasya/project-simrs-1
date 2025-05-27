@@ -72,7 +72,7 @@ class SMMSHandler {
         this.#$Table = $("#table-body");
         this.#$GudangSelect = $("#gudang_id");
         this.#$BarangSelect = $("#select-barang");
-        this.#$LoadingIcon = $("#loading-spinner")
+        this.#$LoadingIcon = $("#loading-spinner");
         this.#$LoadingPage = $("#loading-page");
 
         this.#init();
