@@ -30,7 +30,8 @@
                                 <th>Kode PR</th>
                                 <th>Tanggal PR</th>
                                 <th>Gudang</th>
-                                <th>Keterangan</th>
+                                <th>Keterangan PR</th>
+                                <th>Keterangan APP</th>
                                 <th>User Entry</th>
                                 <th>Type PR</th>
                                 <th>Nominal</th>
@@ -60,6 +61,7 @@
                                     <td>{{ tgl($pr->tanggal_pr) }}</td>
                                     <td>{{ $pr->gudang->nama }}</td>
                                     <td>{{ $pr->keterangan }}</td>
+                                    <td>{{ $pr->keterangan_approval }}</td>
                                     <td>{{ $pr->user->employee->fullname }}</td>
                                     <td>{{ ucfirst($pr->tipe) }}</td>
                                     <td>{{ rp($pr->nominal) }}</td>
@@ -85,7 +87,8 @@
                                 <th>Kode PR</th>
                                 <th>Tanggal PR</th>
                                 <th>Gudang</th>
-                                <th>Keterangan</th>
+                                <th>Keterangan PR</th>
+                                <th>Keterangan APP</th>
                                 <th>User Entry</th>
                                 <th>Type PR</th>
                                 <th>Nominal</th>

@@ -30,6 +30,7 @@ return new class extends Migration {
             $table->enum("status" , ["unprocessed", "pending", "approved", "rejected"])->default("unprocessed");
             $table->integer("approved_qty")->default(0);
             $table->string("keterangan")->nullable();
+            $table->string("keterangan_approval")->nullable();
         });
     }
 

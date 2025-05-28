@@ -1,3 +1,11 @@
+<style>
+    input {
+        border: 0;
+        border-bottom: 1.9px solid #eaeaea;
+        margin-top: -.5rem;
+        border-radius: 0;
+    }
+</style>
 <div class="row justify-content-center">
     <div class="col-xl-8">
         <div id="panel-1" class="panel">
@@ -9,7 +17,7 @@
             <div class="panel-container show">
                 <div class="panel-content">
 
-                    <form action="{{ route('procurement.purchase-request.non-pharmacy') }}" method="get">
+                    <form action="{{ route('procurement.approval-pr.pharmacy') }}" method="get">
                         @csrf
 
                         <div class="row justify-content-center">
@@ -22,10 +30,9 @@
                                             </label>
                                         </div>
                                         <div class="col-xl">
-                                            <input type="date"
-                                                value="{{ request('tanggal_pr') }}"
-                                                style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                class="form-control" id="tanggal_pr" name="tanggal_pr">
+                                            <input type="text" class="form-control" id="datepicker-1"
+                                                placeholder="mm/dd/yyyy - mm/dd/yyyy" name="tanggal_pr">
+
                                             @error('tanggal_pr')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -43,9 +50,8 @@
                                             </label>
                                         </div>
                                         <div class="col-xl">
-                                            <input type="text" value="{{ request('kode_pr') }}"
-                                                style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                class="form-control" id="kode_pr" name="kode_pr">
+                                            <input type="text" value="{{ request('kode_pr') }}" class="form-control"
+                                                id="kode_pr" name="kode_pr">
                                             @error('kode_pr')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -66,7 +72,6 @@
                                         </div>
                                         <div class="col-xl">
                                             <input type="text" value="{{ request('nama_barang') }}"
-                                                style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
                                                 class="form-control" id="nama_barang" name="nama_barang">
                                             @error('nama_barang')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -86,12 +91,12 @@
                                         </div>
                                         <div class="col-xl">
                                             <select name="status" id="status-request" class="form-control">
-                                                <option value="" selected hidden disabled>Pilih Status Request
-                                                </option>
-                                                <option value="">Semua</option>
-                                                <option value="draft">Draft</option>
-                                                <option value="final">Final</option>
-                                                <option value="reviewed">Reviewed</option>
+                                                <option {{ request('status') == 'final' ? 'selected' : '' }}
+                                                    value="final">Unreviewed</option>
+                                                <option {{ request('status') == 'reviewed' ? 'selected' : '' }}
+                                                    value="reviewed">Reviewed</option>
+                                                <option {{ request('status') == 'all' ? 'selected' : '' }}
+                                                    value="all">Semua</option>
                                             </select>
                                         </div>
                                     </div>
@@ -99,23 +104,48 @@
                             </div>
                         </div>
 
-
-                        <div class="row justify-content-end mt-3">
-                            <div class="col-xl-2">
-                                <button type="submit" class="btn btn-outline-primary waves-effect waves-themed">
-                                    <span class="fal fa-search mr-1"></span>
-                                    Cari
-                                </button>
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-xl-2" style="text-align: right">
+                                            <label class="form-label text-end" for="tipe">
+                                                Tipe PR
+                                            </label>
+                                        </div>
+                                        <div class="col-xl">
+                                            <select name="tipe" id="tipe-request" class="form-control">
+                                                <option value="" selected hidden disabled>Pilih Tipe Request
+                                                </option>
+                                                <option {{ !request('tipe') ? 'selected' : '' }} value="">Semua
+                                                </option>
+                                                <option {{ request('tipe') == 'normal' ? 'selected' : '' }}
+                                                    value="normal">Normal</option>
+                                                <option {{ request('tipe') == 'urgent' ? 'selected' : '' }}
+                                                    value="urgent">Urgent</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-xl-3">
-                                <button type="button" class="btn btn-primary waves-effect waves-themed" id="tambah-btn">
-                                    <span class="fal fa-plus mr-1"></span>
-                                    Tambah PR
-                                </button>
+
+                            <div class="col-xl-6">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-xl-2" style="text-align: right">
+                                        </div>
+                                        <div class="col-xl" style="text-align: center">
+                                            <button type="submit"
+                                                class="btn btn-outline-primary waves-effect waves-themed">
+                                                <span class="fal fa-search mr-1"></span>
+                                                Cari
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </form>
-
                 </div>
             </div>
         </div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
+use App\Http\Controllers\ProcurementPRApprovalPharmacy;
 use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
 use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
@@ -286,6 +287,20 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/print/{id}", [ProcurementPurchaseRequestNonPharmacyController::class, "print"])->name("procurement.purchase-request.non-pharmacy.print");
                     Route::get("/edit/{id}", [ProcurementPurchaseRequestNonPharmacyController::class, "edit"])->name("procurement.purchase-request.non-pharmacy.edit");
                 });
+            });
+
+            Route::prefix("approval-pr")->group(function () {
+                Route::prefix("pharmacy")->group(function () {
+                    Route::get("/", [ProcurementPRApprovalPharmacy::class, "index"])->name("procurement.approval-pr.pharmacy");
+                    Route::get("/print/{id}", [ProcurementPRApprovalPharmacy::class, "print"])->name("procurement.approval-pr.pharmacy.print");
+                    Route::get("/edit/{id}", [ProcurementPRApprovalPharmacy::class, "edit"])->name("procurement.approval-pr.pharmacy.edit");
+                });
+
+                // Route::prefix("non-pharmacy")->group(function () {
+                //     Route::get("/", [ProcurementPurchaseRequestNonPharmacyController::class, "index"])->name("procurement.purchase-request.non-pharmacy");
+                //     Route::get("/print/{id}", [ProcurementPurchaseRequestNonPharmacyController::class, "print"])->name("procurement.purchase-request.non-pharmacy.print");
+                //     Route::get("/edit/{id}", [ProcurementPurchaseRequestNonPharmacyController::class, "edit"])->name("procurement.purchase-request.non-pharmacy.edit");
+                // });
             });
         });
 

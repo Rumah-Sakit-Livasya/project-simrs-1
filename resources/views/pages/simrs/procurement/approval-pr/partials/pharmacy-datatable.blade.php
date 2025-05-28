@@ -15,7 +15,7 @@
         <div id="panel-1" class="panel">
             <div class="panel-hdr">
                 <h2>
-                    Daftar <span class="fw-300"><i>Purchase Request (Pharmacy)</i></span>
+                    Daftar <span class="fw-300"><i>Approval PR (Pharmacy)</i></span>
                 </h2>
             </div>
             <div class="panel-container show">
@@ -29,10 +29,11 @@
                                 <th>Detail</th>
                                 <th>Kode PR</th>
                                 <th>Tanggal PR</th>
+                                <th>Tanggal APP</th>
                                 <th>Gudang</th>
                                 <th>Keterangan PR</th>
                                 <th>Keterangan APP</th>
-                                <th>User Entry</th>
+                                <th>User APP</th>
                                 <th>Type PR</th>
                                 <th>Nominal</th>
                                 <th>Status</th>
@@ -52,29 +53,28 @@
                                         </button>
                                         <div class="display-none" id="popover-content-{{ $pr->id }}">
                                             @include(
-                                                'pages.simrs.procurement.purchase-request.partials.pr-detail',
+                                                'pages.simrs.procurement.approval-pr.partials.pr-detail',
                                                 ['pr' => $pr]
                                             )
                                         </div>
                                     </td>
                                     <td>{{ $pr->kode_pr }}</td>
                                     <td>{{ tgl($pr->tanggal_pr) }}</td>
+                                    <td>{{ $pr->tanggal_app ? tgl($pr->tanggal_app) : 'Unreviewed' }}</td>
                                     <td>{{ $pr->gudang->nama }}</td>
                                     <td>{{ $pr->keterangan }}</td>
                                     <td>{{ $pr->keterangan_approval }}</td>
-                                    <td>{{ $pr->user->employee->fullname }}</td>
+                                    <td>{{ $pr->app_user && $pr->app_user->employee->fullname }}</td>
                                     <td>{{ ucfirst($pr->tipe) }}</td>
                                     <td>{{ rp($pr->nominal) }}</td>
-                                    <td>{{ ucfirst($pr->status) }}</td>
+                                    <td>{{ $pr->status == 'final' ? 'Unreviewed' : 'Reviewed' }}</td>
                                     <td>
                                         <a class="mdi mdi-printer pointer mdi-24px text-primary print-btn"
                                             title="Print" data-id="{{ $pr->id }}"></a>
 
-                                        @if ($pr->status == 'draft')
+                                        @if ($pr->status == 'final')
                                             <a class="mdi mdi-pencil pointer mdi-24px text-secondary edit-btn"
-                                                title="Edit" data-id="{{ $pr->id }}"></a>
-                                            <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                                                title="Hapus" data-id="{{ $pr->id }}"></a>
+                                                title="Review" data-id="{{ $pr->id }}"></a>
                                         @endif
                                     </td>
                                 </tr>
@@ -86,10 +86,11 @@
                                 <th>Detail</th>
                                 <th>Kode PR</th>
                                 <th>Tanggal PR</th>
+                                <th>Tanggal APP</th>
                                 <th>Gudang</th>
                                 <th>Keterangan PR</th>
                                 <th>Keterangan APP</th>
-                                <th>User Entry</th>
+                                <th>User APP</th>
                                 <th>Type PR</th>
                                 <th>Nominal</th>
                                 <th>Status</th>

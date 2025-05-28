@@ -19,14 +19,16 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
             $table->date("tanggal_pr");
+            $table->date("tanggal_app")->nullable();
             $table->string("kode_pr");
             $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
+            $table->foreignId("app_user_id")->nullable()->constrained("users")->cascadeOnDelete();
             $table->foreignId("gudang_id")->constrained("warehouse_master_gudang")->cascadeOnDelete();
             $table->enum("tipe", ["normal", "urgent"])->default("normal");
             $table->integer("nominal");
             $table->enum("status" , ["draft", "final", "reviewed"])->default("draft");
-            $table->boolean("approved")->default(false);
             $table->string("keterangan")->nullable();
+            $table->string("keterangan_approval")->nullable();
         });
     }
 

@@ -21,6 +21,10 @@ class ProcurementPurchaseRequestPharmacy extends Model implements AuditableContr
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function app_user(){
+        return $this->belongsTo(User::class, 'app_user_id');
+    }
+
     public function items(){
         return $this->hasMany(ProcurementPurchaseRequestPharmacyItems::class, 'pr_id');
     }

@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Print PR</title>
+    <title>Print APR</title>
     <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
     <link rel="stylesheet/less" type="text/css" media="all" href="{{ asset('css/print.css') }}">
     <script src="{{ asset('js/jquery.js') }}" type="text/javascript"></script>
@@ -609,8 +609,11 @@
 
         <h2 class="bdr">
             <span class="rgt"><span class="til">Kode PR</span><span>{{ $pr->kode_pr }}</span></span>
-            Purchase Request (Non Pharmacy)
-            <span>Tanggal PR : {{ tgl($pr->tanggal_pr) }}</span>
+            Purchase Request Approval (Pharmacy)
+            <span>Tanggal Request : {{ tgl($pr->tanggal_pr) }}</span>
+            @if ($pr->tanggal_app)
+                <span>Tanggal Approval : {{ tgl($pr->tanggal_app) }}</span>
+            @endif
         </h2>
 
         <table width="100%" class="bdr2 pad">
@@ -618,22 +621,28 @@
                 <tr>
                     <td width="20%" class="label">Asal PR</td>
                     <td>{{ $pr->gudang->nama }}</td>
-                </tr>
-                <tr>
                     <td class="label">Tipe PR</td>
                     <td>{{ ucfirst($pr->tipe) }}</td>
                 </tr>
                 <tr>
-                    <td class="label">Total</td>
-                    <td>{{ rp($pr->nominal) }}</td>
+                    <td width="20%" class="label">User PR</td>
+                    <td>{{ $pr->user->employee->fullname }}</td>
+                    @if ($pr->app_user)
+                        <td width="20%" class="label">User APP</td>
+                        <td>{{ $pr->app_user->employee->fullname }}</td>
+                    @endif
                 </tr>
                 <tr>
+                    <td class="label">Total</td>
+                    <td>{{ rp($pr->nominal) }}</td>
                     <td class="label">Status</td>
                     <td>{{ $pr->status == 'final' ? 'Unreviewed' : ucfirst($pr->status) }}</td>
                 </tr>
                 <tr>
-                    <td class="label">Keterangan</td>
+                    <td class="label">Keterangan PR</td>
                     <td>{{ $pr->keterangan }}</td>
+                    <td class="label">Keterangan APP</td>
+                    <td>{{ $pr->keterangan_approval }}</td>
                 </tr>
             </tbody>
         </table>
@@ -642,13 +651,17 @@
             <thead>
                 <tr>
                     <th width="5%">NO</th>
-                    <th width="10%">KODE BARANG</th>
+                    <th width="5%">KODE BARANG</th>
                     <th>NAMA BARANG</th>
-                    <th width="10%">SATUAN</th>
-                    <th width="10%">JML</th>
-                    <th width="10%">HARGA</th>
-                    <th width="10%">SUBTOTAL</th>
+                    <th width="5%">SATUAN</th>
+                    <th width="5%">STOK</th>
                     <th>DETAIL NOTES</th>
+                    <th width="5%">QTY PR</th>
+                    <th width="5%">QTY APP</th>
+                    <th width="10%">HARGA</th>
+                    <th width="10%">SUBTOTAL PR</th>
+                    <th width="10%">SUBTOTAL APP</th>
+                    <th width="5%">STATUS</th>
                     <th>APPROVAL NOTES</th>
                 </tr>
             </thead>
@@ -660,10 +673,14 @@
                         <td>{{ $item->barang->kode }}</td>
                         <td>{{ $item->barang->nama }}</td>
                         <td>{{ $item->unit_barang }}</td>
+                        <td>W.I.P.</td>
+                        <td>{{ $item->keterangan }}</td>
                         <td align="right">{{ $item->qty }}</td>
+                        <td align="right">{{ $item->approved_qty }}</td>
                         <td align="right">{{ rp($item->harga_barang) }}</td>
                         <td align="right">{{ rp($item->subtotal) }}</td>
-                        <td>{{ $item->keterangan }}</td>
+                        <td align="right">{{ rp($item->harga_barang * $item->approved_qty) }}</td>
+                        <td>{{ ucfirst($item->status) }}</td>
                         <td>{{ $item->keterangan_approval }}</td>
                     </tr>
                 @endforeach
@@ -682,9 +699,9 @@
                     <td width="30%" align="center" style="vertical-align: bottom;">
 
                         <br><br><br><br><br><br><br><br>
-                        ({{ $pr->user->employee->fullname }})
+                        ({{ $pr->app_user ? $pr->app_user->employee->fullname : '' }})
                         <br>
-                        {{ \Carbon\Carbon::now()->format('d F Y') }}
+                        {{ $pr->tanggal_app ? tgl($pr->tanggal_app) : '' }}
                     </td>
                 </tr>
             </tbody>

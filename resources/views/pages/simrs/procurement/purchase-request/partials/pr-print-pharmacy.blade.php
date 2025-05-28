@@ -628,8 +628,8 @@
                     <td>{{ rp($pr->nominal) }}</td>
                 </tr>
                 <tr>
-                    <td class="label">Approval Status</td>
-                    <td>{{ $pr->approved ? 'Approved' : 'Unapproved' }}</td>
+                    <td class="label">Status</td>
+                    <td>{{ $pr->status == 'final' ? 'Unreviewed' : ucfirst($pr->status) }}</td>
                 </tr>
                 <tr>
                     <td class="label">Keterangan</td>
@@ -649,6 +649,7 @@
                     <th width="10%">HARGA</th>
                     <th width="10%">SUBTOTAL</th>
                     <th>DETAIL NOTES</th>
+                    <th>APPROVAL NOTES</th>
                 </tr>
             </thead>
             <tbody>
@@ -663,6 +664,7 @@
                         <td align="right">{{ rp($item->harga_barang) }}</td>
                         <td align="right">{{ rp($item->subtotal) }}</td>
                         <td>{{ $item->keterangan }}</td>
+                        <td>{{ $item->keterangan_approval }}</td>
                     </tr>
                 @endforeach
 

@@ -13,15 +13,23 @@ class ProcurementPurchaseRequestNonPharmacy extends Model implements AuditableCo
     protected $table = "procurement_purchase_request_non_pharmacy";
     protected $guarded = ["id"];
 
-    public function gudang(){
+    public function gudang()
+    {
         return $this->belongsTo(WarehouseMasterGudang::class, 'gudang_id');
     }
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function items(){
+    public function app_user()
+    {
+        return $this->belongsTo(User::class, 'app_user_id');
+    }
+
+    public function items()
+    {
         return $this->hasMany(ProcurementPurchaseRequestNonPharmacyItems::class, 'pr_id');
     }
 }

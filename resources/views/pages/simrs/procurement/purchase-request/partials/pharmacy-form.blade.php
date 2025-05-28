@@ -18,7 +18,7 @@
                                     <div class="row">
                                         <div class="col-xl-2" style="text-align: right">
                                             <label class="form-label text-end" for="tanggal_pr">
-                                                Tanggal Order
+                                                Tanggal PR
                                             </label>
                                         </div>
                                         <div class="col-xl">
