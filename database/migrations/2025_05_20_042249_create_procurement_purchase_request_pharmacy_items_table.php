@@ -28,7 +28,7 @@ return new class extends Migration {
             $table->integer("qty");
             $table->integer("subtotal");
             $table->enum("status" , ["unprocessed", "pending", "approved", "rejected"])->default("unprocessed");
-            $table->integer("approved_qty")->default(0);
+            $table->integer("approved_qty")->nullable();
             $table->string("keterangan")->nullable();
             $table->string("keterangan_approval")->nullable();
         });

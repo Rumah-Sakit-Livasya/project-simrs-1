@@ -8,6 +8,7 @@ use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\ProcurementPRApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalPharmacy;
 use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
@@ -256,9 +257,9 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::put("/update/{id}", [ProcurementPRApprovalPharmacy::class, 'update'])->name('procurement.approval-pr.pharmacy.update');
             });
 
-            // Route::prefix("non-pharmacy")->group(function () {
-            //     Route::put("/update/{id}", [ProcurementPurchaseRequestNonPharmacyController::class, 'update'])->name('procurement.approval-pr.non-pharmacy.update');
-            // });
+            Route::prefix("non-pharmacy")->group(callback: function () {
+                Route::put("/update/{id}", [ProcurementPRApprovalNonPharmacy::class, 'update'])->name('procurement.approval-pr.non-pharmacy.update');
+            });
         });
     });
 

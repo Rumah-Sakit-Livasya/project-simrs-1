@@ -133,7 +133,7 @@ class ProcurementPurchaseRequestNonPharmacyController extends Controller
                     "qty" => $validatedData2["qty"][$key],
                     "subtotal" => $validatedData2["hna"][$key] * $validatedData2["qty"][$key],
                     "status" => "unprocessed",
-                    "approved_qty" => 0,
+                    "approved_qty" => null,
                     "keterangan" => $validatedData2["keterangan_item"][$key] ?? null,
                 ]);
             }
@@ -246,7 +246,7 @@ class ProcurementPurchaseRequestNonPharmacyController extends Controller
                     "qty" => $validatedData2["qty"][$key],
                     "subtotal" => $validatedData2["hna"][$key] * $validatedData2["qty"][$key],
                     "status" => "unprocessed",
-                    "approved_qty" => 0,
+                    "approved_qty" => null,
                     "keterangan" => $validatedData2["keterangan_item"][$key] ?? null,
                 ];
 

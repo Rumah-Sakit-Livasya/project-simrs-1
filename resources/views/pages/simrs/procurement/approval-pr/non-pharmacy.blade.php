@@ -1,11 +1,11 @@
 @extends('inc.layout')
-@section('title', 'List Approval Purchase Request (Pharmacy)')
+@section('title', 'List Approval Purchase Request (Non Pharmacy)')
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
 
-        @include('pages.simrs.procurement.approval-pr.partials.pharmacy-form')
+        @include('pages.simrs.procurement.approval-pr.partials.non-pharmacy-form')
 
-        @include('pages.simrs.procurement.approval-pr.partials.pharmacy-datatable')
+        @include('pages.simrs.procurement.approval-pr.partials.non-pharmacy-datatable')
     </main>
 @endsection
 @section('plugin')
@@ -117,6 +117,6 @@
     </script>
 
 
-    <script src="{{ asset('js/simrs/procurement/approval-pr/pharmacy.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/procurement/approval-pr/non-pharmacy.js') }}?v={{ time() }}"></script>
 
 @endsection

@@ -58,7 +58,7 @@
                         <div id="loading-page"></div>
                         <div class="panel-content">
                             <form id="form-pr" name="form-pr"
-                                action="{{ route('procurement.approval-pr.pharmacy.update', ['id' => $pr->id]) }}"
+                                action="{{ route('procurement.approval-pr.non-pharmacy.update', ['id' => $pr->id]) }}"
                                 method="post">
                                 @csrf
                                 @method('PUT')
@@ -316,5 +316,5 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
     <script src="{{ asset('js/jquery.js') }}"></script>
-    <script src="{{ asset('js/simrs/procurement/approval-pr/popup-pharmacy.js') }}"></script>
+    <script src="{{ asset('js/simrs/procurement/approval-pr/popup-non-pharmacy.js') }}"></script>
 @endsection

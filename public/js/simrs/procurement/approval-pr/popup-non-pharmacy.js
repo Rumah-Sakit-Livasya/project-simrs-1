@@ -5,7 +5,7 @@
 // @ts-ignore
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
-class PopupAPRPharmacyHandler {
+class PopupAPRNPharmacyHandler {
 
     /**
      * @type {JQuery<HTMLElement>}
@@ -151,4 +151,4 @@ class PopupAPRPharmacyHandler {
 
 }
 
-const PopupAPRPharmacyClass = new PopupAPRPharmacyHandler();
+const PopupAPRNPharmacyClass = new PopupAPRNPharmacyHandler();
