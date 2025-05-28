@@ -12,6 +12,7 @@ use App\Http\Controllers\ProcurementPRApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalPharmacy;
 use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
+use App\Http\Controllers\ProcurementSetupSupplier;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
 use App\Http\Controllers\WarehouseBarangFarmasiController;
 use App\Http\Controllers\WarehouseBarangNonFarmasiController;
@@ -259,6 +260,14 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
             Route::prefix("non-pharmacy")->group(callback: function () {
                 Route::put("/update/{id}", [ProcurementPRApprovalNonPharmacy::class, 'update'])->name('procurement.approval-pr.non-pharmacy.update');
+            });
+        });
+
+        Route::prefix("setup")->group(function () {
+            Route::prefix("supplier")->group(function () {
+                Route::post('/store', [ProcurementSetupSupplier::class, 'store'])->name('procurement.setup.supplier.store');
+                Route::put('/update/{id}/', [ProcurementSetupSupplier::class, 'update'])->name('procurement.setup.supplier.update');
+                Route::delete('/destroy/{id}/', [ProcurementSetupSupplier::class, 'destroy'])->name('procurement.setup.supplier.destroy');
             });
         });
     });

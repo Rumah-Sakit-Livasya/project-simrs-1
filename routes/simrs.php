@@ -10,6 +10,7 @@ use App\Http\Controllers\ProcurementPRApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalPharmacy;
 use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
+use App\Http\Controllers\ProcurementSetupSupplier;
 use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\BedController;
@@ -303,6 +304,10 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/edit/{id}", [ProcurementPRApprovalNonPharmacy::class, "edit"])->name("procurement.approval-pr.non-pharmacy.edit");
                 });
             });
+
+            Route::prefix("setup")->group(function () {
+                Route::get("supplier", [ProcurementSetupSupplier::class, "index"])->name("procurement.setup.supplier");
+            });
         });
 
         Route::prefix('igd')->group(function () {
@@ -506,39 +511,39 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/', [InsidenController::class, 'index'])->name('insiden');
         });
 
-        Route::prefix('procurement')->group(function () {
-            Route::prefix('purchase-request')->group(function () {
-                Route::get('farmasi', [ProcurementPurchaseRequestController::class, 'farmasi'])->name('procurement.purchase-request.farmasi');
-                Route::get('non-farmasi', [ProcurementPurchaseRequestController::class, 'nonFarmasi'])->name('procurement.purchase-request.non-farmasi');
-                Route::get('closed-farmasi', [ProcurementPurchaseRequestController::class, 'closedFarmasi'])->name('procurement.purchase-request.closed-farmasi');
-                Route::get('closed-non-farmasi', [ProcurementPurchaseRequestController::class, 'closedNonFarmasi'])->name('procurement.purchase-request.closed-non-farmasi');
-            });
+        // Route::prefix('procurement')->group(function () {
+        //     Route::prefix('purchase-request')->group(function () {
+        //         Route::get('farmasi', [ProcurementPurchaseRequestController::class, 'farmasi'])->name('procurement.purchase-request.farmasi');
+        //         Route::get('non-farmasi', [ProcurementPurchaseRequestController::class, 'nonFarmasi'])->name('procurement.purchase-request.non-farmasi');
+        //         Route::get('closed-farmasi', [ProcurementPurchaseRequestController::class, 'closedFarmasi'])->name('procurement.purchase-request.closed-farmasi');
+        //         Route::get('closed-non-farmasi', [ProcurementPurchaseRequestController::class, 'closedNonFarmasi'])->name('procurement.purchase-request.closed-non-farmasi');
+        //     });
 
-            Route::prefix('approval-pr')->group(function () {
-                Route::get('farmasi', [ApprovalPRController::class, 'farmasi'])->name('procurement.approval-pr.farmasi');
-                Route::get('non-farmasi', [ApprovalPRController::class, 'nonFarmasi'])->name('procurement.approval-pr.non-farmasi');
-            });
+        //     Route::prefix('approval-pr')->group(function () {
+        //         Route::get('farmasi', [ApprovalPRController::class, 'farmasi'])->name('procurement.approval-pr.farmasi');
+        //         Route::get('non-farmasi', [ApprovalPRController::class, 'nonFarmasi'])->name('procurement.approval-pr.non-farmasi');
+        //     });
 
-            Route::prefix('purchase-order')->group(function () {
-                Route::get('farmasi', [PurchaseOrderController::class, 'farmasi'])->name('procurement.purchase-order.farmasi');
-                Route::get('non-farmasi', [PurchaseOrderController::class, 'nonFarmasi'])->name('procurement.purchase-order.non-farmasi');
-            });
+        //     Route::prefix('purchase-order')->group(function () {
+        //         Route::get('farmasi', [PurchaseOrderController::class, 'farmasi'])->name('procurement.purchase-order.farmasi');
+        //         Route::get('non-farmasi', [PurchaseOrderController::class, 'nonFarmasi'])->name('procurement.purchase-order.non-farmasi');
+        //     });
 
-            Route::prefix('approval-po')->group(function () {
-                Route::get('farmasi', [ApprovalPOController::class, 'farmasi'])->name('procurement.approval-po.farmasi');
-                Route::get('non-farmasi', [ApprovalPOController::class, 'nonFarmasi'])->name('procurement.approval-po.non-farmasi');
-                Route::get('ceo', [ApprovalPOController::class, 'ceo'])->name('procurement.approval-po.ceo');
-            });
+        //     Route::prefix('approval-po')->group(function () {
+        //         Route::get('farmasi', [ApprovalPOController::class, 'farmasi'])->name('procurement.approval-po.farmasi');
+        //         Route::get('non-farmasi', [ApprovalPOController::class, 'nonFarmasi'])->name('procurement.approval-po.non-farmasi');
+        //         Route::get('ceo', [ApprovalPOController::class, 'ceo'])->name('procurement.approval-po.ceo');
+        //     });
 
-            Route::prefix('pengajuan-cash-advance')->group(function () {
-                Route::get('/', [ApprovalPOController::class, 'pengajuanCashAdvance'])->name('procurement.pengajuan-cash-advance');
-            });
+        //     Route::prefix('pengajuan-cash-advance')->group(function () {
+        //         Route::get('/', [ApprovalPOController::class, 'pengajuanCashAdvance'])->name('procurement.pengajuan-cash-advance');
+        //     });
 
-            Route::prefix('setup')->group(function () {
-                Route::get('supplier', [SetupController::class, 'supplier'])->name('procurement.setup.supplier');
-                Route::get('price-list-supplier', [SetupController::class, 'priceListSupplier'])->name('procurement.setup.price-list-supplier');
-            });
-        });
+        //     Route::prefix('setup')->group(function () {
+        //         Route::get('supplier', [SetupController::class, 'supplier'])->name('procurement.setup.supplier');
+        //         Route::get('price-list-supplier', [SetupController::class, 'priceListSupplier'])->name('procurement.setup.price-list-supplier');
+        //     });
+        // });
 
         Route::prefix('bpjs')->group(function () {
             Route::prefix('bridging-vclaim')->group(function () {
