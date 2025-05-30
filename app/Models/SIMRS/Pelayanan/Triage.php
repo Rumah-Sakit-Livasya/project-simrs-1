@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS\Pelayanan;
 
+use App\Models\Signature;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -65,5 +66,10 @@ class Triage extends Model
     public function registration()
     {
         return $this->belongsTo(Registration::class);
+    }
+
+    public function signature()
+    {
+        return $this->morphOne(Signature::class, 'signable');
     }
 }

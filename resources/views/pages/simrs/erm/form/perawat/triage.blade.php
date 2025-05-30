@@ -17,7 +17,7 @@
                             <div class="form-group">
                                 <label for="tgl_masuk" class="control-label text-primary">Hari/Tanggal</label>
                                 <input type="date" name="tgl_masuk" class="form-control"
-                                    value="{{ $pengkajian?->tgl_masuk?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
+                                    value="{{ $pengkajian?->tgl_masuk ?? now()->format('Y-m-d') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -354,24 +354,13 @@
                         </table>
                     </div>
 
-                    <div class="row mt-5">
-                        <div class="col-md-4 text-center">
-                            <span>Perawat,</span>
-                            <div id="tombol-1" class="mt-3">
-                                <a class="btn btn-primary btn-sm text-white ttd" onclick="openSignaturePad(1)"
-                                    id="ttd_pegawai">Tanda tangan</a>
-                            </div>
-                            <div class="mt-3">
-                                <img id="signature-display-1" src="" alt="Signature Image"
-                                    style="display:none; max-width:60%;">
-                            </div>
-                            <div class="mt-3">
-                                <span>{{ auth()->user()->employee->fullname }}</span>
-                            </div>
-                        </div>
-                    </div>
+                    @include('pages.simrs.erm.partials.signature-field', [
+                        'judul' => 'Perawat,',
+                        'pic' => auth()->user()->employee->fullname,
+                        'role' => 'perawat',
+                    ])
 
-                    <div class="row mt-5">
+                    <div class="row mt-5 justify-content-center">
                         <div class="col-md-12 px-3">
                             <div class="card-actionbar">
                                 <div class="card-actionbar-row d-flex justify-content-between align-items-center">

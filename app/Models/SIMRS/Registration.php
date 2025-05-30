@@ -7,6 +7,7 @@ use App\Models\Employee;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Keuangan\Kasir;
+use App\Models\SIMRS\Pelayanan\RujukAntarRS;
 use App\Models\SIMRS\Pelayanan\Triage;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
@@ -143,6 +144,16 @@ class Registration extends Model implements AuditableContract
     public function ews_anak()
     {
         return $this->hasOne(EWSAnak::class);
+    }
+
+    public function assesment_gadar()
+    {
+        return $this->hasOne(AssesmentKeperawatanGadar::class);
+    }
+
+    public function rujuk_antar_rs()
+    {
+        return $this->hasOne(RujukAntarRS::class);
     }
 
     // public function generateNomorRegistrasi()

@@ -938,43 +938,30 @@
                         </div>
                     </div>
 
-                    <div class="row mt-3">
+                    <div class="row mt-3 justify-content-center">
                         <div class="col-md-4 text-center">
-                            <span>Perawat yang mengirim,</span>
-                            <div id="tombol-1" class="mt-3">
-                                <a class="btn btn-primary btn-sm text-white ttd" onclick="openSignaturePad(1)"
-                                    id="ttd_pegawai">Tanda tangan</a>
-                            </div>
-                            <div class="mt-3">
-                                <img id="signature-display-1" src="" alt="Signature Image"
-                                    style="display:none; max-width:60%;">
-                            </div>
-                            <div class="mt-3">
-                                <span>{{ auth()->user()->employee->fullname }}</span>
-                            </div>
-
+                            @include('pages.simrs.erm.partials.signature-many', [
+                                'judul' => 'Perawat yang mengirim,',
+                                'name_prefix' => 'pengirim',
+                                'index' => 1,
+                                'signature_model' => $pengkajian?->signaturePengirim,
+                            ])
                         </div>
                         <div class="col-md-4 text-center">
                         </div>
                         <div class="col-md-4 text-center">
-                            <span>Perawat yang menerima,</span>
-                            <div id="tombol-2" class="mt-3">
-                                <a class="btn btn-primary btn-sm text-white ttd" onclick="openSignaturePad(2)"
-                                    id="ttd_pegawai">Tanda tangan</a>
-                            </div>
-                            <div class="mt-3">
-                                <img id="signature-display-2" src="" alt="Signature Image"
-                                    style="display:none; max-width:60%;">
-                            </div>
-                            <div class="mt-3">
-                                <span>{{ auth()->user()->employee->fullname }}</span>
-                            </div>
-
+                            @include('pages.simrs.erm.partials.signature-many', [
+                                'judul' => 'Perawat yang menerima,',
+                                'name_prefix' => 'penerima',
+                                'index' => 2,
+                                'signature_model' => $pengkajian?->signaturePenerima,
+                            ])
                         </div>
                     </div>
 
                     <header class="text-warning">
-                        <h4 class="mt-5 font-weight-bold text-center">DI ISI UNTUK PASIEN YANG KEMBALI KE RUANG
+                        <h4 class="mt-5 font-weight-bold text-center">
+                            DI ISI UNTUK PASIEN YANG KEMBALI KE RUANG
                             SEMULA
                             PASCA
                             TINDAKAN / PROSEDUR
@@ -1109,36 +1096,22 @@
 
                     <div class="row mt-3">
                         <div class="col-md-4 text-center">
-                            <span>Perawat yang mengirim,</span>
-                            <div id="tombol-1" class="mt-3">
-                                <a class="btn btn-primary btn-sm text-white ttd" onclick="openSignaturePad(1)"
-                                    id="ttd_pegawai">Tanda tangan</a>
-                            </div>
-                            <div class="mt-3">
-                                <img id="signature-display-1" src="" alt="Signature Image"
-                                    style="display:none; max-width:60%;">
-                            </div>
-                            <div class="mt-3">
-                                <span>{{ auth()->user()->employee->fullname }}</span>
-                            </div>
-
+                            @include('pages.simrs.erm.partials.signature-many', [
+                                'judul' => 'Perawat yang mengirim,',
+                                'name_prefix' => 'pengirim_balik',
+                                'index' => 3,
+                                'signature_model' => $pengkajian?->signaturePengirimBalik,
+                            ])
                         </div>
                         <div class="col-md-4 text-center">
                         </div>
                         <div class="col-md-4 text-center">
-                            <span>Perawat yang menerima,</span>
-                            <div id="tombol-2" class="mt-3">
-                                <a class="btn btn-primary btn-sm text-white ttd" onclick="openSignaturePad(2)"
-                                    id="ttd_pegawai">Tanda tangan</a>
-                            </div>
-                            <div class="mt-3">
-                                <img id="signature-display-2" src="" alt="Signature Image"
-                                    style="display:none; max-width:60%;">
-                            </div>
-                            <div class="mt-3">
-                                <span>{{ auth()->user()->employee->fullname }}</span>
-                            </div>
-
+                            @include('pages.simrs.erm.partials.signature-many', [
+                                'judul' => 'Perawat yang menerima,',
+                                'name_prefix' => 'penerima_balik',
+                                'index' => 4,
+                                'signature_model' => $pengkajian?->signaturePenerimaBalik,
+                            ])
                         </div>
                     </div>
 

@@ -229,10 +229,76 @@
             </div>
         </div>
     </main>
+    @include('pages.simrs.erm.partials.ttd')
+    @include('pages.simrs.erm.partials.ttd-many')
 @endsection
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
+        function openSignaturePad(index, target) {
+            $('#btn_save_ttd').attr('data-target', target);
+            $('#signatureModal').modal('show');
+        }
+
+        function saveSignature() {
+            if (!hasDrawn) {
+                alert("Silakan buat tanda tangan terlebih dahulu.");
+                return;
+            }
+
+            const dataURL = canvas.toDataURL('image/png');
+            const target = $('#btn_save_ttd').attr('data-target');
+
+            // Simpan base64 ke input hidden
+            $('#signature_image').val(dataURL);
+
+            // Tampilkan preview image
+            $('#signature_preview').attr('src', dataURL).show();
+
+            // Tutup modal dan bersihkan canvas
+            $('#signatureModal').modal('hide');
+            clearCanvas();
+        }
+
+        let currentSignatureIndex = null;
+
+        function openSignaturePadMany(index) {
+            currentSignatureIndex = index;
+
+            // Tampilkan modal
+            $('#signatureModalMany').data('target-index', index).modal('show');
+
+            // Atur data-index di canvas
+            const canvas = document.getElementById('canvas-many');
+            if (canvas) {
+                canvas.setAttribute('data-index', index);
+                clearCanvas(); // bersihkan canvas sebelum mulai tanda tangan baru
+            }
+        }
+
+
+        function saveSignatureMany() {
+            if (!hasDrawn) {
+                alert("Silakan buat tanda tangan terlebih dahulu.");
+                return;
+            }
+
+            const dataURL = canvas.toDataURL('image/png');
+
+            // Masukkan ke input sesuai index
+            document.querySelectorAll('input[name="signature_image[]"]')[currentSignatureIndex].value = dataURL;
+
+            // Tampilkan preview (jika kamu pakai ID dinamis, sesuaikan)
+            const previews = document.querySelectorAll('#signature_preview');
+            if (previews[currentSignatureIndex]) {
+                previews[currentSignatureIndex].src = dataURL;
+                previews[currentSignatureIndex].style.display = 'block';
+            }
+
+            $('#signatureModalMany').modal('hide');
+        }
+
+
         $(document).ready(function() {
             const pengkajian = @json($pengkajian ?? []);
 
@@ -304,6 +370,7 @@
                     }
                 });
             });
+
 
             // if ($('#filter_pasien #departement_id').val() != null || $('#filter_pasien #doctor_id').val() !=
             //     null) {

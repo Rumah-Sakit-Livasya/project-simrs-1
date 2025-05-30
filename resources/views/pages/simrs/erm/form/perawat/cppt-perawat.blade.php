@@ -64,7 +64,7 @@
                                                         <span>Subjective</span>
                                                     </div>
                                                     <div class="card-body p-0">
-                                                        <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="4"
+                                                        <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="8"
                                                             placeholder="Keluhan Utama">Keluhan Utama: {{ $registration?->pengkajian_nurse_rajal?->keluhan_utama }}</textarea>
                                                     </div>
                                                 </div>
@@ -77,15 +77,15 @@
                                                         <span>Objective</span>
                                                     </div>
                                                     <div class="card-body p-0">
-                                                        <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">
-                                                                Nadi (PR): {{ $registration?->pengkajian_nurse_rajal?->pr }}
-                                                                Respirasi (RR): {{ $registration?->pengkajian_nurse_rajal?->rr }}
-                                                                Tensi (BP): {{ $registration?->pengkajian_nurse_rajal?->bp }}
-                                                                Suhu (T): {{ $registration?->pengkajian_nurse_rajal?->temperatur }}
-                                                                Tinggi Badan: {{ $registration?->pengkajian_nurse_rajal?->body_height }}
-                                                                Berat Badan: {{ $registration?->pengkajian_nurse_rajal?->body_weight }}
-                                                                SPO2 : {{ $registration?->pengkajian_nurse_rajal?->sp02 }}
-                                                                Skor Nyeri: {{ $registration?->pengkajian_nurse_rajal?->skor_nyeri }}
+                                                        <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="8">
+Nadi (PR): {{ $registration?->pengkajian_dokter_rajal?->pr }}
+Respirasi (RR): {{ $registration?->pengkajian_dokter_rajal?->rr }}
+Tensi (BP): {{ $registration?->pengkajian_dokter_rajal?->bp }}
+Suhu (T): {{ $registration?->pengkajian_dokter_rajal?->temperatur }}
+Tinggi Badan: {{ $registration?->pengkajian_dokter_rajal?->body_height }}
+Berat Badan: {{ $registration?->pengkajian_dokter_rajal?->body_weight }}
+SPO2 : {{ $registration?->pengkajian_dokter_rajal?->sp02 }}
+Skor Nyeri: {{ $registration?->pengkajian_dokter_rajal?->skor_nyeri }}
                                                         </textarea>
                                                     </div>
                                                 </div>
@@ -104,9 +104,9 @@
                                                             Keperawatan</span>
                                                     </div>
                                                     <div class="card-body p-0">
-                                                        <textarea class="form-control border-0 rounded-0" id="assesment" name="assesment" rows="4"
-                                                            placeholder="Diagnosa Keperawatan">Diagnosa Kerja:
-                                                                    Diagnosa Keperawatan: {{ $registration?->pengkajian_nurse_rajal?->diagnosa_keperawatan }}
+                                                        <textarea class="form-control border-0 rounded-0" id="assesment" name="assesment" rows="8">
+Diagnosa Kerja:
+Diagnosa Keperawatan: {{ $registration?->pengkajian_dokter_rajal?->diagnosa_keperawatan }}
                                                         </textarea>
                                                     </div>
                                                 </div>
@@ -122,8 +122,9 @@
                                                             class="badge badge-dark pointer">Intervensi</span>
                                                     </div>
                                                     <div class="card-body p-0">
-                                                        <textarea class="form-control border-0 rounded-0" id="planning" name="planning" rows="4"
-                                                            placeholder="Rencana Tindak Lanjut">Terapi / Tindakan :</textarea>
+                                                        <textarea class="form-control border-0 rounded-0" id="planning" name="planning" rows="8">
+Terapi / Tindakan :
+                                                        </textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -137,8 +138,9 @@
                                                         Evaluasi
                                                     </div>
                                                     <div class="card-body p-0">
-                                                        <textarea class="form-control border-0 rounded-0" id="evaluasi" name="evaluasi" rows="4"
-                                                            placeholder="Evaluasi"></textarea>
+                                                        <textarea class="form-control border-0 rounded-0" id="evaluasi" name="evaluasi" rows="8"
+                                                            placeholder="Evaluasi">
+                                                        </textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -212,7 +214,7 @@
                         </div>
                     </form>
 
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <hr style="border-color: #868686; margin-bottom: 50px;">
                         <div class="card-body">
                             <div class="table-responsive no-margin">
@@ -227,190 +229,12 @@
                                     <tbody id="list_soap">
                                         <tr>
                                             <td class="text-center">
-                                                <div class="deep-purple-text">01 Oct 2024 22:34<br><span
-                                                        class="green-text" style="font-weight:400;">RAWAT
-                                                        INAP</span><br><b style="font-weight: 400;">Lia Yulianti,
-                                                        A.Md.Kep</b><br>
-                                                    <div class="input-oleh deep-orange-text">Input oleh : <br>Lia
-                                                        Yulianti,
-                                                        A.Md.Kep</div>
-                                                    <a href="javascript:void(0)"
-                                                        class="d-block text-uppercase badge badge-primary"><i
-                                                            class="mdi mdi-plus-circle"></i> Verifikasi</a>
-                                                    <div>
-                                                        <img src="http://192.168.1.253/real/include/images/ttd_blank.png"
-                                                            width="200px;" height="100px;"
-                                                            onerror="this.src=this.onerror=null; this.src='http://192.168.1.253/real/include/images/ttd_blank.png'">
-                                                    </div>
-                                                </div>
                                             </td>
                                             <td>
                                                 <table width="100%" class="table-soap nurse">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td colspan="3" class="soap-text title">Perawat
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center"
-                                                                width="8%">S
-                                                            </td>
-                                                            <td>Keluhan utama : px mengatakan nyeri luka post sc
-                                                                berkurang</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">O
-                                                            </td>
-                                                            <td>Keadaan Umum : sedang<br>
-                                                                Nadi : 80x/menit <br>
-                                                                Respirasi(RR) : 20x/menit<br>
-                                                                Tensi (BP) : 130/80mmHg<br>
-                                                                Suhu (T) : 36.8C<br>
-                                                                Berat badan : Kg<br>
-                                                                Skor EWS : 0<br>
-                                                                Skor nyeri : 0<br>
-                                                                Saturasi : 99<br>
-                                                                Skor resiko jatuh : 35</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">A
-                                                            </td>
-                                                            <td>Diagnosa Keperawatan : gangguan rasa nyaman
-                                                                nyeri<br>
-                                                                Diagnosa Keperawatan : <br>
-                                                                Diagnosa Keperawatan : </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">P
-                                                            </td>
-                                                            <td>Rencana Tindak Lanjut : obs ku dan ttv<br>
-                                                                Rencana Tindak Lanjut : berikan therapy sesuai advis
-                                                                dpjp<br>
-                                                                Rencana Tindak Lanjut : </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">
-                                                            </td>
-                                                            <td><strong class="deep-orange-text"></strong></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text"></td>
-                                                            <td colspan="2"><strong
-                                                                    class="deep-purple-text"><u>Evaluasi</u>:</strong><br>instoper<br>
-                                                                cefo 2x1 jam06;00 4)<br>
-                                                                metro tab 3x1<br>
-                                                                by (+)<br>
-                                                                hasil visit :<br>
-                                                                + nifed 3x1<br>
-                                                                + dopamet 3x1</td>
-                                                        </tr>
-                                                    </tbody>
                                                 </table>
                                             </td>
                                             <td>
-                                                <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap"
-                                                    data-id="90988" title="Copy"></i>
-                                                <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap"
-                                                    data-id="90988" title="Hapus"></i>
-                                                <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap"
-                                                    data-id="90988" title="Edit SOAP & Resep Elektronik"
-                                                    style="display: {show_admin}"></i>
-                                                <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian"
-                                                    data-id="90988" title="Print Antrian Resep" style="display:"></i>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center">
-                                                <div class="deep-purple-text">01 Oct 2024 22:34<br><span
-                                                        class="green-text" style="font-weight:400;">RAWAT
-                                                        INAP</span><br><b style="font-weight: 400;">Lia Yulianti,
-                                                        A.Md.Kep</b><br>
-                                                    <div class="input-oleh deep-orange-text">Input oleh : <br>Lia
-                                                        Yulianti,
-                                                        A.Md.Kep</div>
-                                                    <a href="javascript:void(0)"
-                                                        class="d-block text-uppercase badge badge-primary"><i
-                                                            class="mdi mdi-plus-circle"></i> Verifikasi</a>
-                                                    <div>
-                                                        <img src="http://192.168.1.253/real/include/images/ttd_blank.png"
-                                                            width="200px;" height="100px;"
-                                                            onerror="this.src=this.onerror=null; this.src='http://192.168.1.253/real/include/images/ttd_blank.png'">
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <table width="100%" class="table-soap nurse">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td colspan="3" class="soap-text title">Perawat
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center"
-                                                                width="8%">S
-                                                            </td>
-                                                            <td>Keluhan utama : px mengatakan nyeri luka post sc
-                                                                berkurang</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">O
-                                                            </td>
-                                                            <td>Keadaan Umum : sedang<br>
-                                                                Nadi : 80x/menit <br>
-                                                                Respirasi(RR) : 20x/menit<br>
-                                                                Tensi (BP) : 130/80mmHg<br>
-                                                                Suhu (T) : 36.8C<br>
-                                                                Berat badan : Kg<br>
-                                                                Skor EWS : 0<br>
-                                                                Skor nyeri : 0<br>
-                                                                Saturasi : 99<br>
-                                                                Skor resiko jatuh : 35</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">A
-                                                            </td>
-                                                            <td>Diagnosa Keperawatan : gangguan rasa nyaman
-                                                                nyeri<br>
-                                                                Diagnosa Keperawatan : <br>
-                                                                Diagnosa Keperawatan : </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">P
-                                                            </td>
-                                                            <td>Rencana Tindak Lanjut : obs ku dan ttv<br>
-                                                                Rencana Tindak Lanjut : berikan therapy sesuai advis
-                                                                dpjp<br>
-                                                                Rencana Tindak Lanjut : </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">
-                                                            </td>
-                                                            <td><strong class="deep-orange-text"></strong></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text"></td>
-                                                            <td colspan="2"><strong
-                                                                    class="deep-purple-text"><u>Evaluasi</u>:</strong><br>instoper<br>
-                                                                cefo 2x1 jam06;00 4)<br>
-                                                                metro tab 3x1<br>
-                                                                by (+)<br>
-                                                                hasil visit :<br>
-                                                                + nifed 3x1<br>
-                                                                + dopamet 3x1</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                            <td>
-                                                <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap"
-                                                    data-id="90988" title="Copy"></i>
-                                                <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap"
-                                                    data-id="90988" title="Hapus"></i>
-                                                <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap"
-                                                    data-id="90988" title="Edit SOAP & Resep Elektronik"
-                                                    style="display: {show_admin}"></i>
-                                                <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian"
-                                                    data-id="90988" title="Print Antrian Resep" style="display:"></i>
                                             </td>
                                         </tr>
                                         <!-- Additional rows here -->
@@ -476,6 +300,8 @@
 
                         // Loop data dan tambahkan baris
                         $.each(response, function(index, data) {
+                            console.log(data);
+
                             let formattedDate = new Intl.DateTimeFormat('id-ID', {
                                 weekday: 'long',
                                 year: 'numeric',
@@ -489,10 +315,10 @@
                             var row = `
                                 <tr>
                                     <td class="text-center">
-                                        <div class="deep-purple-text">${formattedDate}<br>
-                                            <span class="green-text" style="font-weight:400;">${data.tipe_rawat}</span><br>
-                                            <b style="font-weight: 400;">Dokter ID: ${data.doctor_id}</b><br>
-                                            <div class="input-oleh deep-orange-text">Input oleh: ${data.user_id}</div>
+                                        <div class="deep-purple-text">
+                                            <div class="text-primary mt-3" style="font-weight:400;">${formattedDate}</div>
+                                            <div class="text-success mt-3" style="font-weight:400;">${data.tipe_rawat}</div>
+                                            <div class="input-oleh text-warning mb-2 mt-1">${data.user.name}</div>
                                             <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
                                             <div>
                                                 <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">

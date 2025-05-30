@@ -24,7 +24,7 @@
                                 <div class="input-group">
                                     <div class="input-group">
                                         <input id="pr" type="text" name="pr" class="form-control"
-                                            value="{{ $registration?->pengkajian_nurse_rajal?->pr }}">
+                                            value="{{ $pengkajian?->pr ?? $triage?->pr }}">
                                         <div class="input-group-append">
                                             <span class="input-group-text">x/menit</span>
                                         </div>
@@ -37,7 +37,7 @@
                                 <label for="rr" class="text-primary">Respirasi (RR)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="rr" name="rr" type="text"
-                                        value="{{ $registration?->pengkajian_nurse_rajal?->rr }}">
+                                        value="{{ $pengkajian?->rr ?? $triage?->rr }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">x/menit</span>
                                     </div>
@@ -49,7 +49,7 @@
                                 <label for="body_height">Tinggi Badan (cm)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric calc-bmi-pd" id="body_height" name="body_height"
-                                        type="text" value="{{ $registration?->pengkajian_nurse_rajal?->body_height }}">
+                                        type="text" value="{{ $pengkajian?->body_height ?? $triage?->body_height }}"">
                                     <div class="input-group-append">
                                         <span class="input-group-text">cm</span>
                                     </div>
@@ -61,7 +61,7 @@
                                 <label for="body_weight">Berat Badan (kg)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric calc-bmi-pd" id="body_weight" name="body_weight"
-                                        type="text" value="{{ $registration?->pengkajian_nurse_rajal?->body_weight }}">
+                                        type="text" value="{{ $pengkajian?->body_weight ?? $triage?->body_weight }}" }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">kg</span>
                                     </div>
@@ -77,7 +77,7 @@
                                 <label for="bp">Tensi (BP)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="bp" name="bp" type="text"
-                                        value="{{ $registration?->pengkajian_nurse_rajal?->bp }}">
+                                        value="{{ $pengkajian?->bp ?? $triage?->bp }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">mmHg</span>
                                     </div>
@@ -89,7 +89,7 @@
                                 <label for="temperatur">Suhu (T)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="temperatur" name="temperatur" type="text"
-                                        value="{{ $pengkajian?->temperatur }}">
+                                        value="{{ $pengkajian?->temperatur ?? $triage?->temperatur }}">
 
                                     <div class="input-group-append">
                                         <span class="input-group-text">°C</span>
@@ -105,7 +105,7 @@
                                 <label for="bmi">Index Massa Tubuh</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="bmi" name="bmi" readonly
-                                        type="text" value="{{ $pengkajian?->bmi }}">
+                                        type="text" value="{{ $pengkajian?->bmi ?? $triage?->bmi }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">Kg/m²</span>
                                     </div>
@@ -116,7 +116,7 @@
                             <div class="form-group">
                                 <label for="kat_bmi">Katerogi IMT</label>
                                 <input class="form-control" id="kat_bmi" name="kat_bmi" readonly type="text"
-                                    value="{{ $pengkajian?->kat_bmi }}">
+                                    value="{{ $pengkajian?->kat_bmi ?? $triage?->kat_bmi }}">
                             </div>
                         </div>
                     </div>
@@ -126,7 +126,7 @@
                             <label for="sp02">SP 02</label>
                             <div class="input-group">
                                 <input class="form-control" id="sp02" name="sp02" type="text"
-                                    value="{{ $pengkajian?->sp02 }}">
+                                    value="{{ $pengkajian?->sp02 ?? $triage?->sp02 }}">
                                 <div class="input-group-append">
                                     <span class="input-group-text">%</span>
                                 </div>
@@ -343,20 +343,20 @@
                                             <div class="form-check">
                                                 <input type="checkbox" id="edukasi_proses_penyakit" name="awal_edukasi[]"
                                                     value="proses_penyakit" class="form-check-input"
-                                                    {{ in_array('proses_penyakit', json_decode($pengkajian?->awal_edukasi ?? '[]')) ? 'checked' : '' }}>
+                                                    {{ in_array('proses_penyakit', json_decode($pengkajian?->awal_edukasi) ?? []) ? 'checked' : '' }}>
                                                 <label for="edukasi_proses_penyakit" class="form-check-label">Proses
                                                     Penyakit</label>
                                             </div>
                                             <div class="form-check">
                                                 <input type="checkbox" id="edukasi_terapi" name="awal_edukasi[]"
                                                     value="terapi" class="form-check-input"
-                                                    {{ in_array('edukasi_terapi', json_decode($pengkajian?->awal_edukasi ?? '[]')) ? 'checked' : '' }}>
+                                                    {{ in_array('edukasi_terapi', json_decode($pengkajian?->awal_edukasi) ?? []) ? 'checked' : '' }}>
                                                 <label for="edukasi_terapi" class="form-check-label">Terapi</label>
                                             </div>
                                             <div class="form-check">
                                                 <input type="checkbox" id="edukasi_tindakan_medis" name="awal_edukasi[]"
                                                     value="tindakan_medis" class="form-check-input"
-                                                    {{ in_array('tindakan_medis', json_decode($pengkajian?->awal_edukasi ?? '[]')) ? 'checked' : '' }}>
+                                                    {{ in_array('tindakan_medis', json_decode($pengkajian?->awal_edukasi) ?? []) ? 'checked' : '' }}>
                                                 <label for="edukasi_tindakan_medis" class="form-check-label">Tindakan
                                                     Medis</label>
                                             </div>
@@ -368,14 +368,14 @@
                                             <div class="form-check">
                                                 <input type="checkbox" id="evaluasi_akut" name="awal_evaluasi_penyakit[]"
                                                     value="akut" class="form-check-input"
-                                                    {{ in_array('akut', json_decode($pengkajian?->awal_evaluasi_penyakit ?? '[]')) ? 'checked' : '' }}>
+                                                    {{ in_array('akut', json_decode($pengkajian?->awal_evaluasi_penyakit) ?? []) ? 'checked' : '' }}>
                                                 <label for="evaluasi_akut" class="form-check-label">Akut</label>
                                             </div>
                                             <div class="form-check">
                                                 <input type="checkbox" id="evaluasi_kronis"
                                                     name="awal_evaluasi_penyakit[]" value="kronis"
                                                     class="form-check-input"
-                                                    {{ in_array('kronis', json_decode($pengkajian?->awal_evaluasi_penyakit ?? '[]')) ? 'checked' : '' }}>
+                                                    {{ in_array('kronis', json_decode($pengkajian?->awal_evaluasi_penyakit) ?? []) ? 'checked' : '' }}>
                                                 <label for="evaluasi_kronis" class="form-check-label">Kronis</label>
                                             </div>
                                         </td>
@@ -387,7 +387,7 @@
                                                 <input type="checkbox" id="rencana_rawat_jalan"
                                                     name="awal_rencana_tindak_lanjut[]" value="rajal"
                                                     class="form-check-input"
-                                                    {{ in_array('rajal', json_decode($pengkajian?->awal_rencana_tindak_lanjut ?? '[]')) ? 'checked' : '' }}>
+                                                    {{ in_array('rajal', json_decode($pengkajian?->awal_rencana_tindak_lanjut) ?? []) ? 'checked' : '' }}>
                                                 <label for="rencana_rawat_jalan" class="form-check-label">Rawat
                                                     Jalan</label>
                                             </div>
@@ -395,7 +395,7 @@
                                                 <input type="checkbox" id="rencana_rawat_inap"
                                                     name="awal_rencana_tindak_lanjut[]" value="ranap"
                                                     class="form-check-input"
-                                                    {{ in_array('ranap', json_decode($pengkajian?->awal_rencana_tindak_lanjut ?? '[]')) ? 'checked' : '' }}>
+                                                    {{ in_array('ranap', json_decode($pengkajian?->awal_rencana_tindak_lanjut) ?? []) ? 'checked' : '' }}>
                                                 <label for="rencana_rawat_inap" class="form-check-label">Rawat
                                                     Inap</label>
                                             </div>
@@ -403,14 +403,14 @@
                                                 <input type="checkbox" id="rencana_rujuk"
                                                     name="awal_rencana_tindak_lanjut[]" value="rujuk"
                                                     class="form-check-input"
-                                                    {{ in_array('rujuk', json_decode($pengkajian?->awal_rencana_tindak_lanjut ?? '[]')) ? 'checked' : '' }}>
+                                                    {{ in_array('rujuk', json_decode($pengkajian?->awal_rencana_tindak_lanjut) ?? []) ? 'checked' : '' }}>
                                                 <label for="rencana_rujuk" class="form-check-label">Rujuk</label>
                                             </div>
                                             <div class="form-check">
                                                 <input type="checkbox" id="rencana_konsul"
                                                     name="awal_rencana_tindak_lanjut[]" value="konsul"
                                                     class="form-check-input"
-                                                    {{ in_array('konsul', json_decode($pengkajian?->awal_rencana_tindak_lanjut ?? '[]')) ? 'checked' : '' }}>
+                                                    {{ in_array('konsul', json_decode($pengkajian?->awal_rencana_tindak_lanjut) ?? []) ? 'checked' : '' }}>
                                                 <label for="rencana_konsul" class="form-check-label">Konsul</label>
                                             </div>
                                         </td>
@@ -422,22 +422,15 @@
 
                     <div class="row">
                         <div class="col-md-12 px-3">
-                            <div class="form-group">
-                                <div class="input-group mb-4">
-                                    <div class="d-flex flex-column align-items-center">
-                                        <span>Dokter,</span>
-                                        <img src="http://192.168.1.253/real/pengkajian/54974/images/pkid_166671_data_ttd.png?6703600e7ad50"
-                                            id="img_ttd" class="img-fluid" style="max-width: 200px; max-height: 100px;"
-                                            onerror="this.onerror=null; this.src='http://192.168.1.253/real/include/ttd_pegawai/955.png'">
-                                        <input type="text" name="nama_dokter" class="form-control text-center"
-                                            value="{{ $registration->doctor->employee->fullname }}" style="width: 100%;">
-                                        <span class="badge bg-primary pointer" id="btn-ttd">TTD Pen
-                                            Tablet</span>
-                                    </div>
-                                </div>
-                            </div>
+                            @include('pages.simrs.erm.partials.signature-field', [
+                                'judul' => 'Dokter, ',
+                                'pic' => $registration->doctor->employee->fullname,
+                                'role' => 'Dokter',
+                            ])
                         </div>
                     </div>
+
+
                     <div class="row">
                         <div class="col-md-12 px-3">
                             <div class="card-actionbar">
@@ -470,7 +463,7 @@
 @endsection
 @section('plugin-erm')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-    @include('pages.simrs.poliklinik.partials.action-js.pengkajian-dokter')
+    @include('pages.simrs.erm.partials.action-js.pengkajian-dokter')
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');

@@ -29,10 +29,11 @@
                                         value="{{ $registration->patient->name }}" readonly>
                                 </td>
                                 <td style="width: 20%;">
-                                    <div class="form-check">
-                                        <input class="form-check-input custom-checkbox" type="radio" id="kunjungan_awal"
-                                            name="alasan_masuk_rs" value="kunjungan_awal">
-                                        <label class="form-check-label ml-2" for="kunjungan_awal">Kunjungan
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="radio" class="custom-control-input" value="kunjungan_awal"
+                                            name="alasan_masuk_rs" id="kunjungan-awal"
+                                            {{ $pengkajian?->alasan_masuk_rs == 'kunjungan_awal' ? 'checked' : '' }}>
+                                        <label class="custom-control-label text-primary" for="kunjungan-awal">Kunjungan
                                             Awal</label>
                                     </div>
                                 </td>
@@ -50,10 +51,11 @@
                                         value="{{ $registration->patient->medical_record_number }}" readonly>
                                 </td>
                                 <td>
-                                    <div class="form-check">
-                                        <input class="form-check-input custom-checkbox" type="radio" id="kontrol_lanjutan"
-                                            name="alasan_masuk_rs" value="kontrol_lanjutan">
-                                        <label class="form-check-label ml-2" for="kontrol_lanjutan">Kontrol
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="radio" class="custom-control-input" value="kontrol_lanjutan"
+                                            name="alasan_masuk_rs" id="kontrol-lanjutan"
+                                            {{ $pengkajian?->alasan_masuk_rs == 'kontrol_lanjutan' ? 'checked' : '' }}>
+                                        <label class="custom-control-label text-primary" for="kontrol-lanjutan">Kontrol
                                             Lanjutan</label>
                                     </div>
                                 </td>
@@ -71,19 +73,14 @@
                                             placeholder="dd/mm/yyyy"
                                             value="{{ \Carbon\Carbon::parse($registration->patient->date_of_birth)->format('d/m/Y') }}"
                                             readonly>
-
-                                        {{-- <div class="input-group-append">
-                                                <span class="input-group-text fs-xl">
-                                                    <i class="fal fa-calendar-check"></i>
-                                                </span>
-                                            </div> --}}
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="form-check">
-                                        <input class="form-check-input custom-checkbox" type="radio" id="observasi"
-                                            name="alasan_masuk_rs" value="observasi">
-                                        <label class="form-check-label ml-2" for="observasi">Observasi</label>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="radio" class="custom-control-input" value="observasi"
+                                            name="alasan_masuk_rs" id="observasi"
+                                            {{ $pengkajian?->alasan_masuk_rs == 'observasi' ? 'checked' : '' }}>
+                                        <label class="custom-control-label text-primary" for="observasi">Observasi</label>
                                     </div>
                                 </td>
                             </tr>
@@ -99,10 +96,12 @@
                                         value="{{ $registration->patient->gender }}" readonly>
                                 </td>
                                 <td>
-                                    <div class="form-check">
-                                        <input class="form-check-input custom-checkbox" type="radio" id="post_operasi"
-                                            name="alasan_masuk_rs" value="post_operasi">
-                                        <label class="form-check-label ml-2" for="post_operasi">Post Operasi</label>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="radio" class="custom-control-input" value="post_operasi"
+                                            name="alasan_masuk_rs" id="post-operasi"
+                                            {{ $pengkajian?->alasan_masuk_rs == 'post_operasi' ? 'checked' : '' }}>
+                                        <label class="custom-control-label text-primary" for="post-operasi">Post
+                                            Operasi</label>
                                     </div>
                                 </td>
                             </tr>
@@ -141,35 +140,55 @@
                                     <label>:</label>
                                 </td>
                                 <td colspan="2">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input custom-checkbox" type="radio" id="sembuh"
-                                            name="cara_keluar" value="sembuh">
-                                        <label class="form-check-label" for="sembuh">Sembuh</label>
+                                    <div class="form-check form-check-inline mr-4">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="radio" class="custom-control-input" value="sembuh"
+                                                name="cara_keluar" id="sembuh"
+                                                {{ $pengkajian?->cara_keluar == 'sembuh' ? 'checked' : '' }}>
+                                            <label class="custom-control-label text-primary" for="sembuh">Sembuh</label>
+                                        </div>
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input custom-checkbox" type="radio" id="meninggal"
-                                            name="cara_keluar" value="meninggal">
-                                        <label class="form-check-label" for="meninggal">Meninggal</label>
+                                    <div class="form-check form-check-inline mr-4">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="radio" class="custom-control-input" value="meninggal"
+                                                name="cara_keluar" id="meninggal"
+                                                {{ $pengkajian?->cara_keluar == 'meninggal' ? 'checked' : '' }}>
+                                            <label class="custom-control-label text-primary"
+                                                for="meninggal">Meninggal</label>
+                                        </div>
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input custom-checkbox" type="radio" id="rawat"
-                                            name="cara_keluar" value="rawat">
-                                        <label class="form-check-label" for="rawat">Rawat</label>
+                                    <div class="form-check form-check-inline mr-4">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="radio" class="custom-control-input" value="rawat"
+                                                name="cara_keluar" id="rawat"
+                                                {{ $pengkajian?->cara_keluar == 'rawat' ? 'checked' : '' }}>
+                                            <label class="custom-control-label text-primary" for="rawat">Rawat</label>
+                                        </div>
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input custom-checkbox" type="radio" id="rujuk"
-                                            name="cara_keluar" value="rujuk">
-                                        <label class="form-check-label" for="rujuk">Rujuk</label>
+                                    <div class="form-check form-check-inline mr-4">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="radio" class="custom-control-input" value="rujuk"
+                                                name="cara_keluar" id="rujuk"
+                                                {{ $pengkajian?->cara_keluar == 'rujuk' ? 'checked' : '' }}>
+                                            <label class="custom-control-label text-primary" for="rujuk">Rujuk</label>
+                                        </div>
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input custom-checkbox" type="radio" id="aps"
-                                            name="cara_keluar" value="aps">
-                                        <label class="form-check-label" for="aps">APS</label>
+                                    <div class="form-check form-check-inline mr-4">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="radio" class="custom-control-input" value="aps"
+                                                name="cara_keluar" id="aps"
+                                                {{ $pengkajian?->cara_keluar == 'aps' ? 'checked' : '' }}>
+                                            <label class="custom-control-label text-primary" for="aps">APS</label>
+                                        </div>
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input custom-checkbox" type="radio" id="kontrol"
-                                            name="cara_keluar" value="kontrol">
-                                        <label class="form-check-label" for="kontrol">Kontrol</label>
+                                    <div class="form-check form-check-inline mr-4">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="radio" class="custom-control-input" value="kontrol"
+                                                name="cara_keluar" id="kontrol"
+                                                {{ $pengkajian?->cara_keluar == 'kontrol' ? 'checked' : '' }}>
+                                            <label class="custom-control-label text-primary"
+                                                for="kontrol">Kontrol</label>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

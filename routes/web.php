@@ -385,6 +385,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('impersonate');
     Route::post('/switchback', [SwitchUserController::class, 'switchBack'])->name('switchback');
 });
+Route::get('/test', function () {
+    return view('pages.testing');
+});
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/simrs.php';

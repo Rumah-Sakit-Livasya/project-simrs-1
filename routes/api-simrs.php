@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\SIMRS\AssesmentGadarController;
+use App\Http\Controllers\SIMRS\RujukAntarRSController;
 use App\Models\OrderParameterLaboratorium;
 use Illuminate\Support\Facades\Route;
 
@@ -140,8 +142,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::prefix('igd')->group(function () {
         Route::post('/filter-pasien', [IGDController::class, 'index'])->name('igd.filter-pasien');
     });
+
     Route::prefix('erm')->group(function () {
         Route::post('/filter-pasien', [ERMController::class, 'filterPasien'])->name('erm.filter-pasien');
+        Route::post('/save-signature/{id}', [ERMController::class, 'saveSignature'])->name('erm.save-signature');
 
         Route::prefix('ews-anak')->group(function () {
             Route::post('/', [EWSAnakController::class, 'store'])->name('erm.ews-anak.store');
@@ -159,8 +163,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         });
 
         Route::prefix('assesment-keperawatan-gadar')->group(function () {
-            Route::post('/', [Assesment::class, 'store'])->name('erm.assesment-keperawatan-gadar.store');
-            Route::get('/{id}', [Assesment::class, 'getData'])->name('erm.assesment-keperawatan-gadar.store');
+            Route::post('/', [AssesmentGadarController::class, 'store'])->name('erm.assesment-keperawatan-gadar.store');
+            Route::get('/{id}', [AssesmentGadarController::class, 'getData'])->name('erm.assesment-keperawatan-gadar.store');
+        });
+
+        Route::prefix('rujuk-antar-rs')->group(function () {
+            Route::post('/', [RujukAntarRSController::class, 'store'])->name('erm.rujuk-antar-rs.store');
+            Route::get('/{id}', [RujukAntarRSController::class, 'getData'])->name('erm.rujuk-antar-rs.store');
         });
     });
     Route::prefix('poliklinik')->group(function () {
@@ -272,8 +281,6 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');
             });
         });
-
-
 
         Route::prefix('penunjang-medis')->group(function () {
             Route::get('/radiologi/grup-parameter-radiologi/{id}', [GrupParameterRadiologiController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.radiologi.grup-parameter.get');
