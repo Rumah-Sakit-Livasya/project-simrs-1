@@ -1,5 +1,4 @@
 @extends('inc.layout')
-@se
 @section('extended-css')
     <style>
         hr {
