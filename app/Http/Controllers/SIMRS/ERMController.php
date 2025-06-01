@@ -9,6 +9,8 @@ use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\EWSAnak;
+use App\Models\SIMRS\EWSDewasa;
+use App\Models\SIMRS\EWSObstetri;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
@@ -214,6 +216,7 @@ class ERMController extends Controller
         // }
 
         // Jika permintaan datang dari klik menu dan nomor registrasi tersedia
+        $pengkajian = $registration;
         if ($menu && $noRegist) {
             // $html = view('pages.simrs.erm.partials.list-pasien', compact('registrations'))->render();
 
@@ -225,7 +228,7 @@ class ERMController extends Controller
 
 
         // Jika halaman awal dibuka (tanpa filter)
-        return view('pages.simrs.erm.index', compact('departements', 'menu', 'jadwal_dokter', 'registration', 'registrations', 'path'));
+        return view('pages.simrs.erm.index', compact('departements', 'pengkajian', 'menu', 'jadwal_dokter', 'registration', 'registrations', 'path'));
     }
 
 
@@ -311,12 +314,12 @@ class ERMController extends Controller
                 return view('pages.simrs.erm.form.perawat.ews-anak', compact('registration', 'pengkajian', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'ews_dewasa':
-                $ews_dewasa = OrderLaboratorium::where('registration_id', $registration->id)->get();
-                return view('pages.simrs.erm.form.perawat.ews-dewasa', compact('ews_dewasa', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                $pengkajian = EWSDewasa::where('registration_id', $registration->id)->first();
+                return view('pages.simrs.erm.form.perawat.ews-dewasa', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'ews_obstetri':
-                $ews_obstetri = OrderLaboratorium::where('registration_id', $registration->id)->get();
-                return view('pages.simrs.erm.form.perawat.ews-obstetri', compact('ews_obstetri', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                $pengkajian = EWSObstetri::where('registration_id', $registration->id)->first();
+                return view('pages.simrs.erm.form.perawat.ews-obstetri', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'assesment_gadar':
                 $pengkajian = AssesmentKeperawatanGadar::where('registration_id', $registration->id)->first();

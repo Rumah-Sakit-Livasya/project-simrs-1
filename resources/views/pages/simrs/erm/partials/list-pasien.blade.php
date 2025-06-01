@@ -31,7 +31,7 @@
 
                                 <div class="number mr-4 p-2 text-white text-center {{ $bgColor }}"
                                     style="border-radius: 11px; width: 65px; height: 65px; line-height: 50px;">
-                                    {{ str_pad($registration->no_urut, 3, '0', STR_PAD_LEFT) }}
+                                    {{ str_pad($loop->iteration, 3, '0', STR_PAD_LEFT) }}
                                 </div>
                                 <div class="patient-name"
                                     data-pregid="{{ $registration->patient->medical_record_number }}">

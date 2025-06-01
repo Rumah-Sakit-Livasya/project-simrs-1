@@ -971,6 +971,7 @@
                     @include('pages.simrs.erm.partials.signature-field', [
                         'judul' => 'Perawat,',
                         'pic' => auth()->user()->employee->fullname,
+                        'role' => 'perawat',
                     ])
 
                     <div class="row mt-5">

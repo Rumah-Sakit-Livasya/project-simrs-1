@@ -113,9 +113,8 @@
                                     <label>:</label>
                                 </td>
                                 <td>
-                                    <input type="datetime-local" class="form-control" id="tgl_masuk" name="tgl_masuk"
-                                        placeholder="dd/mm/yyyy"
-                                        value="{{ \Carbon\Carbon::parse(now()->setTimeZone('Asia/Jakarta'))->format('d/m/Y H:i') }}">
+                                    <input type="text" class="form-control" id="tgl_masuk" name="tgl_masuk"
+                                        value="{{ \Carbon\Carbon::parse($registration->registration_date)->format('d-m-Y') }}">
                                 </td>
                                 <td>
                                     <div class="input-group">
@@ -302,22 +301,15 @@
                                     <table class="table table-borderless">
                                         <tbody>
                                             <tr>
-                                                <td style="width: 65%">
+                                                <td style="width: 35%">
 
                                                 </td>
-                                                <td style="width: 35%">
-                                                    <div class="text-center">
-                                                        DPJP/Dokter Yang Memeriksa
-                                                    </div>
-                                                    <div class="text-center">
-                                                        <a class="btn btn-primary btn-ttd-resume-medis btn-sm text-white my-2"
-                                                            data-id="{{ auth()->user()->id }}">
-                                                            Tanda Tangan
-                                                        </a>
-                                                        <img id="signature-display" src="" alt="Signature Image"
-                                                            style="display:none; max-width:80%;"><br>
-                                                        <span>{{ auth()->user()->employee->fullname }}</span>
-                                                    </div>
+                                                <td style="width: 65%">
+                                                    @include('pages.simrs.erm.partials.signature-field', [
+                                                        'judul' => 'Dokter yang memeriksa,',
+                                                        'pic' => $registration->doctor->employee->fullname,
+                                                        'role' => 'perawat',
+                                                    ])
                                                 </td>
                                                 <td style="width: 10%">
                                                     <input type="hidden" name="is_ttd">
@@ -362,7 +354,7 @@
 @endsection
 @section('plugin-erm')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-    @include('pages.simrs.poliklinik.partials.action-js.resume-medis-rajal')
+    @include('pages.simrs.erm.partials.action-js.resume-medis-rajal')
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');

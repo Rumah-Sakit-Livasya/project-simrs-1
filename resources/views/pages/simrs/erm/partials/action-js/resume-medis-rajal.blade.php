@@ -19,16 +19,16 @@
         $('.btn-ttd-resume-medis').on('click', function() {
             const idUser = $(this).attr('data-id');
             const token = "{{ csrf_token() }}";
-            const ttd = "{{ auth()->user()->employee->ttd ? auth()->user()->employee->ttd : '' }}";
+            // const ttd = "{{ auth()->user()->employee->ttd ? auth()->user()->employee->ttd : '' }}";
 
-            if (ttd) {
-                const path = "/api/simrs/signature/" + ttd + "?token=" + token;
-                $(this).hide();
-                $('input[name=is_ttd]').val(1);
-                $('#signature-display').attr('src', path).show();
-            } else {
-                showErrorAlert('Tanda tangan tidak ditemukan!');
-            }
+            // if (ttd) {
+            //     const path = "/api/simrs/signature/" + ttd + "?token=" + token;
+            //     $(this).hide();
+            //     $('input[name=is_ttd]').val(1);
+            //     $('#signature-display').attr('src', path).show();
+            // } else {
+            //     showErrorAlertNoRefresh('Tanda tangan tidak ditemukan!');
+            // }
         });
 
         function submitFormResume(actionType) {
@@ -56,11 +56,11 @@
                     }, 1000);
                 },
                 error: function(response) {
-                    if(response.status == 422) {
-                        showErrorAlert("Kolom yang wajib diisi belum ter isi!");
+                    if (response.status == 422) {
+                        showErrorAlertNoRefresh("Kolom yang wajib diisi belum ter isi!");
                         // console.log(response);
-                    }else {
-                        showErrorAlert(response.responseJSON.error);
+                    } else {
+                        showErrorAlertNoRefresh(response.responseJSON.error);
                         // console.log(response.responseJSON.error);
 
                     }

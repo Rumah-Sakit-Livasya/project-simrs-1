@@ -152,7 +152,7 @@ class AssesmentGadarController extends Controller
             if ($request->filled('signature_image')) {
                 $imageData = $request->input('signature_image');
                 $pic = $request->input('pic');
-                $pic = $request->input('role');
+                $role = $request->input('role');
                 $image = str_replace('data:image/png;base64,', '', $imageData);
                 $image = str_replace(' ', '+', $image);
                 $imageName = 'ttd_' . time() . '.png';
@@ -177,6 +177,7 @@ class AssesmentGadarController extends Controller
                     [
                         'signature' => $path,
                         'pic' => $pic,
+                        'role' => $role,
                     ]
                 );
             }

@@ -59,9 +59,11 @@
                         <label for="kelas" class="col-sm-3 col-form-label">Kelas</label>
                         <div class="col-sm-9">
                             <select class="form-select" id="kelas" name="kelas" style="width: 100%;">
-                                <option value="" selected>Pilih Kelas</option>
-                                <option value="rawat-jalan">RAWAT JALAN</option>
-                                <option value="rawat-inap">RAWAT INAP</option>
+                                @foreach ($kelas_rawats as $kelas)
+                                    <option value="{{ $kelas->id }}">
+                                        {{ $kelas->kelas }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                     </div>

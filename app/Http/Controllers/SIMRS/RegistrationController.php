@@ -46,6 +46,7 @@ class RegistrationController extends Controller
             // Cari data registrasi berdasarkan ID
             $registration = Registration::findOrFail($id);
             $tindakan_medis = TindakanMedis::all();
+
             // Buat response dengan data yang sesuai
             return response()->json([
                 'success' => true,
@@ -54,7 +55,7 @@ class RegistrationController extends Controller
                     // 'tanggal_tindakan' => $registration->tanggal_tindakan,
                     'dokter_id' => $registration->doctor_id,
                     'departement_id' => $registration->departement_id,
-                    'kelas_id' => $registration->registration_type,
+                    'kelas_id' => intval($registration->kelas_rawat_id),
                     'tindakan_medis' => $tindakan_medis
                 ],
             ], 200);
@@ -363,8 +364,13 @@ class RegistrationController extends Controller
             $validatedData['date'] = Carbon::now();
             $validatedData['status'] = 'aktif';
 
-            if ($request->registration_type == 'rawat-jalan') {
+            if ($request->registration_type == 'rawat-jalan' || $request->registration_type == 'igd') {
                 $kelas_rawat = KelasRawat::where('kelas', 'like', '%Rawat Jalan%')->first();
+                if ($kelas_rawat) {
+                    $validatedData['kelas_rawat_id'] = $kelas_rawat->id;
+                }
+            } else if ($request->registration_type == 'rawat-inap') {
+                $kelas_rawat = KelasRawat::where('kelas', 'like', '%Rawat Inap%')->first();
                 if ($kelas_rawat) {
                     $validatedData['kelas_rawat_id'] = $kelas_rawat->id;
                 }
