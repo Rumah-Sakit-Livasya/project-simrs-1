@@ -48,7 +48,13 @@ class WarehouseBarangFarmasi extends Model implements AuditableContract
         return $this->hasMany(WarehouseSetupMinMaxStock::class, "barang_f_id", "id");
     }
 
-    public function pr_pharmacy(){
-        return $this->hasMany(ProcurementPurchaseRequestPharmacy::class, "barang_id", "id");
+    public function pr_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseRequestPharmacyItems::class, "barang_id", "id");
+    }
+
+    public function po_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseOrderPharmacyItems::class, "barang_id", "id");
     }
 }
