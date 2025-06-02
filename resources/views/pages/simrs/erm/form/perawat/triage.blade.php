@@ -314,7 +314,7 @@
                                     <td>
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="kesimpulan[]"
-                                                value="Hitam (DOA)" id="field-18">
+                                                value="Hitam" id="field-18">
                                             <label class="form-check-label" for="field-18">Hitam (DOA)</label>
                                         </div>
                                     </td>

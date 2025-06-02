@@ -140,8 +140,8 @@
 
             {{-- FILTER PASIEN --}}
             <div id="js-slide-left"
-                class="flex-wrap flex-shrink-0 position-relative slide-on-mobile slide-on-mobile-left bg-primary-200 pattern-0 pt-3 overflow-hidden">
-                <div class="position-fixed h-full" style="width: 20rem !important">
+                class="h-100 flex-wrap flex-shrink-0 position-relative slide-on-mobile slide-on-mobile-left bg-primary-200 pattern-0 pt-3">
+                <div class="position-fixed h-100" style="width: 20rem !important">
                     <row class="justify-content-center">
                         <div class="col">
                             <form action="#" method="POST" id="filter_pasien">

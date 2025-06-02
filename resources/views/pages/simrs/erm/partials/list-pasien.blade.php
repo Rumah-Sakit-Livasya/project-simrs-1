@@ -1,4 +1,9 @@
-<div class="row" id="daftar-pasien">
+<style>
+    #daftar-pasien::-webkit-scrollbar {
+        width: 0px;
+    }
+</style>
+<div class="row" id="daftar-pasien" style="overflow-y: auto; height: 75vh;">
     <div class="col-12">
         @if ($registrations->isEmpty())
             <p class="mt-3">Tidak ada pasien yang terdaftar hari ini.</p>
@@ -24,8 +29,8 @@
                                         'Hijau' => 'bg-success',
                                         'Kuning' => 'bg-warning',
                                         'Merah' => 'bg-danger',
-                                        'Hitam' => 'bg-dark',
-                                        default => 'bg-secondary',
+                                        'Hitam' => 'bg-fusion-900',
+                                        default => 'bg-white text-dark',
                                     };
                                 @endphp
 
