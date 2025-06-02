@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TindakanMedis;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,5 +39,10 @@ class TarifTindakanMedis extends Model
     public function tindakan_medis()
     {
         return $this->belongsTo(TindakanMedis::class, 'tindakan_medis_id');
+    }
+
+    public function registration()
+    {
+        return $this->belongsTo(Registration::class, 'registration_id');
     }
 }

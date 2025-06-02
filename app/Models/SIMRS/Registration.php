@@ -6,6 +6,7 @@ use App\Models\DietGizi;
 use App\Models\OrderGizi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
+use App\Models\keuangan\JasaDokter;
 use App\Models\Keuangan\KonfirmasiAsuransi;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\CPPT\CPPT;
@@ -16,6 +17,7 @@ use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\TransferPasienAntarRuangan;
 use App\Models\SIMRS\ResumeMedisRajal\ResumeMedisRajal;
+use App\Models\getTotalTarifMedis;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -152,6 +154,7 @@ class Registration extends Model implements AuditableContract
         return $this->hasMany(KonfirmasiAsuransi::class, 'registration_id');
     }
 
+
     public function getDoctorFullnameAttribute()
     {
         return $this->doctor->employee->fullname ?? null;
@@ -161,10 +164,6 @@ class Registration extends Model implements AuditableContract
     {
         return $this->hasMany(TagihanPasien::class, 'registration_id');
     }
-
-
-
-
 
 
 
@@ -195,4 +194,9 @@ class Registration extends Model implements AuditableContract
 
     //     return $year . $month . $day . $count;
     // }
+
+    public function jasaDokter()
+    {
+        return $this->hasMany(JasaDokter::class, 'registration_id');
+    }
 }

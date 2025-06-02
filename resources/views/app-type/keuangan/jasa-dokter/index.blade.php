@@ -1,7 +1,34 @@
 @extends('inc.layout')
-@section('title', 'Jasa Dokter')
+@section('title', 'AP Dokter')
 @section('content')
     <style>
+        /* ... your existing styles ... */
+
+        /* Style for status icons */
+        .status-icon {
+            cursor: pointer;
+        }
+
+        .status-icon.grey {
+            color: #999;
+            /* Warna abu-abu */
+        }
+
+        .status-icon.green {
+            color: #00a65a;
+            /* Warna hijau */
+        }
+
+        /* Style for validation errors in modal */
+        #modalValidationErrorMessagesInsideModal {
+            margin-top: 15px;
+        }
+
+        #modalValidationErrorMessagesInsideModal ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+
         table {
             font-size: 8pt !important;
         }
@@ -38,10 +65,125 @@
             z-index: 999;
         }
 
-        /* Table styling */
-        #dt-basic-example tbody tr:hover {
+        /* PENTING: Tambahkan CSS ini jika belum ada untuk memastikan toggle berfungsi */
+        .child-row {
+            display: none;
+            /* Sembunyikan secara default */
+        }
+
+        .dropdown-icon {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .dropdown-icon.bxs-down-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Styling tambahan untuk memperjelas batas row */
+        .child-row td {
+            background-color: #f9f9f9;
+            border-bottom: 2px solid #ddd;
+        }
+
+        /* Pastikan table di dalam child row memiliki margin dan padding yang tepat */
+        .child-row td>div {
+            padding: 15px;
+            margin: 0;
+        }
+
+        /* Pastikan parent dan child row terhubung secara visual */
+        tr.parent-row.active {
+            border-bottom: none !important;
+        }
+
+        /* Tambahkan di bagian style */
+        .control-details {
+            cursor: pointer;
+            text-align: center;
+            width: 30px;
+        }
+
+        .control-details .dropdown-icon {
+            font-size: 18px;
+            transition: transform 0.3s ease, color 0.3s ease;
+            display: inline-block;
+            color: #3498db;
+            /* Warna biru */
+        }
+
+        .control-details .dropdown-icon.bxs-up-arrow {
+            transform: rotate(180deg);
+            color: #e74c3c;
+            /* Warna merah saat terbuka */
+        }
+
+        .control-details:hover .dropdown-icon {
+            color: #2980b9;
+            /* Warna biru lebih gelap saat hover */
+        }
+
+        /* Sembunyikan ikon sort bawaan DataTables */
+        table.dataTable thead .sorting:after,
+        table.dataTable thead .sorting_asc:after,
+        table.dataTable thead .sorting_desc:after,
+        table.dataTable thead .sorting_asc_disabled:after,
+        table.dataTable thead .sorting_desc_disabled:after {
+            display: none !important;
+        }
+
+        /* Styling untuk child row */
+        /* Pastikan content di child row tidak overflow */
+        .child-row td>div {
+            padding: 15px;
+            width: 100%;
+        }
+
+        /* Styling untuk tabel di dalam child row */
+        .child-table {
+            width: 98% !important;
+            margin: 10px auto !important;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .child-table thead th {
+            background-color: #021d39;
+            color: white;
+            font-size: 12px;
+            padding: 8px !important;
+        }
+
+        .child-table tbody td {
+            padding: 8px !important;
+            font-size: 12px;
+            background-color: white;
+        }
+
+        /* Animasi untuk transisi smooth */
+        .child-row {
+            transition: all 0.3s ease;
+        }
+
+        .child-row.show {
+            opacity: 1;
+        }
+
+        td.control-details::before {
+            display: none !important;
+        }
+
+        /* Efek hover untuk row */
+        #dt-basic-example tbody tr.parent-row:hover {
             background-color: #f8f9fa;
             cursor: pointer;
+        }
+
+        /* Warna berbeda untuk child row */
+        #dt-basic-example tbody tr.child-row:hover {
+            background-color: #f1f1f1;
         }
     </style>
     <main id="js-page-content" role="main" class="page-content">
@@ -54,12 +196,13 @@
                     </div>
                     <div class="panel-container show py-4 px-3">
                         <div class="panel-content">
-                            <form action="#" method="get">
-                                @csrf
+                            {{-- Gunakan GET untuk filter --}}
+                            <form action="{{ route('keuangan.jasa-dokter.index') }}" method="get" id="filterForm">
+                                {{-- @csrf  GET requests don't need CSRF token --}}
                                 <div class="row">
                                     <!-- Baris 1: 3 kolom -->
                                     <div class="col-md-4 mb-3">
-                                        <label class="mb-1">Tanggal Bill</label>
+                                        <label class="mb-1">Tanggal Bill (Awal)</label>
                                         <div class="input-group input-group-sm">
                                             <input type="text" class="form-control form-control-sm datepicker"
                                                 name="tanggal_awal" placeholder="Tanggal awal"
@@ -73,7 +216,7 @@
                                     </div>
 
                                     <div class="col-md-4 mb-3">
-                                        <label class="mb-1">Sampai</label>
+                                        <label class="mb-1">Tanggal Bill (Akhir)</label>
                                         <div class="input-group input-group-sm">
                                             <input type="text" class="form-control form-control-sm datepicker"
                                                 name="tanggal_akhir" placeholder="Tanggal akhir"
@@ -87,11 +230,11 @@
                                     </div>
 
                                     <div class="col-md-4 mb-3">
-                                        <label class="mb-1">Tanggal AP</label>
+                                        <label class="mb-1">Tanggal AP untuk Save Selected</label> {{-- Ganti label agar jelas fungsinya --}}
                                         <div class="input-group input-group-sm">
                                             <input type="text" class="form-control form-control-sm datepicker"
-                                                name="tanggal_ap" placeholder="Tanggal AP"
-                                                value="{{ request('tanggal_ap') ?? '' }}" autocomplete="off">
+                                                name="tanggal_ap_save" placeholder="Tanggal AP" {{-- Ganti name --}}
+                                                value="{{ request('tanggal_ap_save') ?? '' }}" autocomplete="off">
                                             <div class="input-group-append">
                                                 <span class="input-group-text fs-sm">
                                                     <i class="fal fa-calendar"></i>
@@ -121,11 +264,12 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label class="mb-1">Tagihan Pasien</label>
+                                        <label class="mb-1">Status Pembayaran Tagihan</label> {{-- Lebih deskriptif --}}
                                         <select class="form-control form-control-sm select2" name="tagihan_pasien">
                                             <option value="">All</option>
                                             <option value="lunas"
-                                                {{ request('tagihan_pasien') == 'lunas' ? 'selected' : '' }}>Lunas</option>
+                                                {{ request('tagihan_pasien') == 'lunas' ? 'selected' : '' }}>Lunas
+                                            </option>
                                             <option value="belum-lunas"
                                                 {{ request('tagihan_pasien') == 'belum-lunas' ? 'selected' : '' }}>Belum
                                                 Lunas</option>
@@ -145,7 +289,7 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label class="mb-1">Nama Dokter</label>
+                                        <label class="mb-1">Dokter Registrasi</label> {{-- Lebih spesifik --}}
                                         <select class="form-control form-control-sm select2" name="dokter_id">
                                             <option value="">Pilih Dokter</option>
                                             @foreach ($dokters as $dokter)
@@ -164,14 +308,15 @@
                                     <button type="submit" class="btn btn-sm btn-primary mr-2">
                                         <i class="fal fa-search mr-1"></i> Cari
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-success mr-2">
-                                        <i class="fal fa-file-excel mr-1"></i> Export
+                                    {{-- Export button will trigger data retrieval, maybe add custom JS for this --}}
+                                    <button type="button" class="btn btn-sm btn-success mr-2" id="exportExcelBtn">
+                                        <i class="fal fa-file-excel mr-1"></i> Export Excel
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-info mr-2">
-                                        <i class="fal fa-save mr-1"></i> Save AP Dokter
+                                    <button type="button" class="btn btn-sm btn-info mr-2" id="saveApDokterBtn">
+                                        <i class="fal fa-save mr-1"></i> Save AP Dokter Selected
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-danger">
-                                        <i class="fal fa-times mr-1"></i> Cancel AP Dokter
+                                    <button type="button" class="btn btn-sm btn-danger" id="cancelApDokterBtn">
+                                        <i class="fal fa-times mr-1"></i> Cancel AP Dokter Selected
                                     </button>
                                 </div>
                             </form>
@@ -179,125 +324,236 @@
                     </div>
                 </div>
             </div>
-        </div>
 
 
-        <!-- Data Table Panel -->
-        <div class="row mt-4">
-            <div class="col-xl-12">
-                <div id="panel-2" class="panel">
-                    <div class="panel-hdr">
-                        <h2>Daftar <span class="fw-300"><i>AP Dokter</i></span></h2>
-                        <div class="panel-toolbar">
-                            @if (request()->anyFilled([
-                                    'tanggal_awal',
-                                    'tanggal_akhir',
-                                    'tanggal_ap',
-                                    'status_ap',
-                                    'tipe_registrasi',
-                                    'tagihan_pasien',
-                                    'dokter_id',
-                                ]))
-                                <span class="badge bg-primary-600 badge-info p-2">
-                                    Filter Aktif:
-                                    @if (request('tanggal_awal') && request('tanggal_akhir'))
-                                        Periode: {{ request('tanggal_awal') }} s/d {{ request('tanggal_akhir') }}
-                                    @endif
-                                    @if (request('tanggal_ap'))
-                                        {{ request('tanggal_awal') ? ' | ' : '' }} Tanggal AP: {{ request('tanggal_ap') }}
-                                    @endif
-                                    @if (request('status_ap'))
-                                        {{ request('tanggal_awal') || request('tanggal_ap') ? ' | ' : '' }}
-                                        Status: {{ request('status_ap') == 'belum' ? 'Belum dibuat' : 'Sudah dibuat' }}
-                                    @endif
-                                    @if (request('tipe_registrasi'))
-                                        | Tipe:
-                                        {{ request('tipe_registrasi') == 'rawat-jalan' ? 'Rawat Jalan' : 'Rawat Inap' }}
-                                    @endif
-                                    @if (request('tagihan_pasien'))
-                                        | Tagihan: {{ request('tagihan_pasien') == 'umum' ? 'Umum' : 'Asuransi' }}
-                                    @endif
-                                    @if (request('dokter_id'))
-                                        | Dokter: {{ request('dokter_id') == '1' ? 'dr. Andi' : 'dr. Budi' }}
-                                    @endif
-                                </span>
-                            @endif
+            <!-- Data Table Panel -->
+            <div class="row mt-4">
+                <div class="col-xl-12">
+                    <div id="panel-2" class="panel">
+                        <div class="panel-hdr">
+                            <h2>Daftar <span class="fw-300"><i>Tagihan Final untuk AP Dokter</i></span></h2>
+                            <div class="panel-toolbar">
+
+                            </div>
                         </div>
-                    </div>
-                    <div class="panel-container show">
-                        <div class="panel-content">
-                            @if (session('success'))
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
-                                    </button>
-                                    <strong>Sukses!</strong> {{ session('success') }}
-                                </div>
-                            @endif
+                        <div class="panel-container show">
+                            <div class="panel-content">
+                                @if (session('success'))
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                                        </button>
+                                        <strong>Sukses!</strong> {{ session('success') }}
+                                    </div>
+                                @endif
+                                @if (session('error'))
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                                        </button>
+                                        <strong>Error!</strong> {{ session('error') }}
+                                    </div>
+                                @endif
+                                {{-- Display validation errors from modal saves if any --}}
+                                {{-- Dipindahkan ke dalam modal --}}
 
-                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                <thead class="bg-primary-600">
-                                    <tr>
-                                        <th class="text-center">
-                                            <input type="checkbox" id="checkAll">
-                                        </th>
-                                        <th>No</th>
-                                        <th>Tgl Bill</th>
-                                        <th>No. RM/No. Reg</th>
-                                        <th>Nama Pasien</th>
-                                        <th>Detail Tagihan</th>
-                                        <th>Penjamin</th>
-                                        <th>JKP</th>
-                                        <th>Jasa Dokter</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($data as $i => $item)
-                                        <tr>
-                                            <td class="text-center">
-                                                <input type="checkbox" name="select_item[]" value="{{ $item->id }}">
-                                            </td>
-                                            <td class="text-center">{{ $i + 1 }}</td>
-                                            <td>{{ optional($item->registration)->created_at ? \Carbon\Carbon::parse($item->registration->created_at)->format('d-m-Y') : '-' }}
-                                            </td>
-                                            <td>
-                                                {{ optional($item->registration->patient)->medical_record_number ?? '-' }}
-                                                /
-                                                {{ optional($item->registration)->registration_number ?? '-' }}
-                                            </td>
-                                            <td>{{ optional($item->registration->patient)->name ?? '-' }}</td>
-                                            <td>{{ $item->nama_tindakan ?? '-' }}</td>
-                                            <td>{{ optional($item->registration->penjamin)->nama_perusahaan ?? '-' }}</td>
-                                            <td class="text-center">
-                                                {{ $item->jkp ? number_format($item->jkp, 0, ',', '.') : '-' }}</td>
-                                            <td class="text-right">Rp
-                                                {{ number_format($item->share_dokter ?? 0, 0, ',', '.') }}</td>
-                                            <td>
-                                                <span
-                                                    class="badge {{ $item->status == 'draft' ? 'badge-waiting' : 'badge-approved' }}">
-                                                    {{ ucfirst($item->status) }}
-                                                </span>
-                                            </td>
+
+                                <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                                    <thead class="bg-primary-600">
+                                        <tr class="text-center">
+                                            {{-- Checkbox untuk memilih semua --}}
+                                            <th class="text-center">
+                                                <input type="checkbox" id="checkAll">
+                                            </th>
+                                            <th>No</th>
+                                            <th>Tgl Bill</th> {{-- Ini created_at Bilingan --}}
+                                            <th>No. RM/No. Reg</th>
+                                            <th>Nama Pasien</th>
+                                            <th>Detail Tagihan</th> {{-- Ini Nama Tindakan --}}
+                                            <th>Nominal Tagihan</th> {{-- Ini Total Tarif Tindakan --}}
+                                            <th>Penjamin</th>
+                                            <th>JKP</th> {{-- Ini JKP Default dari view --}}
+                                            <th>Jasa Dokter</th> {{-- Ini Share Dr Default dari view --}}
+                                            <th>Status AP</th> {{-- Kolom Status AP --}}
                                         </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="10" class="text-center">Tidak ada data jasa dokter.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
+                                    </thead>
+                                    <tbody class="text-center">
+                                        @forelse ($jasaDokterItems as $index => $item)
+                                            <tr>
+                                                <td class="text-center">
+                                                    <input type="checkbox" name="selected_items[]"
+                                                        value="{{ $item->id }}">
+                                                </td>
+                                                <td>{{ $loop->iteration }}</td>
 
-                            </table>
+                                                {{-- Tanggal Billing dari relasi bilinganSatu --}}
+                                                <td>
+                                                    {{ optional($item->tagihanPasien?->bilinganSatu)->created_at
+                                                        ? optional($item->tagihanPasien?->bilinganSatu)->created_at->format('d-m-Y')
+                                                        : '-' }}
+                                                </td>
 
+                                                {{-- Nomor RM / Registrasi --}}
+                                                <td>
+                                                    {{ $item->tagihanPasien?->registration?->patient?->medical_record_number ?? '-' }}/
+                                                    {{ $item->tagihanPasien?->registration?->registration_number ?? '-' }}
+                                                </td>
+
+                                                {{-- Nama Pasien --}}
+                                                <td>{{ $item->tagihanPasien?->registration?->patient?->name ?? '-' }}</td>
+
+                                                {{-- Nama Tindakan --}}
+                                                <td>{{ $item->nama_tindakan ?? '-' }}</td>
+
+                                                {{-- Nominal --}}
+                                                <td>{{ number_format($item->nominal, 2, ',', '.') }}</td>
+
+                                                {{-- Penjamin --}}
+                                                <td>{{ $item->tagihanPasien?->registration?->penjamin?->nama_perusahaan ?? '-' }}
+                                                </td>
+
+                                                {{-- JKP --}}
+                                                <td>{{ number_format($item->jkp ?? 0, 2, ',', '.') }}</td>
+
+                                                {{-- Share Dokter --}}
+                                                <td>{{ number_format($item->share_dokter ?? 0, 2, ',', '.') }}</td>
+
+                                                {{-- Status Final / Draft --}}
+                                                <td class="text-center status-cell">
+                                                    <span
+                                                        class="badge badge-{{ $item->status == 'final' ? 'success' : 'warning' }}">
+                                                        {{ $item->status == 'final' ? 'Sudah Dibuat' : 'Draft' }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="11" class="text-center">
+                                                    <div class="alert alert-info p-2 m-0">
+                                                        <i class="fal fa-info-circle mr-2"></i>
+                                                        Tidak ada data AP Dokter ditemukan untuk filter yang dipilih.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+
+                                </table>
+
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            {{-- Modal for creating/editing Jasa Dokter AP --}}
+            <div class="modal fade" id="apDokterModal" tabindex="-1" role="dialog"
+                aria-labelledby="apDokterModalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="apDokterModalTitle">Buat / Edit AP Dokter</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            {{-- Loading indicator --}}
+                            <div id="modalLoading" style="display: none; text-align: center; padding: 20px;">
+                                <i class="fal fa-spinner-third fa-spin fa-2x"></i> Loading...
+                            </div>
+                            {{-- Form content --}}
+                            <form id="apDokterForm" method="POST">
+                                @csrf
+                                <input type="hidden" id="tagihan_pasien_id" name="tagihan_pasien_id"
+                                    value="{{ $tagihan_pasien_id ?? '' }}">
+                                <input type="hidden" id="jasa_dokter_id" name="jasa_dokter_id"
+                                    value="{{ $jasa_dokter_id ?? '' }}">
+
+                                <div class="row">
+                                    <!-- Pilih Dokter -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Dokter</label>
+                                            <select name="dokter_id" class="form-control" required>
+                                                <option value="">-- Pilih Dokter --</option>
+                                                @foreach ($dokters as $dokter)
+                                                    <option value="{{ $dokter->id }}"
+                                                        {{ request('dokter_id') == $dokter->id ? 'selected' : '' }}>
+                                                        {{ optional($dokter->employee)->fullname ?? 'Tanpa Nama' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nominal (readonly) -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Nominal</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ number_format($nominal ?? 0) }}" readonly>
+                                        </div>
+                                    </div>
+
+                                    <!-- Diskon (readonly) -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Diskon</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ number_format($diskon ?? 0) }}" readonly>
+                                        </div>
+                                    </div>
+
+                                    <!-- Share Dokter -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Share Dokter</label>
+                                            <input type="number" class="form-control" name="share_dokter"
+                                                value="{{ old('share_dokter', $share_dokter ?? 0) }}" min="0"
+                                                required>
+                                        </div>
+                                    </div>
+
+                                    <!-- JKP -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>JKP</label>
+                                            <input type="number" class="form-control" name="jkp"
+                                                value="{{ old('jkp', $jkp ?? 0) }}" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </form>
+
+                            {{-- Display validation errors from modal saves if any (inside modal body) --}}
+                            <div id="modalValidationErrorMessagesInsideModal"
+                                class="alert alert-danger alert-dismissible fade show mt-3" role="alert"
+                                style="display: none;">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                                </button>
+                                <strong>Validasi Error!</strong>
+                                <ul id="modalValidationErrorListInsideModal"></ul>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="saveModalApDokterBtn">Save
+                                changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
     </main>
 @endsection
 
 @section('plugin')
+    {{-- ... your existing plugin scripts ... --}}
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
@@ -309,9 +565,10 @@
     <script src="/js/notifications/toastr/toastr.js"></script>
     <link rel="stylesheet" href="/css/notifications/toastr/toastr.css">
 
+
     <script>
         $(document).ready(function() {
-            // Initialize datepickers
+            // Inisialisasi datepicker
             $('.datepicker').datepicker({
                 format: 'yyyy-mm-dd',
                 autoclose: true,
@@ -325,34 +582,70 @@
                 }
             });
 
-            // Tambahkan validasi range tanggal
-            $('form').on('submit', function(e) {
-                var startDate = $('[name="tanggal_awal"]').val();
-                var endDate = $('[name="tanggal_akhir"]').val();
-
-                if (startDate && endDate) {
-                    var start = new Date(startDate);
-                    var end = new Date(endDate);
-
-                    if (start > end) {
-                        e.preventDefault();
-                        toastr.error('Tanggal akhir harus lebih besar atau sama dengan tanggal awal');
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-
-            // Initialize select2
+            // Inisialisasi select2 filter form
             $('.select2').select2({
                 dropdownCssClass: "move-up",
                 placeholder: "Pilih opsi",
                 allowClear: true
             });
 
-            // Initialize datatable
-            var table = $('#dt-basic-example').DataTable({
+            // Inisialisasi select2 modal form saat modal terbuka
+            $('#apDokterModal').on('shown.bs.modal', function() {
+                // Hanya inisialisasi jika elemen ada dan belum menjadi instance Select2
+                $('.select2-modal').each(function() {
+                    if (!$(this).data('select2')) {
+                        $(this).select2({
+                            dropdownParent: $(
+                                '#apDokterModal .modal-body'
+                            ), // Penting untuk posisi dropdown
+                            dropdownCssClass: "move-up",
+                            placeholder: "-- Pilih Dokter --",
+                            allowClear: true
+                        });
+                    }
+                });
+            });
+
+            // Hancurkan select2 modal form saat modal tertutup
+            $('#apDokterModal').on('hidden.bs.modal', function() {
+                $('.select2-modal').each(function() {
+                    if ($(this).data(
+                            'select2')) { // Hanya hancurkan jika sudah menjadi instance Select2
+                        $(this).select2('destroy');
+                    }
+                });
+            });
+
+
+            // Validasi tanggal pada filter
+            $('#filterForm').on('submit', function(e) {
+                // Tampilkan loading
+                $('#panel-1 .panel-container').append(
+                    '<div class="panel-loading"><i class="fal fa-spinner-third fa-spin-4x fs-xl"></i></div>'
+                );
+                $('#panel-2 .panel-container').append(
+                    '<div class="panel-loading"><i class="fal fa-spinner-third fa-spin-4x fs-xl"></i></div>'
+                );
+
+                const startDate = $('[name="tanggal_awal"]').val();
+                const endDate = $('[name="tanggal_akhir"]').val();
+
+                if (startDate && endDate) {
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+
+                    if (start > end) {
+                        e.preventDefault();
+                        toastr.error('Tanggal akhir harus lebih besar atau sama dengan tanggal awal');
+                        $('.panel-loading').remove();
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            // Inisialisasi datatable
+            const table = $('#dt-basic-example').DataTable({
                 responsive: true,
                 lengthChange: false,
                 pageLength: 10,
@@ -365,7 +658,7 @@
                         className: 'btn-outline-danger btn-sm mr-1',
                         title: 'Daftar AP Dokter',
                         exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+                            columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
                         },
                         orientation: 'landscape'
                     },
@@ -375,7 +668,7 @@
                         className: 'btn-outline-success btn-sm mr-1',
                         title: 'Daftar AP Dokter',
                         exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+                            columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
                         }
                     },
                     {
@@ -384,35 +677,474 @@
                         className: 'btn-outline-primary btn-sm',
                         title: 'Daftar AP Dokter',
                         exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+                            columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
                         }
-                    }
-                ],
-                columnDefs: [{
-                        orderable: false,
-                        targets: [9] // Kolom aksi tidak bisa diurutkan
-                    },
-                    {
-                        className: 'text-right',
-                        targets: [7] // Kolom jumlah rata kanan
-                    },
-                    {
-                        className: 'text-center',
-                        targets: [0, 6, 9] // Kolom nomor, JKP, dan aksi rata tengah
                     }
                 ]
             });
 
-            // Form validation and submission
-            $('form').on('submit', function(e) {
-                $('#panel-1 .panel-container').append(
-                    '<div class="panel-loading"><i class="fal fa-spinner-third fa-spin-4x fs-xl"></i></div>'
-                );
-                return true;
+            // Enable tooltips
+            table.on('draw.dt', function() {
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // Check All functionality
+            $('#checkAll').on('change', function() {
+                $('#dt-basic-example tbody input[type="checkbox"]').prop('checked', $(this).prop(
+                    'checked'));
             });
 
-            // Enable tooltips
-            $('[data-toggle="tooltip"]').tooltip();
+            // Handle Save Selected button
+            $('#saveApDokterBtn').on('click', function() {
+                let selectedIds = [];
+                $('#dt-basic-example tbody input[type="checkbox"]:checked').each(function() {
+                    selectedIds.push($(this).val());
+                });
+
+                // Filter untuk item draft saja
+                let idsToCreate = selectedIds.filter(id => {
+                    const row = $(`#dt-basic-example tbody input[type="checkbox"][value="${id}"]`)
+                        .closest('tr');
+                    return row.find('.status-icon.grey').length > 0;
+                });
+
+
+
+                const tanggalApSave = $('#filterForm [name="tanggal_ap_save"]').val();
+
+                if (!tanggalApSave) {
+                    toastr.warning('Silakan isi field "Tanggal AP untuk Save Selected" di form filter');
+                    return;
+                }
+
+                Swal.fire({
+                    title: "Konfirmasi",
+                    text: `Anda yakin ingin membuat AP Dokter untuk ${idsToCreate.length} item yang dipilih?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Ya, Buat!",
+                    cancelButtonText: "Batal"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const $btn = $(this);
+                        $btn.prop('disabled', true).html(
+                            '<i class="fal fa-spinner-third fa-spin mr-1"></i> Processing...');
+
+                        $.ajax({
+                            url: "{{ route('keuangan.jasa-dokter.store-selected') }}",
+                            type: "POST",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                item_ids: idsToCreate,
+                                tanggal_ap_save: tanggalApSave
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    toastr.success(response.message);
+                                    window.location.reload();
+                                } else {
+                                    toastr.error(response.message ||
+                                        'Gagal membuat AP Dokter');
+                                }
+                            },
+                            error: function(xhr) {
+                                const errorMessage = xhr.responseJSON?.message ||
+                                    xhr.responseText ||
+                                    'Terjadi kesalahan saat memproses permintaan';
+                                toastr.error(errorMessage);
+                            },
+                            complete: function() {
+                                $btn.prop('disabled', false).html(
+                                    '<i class="fal fa-save mr-1"></i> Save AP Dokter Selected'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Handle Cancel Selected button
+            // Handle Cancel Selected button
+            $('#cancelApDokterBtn').on('click', function() {
+                let selectedIds = [];
+                $('#dt-basic-example tbody input[type="checkbox"]:checked').each(function() {
+                    selectedIds.push($(this).val());
+                });
+
+                // Filter untuk item dengan AP saja (status 'final' / 'Sudah Dibuat')
+                let idsToCancel = selectedIds.filter(id => {
+                    const row = $(`#dt-basic-example tbody input[type="checkbox"][value="${id}"]`)
+                        .closest('tr');
+                    const statusBadge = row.find('.status-cell .badge');
+                    // Memeriksa apakah statusnya 'Sudah Dibuat'
+                    const isFinal = statusBadge.hasClass('badge-success') || statusBadge.text()
+                        .trim() === 'Sudah Dibuat';
+                    return isFinal;
+                });
+
+                if (idsToCancel.length === 0) {
+                    toastr.warning('Tidak ada item yang dipilih yang statusnya "Sudah dibuat AP Dokter".');
+                    return;
+                }
+
+                Swal.fire({
+                    title: "Konfirmasi",
+                    text: `Anda yakin ingin membatalkan AP Dokter untuk ${idsToCancel.length} item yang dipilih?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Ya, Batalkan!",
+                    cancelButtonText: "Tidak"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const $btn = $(this);
+                        $btn.prop('disabled', true).html(
+                            '<i class="fal fa-spinner-third fa-spin mr-1"></i> Processing...');
+
+                        $.ajax({
+                            url: "{{ route('keuangan.jasa-dokter.cancel-selected') }}", // Pastikan route ini ada
+                            type: "POST",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                item_ids: idsToCancel
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    toastr.success(response.message);
+                                    setTimeout(function() {
+                                        window.location.reload();
+                                    }, 1500);
+                                } else {
+                                    toastr.error(response.message ||
+                                        'Gagal membatalkan AP Dokter');
+                                }
+                            },
+                            error: function(xhr) {
+                                const errorMessage = xhr.responseJSON?.message ||
+                                    xhr.responseText ||
+                                    'Terjadi kesalahan saat memproses permintaan pembatalan';
+                                toastr.error(errorMessage);
+                                console.error("AJAX Error Cancel AP:", xhr
+                                    .responseText);
+                            },
+                            complete: function() {
+                                $btn.prop('disabled', false).html(
+                                    '<i class="fal fa-times mr-1"></i> Cancel AP Dokter Selected'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Handle Status Icon Click (Modal)
+            $('#dt-basic-example tbody').on('click', '.status-icon', function() {
+                const tagihanId = $(this).data('id');
+                const status = $(this).data('status');
+                const jasaId = $(this).data('jasa-dokter-id') || null;
+                const mode = status === 'draft' ? 'create' : 'edit';
+                const idToFetch = mode === 'create' ? tagihanId :
+                    jasaId; // ID TagihanPasien atau JasaDokter
+
+                // Reset modal form and show loading
+                $('#apDokterForm')[0].reset();
+                $('.select2-modal').select2('destroy'); // Destroy Select2 before loading new data
+
+                $('#modalLoading').show();
+                $('#apDokterForm').hide();
+                $('#apDokterModalTitle').text(mode === 'create' ? 'Buat AP Dokter' : 'Edit AP Dokter');
+                $('#saveModalApDokterBtn').text(mode === 'create' ? 'Buat AP' : 'Update AP');
+
+                // Set hidden fields and mode
+                $('#tagihan_pasien_id').val(tagihanId);
+                $('#jasa_dokter_id').val(jasaId);
+                $('#modal_mode').val(mode);
+                // Set _method spoofing for PUT if in edit mode
+                $('#method_spoofing').val(mode === 'edit' ? 'PUT' : 'POST');
+
+
+                // Setup modal appearance based on mode (show/hide fields)
+                if (mode === 'create') {
+                    $('.modal-edit-only').hide();
+                    $('.modal-create-only').show();
+                    $('#modal_ap_date').prop('readonly', false);
+                    $('#modal_nominal_ap').prop('readonly', false);
+                    $('#modal_diskon').prop('readonly', false);
+                    $('#modal_ppn_persen').prop('readonly', false);
+                    $('#modal_jkp').prop('readonly', false);
+                    $('#modal_share_dokter_ap').prop('readonly', false);
+
+                } else { // mode === 'edit'
+                    $('.modal-edit-only').show();
+                    $('.modal-create-only').hide();
+                    $('#modal_ap_number').prop('readonly', true);
+                    $('#modal_ap_date').prop('readonly',
+                        true); // AP Date readonly in edit? Sesuaikan kebutuhan
+                    $('#modal_nominal_ap').prop('readonly',
+                        true); // Nominal AP readonly in edit? Sesuaikan kebutuhan
+                    $('#modal_diskon').prop('readonly',
+                        true); // Diskon readonly in edit? Sesuaikan kebutuhan
+                    $('#modal_ppn_persen').prop('readonly',
+                        true); // PPN readonly in edit? Sesuaikan kebutuhan
+                    $('#modal_jkp').prop('readonly', false); // JKP editable in edit
+                    $('#modal_share_dokter_ap').prop('readonly', false); // Share Dokter editable in edit
+                }
+
+
+                $('#apDokterModal').modal('show'); // Show modal immediately
+
+                // Fetch data for the modal
+                // >>> PERBAIKAN URL DI SINI <<<
+                $.ajax({
+                    url: "{{ url('keuangan/jasa-dokter/modal-data') }}" + '/' +
+                        idToFetch, // Gunakan route helper
+                    method: 'GET',
+                    data: {
+                        mode: mode
+                    }, // Kirim mode ke controller
+                    success: function(response) {
+                        if (response.success) {
+                            const data = response.data;
+                            const modalMode = response
+                                .mode; // Pastikan mode dari response konsisten
+
+                            // Populate Reference Data (Readonly) - Common for both modes
+                            $('#modal_rm_reg').val(data.rm_reg);
+                            $('#modal_nama_pasien').val(data.patient_name);
+                            $('#modal_detail_tagihan').val(data.tindakan_medis_name);
+                            $('#modal_dokter_reg_display').val(data.dokter_name);
+                            $('#modal_penjamin').val(data.penjamin_name);
+                            $('#modal_kelas_rawat').val(data.kelas_rawat_name);
+                            $('#modal_bill_date_billing_ref').val(data.bill_date_bilingan_ref);
+                            $('#modal_nominal_total_tarif_ref').val(formatRupiah(data
+                                .nominal_total_tarif_ref));
+                            $('#modal_share_dr_default_ref').val(formatRupiah(data
+                                .share_dr_default_ref));
+                            $('#modal_jkp_default_ref').val(formatRupiah(data.jkp_default_ref));
+
+
+                            if (modalMode === 'edit') {
+                                // Mode Edit: Populate with existing AP data (editable & readonly AP fields)
+                                $('#modal_ap_number').val(data.ap_number);
+                                $('#modal_ap_date').val(data
+                                    .ap_date); // Tanggal AP dari data AP
+                                $('#modal_bill_date_ap_stored').val(data
+                                    .bill_date_ap_stored); // Bill Date tersimpan di AP
+
+                                // Populate editable fields with stored AP values
+                                $('#modal_dokter_id').val(data.dokter_id).trigger(
+                                    'change'); // Dokter dari data AP
+                                $('#modal_nominal_ap').val(data
+                                    .nominal_ap); // Nominal dari data AP
+                                $('#modal_diskon').val(data.diskon); // Diskon dari data AP
+                                $('#modal_ppn_persen').val(data.ppn_persen); // PPN dari data AP
+                                $('#modal_jkp').val(data.jkp); // JKP dari data AP
+                                $('#modal_share_dokter_ap').val(data
+                                    .share_dokter_ap); // Share Dokter dari data AP
+                                $('#modal_status_ap_internal').val(data
+                                    .status); // Status AP dari data AP
+
+                            } else { // modalMode === 'create'
+                                // Mode Create: Populate with default/reference values
+                                $('#modal_ap_date').val(data
+                                    .default_ap_date); // Default AP date today
+                                $('#modal_dokter_id').val(data.default_dokter_id).trigger(
+                                    'change'); // Default dokter registrasi
+                                $('#modal_nominal_ap').val(data
+                                    .default_nominal_ap
+                                ); // Default Nominal AP dari total tarif ref
+                                $('#modal_diskon').val(data.default_diskon); // Default Diskon
+                                $('#modal_ppn_persen').val(data
+                                    .default_ppn_persen); // Default PPN
+                                $('#modal_jkp').val(data
+                                    .default_jkp); // Default JKP dari JKP ref
+                                $('#modal_share_dokter_ap').val(data
+                                    .default_share_dokter_ap
+                                ); // Default Share Dokter AP dari Share Dr ref
+                                $('#modal_status_ap_internal').val(data
+                                    .default_status); // Default status 'final'
+                                // $('#modal_ap_number') is set to 'Akan Dibuat Otomatis' in the HTML/initial JS setup
+                                // $('#modal_bill_date_ap_stored') is not applicable for create mode
+                            }
+
+                            // Re-initialize select2 after data is loaded and form is shown
+                            // This initialization block was already here, which is correct.
+                            // The issue was the extra destroy call BEFORE this.
+                            // Handled by the shown.bs.modal event now.
+
+                        } else {
+                            toastr.error(response.message || 'Gagal mengambil data item.');
+                            $('#apDokterModal').modal('hide');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', xhr.responseText);
+                        let errorMessage = 'Terjadi kesalahan saat mengambil data item.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        toastr.error(errorMessage);
+                        $('#apDokterModal').modal('hide');
+                    },
+                    complete: function() {
+                        $('#modalLoading').hide();
+                        $('#apDokterForm').show();
+                        // Re-initialize select2 after data is loaded and form is shown
+                        $('#apDokterModal').find('.select2-modal').each(function() {
+                            if (!$(this).data(
+                                    'select2'
+                                )) { // Only initialize if not already initialized
+                                $(this).select2({
+                                    dropdownParent: $(
+                                        '#apDokterModal .modal-body'),
+                                    dropdownCssClass: "move-up",
+                                    placeholder: "-- Pilih Dokter --",
+                                    allowClear: true
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Handle Save in Modal
+            // Handle Save Selected button
+            $('#saveApDokterBtn').on('click', function() {
+                let selectedIds = [];
+                $('#dt-basic-example tbody input[type="checkbox"]:checked').each(function() {
+                    selectedIds.push($(this).val());
+                });
+                // console.log('Selected JasaDokter IDs:', selectedIds);
+
+                let idsToCreate = selectedIds.filter(id => {
+                    const row = $(`#dt-basic-example tbody input[type="checkbox"][value="${id}"]`)
+                        .closest('tr');
+                    const statusBadge = row.find('.status-cell .badge');
+                    // Memeriksa apakah statusnya 'Draft' atau 'Belum dibuat' (sesuai teks di badge)
+                    const isDraft = statusBadge.hasClass('badge-warning') || statusBadge.text()
+                        .trim().toLowerCase() === 'draft' || statusBadge.text().trim()
+                        .toLowerCase() === 'belum dibuat';
+                    return isDraft;
+                });
+                // console.log('JasaDokter IDs to Create AP for (Draft):', idsToCreate);
+
+                if (idsToCreate.length === 0) {
+                    toastr.warning(
+                        'Tidak ada item "Draft" atau "Belum dibuat" yang dipilih untuk dibuatkan AP Dokter.'
+                    );
+                    return;
+                }
+
+                const tanggalApSave = $('input[name="tanggal_ap_save"]')
+                    .val(); // Ambil tanggal AP dari filter
+                if (!tanggalApSave) {
+                    toastr.error('Silakan pilih "Tanggal AP untuk Save Selected" terlebih dahulu.');
+                    $('input[name="tanggal_ap_save"]').focus();
+                    return;
+                }
+
+                Swal.fire({
+                    title: "Konfirmasi",
+                    text: `Anda yakin ingin membuat AP Dokter untuk ${idsToCreate.length} item yang dipilih dengan tanggal AP ${tanggalApSave}?`,
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Ya, Buat AP!",
+                    cancelButtonText: "Tidak"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const $btn = $(this);
+                        $btn.prop('disabled', true).html(
+                            '<i class="fal fa-spinner-third fa-spin mr-1"></i> Processing...');
+
+                        $.ajax({
+                            url: "{{ route('keuangan.jasa-dokter.store-selected') }}", // Pastikan route ini ada di web.php
+                            type: "POST",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                item_ids: idsToCreate,
+                                tanggal_ap_save: tanggalApSave // Kirim tanggal AP
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    toastr.success(response.message);
+                                    setTimeout(function() {
+                                        window.location.reload();
+                                    }, 1500); // Beri waktu toastr tampil
+                                } else {
+                                    toastr.error(response.message ||
+                                        'Gagal membuat AP Dokter.');
+                                }
+                            },
+                            error: function(xhr) {
+                                const errorMessage = xhr.responseJSON?.message || xhr
+                                    .responseText ||
+                                    'Terjadi kesalahan saat memproses permintaan.';
+                                toastr.error(errorMessage);
+                                console.error("AJAX Error Save AP:", xhr.responseText);
+                            },
+                            complete: function() {
+                                $btn.prop('disabled', false).html(
+                                    '<i class="fal fa-save mr-1"></i> Save AP Dokter Selected'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Handle Export Excel
+            $('#exportExcelBtn').on('click', function() {
+                const filters = $('#filterForm').serialize();
+                window.location.href = "{{ route('keuangan.jasa-dokter.export-excel') }}?" + filters;
+            });
+
+            // Reset validation saat modal ditutup
+            $('#apDokterModal').on('hidden.bs.modal', function() {
+                $('#modalValidationErrorMessagesInsideModal').hide();
+                $('#modalValidationErrorListInsideModal').empty();
+                // Pastikan select2 dihancurkan
+                $('.select2-modal').each(function() {
+                    if ($(this).data('select2')) {
+                        $(this).select2('destroy');
+                    }
+                });
+            });
+
+            // Function to format number as Rupiah (basic)
+            function formatRupiah(angka) {
+                if (angka === null || angka === undefined || isNaN(angka)) return '0';
+                let number_string = parseFloat(angka).toFixed(2).replace(/\.?0*$/, '').toString();
+                let split = number_string.split('.');
+                let sisa = split[0].length % 3;
+                let rupiah = split[0].substr(0, sisa);
+                let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+                if (ribuan) {
+                    let separator = sisa ? '.' : '';
+                    rupiah += separator + ribuan.join('.');
+                }
+
+                rupiah = split[1] !== undefined && split[1] !== '' ? rupiah + ',' + split[1] : rupiah;
+                if (rupiah === '') rupiah = '0';
+                return rupiah;
+            }
+
+            // Add format Rupiah ke input saat focus out (optional, for visual feedback)
+            $('#apDokterModal').on('blur', 'input[type="number"]', function() {
+                let value = $(this).val();
+                if (value !== '') {
+                    $(this).val(parseFloat(value).toFixed(
+                        2)); // Atau format Rupiah jika tidak mengganggu input
+                }
+            });
+
+
         });
     </script>
 @endsection

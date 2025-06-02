@@ -28,24 +28,40 @@ class TindakanMedis extends Model
         return $this->belongsTo(GrupTindakanMedis::class);
     }
 
-    public function tarifTindakan()
+    public function tarifTindakanMedis()
     {
-        return $this->hasMany(TarifTindakanMedis::class);
+        return $this->hasMany(TarifTindakanMedis::class, 'tindakan_medis_id');
     }
+    // public function getTotalTarif($groupPenjaminId, $kelasRawatId)
+    // {
+    //     // Cari tarif yang sesuai dengan filter
+    //     $tarif = $this->tarifTindakanMedis()
+    //         ->where('group_penjamin_id', $groupPenjaminId)
+    //         ->where('kelas_rawat_id', $kelasRawatId)
+    //         ->first();
 
-    public function tarifTindakanMedis($groupPenjaminId, $kelasRawatId)
+    //     return $tarif ? $tarif->total : 0;
+    // }
+    public function getTotalTarif($groupPenjaminId, $kelasRawatId)
     {
-        return $this->tarifTindakan()
+        $tarif = $this->getTarif($groupPenjaminId, $kelasRawatId);
+        return $tarif ? $tarif->total : 0;
+    }
+    public function getTarif($groupPenjaminId, $kelasRawatId)
+    {
+        return $this->tarifTindakanMedis()
             ->where('group_penjamin_id', $groupPenjaminId)
             ->where('kelas_rawat_id', $kelasRawatId)
             ->first();
     }
 
+    // Method untuk mendapatkan hanya total (tetap dipertahankan untuk backward compatibility)
 
 
-    public function getTotalTarif($groupPenjaminId, $kelasRawatId)
+    // Method untuk mendapatkan share_dr
+    public function getShareDr($groupPenjaminId, $kelasRawatId)
     {
-        $tarif = $this->tarifTindakanMedis($groupPenjaminId, $kelasRawatId);
-        return $tarif ? $tarif->total : 0;
+        $tarif = $this->getTarif($groupPenjaminId, $kelasRawatId);
+        return $tarif ? $tarif->share_dr : 0;
     }
 }

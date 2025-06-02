@@ -183,9 +183,27 @@ Route::group(['middleware' => ['auth']], function () {
         Route::prefix('jasa-dokter')->middleware(['can:view account payable jasa dokter'])->group(function () {
             Route::get('/', [JasaDokterController::class, 'index'])
                 ->name('keuangan.jasa-dokter.index');
+            Route::get('/create', [JasaDokterController::class, 'create'])
+                ->name('keuangan.jasa-dokter.create');
+            Route::post('/store', [JasaDokterController::class, 'store'])
+                ->name('keuangan.jasa-dokter.store');
+            Route::get('/edit/{id}', [JasaDokterController::class, 'edit'])
+                ->name('keuangan.jasa-dokter.edit');
+            Route::post('/update/{id}', [JasaDokterController::class, 'update'])
+                ->name('keuangan.jasa-dokter.update');
+            Route::get('/export-excel', [JasaDokterController::class, 'export'])
+                ->name('keuangan.jasa-dokter.export-excel');
+            Route::post('/store-selected', [JasaDokterController::class, 'storeSelected'])
+                ->name('keuangan.jasa-dokter.store-selected');
+            Route::post('/cancel-selected', [JasaDokterController::class, 'cancelSelected'])
+                ->name('keuangan.jasa-dokter.cancel-selected');
+            Route::get('/get-tagihan-data/{tagihanPasienId}', [JasaDokterController::class, 'getTagihanData'])
+                ->name('keuangan.jasa-dokter.get-tagihan-data');
+            Route::get('/get-tagihan-pasien', [JasaDokterController::class, 'getTagihanPasien'])
+                ->name('keuangan.jasa-dokter.get-tagihan-pasien');
+            Route::get('/modal-data/{id}', [JasaDokterController::class, 'getModalData'])
+                ->name('keuangan.jasa-dokter.modal-data');
         });
-
-
         Route::prefix('pembayaran-jasa-dokter')->middleware(['can:view account payable pembayaran jasa dokter'])->group(function () {
             Route::get('/', [PembayaranJasaDokterController::class, 'index'])
                 ->name('keuangan.pembayaran-jasa-dokter.index');
@@ -193,6 +211,12 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name('keuangan.pembayaran-jasa-dokter.create');
             Route::post('/store', [PembayaranJasaDokterController::class, 'store'])
                 ->name('keuangan.pembayaran-jasa-dokter.store');
+
+            // Route::get('/edit/{id}', [JasaDokterController::class, 'edit'])
+            //     ->name('keuangan.jasa-dokter.edit');
+
+            // TAMBAHKAN: Route untuk get data TagihanPasien untuk modal create
+
         });
 
         Route::prefix('report-ap-dokter')->middleware(['can:view account payable report-ap-dokter'])->group(function () {

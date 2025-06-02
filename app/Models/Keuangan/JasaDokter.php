@@ -1,43 +1,69 @@
 <?php
 
-namespace App\Models\keuangan;
+namespace App\Models\Keuangan;
 
 use App\Models\SIMRS\Doctor;
-use App\Models\SIMRS\OrderTindakanMedis;
+use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\OrderTindakanMedis;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-// app/Models/JasaDokter.php
 class JasaDokter extends Model
 {
-    protected $table = 'jasa_dokter';
+    use HasFactory;
 
+    protected $table = 'jasa_dokter';
     protected $fillable = [
         'registration_id',
         'dokter_id',
         'order_tindakan_medis_id',
+        'tagihan_pasien_id',
         'nama_tindakan',
         'nominal',
         'diskon',
         'ppn_persen',
         'jkp',
-        'jasa_dokter',
         'share_dokter',
-        'status'
+        'status',
+        'ap_number',
+        'ap_date',
+        'bill_date'
     ];
+
+    protected $casts = [
+        'ap_date' => 'date',
+        'bill_date' => 'date',
+        'nominal' => 'decimal:2',
+        'diskon' => 'decimal:2',
+        'ppn_persen' => 'decimal:2',
+        'jkp' => 'decimal:2',
+        'jasa_dokter' => 'decimal:2',
+        'share_dokter' => 'decimal:2',
+    ];
+    public function tagihanPasien()
+    {
+        return $this->belongsTo(\App\Models\SIMRS\TagihanPasien::class, 'tagihan_pasien_id');
+    }
 
     public function registration()
     {
-        return $this->belongsTo(Registration::class);
+        return $this->belongsTo(\App\Models\SIMRS\Registration::class, 'registration_id');
     }
 
+    public function bilingan()
+    {
+        return $this->belongsTo(\App\Models\SIMRS\Bilingan::class, 'bilingan_id');
+    }
+
+    public function doctor()
+    {
+        return $this->belongsTo(\App\Models\SIMRS\Doctor::class, 'dokter_id');
+    }
+
+    // App\Models\keuangan\JasaDokter.php
     public function dokter()
     {
-        return $this->belongsTo(Doctor::class);
-    }
-
-    public function tindakan()
-    {
-        return $this->belongsTo(OrderTindakanMedis::class, 'order_tindakan_medis_id');
+        return $this->belongsTo(Doctor::class, 'dokter_id');
     }
 }
