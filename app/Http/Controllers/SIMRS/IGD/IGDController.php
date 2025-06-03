@@ -13,6 +13,7 @@ use App\Models\SIMRS\Pelayanan\Triage;
 use App\Models\SIMRS\Pengkajian\FormKategori;
 use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
+use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Peralatan\OrderAlatMedis;
 use App\Models\SIMRS\Peralatan\Peralatan;
 use App\Models\SIMRS\Registration;
@@ -88,5 +89,16 @@ class IGDController extends Controller
         return view('pages.simrs.igd.daftar-pasien', [
             'registrations' => $registrations,
         ]);
+    }
+
+    function reprotIGD()
+    {
+        $doctors = Doctor::whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'UGD');
+        })->get();
+
+        $penjamin = Penjamin::all();
+
+        return view('pages.simrs.igd.report-igd', compact('doctors', 'penjamin'));
     }
 }

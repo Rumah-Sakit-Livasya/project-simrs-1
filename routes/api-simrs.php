@@ -141,6 +141,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
     Route::prefix('igd')->group(function () {
         Route::post('/filter-pasien', [IGDController::class, 'index'])->name('igd.filter-pasien');
+        Route::post('/laporan-pasien', [IGDController::class, 'index'])->name('igd.laporan-pasien');
     });
 
     Route::prefix('erm')->group(function () {
