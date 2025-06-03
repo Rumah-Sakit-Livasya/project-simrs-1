@@ -301,6 +301,7 @@ class EmployeeController extends Controller
                     'bank_id' => 'nullable',
                     'account_number' => 'nullable',
                     'account_holder_name' => 'nullable',
+                    'is_management' => 'nullable',
                 ],
                 [
                     'fullname.required' => 'Nama Harus di isi!',
