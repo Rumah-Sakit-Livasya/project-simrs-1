@@ -2,6 +2,8 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\PembayaranCreditCard;
+use App\Models\PembayaranTransfer;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -18,5 +20,15 @@ class PembayaranTagihan extends Model implements AuditableContract
     public function bilingan()
     {
         return $this->belongsTo(Bilingan::class);
+    }
+
+    public function pembayaran_transfer()
+    {
+        return $this->belongsTo(PembayaranTransfer::class);
+    }
+
+    public function pembayaran_credit_card()
+    {
+        return $this->belongsTo(PembayaranCreditCard::class);
     }
 }

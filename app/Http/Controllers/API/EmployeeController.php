@@ -514,4 +514,15 @@ class EmployeeController extends Controller
             ];
         }));
     }
+
+    // Toggle Management
+    public function toggleManagement(Request $request, $id)
+    {
+        $employee = Employee::findOrFail($id);
+
+        $employee->is_management = $request->input('is_management');
+        $employee->save();
+
+        return response()->json(['success' => true]);
+    }
 }

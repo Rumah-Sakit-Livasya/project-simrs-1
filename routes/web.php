@@ -10,6 +10,7 @@ use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
+use App\Http\Controllers\LaporanInternalController;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\Pages\DashboardController;
 use App\Http\Controllers\Pages\UpdateProfileController;
@@ -340,6 +341,18 @@ Route::middleware([LastSeenUser::class])->group(function () {
             Route::get('/', [ChecklistHarianController::class, 'index'])->name('checklist.index');
         });
 
+        Route::middleware(['auth'])->group(function () {
+            Route::get('/laporan-internal', [LaporanInternalController::class, 'index']);
+            Route::post('/laporan-internal-filter', [LaporanInternalController::class, 'index'])->name('laporan-internal.filter');
+            Route::post('/laporan-internal', [LaporanInternalController::class, 'store']);
+            Route::get('/laporan-internal-list', [LaporanInternalController::class, 'list']);
+            Route::delete('/laporan-internal/{id}', [LaporanInternalController::class, 'destroy']);
+            Route::post('/laporan-internal/complete/{id}', [LaporanInternalController::class, 'complete']);
+            Route::get('/laporan-internal/export-harian', [LaporanInternalController::class, 'exportHarian'])
+                ->name('laporan.internal.export.harian');
+            Route::get('/laporan-internal/export-word-harian', [LaporanInternalController::class, 'exportWordHarian'])
+                ->name('laporan.internal.export.word');
+        });
         // routes/web.php
         Route::middleware(['auth'])->group(function () {
             Route::prefix('dashboard')->group(function () {

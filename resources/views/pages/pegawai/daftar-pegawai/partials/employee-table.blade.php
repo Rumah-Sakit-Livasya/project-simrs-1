@@ -7,8 +7,9 @@
             <th style="white-space: nowrap">Nama</th>
             <th style="white-space: nowrap">Perusahaan</th>
             <th style="white-space: nowrap">Unit</th>
-            <th style="white-space: nowrap">Jabatan</th>
             <th style="white-space: nowrap">Status</th>
+            <th style="white-space: nowrap">Jabatan</th>
+            <th style="white-space: nowrap">Status Shift</th>
             <th style="white-space: nowrap">Mulai Kontrak</th>
             <th style="white-space: nowrap">Akhir Kontrak</th>
             <th style="white-space: nowrap">Resign</th>
@@ -36,6 +37,8 @@
                         {{ $employee->company->name ?? '*belum di setting' }}</td>
                     <td style="white-space: nowrap">
                         {{ $employee->organization->name ?? '*belum di setting' }}</td>
+                    <td style="white-space: nowrap">
+                        {{ $employee->is_management ? 'Management' : 'Pelayanan' }}</td>
                     <td style="white-space: nowrap">
                         {{ $employee->jobPosition->name ?? '*belum di setting' }}</td>
                     <td style="white-space: nowrap">
@@ -124,6 +127,8 @@
                     <td style="white-space: nowrap">
                         {{ $employee->organization->name ?? '*belum di setting' }}</td>
                     <td style="white-space: nowrap">
+                        {{ $employee->is_management ? 'Management' : 'Pelayanan' }}</td>
+                    <td style="white-space: nowrap">
                         {{ $employee->jobPosition->name ?? '*belum di setting' }}</td>
                     <td style="white-space: nowrap">
                         {{ $employee->employment_status ?? '*belum di setting' }}</td>
@@ -198,6 +203,13 @@
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             </div>
                         </button>
+                        <button type="button"
+                            class="badge mx-1 badge-warning p-2 border-0 text-white btn-toggle-management"
+                            data-id="{{ $employee->id }}" data-status="{{ $employee->is_management }}"
+                            title="Toggle Manajemen">
+                            <span class="fas fa-user-secret"></span>
+                        </button>
+
                     </td>
                 </tr>
             @endforeach
@@ -209,8 +221,9 @@
             <th style="white-space: nowrap">Nama</th>
             <th style="white-space: nowrap">Perusahaan</th>
             <th style="white-space: nowrap">Unit</th>
-            <th style="white-space: nowrap">Jabatan</th>
             <th style="white-space: nowrap">Status</th>
+            <th style="white-space: nowrap">Jabatan</th>
+            <th style="white-space: nowrap">Status Shift</th>
             <th style="white-space: nowrap">Mulai Kontrak</th>
             <th style="white-space: nowrap">Akhir Kontrak</th>
             <th style="white-space: nowrap">Resign</th>
