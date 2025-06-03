@@ -15,13 +15,13 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Contracts\Permission;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements Auditable
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles {
         HasRoles::hasPermissionTo as traitHasPermissionTo;
     }
 
-    use \OwenIt\Auditing\Auditable;
+    // use \OwenIt\Auditing\Auditable;
 
     /**
      * The attributes that are mass assignable.
