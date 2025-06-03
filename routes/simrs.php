@@ -229,8 +229,8 @@ Route::group(['middleware' => ['auth']], function () {
             Route::post('/daftar-pasien', [TriageController::class, 'store'])->name('igd.triage.store');
             Route::get('/triage/{id}', [TriageController::class, 'get'])->name('igd.triage.get');
             Route::get('/catatan-medis', [ERMController::class, 'catatanMedis'])->name('igd.catatan-medis');
-            Route::prefix('/reports')->group(function () {
-                Route::get('igd', [IGDController::class, 'reprotIGD'])->name('igd.reports');
+            Route::prefix('/laporan')->group(function () {
+                Route::get('/', [IGDController::class, 'reprotIGD'])->name('igd.reports');
                 Route::get('rekap-per-dokter', [IGDController::class, 'rekapPerDokter'])->name('igd.reports.rekap-per-dokter');
             });
         });
