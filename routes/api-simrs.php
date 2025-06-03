@@ -8,6 +8,7 @@ use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\ProcurementPOApprovalPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalPharmacy;
 use App\Http\Controllers\ProcurementPurchaseOrderNonPharmacyController;
@@ -279,6 +280,16 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::delete("/destroy/{id}", [ProcurementPurchaseOrderNonPharmacyController::class, 'destroy'])->name('procurement.purchase-order.non-pharmacy.delete');
                 Route::patch("/get/items/", [ProcurementPurchaseOrderNonPharmacyController::class, 'get_items'])->name('procurement.purchase-order.non-pharmacy.get.items');
             });
+        });
+
+        Route::prefix("approval-po")->group(function () {
+            Route::prefix("pharmacy")->group(function () {
+                Route::put("/update/{id}", [ProcurementPOApprovalPharmacy::class, 'update'])->name('procurement.approval-po.pharmacy.update');
+            });
+
+            // Route::prefix("non-pharmacy")->group(callback: function () {
+            //     Route::put("/update/{id}", [ProcurementPOApprovalNonPharmacy::class, 'update'])->name('procurement.approval-po.non-pharmacy.update');
+            // });
         });
 
         Route::prefix("setup")->group(function () {

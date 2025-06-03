@@ -63,7 +63,7 @@ class ProcurementPRApprovalNonPharmacy extends Controller
     public function edit(ProcurementPurchaseRequestNonPharmacy $procurementPurchaseRequestNonPharmacy, $id)
     {
         return view("pages.simrs.procurement.approval-pr.partials.popup-approve-pr-non-pharmacy", [
-            "pr" => $procurementPurchaseRequestNonPharmacy->find($id)->first()
+            "pr" => $procurementPurchaseRequestNonPharmacy->find($id)
         ]);
     }
 

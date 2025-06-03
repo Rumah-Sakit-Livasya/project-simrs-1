@@ -15,7 +15,7 @@
         <div id="panel-1" class="panel">
             <div class="panel-hdr">
                 <h2>
-                    Daftar <span class="fw-300"><i>Approval PR (Pharmacy)</i></span>
+                    Daftar <span class="fw-300"><i>Approval PO (Pharmacy)</i></span>
                 </h2>
             </div>
             <div class="panel-container show">
@@ -27,54 +27,69 @@
                             <tr>
                                 <th>#</th>
                                 <th>Detail</th>
-                                <th>Kode PR</th>
-                                <th>Tanggal PR</th>
+                                <th>Kode PO</th>
+                                <th>Tanggal PO</th>
                                 <th>Tanggal APP</th>
-                                <th>Gudang</th>
-                                <th>Keterangan PR</th>
+                                <th>Supplier</th>
+                                <th>Keterangan PO</th>
                                 <th>Keterangan APP</th>
                                 <th>User APP</th>
-                                <th>Tipe PR</th>
+                                <th>Tipe PO</th>
                                 <th>Nominal</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($prs as $pr)
+                            @foreach ($pos as $po)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-primary" data-bs-placement="top"
                                             data-bs-toggle="popover" data-bs-title="Detail Purchase Request"
                                             data-bs-html="true"
-                                            data-bs-content-id="popover-content-{{ $pr->id }}">
+                                            data-bs-content-id="popover-content-{{ $po->id }}">
                                             <i class="fas fa-list text-light" style="transform: scale(1.8)"></i>
                                         </button>
-                                        <div class="display-none" id="popover-content-{{ $pr->id }}">
+                                        <div class="display-none" id="popover-content-{{ $po->id }}">
                                             @include(
-                                                'pages.simrs.procurement.approval-pr.partials.pr-detail',
-                                                ['pr' => $pr]
+                                                'pages.simrs.procurement.approval-po.partials.po-detail',
+                                                ['po' => $po]
                                             )
                                         </div>
                                     </td>
-                                    <td>{{ $pr->kode_pr }}</td>
-                                    <td>{{ tgl($pr->tanggal_pr) }}</td>
-                                    <td>{{ $pr->tanggal_app ? tgl($pr->tanggal_app) : 'Unreviewed' }}</td>
-                                    <td>{{ $pr->gudang->nama }}</td>
-                                    <td>{{ $pr->keterangan }}</td>
-                                    <td>{{ $pr->keterangan_approval }}</td>
-                                    <td>{{ $pr->app_user && $pr->app_user->employee->fullname }}</td>
-                                    <td>{{ ucfirst($pr->tipe) }}</td>
-                                    <td>{{ rp($pr->nominal) }}</td>
-                                    <td>{{ $pr->status == 'final' ? 'Unreviewed' : 'Reviewed' }}</td>
+                                    <td>{{ $po->kode_po }}</td>
+                                    <td>{{ tgl($po->tanggal_po) }}</td>
+                                    <td>{{ $po->tanggal_app ? tgl($po->tanggal_app) : 'Unapproved' }}</td>
+                                    <td>{{ $po->supplier->nama }}</td>
+                                    <td>{{ $po->keterangan }}</td>
+                                    <td>{{ $po->keterangan_approval }}</td>
+                                    <td>{{ $po->app_user && $po->app_user->employee->fullname }}</td>
+                                    <td>{{ ucfirst($po->tipe) }}</td>
+                                    <td>{{ rp($po->nominal) }}</td>
                                     <td>
-                                        <a class="mdi mdi-printer pointer mdi-24px text-primary print-btn"
-                                            title="Print" data-id="{{ $pr->id }}"></a>
+                                        @switch($po->approval)
+                                            @case('unreviewed')
+                                                <span class="text-secondary">Unreviewed</span>
+                                            @break
 
-                                        @if ($pr->status == 'final')
+                                            @case('approve')
+                                                <span class="text-success">Approved</span>
+                                            @break
+
+                                            @case('reject')
+                                                <span class="text-danger">Rejected</span>
+                                            @break
+
+                                            @case('revision')
+                                                <span class="text-info">Revision</span>
+                                            @break
+                                        @endswitch
+                                    </td>
+                                    <td>
+                                        @if ($po->approval == 'unreviewed')
                                             <a class="mdi mdi-pencil pointer mdi-24px text-secondary edit-btn"
-                                                title="Review" data-id="{{ $pr->id }}"></a>
+                                                title="Review" data-id="{{ $po->id }}"></a>
                                         @endif
                                     </td>
                                 </tr>
@@ -84,14 +99,14 @@
                             <tr>
                                 <th>#</th>
                                 <th>Detail</th>
-                                <th>Kode PR</th>
-                                <th>Tanggal PR</th>
+                                <th>Kode PO</th>
+                                <th>Tanggal PO</th>
                                 <th>Tanggal APP</th>
-                                <th>Gudang</th>
-                                <th>Keterangan PR</th>
+                                <th>Supplier</th>
+                                <th>Keterangan PO</th>
                                 <th>Keterangan APP</th>
                                 <th>User APP</th>
-                                <th>Tipe PR</th>
+                                <th>Tipe PO</th>
                                 <th>Nominal</th>
                                 <th>Status</th>
                                 <th>Aksi</th>

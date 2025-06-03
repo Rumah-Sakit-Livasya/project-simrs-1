@@ -1,5 +1,5 @@
 @extends('inc.layout-no-side')
-@section('title', 'Purchase Order Form')
+@section('title', 'Purchase Order Approval Form')
 @section('extended-css')
     <style>
         .display-none {
@@ -58,7 +58,7 @@
                         <div id="loading-page"></div>
                         <div class="panel-content">
                             <form id="form-po" name="form-po"
-                                action="{{ route('procurement.purchase-order.non-pharmacy.update', ['id' => $po->id]) }}"
+                                action="{{ route('procurement.approval-po.pharmacy.update', ['id' => $po->id]) }}"
                                 method="post">
                                 @csrf
                                 @method('put')
@@ -66,6 +66,8 @@
                                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
                                 <input type="hidden" name="id" value="{{ $po->id }}">
                                 <input type="hidden" name="kode_po" value="{{ $po->kode_po }}">
+                                <input type="hidden" name="tanggal_app"
+                                    value="{{ Carbon\Carbon::today()->toDateString() }}">
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
@@ -77,7 +79,7 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="date" class="form-control" id="datepicker-1"
+                                                    <input type="date" readonly class="form-control" id="datepicker-1"
                                                         placeholder="Select date" name="tanggal_po"
                                                         value="{{ $po->tanggal_po }}">
                                                 </div>
@@ -94,16 +96,10 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select name="supplier_id" id="supplier-select"
+                                                    <select name="supplier_id" id="supplier-select" disabled
                                                         class="form-control select2">
-                                                        <option value="" hidden disabled selected>Pilih Supplier
+                                                        <option value="{{ $po->supplier_id }}">{{ $po->supplier->nama }}
                                                         </option>
-                                                        @foreach ($suppliers as $supplier)
-                                                            <option
-                                                                {{ $supplier->id == $po->supplier_id ? 'selected' : '' }}
-                                                                value="{{ $supplier->id }}">{{ $supplier->nama }}
-                                                            </option>
-                                                        @endforeach
                                                     </select>
                                                 </div>
                                             </div>
@@ -119,10 +115,7 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select name="top" id="top-select" class="form-control">
-                                                        <option value="" hidden disabled selected>Pilih Term of
-                                                            Payment
-                                                        </option>
+                                                    <select name="top" id="top-select" class="form-control" disabled>
                                                         <option {{ $po->top == 'COD' ? 'selected' : '' }} value="COD">COD
                                                         </option>
                                                         <option {{ $po->top == '7HARI' ? 'selected' : '' }} value="7HARI">
@@ -158,7 +151,7 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="date" class="form-control" id="datepicker-1"
+                                                    <input type="date" readonly class="form-control" id="datepicker-1"
                                                         placeholder="Select date" name="tanggal_kirim"
                                                         value="{{ $po->tanggal_kirim }}">
                                                 </div>
@@ -175,7 +168,7 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" class="form-control" name="pic_terima"
+                                                    <input type="text" class="form-control" name="pic_terima" readonly
                                                         value="{{ $po->pic_terima }}">
                                                 </div>
                                             </div>
@@ -191,7 +184,8 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select name="tipe_top" id="tipe_top-select" class="form-control">
+                                                    <select name="tipe_top" id="tipe_top-select" class="form-control"
+                                                        disabled>
                                                         <option value="SETELAH_TUKAR_FAKTUR"
                                                             {{ $po->tipe_top == 'SETELAH_TUKAR_FAKTUR' ? 'selected' : '' }}>
                                                             SETELAH TUKAR FAKTUR
@@ -217,7 +211,7 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select name="tipe" class="form-control" required>
+                                                    <select name="tipe" class="form-control" disabled>
                                                         {{-- normal, urgent --}}
                                                         <option value="normal"
                                                             {{ $po->tipe == 'normal' ? 'selected' : '' }}>
@@ -241,7 +235,7 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" class="form-control" name="keterangan"
+                                                    <input type="text" class="form-control" name="keterangan" readonly
                                                         value="{{ $po->keterangan }}">
                                                 </div>
                                             </div>
@@ -258,7 +252,8 @@
                                                 </div>
                                                 <div class="col-xl">
                                                     <input id="ppn-input" type="number" min="0" step="1"
-                                                        class="form-control" name="ppn" value="{{ $po->ppn }}">
+                                                        readonly class="form-control" name="ppn"
+                                                        value="{{ $po->ppn }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -280,7 +275,6 @@
                                                 <th>Disc(%)</th>
                                                 <th>Disc(Rp)</th>
                                                 <th>Subtotal</th>
-                                                <th>Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody id="tableItems">
@@ -312,17 +306,13 @@
                                                     <td>{{ $item->unit_barang }}</td>
 
                                                     <td><input type="number" name="qty[{{ $loop->iteration }}]"
-                                                            min="0" step="1"
+                                                            min="0" step="1" readonly
                                                             max="{{ $item->pr_item ? $item->pr_item->approved_qty - $item->pr_item->ordered_qty + $item->qty : '999999999' }}"
-                                                            class="form-control" value="{{ $item->qty }}"
-                                                            onkeyup="PopupPONPharmacyClass.refreshTotal()"
-                                                            onchange="PopupPONPharmacyClass.refreshTotal()">
+                                                            class="form-control" value="{{ $item->qty }}">
                                                     </td>
                                                     <td><input type="number" name="qty_bonus[{{ $loop->iteration }}]"
                                                             min="0" step="1" class="form-control"
-                                                            value="{{ $item->qty_bonus }}"
-                                                            onkeyup="PopupPONPharmacyClass.refreshTotal()"
-                                                            onchange="PopupPONPharmacyClass.refreshTotal()"></td>
+                                                            value="{{ $item->qty_bonus }}" readonly></td>
                                                     <td class="harga_total">{{ rp($item->harga_barang * $item->qty) }}
                                                     </td>
                                                     <td class="discount_percent">
@@ -330,36 +320,24 @@
                                                             name="discount_percent[{{ $loop->iteration }}]"
                                                             min="0" step="1" class= "form-control"
                                                             value="{{ ($item->discount_nominal / ($item->harga_barang * $item->qty)) * 100 }}"
-                                                            onkeyup="PopupPONPharmacyClass.discountPercentChange(event)"
-                                                            onchange="PopupPONPharmacyClass.discountPercentChange(event)">
+                                                            readonly>
                                                     <td class="discount_rp">
                                                         <input type="number"
                                                             name="discount_nominal[{{ $loop->iteration }}]"
                                                             min="0" step="1" class= "form-control"
-                                                            value="{{ $item->discount_nominal }}"
-                                                            onkeyup="PopupPONPharmacyClass.discountNominalChange(event)"
-                                                            onchange="PopupPONPharmacyClass.discountNominalChange(event)">
+                                                            value="{{ $item->discount_nominal }}" readonly>
                                                     </td>
                                                     <td class="subtotal">{{ rp($item->subtotal) }}</td>
-                                                    <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                                                            title="Hapus"
-                                                            onclick="PopupPONPharmacyClass.deleteItem({{ $loop->iteration }})"></a>
-                                                    </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
                                         <tfoot>
                                             <tr>
                                                 <td class="text-right" colspan="4">
-                                                    <button type="button" id="add-btn"
-                                                        class="btn btn-primary waves-effect waves-themed">
-                                                        <span class="fal fa-plus mr-1"></span>
-                                                        Tambah Item
-                                                    </button>
-                                                    @include('pages.simrs.procurement.purchase-order.partials.modal-add-item')
                                                 </td>
                                                 <td class="text-right">Total
-                                                    <input type="hidden" value="{{ $po->nominal }}" name="nominal">
+                                                    <input type="hidden" value="{{ $po->nominal }}" name="nominal"
+                                                        readonly>
                                                 </td>
                                                 <td id="harga-display">{{ rp($total) }}</td>
                                                 <td>{{--  --}}</td>
@@ -375,45 +353,23 @@
                                     </table>
                                 </div>
 
-                                @if (isset($po->tanggal_app) && $po->approval == 'revision')
-                                    <div class="row justify-content-center">
-                                        <div class="col-xl-12">
-                                            <div class="form-group">
-                                                <div class="row">
-                                                    <div class="col-xl-2" style="text-align: right">
-                                                        <label class="form-label text-end" for="keterangan_approval">
-                                                            Keterangan Approval
-                                                        </label>
-                                                    </div>
-                                                    <div class="col-xl-8">
-                                                        <input type="text" class="form-control"
-                                                            name="keterangan_approval" readonly
-                                                            value="{{ $po->keterangan_approval }}">
-                                                    </div>
+                                <div class="row justify-content-center">
+                                    <div class="col-xl-12">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="keterangan_approval">
+                                                        Keterangan Approval
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl-8">
+                                                    <input type="text" class="form-control" name="keterangan_approval"
+                                                        value="{{ $po->keterangan_approval }}">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                @elseif (isset($po->tanggal_app_ceo) && $po->approval_ceo == 'revision')
-                                    <div class="row justify-content-center">
-                                        <div class="col-xl-12">
-                                            <div class="form-group">
-                                                <div class="row">
-                                                    <div class="col-xl-2" style="text-align: right">
-                                                        <label class="form-label text-end" for="keterangan_approval">
-                                                            Keterangan Approval CEO
-                                                        </label>
-                                                    </div>
-                                                    <div class="col-xl-8">
-                                                        <input type="text" class="form-control"
-                                                            name="keterangan_approval_ceo" readonly
-                                                            value="{{ $po->keterangan_approval_ceo }}">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
+                                </div>
 
                                 <div class="col-xl-12 mt-5">
                                     <div class="row">
@@ -425,18 +381,21 @@
                                             </a>
                                         </div>
                                         <div class="col-xl text-right">
-                                            @if ($po->status != 'final')
-                                                @if ($po->approval != 'revision' && $po->approval_ceo != 'revision')
-                                                    <button type="submit" id="order-submit-draft"
-                                                        class="btn btn-lg btn-primary waves-effect waves-themed">
-                                                        <span class="fal fa-save mr-1"></span>
-                                                        Simpan Draft
-                                                    </button>
-                                                @endif
-                                                <button type="submit" id="order-submit-final"
+                                            @if ($po->approval == 'unreviewed')
+                                                <button type="submit" id="order-submit-approve"
                                                     class="btn btn-lg btn-success waves-effect waves-themed">
-                                                    <span class="fal fa-save mr-1"></span>
-                                                    Simpan Final
+                                                    <span class="fal fa-check mr-1"></span>
+                                                    Approve
+                                                </button>
+                                                <button type="submit" id="order-submit-revision"
+                                                    class="btn btn-lg btn-info waves-effect waves-themed">
+                                                    <span class="fal fa-pencil mr-1"></span>
+                                                    Revision
+                                                </button>
+                                                <button type="submit" id="order-submit-reject"
+                                                    class="btn btn-lg btn-danger waves-effect waves-themed">
+                                                    <span class="fal fa-times mr-1"></span>
+                                                    Reject
                                                 </button>
                                             @else
                                                 <h1 style="color: red">Data sudah final</h1>
@@ -466,6 +425,6 @@
     <script>
         $(".select2").select2();
     </script>
-    <script src="{{ asset('js/simrs/procurement/purchase-order/popup-non-pharmacy.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/procurement/approval-po/popup-pharmacy.js') }}?v={{ time() }}"></script>
 
 @endsection

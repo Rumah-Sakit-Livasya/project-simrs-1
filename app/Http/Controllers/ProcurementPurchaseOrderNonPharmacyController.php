@@ -210,7 +210,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
     public function edit(ProcurementPurchaseOrderNonPharmacy $poocurementPurchaseOrderNonPharmacy, $id)
     {
         return view("pages.simrs.procurement.purchase-order.partials.popup-edit-po-non-farmasi", [
-            "po" => $poocurementPurchaseOrderNonPharmacy::find($id)->first(),
+            "po" => $poocurementPurchaseOrderNonPharmacy::find($id),
             "suppliers" => WarehouseSupplier::all(),
             "barangs" => WarehouseBarangNonFarmasi::all()
         ]);
@@ -278,7 +278,6 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
 
                 $pois->each(function ($poi) {
                     if ($poi->pri_id) {
-                        $pri = ProcurementPurchaseRequestNonPharmacyItems::find($poi->pri_id);
                         $pri = ProcurementPurchaseRequestNonPharmacyItems::find($poi->pri_id)->first();
                         $pri->decrement("ordered_qty", $poi->qty);
                         $pri->save();
@@ -338,7 +337,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
      */
     public function destroy(ProcurementPurchaseOrderNonPharmacy $procurementPurchaseOrderNonPharmacy, $id)
     {
-        $po = $procurementPurchaseOrderNonPharmacy->find($id)->first();
+        $po = $procurementPurchaseOrderNonPharmacy->find($id);
         if ($po->status != 'draft') {
             return response()->json([
                 'success' => false,

@@ -62,7 +62,7 @@ class ProcurementPRApprovalPharmacy extends Controller
     public function edit(ProcurementPurchaseRequestPharmacy $procurementPurchaseRequestPharmacy, $id)
     {
         return view("pages.simrs.procurement.approval-pr.partials.popup-approve-pr-pharmacy", [
-            "pr" => $procurementPurchaseRequestPharmacy->find($id)->first()
+            "pr" => $procurementPurchaseRequestPharmacy->find($id)
         ]);
     }
 

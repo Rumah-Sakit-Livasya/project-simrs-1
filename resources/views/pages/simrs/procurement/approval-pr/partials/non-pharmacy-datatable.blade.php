@@ -34,7 +34,7 @@
                                 <th>Keterangan PR</th>
                                 <th>Keterangan APP</th>
                                 <th>User APP</th>
-                                <th>Type PR</th>
+                                <th>Tipe PR</th>
                                 <th>Nominal</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
@@ -91,7 +91,7 @@
                                 <th>Keterangan PR</th>
                                 <th>Keterangan APP</th>
                                 <th>User APP</th>
-                                <th>Type PR</th>
+                                <th>Tipe PR</th>
                                 <th>Nominal</th>
                                 <th>Status</th>
                                 <th>Aksi</th>

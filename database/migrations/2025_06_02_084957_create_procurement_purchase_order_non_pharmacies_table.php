@@ -26,6 +26,7 @@ return new class extends Migration
             $table->foreignId("supplier_id")->constrained("warehouse_supplier")->cascadeOnDelete();
             $table->date("tanggal_po");
             $table->date("tanggal_app")->nullable();
+            $table->date("tanggal_app_ceo")->nullable();
             $table->date("tanggal_kirim")->nullable();
             $table->boolean("is_auto")->default(false);
             $table->enum('top', ["COD", "7HARI", "14HARI", "21HARI", "24HARI", "30HARI", "37HARI", "40HARI", "45HARI"])->nullable();

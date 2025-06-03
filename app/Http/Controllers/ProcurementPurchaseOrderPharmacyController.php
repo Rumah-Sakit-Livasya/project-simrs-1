@@ -211,7 +211,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
     public function edit(ProcurementPurchaseOrderPharmacy $poocurementPurchaseOrderPharmacy, $id)
     {
         return view("pages.simrs.procurement.purchase-order.partials.popup-edit-po-farmasi", [
-            "po" => $poocurementPurchaseOrderPharmacy::find($id)->first(),
+            "po" => $poocurementPurchaseOrderPharmacy::find($id),
             "suppliers" => WarehouseSupplier::all(),
             "barangs" => WarehouseBarangFarmasi::all()
         ]);
@@ -266,6 +266,15 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
             $po = $poocurementPurchaseOrderPharmacy->where("id", $id)->firstOrFail();
             $po->update($validatedData1);
 
+            if ($validatedData1["status"] == "final") {
+                if ($po->approval == "revision") {
+                    $po->update(["approval" => "unreviewed"]);
+                } else if ($po->approval_ceo == "revision") {
+                    $po->update(["approval" => "unreviewed"]);
+                    $po->update(["approval_ceo" => "unreviewed"]);
+                }
+            }
+
             // $validatedData["item_id"] is a key => pair array
             // delete everything from ProcurementPurchaseOrderPharmacyItems
             // where po_id == $po->id
@@ -279,7 +288,6 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
 
                 $pois->each(function ($poi) {
                     if ($poi->pri_id) {
-                        $pri = ProcurementPurchaseRequestPharmacyItems::find($poi->pri_id);
                         $pri = ProcurementPurchaseRequestPharmacyItems::find($poi->pri_id)->first();
                         $pri->decrement("ordered_qty", $poi->qty);
                         $pri->save();

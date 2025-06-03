@@ -6,6 +6,7 @@ use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
+use App\Http\Controllers\ProcurementPOApprovalPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalPharmacy;
 use App\Http\Controllers\ProcurementPurchaseOrderNonPharmacyController;
@@ -321,6 +322,19 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/print/{id}", [ProcurementPurchaseOrderNonPharmacyController::class, "print"])->name("procurement.purchase-order.non-pharmacy.print");
                     Route::get("/edit/{id}", [ProcurementPurchaseOrderNonPharmacyController::class, "edit"])->name("procurement.purchase-order.non-pharmacy.edit");
                 });
+            });
+
+            Route::prefix("approval-po")->group(function () {
+                Route::prefix("pharmacy")->group(function () {
+                    Route::get("/", [ProcurementPOApprovalPharmacy::class, "index"])->name("procurement.approval-po.pharmacy");
+                    Route::get("/edit/{id}", [ProcurementPOApprovalPharmacy::class, "edit"])->name("procurement.approval-po.pharmacy.edit");
+                });
+
+                // Route::prefix("non-pharmacy")->group(function () {
+                //     Route::get("/", [ProcurementPOApprovalNonPharmacy::class, "index"])->name("procurement.approval-po.non-pharmacy");
+                //     Route::get("/print/{id}", [ProcurementPOApprovalNonPharmacy::class, "print"])->name("procurement.approval-po.non-pharmacy.print");
+                //     Route::get("/edit/{id}", [ProcurementPOApprovalNonPharmacy::class, "edit"])->name("procurement.approval-po.non-pharmacy.edit");
+                // });
             });
 
             Route::prefix("setup")->group(function () {

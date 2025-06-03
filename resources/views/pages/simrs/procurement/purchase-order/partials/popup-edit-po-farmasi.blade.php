@@ -375,6 +375,46 @@
                                     </table>
                                 </div>
 
+                                @if (isset($po->tanggal_app) && $po->approval == 'revision')
+                                    <div class="row justify-content-center">
+                                        <div class="col-xl-12">
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-xl-2" style="text-align: right">
+                                                        <label class="form-label text-end" for="keterangan_approval">
+                                                            Keterangan Approval
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-xl-8">
+                                                        <input type="text" class="form-control"
+                                                            name="keterangan_approval" readonly
+                                                            value="{{ $po->keterangan_approval }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @elseif (isset($po->tanggal_app_ceo) && $po->approval_ceo == 'revision')
+                                    <div class="row justify-content-center">
+                                        <div class="col-xl-12">
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-xl-2" style="text-align: right">
+                                                        <label class="form-label text-end" for="keterangan_approval">
+                                                            Keterangan Approval CEO
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-xl-8">
+                                                        <input type="text" class="form-control"
+                                                            name="keterangan_approval_ceo" readonly
+                                                            value="{{ $po->keterangan_approval_ceo }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 <div class="col-xl-12 mt-5">
                                     <div class="row">
                                         <div class="col-xl">
@@ -385,12 +425,14 @@
                                             </a>
                                         </div>
                                         <div class="col-xl text-right">
-                                            @if ($po->status == 'draft')
-                                                <button type="submit" id="order-submit-draft"
-                                                    class="btn btn-lg btn-primary waves-effect waves-themed">
-                                                    <span class="fal fa-save mr-1"></span>
-                                                    Simpan Draft
-                                                </button>
+                                            @if ($po->status != 'final')
+                                                @if ($po->approval != 'revision' && $po->approval_ceo != 'revision')
+                                                    <button type="submit" id="order-submit-draft"
+                                                        class="btn btn-lg btn-primary waves-effect waves-themed">
+                                                        <span class="fal fa-save mr-1"></span>
+                                                        Simpan Draft
+                                                    </button>
+                                                @endif
                                                 <button type="submit" id="order-submit-final"
                                                     class="btn btn-lg btn-success waves-effect waves-themed">
                                                     <span class="fal fa-save mr-1"></span>

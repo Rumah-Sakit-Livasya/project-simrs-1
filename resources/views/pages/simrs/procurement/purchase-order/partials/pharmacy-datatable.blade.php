@@ -65,16 +65,53 @@
                                     <td>{{ $po->user->employee->fullname }}</td>
                                     <td>{{ ucfirst($po->tipe) }}</td>
                                     <td>{{ rp($po->nominal) }}</td>
-                                    <td>{{ ucfirst($po->status) }}</td>
+                                    <td>{{ ucfirst($po->status) }} <br>
+                                        Head: @switch($po->approval)
+                                            @case('unreviewed')
+                                                <span class="text-secondary">Unreviewed</span>
+                                            @break
+
+                                            @case('approve')
+                                                <span class="text-success">Approved</span>
+                                            @break
+
+                                            @case('reject')
+                                                <span class="text-danger">Rejected</span>
+                                            @break
+
+                                            @case('revision')
+                                                <span class="text-info">Revision</span>
+                                            @break
+                                        @endswitch <br>
+                                        CEO: @switch($po->approval_ceo)
+                                            @case('unreviewed')
+                                                <span class="text-secondary">Unreviewed</span>
+                                            @break
+
+                                            @case('approve')
+                                                <span class="text-success">Approved</span>
+                                            @break
+
+                                            @case('reject')
+                                                <span class="text-danger">Rejected</span>
+                                            @break
+
+                                            @case('revision')
+                                                <span class="text-info">Revision</span>
+                                            @break
+                                        @endswitch
+                                    </td>
                                     <td>
                                         <a class="mdi mdi-printer pointer mdi-24px text-primary print-btn"
                                             title="Print" data-id="{{ $po->id }}"></a>
 
-                                        @if ($po->status == 'draft')
+                                        @if ($po->status != 'final')
                                             <a class="mdi mdi-pencil pointer mdi-24px text-secondary edit-btn"
                                                 title="Edit" data-id="{{ $po->id }}"></a>
-                                            <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                                                title="Hapus" data-id="{{ $po->id }}"></a>
+                                            @if ($po->status != 'revision')
+                                                <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
+                                                    title="Hapus" data-id="{{ $po->id }}"></a>
+                                            @endif
                                         @endif
                                     </td>
                                 </tr>
