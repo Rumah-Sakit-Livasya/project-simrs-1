@@ -420,10 +420,13 @@
 
                                                 {{-- Status Final / Draft --}}
                                                 <td class="text-center status-cell">
-                                                    <span
-                                                        class="badge badge-{{ $item->status == 'final' ? 'success' : 'warning' }}">
-                                                        {{ $item->status == 'final' ? 'Sudah Dibuat' : 'Draft' }}
-                                                    </span>
+                                                    <i class='bx bx-check-circle status-indicator {{ $item->status == 'final' ? 'green' : 'grey' }} status-icon'
+                                                        data-toggle="tooltip"
+                                                        title="{{ $item->status == 'final' ? 'AP Sudah Dibuat (Klik untuk Edit)' : 'AP Belum Dibuat (Klik untuk Buat)' }}"
+                                                        data-id="{{ $item->tagihan_pasien_id }}" {{-- ID of the original TagihanPasien --}}
+                                                        data-jasa-dokter-id="{{ $item->id }}" {{-- ID of the JasaDokter (AP) record --}}
+                                                        data-status="{{ $item->status }}">
+                                                    </i>
                                                 </td>
                                             </tr>
                                         @empty
@@ -475,7 +478,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Dokter</label>
-                                            <select name="dokter_id" class="form-control" required>
+                                            <select name="dokter_id" class="form-control" id="dokter" required>
                                                 <option value="">-- Pilih Dokter --</option>
                                                 @foreach ($dokters as $dokter)
                                                     <option value="{{ $dokter->id }}"
@@ -587,6 +590,12 @@
                 dropdownCssClass: "move-up",
                 placeholder: "Pilih opsi",
                 allowClear: true
+            });
+            $('#dokter').select2({
+                dropdownCssClass: "move-up",
+                placeholder: "Pilih opsi",
+                allowClear: true,
+                dropdownParent: $('#apDokterModal .modal-body') // Pastikan dropdown muncul di dalam modal
             });
 
             // Inisialisasi select2 modal form saat modal terbuka
@@ -774,15 +783,11 @@
                     selectedIds.push($(this).val());
                 });
 
-                // Filter untuk item dengan AP saja (status 'final' / 'Sudah Dibuat')
                 let idsToCancel = selectedIds.filter(id => {
                     const row = $(`#dt-basic-example tbody input[type="checkbox"][value="${id}"]`)
                         .closest('tr');
-                    const statusBadge = row.find('.status-cell .badge');
-                    // Memeriksa apakah statusnya 'Sudah Dibuat'
-                    const isFinal = statusBadge.hasClass('badge-success') || statusBadge.text()
-                        .trim() === 'Sudah Dibuat';
-                    return isFinal;
+                    return row.find('.status-icon.green').length >
+                        0; // Check for green (final) status
                 });
 
                 if (idsToCancel.length === 0) {
@@ -794,42 +799,32 @@
                     title: "Konfirmasi",
                     text: `Anda yakin ingin membatalkan AP Dokter untuk ${idsToCancel.length} item yang dipilih?`,
                     icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#d33",
-                    cancelButtonColor: "#3085d6",
-                    confirmButtonText: "Ya, Batalkan!",
-                    cancelButtonText: "Tidak"
+                    // ... (rest of Swal config)
                 }).then((result) => {
                     if (result.isConfirmed) {
                         const $btn = $(this);
                         $btn.prop('disabled', true).html(
                             '<i class="fal fa-spinner-third fa-spin mr-1"></i> Processing...');
-
                         $.ajax({
-                            url: "{{ route('keuangan.jasa-dokter.cancel-selected') }}", // Pastikan route ini ada
+                            url: "{{ route('keuangan.jasa-dokter.cancel-selected') }}",
                             type: "POST",
                             data: {
                                 _token: "{{ csrf_token() }}",
-                                item_ids: idsToCancel
+                                item_ids: idsToCancel // These are JasaDokter IDs
                             },
                             success: function(response) {
                                 if (response.success) {
                                     toastr.success(response.message);
-                                    setTimeout(function() {
-                                        window.location.reload();
-                                    }, 1500);
+                                    setTimeout(() => window.location.reload(), 1500);
                                 } else {
                                     toastr.error(response.message ||
-                                        'Gagal membatalkan AP Dokter');
+                                        'Gagal membatalkan AP Dokter.');
                                 }
                             },
                             error: function(xhr) {
-                                const errorMessage = xhr.responseJSON?.message ||
-                                    xhr.responseText ||
-                                    'Terjadi kesalahan saat memproses permintaan pembatalan';
+                                const errorMessage = xhr.responseJSON?.message || xhr
+                                    .responseText || 'Terjadi kesalahan.';
                                 toastr.error(errorMessage);
-                                console.error("AJAX Error Cancel AP:", xhr
-                                    .responseText);
                             },
                             complete: function() {
                                 $btn.prop('disabled', false).html(
@@ -840,6 +835,7 @@
                     }
                 });
             });
+
 
             // Handle Status Icon Click (Modal)
             $('#dt-basic-example tbody').on('click', '.status-icon', function() {
