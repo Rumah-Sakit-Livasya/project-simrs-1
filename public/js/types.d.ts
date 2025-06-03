@@ -505,3 +505,5 @@ interface MinMaxStock {
 }
 
 type PatientType = "rajal" | "ranap" | "otc";
+type SumberItem = "npr" | "pr";
+type TipePR = "all" | "normal" | "urgent";

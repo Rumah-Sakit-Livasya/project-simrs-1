@@ -5,7 +5,7 @@
 // @ts-ignore
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
-class PopupPOPharmacyHandler {
+class PopupPONPharmacyHandler {
 
     /**
      * @type {JQuery<HTMLElement>}
@@ -68,7 +68,7 @@ class PopupPOPharmacyHandler {
      */
     #TipePR = "all";
 
-    #API_URL = "/api/simrs/procurement/purchase-order/pharmacy";
+    #API_URL = "/api/simrs/procurement/purchase-order/non-pharmacy";
 
     constructor() {
         this.#$AddModal = $("#pilihItemModal");
@@ -212,12 +212,14 @@ class PopupPOPharmacyHandler {
             showErrorAlertNoRefresh("Jumlah tidak boleh 0!");
             return;
         }
+
         const trId = row.attr("id");
         const Item = /** @type {BarangFarmasi} */ (row.data("item"));
         const KodePR = row.data("kode_pr");
         const IdPR = row.data("id_pr");
         const MaxQTy = parseInt(row.data("max_qty")) || 999999999;
         const selectedOption = row.find("select[name='satuan" + trId + "']").find("option:selected");
+        
         const Satuan = /** @type {Satuan} */ (selectedOption.data("satuan"));
         const HTML = this.#getItemTableCol(Item, Satuan, Qty, MaxQTy, KodePR, IdPR);
         this.#$Table.append(HTML);
@@ -235,7 +237,7 @@ class PopupPOPharmacyHandler {
      */
     #getItemTableCol(item, satuan, qty, max_qty, kode_pr, IdPR) {
         const key = Math.round(Math.random() * 100000);
-
+        
         return /*html*/`
             <tr id="item${key}">
                 <input type="hidden" name="kode_barang[${key}]" value="${item.kode}">
@@ -249,19 +251,19 @@ class PopupPOPharmacyHandler {
                 <td>${item.nama}</td>
                 <td>${satuan.nama}</td>
                 <td><input type="number" name="qty[${key}]" min="0" step="1" class="form-control" value="${qty}" max="${max_qty}"
-                    onkeyup="PopupPOPharmacyClass.refreshTotal()" onchange="PopupPOPharmacyClass.refreshTotal()"></td>
+                    onkeyup="PopupPONPharmacyClass.refreshTotal()" onchange="PopupPONPharmacyClass.refreshTotal()"></td>
                 <td><input type="number" name="qty_bonus[${key}]" min="0" step="1" class="form-control" value="0"
-                    onkeyup="PopupPOPharmacyClass.refreshTotal()" onchange="PopupPOPharmacyClass.refreshTotal()"></td>                
+                    onkeyup="PopupPONPharmacyClass.refreshTotal()" onchange="PopupPONPharmacyClass.refreshTotal()"></td>                
                 <td class="harga_total">${this.#rp(item.hna * qty)}</td>
                 <td class="discount_percent">
                     <input type="number" name="discount_percent[${key}]" min="0" step="1" class= "form-control" value="0"
-                    onkeyup="PopupPOPharmacyClass.discountPercentChange(event)" onchange="PopupPOPharmacyClass.discountPercentChange(event)">
+                    onkeyup="PopupPONPharmacyClass.discountPercentChange(event)" onchange="PopupPONPharmacyClass.discountPercentChange(event)">
                 <td class="discount_rp">
                     <input type="number" name="discount_nominal[${key}]" min="0" step="1" class= "form-control" value="0"
-                    onkeyup="PopupPOPharmacyClass.discountNominalChange(event)" onchange="PopupPOPharmacyClass.discountNominalChange(event)"></td>
+                    onkeyup="PopupPONPharmacyClass.discountNominalChange(event)" onchange="PopupPONPharmacyClass.discountNominalChange(event)"></td>
                 <td class="subtotal">${this.#rp(item.hna * qty)}</td>
                 <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                        title="Hapus" onclick="PopupPOPharmacyClass.deleteItem(${key})"></a></td>
+                        title="Hapus" onclick="PopupPONPharmacyClass.deleteItem(${key})"></a></td>
             </tr>
         `;
     }
@@ -461,4 +463,4 @@ class PopupPOPharmacyHandler {
 
 }
 
-const PopupPOPharmacyClass = new PopupPOPharmacyHandler();
+const PopupPONPharmacyClass = new PopupPONPharmacyHandler();

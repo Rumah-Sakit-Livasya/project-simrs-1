@@ -42,4 +42,14 @@ class WarehouseBarangNonFarmasi extends Model implements AuditableContract
     {
         return $this->hasMany(WarehouseSetupMinMaxStock::class, "barang_nf_id", "id");
     }
+
+    public function pr_non_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseRequestNonPharmacyItems::class, "barang_id", "id");
+    }
+
+    public function po_non_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseOrderNonPharmacyItems::class, "barang_id", "id");
+    }
 }

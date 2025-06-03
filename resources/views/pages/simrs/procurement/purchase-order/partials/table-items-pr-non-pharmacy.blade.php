@@ -28,12 +28,12 @@
             <td>{{ $pri->approved_qty }}</td>
             <td>{{ $pri->ordered_qty }}</td>
             <td>{{ $pri->approved_qty - $pri->ordered_qty }}</td>
-            <td><input type="number" min="0" oninput="PopupPOPharmacyClass.enforceNumberLimit(event)"
+            <td><input type="number" min="0" oninput="PopupPONPharmacyClass.enforceNumberLimit(event)"
                     max="{{ $pri->approved_qty - $pri->ordered_qty }}" name="qty{{ $pri->id }}"
                     class="form-control qty" value="{{ $pri->approved_qty - $pri->ordered_qty }}">
             </td>
             <td><button type="button" class="btn btn-primary btn-sm" data-id="{{ $pri->id }}"
-                    onclick="PopupPOPharmacyClass.addItem({{ $pri->id }})">
+                    onclick="PopupPONPharmacyClass.addItem({{ $pri->id }})">
                     <i class="fa fa-plus"></i>
                 </button></td>
         </tr>

@@ -18,4 +18,9 @@ class WarehouseSupplier extends Model implements AuditableContract
     {
         return $this->hasMany(ProcurementPurchaseOrderPharmacy::class, "supplier_id");
     }
+
+    public function po_non_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseOrderNonPharmacy::class, "supplier_id");
+    }
 }

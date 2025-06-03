@@ -8,6 +8,7 @@ use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\ProcurementPRApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalPharmacy;
+use App\Http\Controllers\ProcurementPurchaseOrderNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseOrderPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
@@ -314,12 +315,12 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/edit/{id}", [ProcurementPurchaseOrderPharmacyController::class, "edit"])->name("procurement.purchase-order.pharmacy.edit");
                 });
 
-                // Route::prefix("non-pharmacy")->group(function () {
-                //     Route::get("/", [ProcurementPurchaseOrderNonPharmacyController::class, "index"])->name("procurement.purchase-order.non-pharmacy");
-                //     Route::get("/create", [ProcurementPurchaseOrderNonPharmacyController::class, "create"])->name("procurement.purchase-order.non-pharmacy.create");
-                //     Route::get("/print/{id}", [ProcurementPurchaseOrderNonPharmacyController::class, "print"])->name("procurement.purchase-order.non-pharmacy.print");
-                //     Route::get("/edit/{id}", [ProcurementPurchaseOrderNonPharmacyController::class, "edit"])->name("procurement.purchase-order.non-pharmacy.edit");
-                // });
+                Route::prefix("non-pharmacy")->group(function () {
+                    Route::get("/", [ProcurementPurchaseOrderNonPharmacyController::class, "index"])->name("procurement.purchase-order.non-pharmacy");
+                    Route::get("/create", [ProcurementPurchaseOrderNonPharmacyController::class, "create"])->name("procurement.purchase-order.non-pharmacy.create");
+                    Route::get("/print/{id}", [ProcurementPurchaseOrderNonPharmacyController::class, "print"])->name("procurement.purchase-order.non-pharmacy.print");
+                    Route::get("/edit/{id}", [ProcurementPurchaseOrderNonPharmacyController::class, "edit"])->name("procurement.purchase-order.non-pharmacy.edit");
+                });
             });
 
             Route::prefix("setup")->group(function () {

@@ -2,24 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProcurementPurchaseOrderPharmacy;
-use App\Models\ProcurementPurchaseOrderPharmacyItems;
-use App\Models\ProcurementPurchaseRequestPharmacy;
-use App\Models\ProcurementPurchaseRequestPharmacyItems;
-use App\Models\WarehouseBarangFarmasi;
+use App\Models\ProcurementPurchaseOrderNonPharmacy;
+use App\Models\ProcurementPurchaseOrderNonPharmacyItems;
+use App\Models\ProcurementPurchaseRequestNonPharmacyItems;
+use App\Models\WarehouseBarangNonFarmasi;
 use App\Models\WarehouseSupplier;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 
-class ProcurementPurchaseOrderPharmacyController extends Controller
+class ProcurementPurchaseOrderNonPharmacyController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = ProcurementPurchaseOrderPharmacy::query()->with(["items"]);
+        $query = ProcurementPurchaseOrderNonPharmacy::query()->with(["items"]);
         $filters = ["kode_po", "approval", "is_auto"];
         $filterApplied = false;
 
@@ -47,10 +46,10 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
             $po = $query->orderBy('created_at', 'asc')->get();
         } else {
             // Return all data if no filter is applied
-            $po = ProcurementPurchaseOrderPharmacy::all();
+            $po = ProcurementPurchaseOrderNonPharmacy::all();
         }
 
-        return view("pages.simrs.procurement.purchase-order.pharmacy", [
+        return view("pages.simrs.procurement.purchase-order.non-pharmacy", [
             "pos" => $po
         ]);
     }
@@ -60,9 +59,9 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
      */
     public function create()
     {
-        return view("pages.simrs.procurement.purchase-order.partials.popup-add-po-farmasi", [
+        return view("pages.simrs.procurement.purchase-order.partials.popup-add-po-non-farmasi", [
             "suppliers" => WarehouseSupplier::all(),
-            "barangs" => WarehouseBarangFarmasi::all()
+            "barangs" => WarehouseBarangNonFarmasi::all()
         ]);
     }
     public function get_items(Request $request)
@@ -73,12 +72,12 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
         ]);
 
         if ($validatedData["sumber_item"] == "npr") {
-            return view("pages.simrs.procurement.purchase-order.partials.table-items-non-pr-pharmacy", [
-                "items" => WarehouseBarangFarmasi::all()
+            return view("pages.simrs.procurement.purchase-order.partials.table-items-non-pr-non-pharmacy", [
+                "items" => WarehouseBarangNonFarmasi::all()
             ]);
         }
 
-        $query = ProcurementPurchaseRequestPharmacyItems::query()->with(['pr']);
+        $query = ProcurementPurchaseRequestNonPharmacyItems::query()->with(['pr']);
 
         // query where column "ordered_qty" is LESS THAN column "approved_qty" OR "ordered_qty" is NULL
         $query->where(function ($query) {
@@ -96,7 +95,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
 
         $pris = $query->get();
 
-        return view("pages.simrs.procurement.purchase-order.partials.table-items-pr-pharmacy", [
+        return view("pages.simrs.procurement.purchase-order.partials.table-items-pr-non-pharmacy", [
             "pris" => $pris
         ]);
     }
@@ -107,10 +106,10 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = ProcurementPurchaseOrderPharmacy::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = ProcurementPurchaseOrderNonPharmacy::whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return $count . "/FRPO/" . $year . $month;
+        return $count . "/URPO/" . $year . $month;
     }
 
     /**
@@ -139,11 +138,11 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
             "nama_barang" => "required|array",
             "nama_barang.*" => "required|string",
             "barang_id" => "required|array",
-            "barang_id.*" => "required|exists:warehouse_barang_farmasi,id",
+            "barang_id.*" => "required|exists:warehouse_barang_non_farmasi,id",
             "unit_barang" => "required|array",
             "unit_barang.*" => "required|string",
             "pri_id" => "required|array",
-            "pri_id.*" => "nullable|exists:procurement_purchase_request_pharmacy_items,id",
+            "pri_id.*" => "nullable|exists:procurement_purchase_request_non_pharmacy_items,id",
             "qty" => "required|array",
             "qty.*" => "required|integer",
             "qty_bonus" => "required|array",
@@ -158,10 +157,10 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
 
         DB::beginTransaction();
         try {
-            $po = ProcurementPurchaseOrderPharmacy::create($validatedData1);
+            $po = ProcurementPurchaseOrderNonPharmacy::create($validatedData1);
 
             foreach ($validatedData2["barang_id"] as $key => $barang_id) {
-                ProcurementPurchaseOrderPharmacyItems::create([
+                ProcurementPurchaseOrderNonPharmacyItems::create([
                     "po_id" => $po->id,
                     "pri_id" => $validatedData2["pri_id"][$key],
                     "barang_id" => $validatedData2["barang_id"][$key],
@@ -177,7 +176,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
             }
 
             if (isset($validatedData2["pri_id"][$key])) {
-                $pri = ProcurementPurchaseRequestPharmacyItems::find($validatedData2["pri_id"][$key])->first();
+                $pri = ProcurementPurchaseRequestNonPharmacyItems::find($validatedData2["pri_id"][$key])->first();
                 $pri->increment("ordered_qty", $validatedData2["qty"][$key]);
             }
 
@@ -188,19 +187,19 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-    }
+        }
 
     public function print($id)
     {
-        return view("pages.simrs.procurement.purchase-order.partials.po-print-pharmacy", [
-            "po" => ProcurementPurchaseOrderPharmacy::find($id)
+        return view("pages.simrs.procurement.purchase-order.partials.po-print-non-pharmacy", [
+            "po" => ProcurementPurchaseOrderNonPharmacy::find($id)
         ]);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(ProcurementPurchaseOrderPharmacy $poocurementPurchaseOrderPharmacy)
+    public function show(ProcurementPurchaseOrderNonPharmacy $poocurementPurchaseOrderNonPharmacy)
     {
         //
     }
@@ -208,19 +207,19 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ProcurementPurchaseOrderPharmacy $poocurementPurchaseOrderPharmacy, $id)
+    public function edit(ProcurementPurchaseOrderNonPharmacy $poocurementPurchaseOrderNonPharmacy, $id)
     {
-        return view("pages.simrs.procurement.purchase-order.partials.popup-edit-po-farmasi", [
-            "po" => $poocurementPurchaseOrderPharmacy::find($id)->first(),
+        return view("pages.simrs.procurement.purchase-order.partials.popup-edit-po-non-farmasi", [
+            "po" => $poocurementPurchaseOrderNonPharmacy::find($id)->first(),
             "suppliers" => WarehouseSupplier::all(),
-            "barangs" => WarehouseBarangFarmasi::all()
+            "barangs" => WarehouseBarangNonFarmasi::all()
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ProcurementPurchaseOrderPharmacy $poocurementPurchaseOrderPharmacy, $id)
+    public function update(Request $request, ProcurementPurchaseOrderNonPharmacy $poocurementPurchaseOrderNonPharmacy, $id)
     {
         $validatedData1 = $request->validate([
             "tanggal_po" => "required|date",
@@ -244,11 +243,11 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
             "nama_barang" => "required|array",
             "nama_barang.*" => "required|string",
             "barang_id" => "required|array",
-            "barang_id.*" => "required|exists:warehouse_barang_farmasi,id",
+            "barang_id.*" => "required|exists:warehouse_barang_non_farmasi,id",
             "unit_barang" => "required|array",
             "unit_barang.*" => "required|string",
             "pri_id" => "required|array",
-            "pri_id.*" => "nullable|exists:procurement_purchase_request_pharmacy_items,id",
+            "pri_id.*" => "nullable|exists:procurement_purchase_request_non_pharmacy_items,id",
             "qty" => "required|array",
             "qty.*" => "required|integer",
             "qty_bonus" => "required|array",
@@ -263,24 +262,24 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
 
         DB::beginTransaction();
         try {
-            $po = $poocurementPurchaseOrderPharmacy->where("id", $id)->firstOrFail();
+            $po = $poocurementPurchaseOrderNonPharmacy->where("id", $id)->firstOrFail();
             $po->update($validatedData1);
 
             // $validatedData["item_id"] is a key => pair array
-            // delete everything from ProcurementPurchaseOrderPharmacyItems
+            // delete everything from ProcurementPurchaseOrderNonPharmacyItems
             // where po_id == $po->id
             // and id IS NOT IN $validatedData["item_id"]
             // because if it is not in $validatedData["item_id"]
             // it means it has been deleted
             if (count($validatedData2["item_id"]) > 0) {
-                $pois = ProcurementPurchaseOrderPharmacyItems::where("po_id", $po->id)
+                $pois = ProcurementPurchaseOrderNonPharmacyItems::where("po_id", $po->id)
                     ->whereNotIn("id", $validatedData2["item_id"])
                     ->get();
 
                 $pois->each(function ($poi) {
                     if ($poi->pri_id) {
-                        $pri = ProcurementPurchaseRequestPharmacyItems::find($poi->pri_id);
-                        $pri = ProcurementPurchaseRequestPharmacyItems::find($poi->pri_id)->first();
+                        $pri = ProcurementPurchaseRequestNonPharmacyItems::find($poi->pri_id);
+                        $pri = ProcurementPurchaseRequestNonPharmacyItems::find($poi->pri_id)->first();
                         $pri->decrement("ordered_qty", $poi->qty);
                         $pri->save();
                     }
@@ -304,21 +303,21 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
                 ];
 
                 if ($request->has("item_id") && isset($validatedData2["item_id"][$key])) {
-                    $poi = ProcurementPurchaseOrderPharmacyItems::find($validatedData2["item_id"][$key]);
+                    $poi = ProcurementPurchaseOrderNonPharmacyItems::find($validatedData2["item_id"][$key]);
 
                     // check if there's difference in the new "qty" and the stored "qty"
                     if ($poi->qty != $validatedData2["qty"][$key]) {
                         $diff = $validatedData2["qty"][$key] - $poi->qty;
-                        $pri = ProcurementPurchaseRequestPharmacyItems::find($validatedData2["pri_id"][$key])->first();
+                        $pri = ProcurementPurchaseRequestNonPharmacyItems::find($validatedData2["pri_id"][$key])->first();
                         $pri->increment("ordered_qty", $diff);
                         $poi->update($attributes);
                     } else {
                         $poi->update($attributes);
                     }
                 } else {
-                    $poi = new ProcurementPurchaseOrderPharmacyItems($attributes);
+                    $poi = new ProcurementPurchaseOrderNonPharmacyItems($attributes);
                     if (isset($validatedData2["pri_id"][$key])) {
-                        $pri = ProcurementPurchaseRequestPharmacyItems::find($validatedData2["pri_id"][$key])->first();
+                        $pri = ProcurementPurchaseRequestNonPharmacyItems::find($validatedData2["pri_id"][$key])->first();
                         $pri->increment("ordered_qty", $validatedData2["qty"][$key]);
                     }
                 }
@@ -337,9 +336,9 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ProcurementPurchaseOrderPharmacy $procurementPurchaseOrderPharmacy, $id)
+    public function destroy(ProcurementPurchaseOrderNonPharmacy $procurementPurchaseOrderNonPharmacy, $id)
     {
-        $po = $procurementPurchaseOrderPharmacy->find($id)->first();
+        $po = $procurementPurchaseOrderNonPharmacy->find($id)->first();
         if ($po->status != 'draft') {
             return response()->json([
                 'success' => false,

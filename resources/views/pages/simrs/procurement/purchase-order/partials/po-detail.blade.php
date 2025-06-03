@@ -20,7 +20,7 @@
                 $discount_percentage = $item->discount_nominal ? ($item->discount_nominal / $total) * 100 : 0;
             @endphp
             <tr>
-                <td>{{ $item->pr_item && $item->pr_item->pr->kode_pr }}</td>
+                <td>{{ $item->pr_item?->pr->kode_pr }}</td>
                 <td>{{ $item->barang->kode }}</td>
                 <td>{{ $item->barang->nama }}</td>
                 <td>{{ $item->unit_barang }}</td>

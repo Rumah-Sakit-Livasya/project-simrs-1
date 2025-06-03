@@ -27,4 +27,9 @@ class ProcurementPurchaseRequestNonPharmacyItems extends Model implements Audita
     {
         return $this->belongsTo(WarehouseSatuanBarang::class, 'satuan_id');
     }
+
+    public function po_items()
+    {
+        return $this->hasMany(ProcurementPurchaseOrderNonPharmacyItems::class, 'pri_id');
+    }
 }
