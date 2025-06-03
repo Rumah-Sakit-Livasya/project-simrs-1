@@ -26,9 +26,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class Registration extends Model implements AuditableContract
+class Registration extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
 
