@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProcurementPurchaseOrderPharmacy;
+use App\Models\ProcurementPurchaseOrderNonPharmacy;
 use Illuminate\Http\Request;
 
-class ProcurementPOApprovalPharmacy extends Controller
+class ProcurementPOApprovalNonPharmacy extends Controller
 {
     public function index(Request $request)
     {
-        $query = ProcurementPurchaseOrderPharmacy::query()->with(["items"]);
+        $query = ProcurementPurchaseOrderNonPharmacy::query()->with(["items"]);
         $filters = ["kode_po", "tipe"];
         $filterApplied = false;
 
@@ -48,22 +48,22 @@ class ProcurementPOApprovalPharmacy extends Controller
             $po = $query->where("status", "final")->orderBy('created_at', 'asc')->get();
         } else {
             // Return all data if no filter is applied
-            $po = ProcurementPurchaseOrderPharmacy::where("approval", "unreviewed")->where("status", "final")->get();
+            $po = ProcurementPurchaseOrderNonPharmacy::where("approval", "unreviewed")->where("status", "final")->get();
         }
 
-        return view("pages.simrs.procurement.approval-po.pharmacy", [
+        return view("pages.simrs.procurement.approval-po.non-pharmacy", [
             "pos" => $po
         ]);
     }
 
-    public function edit(ProcurementPurchaseOrderPharmacy $procurementPurchaseOrderPharmacy, $id)
+    public function edit(ProcurementPurchaseOrderNonPharmacy $procurementPurchaseOrderNonPharmacy, $id)
     {
-        return view("pages.simrs.procurement.approval-po.partials.popup-approve-po-pharmacy", [
-            "po" => $procurementPurchaseOrderPharmacy->find($id)
+        return view("pages.simrs.procurement.approval-po.partials.popup-approve-po-non-pharmacy", [
+            "po" => $procurementPurchaseOrderNonPharmacy->find($id)
         ]);
     }
 
-    public function update(Request $request, ProcurementPurchaseOrderPharmacy $procurementPurchaseOrderPharmacy, $id)
+    public function update(Request $request, ProcurementPurchaseOrderNonPharmacy $procurementPurchaseOrderNonPharmacy, $id)
     {
         $validatedData = $request->validate([
             "tanggal_app" => "required|date",
@@ -72,7 +72,7 @@ class ProcurementPOApprovalPharmacy extends Controller
             "status_app" => "required|in:approve,revision,reject"
         ]);
 
-        $po = $procurementPurchaseOrderPharmacy->find($id)->first();
+        $po = $procurementPurchaseOrderNonPharmacy->find($id)->first();
 
         if ($validatedData["status_app"] == 'revision') {
             $po->update(["status" => "revision"]);

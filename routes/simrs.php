@@ -6,6 +6,8 @@ use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
+use App\Http\Controllers\ProcurementPOApprovalCEO;
+use App\Http\Controllers\ProcurementPOApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPOApprovalPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalPharmacy;
@@ -330,11 +332,15 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/edit/{id}", [ProcurementPOApprovalPharmacy::class, "edit"])->name("procurement.approval-po.pharmacy.edit");
                 });
 
-                // Route::prefix("non-pharmacy")->group(function () {
-                //     Route::get("/", [ProcurementPOApprovalNonPharmacy::class, "index"])->name("procurement.approval-po.non-pharmacy");
-                //     Route::get("/print/{id}", [ProcurementPOApprovalNonPharmacy::class, "print"])->name("procurement.approval-po.non-pharmacy.print");
-                //     Route::get("/edit/{id}", [ProcurementPOApprovalNonPharmacy::class, "edit"])->name("procurement.approval-po.non-pharmacy.edit");
-                // });
+                Route::prefix("non-pharmacy")->group(function () {
+                    Route::get("/", [ProcurementPOApprovalNonPharmacy::class, "index"])->name("procurement.approval-po.non-pharmacy");
+                    Route::get("/edit/{id}", [ProcurementPOApprovalNonPharmacy::class, "edit"])->name("procurement.approval-po.non-pharmacy.edit");
+                });
+
+                Route::prefix("ceo")->group(function () {
+                    Route::get("/", [ProcurementPOApprovalCEO::class, "index"])->name("procurement.approval-po.ceo");
+                    Route::get("/edit/{type}/{id}", [ProcurementPOApprovalCEO::class, "edit"])->name("procurement.approval-po.ceo.edit");
+                });
             });
 
             Route::prefix("setup")->group(function () {

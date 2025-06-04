@@ -58,7 +58,7 @@
                         <div id="loading-page"></div>
                         <div class="panel-content">
                             <form id="form-po" name="form-po"
-                                action="{{ route('procurement.approval-po.pharmacy.update', ['id' => $po->id]) }}"
+                                action="{{ route('procurement.approval-po.non-pharmacy.update', ['id' => $po->id]) }}"
                                 method="post">
                                 @csrf
                                 @method('put')
@@ -425,6 +425,6 @@
     <script>
         $(".select2").select2();
     </script>
-    <script src="{{ asset('js/simrs/procurement/approval-po/popup-pharmacy.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/procurement/approval-po/popup-non-pharmacy.js') }}?v={{ time() }}"></script>
 
 @endsection

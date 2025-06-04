@@ -8,6 +8,8 @@ use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\ProcurementPOApprovalCEO;
+use App\Http\Controllers\ProcurementPOApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPOApprovalPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPRApprovalPharmacy;
@@ -287,9 +289,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::put("/update/{id}", [ProcurementPOApprovalPharmacy::class, 'update'])->name('procurement.approval-po.pharmacy.update');
             });
 
-            // Route::prefix("non-pharmacy")->group(callback: function () {
-            //     Route::put("/update/{id}", [ProcurementPOApprovalNonPharmacy::class, 'update'])->name('procurement.approval-po.non-pharmacy.update');
-            // });
+            Route::prefix("non-pharmacy")->group(callback: function () {
+                Route::put("/update/{id}", [ProcurementPOApprovalNonPharmacy::class, 'update'])->name('procurement.approval-po.non-pharmacy.update');
+            });
+
+            Route::prefix("ceo")->group(callback: function () {
+                Route::put("/update/{id}", [ProcurementPOApprovalCEO::class, 'update'])->name('procurement.approval-po.ceo.update');
+            });
         });
 
         Route::prefix("setup")->group(function () {

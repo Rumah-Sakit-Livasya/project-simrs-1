@@ -187,7 +187,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        }
+    }
 
     public function print($id)
     {
@@ -265,6 +265,15 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
             $po = $poocurementPurchaseOrderNonPharmacy->where("id", $id)->firstOrFail();
             $po->update($validatedData1);
 
+            if ($validatedData1["status"] == "final") {
+                if ($po->approval == "revision") {
+                    $po->update(["approval" => "unreviewed"]);
+                } else if ($po->approval_ceo == "revision") {
+                    $po->update(["approval" => "unreviewed"]);
+                    $po->update(["approval_ceo" => "unreviewed"]);
+                }
+            }
+
             // $validatedData["item_id"] is a key => pair array
             // delete everything from ProcurementPurchaseOrderNonPharmacyItems
             // where po_id == $po->id
@@ -323,7 +332,8 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
 
                 $poi->save();
             }
-
+            
+            $po->save();
             DB::commit();
             return back()->with('success', 'Data berhasil disimpan');
         } catch (\Exception $e) {

@@ -334,6 +334,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
                 $poi->save();
             }
 
+            $po->save();
             DB::commit();
             return back()->with('success', 'Data berhasil disimpan');
         } catch (\Exception $e) {

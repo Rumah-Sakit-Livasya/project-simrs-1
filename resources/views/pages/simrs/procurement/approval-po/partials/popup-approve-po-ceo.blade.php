@@ -58,7 +58,7 @@
                         <div id="loading-page"></div>
                         <div class="panel-content">
                             <form id="form-po" name="form-po"
-                                action="{{ route('procurement.approval-po.pharmacy.update', ['id' => $po->id]) }}"
+                                action="{{ route('procurement.approval-po.ceo.update', ['id' => $po->id]) }}"
                                 method="post">
                                 @csrf
                                 @method('put')
@@ -66,8 +66,9 @@
                                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
                                 <input type="hidden" name="id" value="{{ $po->id }}">
                                 <input type="hidden" name="kode_po" value="{{ $po->kode_po }}">
-                                <input type="hidden" name="tanggal_app"
+                                <input type="hidden" name="tanggal_app_ceo"
                                     value="{{ Carbon\Carbon::today()->toDateString() }}">
+                                <input type="hidden" name="type" value="{{ $type }}">
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
@@ -358,13 +359,13 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-2" style="text-align: right">
-                                                    <label class="form-label text-end" for="keterangan_approval">
-                                                        Keterangan Approval
+                                                    <label class="form-label text-end" for="keterangan_approval_ceo">
+                                                        Keterangan Approval CEO
                                                     </label>
                                                 </div>
                                                 <div class="col-xl-8">
-                                                    <input type="text" class="form-control" name="keterangan_approval"
-                                                        value="{{ $po->keterangan_approval }}">
+                                                    <input type="text" class="form-control" name="keterangan_approval_ceo"
+                                                        value="{{ $po->keterangan_approval_ceo }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -381,7 +382,7 @@
                                             </a>
                                         </div>
                                         <div class="col-xl text-right">
-                                            @if ($po->approval == 'unreviewed')
+                                            @if ($po->approval_ceo == 'unreviewed')
                                                 <button type="submit" id="order-submit-approve"
                                                     class="btn btn-lg btn-success waves-effect waves-themed">
                                                     <span class="fal fa-check mr-1"></span>
@@ -425,6 +426,6 @@
     <script>
         $(".select2").select2();
     </script>
-    <script src="{{ asset('js/simrs/procurement/approval-po/popup-pharmacy.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/procurement/approval-po/popup-ceo.js') }}?v={{ time() }}"></script>
 
 @endsection
