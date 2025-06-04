@@ -25,84 +25,84 @@
                             <td>COA Inventory</td>
                             <td>:</td>
                             <td>
-                                <input type="text" value="{{ old('coa_inventory') }}"
-                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control" id="coa_inventory" name="coa_inventory">
-                                @error('coa_inventory')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <select class="add-modal-select"name="coa_inventory">
+                                    <option value="" hidden disabled selected>Pilih COA</option>
+                                    @foreach ($coas as $item)
+                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                         </tr>
                         <tr>
                             <td>COA Sales Outpatient</td>
                             <td>:</td>
                             <td>
-                                <input type="text" value="{{ old('coa_sales_outpatient') }}"
-                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control" id="coa_sales_outpatient" name="coa_sales_outpatient">
-                                @error('coa_sales_outpatient')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <select class="add-modal-select"name="coa_sales_outpatient">
+                                    <option value="" hidden disabled selected>Pilih COA</option>
+                                    @foreach ($coas as $item)
+                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                         </tr>
                         <tr>
                             <td>COA COGS Outpatient</td>
                             <td>:</td>
                             <td>
-                                <input type="text" value="{{ old('coa_cogs_outpatient') }}"
-                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control" id="coa_cogs_outpatient" name="coa_cogs_outpatient">
-                                @error('coa_cogs_outpatient')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <select class="add-modal-select"name="coa_cogs_outpatient">
+                                    <option value="" hidden disabled selected>Pilih COA</option>
+                                    @foreach ($coas as $item)
+                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                         </tr>
                         <tr>
                             <td>COA Sales Inpatient</td>
                             <td>:</td>
                             <td>
-                                <input type="text" value="{{ old('coa_sales_inpatient') }}"
-                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control" id="coa_sales_inpatient" name="coa_sales_inpatient">
-                                @error('coa_sales_inpatient')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <select class="add-modal-select"name="coa_sales_inpatient">
+                                    <option value="" hidden disabled selected>Pilih COA</option>
+                                    @foreach ($coas as $item)
+                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                         </tr>
                         <tr>
                             <td>COA COGS Inpatient</td>
                             <td>:</td>
                             <td>
-                                <input type="text" value="{{ old('coa_cogs_inpatient') }}"
-                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control" id="coa_cogs_inpatient" name="coa_cogs_inpatient">
-                                @error('coa_cogs_inpatient')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <select class="add-modal-select"name="coa_cogs_inpatient">
+                                    <option value="" hidden disabled selected>Pilih COA</option>
+                                    @foreach ($coas as $item)
+                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                         </tr>
                         <tr>
                             <td>COA Adjustment Daily</td>
                             <td>:</td>
                             <td>
-                                <input type="text" value="{{ old('coa_adjustment_daily') }}"
-                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control" id="coa_adjustment_daily" name="coa_adjustment_daily">
-                                @error('coa_adjustment_daily')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <select class="add-modal-select"name="coa_adjustment_daily">
+                                    <option value="" hidden disabled selected>Pilih COA</option>
+                                    @foreach ($coas as $item)
+                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                         </tr>
                         <tr>
                             <td>COA Adjustment SO</td>
                             <td>:</td>
                             <td>
-                                <input type="text" value="{{ old('coa_adjustment_so') }}"
-                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control" id="coa_adjustment_so" name="coa_adjustment_so">
-                                @error('coa_adjustment_so')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <select class="add-modal-select"name="coa_adjustment_so">
+                                    <option value="" hidden disabled selected>Pilih COA</option>
+                                    @foreach ($coas as $item)
+                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                         </tr>
                         <tr>
@@ -111,14 +111,16 @@
                             <td>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="konsinsyasi"
-                                        id="konsinsyasi_true" value="1" {{ old('konsinsyasi', 0) == 1 ? 'checked' : '' }}>
+                                        id="konsinsyasi_true" value="1"
+                                        {{ old('konsinsyasi', 0) == 1 ? 'checked' : '' }}>
                                     <label class="form-check-label" for="konsinsyasi_true">
                                         Ya
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="konsinsyasi"
-                                        id="konsinsyasi_false" value="0" {{ old('konsinsyasi', 0) == 0 ? 'checked' : '' }}>
+                                        id="konsinsyasi_false" value="0"
+                                        {{ old('konsinsyasi', 0) == 0 ? 'checked' : '' }}>
                                     <label class="form-check-label" for="konsinsyasi_false">
                                         Tidak
                                     </label>
@@ -130,15 +132,16 @@
                             <td>:</td>
                             <td>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="aktif"
-                                        id="status_aktif_true" value="1" {{ old('aktif', 1) == 1 ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="radio" name="aktif" id="status_aktif_true"
+                                        value="1" {{ old('aktif', 1) == 1 ? 'checked' : '' }}>
                                     <label class="form-check-label" for="status_aktif_true">
                                         Aktif
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="aktif"
-                                        id="status_aktif_false" value="0" {{ old('aktif', 1) == 0 ? 'checked' : '' }}>
+                                        id="status_aktif_false" value="0"
+                                        {{ old('aktif', 1) == 0 ? 'checked' : '' }}>
                                     <label class="form-check-label" for="status_aktif_false">
                                         Non Aktif
                                     </label>
