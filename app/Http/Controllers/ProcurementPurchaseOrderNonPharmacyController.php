@@ -176,7 +176,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
             }
 
             if (isset($validatedData2["pri_id"][$key])) {
-                $pri = ProcurementPurchaseRequestNonPharmacyItems::find($validatedData2["pri_id"][$key])->first();
+                $pri = ProcurementPurchaseRequestNonPharmacyItems::findorfail($validatedData2["pri_id"][$key]);
                 $pri->increment("ordered_qty", $validatedData2["qty"][$key]);
             }
 
@@ -192,7 +192,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
     public function print($id)
     {
         return view("pages.simrs.procurement.purchase-order.partials.po-print-non-pharmacy", [
-            "po" => ProcurementPurchaseOrderNonPharmacy::find($id)
+            "po" => ProcurementPurchaseOrderNonPharmacy::findorfail($id)
         ]);
     }
 
@@ -210,7 +210,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
     public function edit(ProcurementPurchaseOrderNonPharmacy $poocurementPurchaseOrderNonPharmacy, $id)
     {
         return view("pages.simrs.procurement.purchase-order.partials.popup-edit-po-non-farmasi", [
-            "po" => $poocurementPurchaseOrderNonPharmacy::find($id),
+            "po" => $poocurementPurchaseOrderNonPharmacy::findorfail($id),
             "suppliers" => WarehouseSupplier::all(),
             "barangs" => WarehouseBarangNonFarmasi::all()
         ]);
@@ -287,7 +287,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
 
                 $pois->each(function ($poi) {
                     if ($poi->pri_id) {
-                        $pri = ProcurementPurchaseRequestNonPharmacyItems::find($poi->pri_id)->first();
+                        $pri = ProcurementPurchaseRequestNonPharmacyItems::findorfail($poi->pri_id);
                         $pri->decrement("ordered_qty", $poi->qty);
                         $pri->save();
                     }
@@ -311,12 +311,12 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
                 ];
 
                 if ($request->has("item_id") && isset($validatedData2["item_id"][$key])) {
-                    $poi = ProcurementPurchaseOrderNonPharmacyItems::find($validatedData2["item_id"][$key]);
+                    $poi = ProcurementPurchaseOrderNonPharmacyItems::findorfail($validatedData2["item_id"][$key]);
 
                     // check if there's difference in the new "qty" and the stored "qty"
                     if ($poi->qty != $validatedData2["qty"][$key]) {
                         $diff = $validatedData2["qty"][$key] - $poi->qty;
-                        $pri = ProcurementPurchaseRequestNonPharmacyItems::find($validatedData2["pri_id"][$key])->first();
+                        $pri = ProcurementPurchaseRequestNonPharmacyItems::findorfail($validatedData2["pri_id"][$key]);
                         $pri->increment("ordered_qty", $diff);
                         $poi->update($attributes);
                     } else {
@@ -325,7 +325,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
                 } else {
                     $poi = new ProcurementPurchaseOrderNonPharmacyItems($attributes);
                     if (isset($validatedData2["pri_id"][$key])) {
-                        $pri = ProcurementPurchaseRequestNonPharmacyItems::find($validatedData2["pri_id"][$key])->first();
+                        $pri = ProcurementPurchaseRequestNonPharmacyItems::findorfail($validatedData2["pri_id"][$key]);
                         $pri->increment("ordered_qty", $validatedData2["qty"][$key]);
                     }
                 }
@@ -347,7 +347,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
      */
     public function destroy(ProcurementPurchaseOrderNonPharmacy $procurementPurchaseOrderNonPharmacy, $id)
     {
-        $po = $procurementPurchaseOrderNonPharmacy->find($id);
+        $po = $procurementPurchaseOrderNonPharmacy->findorfail($id);
         if ($po->status != 'draft') {
             return response()->json([
                 'success' => false,

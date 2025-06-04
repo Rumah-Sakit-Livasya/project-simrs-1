@@ -177,7 +177,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
             }
 
             if (isset($validatedData2["pri_id"][$key])) {
-                $pri = ProcurementPurchaseRequestPharmacyItems::find($validatedData2["pri_id"][$key])->first();
+                $pri = ProcurementPurchaseRequestPharmacyItems::findorfail($validatedData2["pri_id"][$key]);
                 $pri->increment("ordered_qty", $validatedData2["qty"][$key]);
             }
 
@@ -193,7 +193,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
     public function print($id)
     {
         return view("pages.simrs.procurement.purchase-order.partials.po-print-pharmacy", [
-            "po" => ProcurementPurchaseOrderPharmacy::find($id)
+            "po" => ProcurementPurchaseOrderPharmacy::findorfail($id)
         ]);
     }
 
@@ -211,7 +211,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
     public function edit(ProcurementPurchaseOrderPharmacy $poocurementPurchaseOrderPharmacy, $id)
     {
         return view("pages.simrs.procurement.purchase-order.partials.popup-edit-po-farmasi", [
-            "po" => $poocurementPurchaseOrderPharmacy::find($id),
+            "po" => $poocurementPurchaseOrderPharmacy::findorfail($id),
             "suppliers" => WarehouseSupplier::all(),
             "barangs" => WarehouseBarangFarmasi::all()
         ]);
@@ -288,7 +288,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
 
                 $pois->each(function ($poi) {
                     if ($poi->pri_id) {
-                        $pri = ProcurementPurchaseRequestPharmacyItems::find($poi->pri_id)->first();
+                        $pri = ProcurementPurchaseRequestPharmacyItems::findorfail($poi->pri_id);
                         $pri->decrement("ordered_qty", $poi->qty);
                         $pri->save();
                     }
@@ -312,12 +312,12 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
                 ];
 
                 if ($request->has("item_id") && isset($validatedData2["item_id"][$key])) {
-                    $poi = ProcurementPurchaseOrderPharmacyItems::find($validatedData2["item_id"][$key]);
+                    $poi = ProcurementPurchaseOrderPharmacyItems::findorfail($validatedData2["item_id"][$key]);
 
                     // check if there's difference in the new "qty" and the stored "qty"
                     if ($poi->qty != $validatedData2["qty"][$key]) {
                         $diff = $validatedData2["qty"][$key] - $poi->qty;
-                        $pri = ProcurementPurchaseRequestPharmacyItems::find($validatedData2["pri_id"][$key])->first();
+                        $pri = ProcurementPurchaseRequestPharmacyItems::findorfail($validatedData2["pri_id"][$key]);
                         $pri->increment("ordered_qty", $diff);
                         $poi->update($attributes);
                     } else {
@@ -326,7 +326,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
                 } else {
                     $poi = new ProcurementPurchaseOrderPharmacyItems($attributes);
                     if (isset($validatedData2["pri_id"][$key])) {
-                        $pri = ProcurementPurchaseRequestPharmacyItems::find($validatedData2["pri_id"][$key])->first();
+                        $pri = ProcurementPurchaseRequestPharmacyItems::findorfail($validatedData2["pri_id"][$key]);
                         $pri->increment("ordered_qty", $validatedData2["qty"][$key]);
                     }
                 }
@@ -348,7 +348,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
      */
     public function destroy(ProcurementPurchaseOrderPharmacy $procurementPurchaseOrderPharmacy, $id)
     {
-        $po = $procurementPurchaseOrderPharmacy->find($id)->first();
+        $po = $procurementPurchaseOrderPharmacy->findorfail($id);
         if ($po->status != 'draft') {
             return response()->json([
                 'success' => false,

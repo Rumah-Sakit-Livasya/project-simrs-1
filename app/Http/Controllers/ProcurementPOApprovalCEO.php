@@ -78,9 +78,9 @@ class ProcurementPOApprovalCEO extends Controller
     public function edit($type, $id)
     {
         if ($type == "np") {
-            $po = ProcurementPurchaseOrderNonPharmacy::find($id);
+            $po = ProcurementPurchaseOrderNonPharmacy::findorfail($id);
         } else {
-            $po = ProcurementPurchaseOrderPharmacy::find($id);
+            $po = ProcurementPurchaseOrderPharmacy::findorfail($id);
         }
 
         return view("pages.simrs.procurement.approval-po.partials.popup-approve-po-ceo", [
@@ -100,9 +100,9 @@ class ProcurementPOApprovalCEO extends Controller
         ]);
 
         if($validatedData["type"] == "np"){
-            $po = ProcurementPurchaseOrderNonPharmacy::find($id)->first();
+            $po = ProcurementPurchaseOrderNonPharmacy::findorfail($id);
         } else{
-            $po = ProcurementPurchaseOrderPharmacy::find($id)->first();
+            $po = ProcurementPurchaseOrderPharmacy::findorfail($id);
         }
 
         if ($validatedData["status_app_ceo"] == 'revision') {

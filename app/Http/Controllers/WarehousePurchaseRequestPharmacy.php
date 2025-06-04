@@ -69,7 +69,7 @@ class WarehousePurchaseRequestPharmacy extends Controller
     public function print($id)
     {
         return view("pages.simrs.warehouse.purchase-request.partials.pr-print-pharmacy", [
-            "pr" => ProcurementPurchaseRequestPharmacy::find($id)
+            "pr" => ProcurementPurchaseRequestPharmacy::findorfail($id)
         ]);
     }
 
@@ -172,7 +172,7 @@ class WarehousePurchaseRequestPharmacy extends Controller
     public function edit(ProcurementPurchaseRequestPharmacy $procurementPurchaseRequestPharmacy, $id)
     {
         return view("pages.simrs.warehouse.purchase-request.partials.popup-edit-pr-farmasi", [
-            "pr" => $procurementPurchaseRequestPharmacy::find($id)->first(),
+            "pr" => $procurementPurchaseRequestPharmacy::findorfail($id),
             "satuans" => WarehouseSatuanBarang::all(),
             "gudangs" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 1)->where("warehouse", 1)->get(),
             "barangs" => WarehouseBarangFarmasi::all()
@@ -251,7 +251,7 @@ class WarehousePurchaseRequestPharmacy extends Controller
                 ];
 
                 if ($request->has("item_id") && isset($validatedData2["item_id"][$key])) {
-                    $pri = ProcurementPurchaseRequestPharmacyItems::find($validatedData2["item_id"][$key]);
+                    $pri = ProcurementPurchaseRequestPharmacyItems::findorfail($validatedData2["item_id"][$key]);
                     $pri->update($attributes);
                 } else {
                     $pri = new ProcurementPurchaseRequestPharmacyItems($attributes);
@@ -273,7 +273,7 @@ class WarehousePurchaseRequestPharmacy extends Controller
      */
     public function destroy(ProcurementPurchaseRequestPharmacy $procurementPurchaseRequestPharmacy, $id)
     {
-        $pr = $procurementPurchaseRequestPharmacy->find($id)->first();
+        $pr = $procurementPurchaseRequestPharmacy->findorfail($id);
         if ($pr->status == 'final') {
             return response()->json([
                 'success' => false,

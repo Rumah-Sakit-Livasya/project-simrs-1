@@ -69,7 +69,7 @@ class ProcurementPurchaseRequestNonPharmacyController extends Controller
     public function print($id)
     {
         return view("pages.simrs.procurement.purchase-request.partials.pr-print-non-pharmacy", [
-            "pr" => ProcurementPurchaseRequestNonPharmacy::find($id)
+            "pr" => ProcurementPurchaseRequestNonPharmacy::findorfail($id)
         ]);
     }
 
@@ -172,7 +172,7 @@ class ProcurementPurchaseRequestNonPharmacyController extends Controller
     public function edit(ProcurementPurchaseRequestNonPharmacy $procurementPurchaseRequestNonPharmacy, $id)
     {
         return view("pages.simrs.procurement.purchase-request.partials.popup-edit-pr-non-farmasi", [
-            "pr" => $procurementPurchaseRequestNonPharmacy::find($id)->first(),
+            "pr" => $procurementPurchaseRequestNonPharmacy::findorfail($id),
             "satuans" => WarehouseSatuanBarang::all(),
             "gudangs" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 0)->where("warehouse", 1)->get(),
             "barangs" => WarehouseBarangNonFarmasi::all()
@@ -251,7 +251,7 @@ class ProcurementPurchaseRequestNonPharmacyController extends Controller
                 ];
 
                 if ($request->has("item_id") && isset($validatedData2["item_id"][$key])) {
-                    $pri = ProcurementPurchaseRequestNonPharmacyItems::find($validatedData2["item_id"][$key]);
+                    $pri = ProcurementPurchaseRequestNonPharmacyItems::findorfail($validatedData2["item_id"][$key]);
                     $pri->update($attributes);
                 } else {
                     $pri = new ProcurementPurchaseRequestNonPharmacyItems($attributes);
@@ -273,7 +273,7 @@ class ProcurementPurchaseRequestNonPharmacyController extends Controller
      */
     public function destroy(ProcurementPurchaseRequestNonPharmacy $procurementPurchaseRequestNonPharmacy, $id)
     {
-        $pr = $procurementPurchaseRequestNonPharmacy->find($id)->first();
+        $pr = $procurementPurchaseRequestNonPharmacy->findorfail($id);
         if ($pr->status == 'final') {
             return response()->json([
                 'success' => false,

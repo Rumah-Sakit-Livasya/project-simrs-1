@@ -62,7 +62,7 @@ class ProcurementPRApprovalPharmacy extends Controller
     public function edit(ProcurementPurchaseRequestPharmacy $procurementPurchaseRequestPharmacy, $id)
     {
         return view("pages.simrs.procurement.approval-pr.partials.popup-approve-pr-pharmacy", [
-            "pr" => $procurementPurchaseRequestPharmacy->find($id)
+            "pr" => $procurementPurchaseRequestPharmacy->findorfail($id)
         ]);
     }
 
@@ -83,7 +83,7 @@ class ProcurementPRApprovalPharmacy extends Controller
             "keterangan_item_app.*" => "nullable|string"
         ]);
 
-        $pr = $procurementPurchaseRequestPharmacy->find($id)->first();
+        $pr = $procurementPurchaseRequestPharmacy->findorfail($id);
         if ($validatedData["status_app"] == 'final') {
             $pr->update(["status" => "reviewed"]);
         }
@@ -96,7 +96,7 @@ class ProcurementPRApprovalPharmacy extends Controller
         $pr->save();
 
         foreach ($validatedData["item_id"] as $key => $id) {
-            $item = $pr->items()->find($id);
+            $item = $pr->items()->findorfail($id);
             $item->update([
                 "approved_qty" => $validatedData["approved_qty"][$key],
                 "status" => $validatedData["status_item"][$key],
@@ -111,7 +111,7 @@ class ProcurementPRApprovalPharmacy extends Controller
     public function print($id)
     {
         return view("pages.simrs.procurement.approval-pr.partials.pr-print-pharmacy", [
-            "pr" => ProcurementPurchaseRequestPharmacy::find($id)
+            "pr" => ProcurementPurchaseRequestPharmacy::findorfail($id)
         ]);
     }
 }

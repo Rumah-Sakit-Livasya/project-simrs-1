@@ -63,7 +63,7 @@ class ProcurementPRApprovalNonPharmacy extends Controller
     public function edit(ProcurementPurchaseRequestNonPharmacy $procurementPurchaseRequestNonPharmacy, $id)
     {
         return view("pages.simrs.procurement.approval-pr.partials.popup-approve-pr-non-pharmacy", [
-            "pr" => $procurementPurchaseRequestNonPharmacy->find($id)
+            "pr" => $procurementPurchaseRequestNonPharmacy->findorfail($id)
         ]);
     }
 
@@ -84,7 +84,7 @@ class ProcurementPRApprovalNonPharmacy extends Controller
             "keterangan_item_app.*" => "nullable|string"
         ]);
 
-        $pr = $procurementPurchaseRequestNonPharmacy->find($id)->first();
+        $pr = $procurementPurchaseRequestNonPharmacy->findorfail($id);
         if ($validatedData["status_app"] == 'final') {
             $pr->update(["status" => "reviewed"]);
         }
@@ -97,7 +97,7 @@ class ProcurementPRApprovalNonPharmacy extends Controller
         $pr->save();
 
         foreach ($validatedData["item_id"] as $key => $id) {
-            $item = $pr->items()->find($id);
+            $item = $pr->items()->findorfail($id);
             $item->update([
                 "approved_qty" => $validatedData["approved_qty"][$key],
                 "status" => $validatedData["status_item"][$key],
@@ -112,7 +112,7 @@ class ProcurementPRApprovalNonPharmacy extends Controller
     public function print($id)
     {
         return view("pages.simrs.procurement.approval-pr.partials.pr-print-non-pharmacy", [
-            "pr" => ProcurementPurchaseRequestNonPharmacy::find($id)
+            "pr" => ProcurementPurchaseRequestNonPharmacy::findorfail($id)
         ]);
     }
 }

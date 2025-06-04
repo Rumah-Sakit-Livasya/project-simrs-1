@@ -59,7 +59,7 @@ class ProcurementPOApprovalPharmacy extends Controller
     public function edit(ProcurementPurchaseOrderPharmacy $procurementPurchaseOrderPharmacy, $id)
     {
         return view("pages.simrs.procurement.approval-po.partials.popup-approve-po-pharmacy", [
-            "po" => $procurementPurchaseOrderPharmacy->find($id)
+            "po" => $procurementPurchaseOrderPharmacy->findorfail($id)
         ]);
     }
 
@@ -72,7 +72,7 @@ class ProcurementPOApprovalPharmacy extends Controller
             "status_app" => "required|in:approve,revision,reject"
         ]);
 
-        $po = $procurementPurchaseOrderPharmacy->find($id)->first();
+        $po = $procurementPurchaseOrderPharmacy->findorfail($id);
 
         if ($validatedData["status_app"] == 'revision') {
             $po->update(["status" => "revision"]);

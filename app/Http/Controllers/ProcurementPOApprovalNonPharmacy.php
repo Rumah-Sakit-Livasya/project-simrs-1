@@ -59,7 +59,7 @@ class ProcurementPOApprovalNonPharmacy extends Controller
     public function edit(ProcurementPurchaseOrderNonPharmacy $procurementPurchaseOrderNonPharmacy, $id)
     {
         return view("pages.simrs.procurement.approval-po.partials.popup-approve-po-non-pharmacy", [
-            "po" => $procurementPurchaseOrderNonPharmacy->find($id)
+            "po" => $procurementPurchaseOrderNonPharmacy->findorfail($id)
         ]);
     }
 
@@ -72,7 +72,7 @@ class ProcurementPOApprovalNonPharmacy extends Controller
             "status_app" => "required|in:approve,revision,reject"
         ]);
 
-        $po = $procurementPurchaseOrderNonPharmacy->find($id)->first();
+        $po = $procurementPurchaseOrderNonPharmacy->findorfail($id);
 
         if ($validatedData["status_app"] == 'revision') {
             $po->update(["status" => "revision"]);
