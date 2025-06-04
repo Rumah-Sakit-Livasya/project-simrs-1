@@ -84,6 +84,7 @@ use App\Http\Controllers\WarehouseKategoriBarangController;
 use App\Http\Controllers\WarehouseKelompokBarangController;
 use App\Http\Controllers\WarehouseMasterGudangController;
 use App\Http\Controllers\WarehousePabrikController;
+use App\Http\Controllers\WarehousePurchaseRequestPharmacy;
 use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseSetupMinMaxStockController;
 use App\Http\Controllers\WarehouseSupplierController;
@@ -276,6 +277,22 @@ Route::group(['middleware' => ['auth']], function () {
                 });
                 Route::get('setup-min-max-stock', [WarehouseSetupMinMaxStockController::class, 'index'])->name('warehouse.master-data.setup-min-max-stock');
                 Route::get('setup-min-max-stock/setup', [WarehouseSetupMinMaxStockController::class, 'create'])->name('warehouse.master-data.setup-min-max-stock.create');
+            });
+
+            Route::prefix("purchase-request")->group(function () {
+                Route::prefix("pharmacy")->group(function () {
+                    Route::get("/", [WarehousePurchaseRequestPharmacy::class, "index"])->name("warehouse.purchase-request.pharmacy");
+                    Route::get("/create", [WarehousePurchaseRequestPharmacy::class, "create"])->name("warehouse.purchase-request.pharmacy.create");
+                    Route::get("/print/{id}", [WarehousePurchaseRequestPharmacy::class, "print"])->name("warehouse.purchase-request.pharmacy.print");
+                    Route::get("/edit/{id}", [WarehousePurchaseRequestPharmacy::class, "edit"])->name("warehouse.purchase-request.pharmacy.edit");
+                });
+
+                // Route::prefix("non-pharmacy")->group(function () {
+                //     Route::get("/", [WarehousePurchaseRequestNonPharmacy::class, "index"])->name("warehouse.purchase-request.non-pharmacy");
+                //     Route::get("/create", [WarehousePurchaseRequestNonPharmacy::class, "create"])->name("warehouse.purchase-request.non-pharmacy.create");
+                //     Route::get("/print/{id}", [WarehousePurchaseRequestNonPharmacy::class, "print"])->name("warehouse.purchase-request.non-pharmacy.print");
+                //     Route::get("/edit/{id}", [WarehousePurchaseRequestNonPharmacy::class, "edit"])->name("warehouse.purchase-request.non-pharmacy.edit");
+                // });
             });
         });
 

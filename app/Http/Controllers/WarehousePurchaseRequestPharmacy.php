@@ -11,7 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ProcurementPurchaseRequestPharmacyController extends Controller
+class WarehousePurchaseRequestPharmacy extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -49,7 +49,7 @@ class ProcurementPurchaseRequestPharmacyController extends Controller
             $pr = ProcurementPurchaseRequestPharmacy::all();
         }
 
-        return view("pages.simrs.procurement.purchase-request.pharmacy", [
+        return view("pages.simrs.warehouse.purchase-request.pharmacy", [
             "prs" => $pr
         ]);
     }
@@ -59,7 +59,7 @@ class ProcurementPurchaseRequestPharmacyController extends Controller
      */
     public function create()
     {
-        return view("pages.simrs.procurement.purchase-request.partials.popup-add-pr-farmasi", [
+        return view("pages.simrs.warehouse.purchase-request.partials.popup-add-pr-farmasi", [
             "satuans" => WarehouseSatuanBarang::all(),
             "gudangs" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 1)->where("warehouse", 1)->get(),
             "barangs" => WarehouseBarangFarmasi::all()
@@ -68,7 +68,7 @@ class ProcurementPurchaseRequestPharmacyController extends Controller
 
     public function print($id)
     {
-        return view("pages.simrs.procurement.purchase-request.partials.pr-print-pharmacy", [
+        return view("pages.simrs.warehouse.purchase-request.partials.pr-print-pharmacy", [
             "pr" => ProcurementPurchaseRequestPharmacy::find($id)
         ]);
     }
@@ -76,7 +76,7 @@ class ProcurementPurchaseRequestPharmacyController extends Controller
     public function get_item_gudang($gudang_id)
     {
         // logic coming soon
-        return view("pages.simrs.procurement.purchase-request.partials.table-items-pharmacy", [
+        return view("pages.simrs.warehouse.purchase-request.partials.table-items-pharmacy", [
             "items" => WarehouseBarangFarmasi::all()
         ]);
     }
@@ -171,7 +171,7 @@ class ProcurementPurchaseRequestPharmacyController extends Controller
      */
     public function edit(ProcurementPurchaseRequestPharmacy $procurementPurchaseRequestPharmacy, $id)
     {
-        return view("pages.simrs.procurement.purchase-request.partials.popup-edit-pr-farmasi", [
+        return view("pages.simrs.warehouse.purchase-request.partials.popup-edit-pr-farmasi", [
             "pr" => $procurementPurchaseRequestPharmacy::find($id)->first(),
             "satuans" => WarehouseSatuanBarang::all(),
             "gudangs" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 1)->where("warehouse", 1)->get(),
