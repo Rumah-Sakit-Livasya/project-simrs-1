@@ -31,6 +31,10 @@
                                         <th style="white-space: nowrap">Pemilik Rekening</th>
                                         <th style="white-space: nowrap">Nomor Rekening</th>
                                         <th style="white-space: nowrap">Saldo Awal</th>
+                                        <th style="white-space: nowrap">Akun Kas/Bank</th>
+                                        <th style="white-space: nowrap">Akun Kliring</th>
+                                        <th style="white-space: nowrap">Status Aktivasi</th>
+                                        <th style="white-space: nowrap">Jenis</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </thead>
@@ -41,7 +45,27 @@
                                             <td style="white-space: nowrap">{{ $bank->nama }}</td>
                                             <td style="white-space: nowrap">{{ $bank->pemilik }}</td>
                                             <td style="white-space: nowrap">{{ $bank->nomor }}</td>
-                                            <td style="white-space: nowrap">{{ $bank->saldo }}</td>
+                                            <td style="white-space: nowrap">{{ rp($bank->saldo) }}</td>
+                                            <td style="white-space: nowrap">
+                                                {{ $bank->akunKasBank->code ?? '' }} - {{ $bank->akunKasBank->name ?? '' }}
+                                            </td>
+                                            <td style="white-space: nowrap">
+                                                {{ $bank->akunKliring->code ?? '' }} - {{ $bank->akunKliring->name ?? '' }}
+                                            </td>
+                                            <td style="white-space: nowrap">
+                                                @if ($bank->is_aktivasi)
+                                                    <span class="badge badge-success">Aktif</span>
+                                                @else
+                                                    <span class="badge badge-secondary">Non-Aktif</span>
+                                                @endif
+                                            </td>
+                                            <td style="white-space: nowrap">
+                                                @if ($bank->is_bank)
+                                                    <span class="badge badge-primary">Bank</span>
+                                                @else
+                                                    <span class="badge badge-info">Non-Bank</span>
+                                                @endif
+                                            </td>
                                             <td style="white-space: nowrap">
                                                 <button type="button"
                                                     class="badge mx-1 badge-primary p-2 border-0 text-white"
@@ -63,6 +87,10 @@
                                         <th style="white-space: nowrap">Pemilik Rekening</th>
                                         <th style="white-space: nowrap">Nomor Rekening</th>
                                         <th style="white-space: nowrap">Saldo Awal</th>
+                                        <th style="white-space: nowrap">Akun Kas/Bank</th>
+                                        <th style="white-space: nowrap">Akun Kliring</th>
+                                        <th style="white-space: nowrap">Status Aktivasi</th>
+                                        <th style="white-space: nowrap">Jenis</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </tfoot>
@@ -82,6 +110,11 @@
 
     <script>
         $(document).ready(function() {
+            $('.select2').select2({
+                placeholder: 'Pilih Opsi',
+                dropdownParent: $('#tambah-bank'), // Adjust if your modal has a different ID
+            });
+
             $('#dt-basic-example').dataTable({
                 responsive: true,
                 dom: 'Bfrtip',
