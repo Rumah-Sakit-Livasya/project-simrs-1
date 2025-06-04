@@ -12,25 +12,25 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            <form action="" method="post" autocomplete="off">
+                            <form id="form-laporan-igd" method="post" autocomplete="off">
                                 @csrf
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-4" style="text-align: right">
-                                                    <label for="registration_date">Awal Periode</label>
+                                                    <label for="awal_periode">Awal Periode</label>
                                                 </div>
                                                 <div class="col-xl">
                                                     <div class="form-group row">
                                                         <div class="col-xl ">
                                                             <input type="text" class="form-control" id="datepicker-1"
                                                                 style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                                placeholder="Select date" name="registration_date"
+                                                                placeholder="Select date" name="awal_periode"
                                                                 value="">
                                                         </div>
                                                     </div>
-                                                    @error('registration_date')
+                                                    @error('awal_periode')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
@@ -41,18 +41,18 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-4" style="text-align: right">
-                                                    <label for="registration_date">Akhir Periode</label>
+                                                    <label for="akhir_periode">Akhir Periode</label>
                                                 </div>
                                                 <div class="col-xl">
                                                     <div class="form-group row">
                                                         <div class="col-xl ">
                                                             <input type="text" class="form-control" id="datepicker-2"
                                                                 style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                                placeholder="Select date" name="registration_date"
+                                                                placeholder="Select date" name="akhir_periode"
                                                                 value="">
                                                         </div>
                                                     </div>
-                                                    @error('registration_date')
+                                                    @error('akhir_periode')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
@@ -149,6 +149,46 @@
             $('.select2').select2({
                 placeholder: "Pilih Status",
                 allowClear: true
+            });
+
+            $('#form-laporan-igd').on('submit', function(e) {
+                e.preventDefault(); // Hindari reload halaman
+
+                let form = $(this);
+                let formData = form.serialize();
+
+                $.ajax({
+                    url: `{{ route('igd.laporan.show') }}`,
+                    method: form.attr('method'),
+                    data: formData,
+                    beforeSend: function() {
+                        $('button[type=submit]').prop('disabled', true).text('Memproses...');
+                    },
+                    success: function(html) {
+                        const popupWidth = screen.availWidth;
+                        const popupHeight = screen.availHeight;
+                        const left = 0;
+                        const top = 0;
+
+                        const popup = window.open("", "popupWindow",
+                            `width=${popupWidth},height=${popupHeight},top=${top},left=${left},scrollbars=yes,resizable=yes`
+                        );
+
+                        popup.document.open();
+                        popup.document.write(html); // Tulis HTML langsung ke popup
+                        popup.document.close();
+                        popup.focus(); // Fokus ke popup
+                    },
+                    error: function(xhr) {
+                        alert('Terjadi kesalahan saat memproses data.');
+                        console.error(xhr.responseText);
+                    },
+                    complete: function() {
+                        $('button[type=submit]').prop('disabled', false).html(
+                            '<span class="fal fa-search mr-1"></span> Cari');
+                    }
+                });
+
             });
         });
     </script>

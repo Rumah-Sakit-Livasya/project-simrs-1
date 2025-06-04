@@ -141,11 +141,14 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
     Route::prefix('igd')->group(function () {
         Route::post('/filter-pasien', [IGDController::class, 'index'])->name('igd.filter-pasien');
-        Route::post('/laporan-pasien', [IGDController::class, 'index'])->name('igd.laporan-pasien');
+        Route::prefix('laporan')->group(function () {
+            Route::match(['get', 'post'], '/', [IGDController::class, 'showLaporan'])->name('igd.laporan.show');
+            Route::post('get-data', [IGDController::class, 'getDataLaporan'])->name('igd.laporan.get-data');
+        });
     });
 
     Route::prefix('erm')->group(function () {
-        Route::post('/filter-pasien', [ERMController::class, 'filterPasien'])->name('erm.filter-pasien');
+        Route::post('/filter-pasien/{path}', [ERMController::class, 'filterPasien']);
         Route::post('/save-signature/{id}', [ERMController::class, 'saveSignature'])->name('erm.save-signature');
 
         Route::prefix('ews-anak')->group(function () {

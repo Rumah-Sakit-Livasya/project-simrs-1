@@ -101,4 +101,83 @@ class IGDController extends Controller
 
         return view('pages.simrs.igd.report-igd', compact('doctors', 'penjamin'));
     }
+
+    public function getDataLaporan(Request $request)
+    {
+        try {
+            $query = Registration::query()
+                ->where('registration_type', 'igd');
+            // ->where('status', 'tutup_kunjungan');
+
+            if ($request->filled('doctor_id')) {
+                $query->where('doctor_id', $request->doctor_id);
+            }
+
+            if ($request->filled('penjamin_id')) {
+                $query->whereHas('penjamin', function ($q) use ($request) {
+                    $q->where('id', $request->penjamin_id);
+                });
+            }
+
+            if ($request->filled('awal_periode') && $request->filled('akhir_periode')) {
+                $awalPeriode = Carbon::parse($request->awal_periode)->startOfDay();
+                $akhirPeriode = Carbon::parse($request->akhir_periode)->endOfDay();
+                $query->whereBetween('registration_date', [$awalPeriode, $akhirPeriode]);
+            }
+
+            $registrations = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $registrations,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching data: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Show the report for IGD registrations.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\View\View
+     */
+    public function showLaporan(Request $request)
+    {
+        $from = $request->input('awal_periode');
+        $to = $request->input('akhir_periode');
+        $from = Carbon::parse($from)->startOfDay();
+        $to = Carbon::parse($to)->endOfDay();
+        if ($from->greaterThan($to)) {
+            return redirect()->back()->withErrors(['error' => 'Tanggal awal tidak boleh lebih besar dari tanggal akhir']);
+        }
+
+        $penjaminId = $request->input('penjamin_id');
+        $dokterId = $request->input('doctor_id');
+
+        $penjaminName = $penjaminId ? Penjamin::find($penjaminId)?->nama_perusahaan : 'Semua Penjamin';
+        $dokterName = $dokterId ? Doctor::with('employee')->find($dokterId)?->employee->fullname : 'Semua Dokter';
+
+        // Query data pasien
+        $pasien = Registration::with(['doctor', 'penjamin', 'patient'])
+            ->where('registration_type', 'igd')
+            ->whereBetween('registration_date', [$from, $to])
+            ->when($dokterId, fn($q) => $q->where('doctor_id', $dokterId))
+            ->when($penjaminId, fn($q) => $q->where('penjamin_id', $penjaminId))
+            ->get()
+            ->map(function ($item) {
+                $firstVisit = Registration::where('patient_id', $item->patient_id)
+                    ->orderBy('registration_date', 'asc')
+                    ->first();
+
+                $item->is_new = $firstVisit && $firstVisit->id === $item->id;
+                return $item;
+            });
+
+
+        return view('pages.simrs.igd.partials.print-report', compact('pasien', 'from', 'to', 'penjaminId', 'dokterId', 'dokterName', 'penjaminName'));
+    }
 }

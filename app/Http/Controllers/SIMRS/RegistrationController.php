@@ -392,10 +392,12 @@ class RegistrationController extends Controller
             // Create registration
             $registration = Registration::create($validatedData);
 
+            $gruop_penjamin_id = Penjamin::find($request->penjamin_id)->group_penjamin->id;
 
             // Add registration fee for outpatient visits
             if ($validatedData['registration_type'] == 'rawat-jalan') {
-                $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $request->penjamin_id)
+
+                $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $gruop_penjamin_id)
                     ->where('tarif_registrasi_id', 1)
                     ->first()->harga;
 
@@ -427,8 +429,9 @@ class RegistrationController extends Controller
                     'bilingan_id' => $billing->id,
                 ]);
             } else if ($validatedData['registration_type'] == 'igd') {
-                $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $request->penjamin_id)
-                    ->where('tarif_registrasi_id', 2) // Masih Statis
+
+                $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $gruop_penjamin_id)
+                    ->where('tarif_registrasi_id', 3) // Masih Statis
                     ->first()->harga;
 
                 // Create billing

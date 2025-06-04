@@ -218,7 +218,7 @@ Terapi / Tindakan :
                         <hr style="border-color: #868686; margin-bottom: 50px;">
                         <div class="card-body">
                             <div class="table-responsive no-margin">
-                                <table id="cppt-table" class="table table-striped table-bordered" style="width:100%">
+                                <table id="cppt-dokter" class="table table-striped table-bordered" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th style="width:25%;">Tanggal</th>
@@ -227,6 +227,42 @@ Terapi / Tindakan :
                                         </tr>
                                     </thead>
                                     <tbody id="list_soap">
+                                        <tr>
+                                            <td class="text-center">
+                                            </td>
+                                            <td>
+                                                <table width="100%" class="table-soap nurse">
+                                                </table>
+                                            </td>
+                                            <td>
+                                            </td>
+                                        </tr>
+                                        <!-- Additional rows here -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3" class="text-center">
+                                                <!-- Pagination will be handled by DataTables -->
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div><!--end .table-responsive -->
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <hr style="border-color: #868686; margin-bottom: 50px;">
+                        <div class="card-body">
+                            <div class="table-responsive no-margin">
+                                <table id="cppt-perawat" class="table table-striped table-bordered" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:25%;">Tanggal</th>
+                                            <th style="width: 70%;">Catatan</th>
+                                            <th style="width: 6%;">&nbsp;</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="list_soap_perawat">
                                         <tr>
                                             <td class="text-center">
                                             </td>
@@ -281,7 +317,7 @@ Terapi / Tindakan :
                 submitFormCPPT(); // Panggil fungsi submitForm dengan parameter final
             });
 
-            function loadCPPTData() {
+            function loadCPPTPerawat() {
                 $.ajax({
                     url: '{{ route('cppt.get') }}',
                     type: 'GET',
@@ -291,11 +327,11 @@ Terapi / Tindakan :
                     },
                     success: function(response) {
                         // Bersihkan isi tbody
-                        $('#list_soap').empty();
+                        $('#list_soap_perawat').empty();
 
                         // Hancurkan DataTable kalau sudah diinisialisasi
-                        if ($.fn.DataTable.isDataTable('#cppt-table')) {
-                            $('#cppt-table').DataTable().destroy();
+                        if ($.fn.DataTable.isDataTable('#cppt-perawat')) {
+                            $('#cppt-perawat').DataTable().destroy();
                         }
 
                         // Loop data dan tambahkan baris
@@ -345,17 +381,17 @@ Terapi / Tindakan :
                                     </td>
                                 </tr>
                             `;
-                            $('#list_soap').append(row);
+                            $('#list_soap_perawat').append(row);
                         });
 
                         // Inisialisasi ulang DataTable
-                        $('#cppt-table').DataTable({
-                            paging: true,
-                            searching: true,
+                        $('#cppt-perawat').DataTable({
+                            paging: false,
+                            searching: false,
                             ordering: false,
                             responsive: true,
-                            pageLength: 5, // Bisa diubah sesuai kebutuhan
-
+                            pageLength: 5,
+                            info: false // <-- ini yang menyembunyikan "Showing x to y of z entries"
                         });
                     },
                     error: function(xhr, status, error) {
@@ -363,7 +399,6 @@ Terapi / Tindakan :
                     }
                 });
             }
-
 
             function submitFormCPPT(actionType) {
                 const form = $('#cppt-perawat-rajal-form');
@@ -405,9 +440,10 @@ Terapi / Tindakan :
                 });
             }
 
-            loadCPPTData();
+            loadCPPTPerawat();
         });
     </script>
+
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');

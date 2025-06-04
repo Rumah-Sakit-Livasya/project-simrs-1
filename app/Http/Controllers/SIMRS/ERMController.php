@@ -99,28 +99,32 @@ class ERMController extends Controller
             $registrations = $query->get();
 
             // Render partial view sebagai HTML
-            $html = view('pages.simrs.erm.partials.list-pasien', compact('registrations'))->render();
+            $html = view('pages.simrs.erm.partials.list-pasien', compact('registrations', 'path'))->render();
 
             $menuResponse = $this->poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path);
             if ($menuResponse) {
                 return $menuResponse;
             }
         } else {
+            dd($path);
             return view('pages.simrs.igd.daftar-pasien', [
-                'registrations' => $registration
+                'registrations' => $registration,
+                'path' => $path
             ]);
         }
     }
 
-    public function filterPasien(Request $request)
+    public function filterPasien(Request $request, $path)
     {
         try {
             $routePath = parse_url($request['route'], PHP_URL_PATH);
 
-            if ($routePath === '/simrs/igd/catatan-medis') {
-                $query = Registration::whereDate('registration_date', Carbon::today())->where('registration_type', 'igd');
+            if ($path === 'igd') {
+                $query = Registration::whereDate('registration_date', Carbon::today())
+                    ->where('registration_type', 'igd');
             } else {
-                $query = Registration::whereDate('registration_date', Carbon::today())->where('registration_type', '!=',  'igd');
+                $query = Registration::whereDate('registration_date', Carbon::today())
+                    ->where('registration_type', '!=', 'igd');
             }
 
             $query->when($request->departement_id, function ($q) use ($request) {
@@ -131,10 +135,18 @@ class ERMController extends Controller
                 return $q->where('doctor_id', $request->doctor_id);
             });
 
+            // Koreksi bagian filter berdasarkan nama pasien (relasi ke tabel patients)
+            $query->when($request->patient, function ($q) use ($request) {
+                return $q->whereHas('patient', function ($patient) use ($request) {
+                    $patient->where('name', 'like', '%' . $request->patient . '%');
+                });
+            });
+
             $registrations = $query->get();
 
+
             // Render partial view sebagai HTML
-            $html = view('pages.simrs.erm.partials.list-pasien', compact('registrations'))->render();
+            $html = view('pages.simrs.erm.partials.list-pasien', compact('registrations', 'path'))->render();
 
             return response()->json([
                 'success' => true,
@@ -201,20 +213,6 @@ class ERMController extends Controller
 
         $registration = Registration::where('registration_number', $noRegist)->first();
 
-        // Jika ada registration, ambil pasien dengan departement_id dan doctor_id yang sama
-        // if ($registration) {
-        //     $registrations = Registration::when($registration->departement_id, function ($q) use ($registration) {
-        //         return $q->where('departement_id', $registration->departement_id);
-        //     })
-        //         ->when($registration->doctor_id, function ($q) use ($registration) {
-        //             return $q->where('doctor_id', $registration->doctor_id);
-        //         })
-        //         ->get();
-        // } else {
-        //     // Jika tidak ada filter / registrasi dikirim, tampilkan data IGD saja
-        //     $registrations = Registration::where('registration_type', 'igd')->get();
-        // }
-
         // Jika permintaan datang dari klik menu dan nomor registrasi tersedia
         $pengkajian = $registration;
         if ($menu && $noRegist) {
@@ -226,7 +224,7 @@ class ERMController extends Controller
             }
         }
 
-
+        // dd($path);
         // Jika halaman awal dibuka (tanpa filter)
         return view('pages.simrs.erm.index', compact('departements', 'pengkajian', 'menu', 'jadwal_dokter', 'registration', 'registrations', 'path'));
     }

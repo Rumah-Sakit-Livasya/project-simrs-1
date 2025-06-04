@@ -144,7 +144,7 @@
                 <div class="position-fixed h-100" style="width: 20rem !important">
                     <row class="justify-content-center">
                         <div class="col">
-                            <form action="#" method="POST" id="filter_pasien">
+                            <form action="javascript:void(0)" method="POST" id="filter_pasien">
                                 @csrf
                                 <div class="form-group mb-2">
                                     <select
@@ -192,7 +192,7 @@
                                         class="form-control filter-pasien" placeholder="Nama Pasien">
                                 </div>
                                 <div class="form-group">
-                                    <button type="submit" class="btn btn-primary w-100">Submit</button>
+                                    {{-- <button type="submit" class="btn btn-primary w-100">Submit</button> --}}
                                 </div>
                             </form>
 
@@ -342,14 +342,16 @@
             $('.filter-pasien').on('change', function(e) {
                 e.preventDefault(); // Mencegah form submit langsung
                 console.log('changed')
+                const path = "{{ $path }}";
                 $.ajax({
-                    url: "{{ route('erm.filter-pasien') }}",
+                    url: `/api/simrs/erm/filter-pasien/${path}`,
                     type: "POST",
                     data: {
                         _token: "{{ csrf_token() }}", // Tambahkan token CSRF
                         route: window.location.href,
                         departement_id: $('#filter_pasien #departement_id').val(),
-                        doctor_id: $('#filter_pasien #doctor_id').val()
+                        doctor_id: $('#filter_pasien #doctor_id').val(),
+                        patient: $('#filter_pasien #nama_pasien').val()
                     },
 
                     dataType: "json",
@@ -375,7 +377,6 @@
             // if ($('#filter_pasien #departement_id').val() != null || $('#filter_pasien #doctor_id').val() !=
             //     null) {
             //     $.ajax({
-            //         url: "{{ route('erm.filter-pasien') }}",
             //         type: "POST",
             //         data: {
             //             _token: "{{ csrf_token() }}", // Tambahkan token CSRF

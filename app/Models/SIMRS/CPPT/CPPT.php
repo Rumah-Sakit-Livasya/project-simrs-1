@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS\CPPT;
 
+use App\Models\SIMRS\Registration;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,5 +18,10 @@ class CPPT extends Model implements AuditableContract
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function registration()
+    {
+        return $this->belongsTo(Registration::class);
     }
 }

@@ -335,11 +335,11 @@ Skrining Nyeri:
                         </div>
                     </form>
 
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <hr style="border-color: #868686; margin-bottom: 50px;">
-                        <div class="card-body p-3">
+                        <div class="card-body">
                             <div class="table-responsive no-margin">
-                                <table id="cppt-table" class="table table-striped table-bordered" style="width:100%">
+                                <table id="cppt-dokter" class="table table-striped table-bordered" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th style="width:25%;">Tanggal</th>
@@ -347,195 +347,51 @@ Skrining Nyeri:
                                             <th style="width: 6%;">&nbsp;</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="list_soap">
+                                    <tbody id="list_soap_dokter">
                                         <tr>
                                             <td class="text-center">
-                                                <div class="deep-purple-text">01 Oct 2024 22:34<br><span
-                                                        class="green-text" style="font-weight:400;">RAWAT
-                                                        INAP</span><br><b style="font-weight: 400;">Lia Yulianti,
-                                                        A.Md.Kep</b><br>
-                                                    <div class="input-oleh deep-orange-text">Input oleh : <br>Lia
-                                                        Yulianti,
-                                                        A.Md.Kep</div>
-                                                    <a href="javascript:void(0)"
-                                                        class="d-block text-uppercase badge badge-primary"><i
-                                                            class="mdi mdi-plus-circle"></i> Verifikasi</a>
-                                                    <div>
-                                                        <img src="http://192.168.1.253/real/include/images/ttd_blank.png"
-                                                            width="200px;" height="100px;"
-                                                            onerror="this.src=this.onerror=null; this.src='http://192.168.1.253/real/include/images/ttd_blank.png'">
-                                                    </div>
-                                                </div>
                                             </td>
                                             <td>
                                                 <table width="100%" class="table-soap nurse">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td colspan="3" class="soap-text title">Perawat
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center"
-                                                                width="8%">
-                                                                S
-                                                            </td>
-                                                            <td>Keluhan utama : px mengatakan nyeri luka post sc
-                                                                berkurang</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">O
-                                                            </td>
-                                                            <td>Keadaan Umum : sedang<br>
-                                                                Nadi : 80x/menit <br>
-                                                                Respirasi(RR) : 20x/menit<br>
-                                                                Tensi (BP) : 130/80mmHg<br>
-                                                                Suhu (T) : 36.8C<br>
-                                                                Berat badan : Kg<br>
-                                                                Skor EWS : 0<br>
-                                                                Skor nyeri : 0<br>
-                                                                Saturasi : 99<br>
-                                                                Skor resiko jatuh : 35</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">A
-                                                            </td>
-                                                            <td>Diagnosa Keperawatan : gangguan rasa nyaman
-                                                                nyeri<br>
-                                                                Diagnosa Keperawatan : <br>
-                                                                Diagnosa Keperawatan : </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">P
-                                                            </td>
-                                                            <td>Rencana Tindak Lanjut : obs ku dan ttv<br>
-                                                                Rencana Tindak Lanjut : berikan therapy sesuai advis
-                                                                dpjp<br>
-                                                                Rencana Tindak Lanjut : </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">
-                                                            </td>
-                                                            <td><strong class="deep-orange-text"></strong></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text"></td>
-                                                            <td colspan="2"><strong
-                                                                    class="deep-purple-text"><u>Evaluasi</u>:</strong><br>instoper<br>
-                                                                cefo 2x1 jam06;00 4)<br>
-                                                                metro tab 3x1<br>
-                                                                by (+)<br>
-                                                                hasil visit :<br>
-                                                                + nifed 3x1<br>
-                                                                + dopamet 3x1</td>
-                                                        </tr>
-                                                    </tbody>
                                                 </table>
                                             </td>
                                             <td>
-                                                <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap"
-                                                    data-id="90988" title="Copy"></i>
-                                                <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap"
-                                                    data-id="90988" title="Hapus"></i>
-                                                <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap"
-                                                    data-id="90988" title="Edit SOAP & Resep Elektronik"
-                                                    style="display: {show_admin}"></i>
-                                                <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian"
-                                                    data-id="90988" title="Print Antrian Resep" style="display:"></i>
                                             </td>
                                         </tr>
+                                        <!-- Additional rows here -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3" class="text-center">
+                                                <!-- Pagination will be handled by DataTables -->
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div><!--end .table-responsive -->
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <hr style="border-color: #868686; margin-bottom: 50px;">
+                        <div class="card-body">
+                            <div class="table-responsive no-margin">
+                                <table id="cppt-perawat" class="table table-striped table-bordered" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:25%;">Tanggal</th>
+                                            <th style="width: 70%;">Catatan</th>
+                                            <th style="width: 6%;">&nbsp;</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="list_soap_perawat">
                                         <tr>
                                             <td class="text-center">
-                                                <div class="deep-purple-text">01 Oct 2024 22:34<br><span
-                                                        class="green-text" style="font-weight:400;">RAWAT
-                                                        INAP</span><br><b style="font-weight: 400;">Lia Yulianti,
-                                                        A.Md.Kep</b><br>
-                                                    <div class="input-oleh deep-orange-text">Input oleh : <br>Lia
-                                                        Yulianti,
-                                                        A.Md.Kep</div>
-                                                    <a href="javascript:void(0)"
-                                                        class="d-block text-uppercase badge badge-primary"><i
-                                                            class="mdi mdi-plus-circle"></i> Verifikasi</a>
-                                                    <div>
-                                                        <img src="http://192.168.1.253/real/include/images/ttd_blank.png"
-                                                            width="200px;" height="100px;"
-                                                            onerror="this.src=this.onerror=null; this.src='http://192.168.1.253/real/include/images/ttd_blank.png'">
-                                                    </div>
-                                                </div>
                                             </td>
                                             <td>
                                                 <table width="100%" class="table-soap nurse">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td colspan="3" class="soap-text title">Perawat
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center"
-                                                                width="8%">
-                                                                S
-                                                            </td>
-                                                            <td>Keluhan utama : px mengatakan nyeri luka post sc
-                                                                berkurang</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">O
-                                                            </td>
-                                                            <td>Keadaan Umum : sedang<br>
-                                                                Nadi : 80x/menit <br>
-                                                                Respirasi(RR) : 20x/menit<br>
-                                                                Tensi (BP) : 130/80mmHg<br>
-                                                                Suhu (T) : 36.8C<br>
-                                                                Berat badan : Kg<br>
-                                                                Skor EWS : 0<br>
-                                                                Skor nyeri : 0<br>
-                                                                Saturasi : 99<br>
-                                                                Skor resiko jatuh : 35</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">A
-                                                            </td>
-                                                            <td>Diagnosa Keperawatan : gangguan rasa nyaman
-                                                                nyeri<br>
-                                                                Diagnosa Keperawatan : <br>
-                                                                Diagnosa Keperawatan : </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">P
-                                                            </td>
-                                                            <td>Rencana Tindak Lanjut : obs ku dan ttv<br>
-                                                                Rencana Tindak Lanjut : berikan therapy sesuai advis
-                                                                dpjp<br>
-                                                                Rencana Tindak Lanjut : </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text deep-purple-text text-center">
-                                                            </td>
-                                                            <td><strong class="deep-orange-text"></strong></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="soap-text"></td>
-                                                            <td colspan="2"><strong
-                                                                    class="deep-purple-text"><u>Evaluasi</u>:</strong><br>instoper<br>
-                                                                cefo 2x1 jam06;00 4)<br>
-                                                                metro tab 3x1<br>
-                                                                by (+)<br>
-                                                                hasil visit :<br>
-                                                                + nifed 3x1<br>
-                                                                + dopamet 3x1</td>
-                                                        </tr>
-                                                    </tbody>
                                                 </table>
                                             </td>
                                             <td>
-                                                <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap"
-                                                    data-id="90988" title="Copy"></i>
-                                                <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap"
-                                                    data-id="90988" title="Hapus"></i>
-                                                <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap"
-                                                    data-id="90988" title="Edit SOAP & Resep Elektronik"
-                                                    style="display: {show_admin}"></i>
-                                                <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian"
-                                                    data-id="90988" title="Print Antrian Resep" style="display:"></i>
                                             </td>
                                         </tr>
                                         <!-- Additional rows here -->
@@ -559,7 +415,208 @@ Skrining Nyeri:
 @endsection
 @section('plugin-erm')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-    @include('pages.simrs.poliklinik.partials.action-js.cppt-dokter-rajal')
+    {{-- @include('pages.simrs.erm.partials.action-js.cppt-dokter-rajal') --}}
+    <script>
+        $(document).ready(function() {
+
+            $('#cppt_doctor_id').val("{{ $registration->doctor_id }}")
+            $('.btnAdd').click(function() {
+                $('#add_soap').collapse('show');
+            });
+
+            $('#tutup').on('click', function() {
+                $('#add_soap').collapse('hide');
+
+                $('.btnAdd').attr('aria-expanded', 'false');
+                $('.btnAdd').addClass('collapsed');
+            });
+
+            // Saat tombol Save Final diklik
+            $('#bsSOAP').on('click', function() {
+                submitFormCPPT(); // Panggil fungsi submitForm dengan parameter final
+            });
+
+            function loadCPPTDokter() {
+                $.ajax({
+                    // url: '{{-- route('cppt.get') --}}', // Mengambil route Laravel
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        // Bersihkan tabel
+                        $('#list_soap_dokter').empty();
+
+                        // Iterasi setiap data dan tambahkan ke dalam tabel
+                        $.each(response, function(index, data) {
+                            var row = `
+                            <tr>
+                                <td class="text-center">
+                                    <div class="deep-purple-text">${data.created_at}<br>
+                                        <span class="green-text" style="font-weight:400;">${data.tipe_rawat}</span><br>
+                                        <b style="font-weight: 400;">Dokter ID: ${data.doctor_id}</b><br>
+                                        <div class="input-oleh deep-orange-text">Input oleh: ${data.user_id}</div>
+                                        <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
+                                        <div>
+                                            <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <table width="100%" class="table-soap nurse">
+                                        <tbody>
+                                            <tr><td colspan="3" class="soap-text title">CPPT</td></tr>
+                                            <tr><td class="soap-text deep-purple-text text-center" width="8%">S</td><td>${data.subjective.replace(/\n/g, "<br>")}</td></tr>
+                                            <tr><td class="soap-text deep-purple-text text-center">O</td><td>${data.objective.replace(/\n/g, "<br>")}</td></tr>
+                                            <tr><td class="soap-text deep-purple-text text-center">A</td><td>${data.assesment}</td></tr>
+                                            <tr><td class="soap-text deep-purple-text text-center">P</td><td>${data.planning}</td></tr>
+                                            <tr><td class="soap-text deep-purple-text text-center">I</td><td>${data.instruksi}</td></tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td>
+                                    <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap" data-id="${data.id}" title="Copy"></i>
+                                    <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap" data-id="${data.id}" title="Hapus"></i>
+                                    <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap" data-id="${data.id}" title="Edit SOAP & Resep Elektronik"></i>
+                                    <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print Antrian Resep"></i>
+                                </td>
+                            </tr>
+                        `;
+                            // Tambahkan ke dalam tabel
+                            $('#list_soap_dokter').append(row);
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+
+            function loadCPPTPerawat() {
+                $.ajax({
+                    url: '{{ route('cppt.get') }}',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        registration_id: "{{ $registration->id }}",
+                    },
+                    success: function(response) {
+                        // Bersihkan isi tbody
+                        $('#list_soap_perawat').empty();
+
+                        // Hancurkan DataTable kalau sudah diinisialisasi
+                        if ($.fn.DataTable.isDataTable('#cppt-perawat')) {
+                            $('#cppt-perawat').DataTable().destroy();
+                        }
+
+                        // Loop data dan tambahkan baris
+                        $.each(response, function(index, data) {
+                            console.log(data);
+
+                            let formattedDate = new Intl.DateTimeFormat('id-ID', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false,
+                                timeZone: 'Asia/Jakarta'
+                            }).format(new Date(data.created_at));
+                            var row = `
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="deep-purple-text">
+                                            <div class="text-primary mt-3" style="font-weight:400;">${formattedDate}</div>
+                                            <div class="text-success mt-3" style="font-weight:400;">${data.tipe_rawat}</div>
+                                            <div class="input-oleh text-warning mb-2 mt-1">${data.user.name}</div>
+                                            <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
+                                            <div>
+                                                <img src="http://192.168.1.253/real/include/images/ttd_blank.png" width="200px;" height="100px;">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <table width="100%" class="table-soap nurse">
+                                            <tbody>
+                                                <tr><td colspan="3" class="soap-text title">CPPT</td></tr>
+                                                <tr><td class="soap-text deep-purple-text text-center" width="8%">S</td><td>${data.subjective.replace(/\n/g, "<br>")}</td></tr>
+                                                <tr><td class="soap-text deep-purple-text text-center">O</td><td>${data.objective.replace(/\n/g, "<br>")}</td></tr>
+                                                <tr><td class="soap-text deep-purple-text text-center">A</td><td>${data.assesment}</td></tr>
+                                                <tr><td class="soap-text deep-purple-text text-center">P</td><td>${data.planning}</td></tr>
+                                                <tr><td class="soap-text deep-purple-text text-center">I</td><td>${data.instruksi}</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td>
+                                        <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap" data-id="${data.id}" title="Copy"></i>
+                                        <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap" data-id="${data.id}" title="Hapus"></i>
+                                        <i class="mdi mdi-pencil red-text pointer mdi-18px edit-soap" data-id="${data.id}" title="Edit SOAP & Resep Elektronik"></i>
+                                        <i class="mdi mdi-printer blue-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print Antrian Resep"></i>
+                                    </td>
+                                </tr>
+                            `;
+                            $('#list_soap_perawat').append(row);
+                        });
+
+                        // Inisialisasi ulang DataTable
+                        $('#cppt-perawat').DataTable({
+                            paging: false,
+                            searching: false,
+                            ordering: false,
+                            responsive: true,
+                            pageLength: 5,
+                            info: false // <-- ini yang menyembunyikan "Showing x to y of z entries"
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+
+            function submitFormCPPT(actionType) {
+                const form = $('#cppt-dokter-rajal-form');
+                const registrationNumber = "{{ $registration->registration_number }}";
+
+                const url =
+                    "{{ route('cppt.dokter-rajal.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
+                    .replace('__registration_number__', registrationNumber);
+
+                // Now you can use `url` in your form submission or AJAX request
+
+                let formData = form.serialize(); // Ambil data dari form
+
+                // Tambahkan tipe aksi (draft atau final) ke data form
+                formData += '&action_type=' + actionType;
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: formData,
+                    success: function(response) {
+                        if (actionType === 'draft') {
+                            showSuccessAlert('Data berhasil disimpan sebagai draft!');
+                        } else {
+                            showSuccessAlert('Data berhasil disimpan sebagai final!');
+                        }
+                        setTimeout(() => {
+                            console.log('Reloading the page now.');
+                            window.location.reload();
+                        }, 1000);
+                    },
+                    error: function(response) {
+                        // Tangani error
+                        var errors = response.responseJSON.errors;
+                        $.each(errors, function(key, value) {
+                            showErrorAlert(value[0]);
+                        });
+                    }
+                });
+            }
+
+            loadCPPTPerawat();
+        });
+    </script>
+
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');

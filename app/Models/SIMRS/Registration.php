@@ -5,6 +5,7 @@ namespace App\Models\SIMRS;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
 use App\Models\OrderRadiologi;
+use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Keuangan\Kasir;
 use App\Models\SIMRS\Pelayanan\RujukAntarRS;
@@ -139,6 +140,11 @@ class Registration extends Model implements AuditableContract
     public function triage()
     {
         return $this->hasOne(Triage::class);
+    }
+
+    public function cppt()
+    {
+        return $this->hasMany(CPPT::class);
     }
 
     public function ews_anak()
