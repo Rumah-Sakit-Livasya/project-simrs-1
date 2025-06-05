@@ -1082,5 +1082,4 @@
             });
         });
     </script>
-    @include('pages.simrs.poliklinik.partials.action-js.pengkajian-perawat')
 @endsection

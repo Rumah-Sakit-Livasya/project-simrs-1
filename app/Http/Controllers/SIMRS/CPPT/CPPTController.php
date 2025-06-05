@@ -13,7 +13,42 @@ class CPPTController extends Controller
     {
         try {
             $id = $request->registration_id;
-            $cppt = CPPT::where('registration_id', $id)->with('user.employee')->orderBy('created_at', 'desc')->get();
+            $cppt = CPPT::where('registration_id', $id)
+                ->where('tipe_cppt', '!=', 'dokter')
+                ->with('user.employee')->orderBy('created_at', 'desc')
+                ->get();
+
+            if ($cppt->isNotEmpty()) {
+                $cppt = $cppt->map(function ($item) {
+                    $item->nama = optional($item->user->employee)->fullname;
+
+                    // Modifikasi tipe_rawat menjadi format huruf kapital pada setiap kata
+                    if (!empty($item->tipe_rawat)) {
+                        $item->tipe_rawat = $item->tipe_rawat === 'igd'
+                            ? 'UGD'
+                            : ucwords(str_replace('-', ' ', $item->tipe_rawat));
+                    }
+
+                    return $item;
+                });
+
+                return response()->json($cppt, 200);
+            } else {
+                return response()->json(['error' => 'Data tidak ditemukan!'], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getCPPTDokter(Request $request)
+    {
+        try {
+            $id = $request->registration_id;
+            $cppt = CPPT::where('registration_id', $id)
+                ->where('tipe_cppt', '=', 'dokter')
+                ->with('user.employee')->orderBy('created_at', 'desc')
+                ->get();
 
             if ($cppt->isNotEmpty()) {
                 $cppt = $cppt->map(function ($item) {

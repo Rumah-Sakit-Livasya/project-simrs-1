@@ -39,36 +39,128 @@
                     </div>
 
                     <div class="row mt-3">
-                        <div class="col-md-6">
-                            @foreach ([['pr', 'Nadi (PR)', 'x/menit'], ['bp', 'Tensi (BP)', 'mmHg'], ['body_height', 'Tinggi Badan', 'Cm'], ['bmi', 'Index Massa Tubuh', 'Kg/m²'], ['lingkar_dada', 'Lingkar Dada', 'Cm'], ['sp02', 'SP 02', '%']] as $field)
-                                <div class="form-group mb-3">
-                                    <label for="{{ $field[0] }}"
-                                        class="control-label text-primary">{{ $field[1] }}</label>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label class="text-primary" for="pr">Nadi (PR)</label>
+                                <div class="input-group">
                                     <div class="input-group">
-                                        <input type="text" class="form-control" id="{{ $field[0] }}"
-                                            name="{{ $field[0] }}" value="{{ $pengkajian?->{$field[0]} }}">
+                                        <input id="pr" type="text" name="pr" class="form-control"
+                                            value="{{ $pengkajian?->pr }}">
                                         <div class="input-group-append">
-                                            <span class="input-group-text">{{ $field[2] }}</span>
+                                            <span class="input-group-text">x/menit</span>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            </div>
                         </div>
-
-                        <div class="col-md-6">
-                            @foreach ([['rr', 'Respirasi (RR)', 'x/menit'], ['temperatur', 'Suhu (T)', 'C°'], ['body_weight', 'Berat Badan', 'Kg'], ['kat_bmi', 'Kategori IMT', ''], ['lingkar_perut', 'Lingkar Perut', 'Cm']] as $field)
-                                <div class="form-group mb-3">
-                                    <label for="{{ $field[0] }}"
-                                        class="control-label text-primary">{{ $field[1] }}</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="{{ $field[0] }}"
-                                            name="{{ $field[0] }}" value="{{ $pengkajian?->{$field[0]} }}">
-                                        <div class="input-group-append">
-                                            <span class="input-group-text">{{ $field[2] }}</span>
-                                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="rr" class="text-primary">Respirasi (RR)</label>
+                                <div class="input-group">
+                                    <input class="form-control numeric" id="rr" name="rr" type="text"
+                                        value="{{ $pengkajian?->rr }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">x/menit</span>
                                     </div>
                                 </div>
-                            @endforeach
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="bp" class="text-primary">Tensi (BP)</label>
+                                <div class="input-group">
+                                    <input class="form-control numeric" id="bp" name="bp" type="text"
+                                        value="{{ $pengkajian?->bp }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">mmHg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="temperatur" class="text-primary">Suhu (T)</label>
+                                <div class="input-group">
+                                    <input class="form-control numeric" id="temperatur" name="temperatur" type="text"
+                                        value="{{ $pengkajian?->temperatur }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">C°</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="height" class="text-primary">Tinggi Badan</label>
+                                <div class="input-group">
+                                    <input class="form-control numeric calc-bmi" id="body_height" name="body_height"
+                                        type="text" value="{{ $pengkajian?->body_height }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">Cm</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="weight" class="text-primary">Berat Badan</label>
+                                <div class="input-group">
+                                    <input class="form-control numeric calc-bmi" id="body_weight" name="body_weight"
+                                        type="text" value="{{ $pengkajian?->body_weight }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">Kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="bmi" class="text-primary">Index Massa Tubuh</label>
+                                <div class="input-group">
+                                    <input class="form-control numeric" id="bmi" name="bmi"
+                                        readonly="readonly" type="text" value="{{ $pengkajian?->bmi }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">Kg/m²</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="kat_bmi" class="text-primary">Kategori IMT</label>
+                                <div class="input-group">
+                                    <input class="form-control" id="kat_bmi" name="kat_bmi" readonly="readonly"
+                                        type="text" value="{{ $pengkajian?->kat_bmi }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="sp02" class="text-primary">SP 02</label>
+                                <div class="input-group">
+                                    <input class="form-control" id="sp02" name="sp02" type="text"
+                                        value="{{ $pengkajian?->sp02 }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="lingkar_perut" class="text-primary">Lingkar
+                                    Perut</label>
+                                <div class="input-group">
+                                    <input class="form-control" id="lingkar_perut" name="lingkar_perut" type="text"
+                                        value="{{ $pengkajian?->lingkar_perut }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">Cm</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="row mt-5">
@@ -76,13 +168,13 @@
                             <h4 class="text-primary">Anamnesa</h4>
                             <div class="form-group d-flex">
                                 <div class="form-check mr-4">
-                                    <input class="form-check-input" type="checkbox" name="auto_anamnesa" id="auto_anamnesa"
-                                        value="1">
+                                    <input class="form-check-input" type="checkbox" name="auto_anamnesa"
+                                        id="auto_anamnesa" value="1">
                                     <label class="form-check-label" for="auto_anamnesa">Auto Anamnesa</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="allo_anamnesa" id="allo_anamnesa"
-                                        value="1">
+                                    <input class="form-check-input" type="checkbox" name="allo_anamnesa"
+                                        id="allo_anamnesa" value="1">
                                     <label class="form-check-label" for="allo_anamnesa">Allo Anamnesa</label>
                                 </div>
                             </div>

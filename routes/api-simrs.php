@@ -184,7 +184,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::get('/dokter-pengkajian/{type}/{registration_number}/get', [PengkajianDokterRajalController::class, 'getPengkajian'])->name('pengkajian.dokter-rajal.get');
         Route::get('/perawat-pengkajian/{type}/{registration_number}/get', [PengkajianController::class, 'getPengkajianRajal'])->name('pengkajian.perawat-rajal.get');
         Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
-        Route::get('/dokter-cppt/get', [CPPTController::class, 'getCPPT'])->name('cppt.get');
+        Route::get('/dokter-cppt/get', [CPPTController::class, 'getCPPTDokter'])->name('cppt-dokter.get');
+        Route::get('/perawat-cppt/get', [CPPTController::class, 'getCPPT'])->name('cppt.get');
         Route::post('/dokter-cppt/{type}/{registration_number}/store', [CPPTController::class, 'store'])->name('cppt.dokter-rajal.store');
         Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
         Route::post('/dokter-resume-medis/store', [ResumeMedisRajalController::class, 'store'])->name('resume-medis.dokter-rajal.store');

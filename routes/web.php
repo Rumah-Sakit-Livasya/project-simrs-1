@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\ImpersonateUser;
 use App\Http\Middleware\LastSeenUser;
 use App\Models\ChecklistHarianCategory;
+use App\Models\LaporanInternal;
 use Illuminate\Support\Facades\File;
 
 // Route::get('/test', [TimeScheduleController::class, 'getEmployeesByOrganizationAndJobPosition']);
@@ -385,8 +386,24 @@ Route::middleware(['auth'])->group(function () {
         ->name('impersonate');
     Route::post('/switchback', [SwitchUserController::class, 'switchBack'])->name('switchback');
 });
+
 Route::get('/test', function () {
-    return view('pages.testing');
+    $laporanKendala = LaporanInternal::with(['organization', 'user'])
+        ->where('jenis', 'kendala')
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->groupBy(function ($item) {
+            return $item->organization->name;
+        })
+        ->map(function ($group) {
+            return $group->groupBy(function ($item) {
+                return $item->user->name;
+            });
+        });
+
+    return view('pages.testing', [
+        'laporan' => $laporanKendala,
+    ]);
 });
 
 require __DIR__ . '/auth.php';
