@@ -389,22 +389,24 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/test', function () {
     $laporanKendala = LaporanInternal::with(['organization', 'user'])
-        ->where('jenis', 'kendala')
+        ->whereMonth('created_at', 5) // 5 = Mei
+        ->whereYear('created_at', 2025) // ganti tahun sesuai kebutuhan
         ->orderBy('created_at', 'desc')
         ->get()
-        ->groupBy(function ($item) {
-            return $item->organization->name;
-        })
-        ->map(function ($group) {
-            return $group->groupBy(function ($item) {
-                return $item->user->name;
-            });
+        ->groupBy(fn($item) => $item->organization->name)
+        ->reject(fn($group, $orgName) => in_array($orgName, ['Sanitasi', 'PSRS']))
+        ->map(function ($orgGroup) {
+            return $orgGroup->groupBy(fn($item) => $item->user->name)
+                ->map(function ($userGroup) {
+                    return $userGroup->groupBy(fn($item) => $item->jenis);
+                });
         });
 
     return view('pages.testing', [
         'laporan' => $laporanKendala,
     ]);
 });
+
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/simrs.php';
