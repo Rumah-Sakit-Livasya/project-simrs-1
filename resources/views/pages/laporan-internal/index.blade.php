@@ -62,6 +62,13 @@
                                                 <i class="fas fa-file-excel mr-2"></i>Download Harian
                                             </button>
                                         @endcan
+                                        @can('export pptx laporan internal')
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                                                data-target="#exportPPTXModal">
+                                                <i class="fas fa-file-excel mr-2"></i>Download Laporan Bulanan
+                                            </button>
+                                        @endcan
 
                                         <!-- Tombol Export Word Harian -->
                                         @can('export word laporan internal')
@@ -108,6 +115,7 @@
     @include('pages.laporan-internal.partials.modal.dokumentasi')
     @include('pages.laporan-internal.partials.modal.export-word')
     @include('pages.laporan-internal.partials.modal.export-excel')
+    @include('pages.laporan-internal.partials.modal.export-pptx')
 @endsection
 
 @section('plugin')
@@ -680,6 +688,19 @@
 
             // Close modal
             $('#exportModal').modal('hide');
+        });
+
+        // Export form submission
+        $('#exportPPTXForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const url = form.attr('action') + '?' + form.serialize();
+
+            // Open download in new tab
+            window.open(url, '_blank');
+
+            // Close modal
+            $('#exportPPTXModal').modal('hide');
         });
 
         // Helper function untuk path relatif

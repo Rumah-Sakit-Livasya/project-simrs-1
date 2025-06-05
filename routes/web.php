@@ -355,6 +355,8 @@ Route::middleware([LastSeenUser::class])->group(function () {
                 ->name('laporan.internal.export.harian');
             Route::get('/laporan-internal/export-word-harian', [LaporanInternalController::class, 'exportWordHarian'])
                 ->name('laporan.internal.export.word');
+            Route::get('/laporan-internal/export-laporan-bulanan', [LaporanInternalController::class, 'exportPPTXHarian'])
+                ->name('laporan.internal.export.pptx');
         });
         // routes/web.php
         Route::middleware(['auth'])->group(function () {

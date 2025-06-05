@@ -392,6 +392,25 @@ class LaporanInternalController extends Controller
         exit;
     }
 
+    public function exportPPTXHarian(Request $request)
+    {
+        $laporan = LaporanInternal::with(['organization', 'user'])
+            ->whereMonth('created_at', $request->bulan) // 5 = Mei
+            ->whereYear('created_at', 2025) // ganti tahun sesuai kebutuhan
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy(fn($item) => $item->organization->name)
+            ->reject(fn($group, $orgName) => in_array($orgName, ['Sanitasi', 'PSRS']))
+            ->map(function ($orgGroup) {
+                return $orgGroup->groupBy(fn($item) => $item->user->name)
+                    ->map(function ($userGroup) {
+                        return $userGroup->groupBy(fn($item) => $item->jenis);
+                    });
+            });
+
+        return view('pages.laporan-internal.pptx', compact('laporan'));
+    }
+
 
     public function destroy($id)
     {
