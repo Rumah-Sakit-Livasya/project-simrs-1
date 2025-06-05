@@ -9,6 +9,7 @@ use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\Depo\StokRequestController;
 use App\Http\Controllers\SIMRS\Depo\UnitCostController as DepoUnitCostController;
 use App\Http\Controllers\SIMRS\Dokter\DokterController;
+use App\Http\Controllers\SIMRS\ERMController;
 use App\Http\Controllers\SIMRS\EthnicController;
 use App\Http\Controllers\SIMRS\Farmasi\FarmasiController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
@@ -53,6 +54,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TagihanPasienController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Http\Controllers\SIMRS\TriageController;
 use App\Http\Controllers\SIMRS\Warehouse\DistribusiBarangController;
 use App\Http\Controllers\SIMRS\Warehouse\MasterDataWarehouseController;
 use App\Http\Controllers\SIMRS\Warehouse\PenerimaanBarangController;
@@ -61,9 +63,6 @@ use App\Http\Controllers\SIMRS\Warehouse\ReportWarehouseController;
 use App\Http\Controllers\SIMRS\Warehouse\RevaluasiStokController;
 use App\Http\Controllers\SIMRS\Warehouse\StockRequestController;
 use App\Http\Controllers\SIMRS\Warehouse\UnitCostController;
-use App\Http\Controllers\SIMRS\Warehouse\WarehouseController;
-use App\Models\SIMRS\Registration;
-use App\Models\SIMRS\TagihanPasien;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -220,22 +219,25 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
         Route::prefix('poliklinik')->group(function () {
-            Route::get('/daftar-pasien', [PoliklinikController::class, 'index'])->name('poliklinik.daftar-pasien');
+            Route::get('/daftar-pasien', [ERMController::class, 'catatanMedis'])->name('poliklinik.daftar-pasien');
             Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
         });
 
         Route::prefix('igd')->group(function () {
             Route::get('/daftar-pasien', [IGDController::class, 'index'])->name('igd.daftar-pasien');
-            Route::get('/catatan-medis', [IGDController::class, 'catatanMedis'])->name('igd.catatan-medis');
-            Route::prefix('/reports')->group(function () {
-                Route::get('igd', [IGDController::class, 'reprotIGD'])->name('igd.reports');
+            Route::post('/daftar-pasien/filter', [IGDController::class, 'index'])->name('igd.daftar-pasien.filter');
+            Route::post('/daftar-pasien', [TriageController::class, 'store'])->name('igd.triage.store');
+            Route::get('/triage/{id}', [TriageController::class, 'get'])->name('igd.triage.get');
+            Route::get('/catatan-medis', [ERMController::class, 'catatanMedis'])->name('igd.catatan-medis');
+            Route::prefix('/laporan')->group(function () {
+                Route::get('/', [IGDController::class, 'reprotIGD'])->name('igd.reports');
                 Route::get('rekap-per-dokter', [IGDController::class, 'rekapPerDokter'])->name('igd.reports.rekap-per-dokter');
             });
         });
 
         Route::prefix('rawat-inap')->group(function () {
             Route::get('/daftar-pasien', [IGDController::class, 'index'])->name('rawat-inap.daftar-pasien');
-            Route::get('/catatan-medis', [IGDController::class, 'catatanMedis'])->name('rawat-inap.catatan-medis');
+            Route::get('/catatan-medis', [ERMController::class, 'catatanMedis'])->name('rawat-inap.catatan-medis');
             Route::prefix('/reports')->group(function () {
                 Route::get('rawat-inap', [IGDController::class, 'reprotIGD'])->name('rawat-inap.reports');
                 Route::get('laporan-per-tanggal', [IGDController::class, 'reportPerTanggal'])->name('rawat-inap.reports.per-tanggal');
@@ -479,6 +481,7 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('kasir')->group(function () {
             Route::get('/tagihan-pasien', [TagihanPasienController::class, 'index'])->name('tagihan.pasien.index');
+            Route::post('/tagihan-pasien/search', [TagihanPasienController::class, 'index'])->name('tagihan.pasien.search');
             Route::put('/tagihan-pasien/update-disc/{id}', [TagihanPasienController::class, 'updateDisc'])->name('tagihan.pasien.diskon');
             Route::post('/tagihan-pasien', [TagihanPasienController::class, 'store'])->name('tagihan.pasien.store');
             Route::get('/get-nominal-awal/{id}', [TagihanPasienController::class, 'getNominalAwal'])->name('tagihan.pasien.get.nominal');

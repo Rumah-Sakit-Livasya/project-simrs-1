@@ -117,7 +117,11 @@
                                                 <td>{{ $row->nama_tarif }}</td>
                                                 <td>{{ $row->tipe }}</td>
                                                 <td>Rawat Jalan</td>
-                                                <td>{{ $row->ruangan ?? '-' }}</td>
+                                                <td>
+                                                    @foreach ($row->departements as $departement)
+                                                        {{ $departement->name }}
+                                                    @endforeach
+                                                </td>
                                                 <td>
                                                     <button class="btn btn-sm btn-primary px-2 py-1 btn-departement"
                                                         data-id="{{ $row->id }}">

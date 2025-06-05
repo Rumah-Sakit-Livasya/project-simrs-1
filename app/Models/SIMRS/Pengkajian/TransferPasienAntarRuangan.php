@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS\Pengkajian;
 
+use App\Models\Signature;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,5 +20,31 @@ class TransferPasienAntarRuangan extends Model implements \OwenIt\Auditing\Contr
     public function registration()
     {
         return $this->belongsTo(Registration::class, 'registration_id');
+    }
+
+    // Pengkajian.php
+    public function signatures()
+    {
+        return $this->morphMany(Signature::class, 'signable');
+    }
+
+    public function signaturePengirim()
+    {
+        return $this->signatures()->where('role', 'pengirim')->latest()->first();
+    }
+
+    public function signaturePenerima()
+    {
+        return $this->signatures()->where('role', 'penerima')->latest()->first();
+    }
+
+    public function signaturePengirimBalik()
+    {
+        return $this->signatures()->where('role', 'pengirim_balik')->latest()->first();
+    }
+
+    public function signaturePenerimaBalik()
+    {
+        return $this->signatures()->where('role', 'penerima_balik')->latest()->first();
     }
 }

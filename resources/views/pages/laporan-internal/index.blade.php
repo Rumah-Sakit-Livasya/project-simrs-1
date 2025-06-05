@@ -36,112 +36,9 @@
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         <div class="container-fluid py-4">
-            <div class="row mb-3">
-                <div class="col-12">
-                    <div id="panel-1" class="panel">
-                        <div class="panel-hdr">
-                            <h2>Laporan Internal IT</h2>
-                        </div>
-                        <div class="panel-container show">
-                            <div class="panel-content">
-                                <form id="filter-form" method="POST" action="{{ route('laporan-internal.filter') }}">
-                                    @csrf
-                                    <div class="row mb-3">
-                                        <div class="col">
-                                            <div class="form-group">
-                                                <label class="form-label mb-1 font-weight-normal"
-                                                    for="datepicker-modal-2">Tanggal<i class="text-danger">*</i></label>
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text fs-xl"><i
-                                                                class="fal fa-calendar"></i></span>
-                                                    </div>
-                                                    <input type="text" id="datepicker-modal-2"
-                                                        class="form-control datepicker @error('tanggal') is-invalid @enderror"
-                                                        placeholder="Select a date" name="tanggal">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="form-group mb-3">
-                                                <label for="filter-jenis">Jenis</label>
-                                                <!-- Mengubah input menjadi select3 -->
-                                                <select class="select3 form-control @error('jenis') is-invalid @enderror"
-                                                    name="jenis" id="filter-jenis">
-                                                    <option value="">Pilih Jenis</option>
-                                                    <!-- Placeholder option -->
-                                                    <option value="kendala"
-                                                        {{ (old('jenis') ?? request('jenis')) == 'kendala' ? 'selected' : '' }}>
-                                                        Kendala</option>
-                                                    <option value="kegiatan"
-                                                        {{ (old('jenis') ?? request('jenis')) == 'kegiatan' ? 'selected' : '' }}>
-                                                        Kegiatan</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="form-group mb-3">
-                                                <label for="user">User</label>
-                                                <select class="select3 form-control @error('user') is-invalid @enderror"
-                                                    name="user[]" id="user" multiple>
-                                                    @foreach (App\Models\Employee::where('is_active', 1)->whereHas('organization', function ($query) {
-                $query->where('name', 'like', '%Informasi Teknologi (IT)%');
-            })->get() as $employee)
-                                                        <option value="{{ $employee->id }}">
-                                                            {{ old('user', $employee->fullname) }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="form-group mb-3">
-                                                <label for="filter-status">Status</label>
-                                                <!-- Mengubah input menjadi select3 -->
-                                                <select class="select3 form-control @error('status') is-invalid @enderror"
-                                                    name="status" id="filter-status">
-                                                    <option value="">Pilih Status</option>
-                                                    <!-- Placeholder option -->
-                                                    <option value="selesai"
-                                                        {{ (old('status') ?? request('status')) == 'selesai' ? 'selected' : '' }}>
-                                                        Selesai</option>
-                                                    <option value="diproses"
-                                                        {{ (old('status') ?? request('status')) == 'diproses' ? 'selected' : '' }}>
-                                                        Diproses</option>
-                                                    <option value="ditunda"
-                                                        {{ (old('status') ?? request('status')) == 'ditunda' ? 'selected' : '' }}>
-                                                        Ditunda</option>
-                                                    <option value="ditolak"
-                                                        {{ (old('status') ?? request('status')) == 'ditolak' ? 'selected' : '' }}>
-                                                        Ditolak</option>
-                                                </select>
-
-                                                @error('status')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <label class="form-label" for="">&nbsp</label>
-                                            <button type="submit" class="btn btn-primary btn-block w-100">
-                                                <div class="ikon-tambah">
-                                                    <span class="fal fa-search mr-1"></span>Cari
-                                                </div>
-                                                <div class="span spinner-text d-none">
-                                                    <span class="spinner-border spinner-border-sm" role="status"
-                                                        aria-hidden="true"></span>
-                                                    Loading...
-                                                </div>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            @can('filter laporan internal')
+                @include('pages.laporan-internal.partials.filter')
+            @endcan
             <div class="row mb-3">
                 <div class="col-12">
                     <div id="panel-2" class="panel">
@@ -152,21 +49,27 @@
                             <div class="panel-content">
                                 <div class="row mb-3">
                                     <div class="col">
-                                        <button class="btn btn-primary btn-sm" data-toggle="modal"
-                                            data-target="#tambah-data">
-                                            <i class="fas fa-plus me-1"></i> Tambah Laporan
-                                        </button>
-                                        <!-- Button trigger modal -->
-                                        <button type="button" class="btn btn-success btn-sm" data-toggle="modal"
-                                            data-target="#exportModal">
-                                            <i class="fas fa-file-excel mr-2"></i>Download Harian
-                                        </button>
+                                        @can('create laporan internal')
+                                            <button class="btn btn-primary btn-sm" data-toggle="modal"
+                                                data-target="#tambah-data">
+                                                <i class="fas fa-plus me-1"></i> Tambah Laporan
+                                            </button>
+                                        @endcan
+                                        @can('export excel laporan internal')
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal"
+                                                data-target="#exportModal">
+                                                <i class="fas fa-file-excel mr-2"></i>Download Harian
+                                            </button>
+                                        @endcan
 
                                         <!-- Tombol Export Word Harian -->
-                                        <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal"
-                                            data-target="#exportWordModal">
-                                            <i class="fas fa-file-word mr-2"></i> Download Word Harian
-                                        </button>
+                                        @can('export word laporan internal')
+                                            <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal"
+                                                data-target="#exportWordModal">
+                                                <i class="fas fa-file-word mr-2"></i> Download Word Harian
+                                            </button>
+                                        @endcan
 
                                     </div>
                                 </div>
@@ -179,10 +82,13 @@
                                                 <th>Jenis</th>
                                                 <th>Uraian</th>
                                                 <th>Status</th>
+                                                <th>Keterangan</th>
                                                 {{-- <th>Dokumentasi</th> --}}
-                                                <th>Jam Masuk</th>
-                                                <th>Jam Diproses</th>
-                                                <th>Respon Time</th>
+                                                @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)')
+                                                    <th>Jam Masuk</th>
+                                                    <th>Jam Diproses</th>
+                                                    <th>Respon Time</th>
+                                                @endif
                                                 <th>User</th>
                                                 <th>Aksi</th>
                                             </tr>
@@ -196,270 +102,12 @@
                 </div>
             </div>
         </div>
-
-        <!-- Tambah Laporan Modal -->
-        <div class="modal fade" id="tambah-data" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title">Tambah Laporan Baru</h5>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form id="form-laporan" enctype="multipart/form-data">
-                        <div class="modal-body">
-                            @csrf
-                            <input type="hidden" name="user_id" value="{{ auth()->id() }}">
-
-                            <div class="row mb-3">
-                                <!-- Tanggal -->
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="tanggal" class="font-weight-bold">Tanggal Laporan</label>
-                                        <input type="text" class="form-control datepicker" id="tanggal"
-                                            name="tanggal" required>
-                                    </div>
-                                </div>
-
-                                <!-- Jenis Laporan -->
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="jenis" class="font-weight-bold">Jenis Laporan</label>
-                                        <select class="form-control select2" id="jenis" name="jenis" required>
-                                            <option value="" selected disabled>Pilih Jenis Laporan</option>
-                                            <option value="kegiatan">Kegiatan</option>
-                                            <option value="kendala">Kendala</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Organization Field (Hidden by default) -->
-                            <div class="row mb-3">
-                                <div class="col-12" id="organization-field" style="display: none;">
-                                    <div class="form-group">
-                                        <label for="organization" class="font-weight-bold">Organisasi Terkait</label>
-                                        <select class="form-control select2" id="organization" name="organization_id">
-                                            <option value="" selected disabled>Pilih Organisasi</option>
-                                            @foreach (\App\Models\Organization::all() as $org)
-                                                <option value="{{ $org->id }}">{{ $org->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <small class="text-muted">Hanya untuk laporan kegiatan</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Uraian -->
-                            <div class="row mb-3">
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label for="kegiatan" class="font-weight-bold">Uraian Lengkap</label>
-                                        <textarea class="form-control" id="kegiatan" name="kegiatan" rows="4" required
-                                            placeholder="Deskripsikan laporan secara detail"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Status -->
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="status" class="font-weight-bold">Status</label>
-                                        <select class="form-control select2" id="status" name="status" required>
-                                            <option value="" disabled selected>Pilih Status</option>
-                                            <option value="selesai">Selesai</option>
-                                            <option value="diproses">Diproses</option>
-                                            <option value="ditunda">Ditunda</option>
-                                            <option value="ditolak">Ditolak</option>
-                                        </select>
-                                    </div>
-                                    <!-- Keterangan -->
-
-                                    <div class="form-group" id="keterangan-field" style="display: none;">
-                                        <label for="keterangan" class="font-weight-bold">Keterangan</label>
-                                        <textarea class="form-control" id="keterangan" name="keterangan" rows="4"
-                                            placeholder="Deskripsikan keterangan status secara detail"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="font-weight-bold">Timeline</label>
-                                        <div class="timeline-inputs">
-                                            <div class="input-group mb-2">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-light">Masuk</span>
-                                                </div>
-                                                <input type="time" class="form-control" name="jam_masuk">
-                                            </div>
-                                            <div class="input-group mb-2">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-light">Diproses</span>
-                                                </div>
-                                                <input type="time" class="form-control" name="jam_diproses">
-                                            </div>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-light">Selesai</span>
-                                                </div>
-                                                <input type="time" class="form-control" name="jam_selesai">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col">
-                                    {{-- <div class="form-group mb-0">
-                                        <label class="form-label">File (Browser)</label>
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="customFile">
-                                            <label class="custom-file-label" for="customFile">Choose file</label>
-                                        </div>
-                                    </div> --}}
-
-                                    <div class="form-group">
-                                        <label for="dokumentasi" class="form-label">Dokumentasi (Opsional)</label>
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="dokumentasi"
-                                                name="dokumentasi" accept=".jpg,.jpeg,.png,.pdf">
-                                            <label class="custom-file-label" for="customFile">Choose file</label>
-                                        </div>
-                                        <small class="text-muted">Format: JPG, PNG, PDF (Max 2MB)</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                <i class="fas fa-times mr-1"></i> Batal
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save mr-1"></i> Simpan Laporan
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal for showing documentation -->
-        <div class="modal fade" id="dokumentasiModal" tabindex="-1" role="dialog"
-            aria-labelledby="dokumentasiModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="dokumentasiModalLabel">Dokumentasi</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body text-center">
-                        <div id="noDocument" class="py-5" style="display: none;">
-                            <i class="fas fa-file-excel fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">Tidak ada dokumentasi tersedia</p>
-                        </div>
-                        <div id="unsupportedFormat" class="py-5" style="display: none;">
-                            <i class="fas fa-file-excel fa-3x text-danger mb-3"></i>
-                            <p class="text-danger">Format file tidak didukung. Hanya JPG, PNG, dan PDF yang bisa
-                                ditampilkan.</p>
-                        </div>
-                        <img id="dokumentasiImage" src="" class="img-fluid"
-                            style="max-height: 70vh; display: none;" alt="Dokumentasi">
-                        <div id="dokumentasiPdf" class="w-100" style="height: 70vh; display: none;">
-                            <iframe id="pdfViewer" src=""
-                                style="width: 100%; height: 100%; border: none;"></iframe>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                        <a id="downloadDokumentasi" href="#" class="btn btn-primary" download
-                            style="display: none;">
-                            <i class="fas fa-download"></i> Unduh
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Export Word Modal -->
-        <div class="modal fade" id="exportWordModal" tabindex="-1" role="dialog"
-            aria-labelledby="exportWordModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exportWordModalLabel">Download Laporan Word Harian</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form id="exportWordForm" action="{{ route('laporan.internal.export.word') }}" method="GET">
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label for="exportWordTanggal">Tanggal Laporan</label>
-                                <input type="date" class="form-control" id="exportWordTanggal" name="tanggal"
-                                    required value="{{ date('Y-m-d') }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="exportWordJenis">Jenis Laporan</label>
-                                <select class="form-control" id="exportWordJenis" name="jenis">
-                                    <option value="">Semua Jenis</option>
-                                    <option value="kegiatan">Kegiatan</option>
-                                    <option value="kendala">Kendala</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-secondary">
-                                <i class="fas fa-download mr-2"></i>Download Word
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Export Modal -->
-        <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exportModalLabel">Download Laporan Harian</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form id="exportForm" action="{{ route('laporan.internal.export.harian') }}" method="GET">
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label for="exportTanggal">Tanggal Laporan</label>
-                                <input type="date" class="form-control" id="exportTanggal" name="tanggal" required
-                                    value="{{ date('Y-m-d') }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="exportJenis">Jenis Laporan</label>
-                                <select class="form-control" id="exportJenis" name="jenis">
-                                    <option value="">Semua Jenis</option>
-                                    <option value="kegiatan">Kegiatan</option>
-                                    <option value="kendala">Kendala</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-download mr-2"></i>Download
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
     </main>
+    @include('pages.laporan-internal.partials.modal.create')
+    @include('pages.laporan-internal.partials.modal.edit')
+    @include('pages.laporan-internal.partials.modal.dokumentasi')
+    @include('pages.laporan-internal.partials.modal.export-word')
+    @include('pages.laporan-internal.partials.modal.export-excel')
 @endsection
 
 @section('plugin')
@@ -491,27 +139,49 @@
 
         $(document).ready(function() {
             // Initialize select2
-            $('#form-laporan .select2').select2({
+            $('#create-form-laporan .select2').select2({
                 dropdownParent: $('#tambah-data')
+            });
+            $('#edit-form-laporan .select2').select2({
+                dropdownParent: $('#ubah-data')
             });
 
             $(function() {
                 $('.select3').select2();
+                $('#pic').select2({
+                    placeholder: 'Pilih data berikut',
+                    dropdownParent: $('#exportWordModal'),
+                    allowClear: true
+                });
             });
 
             // Show/hide organization field based on jenis selection
-            $('#jenis').change(function() {
+            $('#create-jenis').change(function() {
                 if ($(this).val() === 'kendala') {
-                    $('#organization-field').show();
-                    $('#organization').prop('required', true);
-                    $('input[name="organization_id"]').remove();
+                    $('#create-organization-field').show();
+                    $('input[name="unit_terkait"]').remove();
                 } else {
-                    $('#organization-field').hide();
-                    $('#organization').prop('required', false);
-                    if (!$('input[name="organization_id"]').length) {
+                    $('#create-organization-field').hide();
+                    if (!$('input[name="unit_terkait"]').length) {
                         $('<input>').attr({
                             type: 'hidden',
-                            name: 'organization_id',
+                            name: 'unit_terkait',
+                            value: '{{ auth()->user()->employee->organization_id }}'
+                        }).appendTo('form');
+                    }
+                }
+            });
+
+            $('#edit-jenis').change(function() {
+                if ($(this).val() === 'kendala') {
+                    $('#edit-organization-field').show();
+                    $('input[name="unit_terkait"]').remove();
+                } else {
+                    $('#edit-organization-field').hide();
+                    if (!$('input[name="unit_terkait"]').length) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'unit_terkait',
                             value: '{{ auth()->user()->employee->organization_id }}'
                         }).appendTo('form');
                     }
@@ -519,11 +189,19 @@
             });
 
             // Show/hide keterangan field based on status selection
-            $('#status').change(function() {
+            $('#edit-status').change(function() {
                 if ($(this).val() === 'ditunda' || $(this).val() === 'ditolak') {
-                    $('#keterangan-field').show();
+                    $('#edit-keterangan-field').show();
                 } else {
-                    $('#keterangan-field').hide();
+                    $('#edit-keterangan-field').hide();
+                }
+            });
+
+            $('#create-status').change(function() {
+                if ($(this).val() === 'ditunda' || $(this).val() === 'ditolak') {
+                    $('#create-keterangan-field').show();
+                } else {
+                    $('#create-keterangan-field').hide();
                 }
             });
 
@@ -545,10 +223,14 @@
                     url: '/laporan-internal-list',
                     type: 'GET',
                     data: function(d) {
+                        console.log(d);
+
                         // Tambahkan data filter ke request
-                        d.jenis = $('#jenis').val();
-                        d.status = $('#status').val();
-                        d.tanggal = $('#datepicker-modal-2').val();
+                        d.user_id = $('#filter-user').val();
+                        d.jenis = $('#filter-jenis').val();
+                        d.status = $('#filter-status').val();
+                        d.tanggal = $('#filter-tanggal').val();
+                        d.organization = {{ auth()->user()->employee->organization->id }};
                     },
                     error: function(xhr) {
                         console.error('DataTables error:', xhr.responseText);
@@ -593,80 +275,88 @@
                         name: 'status',
                         render: function(data) {
                             let badgeClass = 'bg-secondary';
-                            if (data === 'Selesai') badgeClass = 'bg-success';
-                            if (data === 'Diproses') badgeClass = 'bg-primary';
-                            if (data === 'Baru') badgeClass = 'bg-info';
-                            if (data === 'Ditolak') badgeClass = 'bg-danger';
+                            if (data == 'selesai') badgeClass = 'bg-success';
+                            if (data == 'diproses') badgeClass = 'bg-primary';
+                            if (data == 'baru') badgeClass = 'bg-info';
+                            if (data == 'ditolak') badgeClass = 'bg-danger';
                             return `<span class="badge ${badgeClass}">${data}</span>`;
                         }
                     },
                     {
-                        data: 'jam_masuk',
-                        name: 'jam_masuk',
+                        data: 'keterangan',
+                        name: 'keterangan',
                         render: function(data) {
-                            if (!data) return '-';
-                            try {
-                                // Jika format waktu sudah HH:MM:SS
-                                if (typeof data === 'string' && data.match(/^\d{2}:\d{2}:\d{2}$/)) {
-                                    return data;
-                                }
-                                // Jika format timestamp
-                                return new Date(data).toLocaleTimeString('id-ID', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    second: '2-digit',
-                                    hour12: false
-                                });
-                            } catch (e) {
-                                return '<span class="text-warning">Invalid</span>';
-                            }
+                            return data ?? '-';
                         }
                     },
-                    {
-                        data: 'jam_diproses',
-                        name: 'jam_diproses',
-                        render: function(data) {
-                            if (!data) return '-';
-                            try {
-                                if (typeof data === 'string' && data.match(/^\d{2}:\d{2}:\d{2}$/)) {
-                                    return data;
-                                }
-                                return new Date(data).toLocaleTimeString('id-ID', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    second: '2-digit',
-                                    hour12: false
-                                });
-                            } catch (e) {
-                                return '<span class="text-warning">Invalid</span>';
-                            }
-                        }
-                    },
-                    {
-                        data: null,
-                        name: 'respon_time',
-                        render: function(data, type, row) {
-                            // Hitung waktu respon dari jam_masuk ke jam_diproses
-                            if (row.jam_masuk && row.jam_diproses) {
+                    @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)')
+                        {
+                            data: 'jam_masuk',
+                            name: 'jam_masuk',
+                            render: function(data) {
+                                if (!data) return '-';
                                 try {
-                                    const start = this.parseTime(row.jam_masuk);
-                                    const respon = this.parseTime(row.jam_diproses);
-
-                                    if (respon < start) {
-                                        return '<span class="text-danger">Invalid</span>';
+                                    // Jika format waktu sudah HH:MM:SS
+                                    if (typeof data === 'string' && data.match(
+                                            /^\d{2}:\d{2}:\d{2}$/)) {
+                                        return data;
                                     }
-
-                                    const diff = Math.abs(respon - start);
-                                    return this.formatDuration(diff);
+                                    // Jika format timestamp
+                                    return new Date(data).toLocaleTimeString('id-ID', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                        hour12: false
+                                    });
                                 } catch (e) {
-                                    console.error('Error calculating response time:', e);
-                                    return '<span class="text-warning">Error</span>';
+                                    return '<span class="text-warning">Invalid</span>';
                                 }
                             }
-                            return '-';
-                        }
-                    },
-                    {
+                        }, {
+                            data: 'jam_diproses',
+                            name: 'jam_diproses',
+                            render: function(data) {
+                                if (!data) return '-';
+                                try {
+                                    if (typeof data === 'string' && data.match(
+                                            /^\d{2}:\d{2}:\d{2}$/)) {
+                                        return data;
+                                    }
+                                    return new Date(data).toLocaleTimeString('id-ID', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                        hour12: false
+                                    });
+                                } catch (e) {
+                                    return '<span class="text-warning">Invalid</span>';
+                                }
+                            }
+                        }, {
+                            data: null,
+                            name: 'respon_time',
+                            render: function(data, type, row) {
+                                // Hitung waktu respon dari jam_masuk ke jam_diproses
+                                if (row.jam_masuk && row.jam_diproses) {
+                                    try {
+                                        const start = this.parseTime(row.jam_masuk);
+                                        const respon = this.parseTime(row.jam_diproses);
+
+                                        if (respon < start) {
+                                            return '<span class="text-danger">Invalid</span>';
+                                        }
+
+                                        const diff = Math.abs(respon - start);
+                                        return this.formatDuration(diff);
+                                    } catch (e) {
+                                        console.error('Error calculating response time:', e);
+                                        return '<span class="text-warning">Error</span>';
+                                    }
+                                }
+                                return '-';
+                            }
+                        },
+                    @endif {
                         data: 'fullname',
                         name: 'fullname',
                         render: function(data) {
@@ -681,13 +371,15 @@
                         render: function(data, type, row) {
                             // Tombol default (edit dan delete)
                             let buttons = `
-                                            <div class="btn-group">
-                                                <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            @can('delete laporan internal')
                                                 <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(${data})">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
+                                            @endcan
                                         `;
 
                             // Tambahkan tombol dokumentasi jika ada
@@ -784,7 +476,7 @@
 
 
             // Form submission with file upload support
-            $('#form-laporan').on('submit', function(e) {
+            $('#create-form-laporan').on('submit', function(e) {
                 e.preventDefault();
                 const btn = $(this).find('button[type="submit"]');
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...');
@@ -806,7 +498,7 @@
                     },
                     success: function(response) {
                         showToast(response.message);
-                        $('#form-laporan')[0].reset();
+                        $('#create-form-laporan')[0].reset();
                         $('#tambah-data').modal('hide');
                         table.ajax.reload();
                     },
@@ -831,12 +523,68 @@
                 });
             });
 
+            $('#edit-form-laporan').on('submit', function(e) {
+                e.preventDefault();
+                const btn = $(this).find('button[type="submit"]');
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...');
+
+                // Ambil ID laporan
+                const laporanId = $('#edit-laporan-id').val();
+                console.log("Laporan ID: " + laporanId);
+
+                // Buat FormData objek untuk menangani file upload
+                const formData = new FormData(this); // this refers to the form element
+
+                // Debugging: Periksa semua data yang ada di FormData
+                for (let pair of formData.entries()) {
+                    console.log(pair[0] + ": " + pair[1]);
+                }
+
+                // Ambil CSRF token dari meta tag
+                const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+                $.ajax({
+                    url: `/laporan-internal/${laporanId}`, // URL untuk PUT dengan ID di URL
+                    method: 'POST',
+                    data: formData,
+                    processData: false, // Jangan proses data
+                    contentType: false, // Jangan set contentType, biar FormData mengatur sendiri
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        showToast(response.message);
+                        $('#ubah-data').modal('hide');
+                        table.ajax.reload();
+                    },
+                    error: function(xhr) {
+                        $('#ubah-data').modal('hide');
+                        const errorMessage = xhr.responseJSON?.message ||
+                            'Gagal menyimpan data';
+                        showToast(errorMessage, 'error');
+
+                        // Jika ada error validasi, tampilkan pesan kesalahan
+                        if (xhr.responseJSON?.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            for (const field in errors) {
+                                const errorMessage = errors[field][0];
+                                $(`#${field}-error`).text(errorMessage).show();
+                            }
+                        }
+                    },
+                    complete: function() {
+                        btn.prop('disabled', false).html(
+                            '<i class="fas fa-save mr-1"></i> Simpan Laporan');
+                    }
+                });
+            });
+
             // Reset form when modal is closed
             $('#tambah-data').on('hidden.bs.modal', function() {
-                $('#form-laporan')[0].reset();
+                $('#create-form-laporan')[0].reset();
                 $('.select2').val(null).trigger('change');
                 $('.datepicker').datepicker('setDate', new Date());
-                $('#organization-field').hide();
+                $('#create-organization-field').hide();
             });
         });
 
@@ -941,12 +689,99 @@
             return window.location.origin + '/' + cleanPath;
         }
 
+        function formatTime(time) {
+            // Jika waktu memiliki format "HH:MM:SS", ambil hanya "HH:MM"
+            return time ? time.substring(0, 5) : '';
+        }
+
         function editLaporan(id) {
-            Swal.fire({
-                title: 'Edit Laporan',
-                text: 'Fitur edit akan segera tersedia!',
-                icon: 'info',
-                confirmButtonText: 'OK'
+            // Misalkan id digunakan untuk mengambil data tertentu atau mengubah konten di modal
+            // Anda bisa menggunakan id ini untuk mengisi data ke dalam form modal jika diperlukan
+
+            // Contoh mengambil data dari server menggunakan id dan menampilkannya di modal (menggunakan jQuery untuk simplicity)
+            $.ajax({
+                url: `/laporan-internal/get/${id}`, // Ganti dengan URL yang sesuai
+                method: 'GET',
+                data: {
+                    id: id
+                },
+                success: function(response) {
+                    console.log(response);
+                    if (response.status === 'success' && response.data) {
+                        // Mengisi form dengan data dari response
+                        $('#ubah-data').find('#edit-tanggal').val(response.data.tanggal);
+                        $('#ubah-data').find('#edit-unit-terkait').val(response.data.unit_terkait).trigger(
+                            'change');
+                        $('#ubah-data').find('#edit-kegiatan').val(response.data.kegiatan);
+                        $('#ubah-data').find('#edit-jam-masuk').val(formatTime(response.data.jam_masuk));
+                        $('#ubah-data').find('#edit-jam-diproses').val(formatTime(response.data.jam_diproses));
+                        $('#ubah-data').find('#edit-jam-selesai').val(formatTime(response.data.jam_selesai));
+                        $('#ubah-data').find('#edit-status').val(response.data.status).trigger('change');
+                        $('#ubah-data').find('#edit-jenis').val(response.data.jenis).trigger('change');
+                        $('#ubah-data').find('#edit-user-id').val(response.data.user_id);
+                        $('#ubah-data').find('#edit-laporan-id').val(response.data.id);
+                        $('#ubah-data').find('#edit-organization-id').val(response.data.organization_id);
+
+                        // Hanya menampilkan nama file (tidak bisa mengubah nilai file input)
+                        $('#ubah-data').find('#edit-dokumentasi').val(
+                            ''); // Clear file input as it cannot be set programmatically
+
+                        // Menampilkan preview dokumentasi jika ada
+                        const previewContainer = $('#dokumentasi-preview');
+                        if (response.data.dokumentasi) {
+                            const fileUrl = response.data.dokumentasi;
+                            const fileExtension = fileUrl.split('.').pop().toLowerCase();
+                            if (fileExtension === 'jpg' || fileExtension === 'jpeg' || fileExtension ===
+                                'png') {
+                                // Menampilkan preview gambar
+                                previewContainer.html(
+                                    `<img src="${fileUrl}" alt="Preview" style="max-width: 100%; max-height: 200px;">`
+                                );
+                            } else if (fileExtension === 'pdf') {
+                                // Menampilkan link untuk file PDF
+                                previewContainer.html(`<a href="${fileUrl}" target="_blank">View PDF</a>`);
+                            }
+                            previewContainer.show(); // Menampilkan preview
+                        } else {
+                            previewContainer.hide(); // Menyembunyikan preview jika tidak ada file
+                        }
+
+                        // Menampilkan modal
+                        $('#ubah-data').modal('show');
+                    } else {
+                        alert('Data tidak ditemukan atau terjadi kesalahan');
+                    }
+                },
+                error: function() {
+                    alert('Gagal mengambil data');
+                }
+            });
+
+            // Mengatur preview gambar baru setelah file dipilih
+            $('#edit-dokumentasi').on('change', function(event) {
+                const file = event.target.files[0]; // Ambil file yang dipilih
+                const previewContainer = $('#dokumentasi-preview');
+
+                if (file) {
+                    const fileReader = new FileReader();
+
+                    fileReader.onload = function(e) {
+                        const fileExtension = file.name.split('.').pop().toLowerCase();
+
+                        if (fileExtension === 'jpg' || fileExtension === 'jpeg' || fileExtension === 'png') {
+                            // Menampilkan preview gambar
+                            previewContainer.html(
+                                `<img src="${e.target.result}" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 11px;">`
+                            );
+                        } else if (fileExtension === 'pdf') {
+                            // Menampilkan link untuk file PDF
+                            previewContainer.html(`<a href="${e.target.result}" target="_blank">View PDF</a>`);
+                        }
+                        previewContainer.show(); // Menampilkan preview
+                    };
+
+                    fileReader.readAsDataURL(file); // Membaca file dan menampilkan preview
+                }
             });
         }
 
@@ -1035,5 +870,25 @@
 
             return durationText.trim();
         }
+
+        document.getElementById('create-dokumentasi').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const previewContainer = document.getElementById('image-preview');
+            const previewImg = document.getElementById('preview-img');
+
+            // Cek apakah file ada dan apakah file tersebut adalah gambar
+            if (file && file.type.match('image.*')) {
+                // Membaca file dan menampilkan preview gambar
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result; // Menyimpan hasil pembacaan file (URL data)
+                    previewContainer.style.display = 'block'; // Menampilkan container preview
+                }
+                reader.readAsDataURL(file);
+            } else {
+                // Menyembunyikan preview jika file bukan gambar
+                previewContainer.style.display = 'none';
+            }
+        });
     </script>
 @endsection

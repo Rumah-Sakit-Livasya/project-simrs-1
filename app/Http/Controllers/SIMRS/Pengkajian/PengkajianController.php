@@ -195,9 +195,9 @@ class PengkajianController extends Controller
             return response()->json(['error' => 'Registration not found.'], 404);
         }
 
-        if ($registration->registration_type != 'rawat-jalan') {
-            return response()->json(['error' => 'Registration type must be rawat-jalan.'], 400);
-        }
+        // if ($registration->registration_type != 'rawat-jalan') {
+        //     return response()->json(['error' => 'Registration type must be rawat-jalan.'], 400);
+        // }
 
         // Cek apakah sudah ada data PengkajianNurseRajal
         $existingPengkajian = $registration->pengkajian_nurse_rajal;
@@ -280,7 +280,7 @@ class PengkajianController extends Controller
         try {
             if ($existingPengkajian) {
                 // Update data yang sudah ada
-                
+
                 $data['modified_by'] = $request->user_id;
                 $existingPengkajian->update($data);
                 return response()->json(['message' => 'Data updated successfully!', 'data' => $existingPengkajian]);
@@ -294,6 +294,7 @@ class PengkajianController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
     public function storeOrUpdateTransferPasienAntarRuangan(Request $request)
     {
         $request['user_id'] = auth()->user()->id;

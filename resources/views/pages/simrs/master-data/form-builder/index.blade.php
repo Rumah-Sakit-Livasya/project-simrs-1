@@ -243,6 +243,9 @@
                             tipeId +
                             '/delete',
                         type: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
                         success: function(response) {
                             showSuccessAlert(response.message);
 

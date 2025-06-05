@@ -13,6 +13,16 @@ class Organization extends Model
         'name'
     ];
 
+    public function getAllChildAssociative()
+    {
+        return $this->child_structures
+            ->flatMap(fn($child) => array_merge(
+                [['id' => $child->organization->id, 'name' => $child->organization->name]],
+                $child->organization->getAllChildAssociative()
+            ))
+            ->toArray();
+    }
+
     public function child_structures()
     {
         return $this->hasMany(Structure::class, 'parent_organization');

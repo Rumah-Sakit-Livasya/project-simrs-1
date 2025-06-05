@@ -18,7 +18,7 @@
                     <div class="panel-container show">
                         <div class="panel-content">
 
-                            <form action="" method="post">
+                            <form action="{{ route('tagihan.pasien.search') }}" method="post">
                                 @csrf
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">

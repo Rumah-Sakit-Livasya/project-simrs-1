@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\ImpersonateUser;
 use App\Http\Middleware\LastSeenUser;
 use App\Models\ChecklistHarianCategory;
+use App\Models\LaporanInternal;
 use Illuminate\Support\Facades\File;
 
 // Route::get('/test', [TimeScheduleController::class, 'getEmployeesByOrganizationAndJobPosition']);
@@ -342,9 +343,11 @@ Route::middleware([LastSeenUser::class])->group(function () {
         });
 
         Route::middleware(['auth'])->group(function () {
-            Route::get('/laporan-internal', [LaporanInternalController::class, 'index']);
+            Route::get('/laporan-internal', [LaporanInternalController::class, 'index'])->name('laporan-internal')->middleware('can:view laporan internal');
+            Route::get('/laporan-internal/get/{id}', [LaporanInternalController::class, 'getLaporan'])->name('laporan-internal')->middleware('can:view laporan internal');
             Route::post('/laporan-internal-filter', [LaporanInternalController::class, 'index'])->name('laporan-internal.filter');
             Route::post('/laporan-internal', [LaporanInternalController::class, 'store']);
+            Route::post('/laporan-internal/{id}', [LaporanInternalController::class, 'update']);
             Route::get('/laporan-internal-list', [LaporanInternalController::class, 'list']);
             Route::delete('/laporan-internal/{id}', [LaporanInternalController::class, 'destroy']);
             Route::post('/laporan-internal/complete/{id}', [LaporanInternalController::class, 'complete']);
@@ -382,6 +385,25 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(ImpersonateUser::class)
         ->name('impersonate');
     Route::post('/switchback', [SwitchUserController::class, 'switchBack'])->name('switchback');
+});
+
+Route::get('/test', function () {
+    $laporanKendala = LaporanInternal::with(['organization', 'user'])
+        ->where('jenis', 'kendala')
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->groupBy(function ($item) {
+            return $item->organization->name;
+        })
+        ->map(function ($group) {
+            return $group->groupBy(function ($item) {
+                return $item->user->name;
+            });
+        });
+
+    return view('pages.testing', [
+        'laporan' => $laporanKendala,
+    ]);
 });
 
 require __DIR__ . '/auth.php';
