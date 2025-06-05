@@ -122,4 +122,56 @@
     </div> <!-- Close last .ppt-slide -->
     @endif
     </div>
+
+    <!-- Tombol Export -->
+    <div class="text-center my-4">
+        <button id="exportPDF" class="btn btn-danger">Export ke PDF</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        document.getElementById('exportPDF').addEventListener('click', async function() {
+            const slides = document.querySelectorAll('.ppt-slide');
+            const {
+                jsPDF
+            } = window.jspdf;
+
+            // Ambil ukuran slide pertama untuk menentukan ukuran halaman
+            const firstSlide = slides[0];
+            const canvas = await html2canvas(firstSlide, {
+                scale: 2
+            });
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+            const pageWidth = canvas.width;
+            const pageHeight = canvas.height;
+
+            // Buat PDF dengan ukuran slide dan orientasi landscape
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'px',
+                format: [pageWidth, pageHeight]
+            });
+
+            // Tambahkan halaman pertama
+            pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
+
+            // Tambahkan sisanya
+            for (let i = 1; i < slides.length; i++) {
+                const slideCanvas = await html2canvas(slides[i], {
+                    scale: 2
+                });
+                const slideImgData = slideCanvas.toDataURL('image/jpeg', 1.0);
+                const w = slideCanvas.width;
+                const h = slideCanvas.height;
+
+                pdf.addPage([w, h], 'landscape');
+                pdf.addImage(slideImgData, 'JPEG', 0, 0, w, h);
+            }
+
+            pdf.save("laporan-kegiatan.pdf");
+        });
+    </script>
 @endsection
