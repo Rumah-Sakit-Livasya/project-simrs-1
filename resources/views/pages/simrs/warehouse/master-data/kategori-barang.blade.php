@@ -16,6 +16,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
+    {{-- Select 2 --}}
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
 
     <script>
         var controls = {
@@ -24,6 +26,17 @@
         }
 
         $(document).ready(function() {
+
+
+            $(".add-modal-select").select2({
+                dropdownParent: $("#addModal")
+            });
+
+            $(".edit-modal-select").each(function(){
+                $(this).select2({
+                    dropdownParent: $(this).closest(".edit-modal")
+                });
+            });
 
             $('#loading-spinner').show();
             // initialize datatable

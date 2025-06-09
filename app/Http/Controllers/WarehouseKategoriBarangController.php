@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Keuangan\ChartOfAccount;
 use App\Models\WarehouseKategoriBarang;
 use Illuminate\Http\Request;
 
@@ -44,7 +45,8 @@ class WarehouseKategoriBarangController extends Controller
         }
 
         return view("pages.simrs.warehouse.master-data.kategori-barang", [
-            "kategoris" => $kategoris
+            "kategoris" => $kategoris,
+            "coas" => ChartOfAccount::all()
         ]);
     }
 
@@ -63,13 +65,13 @@ class WarehouseKategoriBarangController extends Controller
     {
         $validatedData = $request->validate([
             'nama' => 'required|string|max:255',
-            'coa_inventory' => 'nullable|string|max:255',
-            'coa_sales_outpatient' => 'nullable|string|max:255',
-            'coa_cogs_outpatient' => 'nullable|string|max:255',
-            'coa_sales_inpatient' => 'nullable|string|max:255',
-            'coa_cogs_inpatient' => 'nullable|string|max:255',
-            'coa_adjustment_daily' => 'nullable|string|max:255',
-            'coa_adjustment_so' => 'nullable|string|max:255',
+            'coa_inventory' => 'nullable|exists:chart_of_account,id',
+            'coa_sales_outpatient' => 'nullable|exists:chart_of_account,id',
+            'coa_cogs_outpatient' => 'nullable|exists:chart_of_account,id',
+            'coa_sales_inpatient' => 'nullable|exists:chart_of_account,id',
+            'coa_cogs_inpatient' => 'nullable|exists:chart_of_account,id',
+            'coa_adjustment_daily' => 'nullable|exists:chart_of_account,id',
+            'coa_adjustment_so' => 'nullable|exists:chart_of_account,id',
             'konsinsyasi' => 'required|boolean',
             'aktif' => 'required|boolean',
             'kode' => 'nullable|string|max:255',
@@ -103,13 +105,13 @@ class WarehouseKategoriBarangController extends Controller
         $validatedData = $request->validate([
             'id' => 'required|integer',
             'nama' => 'required|string|max:255',
-            'coa_inventory' => 'nullable|string|max:255',
-            'coa_sales_outpatient' => 'nullable|string|max:255',
-            'coa_cogs_outpatient' => 'nullable|string|max:255',
-            'coa_sales_inpatient' => 'nullable|string|max:255',
-            'coa_cogs_inpatient' => 'nullable|string|max:255',
-            'coa_adjustment_daily' => 'nullable|string|max:255',
-            'coa_adjustment_so' => 'nullable|string|max:255',
+            'coa_inventory' => 'nullable|exists:chart_of_account,id',
+            'coa_sales_outpatient' => 'nullable|exists:chart_of_account,id',
+            'coa_cogs_outpatient' => 'nullable|exists:chart_of_account,id',
+            'coa_sales_inpatient' => 'nullable|exists:chart_of_account,id',
+            'coa_cogs_inpatient' => 'nullable|exists:chart_of_account,id',
+            'coa_adjustment_daily' => 'nullable|exists:chart_of_account,id',
+            'coa_adjustment_so' => 'nullable|exists:chart_of_account,id',
             'konsinsyasi' => 'required|boolean',
             'aktif' => 'required|boolean',
             'kode' => 'nullable|string|max:255',

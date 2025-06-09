@@ -139,4 +139,34 @@ class User extends Authenticatable
     {
         return $this->last_seen ? \Carbon\Carbon::parse($this->last_seen)->diffForHumans() : 'Belum pernah online';
     }
+
+    public function pr_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseRequestPharmacy::class, 'user_id');
+    }
+
+    public function pr_non_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseRequestNonPharmacy::class, 'user_id');
+    }
+
+    public function app_pr_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseRequestPharmacy::class, 'app_user_id');
+    }
+
+    public function app_pr_non_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseRequestNonPharmacy::class, 'app_user_id');
+    }
+
+    public function po_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseOrderPharmacy::class, 'user_id');
+    }
+
+    public function po_non_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseOrderNonPharmacy::class, 'user_id');
+    }
 }

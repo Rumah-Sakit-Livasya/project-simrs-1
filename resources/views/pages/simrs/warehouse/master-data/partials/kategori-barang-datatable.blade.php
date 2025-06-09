@@ -45,13 +45,13 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $kategori->nama }}</td>
-                                    <td>{{ $kategori->coa_inventory }}</td>
-                                    <td>{{ $kategori->coa_sales_outpatient }}</td>
-                                    <td>{{ $kategori->coa_cogs_outpatient }}</td>
-                                    <td>{{ $kategori->coa_sales_inpatient }}</td>
-                                    <td>{{ $kategori->coa_cogs_inpatient }}</td>
-                                    <td>{{ $kategori->coa_adjustment_daily }}</td>
-                                    <td>{{ $kategori->coa_adjustment_so }}</td>
+                                    <td>{{ $kategori->_coa_inventory?->name }}</td>
+                                    <td>{{ $kategori->_coa_sales_outpatient?->name }}</td>
+                                    <td>{{ $kategori->_coa_cogs_outpatient?->name }}</td>
+                                    <td>{{ $kategori->_coa_sales_inpatient?->name }}</td>
+                                    <td>{{ $kategori->_coa_cogs_inpatient?->name }}</td>
+                                    <td>{{ $kategori->_coa_adjustment_daily?->name }}</td>
+                                    <td>{{ $kategori->_coa_adjustment_so?->name }}</td>
                                     <td>{{ $kategori->konsinsyasi ? 'Ya' : 'Tidak' }}</td>
                                     <td>{{ $kategori->aktif ? 'Aktif' : 'Non Aktif' }}</td>
                                     <td>{{ $kategori->kode }}</td>

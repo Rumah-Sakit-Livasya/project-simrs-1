@@ -17,4 +17,8 @@ class WarehouseMasterGudang extends Model implements AuditableContract
     public function smms(){
         return $this->hasMany(WarehouseSetupMinMaxStock::class, 'gudang_id','id');
     }
+
+    public function pr_pharmacy(){
+        return $this->hasMany(ProcurementPurchaseRequestPharmacy::class, 'gudang_id','id');
+    }
 }
