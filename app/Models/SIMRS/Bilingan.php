@@ -94,9 +94,9 @@ class Bilingan extends Model implements AuditableContract
     }
 
     // App\Models\SIMRS\Bilingan.php
-      protected static function booted()
+    protected static function booted()
     {
-        static::updated(function (Bilingan $bilingan) { 
+        static::updated(function (Bilingan $bilingan) {
             \Log::info('Bilingan updated', ['id' => $bilingan->id, 'status' => $bilingan->status]);
 
             if ($bilingan->isDirty('status') && strtolower($bilingan->status) === 'final') {
@@ -183,7 +183,6 @@ class Bilingan extends Model implements AuditableContract
             ]);
 
             \Log::info('JasaDokter (draft) created successfully', ['tagihan_id' => $tagihan->id, 'bilingan_id' => $this->id]);
-
         } catch (\Exception $e) {
             \Log::error('Error creating JasaDokter (draft): ' . $e->getMessage(), [
                 'tagihan_id' => $tagihan->id,
@@ -193,4 +192,3 @@ class Bilingan extends Model implements AuditableContract
         }
     }
 }
-

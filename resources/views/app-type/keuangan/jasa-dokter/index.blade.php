@@ -449,107 +449,7 @@
                 </div>
             </div>
 
-            {{-- Modal for creating/editing Jasa Dokter AP --}}
-            <div class="modal fade" id="apDokterModal" tabindex="-1" role="dialog"
-                aria-labelledby="apDokterModalTitle" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="apDokterModalTitle">Buat / Edit AP Dokter</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true"><i class="fal fa-times"></i></span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            {{-- Loading indicator --}}
-                            <div id="modalLoading" style="display: none; text-align: center; padding: 20px;">
-                                <i class="fal fa-spinner-third fa-spin fa-2x"></i> Loading...
-                            </div>
-                            {{-- Form content --}}
-                            <form id="apDokterForm" method="POST">
-                                @csrf
-                                <input type="hidden" id="tagihan_pasien_id" name="tagihan_pasien_id"
-                                    value="{{ $tagihan_pasien_id ?? '' }}">
-                                <input type="hidden" id="jasa_dokter_id" name="jasa_dokter_id"
-                                    value="{{ $jasa_dokter_id ?? '' }}">
 
-                                <div class="row">
-                                    <!-- Pilih Dokter -->
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Dokter</label>
-                                            <select name="dokter_id" class="form-control" id="dokter" required>
-                                                <option value="">-- Pilih Dokter --</option>
-                                                @foreach ($dokters as $dokter)
-                                                    <option value="{{ $dokter->id }}"
-                                                        {{ request('dokter_id') == $dokter->id ? 'selected' : '' }}>
-                                                        {{ optional($dokter->employee)->fullname ?? 'Tanpa Nama' }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <!-- Nominal (readonly) -->
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Nominal</label>
-                                            <input type="text" class="form-control"
-                                                value="{{ number_format($nominal ?? 0) }}" readonly>
-                                        </div>
-                                    </div>
-
-                                    <!-- Diskon (readonly) -->
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Diskon</label>
-                                            <input type="text" class="form-control"
-                                                value="{{ number_format($diskon ?? 0) }}" readonly>
-                                        </div>
-                                    </div>
-
-                                    <!-- Share Dokter -->
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Share Dokter</label>
-                                            <input type="number" class="form-control" name="share_dokter"
-                                                value="{{ old('share_dokter', $share_dokter ?? 0) }}" min="0"
-                                                required>
-                                        </div>
-                                    </div>
-
-                                    <!-- JKP -->
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>JKP</label>
-                                            <input type="number" class="form-control" name="jkp"
-                                                value="{{ old('jkp', $jkp ?? 0) }}" min="0">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary">Simpan</button>
-                            </form>
-
-                            {{-- Display validation errors from modal saves if any (inside modal body) --}}
-                            <div id="modalValidationErrorMessagesInsideModal"
-                                class="alert alert-danger alert-dismissible fade show mt-3" role="alert"
-                                style="display: none;">
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true"><i class="fal fa-times"></i></span>
-                                </button>
-                                <strong>Validasi Error!</strong>
-                                <ul id="modalValidationErrorListInsideModal"></ul>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" id="saveModalApDokterBtn">Save
-                                changes</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
 
     </main>
@@ -591,29 +491,14 @@
                 placeholder: "Pilih opsi",
                 allowClear: true
             });
-            $('#dokter').select2({
-                dropdownCssClass: "move-up",
-                placeholder: "Pilih opsi",
-                allowClear: true,
-                dropdownParent: $('#apDokterModal .modal-body') // Pastikan dropdown muncul di dalam modal
-            });
+            // $('#dokter').select2({
+            //     dropdownCssClass: "move-up",
+            //     placeholder: "Pilih opsi",
+            //     allowClear: true,
+            //     dropdownParent: $('#apDokterModal .modal-body') // Pastikan dropdown muncul di dalam modal
+            // });
 
-            // Inisialisasi select2 modal form saat modal terbuka
-            $('#apDokterModal').on('shown.bs.modal', function() {
-                // Hanya inisialisasi jika elemen ada dan belum menjadi instance Select2
-                $('.select2-modal').each(function() {
-                    if (!$(this).data('select2')) {
-                        $(this).select2({
-                            dropdownParent: $(
-                                '#apDokterModal .modal-body'
-                            ), // Penting untuk posisi dropdown
-                            dropdownCssClass: "move-up",
-                            placeholder: "-- Pilih Dokter --",
-                            allowClear: true
-                        });
-                    }
-                });
-            });
+
 
             // Hancurkan select2 modal form saat modal tertutup
             $('#apDokterModal').on('hidden.bs.modal', function() {
@@ -863,41 +748,18 @@
                 $('#method_spoofing').val(mode === 'edit' ? 'PUT' : 'POST');
 
 
+
                 // Setup modal appearance based on mode (show/hide fields)
-                if (mode === 'create') {
-                    $('.modal-edit-only').hide();
-                    $('.modal-create-only').show();
-                    $('#modal_ap_date').prop('readonly', false);
-                    $('#modal_nominal_ap').prop('readonly', false);
-                    $('#modal_diskon').prop('readonly', false);
-                    $('#modal_ppn_persen').prop('readonly', false);
-                    $('#modal_jkp').prop('readonly', false);
-                    $('#modal_share_dokter_ap').prop('readonly', false);
-
-                } else { // mode === 'edit'
-                    $('.modal-edit-only').show();
-                    $('.modal-create-only').hide();
-                    $('#modal_ap_number').prop('readonly', true);
-                    $('#modal_ap_date').prop('readonly',
-                        true); // AP Date readonly in edit? Sesuaikan kebutuhan
-                    $('#modal_nominal_ap').prop('readonly',
-                        true); // Nominal AP readonly in edit? Sesuaikan kebutuhan
-                    $('#modal_diskon').prop('readonly',
-                        true); // Diskon readonly in edit? Sesuaikan kebutuhan
-                    $('#modal_ppn_persen').prop('readonly',
-                        true); // PPN readonly in edit? Sesuaikan kebutuhan
-                    $('#modal_jkp').prop('readonly', false); // JKP editable in edit
-                    $('#modal_share_dokter_ap').prop('readonly', false); // Share Dokter editable in edit
-                }
 
 
-                $('#apDokterModal').modal('show'); // Show modal immediately
+
 
                 // Fetch data for the modal
                 // >>> PERBAIKAN URL DI SINI <<<
                 $.ajax({
-                    url: "{{ url('keuangan/jasa-dokter/modal-data') }}" + '/' +
-                        idToFetch, // Gunakan route helper
+                    url: "{{ route('keuangan.jasa-dokter.get-modal-data', ['jasaDokterId' => '__ID__']) }}"
+                        .replace('__ID__', idToFetch),
+
                     method: 'GET',
                     data: {
                         mode: mode
@@ -963,14 +825,10 @@
                                 ); // Default Share Dokter AP dari Share Dr ref
                                 $('#modal_status_ap_internal').val(data
                                     .default_status); // Default status 'final'
-                                // $('#modal_ap_number') is set to 'Akan Dibuat Otomatis' in the HTML/initial JS setup
-                                // $('#modal_bill_date_ap_stored') is not applicable for create mode
+
                             }
 
-                            // Re-initialize select2 after data is loaded and form is shown
-                            // This initialization block was already here, which is correct.
-                            // The issue was the extra destroy call BEFORE this.
-                            // Handled by the shown.bs.modal event now.
+
 
                         } else {
                             toastr.error(response.message || 'Gagal mengambil data item.');
@@ -1023,14 +881,14 @@
                     // Memeriksa apakah statusnya 'Draft' atau 'Belum dibuat' (sesuai teks di badge)
                     const isDraft = statusBadge.hasClass('badge-warning') || statusBadge.text()
                         .trim().toLowerCase() === 'draft' || statusBadge.text().trim()
-                        .toLowerCase() === 'belum dibuat';
+                        .toLowerCase() === 'final';
                     return isDraft;
                 });
                 // console.log('JasaDokter IDs to Create AP for (Draft):', idsToCreate);
 
                 if (idsToCreate.length === 0) {
                     toastr.warning(
-                        'Tidak ada item "Draft" atau "Belum dibuat" yang dipilih untuk dibuatkan AP Dokter.'
+                        'Tidak ada item "Draft" atau "Final" yang dipilih untuk dibuatkan AP Dokter.'
                     );
                     return;
                 }
@@ -1142,5 +1000,77 @@
 
 
         });
+
+        // --- Event Handler untuk Klik Ikon Status ---
+        $('#dt-basic-example tbody').on('click', '.status-icon', function() {
+            const tagihanPasienId = $(this).data('tagihan-pasien-id');
+            const jasaDokterId = $(this).data('jasa-dokter-id'); // Ini adalah ID dari tabel jasa_dokter
+            const statusAp = $(this).data('status'); // 'draft' atau 'final' dari record jasa_dokter
+
+            console.log(
+                `Status icon clicked. Status AP: ${statusAp}, JasaDokter ID: ${jasaDokterId}, TagihanPasien ID: ${tagihanPasienId}`
+            );
+
+            let urlPopup;
+            let popupTitlePrefix = "APDokter";
+
+            // KONDISI UTAMA: Jika jasaDokterId ADA, berarti record di tabel jasa_dokter sudah terbentuk,
+            // baik statusnya 'draft' maupun 'final'. Maka, kita selalu buka popup edit.
+            if (jasaDokterId) {
+                urlPopup = `{{ route('keuangan.jasa-dokter.edit-popup', ['jasaDokter' => ':id']) }}`.replace(':id',
+                    jasaDokterId);
+                // Judul popup bisa dibedakan jika mau
+                popupTitlePrefix = statusAp === 'final' ? "EditAPDokterFinal" : "LengkapiAPDokterDraft";
+                console.log(
+                    `Opening popup for EXISTING JasaDokter ID: ${jasaDokterId}. Status: ${statusAp}. ACTION: EDIT/LENGKAPI. URL: ${urlPopup}`
+                );
+            }
+            // KONDISI KEDUA: Jika jasaDokterId TIDAK ADA, DAN statusnya 'draft' (artinya "belum dibuatkan record AP sama sekali"),
+            // DAN tagihanPasienId ADA, maka kita buka popup untuk membuat AP baru berdasarkan tagihan tersebut.
+            else if (!jasaDokterId && statusAp === 'draft' && tagihanPasienId) {
+                urlPopup = `{{ route('keuangan.jasa-dokter.edit-popup', ['jasaDokter' => ':id']) }}`.replace(':id',
+                    jasaDokterId);
+                popupTitlePrefix = "CreateAPDokterBaru";
+                console.log(
+                    `Opening CREATE popup for TagihanPasien ID: ${tagihanPasienId}. ACTION: CREATE BARU. URL: ${urlPopup}`
+                );
+            }
+            // KONDISI LAIN (Error atau tidak valid)
+            else {
+                let warningMessage = "Aksi tidak dapat dilakukan. ";
+                if (!tagihanPasienId && statusAp === 'draft' && !jasaDokterId) {
+                    warningMessage += "ID Tagihan Pasien tidak ditemukan untuk membuat AP baru.";
+                } else if (!jasaDokterId && statusAp === 'final') {
+                    warningMessage += "ID Jasa Dokter tidak ditemukan untuk item yang berstatus final.";
+                } else {
+                    warningMessage += "Kombinasi status dan ID tidak valid.";
+                }
+                toastr.warning(warningMessage);
+                console.warn(`Cannot open popup: ${warningMessage}`);
+                return; // Hentikan eksekusi jika tidak ada URL popup yang valid
+            }
+
+            // Jika urlPopup berhasil ditentukan, buka popupnya
+            const popupWidth = 950;
+            const popupHeight = 650;
+            const left = (screen.width - popupWidth) / 2;
+            const top = (screen.height - popupHeight) / 2;
+            const windowName = popupTitlePrefix + "_" + (jasaDokterId || tagihanPasienId); // Nama window unik
+
+            window.open(
+                urlPopup,
+                windowName,
+                `width=${popupWidth},height=${popupHeight},top=${top},left=${left},scrollbars=yes,resizable=yes,status=yes`
+            );
+        });
+
+
+        // Handle Export Excel
+        $('#exportExcelBtn').on('click', function() {
+            const filters = $('#filterForm').serialize();
+            window.location.href = "{{ route('keuangan.jasa-dokter.export-excel') }}?" + filters;
+        });
+
+        // Akhir dari $(document).ready(function() {
     </script>
 @endsection

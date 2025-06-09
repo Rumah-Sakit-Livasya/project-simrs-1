@@ -17,6 +17,14 @@ class APSupplierController extends Controller
 
     public function create()
     {
-        return view('app-type.keuangan.ap-supplier.create');
+        return view('app-type.keuangan.ap-supplier.partials.create');
+    }
+    public function edit()
+    {
+        return view('app-type.keuangan.ap-supplier.partials.edit');
+    }
+    public function pilihPo()
+    {
+        return view('app-type.keuangan.ap-supplier.partials.pilih-po');
     }
 }

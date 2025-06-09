@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\JasaDokterExport; // Pastikan export class ini ada dan diperbarui
+use Illuminate\Support\Facades\Validator;
+
 class JasaDokterController extends Controller
 {
     public function index(Request $request)
@@ -35,15 +37,7 @@ class JasaDokterController extends Controller
                 $q->where('tagihan', 'LIKE', '[Tindakan Medis]%');
             })
             // Relasi yang dibutuhkan untuk view
-            ->with([
-                'tagihanPasien.registration.patient',
-                'tagihanPasien.registration.penjamin',
-                'tagihanPasien.registration.kelas_rawat',
-                'tagihanPasien.registration.doctor.employee',
-                'tagihanPasien.tindakan_medis.tarifTindakanMedis',
-                'tagihanPasien.bilinganSatu.pembayaranTagihan',
-                'dokter.employee'
-            ]);
+            ->with(['tagihanPasien.registration.patient', 'tagihanPasien.registration.penjamin', 'tagihanPasien.registration.kelas_rawat', 'tagihanPasien.registration.doctor.employee', 'tagihanPasien.tindakan_medis.tarifTindakanMedis', 'tagihanPasien.bilinganSatu.pembayaranTagihan', 'dokter.employee']);
 
         // Filter tanggal dari bilingan (created_at)
         if ($request->filled('tanggal_awal')) {
@@ -106,7 +100,6 @@ class JasaDokterController extends Controller
         return view('app-type.keuangan.jasa-dokter.index', compact('jasaDokterItems', 'dokters'));
     }
 
-
     // Method untuk menyimpan AP Dokter dari item yang dipilih (batch create)
     public function storeSelected(Request $request)
     {
@@ -135,15 +128,12 @@ class JasaDokterController extends Controller
         DB::beginTransaction();
         try {
             $currentSequence = 1; // Reset sequence untuk batch ini berdasarkan tanggal AP yang sama
-            $lastApOnDate = JasaDokter::whereDate('ap_date', $apDate->toDateString())
-                ->whereNotNull('ap_number')
-                ->orderBy('ap_number', 'desc')
-                ->first();
+            $lastApOnDate = JasaDokter::whereDate('ap_date', $apDate->toDateString())->whereNotNull('ap_number')->orderBy('ap_number', 'desc')->first();
             if ($lastApOnDate && $lastApOnDate->ap_number) {
                 if (preg_match('/-(\d{4})$/', $lastApOnDate->ap_number, $matches)) {
-                    $currentSequence = (int)$matches[1] + 1;
+                    $currentSequence = (int) $matches[1] + 1;
                 } elseif (preg_match('/-(\d+)$/', $lastApOnDate->ap_number, $matches)) {
-                    $currentSequence = (int)$matches[1] + 1;
+                    $currentSequence = (int) $matches[1] + 1;
                 }
             }
 
@@ -153,8 +143,8 @@ class JasaDokterController extends Controller
 
                 $jasaDokter->update([
                     'ap_number' => $apNumber,
-                    'ap_date'   => $apDate,
-                    'status'    => 'final',
+                    'ap_date' => $apDate,
+                    'status' => 'final',
                 ]);
                 $processedCount++;
             }
@@ -182,21 +172,17 @@ class JasaDokterController extends Controller
     {
         try {
             // Ambil data JasaDokter dengan relasi yang diperlukan
-            $jasaDokter = JasaDokter::with([
-                'tagihanPasien.registration.patient',
-                'tagihanPasien.registration.doctor.employee',
-                'tagihanPasien.registration.penjamin',
-                'tagihanPasien.registration.kelas_rawat',
-                'tagihanPasien.tindakan_medis.tarifTindakanMedis',
-                'tagihanPasien.bilinganSatu'
-            ])->findOrFail($id);
+            $jasaDokter = JasaDokter::with(['tagihanPasien.registration.patient', 'tagihanPasien.registration.doctor.employee', 'tagihanPasien.registration.penjamin', 'tagihanPasien.registration.kelas_rawat', 'tagihanPasien.tindakan_medis.tarifTindakanMedis', 'tagihanPasien.bilinganSatu'])->findOrFail($id);
 
             // Pastikan relasi tagihanPasien ada
             if (!$jasaDokter->tagihanPasien) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tagihan pasien tidak ditemukan untuk AP Dokter ini.'
-                ], 404);
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Data tagihan pasien tidak ditemukan untuk AP Dokter ini.',
+                    ],
+                    404,
+                );
             }
 
             $item = $jasaDokter->tagihanPasien;
@@ -206,10 +192,7 @@ class JasaDokterController extends Controller
             $nominalTotalTarifDefault = 0;
 
             if ($item->tindakan_medis && $item->tindakan_medis->tarifTindakanMedis) {
-                $tarif = $item->tindakan_medis->getTarif(
-                    $item->registration->penjamin_id ?? null,
-                    $item->registration->kelas_rawat_id ?? null
-                );
+                $tarif = $item->tindakan_medis->getTarif($item->registration->penjamin_id ?? null, $item->registration->kelas_rawat_id ?? null);
 
                 $shareDrDefault = $tarif->share_dr ?? 0;
                 $nominalTotalTarifDefault = $tarif->total ?? 0;
@@ -238,23 +221,27 @@ class JasaDokterController extends Controller
 
                     // Data referensi untuk form
                     'default_share_dokter' => $shareDrDefault,
-                ]
+                ],
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data AP Dokter tidak ditemukan.'
-            ], 404);
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Data AP Dokter tidak ditemukan.',
+                ],
+                404,
+            );
         } catch (\Exception $e) {
             Log::error('Error in JasaDokterController@edit: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil data.'
-            ], 500);
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat mengambil data.',
+                ],
+                500,
+            );
         }
     }
-
-
 
     // Method untuk update AP Dokter dari modal edit
     public function update(Request $request, $id)
@@ -290,8 +277,7 @@ class JasaDokterController extends Controller
     public function createSingle(Request $request, $tagihanPasienId)
     {
         // Cari TagihanPasien item
-        $item = TagihanPasien::with(['registration.kelas_rawat', 'registration.penjamin', 'registration.doctor', 'tindakan_medis.tarifTindakanMedis', 'bilinganSatu'])
-            ->findOrFail($tagihanPasienId);
+        $item = TagihanPasien::with(['registration.kelas_rawat', 'registration.penjamin', 'registration.doctor', 'tindakan_medis.tarifTindakanMedis', 'bilinganSatu'])->findOrFail($tagihanPasienId);
 
         // Cek lagi apakah AP Dokter sudah ada untuk item ini
         if ($item->jasaDokter) {
@@ -313,10 +299,7 @@ class JasaDokterController extends Controller
         DB::beginTransaction();
         try {
             // Ambil nilai default dari tarif
-            $tarif = $item->tindakan_medis?->getTarif(
-                $item->registration->penjamin_id ?? null,
-                $item->registration->kelas_rawat_id ?? null
-            );
+            $tarif = $item->tindakan_medis?->getTarif($item->registration->penjamin_id ?? null, $item->registration->kelas_rawat_id ?? null);
 
             $shareDrDefault = $tarif->share_dr ?? 0;
             $nominalTotalTarifDefault = $tarif->total ?? 0;
@@ -326,16 +309,13 @@ class JasaDokterController extends Controller
             $apNumberPrefix = $this->generateApNumber($apDate);
 
             // Dapatkan nomor urut terakhir untuk tanggal AP dari modal
-            $lastApToday = JasaDokter::whereDate('ap_date', $apDate->toDateString())
-                ->orderBy('ap_number', 'desc')
-                ->first();
+            $lastApToday = JasaDokter::whereDate('ap_date', $apDate->toDateString())->orderBy('ap_number', 'desc')->first();
             $currentSequence = 1;
             if ($lastApToday && preg_match('/^JD-\d{8}-(\d+)$/', $lastApToday->ap_number, $matches)) {
-                $currentSequence = (int)$matches[1] + 1;
+                $currentSequence = (int) $matches[1] + 1;
             }
             // Generate nomor AP lengkap
             $apNumber = $apNumberPrefix . '-' . str_pad($currentSequence, 4, '0', STR_PAD_LEFT);
-
 
             $jasaDokter = JasaDokter::create([
                 'tagihan_pasien_id' => $item->id,
@@ -395,8 +375,8 @@ class JasaDokterController extends Controller
             foreach ($jasaDokterItemsToCancel as $jasaDokter) {
                 $jasaDokter->update([
                     'ap_number' => null,
-                    'ap_date'   => null,
-                    'status'    => 'draft',
+                    'ap_date' => null,
+                    'status' => 'draft',
                 ]);
                 $cancelledCount++;
             }
@@ -409,140 +389,192 @@ class JasaDokterController extends Controller
         }
     }
 
-
     // Method untuk export Excel (jika menggunakan Maatwebsite\Excel)
     public function exportExcel(Request $request)
     {
-        // Replikasi logika query filtering dari method index() di sini
-        $query = TagihanPasien::query()
-            ->whereHas('bilinganSatu', function ($q) {
-                $q->where('status', 'final');
+        // Query utama dimulai dari JasaDokter, sama seperti di method index()
+        $query = JasaDokter::query()
+            ->whereHas('tagihanPasien.bilinganSatu', function ($q) {
+                $q->where('status', 'final'); // Bilingan dari tagihan pasien harus final
+            })
+            ->whereHas('tagihanPasien', function ($q) {
+                $q->where('tagihan', 'LIKE', '[Tindakan Medis]%'); // Hanya tagihan tindakan medis
             })
             ->with([
-                'registration.patient',
-                'registration.penjamin',
-                'registration.kelas_rawat',
-                'registration.doctor.employee',
-                'tindakan_medis.tarifTindakanMedis',
-                'bilinganSatu.pembayaranTagihan',
-                'jasaDokter',
-                'bilinganSatu'
+                // Eager load relasi yang dibutuhkan untuk data export
+                'tagihanPasien.registration.patient',
+                'tagihanPasien.registration.penjamin',
+                'tagihanPasien.registration.kelas_rawat',
+                'tagihanPasien.registration.doctor.employee', // Dokter Registrasi
+                'tagihanPasien.bilinganSatu.pembayaranTagihan', // Untuk info pembayaran
+                'tagihanPasien.tindakan_medis', // Untuk nama tindakan asli jika perlu
+                'dokter.employee', // Dokter AP (yang ada di tabel jasa_dokter)
             ]);
 
-        // Apply Filters (filter tanggal_awal dan tanggal_akhir menggunakan created_at bilingan)
+        // --- Menerapkan Filter yang Sama Seperti di Method Index ---
+
+        // Filter tanggal dari bilingan (created_at pada tabel bilingan melalui tagihanPasien)
         if ($request->filled('tanggal_awal')) {
-            $query->whereHas('bilinganSatu', function ($q) use ($request) {
+            $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($request) {
                 $q->whereDate('created_at', '>=', $request->tanggal_awal);
             });
         }
         if ($request->filled('tanggal_akhir')) {
-            $query->whereHas('bilinganSatu', function ($q) use ($request) {
+            $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($request) {
                 $q->whereDate('created_at', '<=', $request->tanggal_akhir);
             });
         }
-        // HAPUS FILTER TANGGAL AP DI EXPORT JUGA KARENA INPUT FILTER UTAMA BUKAN UNTUK FILTER AP DATE LAGI
-        // if ($request->filled('tanggal_ap')) { ... }
 
-        // Filter tipe registrasi
+        // Filter tipe registrasi (melalui tagihanPasien)
         if ($request->filled('tipe_registrasi')) {
-            $query->whereHas('registration', function ($q) use ($request) {
+            $query->whereHas('tagihanPasien.registration', function ($q) use ($request) {
                 $q->where('registration_type', $request->tipe_registrasi);
             });
         }
-        // Filter status pembayaran tagihan
+
+        // Filter status pembayaran lunas/belum lunas (melalui tagihanPasien)
         if ($request->filled('tagihan_pasien')) {
-            $query->whereHas('bilinganSatu', function ($q) use ($request) {
-                if ($request->tagihan_pasien == 'lunas') {
+            $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($request) {
+                if ($request->tagihan_pasien === 'lunas') {
                     $q->whereHas('pembayaranTagihan', function ($pq) {
                         $pq->where(DB::raw('lower(bill_notes)'), 'like', '%lunas%');
                     });
-                } elseif ($request->tagihan_pasien == 'belum-lunas') {
+                } elseif ($request->tagihan_pasien === 'belum-lunas') {
                     $q->whereDoesntHave('pembayaranTagihan', function ($pq) {
                         $pq->where(DB::raw('lower(bill_notes)'), 'like', '%lunas%');
                     });
                 }
             });
         }
-        // Filter status AP
+
+        // Filter status AP (langsung pada tabel jasa_dokter)
         if ($request->filled('status_ap')) {
-            if ($request->status_ap == 'draft') {
-                $query->whereDoesntHave('jasaDokter');
-            } elseif ($request->status_ap == 'final') {
-                $query->whereHas('jasaDokter');
+            if ($request->status_ap === 'draft') {
+                $query->where('status', 'draft');
+            } elseif ($request->status_ap === 'final') {
+                $query->where('status', 'final');
             }
+            // Jika ingin 'Belum Ada AP', maka querynya akan berbeda,
+            // kita perlu query TagihanPasien yang `doesntHave('jasaDokter')`.
+            // Namun, karena query utama dari JasaDokter, ini tidak relevan di sini.
         }
-        // Filter dokter registrasi
+
+        // Filter dokter berdasarkan registrasi (melalui tagihanPasien)
         if ($request->filled('dokter_id')) {
-            $query->whereHas('registration', function ($q) use ($request) {
+            $query->whereHas('tagihanPasien.registration', function ($q) use ($request) {
                 $q->where('doctor_id', $request->dokter_id);
             });
         }
 
-        // Urutkan berdasarkan created_at di tabel bilingan menggunakan subquery
-        $query->orderByDesc(
-            Bilingan::select('created_at')
-                ->whereColumn('bilingan.id', 'tagihan_pasien.bilingan_id')
-                ->limit(1)
-        );
+        // Mengambil data JasaDokter yang sudah difilter
+        $jasaDokterItems = $query->get();
 
+        // Lakukan pengurutan di collection jika kompleks, atau gunakan join untuk order by di query DB
+        // Di sini kita sort berdasarkan tanggal bill dari relasi, sama seperti di index
+        $jasaDokterItems = $jasaDokterItems->sortByDesc(function ($item) {
+            return optional($item->tagihanPasien?->bilinganSatu)->created_at;
+        });
 
-        $tagihanPasienItems = $query->get(); // Ambil data yang sudah difilter
-
-        // Buat Export Class menggunakan Maatwebsite\Excel
-        // Pastikan JasaDokterExport Class sudah diperbarui untuk tidak menyertakan kolom share_dokter
-        return Excel::download(new JasaDokterExport($tagihanPasienItems), 'jasa_dokter_ap_' . now()->format('Ymd') . '.xlsx');
+        // Kirim koleksi JasaDokter ke class export
+        return Excel::download(new JasaDokterExport($jasaDokterItems), 'laporan_ap_dokter_' . now()->format('Ymd_His') . '.xlsx');
     }
-
     // Tambahkan method baru untuk get data modal
-    public function getModalData(Request $request, $id)
+
+    public function getModalData($jasaDokterId)
     {
         try {
-            $mode = $request->query('mode'); // 'create' atau 'edit'
+            $jasaDokter = JasaDokter::with(['tagihanPasien.registration.patient', 'tagihanPasien.registration', 'tagihanPasien.tindakan_medis', 'dokter.employee'])->findOrFail($jasaDokterId);
 
-            if ($mode === 'create') {
-                // Data untuk create (dari TagihanPasien)
-                $item = TagihanPasien::with(['registration.patient', 'registration.doctor.employee', 'tindakan_medis', 'bilinganSatu'])
-                    ->findOrFail($id);
+            $data = [
+                'dokter_id_ap' => $jasaDokter->dokter_id,
+                'jasa_dokter_ap' => $jasaDokter->jasa_dokter, // Ganti ini jika share_dokter sudah dihapus
+                'jkp_ap' => $jasaDokter->jkp,
+                'ap_number_display' => $jasaDokter->ap_number,
+                'ap_date_display' => optional($jasaDokter->ap_date)->format('d-m-Y'),
+                'rm_reg_display' => ($jasaDokter->tagihanPasien->registration->patient->medical_record_number ?? '-') . '/' . ($jasaDokter->tagihanPasien->registration->registration_number ?? '-'),
+                'pasien_name_display' => $jasaDokter->tagihanPasien->registration->patient->name ?? '-',
+                'detail_tagihan_referensi' => $jasaDokter->nama_tindakan ?? ($jasaDokter->tagihanPasien->tindakan_medis->nama_tindakan ?? ($jasaDokter->tagihanPasien->tagihan ?? 'N/A')),
+                'nominal_tagihan_referensi' => $jasaDokter->tagihanPasien->nominal ?? 0,
+                'diskon_tagihan_referensi' => $jasaDokter->tagihanPasien->diskon ?? 0,
+            ];
 
-                $tarif = $item->tindakan_medis?->getTarif(
-                    $item->registration->penjamin_id,
-                    $item->registration->kelas_rawat_id
-                );
-
-                return response()->json([
-                    'success' => true,
-                    'mode' => 'create',
-                    'data' => [
-                        'rm_reg' => ($item->registration->patient->medical_record_number ?? '-') . '/' . ($item->registration->registration_number ?? '-'),
-                        'patient_name' => $item->registration->patient->name ?? '-',
-                        'tindakan_medis_name' => $item->tindakan_medis->nama_tindakan ?? '-',
-                        'dokter_name' => $item->registration->doctor->employee->fullname ?? 'N/A',
-                        'bill_date' => $item->bilinganSatu->created_at->format('d-m-Y'),
-                        'nominal' => $tarif->total ?? 0,
-                        'share_dr' => $tarif->share_dr ?? 0,
-                    ]
-                ]);
-            } else {
-                // Data untuk edit (dari JasaDokter)
-                $jasa = JasaDokter::with(['tagihanPasien.registration.patient', 'tagihanPasien.registration.doctor.employee', 'tagihanPasien.tindakan_medis'])
-                    ->findOrFail($id);
-
-                return response()->json([
-                    'success' => true,
-                    'mode' => 'edit',
-                    'data' => [
-                        'ap_number' => $jasa->ap_number,
-                        'ap_date' => $jasa->ap_date->format('Y-m-d'),
-                        'rm_reg' => ($jasa->tagihanPasien->registration->patient->medical_record_number ?? '-') . '/' . ($jasa->tagihanPasien->registration->registration_number ?? '-'),
-                        // ... data lainnya sama dengan create ...
-                        'jasa_dokter' => $jasa->jasa_dokter,
-                        'jkp' => $jasa->jkp,
-                    ]
-                ]);
-            }
+            return response()->json(['success' => true, 'data' => $data]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Data AP Dokter tidak ditemukan.'], 404);
         } catch (\Exception $e) {
-            Log::error('Error in getModalData: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
+            Log::error('Error in getModalDataForEdit: ' . $e->getMessage(), ['id' => $jasaDokterId, 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan server saat mengambil data.'], 500);
+        }
+
+        return view('appt-type.keuangan.jasa-dokter.index')->with([
+            'item' => $jasaDokter, // atau null jika buat baru
+            'dokters' => $dokters,
+            'diskon' => $diskon,
+        ]);
+    }
+
+    public function editPopup(JasaDokter $jasaDokter)
+    {
+        // Eager load relasi yang dibutuhkan untuk form
+        $jasaDokter->load([
+            'tagihanPasien.registration.patient',
+            'tagihanPasien.registration.penjamin',
+            'tagihanPasien.registration.kelas_rawat',
+            'tagihanPasien.bilinganSatu', // Untuk tanggal bill
+            'dokter.employee', // Dokter yang ditugaskan pada AP Jasa ini (jika relasi 'dokter' ada di JasaDokter)
+            'tagihanPasien.tindakan_medis', // Untuk nama tindakan asli
+        ]);
+
+        // Ambil semua dokter untuk dropdown
+        // Sesuaikan query ini jika model Dokter atau struktur data dokter Anda berbeda
+        $allDoctors = Doctor::with('employee') // Asumsi relasi 'employee' di model Doctor memiliki 'fullname'
+            // ->where('is_active', true) // Contoh filter dokter aktif
+            ->get()
+            ->map(function ($doc) {
+                return [
+                    'id' => $doc->id,
+                    // Sesuaikan cara mendapatkan nama lengkap dokter
+                    'fullname' => optional($doc->employee)->fullname ?? ($doc->nama_dokter ?? 'Dokter Tanpa Nama (ID: ' . $doc->id . ')'),
+                ];
+            });
+
+        // Path ke view popup, sesuaikan jika berbeda
+        return view('app-type.keuangan.jasa-dokter.edit-popup', compact('jasaDokter', 'allDoctors'));
+    }
+
+    // Di dalam JasaDokterController.php
+    public function updatePopup(Request $request, JasaDokter $jasaDokter)
+    {
+        // Pastikan parameter $jasaDokter
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'dokter_id_ap' => 'required|exists:doctors,id',
+            ],
+            [
+                'dokter_id_ap.required' => 'Kolom dokter wajib diisi.', // Pesan custom
+                'dokter_id_ap.exists' => 'Dokter yang dipilih tidak valid.',
+            ],
+        );
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput()->with('error_popup', 'Silakan periksa kembali input Anda.'); // Pesan umum untuk Toastr
+        }
+
+        DB::beginTransaction();
+        try {
+            $jasaDokter->dokter_id = $request->input('dokter_id_ap');
+            $jasaDokter->save();
+            DB::commit();
+
+            return back()->with('success_popup', 'Dokter AP berhasil diperbarui.')->with('close_popup_and_refresh_opener', true);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error saat update JasaDokter via popup: ' . $e->getMessage(), [
+                'jasa_dokter_id' => $jasaDokter->id,
+                'request_data' => $request->all(),
+            ]);
+            return redirect()->back()->with('error_popup', 'Gagal memperbarui data: Terjadi kesalahan server.')->withInput();
         }
     }
 }

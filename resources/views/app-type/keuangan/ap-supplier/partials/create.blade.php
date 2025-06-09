@@ -37,34 +37,64 @@
                             <form action="#" method="post">
                                 <div class="form-row">
                                     <div class="col-md-4 mb-3">
-                                        <label>Tanggal AP</label>
-                                        <input type="text" class="form-control datepicker" name="tanggal_ap"
-                                            value="22-05-2025">
+                                        <label class="mb-1">Tanggal AP</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" class="form-control form-control-sm datepicker"
+                                                name="tanggal_AP" placeholder="Pilih Tanggal AP" value=""
+                                                autocomplete="off">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text fs-sm">
+                                                    <i class="fal fa-calendar"></i>
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-md-4 mb-3">
-                                        <label>Due Date</label>
-                                        <input type="text" class="form-control datepicker" name="duedate">
+                                        <label class="mb-1">Due Date</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" class="form-control form-control-sm datepicker"
+                                                name="due_date" placeholder="Atur Jatuh Tempo" value=""
+                                                autocomplete="off">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text fs-sm">
+                                                    <i class="fal fa-calendar"></i>
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-md-4 mb-3">
-                                        <label>Tgl Faktur Pajak</label>
-                                        <input type="text" class="form-control datepicker" name="tgl_faktur_pajak"
-                                            value="22-05-2025">
+                                        <label class="mb-1">Tanggal Faktur Pajak</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" class="form-control form-control-sm datepicker"
+                                                name="Tanggal_faktur_pajak" placeholder="Tanggal Faktur Pajak"
+                                                value="" autocomplete="off">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text fs-sm">
+                                                    <i class="fal fa-calendar"></i>
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div class="form-row">
                                     <div class="col-md-6 mb-3">
-                                        <label>Supplier</label>
-                                        <select class="form-control select2" name="supplier_id">
-                                            <option value="">Pilih Supplier</option>
-                                            <option value="1">PT. PARIT PADANG GLOBAL</option>
+                                        <label class="mb-1">Supplier</label> {{-- Mengganti "supplier" menjadi "Supplier" --}}
+                                        <select class="form-control form-control-sm select2" name="supplier">
+                                            <option value="">All</option>
+                                            <option value="test-supplier-1">Test Supplier 1</option>
+                                            <option value="test-supplier-2">Test Supplier 2</option>
+                                            <option value="test-supplier-3">Test Supplier 3</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label>No Invoice</label>
-                                        <input type="text" class="form-control" name="no_invoice">
+                                        <label class="mb-1">No Invoice</label>
+                                        <input type="text" class="form-control form-control-sm" name="no_invoice"
+                                            placeholder="Masukkan No Invoice" value="">
                                     </div>
                                 </div>
+
+
 
                                 <!-- Tabel Item -->
                                 <table class="table table-bordered mt-3">
@@ -90,12 +120,13 @@
                                 <div class="row mt-3">
                                     <div class="col-md-6">
                                         <textarea class="form-control" rows="4" placeholder="Notes here"></textarea>
-                                        <div class="form-check">
+                                        <div class="form-check mt-2"> {{-- Menambahkan margin top untuk spasi --}}
                                             <input class="form-check-input" type="checkbox" checked> Kwitansi<br>
                                             <input class="form-check-input" type="checkbox" checked> Faktur Pajak<br>
                                             <input class="form-check-input" type="checkbox"> Surat Jalan<br>
                                             <input class="form-check-input" type="checkbox" checked> Salinan PO<br>
-                                            <input class="form-check-input" type="checkbox" checked> Tanda Terima Barang<br>
+                                            <input class="form-check-input" type="checkbox" checked> Tanda Terima
+                                            Barang<br>
                                             <input class="form-check-input" type="checkbox"> Berita Acara
                                         </div>
                                     </div>
@@ -112,11 +143,13 @@
                                             </div>
                                             <label class="col-md-6 col-form-label">PPN (%)</label>
                                             <div class="col-md-6">
-                                                <input type="number" class="form-control" name="ppn" value="0">
+                                                <input type="number" class="form-control" name="ppn"
+                                                    value="0">
                                             </div>
                                             <label class="col-md-6 col-form-label">Material</label>
                                             <div class="col-md-6">
-                                                <input type="number" class="form-control" name="material" value="0">
+                                                <input type="number" class="form-control" name="material"
+                                                    value="0">
                                             </div>
                                             <label class="col-md-6 col-form-label">Grand Total</label>
                                             <div class="col-md-6">
@@ -130,7 +163,10 @@
                                 <div class="form-row mt-3">
                                     <div class="col-md-12 text-right">
                                         <button type="button" class="btn btn-secondary">Back</button>
-                                        <button type="button" class="btn btn-info">Pilih GRN</button>
+                                        <a href="{{ route('keuangan.ap-supplier.partials.pilih-po') }}"
+                                            class="btn btn-info">
+                                            Pilih GRN
+                                        </a>
                                         <button type="submit" class="btn btn-primary">Simpan</button>
                                     </div>
                                 </div>
@@ -141,4 +177,41 @@
             </div>
         </div>
     </main>
+@endsection
+
+@section('plugin')
+    {{-- ... your existing plugin scripts ... --}}
+    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.export.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script src="/js/dependency/moment/moment.js"></script>
+    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+    <script src="/js/formplugins/inputmask/inputmask.bundle.js"></script>
+    <script src="/js/formplugins/sweetalert2/sweetalert2.bundle.js"></script>
+    <script src="/js/notifications/toastr/toastr.js"></script>
+    <link rel="stylesheet" href="/css/notifications/toastr/toastr.css">
+    <script>
+        // Gunakan $(document).ready() untuk memastikan semua elemen DOM sudah dimuat
+        $(document).ready(function() {
+
+            // Inisialisasi Select2
+            $('.select2').select2({
+                dropdownCssClass: "move-up",
+                placeholder: "Pilih opsi",
+                allowClear: true
+            });
+
+            // =========================================================================
+            // PERBAIKAN: Inisialisasi Datepicker untuk semua elemen dengan class .datepicker
+            // =========================================================================
+            $('.datepicker').datepicker({
+                format: 'dd-mm-yyyy', // Mengatur format tanggal
+                autoclose: true, // Kalender akan otomatis tertutup setelah tanggal dipilih
+                todayHighlight: true, // Menyorot tanggal hari ini
+                orientation: "bottom left" // Mengatur posisi kalender agar tidak terpotong
+            });
+
+        });
+    </script>
 @endsection

@@ -191,7 +191,7 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name('keuangan.jasa-dokter.edit');
             Route::post('/update/{id}', [JasaDokterController::class, 'update'])
                 ->name('keuangan.jasa-dokter.update');
-            Route::get('/export-excel', [JasaDokterController::class, 'export'])
+            Route::get('/export-excel', [JasaDokterController::class, 'exportExcel'])
                 ->name('keuangan.jasa-dokter.export-excel');
             Route::post('/store-selected', [JasaDokterController::class, 'storeSelected'])
                 ->name('keuangan.jasa-dokter.store-selected');
@@ -200,9 +200,23 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/get-tagihan-data/{tagihanPasienId}', [JasaDokterController::class, 'getTagihanData'])
                 ->name('keuangan.jasa-dokter.get-tagihan-data');
             Route::get('/get-tagihan-pasien', [JasaDokterController::class, 'getTagihanPasien'])
-                ->name('keuangan.jasa-dokter.get-tagihan-pasien');
-            Route::get('/modal-data/{id}', [JasaDokterController::class, 'getModalData'])
-                ->name('keuangan.jasa-dokter.modal-data');
+                ->name('keuangan.jasa-dokter.get-tagihan-pasien');;
+            Route::get('/get-modal-data/{jasaDokterId}', [JasaDokterController::class, 'getModalData'])
+                ->name('keuangan.jasa-dokter.get-modal-data');
+            Route::get('/edit-popup/{jasaDokter}', [JasaDokterController::class, 'editPopup'])
+                ->name('keuangan.jasa-dokter.edit-popup');
+
+
+            // Route::get('/{jasaDokter}/edit-popup', [JasaDokterController::class, 'editPopup'])
+            //     ->name('edit-popup'); // Akan menjadi keuangan.jasa-dokter.edit-popup
+
+            // Route::put('/{jasaDokter}/update-popup', [JasaDokterController::class, 'updatePopup'])
+            //     ->name('update-popup');
+            Route::put('/{jasaDokter}/update-popup', [JasaDokterController::class, 'updatePopup'])
+                ->name('update-popup');
+
+
+            // Route::get('jasa-dokter/get-modal-data-for-edit/{jasaDokterId}', [JasaDokterController::class, 'getModalDataForEdit'])->name('keuangan.jasa-dokter.get-modal-data-for-edit');
         });
         Route::prefix('pembayaran-jasa-dokter')->middleware(['can:view account payable pembayaran jasa dokter'])->group(function () {
             Route::get('/', [PembayaranJasaDokterController::class, 'index'])
@@ -231,9 +245,13 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/', [APSupplierController::class, 'index'])
                 ->name('keuangan.ap-supplier.index');
             Route::get('/create', [APSupplierController::class, 'create'])
-                ->name('keuangan.ap-supplier.create');
+                ->name('keuangan.ap-supplier.partials.create');
             Route::post('/store', [APSupplierController::class, 'store'])
                 ->name('keuangan.ap-supplier.store');
+            Route::post('/edit', [APSupplierController::class, 'edit'])
+                ->name('keuangan.ap-supplier.partials.edit');
+            Route::get('/pilih-po', [APSupplierController::class, 'pilihPo'])
+                ->name('keuangan.ap-supplier.partials.pilih-po');
         });
 
         route::prefix('ap-non-gr')->middleware(['can:view account payable ap-non-gr'])->group(function () {

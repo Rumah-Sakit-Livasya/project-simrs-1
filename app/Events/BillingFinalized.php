@@ -22,7 +22,8 @@ class BillingFinalized
 
     public function __construct(Bilingan $billing)
     {
-        $this->billing = $billing;
+       $this->billing = $billing;
+        Log::info('--- BillingFinalized Event CONSTRUCTOR CALLED --- Bilingan ID: ' . $billing->id . ' --- Timestamp: ' . now());
     }
     /**
      * Create a new event instance.
