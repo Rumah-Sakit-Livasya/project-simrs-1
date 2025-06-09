@@ -65,7 +65,58 @@
         }
 
         /* PENTING: Tambahkan CSS ini jika belum ada untuk memastikan toggle berfungsi */
+        .child-row {
+            display: none;
+            /* Sembunyikan secara default */
+        }
 
+        .dropdown-icon {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .dropdown-icon.bxs-down-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Styling tambahan untuk memperjelas batas row */
+        .child-row td {
+            background-color: #f9f9f9;
+            border-bottom: 2px solid #ddd;
+        }
+
+        /* Pastikan table di dalam child row memiliki margin dan padding yang tepat */
+        .child-row td>div {
+            padding: 15px;
+            margin: 0;
+        }
+
+        /* Pastikan parent dan child row terhubung secara visual */
+        tr.parent-row.active {
+            border-bottom: none !important;
+        }
+
+        /* Tambahkan di bagian style */
+        .control-details {
+            cursor: pointer;
+            text-align: center;
+            width: 30px;
+        }
+
+        .control-details .dropdown-icon {
+            font-size: 18px;
+            transition: transform 0.3s ease, color 0.3s ease;
+            display: inline-block;
+            color: #3498db;
+            /* Warna biru */
+        }
+
+        .control-details .dropdown-icon.bxs-up-arrow {
+            transform: rotate(180deg);
+            color: #e74c3c;
+            /* Warna merah saat terbuka */
+        }
 
         .control-details:hover .dropdown-icon {
             color: #2980b9;
@@ -155,10 +206,10 @@
                                     <button type="submit" class="btn btn-sm btn-primary mr-2">
                                         <i class="fal fa-search mr-1"></i> Cari
                                     </button>
-                                    <a href="{{ route('keuangan.ap-supplier.partials.create') }}"
-                                        class="btn btn-sm btn-success">
-                                        <i class="fal fa-plus mr-1"></i> Tambah Baru
-                                    </a>
+                                    {{-- <a href="{{ route('keuangan.ap-supplier.partials.create') }}"
+                                            class="btn btn-sm btn-success">
+                                            <i class="fal fa-plus mr-1"></i> Tambah Baru
+                                        </a> --}}
                                 </div>
                             </form>
                         </div>
@@ -236,87 +287,77 @@
 
     <script>
         $(document).ready(function() {
-                    // Initialize tooltips
-                    $('[data-toggle="tooltip"]').tooltip();
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
 
-                    // Inisialisasi Select2 (Sama seperti halaman AP Dokter)
-                    $('.select2').select2({
-                        dropdownCssClass: "move-up",
-                        placeholder: "Pilih opsi",
-                        allowClear: true
-                    });
+            // Inisialisasi Select2 (Sama seperti halaman AP Dokter)
+            $('.select2').select2({
+                dropdownCssClass: "move-up",
+                placeholder: "Pilih opsi",
+                allowClear: true
+            });
+            // Initialize DataTables
+            var tablePO = $('#dt-basic-example').DataTable({
+                responsive: true,
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [{
+                        extend: 'pdfHtml5',
+                        text: '<i class="fal fa-file-pdf mr-1"></i> PDF',
+                        titleAttr: 'Generate PDF',
+                        className: 'btn-outline-danger btn-sm mr-1',
+                        exportOptions: {
+                            columns: ':not(.no-export)' // Exclude columns with 'no-export' class
+                        },
+                        orientation: 'landscape'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fal fa-file-excel mr-1"></i> Excel',
+                        titleAttr: 'Generate Excel',
+                        className: 'btn-outline-success btn-sm mr-1',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fal fa-print mr-1"></i> Print',
+                        titleAttr: 'Print Table',
+                        className: 'btn-outline-primary btn-sm',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    }
+                ],
+                lengthChange: true,
+                pageLength: 10,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Cari data...",
+                    lengthMenu: "Tampil _MENU_ data",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "Tidak ada data.",
+                    infoFiltered: "(difilter dari _MAX_ total data)",
+                    paginate: {
+                        first: "Awal",
+                        last: "Akhir",
+                        next: "Berikutnya",
+                        previous: "Sebelumnya"
+                    },
+                    zeroRecords: "Tidak ada data yang cocok ditemukan."
+                }
+            });
 
-                    $(document).ready(function() {
+            // Handle form submission for filtering DataTable
+            $('#filterPoForm').on('submit', function(e) {
+                e.preventDefault();
+                // tablePO.ajax.reload(); // Uncomment if using AJAX data source
+                toastr.info(
+                    'Filter diterapkan. Jika menggunakan data statis, gunakan pencarian DataTables.');
+            });
 
-                        // Inisialisasi Select2
-                        $('.select2').select2({
-                            dropdownCssClass: "move-up",
-                            placeholder: "Pilih opsi",
-                            allowClear: true
-                        });
-                        // Initialize DataTables
-                        var tablePO = $('#dt-basic-example').DataTable({
-                            responsive: true,
-                            dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                                "<'row'<'col-sm-12'tr>>" +
-                                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                            buttons: [{
-                                    extend: 'pdfHtml5',
-                                    text: '<i class="fal fa-file-pdf mr-1"></i> PDF',
-                                    titleAttr: 'Generate PDF',
-                                    className: 'btn-outline-danger btn-sm mr-1',
-                                    exportOptions: {
-                                        columns: ':not(.no-export)' // Exclude columns with 'no-export' class
-                                    },
-                                    orientation: 'landscape'
-                                },
-                                {
-                                    extend: 'excelHtml5',
-                                    text: '<i class="fal fa-file-excel mr-1"></i> Excel',
-                                    titleAttr: 'Generate Excel',
-                                    className: 'btn-outline-success btn-sm mr-1',
-                                    exportOptions: {
-                                        columns: ':not(.no-export)'
-                                    }
-                                },
-                                {
-                                    extend: 'print',
-                                    text: '<i class="fal fa-print mr-1"></i> Print',
-                                    titleAttr: 'Print Table',
-                                    className: 'btn-outline-primary btn-sm',
-                                    exportOptions: {
-                                        columns: ':not(.no-export)'
-                                    }
-                                }
-                            ],
-                            lengthChange: true,
-                            pageLength: 10,
-                            language: {
-                                search: "_INPUT_",
-                                searchPlaceholder: "Cari data...",
-                                lengthMenu: "Tampil _MENU_ data",
-                                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                                infoEmpty: "Tidak ada data.",
-                                infoFiltered: "(difilter dari _MAX_ total data)",
-                                paginate: {
-                                    first: "Awal",
-                                    last: "Akhir",
-                                    next: "Berikutnya",
-                                    previous: "Sebelumnya"
-                                },
-                                zeroRecords: "Tidak ada data yang cocok ditemukan."
-                            }
-                        });
-
-                        // Handle form submission for filtering DataTable
-                        $('#filterPoForm').on('submit', function(e) {
-                            e.preventDefault();
-                            // tablePO.ajax.reload(); // Uncomment if using AJAX data source
-                            toastr.info(
-                                'Filter diterapkan. Jika menggunakan data statis, gunakan pencarian DataTables.'
-                            );
-                        });
-
-                    });
+        });
     </script>
 @endsection
