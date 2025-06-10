@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\keuangan;
 
 use App\Models\Keuangan\PenerimaanBarangHeader;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

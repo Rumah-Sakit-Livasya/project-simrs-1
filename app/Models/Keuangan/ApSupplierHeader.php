@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\keuangan;
 
 use App\Models\Keuangan\ApSupplierDetail;
+use App\Models\User;
+use App\Models\WarehouseSupplier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

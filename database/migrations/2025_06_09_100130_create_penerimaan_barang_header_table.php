@@ -20,18 +20,16 @@ return new class extends Migration
             $table->string('no_grn', 25)->unique();
             $table->date('tanggal_penerimaan');
 
-            // Relasi ke supplier dan purchase order
+            // Relasi ke supplier (ini tetap sama)
             $table->foreignId('supplier_id')->constrained('warehouse_supplier');
 
-            // ==== BARIS YANG DIPERBAIKI ====
-            $table->foreignId('purchase_id')->constrained('purchases');
+            // ==== PERUBAHAN UTAMA: RELASI POLIMORFIK KE PO ====
+            // Ini akan membuat kolom 'purchasable_id' (BIGINT) dan 'purchasable_type' (VARCHAR)
+            $table->morphs('purchasable');
 
             $table->string('no_surat_jalan_supplier', 100)->nullable();
             $table->decimal('total_nilai_barang', 15, 2)->default(0);
-
-            // KOLOM KUNCI untuk alur AP Supplier
             $table->enum('status_ap', ['Belum AP', 'Sudah AP'])->default('Belum AP');
-
             $table->foreignId('user_penerima_id')->constrained('users');
             $table->text('catatan_penerimaan')->nullable();
 

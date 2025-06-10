@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
 class ProcurementPurchaseOrderPharmacy extends Model implements AuditableContract
@@ -26,5 +27,10 @@ class ProcurementPurchaseOrderPharmacy extends Model implements AuditableContrac
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function penerimaanBarang(): MorphMany
+    {
+        return $this->morphMany(PenerimaanBarangHeader::class, 'purchasable');
     }
 }

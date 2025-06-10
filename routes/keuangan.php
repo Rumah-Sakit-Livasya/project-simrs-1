@@ -265,8 +265,16 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name('keuangan.ap-supplier.store');
             Route::post('/edit', [APSupplierController::class, 'edit'])
                 ->name('keuangan.ap-supplier.partials.edit');
-            Route::get('/pilih-po', [APSupplierController::class, 'pilihPo'])
-                ->name('keuangan.ap-supplier.partials.pilih-po');
+            Route::get('/index-grn', [APSupplierController::class, 'indexGrn'])
+                ->name('keuangan.ap-supplier.indexGrn');
+
+
+            Route::get('/select-grn', [APSupplierController::class, 'selectGrn'])
+                ->name('keuangan.ap-supplier.select-grn');
+
+            // Route alternatif untuk AJAX (opsional)
+            Route::get('/fetch-grn', [APSupplierController::class, 'fetchAvailableGrn'])
+                ->name('keuangan.ap-supplier.fetch-grn');
         });
 
         route::prefix('ap-non-gr')->middleware(['can:view account payable ap-non-gr'])->group(function () {

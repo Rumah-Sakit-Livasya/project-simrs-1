@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\keuangan;
 
+use App\Models\User;
+use App\Models\WarehouseSupplier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -59,10 +61,10 @@ class PenerimaanBarangHeader extends Model
      * Relasi ke model Purchase Order.
      * Sebuah GRN berasal dari satu PO.
      */
-    public function purchase(): BelongsTo
-    {
-        return $this->belongsTo(Purchases::class, 'purchase_id');
-    }
+    // public function purchase(): BelongsTo
+    // {
+    //     return $this->belongsTo( ::class, 'purchase_id');
+    // }
 
     /**
      * Relasi ke model User (yang menerima barang).
