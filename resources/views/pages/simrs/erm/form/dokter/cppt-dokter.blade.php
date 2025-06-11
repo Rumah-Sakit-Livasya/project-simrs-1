@@ -31,6 +31,7 @@
                                         </button>
                                     </div>
                                 </div>
+
                                 <div id="add_soap" class="panel-content collapse in" aria-expanded="true">
                                     <form method="post" class="form-horizontal" id="fsSOAP" autocomplete="off">
                                         <input type="hidden" name="registration_id" value="{{ $registration->id }}" />
@@ -267,12 +268,19 @@ Skrining Nyeri:
                                             </div>
                                         </div>
 
+                                        @include('pages.simrs.erm.partials.signature-field', [
+                                            'judul' => 'Dokter,',
+                                            'pic' => auth()->user()->employee->fullname,
+                                            'role' => 'dokter',
+                                        ])
+
+
                                         <!-- Action Buttons -->
                                         <div class="d-flex justify-content-between mt-4">
                                             <button type="button" class="btn btn-outline-secondary" id="tutup">
                                                 <span class="mdi mdi-arrow-up-bold-circle-outline"></span> Tutup
                                             </button>
-                                            <button type="button" class="btn btn-primary btn-saves-soap" id="bsSOAP"
+                                            <button type="submit" class="btn btn-primary btn-saves-soap" id="bsSOAP"
                                                 name="save">
                                                 <span class="mdi mdi-content-save"></span> Simpan
                                             </button>
@@ -416,8 +424,6 @@ Skrining Nyeri:
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
 
-    @include('pages.simrs.erm.partials.action-js.cppt')
-
     <script>
         $(document).ready(function() {
             function submitFormCPPT(actionType) {
@@ -460,6 +466,12 @@ Skrining Nyeri:
                 });
             }
 
+            // Saat tombol Save Final diklik
+            $('#bsSOAP').on('click', function() {
+                submitFormCPPT(); // Panggil fungsi submitForm dengan parameter final
+            });
+
+
             $('body').addClass('layout-composed');
             $('.select2').select2({
                 placeholder: 'Pilih Item',
@@ -468,9 +480,9 @@ Skrining Nyeri:
                 placeholder: 'Pilih Klinik',
             });
 
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
 
             $('#cppt_doctor_id').select2({
                 placeholder: 'Pilih Dokter',
@@ -492,4 +504,5 @@ Skrining Nyeri:
             });
         });
     </script>
+    @include('pages.simrs.erm.partials.action-js.cppt')
 @endsection

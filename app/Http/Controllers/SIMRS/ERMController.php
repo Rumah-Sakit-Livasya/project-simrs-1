@@ -106,7 +106,6 @@ class ERMController extends Controller
                 return $menuResponse;
             }
         } else {
-            dd($path);
             return view('pages.simrs.igd.daftar-pasien', [
                 'registrations' => $registration,
                 'path' => $path
@@ -120,22 +119,22 @@ class ERMController extends Controller
             $routePath = parse_url($request['route'], PHP_URL_PATH);
 
             if ($path === 'igd') {
-                $query = Registration::whereDate('registration_date', Carbon::today())
-                    ->where('registration_type', 'igd');
+                $query = Registration::where('registration_type', 'igd');
             } else {
-                $query = Registration::whereDate('registration_date', Carbon::today())
-                    ->where('registration_type', '!=', 'igd');
+                $query = Registration::where('registration_type', '!=', 'igd');
             }
 
+            // Filter by department first
             $query->when($request->departement_id, function ($q) use ($request) {
                 return $q->where('departement_id', $request->departement_id);
             });
 
+            // Filter doctor based on selected department
             $query->when($request->doctor_id, function ($q) use ($request) {
                 return $q->where('doctor_id', $request->doctor_id);
             });
 
-            // Koreksi bagian filter berdasarkan nama pasien (relasi ke tabel patients)
+            // Filter by patient name
             $query->when($request->patient, function ($q) use ($request) {
                 return $q->whereHas('patient', function ($patient) use ($request) {
                     $patient->where('name', 'like', '%' . $request->patient . '%');
@@ -144,8 +143,7 @@ class ERMController extends Controller
 
             $registrations = $query->get();
 
-
-            // Render partial view sebagai HTML
+            // Render partial view as HTML
             $html = view('pages.simrs.erm.partials.list-pasien', compact('registrations', 'path'))->render();
 
             return response()->json([
@@ -171,7 +169,6 @@ class ERMController extends Controller
         $noRegist = $request->registration;
 
         $hariIni = Carbon::now()->translatedFormat('l');
-
 
         if ($path === 'igd') {
             $departements = Departement::where('name', 'like', 'ugd')->get();
@@ -206,7 +203,6 @@ class ERMController extends Controller
                 })
                 ->get();
         } else {
-
             $registrations = Registration::where('registration_type', 'rawat-jalan')->get();
             $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
         }
@@ -244,20 +240,27 @@ class ERMController extends Controller
                 return view('pages.simrs.erm.form.perawat.pengkajian-perawat', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajian', 'path'));
 
             case 'pengkajian_dokter':
+                $data = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
                 $pengkajian = PengkajianDokterRajal::where('registration_id', $registration->id)->first();
                 $triage = Triage::where('registration_id', $registration->id)->first();
-                return view('pages.simrs.erm.form.dokter.pengkajian-dokter', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajian', 'triage', 'path'));
+                return view('pages.simrs.erm.form.dokter.pengkajian-dokter', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajian', 'triage', 'path', 'data'));
 
             case 'pengkajian_resep':
                 $pengkajian = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
                 return view('pages.simrs.erm.form.farmasi.pengkajian-resep', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajian', 'path'));
 
             case 'cppt_perawat':
+                if ($path !== 'igd') {
+                    $data = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
+                } else {
+                    $data = Triage::where('registration_id', $registration->id)->first();
+                }
+
                 $perawat = Employee::whereHas('organization', function ($query) {
                     $query->where('name', 'Rawat Jalan');
                 })->get();
                 $pengkajian = CPPT::where('registration_id', $registration->id)->first();
-                return view('pages.simrs.erm.form.perawat.cppt-perawat', compact('registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'perawat', 'path'));
+                return view('pages.simrs.erm.form.perawat.cppt-perawat', compact('registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'perawat', 'path', 'data'));
 
             case 'cppt_farmasi':
                 $dokter = Employee::where('is_doctor', 1)->get();
@@ -280,7 +283,8 @@ class ERMController extends Controller
             case 'pengkajian_lanjutan':
                 $form = FormKategori::all();
                 $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
-                return view('pages.simrs.erm.form.pengkajian-lanjutan', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian', 'path'));
+                $pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->first();
+                return view('pages.simrs.erm.form.pengkajian-lanjutan', compact('pengkajian', 'registration', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian', 'path'));
 
             case 'tindakan_medis':
                 $tindakan_medis = TindakanMedis::all();
@@ -324,8 +328,8 @@ class ERMController extends Controller
                 return view('pages.simrs.erm.form.perawat.assesment-gadar', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'rujuk_antar_rs':
-                $rujuk = RujukAntarRS::where('registration_id', $registration->id)->first();
-                return view('pages.simrs.erm.form.perawat.rujuk-antar-rs', compact('rujuk', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
+                return view('pages.simrs.erm.form.perawat.rujuk-antar-rs', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             default:
                 return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'path'));

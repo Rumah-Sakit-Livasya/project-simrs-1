@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS\CPPT;
 
+use App\Models\Signature;
 use App\Models\SIMRS\Registration;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,5 +24,10 @@ class CPPT extends Model implements AuditableContract
     public function registration()
     {
         return $this->belongsTo(Registration::class);
+    }
+
+    public function signature()
+    {
+        return $this->morphOne(Signature::class, 'signable');
     }
 }

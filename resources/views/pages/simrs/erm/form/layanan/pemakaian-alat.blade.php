@@ -275,9 +275,9 @@
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
             $('#dt-basic-example').dataTable({
                 responsive: false,
             });

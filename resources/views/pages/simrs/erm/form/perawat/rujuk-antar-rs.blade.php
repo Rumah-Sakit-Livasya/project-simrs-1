@@ -18,7 +18,7 @@
                             <div class="form-group">
                                 <label class="control-label text-primary">Tanggal & Jam Masuk</label>
                                 <input type="date" name="tgl_masuk" class="form-control"
-                                    value="{{ $rujuk?->tgl_masuk ?? now()->format('Y-m-d') }}">
+                                    value="{{ $pengkajian?->tgl_masuk ?? now()->format('Y-m-d') }}">
                             </div>
                         </div>
                     </div>
@@ -31,31 +31,31 @@
                             <div class="form-group">
                                 <label for="nama_ts" class="control-label text-primary">Nama Teman Sejawat</label>
                                 <input type="text" name="nama_ts" id="nama_ts" class="form-control"
-                                    value="{{ $rujuk?->nama_ts }}">
+                                    value="{{ $pengkajian?->nama_ts }}">
                             </div>
                             <div class="form-group">
                                 <label for="nama_pasien" class="control-label text-primary">Nama Pasien</label>
                                 <input type="text" name="nama_pasien" id="nama_pasien" class="form-control" readonly
-                                    value="{{ $rujuk?->nama_pasien ?? $registration->patient->name }}">
+                                    value="{{ $pengkajian?->nama_pasien ?? $registration->patient->name }}">
                             </div>
                             <div class="form-group">
                                 <label class="control-label text-primary">Alasan Pasien Keluar</label>
                                 <select name="alasan_keluar" class="select2 form-select">
                                     <option></option>
                                     <option value="Ruang Rawat Inap Penuh"
-                                        {{ ($rujuk?->alasan_keluar ?? '') == 'Ruang Rawat Inap Penuh' ? 'selected' : '' }}>
+                                        {{ ($pengkajian?->alasan_keluar ?? '') == 'Ruang Rawat Inap Penuh' ? 'selected' : '' }}>
                                         Ruang Rawat Inap Penuh
                                     </option>
                                     <option value="Sarana/Prasarana Tidak Tersedia"
-                                        {{ ($rujuk?->alasan_keluar ?? '') == 'Sarana/Prasarana Tidak Tersedia' ? 'selected' : '' }}>
+                                        {{ ($pengkajian?->alasan_keluar ?? '') == 'Sarana/Prasarana Tidak Tersedia' ? 'selected' : '' }}>
                                         Saran/PrasaranaTidak Tersedia
                                     </option>
                                     <option value="Kebutuhan Spesialistik Tidak Tersedia"
-                                        {{ ($rujuk?->alasan_keluar ?? '') == 'Kebutuhan Spesialistik Tidak Tersedia' ? 'selected' : '' }}>
+                                        {{ ($pengkajian?->alasan_keluar ?? '') == 'Kebutuhan Spesialistik Tidak Tersedia' ? 'selected' : '' }}>
                                         Kebutuhan Spesialistik TidakTersedia
                                     </option>
                                     <option value="Atas Permintaan Sendiri"
-                                        {{ ($rujuk?->alasan_keluar ?? '') == 'Atas Permintaan Sendiri' ? 'selected' : '' }}>
+                                        {{ ($pengkajian?->alasan_keluar ?? '') == 'Atas Permintaan Sendiri' ? 'selected' : '' }}>
                                         Atas Permintaan Sendiri
                                     </option>
                                 </select>
@@ -65,39 +65,39 @@
                             <div class="form-group">
                                 <label for="nama_rs" class="control-label text-primary">Nama Rumah Sakit</label>
                                 <input type="text" name="nama_rs" id="nama_rs" class="form-control"
-                                    value="{{ $rujuk?->nama_rs }}">
+                                    value="{{ $pengkajian?->nama_rs }}">
                             </div>
                             <div class="form-group">
                                 <label for="umur_pasien" class="control-label text-primary">Umur Pasien</label>
                                 <input type="text" name="umur_pasien" id="umur_pasien" class="form-control" readonly
-                                    value="{{ $rujuk?->umur_pasien ?? \Carbon\Carbon::parse($registration->patient->date_of_birth)->diff(\Carbon\Carbon::now())->format('%y tahun %m bulan') }}">
+                                    value="{{ $pengkajian?->umur_pasien ?? \Carbon\Carbon::parse($registration->patient->date_of_birth)->diff(\Carbon\Carbon::now())->format('%y tahun %m bulan') }}">
                             </div>
                         </div>
                         <div class="col-md-3 mb-3">
                             <div class="form-group">
                                 <label for="rs_tujuan" class="control-label text-primary">Rumah Sakit Tujuan</label>
                                 <input type="text" name="rs_tujuan" id="rs_tujuan" class="form-control"
-                                    value="{{ $rujuk?->rs_tujuan }}">
+                                    value="{{ $pengkajian?->rs_tujuan }}">
                             </div>
                             <div class="form-group">
                                 <label for="alamat_pasien" class="control-label text-primary">Alamat Pasien</label>
                                 <input type="text" name="alamat_pasien" id="alamat_pasien" class="form-control" readonly
-                                    value="{{ $rujuk?->alamat_pasien ?? $registration->patient->address }}">
+                                    value="{{ $pengkajian?->alamat_pasien ?? $registration->patient->address }}">
                             </div>
                         </div>
                         <div class="col-md-3 mb-3">
                             <div class="form-group">
                                 <label for="dokter_penerima" class="control-label text-primary">Dokter Penerima</label>
                                 <input type="text" name="dokter_penerima" id="dokter_penerima" class="form-control"
-                                    value="{{ $rujuk?->dokter_penerima }}">
+                                    value="{{ $pengkajian?->dokter_penerima }}">
                             </div>
                             <div class="form-group">
                                 <label class="control-label text-primary">Tanggal Masuk & Keluar</label>
                                 <div class="input-group">
                                     <input type="text" name="tgl_masuk" class="form-control" readonly
-                                        value="{{ $rujuk?->tgl_masuk ?? $registration?->registration_date }}">
+                                        value="{{ $pengkajian?->tgl_masuk ?? $registration?->registration_date }}">
                                     <input type="text" name="tgl_keluar" class="form-control" readonly
-                                        value="{{ $rujuk?->tgl_keluar ?? ($registration?->registration_close_date ?? 'Belum Keluar') }}">
+                                        value="{{ $pengkajian?->tgl_keluar ?? ($registration?->registration_close_date ?? 'Belum Keluar') }}">
                                 </div>
                             </div>
                         </div>
@@ -110,15 +110,15 @@
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
                                 <label class="control-label text-primary" for="laboratorium">Laboratorium</label>
-                                <textarea class="form-control" name="pemeriksaan_laboratorium" id="laboratorium" rows="3">{{ $rujuk?->pemeriksaan_laboratorium }}</textarea>
+                                <textarea class="form-control" name="pemeriksaan_laboratorium" id="laboratorium" rows="3">{{ $pengkajian?->pemeriksaan_laboratorium }}</textarea>
                             </div>
                             <div class="form-group">
                                 <label class="control-label text-primary" for="radiologi">Radiologi</label>
-                                <textarea class="form-control" name="pemeriksaan_radiologi" id="radiologi" rows="3">{{ $rujuk?->pemeriksaan_radiologi }}</textarea>
+                                <textarea class="form-control" name="pemeriksaan_radiologi" id="radiologi" rows="3">{{ $pengkajian?->pemeriksaan_radiologi }}</textarea>
                             </div>
                             <div class="form-group">
                                 <label class="control-label text-primary" for="lainnya">Lainnya</label>
-                                <textarea class="form-control" name="pemeriksaan_lainnya" id="lainnya" rows="3">{{ $rujuk?->pemeriksaan_lainnya }}</textarea>
+                                <textarea class="form-control" name="pemeriksaan_lainnya" id="lainnya" rows="3">{{ $pengkajian?->pemeriksaan_lainnya }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -130,7 +130,7 @@
                         <div class="col-md-12 mb-3">
                             <div class="form-group">
                                 {{-- <label class="form-label" for="example-textarea">Text area</label> --}}
-                                <textarea class="form-control" name="diagnosa_masuk" id="example-textarea" rows="5">{{ $rujuk?->diagnosa_masuk }}</textarea>
+                                <textarea class="form-control" name="diagnosa_masuk" id="example-textarea" rows="5">{{ $pengkajian?->diagnosa_masuk }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -140,13 +140,13 @@
                             <div class="form-group">
                                 <label class="control-label text-primary" for="tindakan_dan_terapi">Tindakan dan
                                     Terapi</label>
-                                <textarea class="form-control" name="tindakan_dan_terapi" id="tindakan_dan_terapi" rows="3">{{ $rujuk?->tindakan_dan_terapi }}</textarea>
+                                <textarea class="form-control" name="tindakan_dan_terapi" id="tindakan_dan_terapi" rows="3">{{ $pengkajian?->tindakan_dan_terapi }}</textarea>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="form-group">
                                 <label class="control-label text-primary" for="alasan-dirujuk">Alasan Dirujuk</label>
-                                <textarea class="form-control" name="alasan_dirujuk" id="alasan-dirujuk" rows="3">{{ $rujuk?->alasan_dirujuk }}</textarea>
+                                <textarea class="form-control" name="alasan_dirujuk" id="alasan-dirujuk" rows="3">{{ $pengkajian?->alasan_dirujuk }}</textarea>
                             </div>
                         </div>
                         <div class="col-md-6 my-3">
@@ -154,14 +154,14 @@
                                 <label for="edukasi_pasien" class="control-label text-primary">Edukasi terhadap pasien dan
                                     keluarga</label>
                                 <input type="text" name="edukasi_pasien" id="edukasi_pasien" class="form-control"
-                                    value="{{ $rujuk?->edukasi_pasien }}">
+                                    value="{{ $pengkajian?->edukasi_pasien }}">
                             </div>
                         </div>
                         <div class="col-md-6 my-3">
                             <div class="form-group">
                                 <label for="dpjp" class="control-label text-primary">Dokter Penanggung Jawab</label>
                                 <input type="text" name="dpjp" id="dpjp" class="form-control"
-                                    value="{{ $rujuk?->dpjp ?? $registration->doctor->employee->fullname }}">
+                                    value="{{ $pengkajian?->dpjp ?? $registration->doctor->employee->fullname }}">
                             </div>
                         </div>
                     </div>

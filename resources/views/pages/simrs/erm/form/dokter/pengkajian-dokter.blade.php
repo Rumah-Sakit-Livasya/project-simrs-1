@@ -24,7 +24,7 @@
                                 <div class="input-group">
                                     <div class="input-group">
                                         <input id="pr" type="text" name="pr" class="form-control"
-                                            value="{{ $pengkajian?->pr ?? $triage?->pr }}">
+                                            value="{{ $pengkajian?->pr ?? ($triage?->pr ?? $data?->pr) }}">
                                         <div class="input-group-append">
                                             <span class="input-group-text">x/menit</span>
                                         </div>
@@ -37,7 +37,7 @@
                                 <label for="rr" class="text-primary">Respirasi (RR)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="rr" name="rr" type="text"
-                                        value="{{ $pengkajian?->rr ?? $triage?->rr }}">
+                                        value="{{ $pengkajian?->rr ?? ($triage?->rr ?? $data?->rr) }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">x/menit</span>
                                     </div>
@@ -49,7 +49,8 @@
                                 <label for="body_height">Tinggi Badan (cm)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric calc-bmi-pd" id="body_height" name="body_height"
-                                        type="text" value="{{ $pengkajian?->body_height ?? $triage?->body_height }}"">
+                                        type="text"
+                                        value="{{ $pengkajian?->body_height ?? ($triage?->body_height ?? $data?->body_height) }}">">
                                     <div class="input-group-append">
                                         <span class="input-group-text">cm</span>
                                     </div>
@@ -61,7 +62,8 @@
                                 <label for="body_weight">Berat Badan (kg)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric calc-bmi-pd" id="body_weight" name="body_weight"
-                                        type="text" value="{{ $pengkajian?->body_weight ?? $triage?->body_weight }}" }}">
+                                        type="text"
+                                        value="{{ $pengkajian?->body_weight ?? ($triage?->body_weight ?? $data?->body_weight) }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">kg</span>
                                     </div>
@@ -77,7 +79,7 @@
                                 <label for="bp">Tensi (BP)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="bp" name="bp" type="text"
-                                        value="{{ $pengkajian?->bp ?? $triage?->bp }}">
+                                        value="{{ $pengkajian?->bp ?? ($triage?->bp ?? $data?->bp) }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">mmHg</span>
                                     </div>
@@ -89,7 +91,7 @@
                                 <label for="temperatur">Suhu (T)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="temperatur" name="temperatur" type="text"
-                                        value="{{ $pengkajian?->temperatur ?? $triage?->temperatur }}">
+                                        value="{{ $pengkajian?->temperatur ?? ($triage?->temperatur ?? $data?->temperatur) }}">
 
                                     <div class="input-group-append">
                                         <span class="input-group-text">°C</span>
@@ -105,7 +107,7 @@
                                 <label for="bmi">Index Massa Tubuh</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="bmi" name="bmi" readonly
-                                        type="text" value="{{ $pengkajian?->bmi ?? $triage?->bmi }}">
+                                        type="text" value="{{ $pengkajian?->bmi ?? ($triage?->bmi ?? $data?->bmi) }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">Kg/m²</span>
                                     </div>
@@ -116,7 +118,7 @@
                             <div class="form-group">
                                 <label for="kat_bmi">Katerogi IMT</label>
                                 <input class="form-control" id="kat_bmi" name="kat_bmi" readonly type="text"
-                                    value="{{ $pengkajian?->kat_bmi ?? $triage?->kat_bmi }}">
+                                    value="{{ $pengkajian?->kat_bmi ?? ($triage?->kat_bmi ?? $data?->kat_bmi) }}">
                             </div>
                         </div>
                     </div>
@@ -126,7 +128,7 @@
                             <label for="sp02">SP 02</label>
                             <div class="input-group">
                                 <input class="form-control" id="sp02" name="sp02" type="text"
-                                    value="{{ $pengkajian?->sp02 ?? $triage?->sp02 }}">
+                                    value="{{ $pengkajian?->sp02 ?? ($triage?->sp02 ?? $data?->sp02) }}">
                                 <div class="input-group-append">
                                     <span class="input-group-text">%</span>
                                 </div>
@@ -139,49 +141,46 @@
                             <div class="form-group">
                                 <label for="diagnosa_keperawatan">Diagnosa Keperawatan</label>
                                 <select name="diagnosa_keperawatan" id="diagnosa_keperawatan"
-                                    class="form-control select2" value="{{ $pengkajian?->diagnosa_keperawatan }}">
-                                    <option value="-"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == '-' ? 'selected' : '' }}>
-                                        -</option>
+                                    class="form-control select2">
+                                    @php
+                                        $selectedDiagnosa =
+                                            $pengkajian?->diagnosa_keperawatan ?? ($data?->diagnosa_keperawatan ?? '');
+                                    @endphp
+                                    <option value="-" {{ $selectedDiagnosa === '-' ? 'selected' : '' }}>-</option>
                                     <option value="Gangguan rasa nyaman"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Gangguan rasa nyaman' ? 'selected' : '' }}>
-                                        Gangguan rasa nyaman</option>
-                                    <option value="Nyeri"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Nyeri' ? 'selected' : '' }}>
-                                        Nyeri</option>
+                                        {{ $selectedDiagnosa === 'Gangguan rasa nyaman' ? 'selected' : '' }}>Gangguan rasa
+                                        nyaman</option>
+                                    <option value="Nyeri" {{ $selectedDiagnosa === 'Nyeri' ? 'selected' : '' }}>Nyeri
+                                    </option>
                                     <option value="Pola Nafas tidak efektif"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Pola Nafas tidak efektif' ? 'selected' : '' }}>
-                                        Pola Nafas tidak efektif</option>
+                                        {{ $selectedDiagnosa === 'Pola Nafas tidak efektif' ? 'selected' : '' }}>Pola Nafas
+                                        tidak efektif</option>
                                     <option value="Bersihan jalan nafas tidak efektif"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Bersihan jalan nafas tidak efektif' ? 'selected' : '' }}>
+                                        {{ $selectedDiagnosa === 'Bersihan jalan nafas tidak efektif' ? 'selected' : '' }}>
                                         Bersihan jalan nafas tidak efektif</option>
-                                    <option value="Nyeri Akut"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Nyeri Akut' ? 'selected' : '' }}>
+                                    <option value="Nyeri Akut" {{ $selectedDiagnosa === 'Nyeri Akut' ? 'selected' : '' }}>
                                         Nyeri Akut</option>
                                     <option value="Nyeri Kronis"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Nyeri Kronis' ? 'selected' : '' }}>
-                                        Nyeri Kronis</option>
+                                        {{ $selectedDiagnosa === 'Nyeri Kronis' ? 'selected' : '' }}>Nyeri Kronis</option>
                                     <option value="Resiko Infeksi"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Resiko Infeksi' ? 'selected' : '' }}>
-                                        Resiko Infeksi</option>
+                                        {{ $selectedDiagnosa === 'Resiko Infeksi' ? 'selected' : '' }}>Resiko Infeksi
+                                    </option>
                                     <option value="Harga diri Rendah"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Harga diri Rendah' ? 'selected' : '' }}>
-                                        Harga diri Rendah</option>
+                                        {{ $selectedDiagnosa === 'Harga diri Rendah' ? 'selected' : '' }}>Harga diri Rendah
+                                    </option>
                                     <option value="Resiko Perilaku Kekerasan"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Resiko Perilaku Kekerasan' ? 'selected' : '' }}>
-                                        Resiko Perilaku Kekerasan</option>
-                                    <option value="Halusinasi"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Halusinasi' ? 'selected' : '' }}>
+                                        {{ $selectedDiagnosa === 'Resiko Perilaku Kekerasan' ? 'selected' : '' }}>Resiko
+                                        Perilaku Kekerasan</option>
+                                    <option value="Halusinasi" {{ $selectedDiagnosa === 'Halusinasi' ? 'selected' : '' }}>
                                         Halusinasi</option>
                                     <option value="Isolasi Sosial"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Isolasi Sosial' ? 'selected' : '' }}>
-                                        Isolasi Sosial</option>
+                                        {{ $selectedDiagnosa === 'Isolasi Sosial' ? 'selected' : '' }}>Isolasi Sosial
+                                    </option>
                                     <option value="Resiko Bunuh Diri"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Resiko Bunuh Diri' ? 'selected' : '' }}>
-                                        Resiko Bunuh Diri</option>
-                                    <option value="Waham"
-                                        {{ $pengkajian && $pengkajian->diagnosa_keperawatan == 'Waham' ? 'selected' : '' }}>
-                                        Waham</option>
+                                        {{ $selectedDiagnosa === 'Resiko Bunuh Diri' ? 'selected' : '' }}>Resiko Bunuh Diri
+                                    </option>
+                                    <option value="Waham" {{ $selectedDiagnosa === 'Waham' ? 'selected' : '' }}>Waham
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -190,25 +189,28 @@
                             <div class="form-group">
                                 <label for="rencana_tindak_lanjut">Rencana Tindak Lanjut</label>
                                 <select name="rencana_tindak_lanjut" id="rencana_tindak_lanjut"
-                                    class="form-control select2" value="{{ $pengkajian?->rencana_tidak_lanjut }}">
-                                    <option value="-"
-                                        {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == '-' ? 'selected' : '' }}>
-                                        -</option>
+                                    class="form-control select2">
+                                    @php
+                                        $selectedRencana =
+                                            $pengkajian->rencana_tindak_lanjut ?? ($data?->rencana_tindak_lanjut ?? '');
+                                    @endphp
+                                    <option value="-" {{ $selectedRencana === '-' ? 'selected' : '' }}>-</option>
                                     <option value="Kolaborasi Dokter"
-                                        {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Kolaborasi Dokter' ? 'selected' : '' }}>
-                                        Kolaborasi Dokter</option>
+                                        {{ $selectedRencana === 'Kolaborasi Dokter' ? 'selected' : '' }}>Kolaborasi Dokter
+                                    </option>
                                     <option value="Perawatan Luka"
-                                        {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Perawatan Luka' ? 'selected' : '' }}>
-                                        Perawatan Luka</option>
+                                        {{ $selectedRencana === 'Perawatan Luka' ? 'selected' : '' }}>Perawatan Luka
+                                    </option>
                                     <option value="Memberikan Edukasi"
-                                        {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Memberikan Edukasi' ? 'selected' : '' }}>
-                                        Memberikan Edukasi</option>
+                                        {{ $selectedRencana === 'Memberikan Edukasi' ? 'selected' : '' }}>Memberikan
+                                        Edukasi</option>
                                     <option value="Mengukur tanda - tanda vital"
-                                        {{ $pengkajian && $pengkajian->rencana_tindak_lanjut == 'Mengukur tanda - tanda vital' ? 'selected' : '' }}>
+                                        {{ $selectedRencana === 'Mengukur tanda - tanda vital' ? 'selected' : '' }}>
                                         Mengukur tanda - tanda vital</option>
                                 </select>
                             </div>
                         </div>
+
                     </div>
 
                     <div class="row mt-3">
@@ -475,9 +477,9 @@
                 placeholder: 'Pilih Klinik',
             });
 
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
 
             $('#toggle-pasien').on('click', function() {
                 var target = $('#js-slide-left'); // Mengambil elemen target berdasarkan data-target

@@ -65,7 +65,7 @@
                                                     </div>
                                                     <div class="card-body p-0">
                                                         <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="8"
-                                                            placeholder="Keluhan Utama">Keluhan Utama: {{ $registration?->pengkajian_nurse_rajal?->keluhan_utama }}</textarea>
+                                                            placeholder="Keluhan Utama">Keluhan Utama: {{ $data?->keluhan_utama }}</textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -78,14 +78,14 @@
                                                     </div>
                                                     <div class="card-body p-0">
                                                         <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="8">
-Nadi (PR): {{ $registration?->pengkajian_dokter_rajal?->pr }}
-Respirasi (RR): {{ $registration?->pengkajian_dokter_rajal?->rr }}
-Tensi (BP): {{ $registration?->pengkajian_dokter_rajal?->bp }}
-Suhu (T): {{ $registration?->pengkajian_dokter_rajal?->temperatur }}
-Tinggi Badan: {{ $registration?->pengkajian_dokter_rajal?->body_height }}
-Berat Badan: {{ $registration?->pengkajian_dokter_rajal?->body_weight }}
-SPO2 : {{ $registration?->pengkajian_dokter_rajal?->sp02 }}
-Skor Nyeri: {{ $registration?->pengkajian_dokter_rajal?->skor_nyeri }}
+Nadi (PR): {{ $data?->pr }}
+Respirasi (RR): {{ $data?->rr }}
+Tensi (BP): {{ $data?->bp }}
+Suhu (T): {{ $data?->temperatur }}
+Tinggi Badan: {{ $data?->body_height }}
+Berat Badan: {{ $data?->body_weight }}
+SPO2 : {{ $data?->sp02 }}
+Skor Nyeri: {{ $data?->skor_nyeri }}
                                                         </textarea>
                                                     </div>
                                                 </div>
@@ -106,7 +106,7 @@ Skor Nyeri: {{ $registration?->pengkajian_dokter_rajal?->skor_nyeri }}
                                                     <div class="card-body p-0">
                                                         <textarea class="form-control border-0 rounded-0" id="assesment" name="assesment" rows="8">
 Diagnosa Kerja:
-Diagnosa Keperawatan: {{ $registration?->pengkajian_dokter_rajal?->diagnosa_keperawatan }}
+Diagnosa Keperawatan: {{ $data?->diagnosa_keperawatan }}
                                                         </textarea>
                                                     </div>
                                                 </div>
@@ -146,12 +146,18 @@ Terapi / Tindakan :
                                             </div>
                                         </div>
 
+                                        @include('pages.simrs.erm.partials.signature-field', [
+                                            'judul' => 'Perawat,',
+                                            'pic' => auth()->user()->employee->fullname,
+                                            'role' => 'perawat',
+                                        ])
+
                                         <!-- Action Buttons -->
                                         <div class="d-flex justify-content-between mt-4">
                                             <button type="button" class="btn btn-outline-secondary" id="tutup">
                                                 <span class="mdi mdi-arrow-up-bold-circle-outline"></span> Tutup
                                             </button>
-                                            <button type="button" class="btn btn-primary btn-saves-soap" id="bsSOAP"
+                                            <button type="submit" class="btn btn-primary btn-saves-soap" id="bsSOAP"
                                                 name="save">
                                                 <span class="mdi mdi-content-save"></span> Simpan
                                             </button>
@@ -219,13 +225,6 @@ Terapi / Tindakan :
                         <div class="card-body">
                             <div class="table-responsive no-margin">
                                 <table id="cppt-dokter" class="table table-striped table-bordered" style="width:100%">
-                                    <thead>
-                                        <tr>
-                                            <th style="width:25%;">Tanggal</th>
-                                            <th style="width: 70%;">Catatan</th>
-                                            <th style="width: 6%;">&nbsp;</th>
-                                        </tr>
-                                    </thead>
                                     <tbody id="list_soap_dokter">
                                         <tr>
                                             <td class="text-center">
@@ -255,13 +254,6 @@ Terapi / Tindakan :
                         <div class="card-body">
                             <div class="table-responsive no-margin">
                                 <table id="cppt-perawat" class="table table-striped table-bordered" style="width:100%">
-                                    <thead>
-                                        <tr>
-                                            <th style="width:25%;">Tanggal</th>
-                                            <th style="width: 70%;">Catatan</th>
-                                            <th style="width: 6%;">&nbsp;</th>
-                                        </tr>
-                                    </thead>
                                     <tbody id="list_soap_perawat">
                                         <tr>
                                             <td class="text-center">
@@ -292,12 +284,10 @@ Terapi / Tindakan :
         </div>
     @endif
 @endsection
-@section('plugin')
+@section('plugin-erm')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-
-    @include('pages.simrs.erm.partials.action-js.cppt')
 
     <script>
         $(document).ready(function() {
@@ -341,6 +331,11 @@ Terapi / Tindakan :
                 });
             }
 
+            // Saat tombol Save Final diklik
+            $('#bsSOAP').on('click', function() {
+                submitFormCPPT(); // Panggil fungsi submitForm dengan parameter final
+            });
+
             $('body').addClass('layout-composed');
             $('.select2').select2({
                 placeholder: 'Pilih Item',
@@ -348,9 +343,9 @@ Terapi / Tindakan :
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
 
             $('#toggle-pasien').on('click', function() {
                 var target = $('#js-slide-left'); // Mengambil elemen target berdasarkan data-target
@@ -368,4 +363,5 @@ Terapi / Tindakan :
             });
         });
     </script>
+    @include('pages.simrs.erm.partials.action-js.cppt')
 @endsection

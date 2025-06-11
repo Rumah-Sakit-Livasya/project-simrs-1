@@ -177,12 +177,8 @@
                                         class="select2 form-control @error('doctor_id') is-invalid @enderror filter-pasien"
                                         name="doctor_id" id="doctor_id">
                                         <option value=""></option>
-                                        @foreach ($jadwal_dokter as $jadwal)
-                                            <option value="{{ $jadwal->doctor_id }}"
-                                                {{ ($registration->doctor_id ?? '') == $jadwal->doctor_id ? 'selected' : '' }}>
-                                                {{ $jadwal->doctor->employee->fullname }}</option>
-                                        @endforeach
                                     </select>
+
                                     @error('doctor_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -306,12 +302,41 @@
             $('.select2').select2({
                 placeholder: 'Pilih Item',
             });
-            $('#departement_id').select2({
-                placeholder: 'Pilih Klinik',
+
+            function loadDoctors(departementId) {
+                if (departementId) {
+                    $.ajax({
+                        url: '/api/simrs/erm/get-jadwal-dokter/' + departementId,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            $('#doctor_id').empty();
+                            $('#doctor_id').append('<option value=""></option>');
+                            $.each(data, function(key, value) {
+                                $('#doctor_id').append('<option value="' + value.doctor_id +
+                                    '">' + value.doctor_name + '</option>');
+                            });
+
+                            // Preselect if available
+                            var selectedDoctorId = $('#doctor_id').data('selected');
+                            if (selectedDoctorId) {
+                                $('#doctor_id').val(selectedDoctorId).trigger('change');
+                            }
+                        }
+                    });
+                } else {
+                    $('#doctor_id').empty().append('<option value=""></option>');
+                }
+            }
+
+            $(window).on('load', function() {
+                loadDoctors($('#departement_id').val());
             });
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
+
+            $('#departement_id').on('change', function() {
+                loadDoctors($(this).val());
             });
+
 
             if (pengkajian) {
                 $('#diagnosa-keperawatan').val(pengkajian.diagnosa_keperawatan).select2();

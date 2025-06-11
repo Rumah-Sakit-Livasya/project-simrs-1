@@ -1019,9 +1019,9 @@
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
 
             if (pengkajian) {
                 $('#diagnosa-keperawatan').val(pengkajian.diagnosa_keperawatan).select2();
@@ -1049,37 +1049,37 @@
             });
 
             // Filter Pasien
-            $('.filter-pasien').on('change', function(e) {
-                e.preventDefault(); // Mencegah form submit langsung
-                console.log('changed')
-                $.ajax({
-                    url: "{{ route('poliklinik.filter-pasien') }}",
-                    type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}", // Tambahkan token CSRF
-                        route: window.location.href,
-                        departement_id: $('#filter_pasien #departement_id').val(),
-                        doctor_id: $('#filter_pasien #doctor_id').val()
-                    },
+            // $('.filter-pasien').on('change', function(e) {
+            //     e.preventDefault(); // Mencegah form submit langsung
+            //     console.log('changed')
+            //     $.ajax({
+            //         url: "{{ route('poliklinik.filter-pasien') }}",
+            //         type: "POST",
+            //         data: {
+            //             _token: "{{ csrf_token() }}", // Tambahkan token CSRF
+            //             route: window.location.href,
+            //             departement_id: $('#filter_pasien #departement_id').val(),
+            //             doctor_id: $('#filter_pasien #doctor_id').val()
+            //         },
 
-                    dataType: "json",
-                    beforeSend: function() {
-                        $('#daftar-pasien .col-12').html(
-                            '<p>Sedang memuat...</p>'); // Tambahkan loading
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            $('#daftar-pasien .col-12').html(response.html);
-                        } else {
-                            $('#daftar-pasien .col-12').html(
-                                '<p>Tidak ada data pasien.</p>');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        alert("Terjadi kesalahan, silakan coba lagi.");
-                    }
-                });
-            });
+            //         dataType: "json",
+            //         beforeSend: function() {
+            //             $('#daftar-pasien .col-12').html(
+            //                 '<p>Sedang memuat...</p>'); // Tambahkan loading
+            //         },
+            //         success: function(response) {
+            //             if (response.success) {
+            //                 $('#daftar-pasien .col-12').html(response.html);
+            //             } else {
+            //                 $('#daftar-pasien .col-12').html(
+            //                     '<p>Tidak ada data pasien.</p>');
+            //             }
+            //         },
+            //         error: function(xhr, status, error) {
+            //             alert("Terjadi kesalahan, silakan coba lagi.");
+            //         }
+            //     });
+            // });
         });
     </script>
 @endsection

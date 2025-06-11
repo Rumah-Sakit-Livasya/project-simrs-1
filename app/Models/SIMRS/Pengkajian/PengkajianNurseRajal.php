@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS\Pengkajian;
 
+use App\Models\Signature;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,5 +30,10 @@ class PengkajianNurseRajal extends Model implements \OwenIt\Auditing\Contracts\A
     public function pengkajian_dokter_rajal()
     {
         return $this->hasOne(PengkajianDokterRajal::class, 'registration_id', 'registration_id');
+    }
+
+    public function signature()
+    {
+        return $this->morphOne(Signature::class, 'signable');
     }
 }

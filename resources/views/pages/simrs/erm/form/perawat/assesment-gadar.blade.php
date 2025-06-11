@@ -111,6 +111,7 @@
                     @include('pages.simrs.erm.form.perawat.component.skrining-gizi')
                     @include('pages.simrs.erm.form.perawat.component.barthel-index')
                     @include('pages.simrs.erm.form.perawat.component.perencanaan-pulang')
+
                     @include('pages.simrs.erm.partials.signature-field', [
                         'judul' => 'Perawat,',
                         'pic' => auth()->user()->employee->fullname,
