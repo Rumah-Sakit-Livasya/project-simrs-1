@@ -225,8 +225,8 @@
             </div>
         </div>
     </main>
-    @include('pages.simrs.erm.partials.ttd')
     @include('pages.simrs.erm.partials.ttd-many')
+    @include('pages.simrs.erm.partials.ttd')
 @endsection
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
@@ -265,9 +265,9 @@
             $('#signatureModalMany').data('target-index', index).modal('show');
 
             // Atur data-index di canvas
-            const canvas = document.getElementById('canvas-many');
-            if (canvas) {
-                canvas.setAttribute('data-index', index);
+            const canvasMany = document.getElementById('canvas-many');
+            if (canvasMany) {
+                canvasMany.setAttribute('data-index', index);
                 clearCanvas(); // bersihkan canvas sebelum mulai tanda tangan baru
             }
         }
@@ -432,6 +432,7 @@
             // }
         });
     </script>
+    @yield('signature')
     @yield('plugin-erm')
     @include('pages.simrs.poliklinik.partials.action-js.pengkajian-perawat')
 @endsection

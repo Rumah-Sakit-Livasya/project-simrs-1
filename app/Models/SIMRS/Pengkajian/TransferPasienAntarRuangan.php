@@ -28,22 +28,19 @@ class TransferPasienAntarRuangan extends Model implements \OwenIt\Auditing\Contr
         return $this->morphMany(Signature::class, 'signable');
     }
 
-    public function signaturePengirim()
+    public function getSignaturePengirimAttribute()
     {
         return $this->signatures()->where('role', 'pengirim')->latest()->first();
     }
-
-    public function signaturePenerima()
+    public function getSignaturePenerimaAttribute()
     {
         return $this->signatures()->where('role', 'penerima')->latest()->first();
     }
-
-    public function signaturePengirimBalik()
+    public function getSignaturePengirimBalikAttribute()
     {
         return $this->signatures()->where('role', 'pengirim_balik')->latest()->first();
     }
-
-    public function signaturePenerimaBalik()
+    public function getSignaturePenerimaBalikAttribute()
     {
         return $this->signatures()->where('role', 'penerima_balik')->latest()->first();
     }
