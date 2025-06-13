@@ -21,4 +21,12 @@ class WarehouseMasterGudang extends Model implements AuditableContract
     public function pr_pharmacy(){
         return $this->hasMany(ProcurementPurchaseRequestPharmacy::class, 'gudang_id','id');
     }
+
+    public function pb_pharmacy(){
+        return $this->hasMany(WarehousePenerimaanBarangFarmasi::class, 'gudang_id','id');
+    }
+
+    public function stored_pharmacy(){
+        return $this->hasMany(StoredBarangFarmasi::class, 'gudang_id','id');
+    }
 }

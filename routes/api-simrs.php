@@ -26,6 +26,7 @@ use App\Http\Controllers\WarehouseKategoriBarangController;
 use App\Http\Controllers\WarehouseKelompokBarangController;
 use App\Http\Controllers\WarehouseMasterGudangController;
 use App\Http\Controllers\WarehousePabrikController;
+use App\Http\Controllers\WarehousePenerimaanBarangFarmasiController;
 use App\Http\Controllers\WarehousePurchaseRequestNonPharmacy;
 use App\Http\Controllers\WarehousePurchaseRequestPharmacy;
 use App\Http\Controllers\WarehouseSatuanBarangController;
@@ -255,6 +256,14 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::put("/update/{id}", [WarehousePurchaseRequestNonPharmacy::class, 'update'])->name('warehouse.purchase-request.non-pharmacy.update');
                 Route::delete("/destroy/{id}", [WarehousePurchaseRequestNonPharmacy::class, 'destroy'])->name('warehouse.purchase-request.non-pharmacy.delete');
                 Route::get("/get/item-gudang/{gudang_id}", [WarehousePurchaseRequestNonPharmacy::class, 'get_item_gudang'])->name('warehouse.purchase-request.non-pharmacy.get.item-gudang');
+            });
+        });
+
+        Route::prefix("penerimaan-barang")->group(function(){
+            Route::prefix("pharmacy")->group(function(){
+                Route::post("/store", [WarehousePenerimaanBarangFarmasiController::class, 'store'])->name('warehouse.penerimaan-barang.pharmacy.store');
+                Route::put("/update/{id}", [WarehousePenerimaanBarangFarmasiController::class, 'update'])->name('warehouse.penerimaan-barang.pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehousePenerimaanBarangFarmasiController::class, 'destroy'])->name('warehouse.penerimaan-barang.pharmacy.delete');
             });
         });
     });

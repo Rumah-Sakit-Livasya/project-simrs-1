@@ -25,7 +25,7 @@ class WarehouseZatAktifController extends Controller
 
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
-            $zats = $query->orderBy('created_at', 'asc')->get();
+            $zats = $query->orderBy('created_at', 'desc')->get();
         } else {
             // Return all data if no filter is applied
             $zats = WarehouseZatAktif::all();

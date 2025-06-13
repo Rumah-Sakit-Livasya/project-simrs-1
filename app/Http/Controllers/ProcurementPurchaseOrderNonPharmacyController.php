@@ -43,7 +43,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
 
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
-            $po = $query->orderBy('created_at', 'asc')->get();
+            $po = $query->orderBy('created_at', 'desc')->get();
         } else {
             // Return all data if no filter is applied
             $po = ProcurementPurchaseOrderNonPharmacy::all();
@@ -106,7 +106,10 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = ProcurementPurchaseOrderNonPharmacy::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = ProcurementPurchaseOrderNonPharmacy::
+            whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
         return $count . "/URPO/" . $year . $month;
@@ -262,7 +265,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
 
         DB::beginTransaction();
         try {
-            $po = $poocurementPurchaseOrderNonPharmacy->where("id", $id)->firstOrFail();
+            $po = $poocurementPurchaseOrderNonPharmacy->findOrFail($id);
             $po->update($validatedData1);
 
             if ($validatedData1["status"] == "final") {

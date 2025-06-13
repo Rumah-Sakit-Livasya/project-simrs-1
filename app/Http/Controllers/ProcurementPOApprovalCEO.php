@@ -55,8 +55,8 @@ class ProcurementPOApprovalCEO extends Controller
 
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
-            $po1 = $query1->orderBy('created_at', 'asc')->get();
-            $po2 = $query2->orderBy('created_at', 'asc')->get();
+            $po1 = $query1->orderBy('created_at', 'desc')->get();
+            $po2 = $query2->orderBy('created_at', 'desc')->get();
             $po1 = $po1->all();
             $po2 = $po2->all();
             $po = collect(array_merge($po1, $po2));

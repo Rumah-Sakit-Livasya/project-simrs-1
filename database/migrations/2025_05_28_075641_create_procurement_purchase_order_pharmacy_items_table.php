@@ -27,6 +27,7 @@ return new class extends Migration {
             $table->integer("harga_barang");
             $table->integer("qty");
             $table->integer("qty_bonus");
+            $table->integer("qty_received")->default(0);
             $table->integer("discount_nominal");
             $table->integer("subtotal");
         });

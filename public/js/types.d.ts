@@ -457,6 +457,7 @@ interface BarangFarmasi {
     golongan_id: number | null;
     kelompok_id: number | null;
     satuan_id: number;
+    satuan?: Satuan;
     principal: string | null;
     harga_principal: number | null;
     diskon_principal: number | null;
@@ -502,6 +503,105 @@ interface MinMaxStock {
     gudang_id: number;
     min: number;
     max: number;
+}
+
+interface ItemPO {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    po_id: number;
+    pri_id: number | null;
+    barang_id: number;
+    barang?: Barang;
+    kode_barang: string;
+    nama_barang: string;
+    unit_barang: string;
+    harga_barang: number;
+    qty: number;
+    qty_bonus: number;
+    subtotal: number;
+    discount_nominal: number;
+    qty_received: number;
+}
+
+interface Supplier {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    kategori: string;
+    nama: string;
+    alamat: string;
+    phone: string;
+    fax: string;
+    email: string;
+    contact_person: string;
+    contact_person_phone?: string | null;
+    contact_person_email: string;
+    no_rek: string;
+    bank: string;
+    top?: string | null;
+    tipe_top: string;
+    ppn: number;
+    aktif: number;
+}
+
+interface PurchaseOrder {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    kode_po: string;
+    user_id: number;
+    app_user_id: number;
+    ceo_app_user_id: number;
+    supplier_id: number;
+    tanggal_po: string;
+    tanggal_app: string;
+    tanggal_app_ceo: string;
+    tanggal_kirim: string;
+    is_auto: number;
+    top: string;
+    tipe_top: string;
+    tipe: string;
+    status: string;
+    approval: string;
+    approval_ceo: string;
+    ppn: number;
+    nominal: number;
+    pic_terima: string;
+    keterangan: string;
+    keterangan_approval?: string | null;
+    keterangan_approval_ceo?: string | null;
+    items?: ItemPO[];
+    supplier: Supplier;
+}
+
+interface Barang {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    kode: string;
+    keterangan: string;
+    hna: number;
+    ppn: number;
+    ppn_rajal: number;
+    ppn_ranap: number;
+    tipe: string;
+    formularium: string;
+    jenis_obat: string;
+    exp: string;
+    aktif: number;
+    kategori_id: number;
+    golongan_id: number;
+    kelompok_id: number;
+    satuan_id: number;
+    principal: string;
+    harga_principal: number;
+    diskon_principal: number;
 }
 
 type PatientType = "rajal" | "ranap" | "otc";

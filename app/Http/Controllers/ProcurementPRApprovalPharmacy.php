@@ -48,7 +48,7 @@ class ProcurementPRApprovalPharmacy extends Controller
 
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
-            $pr = $query->orderBy('created_at', 'asc')->get();
+            $pr = $query->orderBy('created_at', 'desc')->get();
         } else {
             // Return all data if no filter is applied
             $pr = ProcurementPurchaseRequestPharmacy::where("status", "final")->get();

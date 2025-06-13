@@ -27,4 +27,8 @@ class ProcurementPurchaseOrderPharmacyItems extends Model implements AuditableCo
     {
         return $this->belongsTo(ProcurementPurchaseOrderPharmacy::class, 'po_id');
     }
+
+    public function pb(){
+        return $this->hasMany(WarehousePenerimaanBarangFarmasiItems::class, 'poi_id');
+    }
 }

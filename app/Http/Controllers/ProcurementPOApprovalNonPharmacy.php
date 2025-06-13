@@ -45,7 +45,7 @@ class ProcurementPOApprovalNonPharmacy extends Controller
 
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
-            $po = $query->where("status", "final")->orderBy('created_at', 'asc')->get();
+            $po = $query->where("status", "final")->orderBy('created_at', 'desc')->get();
         } else {
             // Return all data if no filter is applied
             $po = ProcurementPurchaseOrderNonPharmacy::where("approval", "unreviewed")->where("status", "final")->get();

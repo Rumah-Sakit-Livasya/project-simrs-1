@@ -9,7 +9,7 @@ use App\Models\ProcurementPurchaseRequestPharmacyItems;
 use App\Models\WarehouseBarangFarmasi;
 use App\Models\WarehouseSupplier;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class ProcurementPurchaseOrderPharmacyController extends Controller
@@ -44,7 +44,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
 
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
-            $po = $query->orderBy('created_at', 'asc')->get();
+            $po = $query->orderBy('created_at', 'desc')->get();
         } else {
             // Return all data if no filter is applied
             $po = ProcurementPurchaseOrderPharmacy::all();
@@ -107,7 +107,9 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = ProcurementPurchaseOrderPharmacy::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = ProcurementPurchaseOrderPharmacy::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
         return $count . "/FRPO/" . $year . $month;
@@ -187,7 +189,6 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
             DB::rollBack();
             return back()->with('error', $e->getMessage());
         }
-
     }
 
     public function print($id)
@@ -263,7 +264,7 @@ class ProcurementPurchaseOrderPharmacyController extends Controller
 
         DB::beginTransaction();
         try {
-            $po = $poocurementPurchaseOrderPharmacy->where("id", $id)->firstOrFail();
+            $po = $poocurementPurchaseOrderPharmacy->findOrFail($id);
             $po->update($validatedData1);
 
             if ($validatedData1["status"] == "final") {

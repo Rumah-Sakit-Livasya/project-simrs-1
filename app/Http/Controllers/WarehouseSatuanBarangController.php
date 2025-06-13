@@ -25,7 +25,7 @@ class WarehouseSatuanBarangController extends Controller
 
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
-            $satuans = $query->orderBy('created_at', 'asc')->get();
+            $satuans = $query->orderBy('created_at', 'desc')->get();
         } else {
             // Return all data if no filter is applied
             $satuans = WarehouseSatuanBarang::all();
