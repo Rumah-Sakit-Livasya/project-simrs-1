@@ -27,4 +27,9 @@ class ProcurementPurchaseOrderNonPharmacyItems extends Model implements Auditabl
     {
         return $this->belongsTo(ProcurementPurchaseOrderNonPharmacy::class, 'po_id');
     }
+
+    public function pb()
+    {
+        return $this->hasMany(WarehousePenerimaanBarangNonFarmasiItems::class, 'poi_id');
+    }
 }

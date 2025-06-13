@@ -690,7 +690,7 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $item->nama_barang }}</td>
-                        <td align="right">{{ tgl($item->tanggal_exp) }}</td>
+                        <td align="right">{{ isset($item->tanggal_exp) ? tgl($item->tanggal_exp) : '' }}</td>
                         <td align="right">{{ $item->no_batch }}</td>
                         <td align="right">{{ $item->qty }}</td>
                         <td>{{ $item->unit_barang }}</td>

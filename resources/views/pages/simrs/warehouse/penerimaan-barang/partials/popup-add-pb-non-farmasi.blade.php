@@ -58,7 +58,7 @@
                         <div id="loading-page"></div>
                         <div class="panel-content">
                             <form id="form-pr" name="form-pr"
-                                action="{{ route('warehouse.penerimaan-barang.pharmacy.store') }}" method="post">
+                                action="{{ route('warehouse.penerimaan-barang.non-pharmacy.store') }}" method="post">
                                 @csrf
                                 @method('post')
                                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
@@ -140,7 +140,7 @@
                                                     <i class="pointer" id="pilih-po-btn" title="Pilih Purchase Order"
                                                         data-bs-toggle="modal" data-bs-target="#pilihPOModal">
                                                         <span class="fal fa-search mr-1 text-primary"></span></i>
-                                                    @include('pages.simrs.warehouse.penerimaan-barang.partials.modal-pilih-po-pharmacy')
+                                                    @include('pages.simrs.warehouse.penerimaan-barang.partials.modal-pilih-po-non-pharmacy')
                                                 </div>
                                             </div>
                                         </div>
@@ -292,7 +292,7 @@
                                                 <th>Kode</th>
                                                 <th>Nama</th>
                                                 <th>Satuan</th>
-                                                <th>Exp Date*</th>
+                                                <th>Exp Date</th>
                                                 <th>No Batch*</th>
                                                 <th>Jumlah PO</th>
                                                 <th>Belum Terima</th>
@@ -316,7 +316,7 @@
                                                         <span class="fal fa-plus mr-1"></span>
                                                         Tambah Item
                                                     </button>
-                                                    @include('pages.simrs.warehouse.penerimaan-barang.partials.modal-add-item-pharmacy')
+                                                    @include('pages.simrs.warehouse.penerimaan-barang.partials.modal-add-item-non-pharmacy')
                                                 </td>
                                                 <td>
                                                     <div class="form-group">
@@ -423,5 +423,5 @@
     <script>
         $(".select2").select2();
     </script>
-    <script src="{{ asset('js/simrs/warehouse/penerimaan-barang/popup-pharmacy.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/warehouse/penerimaan-barang/popup-non-pharmacy.js') }}?v={{ time() }}"></script>
 @endsection

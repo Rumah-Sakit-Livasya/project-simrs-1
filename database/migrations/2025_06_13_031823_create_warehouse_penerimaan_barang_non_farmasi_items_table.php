@@ -5,7 +5,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
 
     use SoftDeletes;
 
@@ -14,19 +15,19 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('warehouse_penerimaan_barang_farmasi_item', function (Blueprint $table) {
+        Schema::create('warehouse_penerimaan_barang_non_farmasi_item', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->softDeletes();
-            $table->foreignId('pb_id')->constrained('warehouse_penerimaan_barang_farmasi')->onDelete('cascade');
-            $table->foreignId('poi_id')->nullable()->constrained('procurement_purchase_order_pharmacy_items')->onDelete('cascade');
-            $table->foreignId('barang_id')->constrained('warehouse_barang_farmasi')->onDelete('cascade');
+            $table->foreignId('pb_id')->constrained('warehouse_penerimaan_barang_non_farmasi')->onDelete('cascade');
+            $table->foreignId('poi_id')->nullable()->constrained('procurement_purchase_order_non_pharmacy_items')->onDelete('cascade');
+            $table->foreignId('barang_id')->constrained('warehouse_barang_non_farmasi')->onDelete('cascade');
             $table->foreignId('satuan_id')->constrained('warehouse_satuan_barang')->onDelete('cascade');
             $table->string('nama_barang');
             $table->string('kode_barang');
             $table->string('unit_barang');
             $table->string('batch_no');
-            $table->date('tanggal_exp');
+            $table->date('tanggal_exp')->nullable();
             $table->integer('qty');
             $table->integer('harga');
             $table->integer('diskon_nominal');
@@ -40,6 +41,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('warehouse_penerimaan_barang_farmasi_item');
+        Schema::dropIfExists('warehouse_penerimaan_barang_non_farmasi_item');
     }
 };

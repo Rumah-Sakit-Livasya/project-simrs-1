@@ -87,6 +87,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Models\Employee;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
@@ -259,11 +260,17 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             });
         });
 
-        Route::prefix("penerimaan-barang")->group(function(){
-            Route::prefix("pharmacy")->group(function(){
+        Route::prefix("penerimaan-barang")->group(function () {
+            Route::prefix("pharmacy")->group(function () {
                 Route::post("/store", [WarehousePenerimaanBarangFarmasiController::class, 'store'])->name('warehouse.penerimaan-barang.pharmacy.store');
                 Route::put("/update/{id}", [WarehousePenerimaanBarangFarmasiController::class, 'update'])->name('warehouse.penerimaan-barang.pharmacy.update');
                 Route::delete("/destroy/{id}", [WarehousePenerimaanBarangFarmasiController::class, 'destroy'])->name('warehouse.penerimaan-barang.pharmacy.delete');
+            });
+
+            Route::prefix("non-pharmacy")->group(function () {
+                Route::post("/store", [WarehousePenerimaanBarangNonFarmasiController::class, 'store'])->name('warehouse.penerimaan-barang.non-pharmacy.store');
+                Route::put("/update/{id}", [WarehousePenerimaanBarangNonFarmasiController::class, 'update'])->name('warehouse.penerimaan-barang.non-pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehousePenerimaanBarangNonFarmasiController::class, 'destroy'])->name('warehouse.penerimaan-barang.non-pharmacy.delete');
             });
         });
     });

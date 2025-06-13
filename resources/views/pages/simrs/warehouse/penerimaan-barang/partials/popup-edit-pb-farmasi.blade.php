@@ -1,5 +1,5 @@
 @extends('inc.layout-no-side')
-@section('title', 'Form Penerimaan Barang')
+@section('title', 'Form Edit Penerimaan Barang')
 @section('extended-css')
     <style>
         .display-none {
@@ -202,7 +202,7 @@
                                                 <div class="col-xl">
                                                     <input type="hidden" name="supplier_id"
                                                         value="{{ $pb->supplier_id }}">
-                                                    <select class="form-select select2" id="supplier"
+                                                    <select class="form-select select2" id="supplier" required
                                                         {{ $pb->po_id ? 'disabled' : '' }}>
                                                         <option value="" disabled selected hidden>Pilih Supplier
                                                         </option>
@@ -340,7 +340,7 @@
                                                     <input type="hidden" name="item_id[{{ $item->id }}]"
                                                         value="{{ $item->id }}">
 
-                                                    @if (isset($pb->po_id))
+                                                    @if (isset($pb->po_id) && !$pb->po->is_auto)
                                                         <input type="hidden" name="poi_id[{{ $item->id }}]"
                                                             value="{{ $item->poi_id }}">
                                                     @endif
@@ -359,14 +359,14 @@
                                                             class="form-control" required value="{{ $item->batch_no }}">
                                                     </td>
                                                     <td>
-                                                        @if (isset($pb->po_id))
+                                                        @if (isset($pb->po_id) && !$pb->po->is_auto)
                                                             {{ $item->poi->qty }}
                                                         @else
                                                             -
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        @if (isset($pb->po_id))
+                                                        @if (isset($pb->po_id) && !$pb->po->is_auto)
                                                             {{ $item->poi->qty - $item->poi->qty_received }}
                                                         @else
                                                             -
@@ -374,7 +374,7 @@
                                                     </td>
                                                     <td><input type="number" name="qty[{{ $item->id }}]"
                                                             class="form-control qty" min="0" step="1"
-                                                            @if (isset($pb->po_id)) max="{{ $item->poi->qty - $item->poi->qty_received }}" @endif
+                                                            @if (isset($pb->po_id) && !$pb->po->is_auto) max="{{ $item->poi->qty - $item->poi->qty_received }}" @endif
                                                             onkeyup="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()"
                                                             onchange="PopupPBPharmacyClass.enforceNumberLimit(event).refreshTotal()"
                                                             required value="{{ $item->qty }}"></td>
@@ -398,7 +398,7 @@
                                                     <td class="subtotal-display">Rp
                                                         {{ rp($item->harga * $item->qty - $item->diskon_nominal) }}</td>
                                                     <td>
-                                                        @if (!isset($pb->po_id))
+                                                        @if (!isset($pb->po_id) && !$pb->po->is_auto)
                                                             <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
                                                                 title="Hapus"
                                                                 onclick="PopupPBPharmacyClass.deleteItem({{ $item->id }})"></a>
@@ -415,7 +415,7 @@
                                                         <span class="fal fa-plus mr-1"></span>
                                                         Tambah Item
                                                     </button>
-                                                    @include('pages.simrs.warehouse.penerimaan-barang.partials.modal-add-item')
+                                                    @include('pages.simrs.warehouse.penerimaan-barang.partials.modal-add-item-pharmacy')
                                                 </td>
                                                 <td colspan="2">
                                                     <div class="form-group">

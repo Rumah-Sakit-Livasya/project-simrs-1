@@ -24,7 +24,7 @@ class WarehouseSatuanBarang extends Model implements AuditableContract
         return $this->hasMany(WarehouseSatuanTambahanBarangNonFarmasi::class, "satuan_id", "id");
     }
 
-        public function barang_farmasi()
+    public function barang_farmasi()
     {
         return $this->hasMany(WarehouseBarangFarmasi::class, "satuan_id", "id");
     }
@@ -34,11 +34,18 @@ class WarehouseSatuanBarang extends Model implements AuditableContract
         return $this->hasMany(WarehouseSatuanTambahanBarangFarmasi::class, "satuan_id", "id");
     }
 
-    public function pr_pharmacy_items(){
+    public function pr_pharmacy_items()
+    {
         return $this->hasMany(ProcurementPurchaseRequestPharmacyItems::class, "satuan_id", "id");
     }
 
-    public function pb_pharmacy_items(){
+    public function pb_pharmacy_items()
+    {
         return $this->hasMany(WarehousePenerimaanBarangFarmasiItems::class, "satuan_id", "id");
+    }
+
+    public function pb_non_pharmacy_items()
+    {
+        return $this->hasMany(WarehousePenerimaanBarangNonFarmasiItems::class, "satuan_id", "id");
     }
 }

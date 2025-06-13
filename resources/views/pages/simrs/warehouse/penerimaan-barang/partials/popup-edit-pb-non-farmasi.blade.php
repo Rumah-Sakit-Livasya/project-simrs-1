@@ -1,5 +1,5 @@
 @extends('inc.layout-no-side')
-@section('title', 'Form Penerimaan Barang')
+@section('title', 'Form Edit Penerimaan Barang')
 @section('extended-css')
     <style>
         .display-none {
@@ -22,7 +22,7 @@
         }
 
         .qty {
-            min-width: 100px;
+            width: 60px;
             margin-left: 10px;
         }
 
@@ -41,6 +41,10 @@
             border-radius: 0 0 4px 4px;
             z-index: 1000;
         }
+
+        .qty {
+            min-width: 80px;
+        }
     </style>
 @endsection
 @section('content')
@@ -58,11 +62,14 @@
                         <div id="loading-page"></div>
                         <div class="panel-content">
                             <form id="form-pr" name="form-pr"
-                                action="{{ route('warehouse.penerimaan-barang.pharmacy.store') }}" method="post">
+                                action="{{ route('warehouse.penerimaan-barang.non-pharmacy.update', ['id' => $pb->id]) }}"
+                                method="post">
                                 @csrf
-                                @method('post')
+                                @method('put')
                                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
+                                <input type="hidden" name="pb_id" value="{{ $pb->id }}">
+
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
@@ -76,7 +83,7 @@
                                                 <div class="col-xl">
                                                     <input readonly type="date" class="form-control" id="datepicker-1"
                                                         placeholder="Select date" name="tanggal_terima"
-                                                        value="{{ \Carbon\Carbon::now()->toDateString() }}">
+                                                        value="{{ $pb->tanggal_terima }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -91,7 +98,8 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" class="form-control" name="no_faktur" required>
+                                                    <input type="text" class="form-control" name="no_faktur" required
+                                                        value="{{ $pb->no_faktur }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -106,13 +114,14 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select class="form-control" name="tipe_terima" id="tipe_terima">
+                                                    <select class="form-control" name="tipe_terima" id="tipe_terima"
+                                                        disabled>
                                                         {{-- po / npo --}}
                                                         <option value="po"
-                                                            {{ old('tipe_terima') == 'po' ? 'selected' : '' }}>Purchase
+                                                            {{ $pb->tipe_terima == 'po' ? 'selected' : '' }}>Purchase
                                                             Order</option>
                                                         <option value="npo"
-                                                            {{ old('tipe_terima') == 'npo' ? 'selected' : '' }}>Non Purchase
+                                                            {{ $pb->tipe_terima == 'npo' ? 'selected' : '' }}>Non Purchase
                                                             Order</option>
                                                     </select>
                                                 </div>
@@ -132,15 +141,10 @@
                                                 </div>
 
                                                 <div class="col-xl">
-                                                    <input type="hidden" name="po_id" value="" required>
-                                                    <input type="text" class="form-control" name="kode_po" readonly
+                                                    <input type="hidden" name="po_id" value="{{ $pb->po_id }}"
                                                         required>
-                                                </div>
-                                                <div class="col-xl-1" id="select-po-btn">
-                                                    <i class="pointer" id="pilih-po-btn" title="Pilih Purchase Order"
-                                                        data-bs-toggle="modal" data-bs-target="#pilihPOModal">
-                                                        <span class="fal fa-search mr-1 text-primary"></span></i>
-                                                    @include('pages.simrs.warehouse.penerimaan-barang.partials.modal-pilih-po-pharmacy')
+                                                    <input type="text" class="form-control" name="kode_po" readonly
+                                                        required value="{{ $pb->po?->kode_po }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -155,7 +159,8 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" class="form-control" name="pic_penerima">
+                                                    <input type="text" class="form-control" name="pic_penerima"
+                                                        value="{{ $pb->pic_penerima }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -173,8 +178,11 @@
                                                     {{-- cash / non_cash --}}
                                                     <select class="form-control form-select" id="tipe_bayar"
                                                         name="tipe_bayar">
-                                                        <option value="non_cash">Non Cash</option>
-                                                        <option value="cash">Cash</option>
+                                                        <option value="non_cash"
+                                                            {{ $pb->tipe_bayar == 'non_cash' ? 'selected' : '' }}>Non Cash
+                                                        </option>
+                                                        <option value="cash"
+                                                            {{ $pb->tipe_bayar == 'cash' ? 'selected' : '' }}>Cash</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -192,12 +200,16 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="hidden" name="supplier_id" value="">
-                                                    <select class="form-select select2" id="supplier" disabled required>
+                                                    <input type="hidden" name="supplier_id"
+                                                        value="{{ $pb->supplier_id }}">
+                                                    <select class="form-select select2" id="supplier" required
+                                                        {{ $pb->po_id ? 'disabled' : '' }}>
                                                         <option value="" disabled selected hidden>Pilih Supplier
                                                         </option>
                                                         @foreach ($suppliers as $supplier)
-                                                            <option value="{{ $supplier->id }}">{{ $supplier->nama }}
+                                                            <option value="{{ $supplier->id }}"
+                                                                {{ $supplier->id == $pb->supplier_id ? 'selected' : '' }}>
+                                                                {{ $supplier->nama }}
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -215,7 +227,8 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" class="form-control" name="keterangan">
+                                                    <input type="text" class="form-control" name="keterangan"
+                                                        value="{{ $pb->keterangan }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -230,7 +243,8 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" disabled class="form-control" name="kas">
+                                                    <input type="text" disabled class="form-control" name="kas"
+                                                        value="{{ $pb->kas }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -248,7 +262,8 @@
                                                 </div>
                                                 <div class="col-xl">
                                                     <input type="date" class="form-control" id="datepicker-1"
-                                                        placeholder="Select date" name="tanggal_faktur">
+                                                        placeholder="Select date" name="tanggal_faktur"
+                                                        value="{{ $pb->tanggal_faktur }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -268,7 +283,9 @@
                                                         <option value="" selected disabled hidden>Pilih Gudang
                                                         </option>
                                                         @foreach ($gudangs as $gudang)
-                                                            <option value="{{ $gudang->id }}">{{ $gudang->nama }}
+                                                            <option value="{{ $gudang->id }}"
+                                                                {{ $gudang->id == $pb->gudang_id ? 'selected' : '' }}>
+                                                                {{ $gudang->nama }}
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -292,7 +309,7 @@
                                                 <th>Kode</th>
                                                 <th>Nama</th>
                                                 <th>Satuan</th>
-                                                <th>Exp Date*</th>
+                                                <th>Exp Date</th>
                                                 <th>No Batch*</th>
                                                 <th>Jumlah PO</th>
                                                 <th>Belum Terima</th>
@@ -306,29 +323,111 @@
                                             </tr>
                                         </thead>
                                         <tbody id="tableItems">
+                                            @foreach ($pb->items as $item)
+                                                <tr id="item{{ $item->id }}">
+                                                    <input type="hidden" name="kode_barang[{{ $item->id }}]"
+                                                        value="{{ $item->kode_barang }}">
+                                                    <input type="hidden" name="nama_barang[{{ $item->id }}]"
+                                                        value="{{ $item->nama_barang }}">
+                                                    <input type="hidden" name="barang_id[{{ $item->id }}]"
+                                                        value="{{ $item->barang_id }}">
+                                                    <input type="hidden" name="unit_barang[{{ $item->id }}]"
+                                                        value="{{ $item->unit_barang }}">
+                                                    <input type="hidden" name="satuan_id[{{ $item->id }}]"
+                                                        value="{{ $item->satuan_id }}">
+                                                    <input type="hidden" name="subtotal[{{ $item->id }}]"
+                                                        value="{{ $item->subtotal }}">
+                                                    <input type="hidden" name="item_id[{{ $item->id }}]"
+                                                        value="{{ $item->id }}">
 
+                                                    @if (isset($pb->po_id) && !$pb->po->is_auto)
+                                                        <input type="hidden" name="poi_id[{{ $item->id }}]"
+                                                            value="{{ $item->poi_id }}">
+                                                    @endif
+
+                                                    <td><input type="checkbox" class="form-control"
+                                                            name="is_bonus[{{ $item->id }}]"
+                                                            onclick="PopupPBNPharmacyClass.refreshTotal()"
+                                                            {{ $item->is_bonus ? 'checked' : '' }}></td>
+                                                    <td>{{ $item->kode_barang }}</td>
+                                                    <td>{{ $item->nama_barang }}</td>
+                                                    <td>{{ $item->unit_barang }}</td>
+                                                    <td><input type="date" name="tanggal_exp[{{ $item->id }}]"
+                                                            class="form-control" value="{{ $item->tanggal_exp }}"></td>
+                                                    <td><input type="text" name="batch_no[{{ $item->id }}]"
+                                                            class="form-control" required value="{{ $item->batch_no }}">
+                                                    </td>
+                                                    <td>
+                                                        @if (isset($pb->po_id) && !$pb->po->is_auto)
+                                                            {{ $item->poi->qty }}
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if (isset($pb->po_id) && !$pb->po->is_auto)
+                                                            {{ $item->poi->qty - $item->poi->qty_received }}
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+                                                    <td><input type="number" name="qty[{{ $item->id }}]"
+                                                            class="form-control qty" min="0" step="1"
+                                                            @if (isset($pb->po_id) && !$pb->po->is_auto) max="{{ $item->poi->qty - $item->poi->qty_received }}" @endif
+                                                            onkeyup="PopupPBNPharmacyClass.enforceNumberLimit(event).refreshTotal()"
+                                                            onchange="PopupPBNPharmacyClass.enforceNumberLimit(event).refreshTotal()"
+                                                            required value="{{ $item->qty }}"></td>
+                                                    <td>{{ rp($item->harga) }}</td>
+                                                    <td><input type="number" name="harga[{{ $item->id }}]"
+                                                            class="form-control" value="{{ $item->harga }}" required>
+                                                    </td>
+                                                    <td><input type="number" name="diskon_percent[{{ $item->id }}]"
+                                                            class="form-control" min="0"
+                                                            value="{{ ($item->diskon_nominal / ($item->harga * $item->qty)) * 100 }}"
+                                                            step="1" max="100"
+                                                            onkeyup="PopupPBNPharmacyClass.diskonPercentChange(event)"
+                                                            onchange="PopupPBNPharmacyClass.diskonPercentChange(event)">
+                                                    </td>
+                                                    <td><input type="number" name="diskon_nominal[{{ $item->id }}]"
+                                                            min="0" step="1"
+                                                            value="{{ $item->diskon_nominal }}" class="form-control"
+                                                            onkeyup="PopupPBNPharmacyClass.diskonNominalChange(event)"
+                                                            onchange="PopupPBNPharmacyClass.diskonNominalChange(event)">
+                                                    </td>
+                                                    <td class="subtotal-display">Rp
+                                                        {{ rp($item->harga * $item->qty - $item->diskon_nominal) }}</td>
+                                                    <td>
+                                                        @if (!isset($pb->po_id) && !$pb->po->is_auto)
+                                                            <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
+                                                                title="Hapus"
+                                                                onclick="PopupPBNPharmacyClass.deleteItem({{ $item->id }})"></a>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td class="text-right" colspan="8">
+                                                <td class="text-right" colspan="7">
                                                     <button type="button" id="add-btn"
                                                         class="btn btn-primary waves-effect waves-themed">
                                                         <span class="fal fa-plus mr-1"></span>
                                                         Tambah Item
                                                     </button>
-                                                    @include('pages.simrs.warehouse.penerimaan-barang.partials.modal-add-item-pharmacy')
+                                                    @include('pages.simrs.warehouse.penerimaan-barang.partials.modal-add-item-non-pharmacy')
                                                 </td>
-                                                <td>
+                                                <td colspan="2">
                                                     <div class="form-group">
                                                         <div class="row">
-                                                            <div class="col-xl-6" style="text-align: right">
+                                                            <div class="col-xl-4" style="text-align: right">
                                                                 <label class="form-label text-end" for="diskon_faktur">
                                                                     Diskon Faktur (Rp)
                                                                 </label>
                                                             </div>
                                                             <div class="col-xl">
-                                                                <input type="number" class="form-control" id="diskon-faktur"
-                                                                    name="diskon_faktur" value="0" min="0">
+                                                                <input type="number" class="form-control"
+                                                                    id="diskon-faktur" name="diskon_faktur"
+                                                                    value="{{ $pb->diskon_faktur }}" min="0">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -343,7 +442,8 @@
                                                             </div>
                                                             <div class="col-xl">
                                                                 <input type="number" class="form-control" id="materai"
-                                                                    name="materai" value="0" min="0">
+                                                                    name="materai" value="{{ $pb->materai }}"
+                                                                    min="0">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -357,22 +457,24 @@
                                                                 </label>
                                                             </div>
                                                             <div class="col-xl">
-                                                                <input type="hidden" name="ppn_nominal" value="0">
+                                                                <input type="hidden" name="ppn_nominal"
+                                                                    value="{{ $pb->ppn_nominal }}">
                                                                 <input type="number" class="form-control" id="ppn"
-                                                                    name="ppn" value="0" min="0"
-                                                                    max="100">
+                                                                    name="ppn" value="{{ $pb->ppn }}"
+                                                                    min="0" max="100">
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td class="text-right">Total
-                                                    <input type="hidden" value="0" name="total">
-                                                    <input type="hidden" value="0" name="total_final">
+                                                    <input type="hidden" value="{{ $pb->total }}" name="total">
+                                                    <input type="hidden" value="{{ $pb->total_final }}"
+                                                        name="total_final">
                                                 </td>
-                                                <td id="discount-display">Rp 0</td>
+                                                <td id="discount-display">{{ rp($pb->items->sum('diskon_nominal')) }}</td>
                                                 <td>
                                                     (+ PPN)
-                                                    <span id="total-display">Rp 0</span>
+                                                    <span id="total-display">{{ rp($pb->total_final) }}</span>
                                                 </td>
                                                 <td>{{--  --}}</td>
                                             </tr>
@@ -390,16 +492,21 @@
                                             </a>
                                         </div>
                                         <div class="col-xl text-right">
-                                            <button type="submit" id="order-submit-draft"
-                                                class="btn btn-lg btn-primary waves-effect waves-themed">
-                                                <span class="fal fa-save mr-1"></span>
-                                                Simpan Draft
-                                            </button>
-                                            <button type="submit" id="order-submit-final"
-                                                class="btn btn-lg btn-success waves-effect waves-themed">
-                                                <span class="fal fa-save mr-1"></span>
-                                                Simpan Final
-                                            </button>
+                                            @if ($pb->status != 'final')
+                                                <button type="submit" id="order-submit-draft"
+                                                    class="btn btn-lg btn-primary waves-effect waves-themed">
+                                                    <span class="fal fa-save mr-1"></span>
+                                                    Simpan Draft
+                                                </button>
+                                                <button type="submit" id="order-submit-final"
+                                                    class="btn btn-lg btn-success waves-effect waves-themed">
+                                                    <span class="fal fa-save mr-1"></span>
+                                                    Simpan Final
+                                                </button>
+                                            @else
+                                                <h1 style="color: red">Data sudah final</h1>
+                                                <p>Tidak dapat diubah lagi</p>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -423,5 +530,6 @@
     <script>
         $(".select2").select2();
     </script>
-    <script src="{{ asset('js/simrs/warehouse/penerimaan-barang/popup-pharmacy.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/warehouse/penerimaan-barang/popup-non-pharmacy.js') }}?v={{ time() }}">
+    </script>
 @endsection

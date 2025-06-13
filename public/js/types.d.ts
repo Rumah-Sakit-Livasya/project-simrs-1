@@ -396,7 +396,7 @@ interface MakananGizi {
     aktif: number;
 }
 
-interface OrderMakananGizi{
+interface OrderMakananGizi {
     id: number;
     created_at: string;
     updated_at: string;
@@ -479,6 +479,7 @@ interface BarangNonFarmasi {
     golongan_id: number | null;
     kelompok_id: number | null;
     satuan_id: number;
+    satuan?: Satuan;
 }
 
 interface MasterGudang {
