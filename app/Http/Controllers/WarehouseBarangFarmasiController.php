@@ -100,7 +100,7 @@ class WarehouseBarangFarmasiController extends Controller
 
         $barang = WarehouseBarangFarmasi::create($validatedData);
 
-        if ($validatedData["satuans_id"]) {
+        if (isset($validatedData["satuans_id"])) {
             foreach ($validatedData['satuans_id'] as $index => $satuanId) {
                 WarehouseSatuanTambahanBarangFarmasi::create([
                     "barang_id" => $barang->id,

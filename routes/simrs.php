@@ -86,6 +86,7 @@ use App\Http\Controllers\WarehouseMasterGudangController;
 use App\Http\Controllers\WarehousePabrikController;
 use App\Http\Controllers\WarehousePenerimaanBarangFarmasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
+use App\Http\Controllers\WarehousePenerimaanBarangReportController;
 use App\Http\Controllers\WarehousePurchaseRequestNonPharmacy;
 use App\Http\Controllers\WarehousePurchaseRequestPharmacy;
 use App\Http\Controllers\WarehouseReturBarangController;
@@ -318,6 +319,11 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/", [WarehouseReturBarangController::class, "index"])->name("warehouse.penerimaan-barang.retur-barang");
                     Route::get("/create", [WarehouseReturBarangController::class, "create"])->name("procurement.penerimaan-barang.retur-barang.create");
                     Route::get("/print/{id}", [WarehouseReturBarangController::class, "print"])->name("warehouse.penerimaan-barang.retur-barang.print");
+                });
+
+                Route::prefix("report")->group(function(){
+                    Route::get("/", [WarehousePenerimaanBarangReportController::class, "index"])->name("warehouse.penerimaan-barang.report");
+                    Route::get("rekap", [WarehousePenerimaanBarangReportController::class, "rekap"])->name("warehouse.penerimaan-barang.report.rekap");
                 });
             });
         });

@@ -192,30 +192,6 @@ class WarehouseReturBarangController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(WarehouseReturBarang $warehouseReturBarang)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(WarehouseReturBarang $warehouseReturBarang)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, WarehouseReturBarang $warehouseReturBarang)
-    {
-        //
-    }
-
-    /**
      * Remove the specified resource from storage.
      */
     public function destroy(WarehouseReturBarang $warehouseReturBarang, $id)
