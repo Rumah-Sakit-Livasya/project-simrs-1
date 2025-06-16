@@ -169,4 +169,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(ProcurementPurchaseOrderNonPharmacy::class, 'user_id');
     }
+
+    public function rb(){
+        return $this->hasMany(WarehouseReturBarang::class, 'user_id');
+    }
 }

@@ -30,8 +30,7 @@ class ProcurementPurchaseOrderPharmacy extends Model implements AuditableContrac
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function penerimaanBarang(): MorphMany
-    {
-        return $this->morphMany(PenerimaanBarangHeader::class, 'purchasable');
+    public function pb(){
+        return $this->hasMany(WarehousePenerimaanBarangFarmasi::class, 'po_id');
     }
 }

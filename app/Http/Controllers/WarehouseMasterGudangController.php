@@ -25,7 +25,7 @@ class WarehouseMasterGudangController extends Controller
 
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
-            $master_gudangs = $query->orderBy('created_at', 'asc')->get();
+            $master_gudangs = $query->orderBy('created_at', 'desc')->get();
         } else {
             // Return all data if no filter is applied
             $master_gudangs = WarehouseMasterGudang::all();

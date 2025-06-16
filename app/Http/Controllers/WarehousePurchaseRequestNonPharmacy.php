@@ -43,7 +43,7 @@ class WarehousePurchaseRequestNonPharmacy extends Controller
 
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
-            $pr = $query->orderBy('created_at', 'asc')->get();
+            $pr = $query->orderBy('created_at', 'desc')->get();
         } else {
             // Return all data if no filter is applied
             $pr = ProcurementPurchaseRequestNonPharmacy::all();
@@ -152,7 +152,10 @@ class WarehousePurchaseRequestNonPharmacy extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = ProcurementPurchaseRequestNonPharmacy::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = ProcurementPurchaseRequestNonPharmacy::
+            whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
         return $count . "/PRU/" . $year . $month;
@@ -219,7 +222,7 @@ class WarehousePurchaseRequestNonPharmacy extends Controller
 
         DB::beginTransaction();
         try {
-            $pr = $warehousePurchaseRequestNonPharmacy->where("id", $id)->firstOrFail();
+            $pr = $warehousePurchaseRequestNonPharmacy->findOrFail($id);
             $pr->update($validatedData1);
 
             // $validatedData["item_id"] is a key => pair array
