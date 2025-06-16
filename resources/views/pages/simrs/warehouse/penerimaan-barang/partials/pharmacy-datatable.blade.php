@@ -44,7 +44,7 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-primary" data-bs-placement="top"
-                                            data-bs-toggle="popover" data-bs-title="Detail Purchase Request"
+                                            data-bs-toggle="popover" data-bs-title="Detail Penerimaan Barang"
                                             data-bs-html="true"
                                             data-bs-content-id="popover-content-{{ $pb->id }}">
                                             <i class="fas fa-list text-light" style="transform: scale(1.8)"></i>

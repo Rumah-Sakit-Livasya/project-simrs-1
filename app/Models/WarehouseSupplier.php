@@ -33,4 +33,8 @@ class WarehouseSupplier extends Model implements AuditableContract
     {
         return $this->hasMany(WarehousePenerimaanBarangNonFarmasi::class, "supplier_id");
     }
+
+    public function rb(){
+        return $this->hasMany(WarehouseReturBarang::class, "supplier_id");
+    }
 }

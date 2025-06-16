@@ -88,6 +88,7 @@ use App\Http\Controllers\WarehousePenerimaanBarangFarmasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Http\Controllers\WarehousePurchaseRequestNonPharmacy;
 use App\Http\Controllers\WarehousePurchaseRequestPharmacy;
+use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseSetupMinMaxStockController;
 use App\Http\Controllers\WarehouseSupplierController;
@@ -311,6 +312,12 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/create", [WarehousePenerimaanBarangNonFarmasiController::class, "create"])->name("procurement.penerimaan-barang.non-pharmacy.create");
                     Route::get("/print/{id}", [WarehousePenerimaanBarangNonFarmasiController::class, "print"])->name("warehouse.penerimaan-barang.non-pharmacy.print");
                     Route::get("/edit/{id}", [WarehousePenerimaanBarangNonFarmasiController::class, "edit"])->name("warehouse.penerimaan-barang.non-pharmacy.edit");
+                });
+
+                Route::prefix("retur-barang")->group(function () {
+                    Route::get("/", [WarehouseReturBarangController::class, "index"])->name("warehouse.penerimaan-barang.retur-barang");
+                    Route::get("/create", [WarehouseReturBarangController::class, "create"])->name("procurement.penerimaan-barang.retur-barang.create");
+                    Route::get("/print/{id}", [WarehouseReturBarangController::class, "print"])->name("warehouse.penerimaan-barang.retur-barang.print");
                 });
             });
         });

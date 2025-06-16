@@ -473,7 +473,7 @@
                                                 </td>
                                                 <td id="discount-display">{{ rp($pb->items->sum('diskon_nominal')) }}</td>
                                                 <td>
-                                                    (+ PPN)
+                                                    (+PPN)
                                                     <span id="total-display">{{ rp($pb->total_final) }}</span>
                                                 </td>
                                                 <td>{{--  --}}</td>

@@ -173,6 +173,7 @@ class PopupPBNPharmacyHandler {
     #init() {
         this.#addEventListeners("#add-btn", this.#handleAddButtonClick);
         this.#addEventListeners("#searchItemInput", this.#handleItemSearchBar, "keyup");
+        this.#addEventListeners("#searchPOInput", this.#handlePOSearchBar, "keyup");
         this.#addEventListeners("#order-submit-draft", this.#handleDraftButtonClick);
         this.#addEventListeners("#order-submit-final", this.#handleFinalButtonClick);
         this.#addEventListeners("#tipe_terima", this.#handleTipeTerimaChange, "change");
@@ -369,6 +370,40 @@ class PopupPBNPharmacyHandler {
 
             // @ts-ignore
             item.style.display = itemName.toLowerCase().includes(value) ? "" : "none";
+        });
+    }
+
+    /**
+     * Handle PO search bar on key up
+     * @param {Event} event 
+     */
+    #handlePOSearchBar(event) {
+        const searchInput = /** @type {HTMLInputElement} */ (event.target);
+        const value = searchInput.value.toLowerCase();
+        const items = document.querySelectorAll("tr.po-row");
+
+        items.forEach((item) => {
+            if (!item) return;
+
+            let kode_po = "";
+            let supplier_po = "";
+
+            const kodePOElement = item.querySelector(".kode-po");
+            if (!kodePOElement) return;
+            kode_po = kodePOElement.textContent || "";
+
+            const supplierPOElement = item.querySelector(".supplier-po");
+            if (!supplierPOElement) return;
+            supplier_po = supplierPOElement.textContent || "";
+
+            // @ts-ignore
+            if (kode_po.toLowerCase().includes(value) || supplier_po.toLowerCase().includes(value)) {
+                // @ts-ignore
+                item.style.display = "";
+            } else {
+                // @ts-ignore
+                item.style.display = "none";
+            }
         });
     }
 

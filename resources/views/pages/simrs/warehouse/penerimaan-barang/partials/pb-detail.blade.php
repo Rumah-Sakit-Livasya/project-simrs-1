@@ -20,8 +20,8 @@
                 <td>{{ $item->kode_barang }}</td>
                 <td>{{ $item->nama_barang }}</td>
                 <td>{{ $item->unit_barang }}</td>
-                <td>{{ tgl($item->tanggal_exp) }}</td>
-                <td>{{ $item->no_batch }}</td>
+                <td>{{ isset($item->tanggal_exp) ? tgl($item->tanggal_exp) : '-' }}</td>
+                <td>{{ $item->batch_no }}</td>
                 <td>{{ $item->qty }}</td>
                 <td>{{ rp($item->harga) }}</td>
                 <td>{{ rp($item->diskon_nominal) }}</td>

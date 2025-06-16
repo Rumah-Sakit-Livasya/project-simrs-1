@@ -605,6 +605,68 @@ interface Barang {
     diskon_principal: number;
 }
 
+interface StoredItem {
+    id: number;
+    created_at: string; // Assuming it's in ISO 8601 format
+    updated_at: string; // Assuming it's in ISO 8601 format
+    deleted_at: string | null; // Assuming a nullable timestamp or null if deleted_at is unset
+    pbi_id: number;
+    gudang_id: number;
+    qty: number;
+
+    pbi?: PenerimaanBarangItem;
+}
+
+interface PenerimaanBarangItem {
+    id: number;
+    created_at: string; // Assuming it's in ISO 8601 format
+    updated_at: string; // Assuming it's in ISO 8601 format
+    deleted_at: string | null; // Nullable timestamp or null if deleted_at is unset
+    pb_id: number;
+    poi_id: number;
+    barang_id: number;
+    satuan_id: number;
+    nama_barang: string;
+    kode_barang: string;
+    unit_barang: string;
+    batch_no: string;
+    tanggal_exp: string | null; // Nullable if it's a date or can be unset
+    qty: number;
+    harga: number;
+    diskon_nominal: number;
+    subtotal: number;
+    is_bonus: number;
+
+    pb?: PenerimaanBarang;
+}
+
+interface PenerimaanBarang {
+    id: number;
+    created_at: string; // Assuming it's in ISO 8601 format
+    updated_at: string; // Assuming it's in ISO 8601 format
+    deleted_at: string | null; // Nullable timestamp or null if deleted_at is unset
+    tanggal_terima: string; // Expected to be a date in string format
+    tanggal_faktur: string | null; //Nullable if it has associated data, otherwise can be null/undefined
+    kode_penerimaan: string;
+    no_faktur: string;
+    pic_penerima: string; // Typically the recipient's name or ID as string
+    keterangan: string;
+    ppn: number;
+    ppn_nominal: number;
+    materai: number;
+    diskon_faktur: number;
+    total: number;
+    total_final: number;
+    user_id: number;
+    gudang_id: number;
+    supplier_id: number;
+    po_id: number;
+    tipe_bayar: string;
+    tipe_terima: "po" | "non_po"; // Depending on your actual data, you can make it more specific
+    status: string;
+    kas: string | null; // Nullable if not all entries contain this field or set to undefined
+}
+
 type PatientType = "rajal" | "ranap" | "otc";
 type SumberItem = "npr" | "pr";
 type TipePR = "all" | "normal" | "urgent";

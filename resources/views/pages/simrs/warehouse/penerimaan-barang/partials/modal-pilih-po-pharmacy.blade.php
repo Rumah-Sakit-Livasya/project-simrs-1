@@ -5,7 +5,7 @@
                 <h1 class="modal-title fs-5" id="addModalLabel">Pilih Purchase Order</h1>
             </div>
             <div class="modal-body">
-                <input type="text" id="searchPOInput" placeholder="Cari Purchase Order..." class="form-control">
+                <input type="text" id="searchPOInput" placeholder="Cari Kode Purchase Order..." class="form-control">
                 <br>
                 <input type="text" id="searchPOSupplierInput" placeholder="Cari Supplier..." class="form-control">
                 <br>
@@ -23,8 +23,8 @@
                             <tr class="pointer po-row" onclick="PopupPBPharmacyClass.SelectPO({{ json_encode($po) }})"
                                 data-bs-dismiss="modal" title="Pilih {{ $po->kode_po }}">
                                 <td>{{ tgl($po->tanggal_po) }}</td>
-                                <td>{{ $po->kode_po }}</td>
-                                <td>{{ $po->supplier->nama }}</td>
+                                <td class="kode-po">{{ $po->kode_po }}</td>
+                                <td class="supplier-po">{{ $po->supplier->nama }}</td>
                                 <td>{{ $po->keterangan }}</td>
                             </tr>
                         @endforeach

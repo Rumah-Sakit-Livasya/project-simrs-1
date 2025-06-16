@@ -21,4 +21,8 @@ class StoredBarangFarmasi extends Model implements AuditableContract
     public function gudang(){
         return $this->belongsTo(WarehouseMasterGudang::class, 'gudang_id');
     }
+
+    public function rbi(){
+        return $this->hasMany(WarehouseReturBarangItems::class, 'si_f_id');
+    }
 }

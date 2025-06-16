@@ -14,11 +14,18 @@ class StoredBarangNonFarmasi extends Model implements AuditableContract
     protected $table = "stored_barang_non_farmasi";
     protected $guarded = ["id"];
 
-    public function pbi(){
+    public function pbi()
+    {
         return $this->belongsTo(WarehousePenerimaanBarangNonFarmasiItems::class, 'pbi_id');
     }
 
-    public function gudang(){
+    public function gudang()
+    {
         return $this->belongsTo(WarehouseMasterGudang::class, 'gudang_id');
+    }
+
+    public function rbi()
+    {
+        return $this->hasMany(WarehouseReturBarangItems::class, 'si_nf_id');
     }
 }

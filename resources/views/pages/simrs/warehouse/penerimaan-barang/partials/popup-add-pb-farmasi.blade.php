@@ -371,7 +371,7 @@
                                                 </td>
                                                 <td id="discount-display">Rp 0</td>
                                                 <td>
-                                                    (+ PPN)
+                                                    (+PPN)
                                                     <span id="total-display">Rp 0</span>
                                                 </td>
                                                 <td>{{--  --}}</td>
