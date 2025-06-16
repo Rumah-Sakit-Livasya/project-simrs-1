@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\keuangan;
+namespace App\Http\Controllers\Keuangan;
 
 use App\Http\Controllers\Controller;
 use App\Models\keuangan\ApSupplierHeader;
@@ -11,173 +11,200 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Log; // Pastikan ini ada untuk logging
 
 class APSupplierController extends Controller
 {
     public function index(Request $request)
     {
-        $queryBuilder = ApSupplierHeader::query();
-
-        // --- Eager Loading untuk Performa Optimal ---
-        $queryBuilder->with(['supplier', 'userEntry', 'details.penerimaanBarang.purchasable']);
-
-
-        $hasFilters = $request->hasAny(['tanggal_awal', 'tanggal_akhir', 'supplier_id', 'po_number', 'invoice_number', 'grn_number']);
-
-        if ($hasFilters) {
-            // Filter by Date Range
-            if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
-                // Konversi format tanggal dari dd-mm-yyyy ke yyyy-mm-dd untuk database
-                $start_date = Carbon::createFromFormat('d-m-Y', $request->tanggal_awal)->startOfDay();
-                $end_date = Carbon::createFromFormat('d-m-Y', $request->tanggal_akhir)->endOfDay();
+        // 1. Mulai query dengan eager loading
+        $queryBuilder = ApSupplierHeader::with(['supplier', 'userEntry',  'details.penerimaanBarang.purchasable']);
+        // dd($queryBuilder->first()->details->first()->penerimaanBarang->purchasable);
+        // 2. Terapkan filter jika ada
+        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
+            try {
+                // Gunakan format Y-m-d yang lebih standar untuk input form
+                $start_date = Carbon::createFromFormat('Y-m-d', $request->tanggal_awal)->startOfDay();
+                $end_date = Carbon::createFromFormat('Y-m-d', $request->tanggal_akhir)->endOfDay();
                 $queryBuilder->whereBetween('tanggal_ap', [$start_date, $end_date]);
-            }
-
-            // Filter by Supplier
-            if ($request->filled('supplier_id')) {
-                $queryBuilder->where('supplier_id', $request->supplier_id);
-            }
-
-            // Filter by Invoice Number
-            if ($request->filled('invoice_number')) {
-                $queryBuilder->where('no_invoice_supplier', 'like', '%' . $request->invoice_number . '%');
-            }
-
-            if ($request->filled('grn_number')) {
-                $queryBuilder->whereHas('details.penerimaanBarang', function ($q) use ($request) {
-                    $q->where('no_grn', 'like', '%' . $request->grn_number . '%');
-                });
-            }
-
-            if ($request->filled('po_number')) {
-                $queryBuilder->whereHas('details.penerimaanBarang.purchasable', function ($q) use ($request) {
-                    $q->where('no_po', 'like', '%' . $request->po_number . '%');
-                });
+            } catch (\Exception $e) {
+                // Abaikan jika format tanggal salah, atau beri pesan error
             }
         }
-
-
-        if ($request->ajax()) {
-            // Jika AJAX, eksekusi query dan kembalikan hasilnya sebagai JSON
-            $results = $hasFilters ? $queryBuilder->latest()->get() : collect([]); // Kirim array kosong jika tidak ada filter
-            return response()->json($results);
+        if ($request->filled('supplier_id')) {
+            $queryBuilder->where('supplier_id', $request->supplier_id);
+        }
+        if ($request->filled('invoice_number')) {
+            $queryBuilder->where('no_invoice_supplier', 'like', '%' . $request->invoice_number . '%');
+        }
+        if ($request->filled('grn_number')) {
+            $queryBuilder->whereHas('details.penerimaanBarang', function ($q) use ($request) {
+                $q->where('no_grn', 'like', '%' . $request->grn_number . '%');
+            });
+        }
+        if ($request->filled('po_number')) {
+            // Memastikan relasi ke PO melalui GRN
+            $queryBuilder->whereHas('details.penerimaanBarang.purchasable', function ($q) use ($request) {
+                // Asumsi kolom di tabel PO adalah 'kode_po'
+                $q->where('kode_po', 'like', '%' . $request->po_number . '%');
+            });
         }
 
+        // 3. FIX LOGIKA: Selalu ambil data, baik ada filter maupun tidak.
+        // Data diurutkan dari yang terbaru, dan dipaginasi.
+        // withQueryString() agar parameter filter tetap ada di link pagination.
+        $ap_suppliers = $queryBuilder->latest('tanggal_ap')->paginate(20)->withQueryString();
 
-        $ap_suppliers = $hasFilters ? $queryBuilder->latest()->paginate(25) : collect([]);
-
-        // Ambil data untuk dropdown di form pencarian
+        // 4. Ambil data untuk dropdown filter
         $suppliers = WarehouseSupplier::where('aktif', 1)->orderBy('nama')->get();
 
-        // Kirim data ke view
-        return view('app-type.keuangan.ap-supplier.index', [ // Pastikan path view benar
-            'ap_suppliers' => $ap_suppliers,
-            'suppliers' => $suppliers
-        ]);
+        $newlyCreatedId = $request->session()->get('newly_created_ap_id');
+        // 5. Kirim data ke view
+        return view('app-type.keuangan.ap-supplier.index', compact('ap_suppliers', 'suppliers', 'newlyCreatedId'));
     }
 
-    // Fungsi untuk menampilkan halaman pilih GRN
     public function indexGrn(Request $request)
     {
+        \Log::debug('indexGrn Request Parameters:', $request->all());
+
         $queryBuilder = PenerimaanBarangHeader::with(['supplier', 'purchasable'])
             ->where('status_ap', 'Belum AP');
 
-        // Filter berdasarkan parameter pencarian
-        $hasFilters = $request->hasAny(['supplier', 'po_number', 'invoice_number', 'grn_number']);
+        $isSearching = $request->hasAny(['supplier_id', 'initial_supplier_id', 'po_number', 'invoice_number', 'grn_number']);
 
-        if ($hasFilters) {
-            if ($request->filled('supplier')) {
-                $queryBuilder->whereHas('supplier', function ($q) use ($request) {
-                    $q->where('nama', 'like', '%' . $request->supplier . '%');
-                });
-            }
-
-            if ($request->filled('po_number')) {
-                $queryBuilder->whereHas('purchasable', function ($q) use ($request) {
-                    $q->where('no_po', 'like', '%' . $request->po_number . '%');
-                });
-            }
-
-            if ($request->filled('invoice_number')) {
-                $queryBuilder->where('no_invoice', 'like', '%' . $request->invoice_number . '%');
-            }
-
-            if ($request->filled('grn_number')) {
-                $queryBuilder->where('no_grn', 'like', '%' . $request->grn_number . '%');
-            }
+        if ($request->filled('initial_supplier_id')) {
+            \Log::debug('Filter by initial supplier_id: ' . $request->initial_supplier_id);
+            $queryBuilder->where('supplier_id', $request->initial_supplier_id);
+            $activeSupplierId = $request->initial_supplier_id;
+        } elseif ($request->filled('supplier_id')) {
+            \Log::debug('Filter by supplier_id: ' . $request->supplier_id);
+            $queryBuilder->where('supplier_id', $request->supplier_id);
+            $activeSupplierId = $request->supplier_id;
+        } else {
+            $activeSupplierId = null;
         }
 
-        $availableGrns = $hasFilters ? $queryBuilder->latest('tanggal_penerimaan')->get() : collect([]);
-        $suppliers = WarehouseSupplier::where('aktif', 1)->orderBy('nama')->get();
+        // Filter tambahan
+        if ($request->filled('po_number')) {
+            $queryBuilder->whereHas('purchasable', function ($q) use ($request) {
+                $q->where('no_po', 'like', '%' . $request->po_number . '%');
+            });
+            \Log::debug('Filter by PO: ' . $request->po_number);
+        }
 
-        // Ambil supplier_id dari request, atau bisa juga pakai default null
-        $activeSupplierId = $request->get('supplier_id');
+        if ($request->filled('invoice_number')) {
+            $queryBuilder->where('no_invoice', 'like', '%' . $request->invoice_number . '%');
+            \Log::debug('Filter by Invoice: ' . $request->invoice_number);
+        }
+
+        if ($request->filled('grn_number')) {
+            $queryBuilder->where('no_grn', 'like', '%' . $request->grn_number . '%');
+            \Log::debug('Filter by GRN: ' . $request->grn_number);
+        }
+
+        $availableGrns = $isSearching ? $queryBuilder->get() : collect([]);
+        \Log::debug('Available GRNs count: ' . $availableGrns->count());
+
+        $suppliers = WarehouseSupplier::where('aktif', 1)->orderBy('nama')->get();
 
         return view('app-type.keuangan.ap-supplier.partials.index-grn', [
             'availableGrns' => $availableGrns,
             'suppliers' => $suppliers,
-            'hasFilters' => $hasFilters,
-            'activeSupplierId' => $activeSupplierId
+            'activeSupplierId' => $activeSupplierId,
+            'isSearching' => $isSearching,
+            'parentWindow' => $request->input('parent_window', '') // Tambahkan ini
         ]);
     }
-
-
     // store function
+    // File: app/Http/Controllers/Keuangan/APSupplierController.php
+
     public function store(Request $request)
     {
+        // =========================================================================
+        // BAGIAN 1: VALIDASI DATA
+        // =========================================================================
+        // Validasi ini sesuai dengan yang Anda berikan.
+        // Ini memastikan data dasar yang dikirim dari form memenuhi aturan.
+        // Format tanggal 'd-m-Y' digunakan karena datepicker Anda mengirim format ini.
         $validated = $request->validate([
             'tanggal_ap' => 'required|date_format:d-m-Y',
             'due_date' => 'required|date_format:d-m-Y|after_or_equal:tanggal_ap',
             'tanggal_faktur_pajak' => 'nullable|date_format:d-m-Y',
             'supplier_id' => 'required|exists:warehouse_supplier,id',
-            'no_invoice' => 'required|string|max:100',
+            'no_invoice' => 'required|string|max:100', // Sesuai dengan name="no_invoice" di form
             'grn_ids' => 'required|array|min:1',
             'grn_ids.*' => 'required|integer|exists:penerimaan_barang_header,id',
-            'notes' => 'nullable|string',
             'diskon_final' => 'required|numeric|min:0',
-            'ppn_persen' => 'required|numeric|min:0',
-            // Checkboxes (boolean)
-            'ada_kwitansi' => 'nullable|boolean',
-            'ada_faktur_pajak' => 'nullable|boolean',
-            'ada_surat_jalan' => 'nullable|boolean',
-            'ada_salinan_po' => 'nullable|boolean',
-            'ada_tanda_terima_barang' => 'nullable|boolean',
-            'ada_berita_acara' => 'nullable|boolean',
+
+            // Field-field ini tidak ada di validasi Anda, jadi kita akan mengambilnya langsung dari request.
+            // Namun, disarankan untuk memvalidasinya juga di masa depan.
+            // 'notes' => 'nullable|string',
+            // 'ppn_persen' => 'required|numeric|min:0',
+            // 'retur' => 'required|numeric|min:0',
+            // 'materai' => 'required|numeric|min:0',
+            // 'keterangan_item' => 'nullable|array',
+            // 'diskon_item' => 'nullable|array',
+            // 'biaya_lainnya_item' => 'nullable|array',
         ]);
 
+        // Inisialisasi variabel $apHeader di luar transaksi agar dapat diakses setelahnya
+        $apHeader = null;
+
         try {
-            // Gunakan Transaksi Database untuk memastikan integritas data
-            DB::transaction(function () use ($request, $validated) {
-                // Konversi format tanggal sebelum disimpan
-                $tanggalAp = Carbon::createFromFormat('d-m-Y', $validated['tanggal_ap']);
-                $dueDate = Carbon::createFromFormat('d-m-Y', $validated['due_date']);
-                $tanggalFakturPajak = $validated['tanggal_faktur_pajak'] ? Carbon::createFromFormat('d-m-Y', $validated['tanggal_faktur_pajak']) : null;
+            // =========================================================================
+            // BAGIAN 2: TRANSAKSI DATABASE
+            // =========================================================================
+            // Menggunakan DB::transaction untuk memastikan semua query berhasil atau
+            // semua dibatalkan jika terjadi error. Ini menjaga integritas data.
+            DB::transaction(function () use ($request, &$apHeader) {
 
-                // 1. Ambil semua GRN yang dipilih untuk menghitung total
-                $selectedGrns = PenerimaanBarangHeader::whereIn('id', $validated['grn_ids'])->get();
+                // Konversi format tanggal dari form ('d-m-Y') ke format database ('Y-m-d')
+                $tanggalAp = Carbon::createFromFormat('d-m-Y', $request->tanggal_ap);
+                $dueDate = Carbon::createFromFormat('d-m-Y', $request->due_date);
+                $tanggalFakturPajak = $request->tanggal_faktur_pajak ? Carbon::createFromFormat('d-m-Y', $request->tanggal_faktur_pajak) : null;
+
+                // Ambil data GRN yang dipilih untuk kalkulasi
+                $selectedGrns = PenerimaanBarangHeader::whereIn('id', $request->grn_ids)->get();
+
+                // =========================================================================
+                // BAGIAN 3: KALKULASI DI BACKEND
+                // =========================================================================
+                // Semua kalkulasi dilakukan di backend untuk keamanan dan keakuratan.
+                // Jangan pernah mempercayai nilai total yang dikirim dari frontend.
                 $subtotal = $selectedGrns->sum('total_nilai_barang');
+                $totalDiskonItem = collect($request->input('diskon_item', []))->sum();
+                $totalBiayaLainItem = collect($request->input('biaya_lainnya_item', []))->sum();
 
-                // Hitung PPN Nominal
-                $ppnNominal = ($subtotal - $request->input('diskon_final', 0)) * ($request->input('ppn_persen', 0) / 100);
+                $retur = $request->input('retur', 0);
+                $diskonFinal = $request->input('diskon_final', 0);
+                $materai = $request->input('materai', 0);
 
-                // Hitung Grand Total
-                $grandTotal = ($subtotal - $request->input('diskon_final', 0)) + $ppnNominal;
+                // Dasar Pengenaan Pajak (DPP) dihitung setelah semua diskon dan retur
+                $dpp = $subtotal - $totalDiskonItem - $diskonFinal - $retur;
+                $ppnNominal = $dpp * ($request->input('ppn_persen', 0) / 100);
+                $grandTotal = $dpp + $ppnNominal + $totalBiayaLainItem + $materai;
 
-                // 2. Buat record di ap_supplier_header
+                // =========================================================================
+                // BAGIAN 4: SIMPAN DATA KE DATABASE
+                // =========================================================================
+                // Membuat record baru di tabel `ap_supplier_header`
                 $apHeader = ApSupplierHeader::create([
                     'kode_ap' => $this->generateApCode(),
-                    'supplier_id' => $validated['supplier_id'],
-                    'no_invoice_supplier' => $validated['no_invoice'],
+                    'supplier_id' => $request->supplier_id,
+                    'no_invoice_supplier' => $request->no_invoice,
+                    'no_faktur_pajak' => $request->no_faktur_pajak,
                     'tanggal_ap' => $tanggalAp,
                     'due_date' => $dueDate,
                     'tanggal_faktur_pajak' => $tanggalFakturPajak,
                     'subtotal' => $subtotal,
-                    'diskon_final' => $request->input('diskon_final', 0),
+                    'diskon_final' => $diskonFinal,
                     'ppn_persen' => $request->input('ppn_persen', 0),
                     'ppn_nominal' => $ppnNominal,
-                    'biaya_lainnya' => 0, // Belum ada di form, kita set 0
+                    'biaya_lainnya' => $totalBiayaLainItem,
+                    'retur' => $retur,
+                    'materai' => $materai,
                     'grand_total' => $grandTotal,
-                    'notes' => $validated['notes'],
+                    'notes' => $request->notes,
                     'status_pembayaran' => 'Belum Lunas',
                     'user_entry_id' => auth()->id(),
                     'ada_kwitansi' => $request->boolean('ada_kwitansi'),
@@ -188,23 +215,38 @@ class APSupplierController extends Controller
                     'ada_berita_acara' => $request->boolean('ada_berita_acara'),
                 ]);
 
-                // 3. Loop untuk menyimpan detail dan update status GRN
+                // Membuat record detail untuk setiap GRN dan mengupdate status GRN
                 foreach ($selectedGrns as $grn) {
                     $apHeader->details()->create([
                         'penerimaan_barang_header_id' => $grn->id,
                         'nominal_grn' => $grn->total_nilai_barang,
+                        'keterangan' => $request->keterangan_item[$grn->id] ?? null,
+                        'diskon_item' => $request->diskon_item[$grn->id] ?? 0,
+                        'biaya_lainnya_item' => $request->biaya_lainnya_item[$grn->id] ?? 0,
                     ]);
-                    // Update status GRN menjadi 'Sudah AP'
                     $grn->update(['status_ap' => 'Sudah AP']);
                 }
             });
         } catch (\Exception $e) {
-            // Jika transaksi gagal, kembalikan dengan pesan error
+            // Jika terjadi error selama transaksi, catat di log dan kembalikan pesan error ke pengguna
+            Log::error('Gagal menyimpan AP Supplier: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage())->withInput();
         }
 
-        // Jika berhasil, redirect ke halaman index
-        return redirect()->route('app-type.keuangan.ap-supplier.index')->with('success', 'AP Supplier berhasil dibuat.');
+        // =========================================================================
+        // BAGIAN 5: REDIRECT DENGAN FLASH SESSION UNTUK POPUP
+        // =========================================================================
+        // Jika $apHeader berhasil dibuat (transaksi sukses), redirect ke halaman index.
+        if ($apHeader) {
+            // `with('newly_created_ap_id', ...)` adalah kunci untuk memicu popup otomatis.
+            // Ia mengirim ID AP yang baru dibuat ke request berikutnya (saat halaman index dimuat).
+            return redirect()->route('keuangan.ap-supplier.index')
+                ->with('success', 'AP Supplier berhasil dibuat.')
+                ->with('newly_created_ap_id', $apHeader->id);
+        }
+
+        // Fallback jika karena suatu hal $apHeader tidak terisi (meskipun jarang terjadi)
+        return redirect()->back()->with('error', 'Gagal mendapatkan data AP setelah penyimpanan.')->withInput();
     }
 
     public function fetchAvailableGrn(Request $request)
@@ -231,12 +273,33 @@ class APSupplierController extends Controller
         return $prefix . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $suppliers = WarehouseSupplier::where('aktif', 1)->orderBy('nama')->get();
 
+        // Initialize selectedGrn as null
+        $selectedGrn = null;
+
+        // Check for single GRN selection
+        if ($request->has('selected_grn')) {
+            $selectedGrn = [
+                'id' => $request->selected_grn,
+                'no_grn' => $request->grn_no,
+                'supplier' => $request->supplier,
+                'supplier_id' => $request->supplier_id,
+                'po_no' => $request->po_no,
+                'total' => $request->total
+            ];
+        }
+        // Check for multiple GRN selection
+        elseif ($request->has('selected_grns')) {
+            $selectedGrns = explode(',', $request->selected_grns);
+            $selectedGrn = ['multiple' => true, 'ids' => $selectedGrns];
+        }
+
         return view('app-type.keuangan.ap-supplier.partials.create', [
-            'suppliers' => $suppliers
+            'suppliers' => $suppliers,
+            'selectedGrn' => $selectedGrn
         ]);
     }
 
@@ -261,5 +324,66 @@ class APSupplierController extends Controller
             'availableGrns' => $availableGrns,
             'supplierId' => $request->supplier_id
         ]);
+    }
+
+    // Add these methods to your APSupplierController
+
+    public function show($id)
+    {
+        $apSupplier = ApSupplierHeader::with([
+            'supplier',
+            'details.penerimaanBarang.purchasable', // Pastikan ini ada
+            'userEntry'
+        ])->findOrFail($id);
+
+        // Hitung ulang semua nilai untuk memastikan konsistensi
+        $apSupplier->subtotal = $apSupplier->details->sum('nominal_grn');
+        $totalDiskonItem = $apSupplier->details->sum('diskon_item');
+        $totalBiayaLainItem = $apSupplier->details->sum('biaya_lainnya_item');
+
+        $dpp = $apSupplier->subtotal - $totalDiskonItem - $apSupplier->diskon_final - $apSupplier->retur;
+        $apSupplier->ppn_nominal = $dpp * ($apSupplier->ppn_persen / 100);
+        $apSupplier->grand_total = $dpp + $apSupplier->ppn_nominal + $totalBiayaLainItem + $apSupplier->materai;
+
+        return view('app-type.keuangan.ap-supplier.partials.details', compact('apSupplier'));
+    }
+
+
+    public function cancel(Request $request, $id)
+    {
+        try {
+            DB::transaction(function () use ($id) {
+                // 1. Temukan AP Supplier yang akan dibatalkan
+                $apSupplier = ApSupplierHeader::findOrFail($id);
+
+                // 2. Kembalikan status semua GRN yang terhubung ke 'Belum AP'
+                foreach ($apSupplier->details as $detail) {
+                    if ($detail->penerimaanBarang) {
+                        $detail->penerimaanBarang->update(['status_ap' => 'Belum AP']);
+                    }
+                }
+
+                // 3. Hapus detail terlebih dahulu untuk menjaga integritas
+                $apSupplier->details()->delete();
+
+                // 4. Hapus header-nya (hard delete)
+                $apSupplier->forceDelete(); // Gunakan forceDelete untuk menghapus permanen
+            });
+
+            return redirect()->route('keuangan.ap-supplier.index')
+                ->with('success', "AP Supplier berhasil dibatalkan dan dihapus permanen.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Gagal membatalkan AP Supplier #{$id}: " . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat membatalkan AP Supplier: ' . $e->getMessage());
+        }
+    }
+
+    public function print(ApSupplierHeader $apSupplier)
+    {
+        $apSupplier->load(['supplier', 'details.penerimaanBarang.purchasable']);
+
+        return view('app-type.keuangan.ap-supplier.print.invoice', compact('apSupplier'));
     }
 }

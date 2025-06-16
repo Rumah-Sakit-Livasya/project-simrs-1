@@ -74,4 +74,9 @@ class PenerimaanBarangHeader extends Model
     {
         return $this->belongsTo(User::class, 'user_penerima_id');
     }
+
+    public function purchasable()
+    {
+        return $this->morphTo();
+    }
 }

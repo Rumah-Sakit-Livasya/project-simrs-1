@@ -1,393 +1,586 @@
-@extends('inc.layout')
-@section('title', 'Tambah AP Supplier')
-@section('content')
-    <style>
-        .form-control {
-            border: 0;
-            border-bottom: 1.9px solid #eaeaea;
-            border-radius: 0;
-            padding-left: 0;
-            padding-right: 0;
-        }
+    @extends('inc.layout')
+    @section('title', 'Tambah AP Supplier')
+    @section('content')
+        <style>
+            table {
+                font-size: 8pt !important;
+            }
 
-        .form-control:focus {
-            box-shadow: none;
-            border-color: #eaeaea;
-        }
+            .badge-waiting {
+                background-color: #f39c12;
+                color: white;
+            }
 
-        .select2-selection {
-            border: 0 !important;
-            border-bottom: 1.9px solid #eaeaea !important;
-            border-radius: 0 !important;
-        }
+            .badge-approved {
+                background-color: #00a65a;
+                color: white;
+            }
 
-        table {
-            font-size: 8pt !important;
-        }
+            .badge-rejected {
+                background-color: #dd4b39;
+                color: white;
+            }
 
-        .input-item {
-            width: 100px;
-            text-align: right;
-        }
-    </style>
-    <main id="js-page-content" role="main" class="page-content">
-        <div class="row justify-content-center">
-            <div class="col-xl-12">
-                <div class="panel">
-                    <div class="panel-hdr">
-                        <h2>Proses <span class="fw-300"><i>AP Supplier</i></span></h2>
+            .modal-lg {
+                max-width: 800px;
+            }
+
+            .panel-loading {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 999;
+            }
+
+            /* PENTING: Tambahkan CSS ini jika belum ada untuk memastikan toggle berfungsi */
+            .child-row {
+                display: none;
+                /* Sembunyikan secara default */
+            }
+
+            .dropdown-icon {
+                font-size: 14px;
+                transition: transform 0.3s ease;
+                display: inline-block;
+            }
+
+            .dropdown-icon.bxs-down-arrow {
+                transform: rotate(180deg);
+            }
+
+            /* Styling tambahan untuk memperjelas batas row */
+            .child-row td {
+                background-color: #f9f9f9;
+                border-bottom: 2px solid #ddd;
+            }
+
+            /* Pastikan table di dalam child row memiliki margin dan padding yang tepat */
+            .child-row td>div {
+                padding: 15px;
+                margin: 0;
+            }
+
+            /* Pastikan parent dan child row terhubung secara visual */
+            tr.parent-row.active {
+                border-bottom: none !important;
+            }
+
+            /* Tambahkan di bagian style */
+            .control-details {
+                cursor: pointer;
+                text-align: center;
+                width: 30px;
+            }
+
+            .control-details .dropdown-icon {
+                font-size: 18px;
+                transition: transform 0.3s ease, color 0.3s ease;
+                display: inline-block;
+                color: #3498db;
+                /* Warna biru */
+            }
+
+            .control-details .dropdown-icon.bxs-up-arrow {
+                transform: rotate(180deg);
+                color: #e74c3c;
+                /* Warna merah saat terbuka */
+            }
+
+            .control-details:hover .dropdown-icon {
+                color: #2980b9;
+                /* Warna biru lebih gelap saat hover */
+            }
+
+            /* Sembunyikan ikon sort bawaan DataTables */
+            table.dataTable thead .sorting:after,
+            table.dataTable thead .sorting_asc:after,
+            table.dataTable thead .sorting_desc:after,
+            table.dataTable thead .sorting_asc_disabled:after,
+            table.dataTable thead .sorting_desc_disabled:after {
+                display: none !important;
+            }
+
+            /* Styling untuk child row */
+            /* Pastikan content di child row tidak overflow */
+            .child-row td>div {
+                padding: 15px;
+                width: 100%;
+            }
+
+            /* Styling untuk tabel di dalam child row */
+            .child-table {
+                width: 98% !important;
+                margin: 10px auto !important;
+                border-radius: 4px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+                overflow: hidden;
+            }
+
+            .child-table thead th {
+                background-color: #021d39;
+                color: white;
+                font-size: 12px;
+                padding: 8px !important;
+            }
+
+            .child-table tbody td {
+                padding: 8px !important;
+                font-size: 12px;
+                background-color: white;
+            }
+
+            /* Animasi untuk transisi smooth */
+            .child-row {
+                transition: all 0.3s ease;
+            }
+
+            .child-row.show {
+                opacity: 1;
+            }
+
+            td.control-details::before {
+                display: none !important;
+            }
+
+            /* Efek hover untuk row */
+            #dt-basic-example tbody tr.parent-row:hover {
+                background-color: #f8f9fa;
+                cursor: pointer;
+            }
+            /* Efek hover untuk child row */                                        
+            /* Warna berbeda untuk child row */
+                #dt-basic-example tbody tr.child-row:hover {
+                background-color: #f1f1f1;
+            }
+
+            
+        </style>
+        <main id="js-page-content" role="main" class="page-content">
+            {{-- FIX: Route form action disesuaikan dengan standar route Anda --}}
+            <form action="{{ route('keuangan.ap-supplier.store') }}" method="post" id="create-ap-form">
+                @csrf
+                <div class="row justify-content-center align-item-center">
+                    {{-- Panel 1: Form Input Utama (col-xl-10) --}}
+                    <div class="col-xl-10">
+                        <div class="panel">
+                            <div class="panel-hdr">
+                                <h2>Form AP Supplier</h2>
+                            </div>
+                            <div class="panel-container show">
+                                <div class="panel-content">
+                                    <div class="form-row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">Tanggal AP <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control form-control-sm datepicker"
+                                                    name="tanggal_ap" value="{{ old('tanggal_ap', date('d-m-Y')) }}"
+                                                    autocomplete="off" required>
+                                                <div class="input-group-append"><span class="input-group-text fs-sm"><i
+                                                            class="fal fa-calendar"></i></span></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">Due Date <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control form-control-sm datepicker"
+                                                    name="due_date" value="{{ old('due_date') }}" autocomplete="off" required>
+                                                <div class="input-group-append"><span class="input-group-text fs-sm"><i
+                                                            class="fal fa-calendar"></i></span></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">Tanggal Faktur Pajak</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control form-control-sm datepicker"
+                                                    name="tanggal_faktur_pajak" value="{{ old('tanggal_faktur_pajak') }}"
+                                                    autocomplete="off">
+                                                <div class="input-group-append"><span class="input-group-text fs-sm"><i
+                                                            class="fal fa-calendar"></i></span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">Supplier <span class="text-danger">*</span></label>
+                                            <select class="form-control form-control-sm select2" id="supplier_id"
+                                                name="supplier_id" required>
+                                                <option value="" disabled selected>Pilih Supplier</option>
+                                                @foreach ($suppliers as $supplier)
+                                                    <option value="{{ $supplier->id }}" data-ppn="{{ $supplier->ppn ?? 0 }}"
+                                                        {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                                                        {{ $supplier->nama }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">No Invoice Supplier <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" class="form-control form-control-sm" name="no_invoice"
+                                                value="{{ old('no_invoice') }}" required>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">No Faktur Pajak</label>
+                                            <input type="text" class="form-control form-control-sm" name="no_faktur_pajak"
+                                                value="{{ old('no_faktur_pajak') }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="panel-container show">
-                        <div class="panel-content">
-                            <form action="{{ route('keuangan.ap-supplier.store') }}" method="post" id="create-ap-form">
-                                @csrf
-                                {{-- Form Header (Tanggal, Supplier, dll.) --}}
-                                <div class="form-row">
-                                    <div class="col-md-4 mb-3">
-                                        <label class="mb-1">Tanggal AP <span class="text-danger">*</span></label>
-                                        <div class="input-group input-group-sm">
-                                            <input type="text" class="form-control form-control-sm datepicker"
-                                                name="tanggal_ap" placeholder="Pilih Tanggal AP"
-                                                value="{{ old('tanggal_ap', date('d-m-Y')) }}" autocomplete="off" required>
-                                            <div class="input-group-append"><span class="input-group-text fs-sm"><i
-                                                        class="fal fa-calendar"></i></span></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="mb-1">Due Date <span class="text-danger">*</span></label>
-                                        <div class="input-group input-group-sm">
-                                            <input type="text" class="form-control form-control-sm datepicker"
-                                                name="due_date" placeholder="Atur Jatuh Tempo" value="{{ old('due_date') }}"
-                                                autocomplete="off" required>
-                                            <div class="input-group-append"><span class="input-group-text fs-sm"><i
-                                                        class="fal fa-calendar"></i></span></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="mb-1">Tanggal Faktur Pajak</label>
-                                        <div class="input-group input-group-sm">
-                                            <input type="text" class="form-control form-control-sm datepicker"
-                                                name="tanggal_faktur_pajak" placeholder="Tanggal Faktur Pajak"
-                                                value="{{ old('tanggal_faktur_pajak') }}" autocomplete="off">
-                                            <div class="input-group-append"><span class="input-group-text fs-sm"><i
-                                                        class="fal fa-calendar"></i></span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="mb-1">Supplier <span class="text-danger">*</span></label>
-                                        <select class="form-control form-control-sm select2" id="supplier_id"
-                                            name="supplier_id" required>
-                                            <option value="" disabled selected>Pilih Supplier</option>
-                                            @foreach ($suppliers as $supplier)
-                                                <option value="{{ $supplier->id }}" data-ppn="{{ $supplier->ppn ?? 0 }}"
-                                                    {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                                                    {{ $supplier->nama }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="mb-1">No Invoice <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control form-control-sm" name="no_invoice"
-                                            placeholder="Masukkan No Invoice" value="{{ old('no_invoice') }}" required>
-                                    </div>
-                                </div>
 
-                                {{-- Tabel Item GRN yang Dipilih --}}
-                                <table class="table table-bordered mt-3">
-                                    <thead class="bg-primary-600 text-white">
-                                        <tr>
-                                            <th width="5%">#</th>
-                                            <th>Tgl GRN</th>
-                                            <th>No. GRN</th>
-                                            <th>No. PO</th>
-                                            <th class="text-right">Nominal</th>
-                                            <th class="text-right">Diskon</th>
-                                            <th class="text-right">Biaya Lain</th>
-                                            <th width="5%" class="text-center">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="grn-selected-list">
-                                        <tr id="grn-placeholder">
-                                            <td colspan="8" class="text-center">Belum ada GRN yang dipilih.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                    {{-- Panel 2: Tabel dan Total (col-xl-12) --}}
+                    <div class="col-xl-12 mt-4">
+                        <div class="panel">
+                            <div class="panel-hdr">
+                                <h2>Detail Penerimaan Barang (GRN)</h2>
+                            </div>
+                            <div class="panel-container show">
+                                <div class="panel-content">
+                                    <table class="table table-bordered table-hover" id="grn-table">
+                                        <thead class="bg-primary-600 text-white">
+                                            <tr class="text-center">
+                                                <th width="3%">#</th>
+                                                <th width="10%">Tgl GRN</th>
+                                                <th width="12%">No. GRN</th>
+                                                <th width="13%">No. PO</th>
+                                                <th width="29%">Keterangan</th>
+                                                <th width="10%" class="">Diskon</th>
+                                                <th width="10%" class="">Biaya Lainnya</th>
+                                                <th width="13%" class="">Nominal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="grn-selected-list">
+                                            {{-- Penanganan data kosong dilakukan oleh JavaScript karena data di-load secara dinamis --}}
+                                            <tr id="grn-placeholder">
+                                                <td colspan="8" class="text-center text-muted py-4">Belum ada GRN yang
+                                                    dipilih. Silakan pilih supplier terlebih dahulu.</td>
+                                            </tr>   
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="font-weight-bold" style="background-color: #f3f3f3;">
+                                                <td colspan="5" class="text-center">Total Item</td>
+                                                <td id="total-diskon-item" class="text-center">0,00</td>
+                                                <td id="total-biaya-lain" class="text-center">0,00</td>
+                                                <td id="total-nominal" class="text-center">0,00</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
 
-                                <div class="row mt-3">
-                                    {{-- Kolom Notes dan Kelengkapan Dokumen --}}
-                                    <div class="col-md-6">
-                                        <label class="mb-1">Notes</label>
-                                        <textarea class="form-control" name="notes" rows="4" placeholder="Catatan tambahan...">{{ old('notes') }}</textarea>
-                                        <label class="mt-2 mb-1">Kelengkapan Dokumen</label>
-                                        <div class="d-flex flex-wrap">
-                                            <div class="form-check mr-3"><input class="form-check-input" type="checkbox"
-                                                    name="ada_kwitansi" value="1"> Kwitansi</div>
-                                            <div class="form-check mr-3"><input class="form-check-input" type="checkbox"
-                                                    name="ada_faktur_pajak" value="1"> Faktur Pajak</div>
-                                            <div class="form-check mr-3"><input class="form-check-input" type="checkbox"
-                                                    name="ada_surat_jalan" value="1"> Surat Jalan</div>
-                                            <div class="form-check mr-3"><input class="form-check-input" type="checkbox"
-                                                    name="ada_salinan_po" value="1"> Salinan PO</div>
-                                            <div class="form-check mr-3"><input class="form-check-input" type="checkbox"
-                                                    name="ada_tanda_terima_barang" value="1"> Tanda Terima</div>
-                                            <div class="form-check"><input class="form-check-input" type="checkbox"
-                                                    name="ada_berita_acara" value="1"> Berita Acara</div>
+                                    <div class="row mt-4">
+                                        <div class="col-md-7">
+                                            <label class="form-label">Notes</label>
+                                            <textarea class="form-control" name="notes" rows="4" placeholder="Catatan tambahan...">{{ old('notes') }}</textarea>
+                                            <label class="mt-3 form-label">Kelengkapan Dokumen</label>
+                                            <div class="d-flex flex-wrap">
+                                                <div class="form-check mr-3"><input class="form-check-input" type="checkbox"
+                                                        name="ada_kwitansi" value="1"
+                                                        @if (old('ada_kwitansi', true)) checked @endif> Kwitansi</div>
+                                                <div class="form-check mr-3"><input class="form-check-input" type="checkbox"
+                                                        name="ada_faktur_pajak" value="1"
+                                                        @if (old('ada_faktur_pajak', true)) checked @endif> Faktur Pajak</div>
+                                                <div class="form-check mr-3"><input class="form-check-input" type="checkbox"
+                                                        name="ada_surat_jalan" value="1"
+                                                        @if (old('ada_surat_jalan')) checked @endif> Surat Jalan</div>
+                                                <div class="form-check mr-3"><input class="form-check-input" type="checkbox"
+                                                        name="ada_salinan_po" value="1"
+                                                        @if (old('ada_salinan_po', true)) checked @endif> Salinan PO</div>
+                                                <div class="form-check mr-3"><input class="form-check-input" type="checkbox"
+                                                        name="ada_tanda_terima_barang" value="1"
+                                                        @if (old('ada_tanda_terima_barang', true)) checked @endif> Tanda Terima</div>
+                                                <div class="form-check"><input class="form-check-input" type="checkbox"
+                                                        name="ada_berita_acara" value="1"
+                                                        @if (old('ada_berita_acara')) checked @endif> Berita Acara</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    {{-- Kolom Kalkulasi Total --}}
-                                    <div class="col-md-6">
-                                        <div class="form-group row"><label
-                                                class="col-md-6 col-form-label">Subtotal</label>
-                                            <div class="col-md-6"><input type="text" class="form-control text-right"
-                                                    id="subtotal" readonly></div>
-                                        </div>
-                                        <div class="form-group row"><label class="col-md-6 col-form-label">Diskon
-                                                Final</label>
-                                            <div class="col-md-6"><input type="number"
-                                                    class="form-control text-right calculation-field" name="diskon_final"
-                                                    id="diskon_final" value="0" step="any"></div>
-                                        </div>
-                                        <div class="form-group row"><label class="col-md-6 col-form-label">Total Setelah
-                                                Diskon</label>
-                                            <div class="col-md-6"><input type="text" class="form-control text-right"
-                                                    id="total_after_discount" readonly></div>
-                                        </div>
-                                        <div class="form-group row"><label class="col-md-6 col-form-label">PPN (%)</label>
-                                            <div class="col-md-6"><input type="number"
-                                                    class="form-control text-right calculation-field" name="ppn_persen"
-                                                    id="ppn_persen" value="0" step="any"></div>
-                                        </div>
-                                        <div class="form-group row"><label class="col-md-6 col-form-label">PPN
-                                                (Nominal)</label>
-                                            <div class="col-md-6"><input type="text" class="form-control text-right"
-                                                    id="ppn_nominal" readonly></div>
-                                        </div>
-                                        <div class="form-group row font-weight-bold"><label
-                                                class="col-md-6 col-form-label">Grand Total</label>
-                                            <div class="col-md-6"><input type="text"
-                                                    class="form-control text-right font-weight-bold" id="grand_total"
-                                                    readonly></div>
+
+                                        <div class="col-md-5">
+                                            <table class="table table-sm table-borderless table-calculation">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Retur</td>
+                                                        <td><input type="text" name="retur" id="retur"
+                                                                class="form-control text-right calculation-field"
+                                                                value="{{ old('retur', 0) }}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Diskon Final</td>
+                                                        <td><input type="text" name="diskon_final" id="diskon_final"
+                                                                class="form-control text-right calculation-field"
+                                                                value="{{ old('diskon_final', 0) }}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>PPN %</td>
+                                                        <td>
+                                                            <div class="input-group">
+                                                                <!-- Persen di start -->
+                                                                <input type="text" name="ppn_persen" id="ppn_persen"
+                                                                    class="form-control text-end calculation-field"
+                                                                    style="max-width: 60px;" value="{{ old('ppn_persen', 0) }}">
+                                                                
+                                                                <!-- Nominal di end -->
+                                                                <input type="text" id="ppn_nominal"
+                                                                    class="form-control text-end text-right bg-light" readonly>
+                                                            </div>
+                                                        </td>
+                                                        
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Materai</td>
+                                                        <td><input type="text" name="materai" id="materai"
+                                                                class="form-control text-right calculation-field"
+                                                                value="{{ old('materai', 0) }}"></td>
+                                                    </tr>
+                                                    <tr class="font-weight-bold" style="background-color: #f3f3f3;">
+                                                        <td >Grand Total</td>
+                                                        <td class=" text-right"><span id="grand_total">0,00</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="form-row mt-3">
-                                    <div class="col-md-12 text-right">
-                                        <a href="{{ route('keuangan.ap-supplier.index') }}"
-                                            class="btn btn-secondary">Kembali</a>
-                                        <button type="button" class="btn btn-info" id="btn-index-grn" disabled>Pilih
-                                            GRN</button>
-                                        <button type="submit" class="btn btn-primary">Simpan</button>
+                                <div
+                                    class="panel-content border-faded border-left-0 border-right-0 border-bottom-0 d-flex flex-row align-items-center">
+                                    <a href="{{ route('keuangan.ap-supplier.index') }}"
+                                        class="btn btn-secondary">Back</a>
+                                    <div class="ml-auto">
+                                        <button type="button" class="btn btn-info" id="btn-index-grn" disabled>
+                                            <i class="fal fa-plus-circle mr-1"></i> Pilih GRN
+                                        </button>
+                                        <button type="submit" class="btn btn-primary ml-2">Simpan</button>
                                     </div>
                                 </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </main>
-@endsection
+            </form>
+        </main>
+    @endsection
 
-@section('plugin')
-    {{-- Hanya sertakan script yang dibutuhkan --}}
-    <script src="/js/formplugins/select2/select2.bundle.js"></script>
-    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-    <script src="/js/dependency/moment/moment.js"></script>
+    @section('plugin')
+        {{-- Plugin CSS & JS --}}
+        <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+        <script src="/js/formplugins/select2/select2.bundle.js"></script>
+        <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+        <script src="/js/dependency/moment/moment.js"></script>
+        <script src="/js/formplugins/sweetalert2/sweetalert2.bundle.js"></script>
+        <script src="/js/notifications/toastr/toastr.js"></script>
+        <link rel="stylesheet" media="screen, print" href="/css/notifications/toastr/toastr.css">
 
-    <script>
-        // =========================================================================
-        // === BAGIAN SCRIPT YANG DIPERBAIKI (HANYA ADA SATU DOCUMENT.READY) ===
-        // =========================================================================
+        {{-- Script Khusus Halaman Ini --}}
+        <script>
+            $(document).ready(function() {
+                // Inisialisasi plugin
+                $('.datepicker').datepicker({
+                    format: 'dd-mm-yyyy',
+                    autoclose: true,
+                    todayHighlight: true,
+                    language: 'id',
+                    orientation: 'bottom auto',
+                    templates: {
+                        leftArrow: '<i class="fal fa-angle-left"></i>',
+                        rightArrow: '<i class="fal fa-angle-right"></i>'
+                    }
+                });
+                $('.select2').select2({
+                    placeholder: "Pilih opsi",
+                    allowClear: true
+                });
 
-        // --- Fungsi Global (di luar document.ready) agar bisa dipanggil oleh pop-up ---
-        let selectedGrns = [];
-        let popupWindow = null; // Untuk tracking window pop-up
+                // Variabel global
+                let selectedGrns = [];
+                let popupWindow = null;
 
-        function addGrnFromPopup(grnData) {
-            const isExist = selectedGrns.some(g => g.id === grnData.id);
-            if (isExist) {
-                alert('GRN ' + grnData.no_grn + ' sudah dipilih.');
-                return;
-            }
-            grnData.diskon = 0;
-            grnData.biaya_lain = 0;
-            selectedGrns.push(grnData);
-            renderSelectedGrns();
-            calculateTotals();
-        }
+                // Fungsi untuk format mata uang
+                function formatCurrency(number) {
+                 return  new Intl.NumberFormat('id-ID', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(number);
+}
 
-        // --- Logika Utama (di dalam document.ready) ---
-        $(document).ready(function() {
-            // -- Helper Functions (di dalam scope document.ready) --
-            function renderSelectedGrns() {
-                const list = $('#grn-selected-list');
-                $('input[name^="grn_ids"], input[name^="diskon_item"], input[name^="biaya_lain_item"]').remove();
-                list.empty();
 
-                if (selectedGrns.length > 0) {
-                    selectedGrns.forEach(function(grn, index) {
-                        const form = $('#create-ap-form');
-                        form.append(`<input type="hidden" name="grn_ids[${grn.id}]" value="${grn.id}">`);
-                        list.append(`
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td>${moment(grn.tanggal_penerimaan).format('DD MMM YYYY')}</td>
-                                <td>${grn.no_grn}</td>
+                // Fungsi untuk parse nilai dari format mata uang
+                function parseCurrency(value) {
+                    return parseFloat(String(value).replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0;
+                }
+
+                // Kalkulasi Utama
+                function calculateTotals() {
+                    let subtotal = 0,
+                        totalItemDiskon = 0,
+                        totalItemBiayaLain = 0;
+                    selectedGrns.forEach(grn => {
+                        subtotal += parseFloat(grn.total_nilai_barang) || 0;
+                        totalItemDiskon += parseFloat(grn.diskon) || 0;
+                        totalItemBiayaLain += parseFloat(grn.biaya_lainnya) || 0;
+                    });
+
+                    const retur = parseCurrency($('#retur').val());
+                    const diskonFinal = parseCurrency($('#diskon_final').val());
+                    const materai = parseCurrency($('#materai').val());
+                    const ppnPersen = parseCurrency($('#ppn_persen').val());
+
+                    const dpp = subtotal - totalItemDiskon - diskonFinal - retur;
+                    const ppnNominal = dpp * (ppnPersen / 100);
+                    const grandTotal = dpp + ppnNominal + totalItemBiayaLain + materai;
+
+                    // Update tampilan
+                    $('#total-diskon-item').text(formatCurrency(totalItemDiskon));
+                    $('#total-biaya-lain').text(formatCurrency(totalItemBiayaLain));
+                    $('#total-nominal').text(formatCurrency(subtotal));
+                    $('#ppn_nominal').val(formatCurrency(ppnNominal));
+                    $('#grand_total').text(formatCurrency(grandTotal));
+                }
+
+                // Render ulang tabel GRN
+                function renderSelectedGrns() {
+                    const $list = $('#grn-selected-list');
+                    $list.empty();
+                    $('#create-ap-form input[name^="grn_ids"]').remove();
+                    if (selectedGrns.length === 0) {
+                        $list.html(
+                            '<tr id="grn-placeholder"><td colspan="8" class="text-center text-muted py-4">Belum ada GRN yang dipilih.</td></tr>'
+                            );
+                        return;
+                    }
+                    selectedGrns.forEach((grn, index) => {
+                        $('#create-ap-form').append(`<input type="hidden" name="grn_ids[]" value="${grn.id}">`);
+                        const formattedDate = grn.tanggal_penerimaan ? moment(grn.tanggal_penerimaan).format(
+                            'DD MMM YYYY') : 'N/A';
+                        $list.append(`
+                            <tr data-grn-id="${grn.id} " class="text-center">
+                                <td class="text-center"><button type="button" class="btn btn-xs btn-outline-danger remove-grn-btn" data-id="${grn.id}" title="Hapus"><i class="fal fa-times"></i></button></td>
+                                <td>${formattedDate}</td>
+                                <td>${grn.no_grn || 'N/A'}</td>
                                 <td>${grn.purchasable ? grn.purchasable.no_po : 'N/A'}</td>
-                                <td class="text-right">${formatCurrency(grn.total_nilai_barang)}</td>
-                                <td><input type="number" class="form-control input-item item-calculation" name="diskon_item[${grn.id}]" data-id="${grn.id}" data-field="diskon" value="${grn.diskon}" step="any"></td>
-                                <td><input type="number" class="form-control input-item item-calculation" name="biaya_lain_item[${grn.id}]" data-id="${grn.id}" data-field="biaya_lain" value="${grn.biaya_lain}" step="any"></td>
-                                <td class="text-center"><button type="button" class="btn btn-xs btn-danger remove-grn-btn" data-id="${grn.id}"><i class="fal fa-trash"></i></button></td>
+                                <td>
+                                    
+                                    </td>
+                                <td>${formatCurrency(grn.diskon || 0)}</td>
+                                <td>${formatCurrency(grn.biaya_lainnya || 0)}</td>
+                                <td class="text -right">${formatCurrency(grn.total_nilai_barang || 0)}</td>
                             </tr>
                         `);
                     });
-                } else {
-                    list.html(
-                        '<tr id="grn-placeholder"><td colspan="8" class="text-center">Belum ada GRN yang dipilih.</td></tr>'
-                    );
-                }
-            }
-
-            function calculateTotals() {
-                let subtotal = selectedGrns.reduce((sum, grn) => sum + parseFloat(grn.total_nilai_barang), 0);
-                let totalItemDiskon = 0;
-                let totalItemBiayaLain = 0;
-                selectedGrns.forEach(grn => {
-                    totalItemDiskon += parseFloat(grn.diskon) || 0;
-                    totalItemBiayaLain += parseFloat(grn.biaya_lain) || 0;
-                });
-                let diskonFinal = parseFloat($('#diskon_final').val()) || 0;
-                let totalAfterDiscount = subtotal - totalItemDiskon - diskonFinal;
-                let ppnPersen = parseFloat($('#ppn_persen').val()) || 0;
-                let ppnNominal = totalAfterDiscount * (ppnPersen / 100);
-                let grandTotal = totalAfterDiscount + ppnNominal + totalItemBiayaLain;
-
-                $('#subtotal').val(formatCurrency(subtotal));
-                $('#total_after_discount').val(formatCurrency(totalAfterDiscount));
-                $('#ppn_nominal').val(formatCurrency(ppnNominal));
-                $('#grand_total').val(formatCurrency(grandTotal));
-            }
-
-            function formatCurrency(number) {
-                return new Intl.NumberFormat('id-ID', {
-                    style: 'decimal',
-                    minimumFractionDigits: 2
-                }).format(number);
-            }
-
-            // -- Inisialisasi Plugin --
-            $('.select2').select2({
-                placeholder: "Pilih opsi",
-                allowClear: true
-            });
-            $('.datepicker').datepicker({
-                format: 'dd-mm-yyyy',
-                autoclose: true,
-                todayHighlight: true,
-                orientation: "bottom left"
-            });
-
-            // -- Event Listeners --
-            $('#supplier_id').on('change', function() {
-                const supplierId = $(this).val();
-                const ppn = $(this).find(':selected').data('ppn') || 0;
-                $('#ppn_persen').val(ppn);
-                $('#btn-index-grn').prop('disabled', !supplierId);
-                selectedGrns = [];
-                renderSelectedGrns();
-                calculateTotals();
-            });
-
-            // BAGIAN UTAMA YANG MEMBUAT POP-UP BERFUNGSI - DIPERBAIKI
-            $('#btn-index-grn').on('click', function(e) {
-                e.preventDefault(); // Mencegah default behavior
-
-                const supplierId = $('#supplier_id').val();
-                if (!supplierId) {
-                    alert('Silakan pilih supplier terlebih dahulu.');
-                    return;
                 }
 
-                // Tutup pop-up sebelumnya jika masih terbuka
-                if (popupWindow && !popupWindow.closed) {
-                    popupWindow.close();
-                }
-
-                // URL untuk pop-up - pastikan route ini ada di web.php
-                const baseUrl = "{{ url('/') }}";
-
-                let urlPopup =
-                    `{{ route('keuangan.ap-supplier.indexGrn') }}?initial_supplier_id=${supplierId}`;
-                // Konfigurasi pop-up
-                const popupWidth = 1000;
-                const popupHeight = 700;
-                const left = Math.max(0, (screen.width - popupWidth) / 2);
-                const top = Math.max(0, (screen.height - popupHeight) / 2);
-
-                const windowFeatures = [
-                    `width=${popupWidth}`,
-                    `height=${popupHeight}`,
-                    `left=${left}`,
-                    `top=${top}`,
-                    'scrollbars=yes',
-                    'resizable=yes',
-                    'status=yes',
-                    'toolbar=no',
-                    'menubar=no',
-                    'location=no'
-                ].join(',');
-
-                try {
-                    // Buka pop-up dengan nama window unik
-                    const windowName = `indexGrn_${supplierId}_${Date.now()}`;
-                    popupWindow = window.open(urlPopup, windowName, windowFeatures);
-
-                    // Fokus ke pop-up jika berhasil dibuka
-                    if (popupWindow) {
-                        popupWindow.focus();
-
-                        // Optional: Monitor jika pop-up ditutup
-                        const checkClosed = setInterval(() => {
-                            if (popupWindow.closed) {
-                                clearInterval(checkClosed);
-                                popupWindow = null;
-                            }
-                        }, 1000);
-                    } else {
-                        alert('Pop-up diblokir oleh browser. Silakan izinkan pop-up untuk situs ini.');
+                // Fungsi untuk menangani penambahan GRN dari popup
+                function addGrnFromPopup(grnData) {
+                    if (selectedGrns.some(g => g.id === grnData.id)) {
+                        toastr.warning('GRN sudah dipilih sebelumnya.', 'Peringatan');
+                        return;
                     }
-                } catch (error) {
-                    console.error('Error membuka pop-up:', error);
-                    alert('Gagal membuka pop-up. Periksa pengaturan browser Anda.');
+                    grnData.diskon = 0;
+                    grnData.biaya_lainnya = 0;
+                    selectedGrns.push(grnData);
+                    renderSelectedGrns();
+                    calculateTotals();
+                    toastr.success('GRN berhasil ditambahkan.', 'Sukses');
                 }
-            });
 
-            // Event listener untuk menghapus GRN
-            $('#grn-selected-list').on('click', '.remove-grn-btn', function(e) {
-                e.preventDefault();
-                const grnId = $(this).data('id');
-                selectedGrns = selectedGrns.filter(g => g.id !== grnId);
-                renderSelectedGrns();
+                // Event Listener untuk popup
+                window.addEventListener('message', function(event) {
+                    if (event.data && event.data.type === 'GRN_SELECTED') {
+                        addGrnFromPopup(event.data.data);
+                        if (popupWindow && !popupWindow.closed) popupWindow.close();
+                    }
+                }, false);
+
+                $('#btn-index-grn').on('click', function(e) {
+                    e.preventDefault();
+                    const supplierId = $('#supplier_id').val();
+                    if (!supplierId) {
+                        toastr.error('Pilih supplier terlebih dahulu.', 'Error');
+                        return;
+                    }
+                    if (popupWindow && !popupWindow.closed) popupWindow.close();
+                    const url =
+                        `{{ route('keuangan.ap-supplier.indexGrn') }}?initial_supplier_id=${supplierId}`;
+                    popupWindow = window.open(url, `grnSelector_${Date.now()}`,
+                        'width=1200,height=800,scrollbars=yes');
+                    if (!popupWindow) {
+                        toastr.error('Popup diblokir. Izinkan popup untuk situs ini.', 'Error');
+                    }
+                });
+
+                // Event Listener untuk perubahan nilai input numerik agar terformat
+                $('.panel').on('blur', '.calculation-field, .item-calculation', function() {
+                    const value = parseCurrency($(this).val());
+                    $(this).val(formatCurrency(value));
+                }).on('input', '.calculation-field', calculateTotals);
+
+                $('#grn-selected-list').on('input', '.item-calculation', function() {
+                    const grnId = parseInt($(this).closest('tr').data('grn-id'));
+                    const field = $(this).data('field');
+                    const value = parseCurrency($(this).val());
+                    const grn = selectedGrns.find(g => g.id === grnId);
+                    if (grn) {
+                        grn[field] = value;
+                    }
+                    calculateTotals();
+                });
+
+                // Event Listener untuk hapus GRN
+                $('#grn-selected-list').on('click', '.remove-grn-btn', function() {
+                    const grnId = parseInt($(this).data('id'));
+                    selectedGrns = selectedGrns.filter(g => g.id !== grnId);
+                    renderSelectedGrns();
+                    calculateTotals();
+                });
+
+                // Event Listener ganti supplier
+                $('#supplier_id').on('change', function() {
+                    const supplierId = $(this).val();
+                    const ppn = $(this).find(':selected').data('ppn') || 0;
+                    $('#ppn_persen').val(ppn).trigger('input');
+                    $('#btn-index-grn').prop('disabled', !supplierId);
+                    if (supplierId && selectedGrns.length > 0) {
+                        Swal.fire({
+                            title: 'Ganti Supplier?',
+                            text: "Mengganti supplier akan menghapus semua GRN yang sudah dipilih. Lanjutkan?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Ya, Lanjutkan!',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                selectedGrns = [];
+                                renderSelectedGrns();
+                                calculateTotals();
+                            } else {
+                                $(this).val(selectedGrns[0]?.supplier_id || '').trigger(
+                                    'change.select2');
+                            }
+                        });
+                    }
+                });
+
+                // Validasi sebelum submit
+                $('#create-ap-form').on('submit', function(e) {
+                    if (selectedGrns.length === 0) {
+                        e.preventDefault();
+                        toastr.error('Anda harus memilih setidaknya satu GRN.', 'Error Validasi');
+                    }
+                    // Unformat nilai sebelum submit agar controller menerima angka murni
+                    $('.calculation-field, .item-calculation').each(function() {
+                        $(this).val(parseCurrency($(this).val()));
+                    });
+                });
+
+                // Kalkulasi dan format awal
+                $('.calculation-field').each(function() {
+                    $(this).val(formatCurrency(parseCurrency($(this).val())));
+                });
                 calculateTotals();
             });
-
-            // Event listener untuk perubahan nilai item
-            $('#grn-selected-list').on('change keyup', '.item-calculation', function() {
-                const grnId = $(this).data('id');
-                const field = $(this).data('field');
-                const value = $(this).val();
-                const grnIndex = selectedGrns.findIndex(g => g.id === grnId);
-                if (grnIndex > -1) {
-                    selectedGrns[grnIndex][field] = value;
-                }
-                calculateTotals();
-            });
-
-            // Event listener untuk field kalkulasi
-            $('.calculation-field').on('keyup change', calculateTotals);
-        });
-    </script>
-@endsection
+        </script>
+    @endsection

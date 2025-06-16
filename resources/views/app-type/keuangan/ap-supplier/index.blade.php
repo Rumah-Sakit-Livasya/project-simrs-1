@@ -2,45 +2,161 @@
 @section('title', 'AP Supplier')
 @section('content')
     <style>
-        .form-control {
-            border: 0;
-            border-bottom: 1.9px solid #eaeaea;
-            border-radius: 0;
-            padding-left: 0;
-            padding-right: 0;
-        }
-
-        .form-control:focus {
-            box-shadow: none;
-            border-color: #eaeaea;
-        }
-
-        .select2-selection {
-            border: 0 !important;
-            border-bottom: 1.9px solid #eaeaea !important;
-            border-radius: 0 !important;
-        }
-
         table {
             font-size: 8pt !important;
         }
 
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.7);
-            z-index: 9999;
-            display: none;
-            justify-content: center;
-            align-items: center;
+        .badge-waiting {
+            background-color: #f39c12;
+            color: white;
         }
 
-        .loading-spinner {
-            color: #333;
-            font-size: 2rem;
+        .badge-approved {
+            background-color: #00a65a;
+            color: white;
+        }
+
+        .badge-rejected {
+            background-color: #dd4b39;
+            color: white;
+        }
+
+        .modal-lg {
+            max-width: 800px;
+        }
+
+        .panel-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        /* PENTING: Tambahkan CSS ini jika belum ada untuk memastikan toggle berfungsi */
+        .child-row {
+            display: none;
+            /* Sembunyikan secara default */
+        }
+
+        .dropdown-icon {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .dropdown-icon.bxs-down-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Styling tambahan untuk memperjelas batas row */
+        .child-row td {
+            background-color: #f9f9f9;
+            border-bottom: 2px solid #ddd;
+        }
+
+        /* Pastikan table di dalam child row memiliki margin dan padding yang tepat */
+        .child-row td>div {
+            padding: 15px;
+            margin: 0;
+        }
+
+        /* Pastikan parent dan child row terhubung secara visual */
+        tr.parent-row.active {
+            border-bottom: none !important;
+        }
+
+        /* Tambahkan di bagian style */
+        .control-details {
+            cursor: pointer;
+            text-align: center;
+            width: 30px;
+        }
+
+        .control-details .dropdown-icon {
+            font-size: 18px;
+            transition: transform 0.3s ease, color 0.3s ease;
+            display: inline-block;
+            color: #3498db;
+            /* Warna biru */
+        }
+
+        .control-details .dropdown-icon.bxs-up-arrow {
+            transform: rotate(180deg);
+            color: #e74c3c;
+            /* Warna merah saat terbuka */
+        }
+
+        .control-details:hover .dropdown-icon {
+            color: #2980b9;
+            /* Warna biru lebih gelap saat hover */
+        }
+
+        /* Sembunyikan ikon sort bawaan DataTables */
+        table.dataTable thead .sorting:after,
+        table.dataTable thead .sorting_asc:after,
+        table.dataTable thead .sorting_desc:after,
+        table.dataTable thead .sorting_asc_disabled:after,
+        table.dataTable thead .sorting_desc_disabled:after {
+            display: none !important;
+        }
+
+        /* Styling untuk child row */
+        /* Pastikan content di child row tidak overflow */
+        .child-row td>div {
+            padding: 15px;
+            width: 100%;
+        }
+
+        /* Styling untuk tabel di dalam child row */
+        .child-table {
+            width: 98% !important;
+            margin: 10px auto !important;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .child-table thead th {
+            background-color: #021d39;
+            color: white;
+            font-size: 12px;
+            padding: 8px !important;
+        }
+
+        .child-table tbody td {
+            padding: 8px !important;
+            font-size: 12px;
+            background-color: white;
+        }
+
+        /* Animasi untuk transisi smooth */
+        .child-row {
+            transition: all 0.3s ease;
+        }
+
+        .child-row.show {
+            opacity: 1;
+        }
+
+        td.control-details::before {
+            display: none !important;
+        }
+
+        /* Efek hover untuk row */
+        #dt-basic-example tbody tr.parent-row:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+
+        /* Warna berbeda untuk child row */
+        #dt-basic-example tbody tr.child-row:hover {
+            background-color: #f1f1f1;
         }
     </style>
 
@@ -137,6 +253,7 @@
                             <table id="ap-supplier-table" class="table table-bordered table-hover table-striped w-100">
                                 <thead class="bg-primary-600">
                                     <tr>
+                                        <th>#</th>
                                         <th>Tanggal</th>
                                         <th>Kode AP</th>
                                         <th>Supplier</th>
@@ -154,29 +271,33 @@
                                     {{-- Tampilkan data awal dari controller menggunakan @forelse --}}
                                     @forelse($ap_suppliers as $item)
                                         <tr>
+                                            <td class="text-center">{{ $loop->iteration }}</td>
                                             <td>{{ \Carbon\Carbon::parse($item->tanggal_ap)->format('d M Y') }}</td>
                                             <td>{{ $item->kode_ap }}</td>
                                             <td>{{ $item->supplier->nama ?? 'N/A' }}</td>
-                                            <td>
-                                                {!! $item->details->map(function ($detail) {
-                                                        return optional(optional($detail->penerimaanBarang)->purchasable)->no_po;
-                                                    })->filter()->unique()->implode('<br>') ?:
-                                                    '-' !!}
-                                            </td>
+                                            <td>{{ $item->po_numbers }}</td>
                                             <td>{{ $item->no_invoice_supplier }}</td>
                                             <td>{{ \Carbon\Carbon::parse($item->due_date)->format('d M Y') }}</td>
                                             <td class="text-right">{{ number_format($item->grand_total, 2, ',', '.') }}</td>
                                             <td>{{ $item->notes ?? '-' }}</td>
                                             <td>{{ $item->userEntry->name ?? 'N/A' }}</td>
                                             <td class="text-center">
-                                                <a href="#" class="btn btn-xs btn-success" title="Print"><i
-                                                        class="fal fa-print"></i></a>
-                                                <a href="{{ route('ap-supplier.edit', $item->id) }}"
-                                                    class="btn btn-xs btn-primary" title="Edit"><i
-                                                        class="fal fa-edit"></i></a>
-                                                <button type="button" class="btn btn-xs btn-danger delete-btn"
-                                                    data-url="{{ route('ap-supplier.destroy', $item->id) }}"
-                                                    title="Delete"><i class="fal fa-trash"></i></button>
+                                                <button type="button" 
+                                                class="btn btn-xs btn-icon " 
+                                                title="Print Tukar Faktur" 
+                                                data-toggle="tooltip"
+                                                onclick="openPrintPopup('{{ route('keuangan.ap-supplier.print.invoice', $item->id) }}')">
+                                            <i class='bx bx-printer'></i>
+                                        </button>
+                                                {{-- <a href="#" class="btn btn-xs btn-success" title="Pembayaran" data-toggle="tooltip">
+                                                    <i class="fal fa-check-circle"></i>
+                                                </a> --}}
+                                                <a href="{{ route('keuangan.ap-supplier.show', $item->id) }}" class="btn btn-xs btn-primary" title="Detail" data-toggle="tooltip">
+                                                    <i class="fal fa-eye"></i>
+                                                </a>
+                                                {{-- <a href="#" class="btn btn-xs btn-danger" title="Cancel" data-toggle="tooltip">
+                                                    <i class="fal fa-ban"></i>
+                                                </a> --}}
                                             </td>
                                         </tr>
                                     @empty
@@ -195,8 +316,26 @@
     </main>
 @endsection
 
+   <!-- Script untuk handle auto print popup -->
+    {{-- @if(session('newly_created_ap_id'))
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            const printUrl = "{{ route('keuangan.ap-supplier.print.invoice', session('newly_created_ap_id')) }}";
+            const popup = window.open(printUrl, 'PrintAPInvoice', 
+                'width=1200,height=800,scrollbars=yes,top=100,left=100');
+            
+            if (!popup) {
+                // Fallback jika popup diblokir
+                window.location.href = printUrl;
+            }
+        }, 1000); // Delay 1 detik setelah halaman load
+    });
+    </script>
+    @endif
+@endsection --}}
+
 @section('plugin')
-    {{-- Script plugin tidak perlu diubah --}}
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
@@ -205,108 +344,214 @@
     <script src="/js/notifications/toastr/toastr.js"></script>
 
     <script>
-        $(document).ready(function() {
-            // Inisialisasi plugin dasar
-            $('.select2').select2({
-                placeholder: "Pilih opsi",
-                allowClear: true
+  // Definisikan fungsi openPrintPopup di global scope agar bisa diakses dari onclick
+function openPrintPopup(url) {
+    const popupWidth = 1600;
+    const popupHeight = 1200;
+    const left = (screen.width / 2) - (popupWidth / 2);
+    const top = (screen.height / 2) - (popupHeight / 2);
+    const windowFeatures = `width=${popupWidth},height=${popupHeight},top=${top},left=${left},resizable=yes,scrollbars=yes,status=yes`;
+    
+    const printWindow = window.open(url, 'PrintWindow', windowFeatures);
+    if (window.focus) {
+        printWindow.focus();
+    }
+}
+
+$(document).ready(function() {
+    // Inisialisasi plugin dasar
+    $('.select2').select2({
+        placeholder: "Pilih opsi",
+        allowClear: true
+    });
+
+    $('.datepicker').datepicker({
+        format: 'dd-mm-yyyy',
+        autoclose: true,
+        todayHighlight: true,
+        orientation: "bottom left"
+    });
+
+    // Inisialisasi DataTables untuk fitur export, search, dll. TAPI TANPA server-side
+    $('#ap-supplier-table').DataTable({
+        responsive: true,
+        lengthChange: false,
+        dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        buttons: [{
+                extend: 'excelHtml5',
+                className: 'btn-outline-success btn-sm mr-1'
+            },
+            {
+                extend: 'print',
+                className: 'btn-outline-primary btn-sm'
+            }
+        ]
+    });
+
+    // =========================================================================
+    // PERUBAHAN BESAR: Logika AJAX untuk Form Pencarian
+    // =========================================================================
+    $('#search-form').on('submit', function(e) {
+        e.preventDefault();
+        $('.loading-overlay').css('display', 'flex'); // Tampilkan loading
+
+        $.ajax({
+            url: "{{ route('keuangan.ap-supplier.index') }}",
+            type: "GET",
+            data: $(this).serialize(), // Kirim semua data form
+            success: function(response) {
+                // Panggil fungsi untuk membangun ulang tabel
+                updateTable(response);
+                $('.loading-overlay').hide(); // Sembunyikan loading
+            },
+            error: function(xhr) {
+                console.error("Error fetching data: ", xhr);
+                toastr.error('Gagal mengambil data dari server.');
+                $('.loading-overlay').hide(); // Sembunyikan loading
+            }
+        });
+    });
+
+    function updateTable(data) {
+        var table = $('#ap-supplier-table').DataTable();
+        table.clear(); // Hapus data lama dari DataTables
+
+        if (data.length === 0) {
+            // Jika tidak ada data, DataTables akan otomatis menampilkan pesan "No data available in table"
+        } else {
+            $.each(data, function(index, item) {
+                // Proses data PO
+                var po_numbers = item.details.map(function(detail) {
+                    return detail.penerimaan_barang && detail.penerimaan_barang
+                        .purchasable ? detail.penerimaan_barang.purchasable.no_po : null;
+                }).filter(Boolean).join('<br>') || '-';
+
+                // Tambah baris baru ke DataTables - UPDATE: Tambahkan nomor urut
+                table.row.add([
+                    index + 1, // Nomor urut
+                    moment(item.tanggal_ap).format('DD MMM YYYY'),
+                    item.kode_ap,
+                    item.supplier ? item.supplier.nama : 'N/A',
+                    po_numbers,
+                    item.no_invoice_supplier,
+                    moment(item.due_date).format('DD MMM YYYY'),
+                    '<div class="text-right">' + new Intl.NumberFormat('id-ID', {
+                        style: 'decimal',
+                        minimumFractionDigits: 2
+                    }).format(item.grand_total) + '</div>',
+                    item.notes || '-',
+                    item.user_entry ? item.user_entry.name : 'N/A',
+                    `<div class="text-center">
+                        <button type="button" 
+                            class="btn btn-xs btn-icon btn-outline-info js-btn-print" 
+                            title="Print Tukar Faktur" 
+                            data-toggle="tooltip"
+                            data-url="/keuangan/ap-supplier/${item.id}/print/invoice">
+                            <i class='bx bx-printer'></i>
+                        </button>
+                        <a href="/keuangan/ap-supplier/${item.id}" class="btn btn-xs btn-primary" title="Detail" data-toggle="tooltip">
+                            <i class="fal fa-eye"></i>
+                        </a>
+                    </div>`
+                ]);
             });
+        }
 
-            $('.datepicker').datepicker({
-                format: 'dd-mm-yyyy',
-                autoclose: true,
-                todayHighlight: true,
-                orientation: "bottom left"
-            });
+        table.draw(); // Gambar ulang tabel dengan data baru
+        
+        // Inisialisasi tooltip untuk elemen baru
+        $('[data-toggle="tooltip"]').tooltip();
+    }
 
-            // Inisialisasi DataTables untuk fitur export, search, dll. TAPI TANPA server-side
-            $('#ap-supplier-table').DataTable({
-                responsive: true,
-                lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [{
-                        extend: 'excelHtml5',
-                        className: 'btn-outline-success btn-sm mr-1'
-                    },
-                    {
-                        extend: 'print',
-                        className: 'btn-outline-primary btn-sm'
-                    }
-                ]
-            });
+    // Event delegation untuk tombol print yang dibuat secara dinamis
+    $('#ap-supplier-table').on('click', '.js-btn-print', function(e) {
+        e.preventDefault();
+        const printUrl = $(this).data('url');
+        
+        if (printUrl) {
+            openPrintPopup(printUrl);
+        } else {
+            console.error('URL untuk print tidak ditemukan pada tombol.');
+            toastr.error('URL print tidak ditemukan.');
+        }
+    });
 
-            // =========================================================================
-            // PERUBAHAN BESAR: Logika AJAX untuk Form Pencarian
-            // =========================================================================
-            $('#search-form').on('submit', function(e) {
-                e.preventDefault();
-                $('.loading-overlay').css('display', 'flex'); // Tampilkan loading
-
+    // Logika untuk tombol hapus menggunakan event delegation
+    $('#ap-supplier-table').on('click', '.delete-btn', function(e) {
+        e.preventDefault();
+        const deleteUrl = $(this).data('url');
+        const row = $(this).closest('tr');
+        
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
                 $.ajax({
-                    url: "{{ route('keuangan.ap-supplier.index') }}",
-                    type: "GET",
-                    data: $(this).serialize(), // Kirim semua data form
+                    url: deleteUrl,
+                    type: 'DELETE',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
                     success: function(response) {
-                        // Panggil fungsi untuk membangun ulang tabel
-                        updateTable(response);
-                        $('.loading-overlay').hide(); // Sembunyikan loading
+                        if (response.success) {
+                            toastr.success('Data berhasil dihapus.');
+                            // Refresh tabel dengan trigger search lagi
+                            $('#search-form').trigger('submit');
+                        } else {
+                            toastr.error('Gagal menghapus data.');
+                        }
                     },
                     error: function(xhr) {
-                        console.error("Error fetching data: ", xhr);
-                        toastr.error('Gagal mengambil data dari server.');
-                        $('.loading-overlay').hide(); // Sembunyikan loading
+                        console.error('Error deleting data:', xhr);
+                        toastr.error('Terjadi kesalahan saat menghapus data.');
                     }
                 });
-            });
-
-            function updateTable(data) {
-                var table = $('#ap-supplier-table').DataTable();
-                table.clear(); // Hapus data lama dari DataTables
-
-                if (data.length === 0) {
-                    // Jika tidak ada data, DataTables akan otomatis menampilkan pesan "No data available in table"
-                } else {
-                    $.each(data, function(index, item) {
-                        // Proses data PO
-                        var po_numbers = item.details.map(function(detail) {
-                            return detail.penerimaan_barang && detail.penerimaan_barang
-                                .purchasable ? detail.penerimaan_barang.purchasable.no_po : null;
-                        }).filter(Boolean).join('<br>') || '-';
-
-                        // Tambah baris baru ke DataTables
-                        table.row.add([
-                            moment(item.tanggal_ap).format('DD MMM YYYY'),
-                            item.kode_ap,
-                            item.supplier ? item.supplier.nama : 'N/A',
-                            po_numbers,
-                            item.no_invoice_supplier,
-                            moment(item.due_date).format('DD MMM YYYY'),
-                            new Intl.NumberFormat('id-ID', {
-                                style: 'decimal',
-                                minimumFractionDigits: 2
-                            }).format(item.grand_total),
-                            item.notes || '-',
-                            item.user_entry ? item.user_entry.name : 'N/A',
-                            `
-                                <a href="#" class="btn btn-xs btn-success" title="Print"><i class="fal fa-print"></i></a>
-                                <a href="/ap-supplier/${item.id}/edit" class="btn btn-xs btn-primary" title="Edit"><i class="fal fa-edit"></i></a>
-                                <button type="button" class="btn btn-xs btn-danger delete-btn" data-url="/ap-supplier/${item.id}" title="Delete"><i class="fal fa-trash"></i></button>
-                            `
-                        ]);
-                    });
-                }
-
-                table.draw(); // Gambar ulang tabel dengan data baru
             }
-
-            // Logika untuk tombol hapus (tidak berubah)
-            $('#ap-supplier-table').on('click', '.delete-btn', function() {
-                // ... logika SweetAlert dan AJAX delete Anda ...
-                // Setelah sukses hapus, refresh tabel dengan trigger search lagi
-                // $('#btn-search').click();
-            });
         });
+    });
+
+    // Inisialisasi tooltip untuk elemen yang sudah ada saat halaman dimuat
+    $('[data-toggle="tooltip"]').tooltip();
+
+    // Loading overlay styling
+    if ($('.loading-overlay').length === 0) {
+        $('body').append(`
+            <div class="loading-overlay" style="
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 9999;
+                justify-content: center;
+                align-items: center;
+            ">
+                <div class="loading-spinner" style="
+                    background: white;
+                    padding: 20px;
+                    border-radius: 5px;
+                    text-align: center;
+                ">
+                    <i class="fa fa-spinner fa-spin"></i> Memuat...
+                </div>
+            </div>
+        `);
+    }
+
+    
+
+    
+});
     </script>
 @endsection

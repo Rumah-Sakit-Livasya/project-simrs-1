@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\keuangan\PenerimaanBarangHeader;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;

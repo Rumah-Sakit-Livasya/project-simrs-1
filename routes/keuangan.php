@@ -275,6 +275,27 @@ Route::group(['middleware' => ['auth']], function () {
             // Route alternatif untuk AJAX (opsional)
             Route::get('/fetch-grn', [APSupplierController::class, 'fetchAvailableGrn'])
                 ->name('keuangan.ap-supplier.fetch-grn');
+
+            // Di routes/web.php
+            Route::get('/debug/ap-supplier', function () {
+                return response()->json([
+                    'session' => session()->all(),
+                    'request' => request()->all(),
+                    'env' => [
+                        'APP_ENV' => env('APP_ENV'),
+                        'APP_DEBUG' => env('APP_DEBUG')
+                    ]
+                ]);
+            });
+
+            Route::post('/log-from-js', [APSupplierController::class, 'logFromJs'])->name('log-from-js');
+
+            Route::get('/{id}', [APSupplierController::class, 'show'])
+                ->name('keuangan.ap-supplier.show');
+            Route::post('/{id}/cancel', [APSupplierController::class, 'cancel'])
+                ->name('keuangan.ap-supplier.cancel');
+
+            Route::get('/{apSupplier}/print', [APSupplierController::class, 'print'])->name('keuangan.ap-supplier.print.invoice');
         });
 
         route::prefix('ap-non-gr')->middleware(['can:view account payable ap-non-gr'])->group(function () {

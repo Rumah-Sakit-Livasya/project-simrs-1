@@ -98,4 +98,20 @@ class ApSupplierHeader extends Model
     {
         return $this->hasMany(ApSupplierDetail::class, 'ap_supplier_header_id');
     }
+
+    public function userCancel()
+    {
+        return $this->belongsTo(User::class, 'user_cancel_id');
+    }
+
+    public function getPoNumbersAttribute()
+    {
+        return $this->details->map(function ($detail) {
+            if (!$detail->penerimaanBarang || !$detail->penerimaanBarang->purchasable) {
+                return 'N/A';
+            }
+
+            return $detail->penerimaanBarang->purchasable->kode_po ?? 'N/A';
+        })->unique()->implode(', ');
+    }
 }
