@@ -2,7 +2,12 @@
 
 namespace App\Imports;
 
+use App\Models\Attendance;
+use App\Models\AttendanceCode;
+use App\Models\DayOffRequest;
+use App\Models\Employee;
 use App\Models\LaporanInternal;
+use App\Models\Shift;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
