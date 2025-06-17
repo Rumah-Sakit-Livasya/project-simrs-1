@@ -6,13 +6,12 @@ use App\Models\Attendance;
 use App\Models\AttendanceCode;
 use App\Models\DayOffRequest;
 use App\Models\Employee;
-use App\Models\LaporanInternal;
 use App\Models\Shift;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class AttendanceImport implements ToCollection, WithHeadingRow
+class AttendanceImport implements ToCollection
 {
     public function collection(Collection $rows)
     {
