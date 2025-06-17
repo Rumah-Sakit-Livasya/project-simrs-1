@@ -1,3 +1,9 @@
+<style>
+    .datepicker {
+        width: 100%
+    }
+</style>
+
 <div class="row justify-content-center">
     <div class="col-xl-8">
         <div id="panel-1" class="panel">
@@ -22,7 +28,7 @@
                                             </label>
                                         </div>
                                         <div class="col-xl">
-                                            <input type="text" class="form-control" id="datepicker-1"
+                                            <input type="text" class="form-control datepicker" id="datepicker-1"
                                                 placeholder="mm/dd/yyyy - mm/dd/yyyy" name="tanggal_terima">
 
                                             @error('tanggal_terima')
@@ -42,7 +48,7 @@
                                             </label>
                                         </div>
                                         <div class="col-xl">
-                                            <input type="text" class="form-control" id="datepicker-1"
+                                            <input type="text" class="form-control datepicker" id="datepicker-1"
                                                 placeholder="mm/dd/yyyy - mm/dd/yyyy" name="tanggal_faktur">
 
                                             @error('tanggal_faktur')
@@ -172,10 +178,22 @@
 
 
                         <div class="row justify-content-end mt-3">
-                            <div class="col-xl-2">
+                            <div class="col-xl-3">
                                 <button id="detailPBBtn" class="btn btn-outline-primary waves-effect waves-themed">
                                     <span class="fal fa-search mr-1"></span>
-                                    Cari
+                                    Detail per Penerimaan
+                                </button>
+                            </div>
+                            <div class="col-xl-3">
+                                <button id="detailItemBtn" class="btn btn-outline-primary waves-effect waves-themed">
+                                    <span class="fal fa-search mr-1"></span>
+                                    Detail per Item
+                                </button>
+                            </div>
+                            <div class="col-xl-2">
+                                <button id="rekapBtn" class="btn btn-outline-primary waves-effect waves-themed">
+                                    <span class="fal fa-search mr-1"></span>
+                                    Rekap
                                 </button>
                             </div>
                         </div>

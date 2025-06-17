@@ -323,7 +323,7 @@ Route::group(['middleware' => ['auth']], function () {
 
                 Route::prefix("report")->group(function(){
                     Route::get("/", [WarehousePenerimaanBarangReportController::class, "index"])->name("warehouse.penerimaan-barang.report");
-                    Route::get("rekap", [WarehousePenerimaanBarangReportController::class, "rekap"])->name("warehouse.penerimaan-barang.report.rekap");
+                    Route::get("show/{type}/{json}", [WarehousePenerimaanBarangReportController::class, "show"])->name("warehouse.penerimaan-barang.report.show");
                 });
             });
         });
