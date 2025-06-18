@@ -89,6 +89,7 @@ use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Http\Controllers\WarehouseReturBarangController;
+use App\Http\Controllers\WarehouseStockRequestPharmacyController;
 use App\Models\Employee;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
@@ -280,7 +281,19 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::get("/get/item-supplier/{supplier_id}", [WarehouseReturBarangController::class, 'get_items'])->name('warehouse.penerimaan-barang.retur-barang.get.items');
             });
         });
+
+        Route::prefix("stock-request")->group(function () {
+            // prefix "pharmacy"
+            Route::prefix("pharmacy")->group(function () {
+                Route::post("/store", [WarehouseStockRequestPharmacyController::class, 'store'])->name('warehouse.stock-request.pharmacy.store');
+                Route::put("/update/{id}", [WarehouseStockRequestPharmacyController::class, 'update'])->name('warehouse.stock-request.pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehouseStockRequestPharmacyController::class, 'destroy'])->name('warehouse.stock-request.pharmacy.delete');
+                Route::get("/get/item-gudang/{asal_gudang_id}/{tujuan_gudang_id}", [WarehouseStockRequestPharmacyController::class, 'get_item_gudang'])->name('warehouse.stock-request.pharmacy.get.item-gudang');
+            });
+        });
     });
+
+
 
     Route::prefix("procurement")->group(function () {
         Route::prefix("purchase-request")->group(function () {

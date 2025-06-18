@@ -170,7 +170,13 @@ class User extends Authenticatable implements Auditable
         return $this->hasMany(ProcurementPurchaseOrderNonPharmacy::class, 'user_id');
     }
 
-    public function rb(){
+    public function rb()
+    {
         return $this->hasMany(WarehouseReturBarang::class, 'user_id');
+    }
+
+    public function sr_pharmacy()
+    {
+        return $this->hasMany(WarehouseStockRequestPharmacy::class, 'user_id');
     }
 }

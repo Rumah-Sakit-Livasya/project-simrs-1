@@ -92,6 +92,7 @@ use App\Http\Controllers\WarehousePurchaseRequestPharmacy;
 use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseSetupMinMaxStockController;
+use App\Http\Controllers\WarehouseStockRequestPharmacyController;
 use App\Http\Controllers\WarehouseSupplierController;
 use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\ProcurementPurchaseRequestPharmacy;
@@ -321,9 +322,18 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/print/{id}", [WarehouseReturBarangController::class, "print"])->name("warehouse.penerimaan-barang.retur-barang.print");
                 });
 
-                Route::prefix("report")->group(function(){
+                Route::prefix("report")->group(function () {
                     Route::get("/", [WarehousePenerimaanBarangReportController::class, "index"])->name("warehouse.penerimaan-barang.report");
                     Route::get("show/{type}/{json}", [WarehousePenerimaanBarangReportController::class, "show"])->name("warehouse.penerimaan-barang.report.show");
+                });
+            });
+
+            Route::prefix("stock-request")->group(function () {
+                Route::prefix("pharmacy")->group(function () {
+                    Route::get("/", [WarehouseStockRequestPharmacyController::class, "index"])->name("warehouse.stock-request.pharmacy");
+                    Route::get("/create", [WarehouseStockRequestPharmacyController::class, "create"])->name("procurement.stock-request.pharmacy.create");
+                    Route::get("/print/{id}", [WarehouseStockRequestPharmacyController::class, "print"])->name("procurement.stock-request.pharmacy.print");
+                    Route::get("/edit/{id}", [WarehouseStockRequestPharmacyController::class, "edit"])->name("procurement.stock-request.pharmacy.edit");
                 });
             });
         });
