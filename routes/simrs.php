@@ -92,6 +92,7 @@ use App\Http\Controllers\WarehousePurchaseRequestPharmacy;
 use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseSetupMinMaxStockController;
+use App\Http\Controllers\WarehouseStockRequestNonPharmacyController;
 use App\Http\Controllers\WarehouseStockRequestPharmacyController;
 use App\Http\Controllers\WarehouseSupplierController;
 use App\Http\Controllers\WarehouseZatAktifController;
@@ -334,6 +335,13 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/create", [WarehouseStockRequestPharmacyController::class, "create"])->name("procurement.stock-request.pharmacy.create");
                     Route::get("/print/{id}", [WarehouseStockRequestPharmacyController::class, "print"])->name("procurement.stock-request.pharmacy.print");
                     Route::get("/edit/{id}", [WarehouseStockRequestPharmacyController::class, "edit"])->name("procurement.stock-request.pharmacy.edit");
+                });
+
+                Route::prefix("non-pharmacy")->group(function () {
+                    Route::get("/", [WarehouseStockRequestNonPharmacyController::class, "index"])->name("warehouse.stock-request.non-pharmacy");
+                    Route::get("/create", [WarehouseStockRequestNonPharmacyController::class, "create"])->name("procurement.stock-request.non-pharmacy.create");
+                    Route::get("/print/{id}", [WarehouseStockRequestNonPharmacyController::class, "print"])->name("procurement.stock-request.non-pharmacy.print");
+                    Route::get("/edit/{id}", [WarehouseStockRequestNonPharmacyController::class, "edit"])->name("procurement.stock-request.non-pharmacy.edit");
                 });
             });
         });

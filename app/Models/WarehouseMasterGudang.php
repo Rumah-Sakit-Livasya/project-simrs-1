@@ -49,11 +49,23 @@ class WarehouseMasterGudang extends Model implements AuditableContract
         return $this->hasMany(StoredBarangNonFarmasi::class, 'gudang_id', 'id');
     }
 
-    public function asal_sr_pharmacy(){
+    public function asal_sr_pharmacy()
+    {
         return $this->hasMany(WarehouseStockRequestPharmacy::class, 'asal_gudang_id', 'id');
     }
 
-    public function tujuan_sr_pharmacy(){
+    public function tujuan_sr_pharmacy()
+    {
         return $this->hasMany(WarehouseStockRequestPharmacy::class, 'tujuan_gudang_id', 'id');
+    }
+
+    public function asal_sr_non_pharmacy()
+    {
+        return $this->hasMany(WarehouseStockRequestNonPharmacy::class, 'asal_gudang_id', 'id');
+    }
+
+    public function tujuan_sr_non_pharmacy()
+    {
+        return $this->hasMany(WarehouseStockRequestNonPharmacy::class, 'tujuan_gudang_id', 'id');
     }
 }
