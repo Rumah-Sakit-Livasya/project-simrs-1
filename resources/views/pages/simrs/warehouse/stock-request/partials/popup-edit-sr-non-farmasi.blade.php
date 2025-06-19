@@ -76,7 +76,7 @@
                                                 </div>
                                                 <div class="col-xl">
                                                     <input type="date" class="form-control" id="datepicker-1"
-                                                        placeholder="Select date" name="tanggal_sr"
+                                                        placeholder="Select date" name="tanggal_sr" readonly
                                                         value="{{ $sr->tanggal_sr }}">
                                                 </div>
                                             </div>

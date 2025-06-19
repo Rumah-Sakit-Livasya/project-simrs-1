@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\StoredBarangFarmasi;
-use App\Models\WarehouseBarangFarmasi;
+use App\Models\StoredBarangNonFarmasi;
+use App\Models\WarehouseBarangNonFarmasi;
 use App\Models\WarehouseMasterGudang;
 use App\Models\WarehouseStockRequestNonPharmacy;
 use App\Models\WarehouseStockRequestNonPharmacyItems;
@@ -64,9 +64,9 @@ class WarehouseStockRequestNonPharmacyController extends Controller
         $gudang_asal = WarehouseMasterGudang::findOrFail($asal_gudang_id);
         $gudang_tujuan = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
         return view("pages.simrs.warehouse.stock-request.partials.table-items-non-pharmacy", [
-            "items" => WarehouseBarangFarmasi::all(),
-            "sis_asal" => StoredBarangFarmasi::where("gudang_id", $asal_gudang_id)->where('qty', '>', 0)->get(),
-            "sis_tujuan" => StoredBarangFarmasi::where("gudang_id", $tujuan_gudang_id)->where('qty', '>', 0)->get(),
+            "items" => WarehouseBarangNonFarmasi::all(),
+            "sis_asal" => StoredBarangNonFarmasi::where("gudang_id", $asal_gudang_id)->where('qty', '>', 0)->get(),
+            "sis_tujuan" => StoredBarangNonFarmasi::where("gudang_id", $tujuan_gudang_id)->where('qty', '>', 0)->get(),
             "gudang_asal" => $gudang_asal,
             "gudang_tujuan" => $gudang_tujuan
         ]);
