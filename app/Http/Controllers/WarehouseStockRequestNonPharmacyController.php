@@ -94,7 +94,7 @@ class WarehouseStockRequestNonPharmacyController extends Controller
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return $count . "/SRF/" . $year . $month;
+        return $count . "/SRU/" . $year . $month;
     }
 
     /**

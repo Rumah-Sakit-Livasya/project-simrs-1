@@ -184,4 +184,9 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(WarehouseStockRequestNonPharmacy::class, 'user_id');
     }
+
+    public function db_pharmacy()
+    {
+        return $this->hasMany(WarehouseDistribusiBarangFarmasi::class, 'user_id');
+    }
 }

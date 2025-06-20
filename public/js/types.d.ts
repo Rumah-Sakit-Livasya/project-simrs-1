@@ -667,6 +667,39 @@ interface PenerimaanBarang {
     kas: string | null; // Nullable if not all entries contain this field or set to undefined
 }
 
+// Define StockRequestItem interface for nested items array
+interface StockRequestItem {
+  id: number;
+  created_at: string; // Timestamp in ISO format
+  updated_at: string; // Timestamp in ISO format
+  deleted_at: string | null; // Nullable timestamp or null
+  sr_id: number;
+  barang_id: number;
+  satuan_id: number;
+  qty: number;
+  qty_fulfilled: number;
+  keterangan: string;
+  barang?: BarangFarmasi | BarangNonFarmasi
+  satuan?: Satuan
+}
+
+// Define the main StockRequest interface
+interface StockRequest {
+  id: number;
+  created_at: string; // Timestamp in ISO format
+  updated_at: string; // Timestamp in ISO format
+  deleted_at: string | null; // Nullable timestamp or null
+  tanggal_sr: string; // Date in YYYY-MM-DD format
+  user_id: number;
+  asal_gudang_id: number;
+  tujuan_gudang_id: number;
+  kode_sr: string;
+  keterangan: string;
+  tipe: "normal" | "urgent"; // String literal if only specific values are allowed
+  status: "final" | "draft"; // Specify all possible statuses; replace 'other_status' as needed
+  items?: StockRequestItem[]; // Array of StockRequestItem
+}
+
 type PatientType = "rajal" | "ranap" | "otc";
 type SumberItem = "npr" | "pr";
 type TipePR = "all" | "normal" | "urgent";

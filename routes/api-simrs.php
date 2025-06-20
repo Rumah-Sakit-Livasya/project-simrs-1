@@ -87,6 +87,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Http\Controllers\WarehouseDistribusiBarangFarmasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\WarehouseStockRequestNonPharmacyController;
@@ -298,6 +299,24 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::delete("/destroy/{id}", [WarehouseStockRequestNonPharmacyController::class, 'destroy'])->name('warehouse.stock-request.non-pharmacy.delete');
                 Route::get("/get/item-gudang/{asal_gudang_id}/{tujuan_gudang_id}", [WarehouseStockRequestNonPharmacyController::class, 'get_item_gudang'])->name('warehouse.stock-request.non-pharmacy.get.item-gudang');
             });
+        });
+
+        Route::prefix("distribusi-barang")->group(function () {
+            // prefix "pharmacy"
+            Route::prefix("pharmacy")->group(function () {
+                Route::post("/store", [WarehouseDistribusiBarangFarmasiController::class, 'store'])->name('warehouse.distribusi-barang.pharmacy.store');
+                Route::put("/update/{id}", [WarehouseDistribusiBarangFarmasiController::class, 'update'])->name('warehouse.distribusi-barang.pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehouseDistribusiBarangFarmasiController::class, 'destroy'])->name('warehouse.distribusi-barang.pharmacy.delete');
+                Route::get("/get/item-gudang/{asal_gudang_id}/{tujuan_gudang_id}", [WarehouseDistribusiBarangFarmasiController::class, 'get_item_gudang'])->name('warehouse.distribusi-barang.pharmacy.get.item-gudang');
+                Route::get("/get/stock/{gudang_id}/{barang_id}/{satuan_id}", [WarehouseDistribusiBarangFarmasiController::class, "get_stock"])->name("warehouse.distribusi-barang.pharmacy.get.stock");
+            });
+
+            // Route::prefix("non-pharmacy")->group(function () {
+            //     Route::post("/store", [WarehouseDistribusiBarangFarmasiController::class, 'store'])->name('warehouse.distribusi-barang.non-pharmacy.store');
+            //     Route::put("/update/{id}", [WarehouseDistribusiBarangFarmasiController::class, 'update'])->name('warehouse.distribusi-barang.non-pharmacy.update');
+            //     Route::delete("/destroy/{id}", [WarehouseDistribusiBarangFarmasiController::class, 'destroy'])->name('warehouse.distribusi-barang.non-pharmacy.delete');
+            //     Route::get("/get/item-gudang/{asal_gudang_id}/{tujuan_gudang_id}", [WarehouseDistribusiBarangFarmasiController::class, 'get_item_gudang'])->name('warehouse.distribusi-barang.non-pharmacy.get.item-gudang');
+            // });
         });
     });
 

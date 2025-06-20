@@ -7,16 +7,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class WarehouseStockRequestPharmacy extends Model implements AuditableContract
+class WarehouseDistribusiBarangFarmasi extends Model implements AuditableContract
 {
     use Auditable, SoftDeletes;
-
-    protected $table = "warehouse_stock_request_pharmacy";
+    protected $table = "warehouse_distribusi_barang_farmasi";
     protected $guarded = ["id"];
 
     public function items()
     {
-        return $this->hasMany(WarehouseStockRequestPharmacyItems::class, "sr_id");
+        return $this->hasMany(WarehouseDistribusiBarangFarmasiItems::class, "db_id");
     }
 
     public function user()
@@ -34,7 +33,7 @@ class WarehouseStockRequestPharmacy extends Model implements AuditableContract
         return $this->belongsTo(WarehouseMasterGudang::class, "tujuan_gudang_id");
     }
 
-    public function db(){
-        return $this->hasMany(WarehouseDistribusiBarangFarmasi::class, "sr_id");
+    public function sr(){
+        return $this->belongsTo(WarehouseStockRequestPharmacy::class, "sr_id");
     }
 }
