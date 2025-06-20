@@ -80,6 +80,7 @@ use App\Http\Controllers\SIMRS\Warehouse\WarehouseController;
 use App\Http\Controllers\WarehouseBarangFarmasiController;
 use App\Http\Controllers\WarehouseBarangNonFarmasiController;
 use App\Http\Controllers\WarehouseDistribusiBarangFarmasiController;
+use App\Http\Controllers\WarehouseDistribusiBarangNonFarmasiController;
 use App\Http\Controllers\WarehouseGolonganBarangController;
 use App\Http\Controllers\WarehouseKategoriBarangController;
 use App\Http\Controllers\WarehouseKelompokBarangController;
@@ -354,12 +355,12 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/edit/{id}", [WarehouseDistribusiBarangFarmasiController::class, "edit"])->name("procurement.distribusi-barang.pharmacy.edit");
                 });
 
-                // Route::prefix("non-pharmacy")->group(function () {
-                //     Route::get("/", [WarehouseDistribusiBarangFarmasiController::class, "index"])->name("warehouse.distribusi-barang.non-pharmacy");
-                //     Route::get("/create", [WarehouseDistribusiBarangFarmasiController::class, "create"])->name("procurement.distribusi-barang.non-pharmacy.create");
-                //     Route::get("/print/{id}", [WarehouseDistribusiBarangFarmasiController::class, "print"])->name("procurement.distribusi-barang.non-pharmacy.print");
-                //     Route::get("/edit/{id}", [WarehouseDistribusiBarangFarmasiController::class, "edit"])->name("procurement.distribusi-barang.non-pharmacy.edit");
-                // });
+                Route::prefix("non-pharmacy")->group(function () {
+                    Route::get("/", [WarehouseDistribusiBarangNonFarmasiController::class, "index"])->name("warehouse.distribusi-barang.non-pharmacy");
+                    Route::get("/create", [WarehouseDistribusiBarangNonFarmasiController::class, "create"])->name("procurement.distribusi-barang.non-pharmacy.create");
+                    Route::get("/print/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, "print"])->name("procurement.distribusi-barang.non-pharmacy.print");
+                    Route::get("/edit/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, "edit"])->name("procurement.distribusi-barang.non-pharmacy.edit");
+                });
             });
         });
 

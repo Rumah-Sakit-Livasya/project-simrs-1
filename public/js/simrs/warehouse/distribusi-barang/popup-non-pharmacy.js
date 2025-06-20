@@ -5,7 +5,7 @@
 // @ts-ignore
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
-class PopupDBPharmacyHandler {
+class PopupDBNPharmacyHandler {
 
     /**
      * @type {JQuery<HTMLElement>}
@@ -68,7 +68,7 @@ class PopupDBPharmacyHandler {
     // @ts-ignore
     #KeyCache = window._key_caches ?? [];
 
-    #API_URL = "/api/simrs/warehouse/distribusi-barang/pharmacy";
+    #API_URL = "/api/simrs/warehouse/distribusi-barang/non-pharmacy";
 
     constructor() {
         this.#$AsalGudangId = $("select[name='asal_gudang_id']");
@@ -175,7 +175,7 @@ class PopupDBPharmacyHandler {
         this.#showLoading(true, "Fetching item stocks...");
         for (let i = 0; i < sr.items.length; i++) {
             const sri = sr.items[i];
-            const Item = /** @type {BarangFarmasi | undefined} */ (sri.barang);
+            const Item = /** @type {BarangNonFarmasi | undefined} */ (sri.barang);
             if (!Item) throw alert("Barang not found!"); // dev error
             const Satuan = sri.satuan;
             if (!Satuan) throw alert("Satuan not found!"); // dev error
@@ -321,7 +321,7 @@ class PopupDBPharmacyHandler {
             stock = parseInt(String(stockString));
         }
 
-        const Item = /** @type {BarangFarmasi} */ (row.data("item"));
+        const Item = /** @type {BarangNonFarmasi} */ (row.data("item"));
         const selectedOption = row.find("select[name='satuan" + Item.id + "']").find("option:selected");
         const Satuan = /** @type {Satuan} */ (selectedOption.data("satuan"));
 
@@ -335,7 +335,7 @@ class PopupDBPharmacyHandler {
 
     /**
      * Generate HTML string for Item table collumn
-     * @param {BarangFarmasi} item 
+     * @param {BarangNonFarmasi} item 
      * @param {Satuan} satuan
      * @param {string} key_cache 
      * @param {number} qty 
@@ -363,11 +363,11 @@ class PopupDBPharmacyHandler {
                 <td>${satuan.nama}</td>
                 <td>${stock ? stock : '-'}</td>
                 <td><input type="number" name="qty[${key}]" min="1" ${stock ? `max="${stock}"` : ''} step="1" class="form-control" value="${qty}"
-                    onkeyup="PopupDBPharmacyClass.enforceNumberLimit(event)" onchange="PopupDBPharmacyClass.enforceNumberLimit(event)"></td>
+                    onkeyup="PopupDBNPharmacyClass.enforceNumberLimit(event)" onchange="PopupDBNPharmacyClass.enforceNumberLimit(event)"></td>
                 <td>${sri ? (sri.keterangan || '') : ''}</td>
                 <td><input type="text" name="keterangan_item[${key}]" class="form-control"></td>
                 <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                        title="Hapus" onclick="PopupDBPharmacyClass.deleteItem(${key}, '${key_cache}')"></a></td>
+                        title="Hapus" onclick="PopupDBNPharmacyClass.deleteItem(${key}, '${key_cache}')"></a></td>
             </tr>
         `;
     }
@@ -473,4 +473,4 @@ class PopupDBPharmacyHandler {
 
 }
 
-const PopupDBPharmacyClass = new PopupDBPharmacyHandler();
+const PopupDBNPharmacyClass = new PopupDBNPharmacyHandler();

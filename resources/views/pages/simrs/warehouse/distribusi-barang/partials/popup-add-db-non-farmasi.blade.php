@@ -59,12 +59,10 @@
                         <div id="loading-page"></div>
                         <div class="panel-content">
                             <form id="form-pr" name="form-pr"
-                                action="{{ route('warehouse.distribusi-barang.pharmacy.update', ['id' => $db->id]) }}"
-                                method="post">
+                                action="{{ route('warehouse.distribusi-barang.non-pharmacy.store') }}" method="post">
                                 @csrf
-                                @method('put')
+                                @method('post')
                                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
-                                <input type="hidden" name="id" value="{{ $db->id }}">
                                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
 
                                 <div class="row justify-content-center">
@@ -77,9 +75,9 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="date" class="form-control" id="datepicker-1"
-                                                        placeholder="Select date" name="tanggal_db" readonly
-                                                        value="{{ $db->tanggal_db }}">
+                                                    <input readonly type="date" class="form-control" id="datepicker-1"
+                                                        placeholder="Select date" name="tanggal_db"
+                                                        value="{{ \Carbon\Carbon::now()->toDateString() }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -95,15 +93,14 @@
                                                 </div>
 
                                                 <div class="col-xl">
-                                                    <input type="hidden" name="sr_id" value="{{ $db->sr?->id }}">
-                                                    <input type="text" class="form-control" name="kode_sr"
-                                                        value="{{ $db->sr?->kode_sr }}" readonly>
+                                                    <input type="hidden" name="sr_id" value="">
+                                                    <input type="text" class="form-control" name="kode_sr" readonly>
                                                 </div>
                                                 <div class="col-xl-1" id="select-sr-btn">
                                                     <i class="pointer" id="pilih-sr-btn" title="Pilih Distribusi Barang"
                                                         data-bs-toggle="modal" data-bs-target="#pilihSRModal">
                                                         <span class="fal fa-search mr-1 text-primary"></span></i>
-                                                    @include('pages.simrs.warehouse.distribusi-barang.partials.modal-pilih-sr-pharmacy')
+                                                    @include('pages.simrs.warehouse.distribusi-barang.partials.modal-pilih-sr-non-pharmacy')
                                                 </div>
                                             </div>
                                         </div>
@@ -125,7 +122,7 @@
                                                         <option value="" disabled selected hidden>Pilih Gudang
                                                         </option>
                                                         @foreach ($gudang_asals as $gudang)
-                                                            <option value="{{ $gudang->id }}" {{ $db->asal_gudang_id == $gudang->id ? 'selected' : '' }}>{{ $gudang->nama }}</option>
+                                                            <option value="{{ $gudang->id }}">{{ $gudang->nama }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -147,8 +144,7 @@
                                                         <option value="" disabled selected hidden>Pilih Gudang
                                                         </option>
                                                         @foreach ($gudangs as $gudang)
-                                                            <option value="{{ $gudang->id }}" {{ $db->tujuan_gudang_id == $gudang->id ? 'selected' : '' }}>{{ $gudang->nama }}
-                                                            </option>
+                                                            <option value="{{ $gudang->id }}">{{ $gudang->nama }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -171,7 +167,7 @@
                                                 <div class="col-xl">
                                                     {{-- input text with name "keterangan" --}}
                                                     <input type="text" class="form-control" name="keterangan"
-                                                        id="keterangan" value="{{ $db->keterangan }}">
+                                                        id="keterangan" value="{{ old('keterangan') }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -195,55 +191,7 @@
                                             </tr>
                                         </thead>
                                         <tbody id="tableItems">
-                                            @php
-                                                $key_caches = [];
-                                            @endphp
-                                            @foreach ($db->items as $item)
-                                                @php
-                                                    $key_cache = $item->barang->id . '/' . $item->satuan->id;
-                                                    $key_caches[] = $key_cache;
-                                                @endphp
 
-                                                <tr id="item{{ $loop->iteration }}">
-                                                    <input type="hidden" name="barang_id[{{ $loop->iteration }}]"
-                                                        value="{{ $item->barang->id }}">
-                                                    <input type="hidden" name="satuan_id[{{ $loop->iteration }}]"
-                                                        value="{{ $item->satuan->id }}">
-                                                    <input type="hidden" name="item_id[{{ $loop->iteration }}]"
-                                                        value="{{ $item->id }}">
-                                                    @if ($item->sri_id)
-                                                        <input type="hidden" name="sri_id[{{ $loop->iteration }}]"
-                                                            value="{{ $item->sri_id }}">
-                                                    @endif
-
-                                                    <td>{{ $item->barang->kode }}</td>
-                                                    <td>{{ $item->barang->nama }}</td>
-                                                    <td>{{ $item->satuan->nama }}</td>
-                                                    <td>{{ $item->stock }}</td>
-                                                    <td><input type="number" name="qty[{{ $loop->iteration }}]"
-                                                            min="1" max="{{ $item->stock }}" step="1"
-                                                            class="form-control"
-                                                            value="{{ $item->qty > $item->stock ? $item->stock : $item->qty }}"
-                                                            onkeyup="PopupDBPharmacyClass.enforceNumberLimit(event)"
-                                                            onchange="PopupDBPharmacyClass.enforceNumberLimit(event)"></td>
-                                                    <td>{{ $item->sri?->keterangan }}</td>
-                                                    <td><input type="text"
-                                                            name="keterangan_item[{{ $loop->iteration }}]"
-                                                            class="form-control"></td>
-                                                    <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                                                            title="Hapus"
-                                                            onclick="PopupDBPharmacyClass.deleteItem({{ $loop->iteration }}, '{{ $key_cache }}')"></a>
-                                                    </td>
-                                                </tr>
-                                                @if ($item->qty > $item->stock)
-                                                    <script>
-                                                        alert("Terdapat perubahan stock. Jumlah barang telah disesuaikan secara otomatis.");
-                                                    </script>
-                                                @endif
-                                            @endforeach
-                                            <script>
-                                                window._key_caches = @json($key_caches);
-                                            </script>
                                         </tbody>
                                         <tfoot>
                                             <tr>
@@ -270,21 +218,16 @@
                                             </a>
                                         </div>
                                         <div class="col-xl text-right">
-                                            @if ($db->status == 'draft')
-                                                <button type="submit" id="order-submit-draft"
-                                                    class="btn btn-lg btn-primary waves-effect waves-themed">
-                                                    <span class="fal fa-save mr-1"></span>
-                                                    Simpan Draft
-                                                </button>
-                                                <button type="submit" id="order-submit-final"
-                                                    class="btn btn-lg btn-success waves-effect waves-themed">
-                                                    <span class="fal fa-save mr-1"></span>
-                                                    Simpan Final
-                                                </button>
-                                            @else
-                                                <h1 style="color: red">Data sudah final</h1>
-                                                <p>Tidak dapat diubah lagi</p>
-                                            @endif
+                                            <button type="submit" id="order-submit-draft"
+                                                class="btn btn-lg btn-primary waves-effect waves-themed">
+                                                <span class="fal fa-save mr-1"></span>
+                                                Simpan Draft
+                                            </button>
+                                            <button type="submit" id="order-submit-final"
+                                                class="btn btn-lg btn-success waves-effect waves-themed">
+                                                <span class="fal fa-save mr-1"></span>
+                                                Simpan Final
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -308,5 +251,5 @@
     <script>
         $(".select2").select2();
     </script>
-    <script src="{{ asset('js/simrs/warehouse/distribusi-barang/popup-pharmacy.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/warehouse/distribusi-barang/popup-non-pharmacy.js') }}?v={{ time() }}"></script>
 @endsection

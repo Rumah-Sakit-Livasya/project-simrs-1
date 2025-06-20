@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\StoredBarangFarmasi;
+use App\Models\StoredBarangNonFarmasi;
 use App\Models\WarehouseMasterGudang;
-use App\Models\WarehouseDistribusiBarangFarmasi;
-use App\Models\WarehouseDistribusiBarangFarmasiItems;
-use App\Models\WarehouseStockRequestPharmacy;
-use App\Models\WarehouseStockRequestPharmacyItems;
+use App\Models\WarehouseDistribusiBarangNonFarmasi;
+use App\Models\WarehouseDistribusiBarangNonFarmasiItems;
+use App\Models\WarehouseStockRequestNonPharmacy;
+use App\Models\WarehouseStockRequestNonPharmacyItems;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class WarehouseDistribusiBarangFarmasiController extends Controller
+class WarehouseDistribusiBarangNonFarmasiController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = WarehouseDistribusiBarangFarmasi::query()->with(["items"]);
+        $query = WarehouseDistribusiBarangNonFarmasi::query()->with(["items"]);
         $filters = ["kode_db", "status", "asal_gudang_id", "tujuan_gudang_id"];
         $filterApplied = false;
 
@@ -52,12 +52,12 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
             $db = $query->orderBy('created_at', 'desc')->get();
         } else {
             // Return all data if no filter is applied
-            $db = WarehouseDistribusiBarangFarmasi::all();
+            $db = WarehouseDistribusiBarangNonFarmasi::all();
         }
 
-        return view("pages.simrs.warehouse.distribusi-barang.pharmacy", [
+        return view("pages.simrs.warehouse.distribusi-barang.non-pharmacy", [
             "gudangs" => WarehouseMasterGudang::all(),
-            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 1)->where("warehouse", 1)->get(),
+            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 0)->where("warehouse", 1)->get(),
             "dbs" => $db
         ]);
     }
@@ -66,9 +66,9 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
     {
         $gudang_asal = WarehouseMasterGudang::findOrFail($asal_gudang_id);
         $gudang_tujuan = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
-        return view("pages.simrs.warehouse.distribusi-barang.partials.table-items-pharmacy", [
-            "sis_asal" => StoredBarangFarmasi::where("gudang_id", $asal_gudang_id)->where('qty', '>', 0)->get(),
-            "sis_tujuan" => StoredBarangFarmasi::where("gudang_id", $tujuan_gudang_id)->where('qty', '>', 0)->get(),
+        return view("pages.simrs.warehouse.distribusi-barang.partials.table-items-non-pharmacy", [
+            "sis_asal" => StoredBarangNonFarmasi::where("gudang_id", $asal_gudang_id)->where('qty', '>', 0)->get(),
+            "sis_tujuan" => StoredBarangNonFarmasi::where("gudang_id", $tujuan_gudang_id)->where('qty', '>', 0)->get(),
             "gudang_asal" => $gudang_asal,
             "gudang_tujuan" => $gudang_tujuan
         ]);
@@ -79,16 +79,16 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
      */
     public function create()
     {
-        $srs = WarehouseStockRequestPharmacy::query()->with(["items", "items.barang", "items.satuan"]);
+        $srs = WarehouseStockRequestNonPharmacy::query()->with(["items", "items.barang", "items.satuan"]);
         $srs->where("status", "final");
         $srs->whereHas("items", function ($q) {
             $q->whereColumn("qty_fulfilled", "<", "qty");
         });
 
-        return view("pages.simrs.warehouse.distribusi-barang.partials.popup-add-db-farmasi", [
+        return view("pages.simrs.warehouse.distribusi-barang.partials.popup-add-db-non-farmasi", [
             "srs" => $srs->get(),
             "gudangs" => WarehouseMasterGudang::all(),
-            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 1)->where("warehouse", 1)->get(),
+            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 0)->where("warehouse", 1)->get(),
         ]);
     }
 
@@ -98,7 +98,7 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = WarehouseDistribusiBarangFarmasi::whereMonth('created_at', now()->month)
+        $count = WarehouseDistribusiBarangNonFarmasi::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
@@ -108,17 +108,16 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
 
     public function get_stock($gudang_id, $barang_id, $satuan_id)
     {
-        $si = StoredBarangFarmasi::query()->with(["pbi"]);
+        $si = StoredBarangNonFarmasi::query()->with(["pbi"]);
         $si->where("gudang_id", $gudang_id);
         $si->where("qty", ">", 0);
         $si->whereHas("pbi", function ($q) use ($barang_id, $satuan_id) {
             $q->where("barang_id", $barang_id);
-            $q->where("satuan_id", $satuan_id);
-            $q->whereDate("tanggal_exp", ">=", now())->orWhereNull("tanggal_exp");
+            // $q->where("satuan_id", $satuan_id);
+            // $q->whereDate("tanggal_exp", ">=", now())->orWhereNull("tanggal_exp");
         });
 
         $sis = $si->get();
-
 
         $stock = 0;
         foreach ($sis as $si) {
@@ -135,7 +134,7 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(WarehouseDistribusiBarangFarmasi $warehouseDistribusiBarangPharmacy)
+    public function show(WarehouseDistribusiBarangNonFarmasi $warehouseDistribusiBarangNonPharmacy)
     {
         //
     }
@@ -143,11 +142,11 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(WarehouseDistribusiBarangFarmasi $warehouseDistribusiBarangPharmacy, $id)
+    public function edit(WarehouseDistribusiBarangNonFarmasi $warehouseDistribusiBarangNonPharmacy, $id)
     {
-        $db =  $warehouseDistribusiBarangPharmacy::findorfail($id);
+        $db =  $warehouseDistribusiBarangNonPharmacy::findorfail($id);
         foreach ($db->items as $item) {
-            $si = StoredBarangFarmasi::query()->with(["pbi"]);
+            $si = StoredBarangNonFarmasi::query()->with(["pbi"]);
             $si->where("gudang_id", $db->asal_gudang_id);
             $si->where("qty", ">", 0);
             $si->whereHas("pbi", function ($q) use ($item) {
@@ -164,17 +163,17 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
             }
         }
 
-        $srs = WarehouseStockRequestPharmacy::query()->with(["items", "items.barang", "items.satuan"]);
+        $srs = WarehouseStockRequestNonPharmacy::query()->with(["items", "items.barang", "items.satuan"]);
         $srs->where("status", "final");
         $srs->whereHas("items", function ($q) {
             $q->whereColumn("qty_fulfilled", "<", "qty");
         });
 
-        return view("pages.simrs.warehouse.distribusi-barang.partials.popup-edit-db-farmasi", [
+        return view("pages.simrs.warehouse.distribusi-barang.partials.popup-edit-db-non-farmasi", [
             "srs" => $srs->get(),
             "db" => $db,
             "gudangs" => WarehouseMasterGudang::all(),
-            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 1)->where("warehouse", 1)->get(),
+            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 0)->where("warehouse", 1)->get(),
         ]);
     }
 
@@ -190,7 +189,7 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
             "asal_gudang_id" => "required|exists:warehouse_master_gudang,id",
             "tujuan_gudang_id" => "required|exists:warehouse_master_gudang,id",
             "tanggal_db" => "required|date",
-            "sr_id" => "nullable|exists:warehouse_stock_request_pharmacy,id",
+            "sr_id" => "nullable|exists:warehouse_stock_request_non_pharmacy,id",
             "status" => "required|in:draft,final",
             "keterangan" => "nullable|string"
         ]);
@@ -198,11 +197,11 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
         // dd($validatedData1);
 
         $validatedData2 = $request->validate([
-            "barang_id.*" => "required|exists:warehouse_barang_farmasi,id",
+            "barang_id.*" => "required|exists:warehouse_barang_non_farmasi,id",
             "satuan_id.*" => "required|exists:warehouse_satuan_barang,id",
             "qty.*" => "required|integer",
             "keterangan_item.*" => "nullable|string",
-            "sri_id.*" => "nullable|exists:warehouse_stock_request_pharmacy_item,id"
+            "sri_id.*" => "nullable|exists:warehouse_stock_request_non_pharmacy_item,id"
         ]);
 
         // dd($validatedData2);
@@ -211,7 +210,7 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
         DB::beginTransaction();
 
         try {
-            $db = WarehouseDistribusiBarangFarmasi::create($validatedData1);
+            $db = WarehouseDistribusiBarangNonFarmasi::create($validatedData1);
             $asal_gudang_id = $validatedData1["asal_gudang_id"];
             $tujuan_gudang_id = $validatedData1["tujuan_gudang_id"];
 
@@ -221,7 +220,7 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                 $sri_id = $validatedData2["sri_id"][$index] ?? null;
                 $requested_qty = $validatedData2["qty"][$index];
                 $keterangan_item = $validatedData2["keterangan_item"][$index] ?? null;
-                WarehouseDistribusiBarangFarmasiItems::create([
+                WarehouseDistribusiBarangNonFarmasiItems::create([
                     "db_id" => $db->id,
                     "barang_id" => $barang_id,
                     "satuan_id" => $satuan_id,
@@ -233,14 +232,14 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                 if ($validatedData1["status"] == "final") {
                     // update stock request item
                     if (isset($sri_id)) {
-                        $sri = WarehouseStockRequestPharmacyItems::findOrFail($sri_id);
+                        $sri = WarehouseStockRequestNonPharmacyItems::findOrFail($sri_id);
                         $sri->qty_fulfilled += $requested_qty;
                         if ($sri->qty < $sri->qty_fulfilled) $sri->qty_fulfilled = $sri->qty;
                         $sri->save();
                     }
 
                     // TODO: LOGIC FOR DISTRIBUTE GOODS
-                    $origin_sis = StoredBarangFarmasi::query()->with(["pbi"]);
+                    $origin_sis = StoredBarangNonFarmasi::query()->with(["pbi"]);
                     $origin_sis->where("gudang_id", $asal_gudang_id);
                     $origin_sis->whereHas("pbi", function ($q) use ($barang_id, $satuan_id) {
                         // barang and satuan
@@ -266,7 +265,7 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                         // option 1: update existing
                         // check if there is another $si with gudang_id == tujuan_gudang_id
                         // and pbi the same as $si
-                        $si_tujuan = StoredBarangFarmasi::query()->where("gudang_id", $tujuan_gudang_id)
+                        $si_tujuan = StoredBarangNonFarmasi::query()->where("gudang_id", $tujuan_gudang_id)
                             ->where("pbi_id", $si->pbi_id)
                             ->first();
                         if ($si_tujuan) {
@@ -309,7 +308,7 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                             $si->qty -= $remaining_qty;
                             $si->save();
 
-                            StoredBarangFarmasi::create([
+                            StoredBarangNonFarmasi::create([
                                 "pbi_id" => $si->pbi_id,
                                 "gudang_id" => $tujuan_gudang_id,
                                 "qty" => $remaining_qty
@@ -335,51 +334,51 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, WarehouseDistribusiBarangFarmasi $warehouseDistribusiBarangPharmacy, $id)
+    public function update(Request $request, WarehouseDistribusiBarangNonFarmasi $warehouseDistribusiBarangNonPharmacy, $id)
     {
         // dd($request->all());
         $validatedData1 = $request->validate([
-            "id" => "required|exists:warehouse_distribusi_barang_farmasi,id",
+            "id" => "required|exists:warehouse_distribusi_barang_non_farmasi,id",
             "user_id" => "required|exists:users,id",
             "asal_gudang_id" => "required|exists:warehouse_master_gudang,id",
             "tujuan_gudang_id" => "required|exists:warehouse_master_gudang,id",
             "tanggal_db" => "required|date",
-            "sr_id" => "nullable|exists:warehouse_stock_request_pharmacy,id",
+            "sr_id" => "nullable|exists:warehouse_stock_request_non_pharmacy,id",
             "status" => "required|in:draft,final",
             "keterangan" => "nullable|string"
         ]);
         // dd($validatedData1);
 
         $validatedData2 = $request->validate([
-            "barang_id.*" => "required|exists:warehouse_barang_farmasi,id",
+            "barang_id.*" => "required|exists:warehouse_barang_non_farmasi,id",
             "satuan_id.*" => "required|exists:warehouse_satuan_barang,id",
             "qty.*" => "required|integer",
             "keterangan_item.*" => "nullable|string",
-            "sri_id.*" => "nullable|exists:warehouse_stock_request_pharmacy_item,id",
-            "item_id.*" => "nullable|exists:warehouse_distribusi_barang_farmasi_item,id",
+            "sri_id.*" => "nullable|exists:warehouse_stock_request_non_pharmacy_item,id",
+            "item_id.*" => "nullable|exists:warehouse_distribusi_barang_non_farmasi_item,id",
         ]);
         // dd($validatedData2);
 
         DB::beginTransaction();
 
         try {
-            $db = $warehouseDistribusiBarangPharmacy->findOrFail($id);
+            $db = $warehouseDistribusiBarangNonPharmacy->findOrFail($id);
             $db->update($validatedData1);
             $asal_gudang_id = $validatedData1["asal_gudang_id"];
             $tujuan_gudang_id = $validatedData1["tujuan_gudang_id"];
 
             // $validatedData["item_id"] is a key => pair array
-            // delete everything from WarehouseDistribusiBarangFarmasiItems
+            // delete everything from WarehouseDistribusiBarangNonFarmasiItems
             // where db_id == $pr->id
             // and id IS NOT IN $validatedData["item_id"]
             // because if it is not in $validatedData["item_id"]
             // it means it has been deleted
             if (isset($validatedData2["item_id"]) && count($validatedData2["item_id"]) > 0) {
-                WarehouseDistribusiBarangFarmasiItems::where("db_id", $db->id)
+                WarehouseDistribusiBarangNonFarmasiItems::where("db_id", $db->id)
                     ->whereNotIn("id", $validatedData2["item_id"])
                     ->delete(); // don't force delete to retain history
             } else {
-                WarehouseDistribusiBarangFarmasiItems::where("db_id", $db->id)->delete();
+                WarehouseDistribusiBarangNonFarmasiItems::where("db_id", $db->id)->delete();
             }
 
             foreach ($validatedData2["barang_id"] as $index => $barang_id) {
@@ -397,23 +396,23 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                 ];
 
                 if ($request->has("item_id") && isset($validatedData2["item_id"][$index])) {
-                    $dbi = WarehouseDistribusiBarangFarmasiItems::findorfail($validatedData2["item_id"][$index]);
+                    $dbi = WarehouseDistribusiBarangNonFarmasiItems::findorfail($validatedData2["item_id"][$index]);
                     $dbi->update($attributes);
                 } else {
-                    $dbi = new WarehouseDistribusiBarangFarmasiItems($attributes);
+                    $dbi = new WarehouseDistribusiBarangNonFarmasiItems($attributes);
                 }
 
                 if ($validatedData1["status"] == "final") {
                     // update stock request item
                     if (isset($sri_id)) {
-                        $sri = WarehouseStockRequestPharmacyItems::findOrFail($sri_id);
+                        $sri = WarehouseStockRequestNonPharmacyItems::findOrFail($sri_id);
                         $sri->qty_fulfilled += $requested_qty;
                         if ($sri->qty < $sri->qty_fulfilled) $sri->qty_fulfilled = $sri->qty;
                         $sri->save();
                     }
 
                     // TODO: LOGIC FOR DISTRIBUTE GOODS
-                    $origin_sis = StoredBarangFarmasi::query()->with(["pbi"]);
+                    $origin_sis = StoredBarangNonFarmasi::query()->with(["pbi"]);
                     $origin_sis->where("gudang_id", $asal_gudang_id);
                     $origin_sis->whereHas("pbi", function ($q) use ($barang_id, $satuan_id) {
                         // barang and satuan
@@ -439,7 +438,7 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                         // option 1: update existing
                         // check if there is another $si with gudang_id == tujuan_gudang_id
                         // and pbi the same as $si
-                        $si_tujuan = StoredBarangFarmasi::query()->where("gudang_id", $tujuan_gudang_id)
+                        $si_tujuan = StoredBarangNonFarmasi::query()->where("gudang_id", $tujuan_gudang_id)
                             ->where("pbi_id", $si->pbi_id)
                             ->first();
                         if ($si_tujuan) {
@@ -482,7 +481,7 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                             $si->qty -= $remaining_qty;
                             $si->save();
 
-                            StoredBarangFarmasi::create([
+                            StoredBarangNonFarmasi::create([
                                 "pbi_id" => $si->pbi_id,
                                 "gudang_id" => $tujuan_gudang_id,
                                 "qty" => $remaining_qty
@@ -507,17 +506,17 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
 
     public function print($id)
     {
-        return view("pages.simrs.warehouse.distribusi-barang.partials.db-print-pharmacy", [
-            "db" => WarehouseDistribusiBarangFarmasi::findorfail($id)
+        return view("pages.simrs.warehouse.distribusi-barang.partials.db-print-non-pharmacy", [
+            "db" => WarehouseDistribusiBarangNonFarmasi::findorfail($id)
         ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(WarehouseDistribusiBarangFarmasi $warehouseDistribusiBarangPharmacy, $id)
+    public function destroy(WarehouseDistribusiBarangNonFarmasi $warehouseDistribusiBarangNonPharmacy, $id)
     {
-        $pr = $warehouseDistribusiBarangPharmacy->findorfail($id);
+        $pr = $warehouseDistribusiBarangNonPharmacy->findorfail($id);
         if ($pr->status == 'final') {
             return response()->json([
                 'success' => false,
