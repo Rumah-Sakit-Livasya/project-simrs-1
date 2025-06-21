@@ -81,6 +81,7 @@ use App\Http\Controllers\WarehouseBarangFarmasiController;
 use App\Http\Controllers\WarehouseBarangNonFarmasiController;
 use App\Http\Controllers\WarehouseDistribusiBarangFarmasiController;
 use App\Http\Controllers\WarehouseDistribusiBarangNonFarmasiController;
+use App\Http\Controllers\WarehouseDistribusiBarangReportController;
 use App\Http\Controllers\WarehouseGolonganBarangController;
 use App\Http\Controllers\WarehouseKategoriBarangController;
 use App\Http\Controllers\WarehouseKelompokBarangController;
@@ -360,6 +361,11 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/create", [WarehouseDistribusiBarangNonFarmasiController::class, "create"])->name("procurement.distribusi-barang.non-pharmacy.create");
                     Route::get("/print/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, "print"])->name("procurement.distribusi-barang.non-pharmacy.print");
                     Route::get("/edit/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, "edit"])->name("procurement.distribusi-barang.non-pharmacy.edit");
+                });
+
+                Route::prefix("report")->group(function () {
+                    Route::get("/", [WarehouseDistribusiBarangReportController::class, "index"])->name("warehouse.distribusi-barang.report");
+                    Route::get("show/{json}", [WarehouseDistribusiBarangReportController::class, "show"])->name("warehouse.distribusi-barang.report.show");
                 });
             });
         });
