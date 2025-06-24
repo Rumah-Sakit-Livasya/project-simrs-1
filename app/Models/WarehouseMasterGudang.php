@@ -78,4 +78,8 @@ class WarehouseMasterGudang extends Model implements AuditableContract
     {
         return $this->hasMany(WarehouseDistribusiBarangFarmasi::class, 'tujuan_gudang_id', 'id');
     }
+
+    public function stock_adjustment(){
+        return $this->hasMany(WarehouseStockAdjustment::class, 'gudang_id', 'id');
+    }
 }

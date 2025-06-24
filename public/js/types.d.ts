@@ -436,6 +436,24 @@ interface Satuan {
     aktif: number;
 }
 
+interface KategoriBarang {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    coa_inventory: number;
+    coa_sales_outpatient: number | null;
+    coa_cogs_outpatient: number | null;
+    coa_sales_inpatient: number | null;
+    coa_cogs_inpatient: number | null;
+    coa_adjustment_daily: number | null;
+    coa_adjustment_so: number | null;
+    konsinsyasi: number;
+    aktif: number;
+    kode: string;
+}
+
 interface BarangFarmasi {
     id: number;
     created_at: string;
@@ -461,6 +479,9 @@ interface BarangFarmasi {
     principal: string | null;
     harga_principal: number | null;
     diskon_principal: number | null;
+
+    golongan?: GolonganBarang;
+    kategori?: KategoriBarang;
 }
 
 interface BarangNonFarmasi {
@@ -479,7 +500,10 @@ interface BarangNonFarmasi {
     golongan_id: number | null;
     kelompok_id: number | null;
     satuan_id: number;
+
     satuan?: Satuan;
+    golongan?: GolonganBarang;
+    kategori?: KategoriBarang;
 }
 
 interface MasterGudang {
@@ -579,6 +603,16 @@ interface PurchaseOrder {
     supplier: Supplier;
 }
 
+interface GolonganBarang {
+    id: number;
+    deleted_at: Date | null;
+    created_at: string; // Adjusted to string as per the original format
+    updated_at: string; // Adjusted to string as per the original format
+    kode: string;
+    nama: string;
+    aktif: number;
+}
+
 interface Barang {
     id: number;
     created_at: string;
@@ -638,6 +672,8 @@ interface PenerimaanBarangItem {
     is_bonus: number;
 
     pb?: PenerimaanBarang;
+    item?: BarangFarmasi | BarangNonFarmasi;
+    satuan?: Satuan;
 }
 
 interface PenerimaanBarang {
@@ -669,35 +705,35 @@ interface PenerimaanBarang {
 
 // Define StockRequestItem interface for nested items array
 interface StockRequestItem {
-  id: number;
-  created_at: string; // Timestamp in ISO format
-  updated_at: string; // Timestamp in ISO format
-  deleted_at: string | null; // Nullable timestamp or null
-  sr_id: number;
-  barang_id: number;
-  satuan_id: number;
-  qty: number;
-  qty_fulfilled: number;
-  keterangan: string;
-  barang?: BarangFarmasi | BarangNonFarmasi
-  satuan?: Satuan
+    id: number;
+    created_at: string; // Timestamp in ISO format
+    updated_at: string; // Timestamp in ISO format
+    deleted_at: string | null; // Nullable timestamp or null
+    sr_id: number;
+    barang_id: number;
+    satuan_id: number;
+    qty: number;
+    qty_fulfilled: number;
+    keterangan: string;
+    barang?: BarangFarmasi | BarangNonFarmasi
+    satuan?: Satuan
 }
 
 // Define the main StockRequest interface
 interface StockRequest {
-  id: number;
-  created_at: string; // Timestamp in ISO format
-  updated_at: string; // Timestamp in ISO format
-  deleted_at: string | null; // Nullable timestamp or null
-  tanggal_sr: string; // Date in YYYY-MM-DD format
-  user_id: number;
-  asal_gudang_id: number;
-  tujuan_gudang_id: number;
-  kode_sr: string;
-  keterangan: string;
-  tipe: "normal" | "urgent"; // String literal if only specific values are allowed
-  status: "final" | "draft"; // Specify all possible statuses; replace 'other_status' as needed
-  items?: StockRequestItem[]; // Array of StockRequestItem
+    id: number;
+    created_at: string; // Timestamp in ISO format
+    updated_at: string; // Timestamp in ISO format
+    deleted_at: string | null; // Nullable timestamp or null
+    tanggal_sr: string; // Date in YYYY-MM-DD format
+    user_id: number;
+    asal_gudang_id: number;
+    tujuan_gudang_id: number;
+    kode_sr: string;
+    keterangan: string;
+    tipe: "normal" | "urgent"; // String literal if only specific values are allowed
+    status: "final" | "draft"; // Specify all possible statuses; replace 'other_status' as needed
+    items?: StockRequestItem[]; // Array of StockRequestItem
 }
 
 type PatientType = "rajal" | "ranap" | "otc";

@@ -95,6 +95,7 @@ use App\Http\Controllers\WarehousePurchaseRequestPharmacy;
 use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseSetupMinMaxStockController;
+use App\Http\Controllers\WarehouseStockAdjustmentController;
 use App\Http\Controllers\WarehouseStockRequestNonPharmacyController;
 use App\Http\Controllers\WarehouseStockRequestPharmacyController;
 use App\Http\Controllers\WarehouseSupplierController;
@@ -335,37 +336,45 @@ Route::group(['middleware' => ['auth']], function () {
             Route::prefix("stock-request")->group(function () {
                 Route::prefix("pharmacy")->group(function () {
                     Route::get("/", [WarehouseStockRequestPharmacyController::class, "index"])->name("warehouse.stock-request.pharmacy");
-                    Route::get("/create", [WarehouseStockRequestPharmacyController::class, "create"])->name("procurement.stock-request.pharmacy.create");
-                    Route::get("/print/{id}", [WarehouseStockRequestPharmacyController::class, "print"])->name("procurement.stock-request.pharmacy.print");
-                    Route::get("/edit/{id}", [WarehouseStockRequestPharmacyController::class, "edit"])->name("procurement.stock-request.pharmacy.edit");
+                    Route::get("/create", [WarehouseStockRequestPharmacyController::class, "create"])->name("warehouse.stock-request.pharmacy.create");
+                    Route::get("/print/{id}", [WarehouseStockRequestPharmacyController::class, "print"])->name("warehouse.stock-request.pharmacy.print");
+                    Route::get("/edit/{id}", [WarehouseStockRequestPharmacyController::class, "edit"])->name("warehouse.stock-request.pharmacy.edit");
                 });
 
                 Route::prefix("non-pharmacy")->group(function () {
                     Route::get("/", [WarehouseStockRequestNonPharmacyController::class, "index"])->name("warehouse.stock-request.non-pharmacy");
-                    Route::get("/create", [WarehouseStockRequestNonPharmacyController::class, "create"])->name("procurement.stock-request.non-pharmacy.create");
-                    Route::get("/print/{id}", [WarehouseStockRequestNonPharmacyController::class, "print"])->name("procurement.stock-request.non-pharmacy.print");
-                    Route::get("/edit/{id}", [WarehouseStockRequestNonPharmacyController::class, "edit"])->name("procurement.stock-request.non-pharmacy.edit");
+                    Route::get("/create", [WarehouseStockRequestNonPharmacyController::class, "create"])->name("warehouse.stock-request.non-pharmacy.create");
+                    Route::get("/print/{id}", [WarehouseStockRequestNonPharmacyController::class, "print"])->name("warehouse.stock-request.non-pharmacy.print");
+                    Route::get("/edit/{id}", [WarehouseStockRequestNonPharmacyController::class, "edit"])->name("warehouse.stock-request.non-pharmacy.edit");
                 });
             });
 
             Route::prefix("distribusi-barang")->group(function () {
                 Route::prefix("pharmacy")->group(function () {
                     Route::get("/", [WarehouseDistribusiBarangFarmasiController::class, "index"])->name("warehouse.distribusi-barang.pharmacy");
-                    Route::get("/create", [WarehouseDistribusiBarangFarmasiController::class, "create"])->name("procurement.distribusi-barang.pharmacy.create");
-                    Route::get("/print/{id}", [WarehouseDistribusiBarangFarmasiController::class, "print"])->name("procurement.distribusi-barang.pharmacy.print");
-                    Route::get("/edit/{id}", [WarehouseDistribusiBarangFarmasiController::class, "edit"])->name("procurement.distribusi-barang.pharmacy.edit");
+                    Route::get("/create", [WarehouseDistribusiBarangFarmasiController::class, "create"])->name("warehouse.distribusi-barang.pharmacy.create");
+                    Route::get("/print/{id}", [WarehouseDistribusiBarangFarmasiController::class, "print"])->name("warehouse.distribusi-barang.pharmacy.print");
+                    Route::get("/edit/{id}", [WarehouseDistribusiBarangFarmasiController::class, "edit"])->name("warehouse.distribusi-barang.pharmacy.edit");
                 });
 
                 Route::prefix("non-pharmacy")->group(function () {
                     Route::get("/", [WarehouseDistribusiBarangNonFarmasiController::class, "index"])->name("warehouse.distribusi-barang.non-pharmacy");
-                    Route::get("/create", [WarehouseDistribusiBarangNonFarmasiController::class, "create"])->name("procurement.distribusi-barang.non-pharmacy.create");
-                    Route::get("/print/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, "print"])->name("procurement.distribusi-barang.non-pharmacy.print");
-                    Route::get("/edit/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, "edit"])->name("procurement.distribusi-barang.non-pharmacy.edit");
+                    Route::get("/create", [WarehouseDistribusiBarangNonFarmasiController::class, "create"])->name("warehouse.distribusi-barang.non-pharmacy.create");
+                    Route::get("/print/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, "print"])->name("warehouse.distribusi-barang.non-pharmacy.print");
+                    Route::get("/edit/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, "edit"])->name("warehouse.distribusi-barang.non-pharmacy.edit");
                 });
 
                 Route::prefix("report")->group(function () {
                     Route::get("/", [WarehouseDistribusiBarangReportController::class, "index"])->name("warehouse.distribusi-barang.report");
                     Route::get("show/{json}", [WarehouseDistribusiBarangReportController::class, "show"])->name("warehouse.distribusi-barang.report.show");
+                });
+            });
+
+            Route::prefix("revaluasi-stock")->group(function () {
+                Route::prefix("stock-adjustment")->group(function () {
+                    Route::get("/", [WarehouseStockAdjustmentController::class, "index"])->name("warehouse.revaluasi-stock.stock-adjustment");
+                    Route::get("/create/{token}", [WarehouseStockAdjustmentController::class, "create"])->name("warehouse.revaluasi-stock.stock-adjustment.create");
+                    Route::get("/edit/{gudang_id}/{barang_id}/{satuan_id}/{type}/{token}", [WarehouseStockAdjustmentController::class, "edit"])->name("warehouse.revaluasi-stock.stock-adjustment.edit");
                 });
             });
         });

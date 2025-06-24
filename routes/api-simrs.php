@@ -91,6 +91,7 @@ use App\Http\Controllers\WarehouseDistribusiBarangFarmasiController;
 use App\Http\Controllers\WarehouseDistribusiBarangNonFarmasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Http\Controllers\WarehouseReturBarangController;
+use App\Http\Controllers\WarehouseStockAdjustmentController;
 use App\Http\Controllers\WarehouseStockRequestNonPharmacyController;
 use App\Http\Controllers\WarehouseStockRequestPharmacyController;
 use App\Models\Employee;
@@ -318,6 +319,14 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::delete("/destroy/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, 'destroy'])->name('warehouse.distribusi-barang.non-pharmacy.delete');
                 Route::get("/get/item-gudang/{asal_gudang_id}/{tujuan_gudang_id}", [WarehouseDistribusiBarangNonFarmasiController::class, 'get_item_gudang'])->name('warehouse.distribusi-barang.non-pharmacy.get.item-gudang');
                 Route::get("/get/stock/{gudang_id}/{barang_id}/{satuan_id}", [WarehouseDistribusiBarangNonFarmasiController::class, "get_stock"])->name("warehouse.distribusi-barang.non-pharmacy.get.stock");
+            });
+        });
+
+        Route::prefix("revaluasi-stock")->group(function () {
+            Route::prefix("stock-adjustment")->group(function () {
+                Route::post("/login", [WarehouseStockAdjustmentController::class, "login"])->name("warehouse.revaluasi-stock.stock-adjustment.login");
+                Route::get("/get/item-gudang/{token}/{gudang_id}", [WarehouseStockAdjustmentController::class, "get_items"])->name("warehouse.revaluasi-stock.stock-adjustment.get-items");
+                Route::put("/update", [WarehouseStockAdjustmentController::class, 'update'])->name('warehouse.revaluasi-stock.stock-adjustment.update');
             });
         });
     });
