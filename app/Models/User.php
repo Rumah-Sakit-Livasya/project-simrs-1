@@ -190,11 +190,23 @@ class User extends Authenticatable implements Auditable
         return $this->hasMany(WarehouseDistribusiBarangFarmasi::class, 'user_id');
     }
 
-    public function stock_adjustment(){
+    public function stock_adjustment()
+    {
         return $this->hasMany(WarehouseStockAdjustment::class, "user_id");
     }
 
-    public function authorized_stock_adjustment_user(){
+    public function authorized_stock_adjustment_user()
+    {
         return $this->hasMany(WarehouseStockAdjustmentUsers::class, "user_id");
+    }
+
+    public function gudang_opname_start()
+    {
+        return $this->hasMany(WarehouseStockOpnameGudang::class, "start_user_id");
+    }
+
+    public function gudang_opname_finish()
+    {
+        return $this->hasMany(WarehouseStockOpnameGudang::class, "finish_user_id");
     }
 }
