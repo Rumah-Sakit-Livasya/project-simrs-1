@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\LaporanHarianExport;
+use App\Imports\LaporanInternalImport;
 use App\Models\Employee;
 use App\Models\LaporanInternal;
 use App\Models\Organization;
@@ -10,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
@@ -411,6 +413,33 @@ class LaporanInternalController extends Controller
         return view('pages.laporan-internal.pptx', compact('laporan'));
     }
 
+    public function import(Request $request)
+    {
+        // Validasi file
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            Excel::import(new LaporanInternalImport, $request->file('file'));
+
+            return response()->json([
+                'message' => 'Import data laporan internal berhasil.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat import data.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     public function destroy($id)
     {
@@ -426,7 +455,6 @@ class LaporanInternalController extends Controller
 
         return response()->json(['message' => 'Laporan berhasil dihapus']);
     }
-
 
     /**
      * Method untuk mengganti simbol dengan kata

@@ -69,6 +69,13 @@
                                                 <i class="fas fa-file-excel mr-2"></i>Download Laporan Bulanan
                                             </button>
                                         @endcan
+                                        @can('import laporan internal')
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                                                data-target="#importLaporan">
+                                                <i class="fas fa-file-excel mr-2"></i>Import Laporan
+                                            </button>
+                                        @endcan
 
                                         <!-- Tombol Export Word Harian -->
                                         @can('export word laporan internal')
@@ -116,6 +123,7 @@
     @include('pages.laporan-internal.partials.modal.export-word')
     @include('pages.laporan-internal.partials.modal.export-excel')
     @include('pages.laporan-internal.partials.modal.export-pptx')
+    @include('pages.laporan-internal.partials.modal.import')
 @endsection
 
 @section('plugin')
@@ -393,7 +401,7 @@
                             // Tambahkan tombol dokumentasi jika ada
                             if (row.dokumentasi && !isNumeric(row.dokumentasi)) {
                                 buttons += `
-                                            <button class="btn btn-sm btn-icon btn-info btn-show-dokumentasi" 
+                                            <button class="btn btn-sm btn-icon btn-info btn-show-dokumentasi"
                                                     data-file="${row.dokumentasi.startsWith('http') ? row.dokumentasi : assetUrl(row.dokumentasi)}">
                                                 <i class="fas fa-eye"></i>
                                             </button>
@@ -530,6 +538,57 @@
                     }
                 });
             });
+
+            $('#import-form-laporan').on('submit', function(e) {
+                e.preventDefault();
+
+                const btn = $(this).find('button[type="submit"]');
+                btn.prop('disabled', true).html(
+                    '<i class="fas fa-spinner fa-spin me-1"></i> Mengunggah...');
+
+                // Bersihkan pesan error sebelumnya
+                $('#file-error').hide().text('');
+
+                const formData = new FormData(this);
+                console.log(formData);
+
+                const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+                $.ajax({
+                    url: '/laporan-internal/import',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        showToast(response.message || 'Data berhasil diimpor!');
+                        $('#import-form-laporan')[0].reset();
+                        $('#importLaporan').modal('hide');
+                        if (typeof table !== 'undefined') {
+                            table.ajax.reload();
+                        }
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseJSON?.message || 'Gagal mengimpor data.';
+                        showToast(message, 'error');
+
+                        if (xhr.responseJSON?.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            if (errors.file) {
+                                $('#file-error').text(errors.file[0]).show();
+                            }
+                        }
+                    },
+                    complete: function() {
+                        btn.prop('disabled', false).html(
+                            '<i class="fas fa-file-import me-1"></i> Import Excel');
+                    }
+                });
+            });
+
 
             $('#edit-form-laporan').on('submit', function(e) {
                 e.preventDefault();

@@ -387,4 +387,43 @@ interface OrderLaboratorium {
     updated_at: string;
 }
 
+interface MakananGizi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    nama: string;
+    harga: number;
+    aktif: number;
+}
+
+interface OrderMakananGizi{
+    id: number;
+    created_at: string;
+    updated_at: string;
+    order_id: number;
+    makanan_id: number;
+    harga: number;
+    persentase_habis: number;
+    food: MakananGizi;
+}
+
+interface OrderGizi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    registration_id: number;
+    kategori_id: number;
+    untuk: string;
+    tanggal_order: string;
+    waktu_makan: string;
+    ditagihkan: number;
+    digabung: number;
+    total_harga: number;
+    status_payment: number;
+    status_order: number;
+    nama_pemesan: string;
+    registration: Registration;
+    foods: OrderMakananGizi[];
+}
+
 type PatientType = "rajal" | "ranap" | "otc";
