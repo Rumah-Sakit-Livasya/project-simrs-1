@@ -117,7 +117,7 @@
                                                 <td>{{ $row->nama_persalinan }}</td>
                                                 <td>{{ $row->nama_billing }}</td>
                                                 <td>
-                                                    <button class="btn btn-sm btn-primary px-2 py-1 btn-edit"
+                                                    <button class="btn btn-sm btn-primary px-2 py-1 btn-tarif"
                                                         data-id="{{ $row->id }}">
                                                         <i class="fas fa-credit-card"></i>
                                                     </button>
@@ -172,6 +172,23 @@
 
             $('#btn-tambah-persalinan').click(function() {
                 $('#modal-tambah-persalinan').modal('show');
+            });
+
+            $('.btn-tarif').click(function() {
+                const id_param = $(this).attr('data-id');
+                const url = `{{ route('master-data.persalinan.tarif.index', ':id') }}`
+                    .replace(':id', id_param);
+                const popupWidth = 900;
+                const popupHeight = 600;
+                const left = (screen.width - popupWidth) / 2;
+                const top = (screen.height - popupHeight) / 2;
+
+                window.open(
+                    url,
+                    "popupWindow",
+                    "width=" + popupWidth + ",height=" + popupHeight + ",top=" + top + ",left=" + left +
+                    ",scrollbars=yes,resizable=yes"
+                );
             });
 
             $('.btn-edit').click(function() {

@@ -345,7 +345,9 @@ class ReportController extends Controller
             ];
 
             //ambil jumlah ontime
-            $grafik_jumlah_ontime = $employee->attendance->where('clock_in', '!=', null)->where('late_clock_in', null)->where('is_day_off', null)->count();
+            $grafik_jumlah_ontime = $employee->attendance->where('clock_in', '!=', null)
+                ->where('late_clock_in', null)->where('is_day_off', null)->count();
+
             $on_time_reports[] = [
                 Str::limit($employee->fullname, 8),
                 $grafik_jumlah_ontime,

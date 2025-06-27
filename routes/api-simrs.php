@@ -46,6 +46,7 @@ use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
+use App\Http\Controllers\SIMRS\Persalinan\TarifPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Poliklinik\LayananController;
 use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
@@ -59,6 +60,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Http\Controllers\TarifOperasiController;
 use App\Models\Employee;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
@@ -388,6 +390,11 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::patch('/{id}/update', [DaftarPersalinanController::class, 'update'])->name('master-data.persalinan.daftar-persalinan.update');
                 Route::delete('/{id}/delete', [DaftarPersalinanController::class, 'delete'])->name('master-data.persalinan.daftar-persalinan.delete');
             });
+
+            Route::prefix('tarif')->group(function () {
+                Route::get('/persalinan/{persalinanId}/tarif/{grupPenjaminId}', [TarifPersalinanController::class, 'getTarifPersalinan'])->name('master-data.persalinan.tarif.get');
+                Route::post('/persalinan/{persalinanId}/tarif/{grupPenjaminId}', [TarifPersalinanController::class, 'store'])->name('master-data.persalinan.tarif.store');
+            });
         });
 
         Route::prefix('operasi')->group(function () {
@@ -418,6 +425,11 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::get('/{id}', [TindakanOperasiController::class, 'getTindakan'])->name('master-data.operasi.tindakan.get');
                 Route::patch('/{id}/update', [TindakanOperasiController::class, 'update'])->name('master-data.operasi.tindakan.update');
                 Route::delete('/{id}/delete', [TindakanOperasiController::class, 'delete'])->name('master-data.operasi.tindakan.delete');
+            });
+
+            Route::prefix('tarif')->group(function () {
+                Route::get('/operasi/{operasiId}/tarif/{grupPenjaminId}', [TarifOperasiController::class, 'getTarifOperasi'])->name('master-data.operasi.tarif.get');
+                Route::post('/operasi/{operasiId}/tarif/{grupPenjaminId}', [TarifOperasiController::class, 'store'])->name('master-data.tindakan_operasi.tarif.store');
             });
         });
 

@@ -41,6 +41,7 @@ use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
+use App\Http\Controllers\SIMRS\Persalinan\TarifPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
 use App\Http\Controllers\SIMRS\Procurement\ApprovalPOController;
@@ -192,6 +193,7 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/kategori', [KategoriPersalinanController::class, 'index'])->name('master-data.persalinan.kategori.index');
                 Route::get('/tipe', [TipePersalinanController::class, 'index'])->name('master-data.persalinan.tipe');
                 Route::get('/daftar-persalinan', [DaftarPersalinanController::class, 'index'])->name('master-data.persalinan.daftar');
+                Route::get('/persalinan/{id}/tarif', [DaftarPersalinanController::class, 'tarifPersalinan'])->name('master-data.persalinan.tarif.index');
             });
 
             Route::prefix('operasi')->group(function () {
@@ -199,6 +201,7 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/tipe', [TipeOperasiController::class, 'index'])->name('master-data.operasi.tipe');
                 Route::get('/jenis', [JenisOperasiController::class, 'index'])->name('master-data.operasi.jenis');
                 Route::get('/tindakan', [TindakanOperasiController::class, 'index'])->name('master-data.operasi.tindakan');
+                Route::get('/tindakan/{id}/tarif', [TindakanOperasiController::class, 'tarifPersalinan'])->name('master-data.operasi.tarif');
             });
 
             Route::prefix('grup-suplier')->group(function () {
