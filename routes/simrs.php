@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\BilinganController;
+use App\Http\Controllers\KategoriGiziController;
+use App\Http\Controllers\MakananGiziController;
+use App\Http\Controllers\MenuGiziController;
+use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
 use App\Http\Controllers\SIMRS\RoomController;
 use App\Http\Controllers\SIMRS\BedController;
@@ -305,17 +309,27 @@ Route::group(['middleware' => ['auth']], function () {
         Route::prefix('gizi')->group(function () {
             Route::prefix('daftar-pasien')->group(function () {
                 Route::get('list-pasien', [GiziController::class, 'index'])->name('gizi.daftar-pasien.list-pasien');
-                Route::get('list-order-gizi', [GiziController::class, 'listOrderGizi'])->name('gizi.daftar-pasien.list-order-gizi');
+                Route::get('list-order-gizi', [OrderGiziController::class, 'index'])->name('gizi.daftar-order.list-order-gizi');
+            });
+
+            Route::prefix("popup")->group(function () {
+                Route::get("/order/{untuk}/{registration_id}", [OrderGiziController::class, 'create'])->name('gizi.popup.order');
+                Route::get("/label/{id_order}", [OrderGiziController::class, 'label'])->name('gizi.popup.label');
+                Route::get("/bulk-label/{order_ids}", [OrderGiziController::class, 'bulk_label'])->name('gizi.popup.bulk-label');
+                Route::get("/print-nota/{order_ids}", [OrderGiziController::class, 'print_nota'])->name('gizi.popup.print-nota');
+                Route::get("/edit/{order_ids}", [OrderGiziController::class, 'edit'])->name('gizi.popup.edit-order');
             });
 
             Route::prefix('reports')->group(function () {
                 Route::get('/', [GiziController::class, 'reports'])->name('gizi.reports');
+                Route::get('/view/{startDate}/{endDate}/{kategori_id}/{food_id}/{status_payment}/{waktu_makan}/{untuk}', [GiziController::class, 'reports_view'])
+                    ->name('gizi.reports.view');
             });
 
             Route::prefix('master-data')->group(function () {
-                Route::get('kategori-menu', [GiziController::class, 'kategoriMenu'])->name('gizi.master-data.kategori-menu');
-                Route::get('daftar-makanan', [GiziController::class, 'daftarMakanan'])->name('gizi.master-data.daftar-makanan');
-                Route::get('daftar-menu', [GiziController::class, 'daftarMenu'])->name('gizi.master-data.daftar-menu');
+                Route::get('kategori-menu', [KategoriGiziController::class, 'index'])->name('gizi.master-data.kategori-menu');
+                Route::get('daftar-makanan', [MakananGiziController::class, 'index'])->name('gizi.master-data.daftar-makanan');
+                Route::get('daftar-menu', [MenuGiziController::class, 'index'])->name('gizi.master-data.daftar-menu');
             });
         });
 
