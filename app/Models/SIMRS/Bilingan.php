@@ -19,14 +19,7 @@ class Bilingan extends Model implements AuditableContract
     protected $guarded = ['id'];
     protected $table = 'bilingan';
 
-    // protected static function booted()
-    // // {
-    // //     static::updated(function ($billing) {
-    // //         if ($billing->isDirty('status') && strtolower($billing->status) === 'final') {
-    // //             event(new BillingFinalized($billing));
-    // //         }
-    // //     });
-    // // }
+
 
 
 
@@ -64,6 +57,10 @@ class Bilingan extends Model implements AuditableContract
     {
         return $this->hasOne(PembayaranTagihan::class, 'bilingan_id');
     }
+    public function konfirmasiAsuransi()
+    {
+        return $this->hasOne(\App\Models\Keuangan\KonfirmasiAsuransi::class, 'registration_id', 'registration_id');
+    }
 
     // Accessor untuk cek status lunas berdasarkan pembayaran tagihan
     // public function getStatusLunasAttribute()
@@ -93,7 +90,7 @@ class Bilingan extends Model implements AuditableContract
         return $this->belongsToMany(TagihanPasien::class, 'bilingan_tagihan_pasien', 'bilingan_id', 'tagihan_pasien_id');
     }
 
-    // App\Models\SIMRS\Bilingan.php
+
     protected static function booted()
     {
         static::updated(function (Bilingan $bilingan) {

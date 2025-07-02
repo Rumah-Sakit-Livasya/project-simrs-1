@@ -61,7 +61,6 @@ class JasaDokter extends Model
         return $this->belongsTo(\App\Models\SIMRS\Doctor::class, 'dokter_id');
     }
 
-    // App\Models\keuangan\JasaDokter.php
     public function dokter()
     {
         return $this->belongsTo(Doctor::class, 'dokter_id');

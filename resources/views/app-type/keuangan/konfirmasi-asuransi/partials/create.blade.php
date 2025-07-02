@@ -5,12 +5,12 @@
     @push('style')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     @endpush
-    <style> <style>
+    <style>
         table {
             font-size: 8pt !important;
         }
 
-        .badge-waiting {
+        .badge-pending {
             background-color: #f39c12;
             color: white;
         }
@@ -42,10 +42,8 @@
             z-index: 999;
         }
 
-        /* PENTING: Tambahkan CSS ini jika belum ada untuk memastikan toggle berfungsi */
         .child-row {
             display: none;
-            /* Sembunyikan secara default */
         }
 
         .dropdown-icon {
@@ -54,32 +52,28 @@
             display: inline-block;
         }
 
-        .dropdown-icon.bxs-down-arrow {
+        .dropdown-icon.rotated {
             transform: rotate(180deg);
         }
 
-        /* Styling tambahan untuk memperjelas batas row */
         .child-row td {
             background-color: #f9f9f9;
             border-bottom: 2px solid #ddd;
         }
 
-        /* Pastikan table di dalam child row memiliki margin dan padding yang tepat */
         .child-row td>div {
             padding: 15px;
             margin: 0;
         }
 
-        /* Pastikan parent dan child row terhubung secara visual */
         tr.parent-row.active {
             border-bottom: none !important;
         }
 
-        /* Tambahkan di bagian style */
         .control-details {
             cursor: pointer;
             text-align: center;
-            width: 30px;
+            width: 50px;
         }
 
         .control-details .dropdown-icon {
@@ -87,21 +81,17 @@
             transition: transform 0.3s ease, color 0.3s ease;
             display: inline-block;
             color: #3498db;
-            /* Warna biru */
         }
 
-        .control-details .dropdown-icon.bxs-up-arrow {
+        .control-details .dropdown-icon.rotated {
             transform: rotate(180deg);
             color: #e74c3c;
-            /* Warna merah saat terbuka */
         }
 
         .control-details:hover .dropdown-icon {
             color: #2980b9;
-            /* Warna biru lebih gelap saat hover */
         }
 
-        /* Sembunyikan ikon sort bawaan DataTables */
         table.dataTable thead .sorting:after,
         table.dataTable thead .sorting_asc:after,
         table.dataTable thead .sorting_desc:after,
@@ -110,14 +100,11 @@
             display: none !important;
         }
 
-        /* Styling untuk child row */
-        /* Pastikan content di child row tidak overflow */
         .child-row td>div {
             padding: 15px;
             width: 100%;
         }
 
-        /* Styling untuk tabel di dalam child row */
         .child-table {
             width: 98% !important;
             margin: 10px auto !important;
@@ -139,7 +126,6 @@
             background-color: white;
         }
 
-        /* Animasi untuk transisi smooth */
         .child-row {
             transition: all 0.3s ease;
         }
@@ -152,15 +138,97 @@
             display: none !important;
         }
 
-        /* Efek hover untuk row */
-        #dt-basic-example tbody tr.parent-row:hover {
+        #pj-table tbody tr.parent-row:hover {
             background-color: #f8f9fa;
             cursor: pointer;
         }
 
-        /* Warna berbeda untuk child row */
-        #dt-basic-example tbody tr.child-row:hover {
+        #pj-table tbody tr.child-row:hover {
             background-color: #f1f1f1;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-spinner {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        /* Fix untuk memastikan child row dapat di-toggle */
+        .parent-row.expanded {
+            border-bottom: none !important;
+        }
+
+        .toggle-detail {
+            border: none;
+            background: transparent;
+            color: #3498db;
+            padding: 5px;
+        }
+
+        .toggle-detail:hover {
+            color: #2980b9;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .toggle-detail:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.25);
+        }
+
+        /* PERBAIKAN CSS UNTUK DETAILS CONTROL */
+        .details-control {
+            cursor: pointer;
+            text-align: center;
+            width: 30px;
+            padding: 8px !important;
+        }
+
+        .details-control i {
+            transition: transform 0.3s ease, color 0.3s ease;
+            color: #3498db;
+            font-size: 16px;
+            /* Default: Panah ke atas (chevron-up) */
+            transform: rotate(0deg);
+        }
+
+        .details-control:hover i {
+            color: #2980b9;
+        }
+
+        /* Saat baris memiliki class 'dt-hasChild' (child row terbuka), putar ikon 180 derajat (menjadi panah ke bawah) */
+        tr.dt-hasChild td.details-control i {
+            transform: rotate(180deg);
+            color: #e74c3c;
+        }
+
+        .child-row-content {
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+
+        /* Styling untuk badge pada detail */
+        .badge-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .badge-secondary {
+            background-color: #6c757d;
+            color: white;
         }
     </style>
 
@@ -173,7 +241,7 @@
 
     <main id="js-page-content" role="main" class="page-content">
         <div class="row justify-content-center">
-            <div class="col-xl-12">
+            <div class="col-xl-10">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>Form <span class="fw-300"><i>Pencarian Konfirmasi Asuransi</i></span></h2>
@@ -183,118 +251,81 @@
                             <form id="search-form">
                                 @csrf
                                 <!-- Baris Pertama: Periode, Status, Penjamin -->
-                                <div class="row mb-4">
+                                <div class="row mb-3">
                                     <!-- Tanggal Periode (Dari - Sampai) -->
-                                    <div class="col-md-4 mb-3 mb-md-0">
-                                        <div class="form-group row">
-                                            <label for="tanggal_awal" class="col-md-3 col-form-label text-md-right">Periode
-                                                Awal</label>
-                                            <div class="col-md-9">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker" id="tanggal_awal"
-                                                        name="tanggal_awal" placeholder="Pilih tanggal awal"
-                                                        autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl">
-                                                            <i class="fal fa-calendar"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Periode Awal</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" name="tanggal_awal"
+                                                value="{{ request('tanggal_awal') }}">
+                                            <div class="input-group-append"><span class="input-group-text fs-sm"><i
+                                                        class="fal fa-calendar"></i></span></div>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4 mb-3 mb-md-0">
-                                        <div class="form-group row">
-                                            <label for="tanggal_akhir" class="col-md-3 col-form-label text-md-right">Periode
-                                                Akhir</label>
-                                            <div class="col-md-9">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker" id="tanggal_akhir"
-                                                        name="tanggal_akhir" placeholder="Pilih tanggal akhir"
-                                                        autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl">
-                                                            <i class="fal fa-calendar"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Periode Akhir</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" name="tanggal_akhir"
+                                                value="{{ request('tanggal_akhir') }}">
+                                            <div class="input-group-append"><span class="input-group-text fs-sm"><i
+                                                        class="fal fa-calendar"></i></span></div>
                                         </div>
                                     </div>
 
                                     <!-- Status Tagihan -->
-                                    <div class="col-md-4 mb-3 mb-md-0">
-                                        <div class="form-group row align-items-center">
-                                            <label for="status" class="col-md-5 col-form-label text-md-right">
-                                                Status Tagihan
-                                            </label>
-                                            <div class="col-md-7">
-                                                <select class="form-control select2" id="status" name="status">
-                                                    <option value="">Semua</option>
-                                                    <option value="Belum Di Buat Tagihan"
-                                                        {{ request('status') == 'Belum Di Buat Tagihan' ? 'selected' : '' }}>
-                                                        Belum Di buat Tagihan
-                                                    </option>
-                                                    <option value="Sudah Di Buat Tagihan"
-                                                        {{ request('status') == 'Sudah Di Buat Tagihan' ? 'selected' : '' }}>
-                                                        Sudah Di Buat Tagihan
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </div>
+
+                                </div>
+                                <div class="row mb-3">
+
+                                    <div class="col-md-4 mb-3">
+                                        <label>Penjamin</label>
+                                        <select class="form-control select2" id="penjamin_id" name="penjamin_id" required>
+                                            <option value="">Pilih Penjamin</option>
+                                            @foreach ($penjamins as $penjamin)
+                                                <option value="{{ $penjamin->id }}"
+                                                    {{ request('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
+                                                    {{ $penjamin->nama_perusahaan }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <!-- Tanggal Periode (Dari - Sampai) -->
+                                    <div class="col-md-4 mb-3">
+                                        <label>Tagihan Ke</label>
+                                        <select class="form-control w-100 select2" id="tagihan_ke"
+                                            style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
+                                            name="tagihan_ke">
+                                            <option value="">Semua</option>
+                                            @foreach ($penjamins as $penjamin)
+                                                <option value="{{ $penjamin->id }}"
+                                                    {{ request('tagihan_ke') == $penjamin->id ? 'selected' : '' }}>
+                                                    {{ $penjamin->nama_perusahaan }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+
+                                    <div class="col-md-4 mb-3">
+                                        <label>Status Tagihan</label>
+                                        <select class="form-control select2" id="status" name="status">
+                                            <option value="">Semua</option>
+                                            <option value="Belum Di Buat Tagihan"
+                                                {{ request('status') == 'Belum Di Buat Tagihan' ? 'selected' : '' }}>
+                                                Belum Di buat Tagihan
+                                            </option>
+                                            <option value="Sudah Di Buat Tagihan"
+                                                {{ request('status') == 'Sudah Di Buat Tagihan' ? 'selected' : '' }}>
+                                                Sudah Di Buat Tagihan
+                                            </option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                <!-- Baris Kedua: Tagihan Ke, Penjamin, Tipe Pasien -->
-                                <div class="row mb-4">
-                                    <!-- Tagihan Ke -->
-                                    <div class="col-md-4 mb-3 mb-md-0">
-                                        <div class="form-group row align-items-center">
-                                            <label for="tagihan_ke" class="col-md-4 col-form-label text-md-right">
-                                                Tagihan Ke
-                                            </label>
-                                            <div class="col-md-8">
-                                                <select class="form-control w-100 select2" id="tagihan_ke"
-                                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                    name="tagihan_ke">
-                                                    <option value="">Semua</option>
-                                                    @foreach ($penjamins as $penjamin)
-                                                        <option value="{{ $penjamin->id }}"
-                                                            {{ request('tagihan_ke') == $penjamin->id ? 'selected' : '' }}>
-                                                            {{ $penjamin->nama_perusahaan }}</option>
-                                                    @endforeach
-                                                </select>
-                                                @error('tagihan_ke')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <!-- Penjamin -->
-                                    <div class="col-md-4">
-                                        <div class="form-group row align-items-center">
-                                            <label for="penjamin_id" class="col-md-5 col-form-label text-md-right">
-                                                Penjamin <span class="text-danger">*</span>
-                                            </label>
-                                            <div class="col-md-7">
-                                                <select class="form-control select2" id="penjamin_id" name="penjamin_id"
-                                                    required>
-                                                    <option value="">Pilih Penjamin</option>
-                                                    @foreach ($penjamins as $penjamin)
-                                                        <option value="{{ $penjamin->id }}"
-                                                            {{ request('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
-                                                            {{ $penjamin->nama_perusahaan }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
+                                {{-- tipe pasien  --}}
 
-                                    <!-- Tipe Pasien -->
-                                    {{-- <div class="col-md-4">
+                                {{-- <div class="col-md-4">
                                         <div class="form-group row align-items-center">
                                             <label for="tipe_pasien" class="col-md-5 col-form-label text-md-right">
                                                 Tipe Pasien
@@ -314,7 +345,7 @@
                                             </div>
                                         </div>
                                     </div> --}}
-                                </div>
+                                <!-- Baris Kedua: Tagihan Ke, Penjamin, Tipe Pasien -->
 
                                 <!-- Tombol Cari dan Reset -->
                                 <div class="row">
@@ -364,7 +395,7 @@
                                 <tbody>
                                     @forelse ($query as $index => $item)
                                         <tr>
-                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $loop->iteration }}</td>
                                             <td>{{ $item->registration->patient->medical_record_number ?? '-' }}</td>
                                             <td>{{ $item->patient->name ?? '-' }}</td>
                                             <td>{{ $item->bill ?? '-' }}</td>
@@ -410,7 +441,7 @@
             </div>
         </div>
 
-        <div class="row mt-4">
+        <div class="row">
             <div class="col-xl-12">
                 <div id="panel-3" class="panel">
                     <div class="panel-hdr">
@@ -687,81 +718,48 @@
 
             // === BUAT TAGIHAN BUTTON ===
             $('#buat-tagihan').on('click', function() {
-                const selectedIds = $('.row-checkbox:checked').map(function() {
+                const bilinganIds = $('.row-checkbox:checked').map(function() {
                     return $(this).val();
                 }).get();
 
-                if (selectedIds.length === 0) {
-                    toastr.error('Silakan pilih data terlebih dahulu');
+                if (bilinganIds.length === 0) {
+                    toastr.error('Silakan pilih data bilingan terlebih dahulu');
                     return;
                 }
 
+                // Ambil data dari form
                 const jatuhTempo = $('#jatuh_tempo').val();
                 const keterangan = $('#keterangan').val();
-
-                if (!jatuhTempo || !keterangan) {
-                    toastr.warning('Jatuh tempo dan keterangan wajib diisi');
-                    return;
-                }
 
                 $('.loading-overlay').css('display', 'flex');
 
                 $.ajax({
-                    url: '/keuangan/konfirmasi-asuransi/create-invoice',
+                    url: '{{ route('keuangan.konfirmasi-asuransi.store') }}',
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     data: {
-                        selected_ids: selectedIds,
-                        jatuh_tempo: jatuhTempo,
-                        keterangan: keterangan
+                        bilingan_ids: bilinganIds,
+                        jatuh_tempo: jatuhTempo, // Tambahkan ini
+                        keterangan: keterangan // Tambahkan ini
                     },
                     success: function(res) {
                         $('.loading-overlay').hide();
 
                         if (res.success) {
-                            toastr.success(res.message || 'Tagihan berhasil dibuat');
-
-                            // Sembunyikan baris yang sudah dibuat tagihan
-                            selectedIds.forEach(id => {
-                                $('input.row-checkbox[value="' + id + '"]').closest(
-                                    'tr').remove();
-                            });
-
-                            // Refresh datatable berdasarkan filter aktif
-                            const filterData = {
-                                tanggal_awal: $('#tanggal_awal').val(),
-                                tanggal_akhir: $('#tanggal_akhir').val(),
-                                penjamin_id: $('#penjamin_id').val(),
-                                tagihan_ke: $('#tagihan_ke').val(),
-                                status: $('#status').val(),
-                                tipe_pasien: $('#tipe_pasien').val()
-                            };
-
-                            $.ajax({
-                                url: window.location.href,
-                                type: 'GET',
-                                data: filterData,
-                                success: function(data) {
-                                    updateTable(
-                                        data); // fungsi update isi datatable
-                                    $('#select-all').prop('checked', false);
-                                    $('#keterangan').val('');
-                                    calculateTotals(); // update total bawah
-                                },
-                                error: function(xhr) {
-                                    toastr.error('Gagal me-refresh data tabel');
-                                    console.error(xhr);
-                                }
-                            });
+                            toastr.success(res.message);
+                            setTimeout(function() {
+                                window.location.href =
+                                    '{{ route('keuangan.konfirmasi-asuransi.index') }}';
+                            }, 1500);
                         } else {
-                            toastr.error(res.message || 'Gagal membuat tagihan');
+                            toastr.error(res.message || 'Gagal menyimpan data konfirmasi');
                         }
                     },
                     error: function(xhr) {
                         $('.loading-overlay').hide();
-                        toastr.error('Terjadi kesalahan saat membuat tagihan');
+                        toastr.error('Terjadi kesalahan server saat menyimpan data.');
                         console.error(xhr);
                     }
                 });

@@ -22,8 +22,8 @@ return new class extends Migration
                 ->onDelete('cascade');
 
             // Relasi ke tabel GRN.
-            $table->foreignId('penerimaan_barang_header_id')
-                ->constrained('penerimaan_barang_header');
+            $table->integer('penerimaan_barang_id');
+            $table->enum('penerimaan_barang_type', ['farmasi', 'non_farmasi']);
 
             // Menyimpan nominal GRN sebagai arsip saat AP dibuat
             $table->decimal('nominal_grn', 15, 2);

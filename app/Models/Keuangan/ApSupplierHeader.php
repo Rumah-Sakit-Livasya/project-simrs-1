@@ -2,6 +2,7 @@
 
 namespace App\Models\keuangan;
 
+use App\Models\Keuangan\ApNonGRNDetail;
 use App\Models\Keuangan\ApSupplierDetail;
 use App\Models\User;
 use App\Models\WarehouseSupplier;
@@ -27,29 +28,8 @@ class ApSupplierHeader extends Model
      *
      * @var array
      */
-    protected $fillable = [
-        'kode_ap',
-        'supplier_id',
-        'no_invoice_supplier',
-        'tanggal_ap',
-        'tanggal_invoice_supplier',
-        'due_date',
-        'tanggal_faktur_pajak',
-        'subtotal',
-        'diskon_final',
-        'ppn_persen',
-        'ppn_nominal',
-        'biaya_lainnya',
-        'grand_total',
-        'notes',
-        'status_pembayaran',
-        'user_entry_id',
-        'ada_kwitansi',
-        'ada_faktur_pajak',
-        'ada_surat_jalan',
-        'ada_salinan_po',
-        'ada_tanda_terima_barang',
-        'ada_berita_acara',
+    protected $guarded = [
+        'id'
     ];
 
     /**
@@ -92,7 +72,7 @@ class ApSupplierHeader extends Model
 
     /**
      * Relasi ke model Detail AP.
-     * Sebuah AP Header memiliki banyak Detail.
+     * Sebuah AP Header memiliki banyak Detail. 
      */
     public function details(): HasMany
     {
@@ -113,5 +93,24 @@ class ApSupplierHeader extends Model
 
             return $detail->penerimaanBarang->purchasable->kode_po ?? 'N/A';
         })->unique()->implode(', ');
+    }
+
+    public function pembayaranDetails()
+    {
+        return $this->hasMany(PembayaranApSupplierDetail::class, 'ap_supplier_header_id');
+    }
+
+    public function nonPoDetails()
+    {
+
+        return $this->hasMany(ApSupplierDetail::class, 'ap_supplier_header_id');
+    }
+
+    /**
+     * Relasi ke detail AP yang tidak berasal dari PO.
+     */
+    public function nonGrnDetails()
+    {
+        return $this->hasMany(ApNonGRNDetail::class, 'ap_supplier_header_id');
     }
 }

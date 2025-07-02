@@ -11,4 +11,9 @@ class GroupChartOfAccount extends Model
 
     protected $table = 'group_chart_of_account';
     protected $guarded = ['id'];
+
+    public function chartOfAccounts()
+    {
+        return $this->hasMany(ChartOfAccount::class, 'group_id');
+    }
 }

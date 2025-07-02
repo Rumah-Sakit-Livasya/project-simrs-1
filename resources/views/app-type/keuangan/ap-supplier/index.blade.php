@@ -275,30 +275,48 @@
                                             <td>{{ \Carbon\Carbon::parse($item->tanggal_ap)->format('d M Y') }}</td>
                                             <td>{{ $item->kode_ap }}</td>
                                             <td>{{ $item->supplier->nama ?? 'N/A' }}</td>
-                                            <td>{{ $item->po_numbers }}</td>
+                                            <td>
+                                                @php
+                                                    // Menggunakan Laravel Collection untuk mengolah data relasi secara efisien
+                                                    $po_numbers = $item->details
+                                                        ->map(function ($detail) {
+                                                            // Mengambil 'kode_po' dari relasi bertingkat
+                                                            return optional(
+                                                                optional($detail->penerimaanBarang)->po,
+                                                            )->kode_po;
+                                                        })
+                                                        ->filter() // Menghapus nilai null jika ada relasi yang putus
+                                                        ->unique() // Hanya menampilkan nomor PO yang unik
+                                                        ->implode('<br>'); // Menggabungkan beberapa PO dengan baris baru
+                                                @endphp
+
+                                                {{-- Menampilkan hasilnya, atau 'NON' jika kosong --}}
+                                                {!! $po_numbers ?: 'NON PO' !!}
+                                            </td>
+
+
+
                                             <td>{{ $item->no_invoice_supplier }}</td>
                                             <td>{{ \Carbon\Carbon::parse($item->due_date)->format('d M Y') }}</td>
                                             <td class="text-right">{{ number_format($item->grand_total, 2, ',', '.') }}</td>
                                             <td>{{ $item->notes ?? '-' }}</td>
                                             <td>{{ $item->userEntry->name ?? 'N/A' }}</td>
-                                            <td class="text-center">
-                                                <button type="button" 
-                                                class="btn btn-xs btn-icon " 
-                                                title="Print Tukar Faktur" 
-                                                data-toggle="tooltip"
-                                                onclick="openPrintPopup('{{ route('keuangan.ap-supplier.print.invoice', $item->id) }}')">
-                                            <i class='bx bx-printer'></i>
-                                        </button>
-                                                {{-- <a href="#" class="btn btn-xs btn-success" title="Pembayaran" data-toggle="tooltip">
-                                                    <i class="fal fa-check-circle"></i>
-                                                </a> --}}
-                                                <a href="{{ route('keuangan.ap-supplier.show', $item->id) }}" class="btn btn-xs btn-primary" title="Detail" data-toggle="tooltip">
+                                            <td class="text-center  d-flex">
+                                                {{-- Tombol Print (warna kuning) --}}
+                                                <a href="javascript:void(0);" class="btn btn-xs btn-warning me-1"
+                                                    title="Print Tukar Faktur" data-toggle="tooltip"
+                                                    onclick="openPrintPopup('{{ route('keuangan.ap-supplier.print.invoice', $item->id) }}')">
+                                                    <i class="fal fa-print"></i>
+                                                </a>
+
+                                                {{-- Tombol Detail (warna biru) --}}
+                                                <a href="{{ route('keuangan.ap-supplier.show', $item->id) }}"
+                                                    class="btn btn-xs btn-info " style="margin-left:5px;" title="Detail"
+                                                    data-toggle="tooltip">
                                                     <i class="fal fa-eye"></i>
                                                 </a>
-                                                {{-- <a href="#" class="btn btn-xs btn-danger" title="Cancel" data-toggle="tooltip">
-                                                    <i class="fal fa-ban"></i>
-                                                </a> --}}
                                             </td>
+
                                         </tr>
                                     @empty
                                         <tr>
@@ -316,24 +334,7 @@
     </main>
 @endsection
 
-   <!-- Script untuk handle auto print popup -->
-    {{-- @if(session('newly_created_ap_id'))
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            const printUrl = "{{ route('keuangan.ap-supplier.print.invoice', session('newly_created_ap_id')) }}";
-            const popup = window.open(printUrl, 'PrintAPInvoice', 
-                'width=1200,height=800,scrollbars=yes,top=100,left=100');
-            
-            if (!popup) {
-                // Fallback jika popup diblokir
-                window.location.href = printUrl;
-            }
-        }, 1000); // Delay 1 detik setelah halaman load
-    });
-    </script>
-    @endif
-@endsection --}}
+
 
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -344,187 +345,198 @@
     <script src="/js/notifications/toastr/toastr.js"></script>
 
     <script>
-  // Definisikan fungsi openPrintPopup di global scope agar bisa diakses dari onclick
-function openPrintPopup(url) {
-    const popupWidth = 1600;
-    const popupHeight = 1200;
-    const left = (screen.width / 2) - (popupWidth / 2);
-    const top = (screen.height / 2) - (popupHeight / 2);
-    const windowFeatures = `width=${popupWidth},height=${popupHeight},top=${top},left=${left},resizable=yes,scrollbars=yes,status=yes`;
-    
-    const printWindow = window.open(url, 'PrintWindow', windowFeatures);
-    if (window.focus) {
-        printWindow.focus();
-    }
-}
+        // Definisikan fungsi openPrintPopup di global scope agar bisa diakses dari onclick
+        function openPrintPopup(url) {
+            const popupWidth = 1600;
+            const popupHeight = 1200;
+            const left = (screen.width / 2) - (popupWidth / 2);
+            const top = (screen.height / 2) - (popupHeight / 2);
+            const windowFeatures =
+                `width=${popupWidth},height=${popupHeight},top=${top},left=${left},resizable=yes,scrollbars=yes,status=yes`;
 
-$(document).ready(function() {
-    // Inisialisasi plugin dasar
-    $('.select2').select2({
-        placeholder: "Pilih opsi",
-        allowClear: true
-    });
-
-    $('.datepicker').datepicker({
-        format: 'dd-mm-yyyy',
-        autoclose: true,
-        todayHighlight: true,
-        orientation: "bottom left"
-    });
-
-    // Inisialisasi DataTables untuk fitur export, search, dll. TAPI TANPA server-side
-    $('#ap-supplier-table').DataTable({
-        responsive: true,
-        lengthChange: false,
-        dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        buttons: [{
-                extend: 'excelHtml5',
-                className: 'btn-outline-success btn-sm mr-1'
-            },
-            {
-                extend: 'print',
-                className: 'btn-outline-primary btn-sm'
+            const printWindow = window.open(url, 'PrintWindow', windowFeatures);
+            if (window.focus) {
+                printWindow.focus();
             }
-        ]
-    });
+        }
 
-    // =========================================================================
-    // PERUBAHAN BESAR: Logika AJAX untuk Form Pencarian
-    // =========================================================================
-    $('#search-form').on('submit', function(e) {
-        e.preventDefault();
-        $('.loading-overlay').css('display', 'flex'); // Tampilkan loading
-
-        $.ajax({
-            url: "{{ route('keuangan.ap-supplier.index') }}",
-            type: "GET",
-            data: $(this).serialize(), // Kirim semua data form
-            success: function(response) {
-                // Panggil fungsi untuk membangun ulang tabel
-                updateTable(response);
-                $('.loading-overlay').hide(); // Sembunyikan loading
-            },
-            error: function(xhr) {
-                console.error("Error fetching data: ", xhr);
-                toastr.error('Gagal mengambil data dari server.');
-                $('.loading-overlay').hide(); // Sembunyikan loading
-            }
-        });
-    });
-
-    function updateTable(data) {
-        var table = $('#ap-supplier-table').DataTable();
-        table.clear(); // Hapus data lama dari DataTables
-
-        if (data.length === 0) {
-            // Jika tidak ada data, DataTables akan otomatis menampilkan pesan "No data available in table"
-        } else {
-            $.each(data, function(index, item) {
-                // Proses data PO
-                var po_numbers = item.details.map(function(detail) {
-                    return detail.penerimaan_barang && detail.penerimaan_barang
-                        .purchasable ? detail.penerimaan_barang.purchasable.no_po : null;
-                }).filter(Boolean).join('<br>') || '-';
-
-                // Tambah baris baru ke DataTables - UPDATE: Tambahkan nomor urut
-                table.row.add([
-                    index + 1, // Nomor urut
-                    moment(item.tanggal_ap).format('DD MMM YYYY'),
-                    item.kode_ap,
-                    item.supplier ? item.supplier.nama : 'N/A',
-                    po_numbers,
-                    item.no_invoice_supplier,
-                    moment(item.due_date).format('DD MMM YYYY'),
-                    '<div class="text-right">' + new Intl.NumberFormat('id-ID', {
-                        style: 'decimal',
-                        minimumFractionDigits: 2
-                    }).format(item.grand_total) + '</div>',
-                    item.notes || '-',
-                    item.user_entry ? item.user_entry.name : 'N/A',
-                    `<div class="text-center">
-                        <button type="button" 
-                            class="btn btn-xs btn-icon btn-outline-info js-btn-print" 
-                            title="Print Tukar Faktur" 
-                            data-toggle="tooltip"
-                            data-url="/keuangan/ap-supplier/${item.id}/print/invoice">
-                            <i class='bx bx-printer'></i>
-                        </button>
-                        <a href="/keuangan/ap-supplier/${item.id}" class="btn btn-xs btn-primary" title="Detail" data-toggle="tooltip">
-                            <i class="fal fa-eye"></i>
-                        </a>
-                    </div>`
-                ]);
+        $(document).ready(function() {
+            // Inisialisasi plugin dasar
+            $('.select2').select2({
+                placeholder: "Pilih opsi",
+                allowClear: true
             });
-        }
 
-        table.draw(); // Gambar ulang tabel dengan data baru
-        
-        // Inisialisasi tooltip untuk elemen baru
-        $('[data-toggle="tooltip"]').tooltip();
-    }
+            $('.datepicker').datepicker({
+                format: 'dd-mm-yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                orientation: "bottom left"
+            });
 
-    // Event delegation untuk tombol print yang dibuat secara dinamis
-    $('#ap-supplier-table').on('click', '.js-btn-print', function(e) {
-        e.preventDefault();
-        const printUrl = $(this).data('url');
-        
-        if (printUrl) {
-            openPrintPopup(printUrl);
-        } else {
-            console.error('URL untuk print tidak ditemukan pada tombol.');
-            toastr.error('URL print tidak ditemukan.');
-        }
-    });
-
-    // Logika untuk tombol hapus menggunakan event delegation
-    $('#ap-supplier-table').on('click', '.delete-btn', function(e) {
-        e.preventDefault();
-        const deleteUrl = $(this).data('url');
-        const row = $(this).closest('tr');
-        
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Data yang dihapus tidak dapat dikembalikan!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: deleteUrl,
-                    type: 'DELETE',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content')
+            // Inisialisasi DataTables untuk fitur export, search, dll. TAPI TANPA server-side
+            $('#ap-supplier-table').DataTable({
+                responsive: true,
+                lengthChange: false,
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [{
+                        extend: 'excelHtml5',
+                        className: 'btn-outline-success btn-sm mr-1'
                     },
+                    {
+                        extend: 'print',
+                        className: 'btn-outline-primary btn-sm'
+                    }
+                ]
+            });
+
+            // =========================================================================
+            // PERUBAHAN BESAR: Logika AJAX untuk Form Pencarian
+            // =========================================================================
+            $('#search-form').on('submit', function(e) {
+                e.preventDefault();
+                $('.loading-overlay').css('display', 'flex'); // Tampilkan loading
+
+                $.ajax({
+                    url: "{{ route('keuangan.ap-supplier.index') }}",
+                    type: "GET",
+                    data: $(this).serialize(), // Kirim semua data form
                     success: function(response) {
-                        if (response.success) {
-                            toastr.success('Data berhasil dihapus.');
-                            // Refresh tabel dengan trigger search lagi
-                            $('#search-form').trigger('submit');
-                        } else {
-                            toastr.error('Gagal menghapus data.');
-                        }
+                        // Panggil fungsi untuk membangun ulang tabel
+                        updateTable(response);
+                        $('.loading-overlay').hide(); // Sembunyikan loading
                     },
                     error: function(xhr) {
-                        console.error('Error deleting data:', xhr);
-                        toastr.error('Terjadi kesalahan saat menghapus data.');
+                        console.error("Error fetching data: ", xhr);
+                        toastr.error('Gagal mengambil data dari server.');
+                        $('.loading-overlay').hide(); // Sembunyikan loading
                     }
                 });
+            });
+
+            function updateTable(data) {
+                var table = $('#ap-supplier-table').DataTable();
+                table.clear(); // Hapus data lama
+
+                if (data.length === 0) {
+                    // Biarkan kosong, DataTables akan menampilkan pesan default
+                } else {
+                    $.each(data, function(index, item) {
+
+                        // ================================================================
+                        //                     PERBAIKAN UTAMA DI SINI                      
+                        // ================================================================
+                        // Proses data PO dengan rantai objek yang BENAR
+                        var po_numbers = item.details.map(function(detail) {
+                                // Pastikan setiap langkah dalam rantai objek ada sebelum mengaksesnya
+                                if (detail.penerimaan_barang && detail.penerimaan_barang.po) {
+                                    return detail.penerimaan_barang.po.kode_po;
+                                }
+                                return null;
+                            })
+                            .filter(Boolean) // Hapus nilai null
+                            .filter((v, i, a) => a.indexOf(v) === i) // Ambil nilai unik
+                            .join('<br>') || '-'; // Gabungkan atau beri tanda strip
+
+                        // Tambah baris baru ke DataTables
+                        table.row.add([
+                            index + 1,
+                            moment(item.tanggal_ap).format('DD MMM YYYY'),
+                            item.kode_ap,
+                            item.supplier ? item.supplier.nama : 'N/A',
+                            po_numbers, // Gunakan variabel yang sudah diproses dengan benar
+                            item.no_invoice_supplier,
+                            moment(item.due_date).format('DD MMM YYYY'),
+                            '<div class="text-right">' + new Intl.NumberFormat('id-ID', {
+                                style: 'decimal',
+                                minimumFractionDigits: 2
+                            }).format(item.grand_total) + '</div>',
+                            item.notes || '-',
+                            item.user_entry ? item.user_entry.name : 'N/A',
+                            `<div class="text-center">
+                    <button type="button" 
+                        class="btn btn-xs btn-icon btn-outline-info js-btn-print" 
+                        title="Print Tukar Faktur" 
+                        data-toggle="tooltip"
+                        data-url="/keuangan/ap-supplier/${item.id}/print/invoice">
+                        <i class='bx bx-printer'></i>
+                    </button>
+                    <a href="/keuangan/ap-supplier/${item.id}" class="btn btn-xs btn-primary" title="Detail" data-toggle="tooltip">
+                        <i class="fal fa-eye"></i>
+                    </a>
+                </div>`
+                        ]);
+                    });
+                }
+
+                table.draw(); // Gambar ulang tabel dengan data baru
+
+                // Inisialisasi tooltip untuk elemen baru
+                $('[data-toggle="tooltip"]').tooltip();
             }
-        });
-    });
 
-    // Inisialisasi tooltip untuk elemen yang sudah ada saat halaman dimuat
-    $('[data-toggle="tooltip"]').tooltip();
+            // Event delegation untuk tombol print yang dibuat secara dinamis
+            $('#ap-supplier-table').on('click', '.js-btn-print', function(e) {
+                e.preventDefault();
+                const printUrl = $(this).data('url');
 
-    // Loading overlay styling
-    if ($('.loading-overlay').length === 0) {
-        $('body').append(`
+                if (printUrl) {
+                    openPrintPopup(printUrl);
+                } else {
+                    console.error('URL untuk print tidak ditemukan pada tombol.');
+                    toastr.error('URL print tidak ditemukan.');
+                }
+            });
+
+            // Logika untuk tombol hapus menggunakan event delegation
+            $('#ap-supplier-table').on('click', '.delete-btn', function(e) {
+                e.preventDefault();
+                const deleteUrl = $(this).data('url');
+                const row = $(this).closest('tr');
+
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: deleteUrl,
+                            type: 'DELETE',
+                            data: {
+                                _token: $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    toastr.success('Data berhasil dihapus.');
+                                    // Refresh tabel dengan trigger search lagi
+                                    $('#search-form').trigger('submit');
+                                } else {
+                                    toastr.error('Gagal menghapus data.');
+                                }
+                            },
+                            error: function(xhr) {
+                                console.error('Error deleting data:', xhr);
+                                toastr.error('Terjadi kesalahan saat menghapus data.');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Inisialisasi tooltip untuk elemen yang sudah ada saat halaman dimuat
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // Loading overlay styling
+            if ($('.loading-overlay').length === 0) {
+                $('body').append(`
             <div class="loading-overlay" style="
                 display: none;
                 position: fixed;
@@ -547,11 +559,11 @@ $(document).ready(function() {
                 </div>
             </div>
         `);
-    }
+            }
 
-    
 
-    
-});
+
+
+        });
     </script>
 @endsection

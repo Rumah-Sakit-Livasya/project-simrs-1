@@ -171,68 +171,56 @@
                         <div class="panel-content">
                             <form action="{{ route('keuangan.konfirmasi-asuransi.index') }}" method="get">
                                 @csrf
-                                <div class="row">
-                                    <div class="col-xl-6">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Periode Awal</label>
-                                            <div class="col-xl-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker"
-                                                        name="tanggal_awal" placeholder="Pilih tanggal awal"
-                                                        value="{{ request('tanggal_awal') ?? '' }}" autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl">
-                                                            <i class="fal fa-calendar"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Penjamin</label>
-                                            <div class="col-xl-8">
-                                                <select class="form-control select2 w-100" id="penjamin_id"
-                                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                    name="penjamin_id">
-                                                    <option value="">Semua</option>
-                                                    @foreach ($penjamins as $penjamin)
-                                                        <option value="{{ $penjamin->id }}"
-                                                            {{ request('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
-                                                            {{ $penjamin->nama_perusahaan }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
+
+
+
+                                <div class="row mb-3">
+                                    <!-- Tanggal Periode (Dari - Sampai) -->
+                                    <div class="col-md-6 mb-3">
+                                        <label>Periode Awal</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" name="tanggal_awal"
+                                                value="{{ request('tanggal_awal') }}">
+                                            <div class="input-group-append"><span class="input-group-text fs-sm"><i
+                                                        class="fal fa-calendar"></i></span></div>
                                         </div>
                                     </div>
 
-                                    <div class="col-xl-6">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Periode Akhir</label>
-                                            <div class="col-xl-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker"
-                                                        name="tanggal_akhir" placeholder="Pilih tanggal akhir"
-                                                        value="{{ request('tanggal_akhir') ?? '' }}" autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl">
-                                                            <i class="fal fa-calendar"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">No. Invoice</label>
-                                            <div class="col-xl-8">
-                                                <input type="text" class="form-control" id="invoice"
-                                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                    name="invoice" value="{{ request('invoice') }}">
-                                            </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Periode Akhir</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" name="tanggal_akhir"
+                                                value="{{ request('tanggal_akhir') }}">
+                                            <div class="input-group-append"><span class="input-group-text fs-sm"><i
+                                                        class="fal fa-calendar"></i></span></div>
                                         </div>
                                     </div>
+
+
+                                    <div class="col-md-6 mt-3">
+                                        <label>No. Invoice</label>
+                                        <input type="text" class="form-control" id="invoice" name="invoice"
+                                            placeholder="Masukkan No.invoice" value="{{ request('invoice') }}">
+                                    </div>
+
+                                    <div class="col-md-6 mt-3">
+                                        <label>Penjamin</label>
+                                        <select class="form-control select2" id="penjamin_id" name="penjamin_id" required>
+                                            <option value="">Pilih Penjamin</option>
+                                            @foreach ($penjamins as $penjamin)
+                                                <option value="{{ $penjamin->id }}"
+                                                    {{ request('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
+                                                    {{ $penjamin->nama_perusahaan }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <!-- Status Tagihan -->
+
                                 </div>
+
+
+
 
                                 <div class="row justify-content-end mt-3">
                                     <div class="col-auto">

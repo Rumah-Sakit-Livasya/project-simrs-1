@@ -392,6 +392,17 @@ class JasaDokterController extends Controller
     // Method untuk export Excel (jika menggunakan Maatwebsite\Excel)
     public function exportExcel(Request $request)
     {
+        // Validasi input
+        $request->validate([
+            'tanggal_awal' => 'nullable|date',
+            'tanggal_akhir' => 'nullable|date|after_or_equal:tanggal_awal',
+            'dokter_ids' => 'nullable|array', // Array dokter yang dipilih
+            'dokter_ids.*' => 'integer|exists:doctors,id',
+            'tipe_registrasi' => 'nullable|string',
+            'tagihan_pasien' => 'nullable|in:lunas,belum-lunas',
+            'status_ap' => 'nullable|in:draft,final',
+        ]);
+
         // Query utama dimulai dari JasaDokter, sama seperti di method index()
         $query = JasaDokter::query()
             ->whereHas('tagihanPasien.bilinganSatu', function ($q) {
@@ -411,19 +422,34 @@ class JasaDokterController extends Controller
                 'dokter.employee', // Dokter AP (yang ada di tabel jasa_dokter)
             ]);
 
-        // --- Menerapkan Filter yang Sama Seperti di Method Index ---
-
+        // --- FILTER PERIODE TANGGAL (WAJIB) ---
         // Filter tanggal dari bilingan (created_at pada tabel bilingan melalui tagihanPasien)
         if ($request->filled('tanggal_awal')) {
             $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($request) {
                 $q->whereDate('created_at', '>=', $request->tanggal_awal);
             });
         }
+
         if ($request->filled('tanggal_akhir')) {
             $query->whereHas('tagihanPasien.bilinganSatu', function ($q) use ($request) {
                 $q->whereDate('created_at', '<=', $request->tanggal_akhir);
             });
         }
+
+        // --- FILTER DOKTER SPESIFIK (BARU) ---
+        // Filter berdasarkan dokter yang dipilih (bisa multiple)
+        if ($request->filled('dokter_ids') && is_array($request->dokter_ids)) {
+            $query->whereIn('dokter_id', $request->dokter_ids);
+        }
+
+        // Atau jika ingin filter berdasarkan dokter registrasi
+        if ($request->filled('dokter_registrasi_ids') && is_array($request->dokter_registrasi_ids)) {
+            $query->whereHas('tagihanPasien.registration', function ($q) use ($request) {
+                $q->whereIn('doctor_id', $request->dokter_registrasi_ids);
+            });
+        }
+
+        // --- Filter Lainnya (Opsional) ---
 
         // Filter tipe registrasi (melalui tagihanPasien)
         if ($request->filled('tipe_registrasi')) {
@@ -454,12 +480,9 @@ class JasaDokterController extends Controller
             } elseif ($request->status_ap === 'final') {
                 $query->where('status', 'final');
             }
-            // Jika ingin 'Belum Ada AP', maka querynya akan berbeda,
-            // kita perlu query TagihanPasien yang `doesntHave('jasaDokter')`.
-            // Namun, karena query utama dari JasaDokter, ini tidak relevan di sini.
         }
 
-        // Filter dokter berdasarkan registrasi (melalui tagihanPasien)
+        // Filter dokter tunggal (untuk backward compatibility)
         if ($request->filled('dokter_id')) {
             $query->whereHas('tagihanPasien.registration', function ($q) use ($request) {
                 $q->where('doctor_id', $request->dokter_id);
@@ -469,14 +492,40 @@ class JasaDokterController extends Controller
         // Mengambil data JasaDokter yang sudah difilter
         $jasaDokterItems = $query->get();
 
-        // Lakukan pengurutan di collection jika kompleks, atau gunakan join untuk order by di query DB
-        // Di sini kita sort berdasarkan tanggal bill dari relasi, sama seperti di index
+        // Validasi jika tidak ada data
+        if ($jasaDokterItems->isEmpty()) {
+            return back()->with('warning', 'Tidak ada data untuk periode dan filter yang dipilih.');
+        }
+
+        // Lakukan pengurutan di collection
         $jasaDokterItems = $jasaDokterItems->sortByDesc(function ($item) {
             return optional($item->tagihanPasien?->bilinganSatu)->created_at;
         });
 
-        // Kirim koleksi JasaDokter ke class export
-        return Excel::download(new JasaDokterExport($jasaDokterItems), 'laporan_ap_dokter_' . now()->format('Ymd_His') . '.xlsx');
+        // Generate nama file dengan informasi filter
+        $filename = 'laporan_ap_dokter';
+
+        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
+            $filename .= '_' . date('Ymd', strtotime($request->tanggal_awal)) .
+                '_' . date('Ymd', strtotime($request->tanggal_akhir));
+        }
+
+        if ($request->filled('dokter_ids') && count($request->dokter_ids) == 1) {
+            // Jika hanya satu dokter dipilih, tambahkan nama dokter ke filename
+            $dokter = doctor::find($request->dokter_ids[0]);
+            if ($dokter && $dokter->employee) {
+                $dokterName = str_replace(' ', '_', $dokter->employee->fullname);
+                $filename .= '_' . $dokterName;
+            }
+        }
+
+        $filename .= '_' . now()->format('Ymd_His') . '.xlsx';
+
+        // Kirim koleksi JasaDokter ke class export dengan informasi filter
+        return Excel::download(
+            new JasaDokterExport($jasaDokterItems, $request->all()),
+            $filename
+        );
     }
     // Tambahkan method baru untuk get data modal
 

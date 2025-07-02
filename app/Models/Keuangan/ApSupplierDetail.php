@@ -6,6 +6,7 @@ use App\Models\Keuangan\PenerimaanBarangHeader;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class ApSupplierDetail extends Model
 {
@@ -23,10 +24,8 @@ class ApSupplierDetail extends Model
      *
      * @var array
      */
-    protected $fillable = [
-        'ap_supplier_header_id',
-        'penerimaan_barang_header_id',
-        'nominal_grn',
+    protected $guarded = [
+        'id',
     ];
 
     // --- RELASI ELOQUENT ---
@@ -40,12 +39,8 @@ class ApSupplierDetail extends Model
         return $this->belongsTo(ApSupplierHeader::class, 'ap_supplier_header_id');
     }
 
-    /**
-     * Relasi ke model Penerimaan Barang (GRN).
-     * Sebuah Detail AP mengacu pada satu GRN.
-     */
-    public function penerimaanBarang(): BelongsTo
+    public function penerimaanBarang()
     {
-        return $this->belongsTo(PenerimaanBarangHeader::class, 'penerimaan_barang_header_id');
+        return $this->morphTo();
     }
 }

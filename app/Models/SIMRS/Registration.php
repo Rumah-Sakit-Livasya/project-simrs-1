@@ -42,7 +42,6 @@ class Registration extends Model
         return $this->belongsTo(KelasRawat::class);
     }
 
-    // Define the relationship to Bilingan
     public function bilingan()
     {
         return $this->hasOne(Bilingan::class, 'registration_id');

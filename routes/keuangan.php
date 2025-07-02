@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\keuangan\APNonGRController;
+use App\Http\Controllers\Keuangan\APNonGRNController;
 use App\Http\Controllers\keuangan\APSupplierController;
 use App\Http\Controllers\keuangan\JasaDokterController;
 use App\Http\Controllers\Keuangan\BankController;
@@ -16,8 +16,12 @@ use App\Http\Controllers\Keuangan\LPembayaranAsuransiController;
 use App\Http\Controllers\keuangan\PembayaranAPSupplierController;
 use App\Http\Controllers\Keuangan\PembayaranAsuransiController;
 use App\Http\Controllers\Keuangan\PembayaranJasaDokterController;
+use App\Http\Controllers\keuangan\PencairanController;
+use App\Http\Controllers\keuangan\PengajuanController;
+use App\Http\Controllers\Keuangan\PertanggungJawabanController;
 use App\Http\Controllers\keuangan\ReportAPDokterController;
 use App\Http\Controllers\keuangan\ReportAPSupplierController;
+use App\Models\keuangan\Pencairan;
 use Illuminate\Support\Facades\Route;
 
 
@@ -240,6 +244,10 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name('keuangan.pembayaran-jasa-dokter.create');
             Route::post('/store', [PembayaranJasaDokterController::class, 'store'])
                 ->name('keuangan.pembayaran-jasa-dokter.store');
+            // routes/web.php
+
+            Route::get('/pilih-invoice', [PembayaranAPSupplierController::class, 'pilihInvoice'])
+                ->name('keuangan.pembayaran-ap-supplier.pilihInvoice');
 
             // Route::get('/edit/{id}', [JasaDokterController::class, 'edit'])
             //     ->name('keuangan.jasa-dokter.edit');
@@ -255,6 +263,85 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/jasa-dokter-belum-dibayarkan', [ReportAPDokterController::class, 'indexBelumDibayarkan'])
                 ->name('keuangan.report-ap-dokter.belum-dibayarkan');
         });
+
+
+        Route::prefix('cash-advance')->group(function () {
+            // Pengajuan routes
+            Route::get('/pengajuan', [PengajuanController::class, 'index'])
+                ->middleware('can:view cash advance pengajuan')
+                ->name('keuangan.cash-advance.pengajuan');
+
+            Route::get('/create', [PengajuanController::class, 'Pengajuancreate'])
+                ->name('keuangan.cash-advance.pengajuan.create');
+
+            Route::get('/proses/{pengajuan}', [PengajuanController::class, 'proses'])
+                ->name('keuangan.cash-advance.pengajuan.proses');
+
+            Route::post('/{pengajuan}/reject', [PengajuanController::class, 'reject'])
+                ->name('keuangan.cash-advance.pengajuan.reject');
+
+            Route::delete('/{pengajuan}', [PengajuanController::class, 'destroy'])
+                ->name('keuangan.cash-advance.pengajuan.destroy');
+
+            Route::post('/store', [PengajuanController::class, 'store'])
+                ->name('keuangan.cash-advance.pengajuan.store');
+
+            Route::post('/approve-bulk', [PengajuanController::class, 'approveBulk'])
+                ->name('keuangan.cash-advance.pengajuan.approveBulk');
+
+            // Pencairan routes
+            Route::get('/pencairan', [PencairanController::class, 'index'])
+                ->middleware('can:view cash advance pencairan')
+                ->name('keuangan.cash-advance.pencairan');
+
+            Route::get('/Pencairancreate', [PencairanController::class, 'Pencairancreate'])
+                ->name('keuangan.cash-advance.pencairan.pencairancreate');
+
+            // ✅ Ubah POST route untuk pencairan agar unik
+            Route::post('/pencairan/store', [PencairanController::class, 'store'])
+                ->name('keuangan.cash-advance.pencairan.store');
+
+            Route::get('/data-pengajuan-popup', [PencairanController::class, 'dataPengajuanPopup'])
+                ->name('keuangan.cash-advance.pencairan.dataPengajuanPopup');
+
+            Route::get('/get-pengajuan-data/{id}', [PencairanController::class, 'getPengajuanData'])
+                ->name('keuangan.cash-advance.pencairan.getPengajuanData');
+
+            Route::get('/{pencairan}/print', [PencairanController::class, 'print'])
+                ->name('keuangan.cash-advance.pencairan.print');
+
+            // Pertanggungjawaban routes
+            Route::get('/pertanggung-jawaban', [PertanggungJawabanController::class, 'index'])
+                ->middleware('can:view cash advance pertanggung jawaban')
+                ->name('keuangan.cash-advance.pertanggung-jawaban');
+
+            Route::get('/pjawabancreate', [PertanggungJawabanController::class, 'pjawabanCreate'])
+                ->name('keuangan.cash-advance.pertanggung-jawaban.pjawabancreta');
+
+            // ✅ Ubah POST route untuk pertanggung jawaban agar unik
+            Route::post('/pertanggung-jawaban/store', [PertanggungJawabanController::class, 'store'])
+                ->name('keuangan.cash-advance.pertanggung-jawaban.store');
+
+            // Pop-up route
+            Route::get('/data-pencairan-popup', [PertanggungJawabanController::class, 'dataPencairanPopup'])
+                ->name('keuangan.cash-advance.pertanggung-jawaban.dataPencairanPopup');
+
+
+            Route::prefix('laporan')->group(function () {
+                // Laporan Pertanggung Jawaban
+                Route::get('/umur-pertanggung-jawaban', [PertanggungJawabanController::class, 'laporanPj'])
+                    ->middleware('can:view cash advance laporan umur pertanggung jawaban')
+                    ->name('keuangan.cash-advance.laporan.laporan-pj');
+                Route::get('/laporan-detail', [PertanggungJawabanController::class, 'laporanDetail'])
+                    ->middleware('can:view cash advance laporan laporan detail')
+                    ->name('keuangan.cash-advance.laporan.laporan-detail');
+
+                // Laporan Detail
+
+            });
+        });
+
+
 
         route::prefix('ap-supplier')->middleware(['can:view account payable ap-supplier'])->group(function () {
             Route::get('/', [APSupplierController::class, 'index'])
@@ -296,15 +383,27 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name('keuangan.ap-supplier.cancel');
 
             Route::get('/{apSupplier}/print', [APSupplierController::class, 'print'])->name('keuangan.ap-supplier.print.invoice');
+            Route::get('/ap-supplier/pilih-retur', [APSupplierController::class, 'pilihRetur'])->name('keuangan.ap-supplier.pilihRetur');
         });
 
         route::prefix('ap-non-gr')->middleware(['can:view account payable ap-non-gr'])->group(function () {
-            Route::get('/', [APNonGRController::class, 'index'])
+            Route::get('/', [APNonGRNController::class, 'index'])
                 ->name('keuangan.ap-non-gr.index');
-            Route::get('/edit', [APNonGRController::class, 'edit'])
+            Route::get('/edit', [APNonGRNController::class, 'edit'])
                 ->name('keuangan.ap-non-gr.edit');
-            Route::post('/store', [APNonGRController::class, 'store'])
+            Route::get('/create', [APNonGRNController::class, 'create'])
+                ->name('keuangan.ap-non-gr.create');
+            Route::post('/store', [APNonGRNController::class, 'store'])
                 ->name('keuangan.ap-non-gr.store');
+
+            Route::get('/{apSupplier}/print', [APNonGRNController::class, 'print'])->name('keuangan.ap-non-gr.print.invoice');
+
+            Route::post('ap-non-gr/search', [APNonGRNController::class, 'search'])->name('keuangan.ap-non-gr.search');
+
+            Route::get('/{id}', [APNonGRNController::class, 'show'])->name('keuangan.ap-non-gr.show');
+            Route::get('/{id}/edit', [APNonGRNController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [APNonGRNController::class, 'update'])->name('update');
+            Route::delete('/{id}', [APNonGRNController::class, 'destroy'])->name('keuangan.ap-non-gr.destroy');
         });
 
         route::prefix('pembayaran-ap-supplier')->middleware(['can:view account payable pembayaran-ap-supplier'])->group(function () {
@@ -316,8 +415,13 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name('keuangan.pembayaran-ap-supplier.details');
             Route::post('/store', [PembayaranAPSupplierController::class, 'store'])
                 ->name('keuangan.pembayaran-ap-supplier.store');
-            Route::post('/show', [PembayaranAPSupplierController::class, 'show'])
-                ->name('keuangan.pembayaran-ap-supplier.show');
+            Route::post('/get-invoice', [PembayaranAPSupplierController::class, 'getInvoice     '])
+                ->name('keuangan.pembayaran-ap-supplier.get-invoice');
+            Route::delete('/{payment}', [PembayaranAPSupplierController::class, 'destroy'])
+                ->name('keuangan.pembayaran-ap-supplier.destroy');
+
+            Route::get('/{payment}/show', [PembayaranAPSupplierController::class, 'show'])->name('keuangan.pembayaran-ap-supplier.show');
+            Route::put('/{payment}', [PembayaranAPSupplierController::class, 'update'])->name('keuangan.pembayaran-ap-supplier.update');
         });
 
         route::prefix('report-ap-supplier/')->middleware(['can:view account receivable konfirmasi asuransi'])->group(function () {

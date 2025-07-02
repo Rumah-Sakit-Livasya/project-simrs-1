@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 use App\Console\Commands\NotifyContractExpiry;
+use App\Models\WarehousePenerimaanBarangFarmasi;
+use App\Models\WarehousePenerimaanBarangNonFarmasi;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;
@@ -48,5 +51,10 @@ class AppServiceProvider extends ServiceProvider
 
         // // Share session to all views
         // View::share('appType', session('app_type', 'hr'));
+
+        Relation::morphMap([
+            'penerimaan_farmasi' => WarehousePenerimaanBarangFarmasi::class,
+            'penerimaan_non_farmasi' => WarehousePenerimaanBarangNonFarmasi::class,
+        ]);
     }
 }

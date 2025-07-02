@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Keuangan;
 use App\Http\Controllers\Controller;
 use App\Models\Keuangan\InvoiceCounter;
 use App\Models\Keuangan\KonfirmasiAsuransi;
+use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\Patient;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\View;
 use PDF;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class KonfirmasiAsuransiController extends Controller
 {
@@ -98,51 +100,76 @@ class KonfirmasiAsuransiController extends Controller
 
     public function create(Request $request)
     {
-        // Tentukan tanggal default hari ini jika tidak ada input
-        $tanggalAwal = $request->input('tanggal_awal');
-        $tanggalAkhir = $request->input('tanggal_akhir');
+        // 1. Ambil data master untuk dropdown filter
+        $penjamins = Penjamin::all();
 
-        if (!$tanggalAwal || !$tanggalAkhir) {
-            $tanggalAwal = now()->format('Y-m-d');
-            $tanggalAkhir = now()->format('Y-m-d');
-        }
-
-        // Query dasar
-        $query = KonfirmasiAsuransi::with(['patient', 'penjamin', 'registration.patient'])
-            ->whereBetween(DB::raw('DATE(created_at)'), [$tanggalAwal, $tanggalAkhir])
+        // 2. Buat query builder untuk BILINGAN
+        $queryBuilder = Bilingan::with([
+            'registration.patient',
+            'registration.penjamin'
+        ])
+            ->where('status', 'final') // Kriteria utama: ambil yang sudah final
+            ->where('is_paid', 0)      // dan belum lunas
+            ->whereDoesntHave('konfirmasiAsuransi') // dan belum pernah dibuatkan konfirmasi
+            ->whereHas('registration.penjamin', function ($q) {
+                $q->where('group_penjamin_id', 3); // hanya ambil penjamin yang termasuk grup asuransi
+            })
             ->orderBy('created_at', 'desc');
 
-        // Default filter status jika tidak diisi
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        } else {
-            $query->where('status', 'Belum Di Buat Tagihan');
-        }
 
         if ($request->filled('penjamin_id')) {
-            $query->where('penjamin_id', $request->penjamin_id);
-        }
-
-        if ($request->filled('tagihan_ke')) {
-            $query->where('tagihan_ke', $request->tagihan_ke);
-        }
-
-        if ($request->filled('tipe_pasien')) {
-            $query->whereHas('registration', function ($q) use ($request) {
-                $q->where('tipe_pasien', $request->tipe_pasien);
+            $queryBuilder->whereHas('registration', function ($q) use ($request) {
+                $q->where('penjamin_id', $request->penjamin_id);
             });
         }
 
-        // Return response jika AJAX (filter dinamis)
-        if ($request->ajax()) {
-            return response()->json($query->get());
+        // FILTER: Tagihan Ke (sama dengan penjamin)
+        if ($request->filled('tagihan_ke')) {
+            $queryBuilder->whereHas('registration', function ($q) use ($request) {
+                $q->where('penjamin_id', $request->tagihan_ke);
+            });
         }
 
-        // Return view awal
-        return view('app-type.keuangan.konfirmasi-asuransi.partials.create-konfirmasi-asuransi', [
-            'query' => $query->get(),
-            'penjamins' => Penjamin::all(),
-            'registrations' => Registration::with(['patient', 'penjamin'])->get(),
+        // FILTER: Tanggal (kita filter berdasarkan created_at di bilingan)
+        if ($request->filled('tanggal_awal') || $request->filled('tanggal_akhir')) {
+            $startDate = $request->tanggal_awal ? Carbon::parse($request->tanggal_awal)->startOfDay() : now()->subYears(10);
+            $endDate = $request->tanggal_akhir ? Carbon::parse($request->tanggal_akhir)->endOfDay() : now();
+            $queryBuilder->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        // Filter 'status' ('Belum Dibuat Tagihan') diabaikan karena semua data
+        // bilingan di sini secara definisi adalah "Belum Dibuat Tagihan".
+        // Jika user memilih 'Sudah Dibuat Tagihan', hasilnya akan kosong.
+        if ($request->input('status') == 'Sudah Di Buat Tagihan') {
+            $queryBuilder->whereRaw('1 = 0'); // Trik untuk tidak menghasilkan apa-apa
+        }
+
+        // 4. Eksekusi query
+        $bilinganData = $queryBuilder->get();
+
+        // 5. "Menyamarkan" data Bilingan agar cocok dengan struktur KonfirmasiAsuransi
+        $hasilQuery = $bilinganData->map(function ($bilingan) {
+            // Kita buat objek baru atau array yang meniru struktur KonfirmasiAsuransi
+            return (object) [
+                'id' => $bilingan->id, // PENTING: ID ini adalah ID Bilingan
+                'registration' => $bilingan->registration,
+                'patient' => $bilingan->registration->patient ?? null, // Relasi ini tidak ada di model KonfirmasiAsuransi, tapi view Anda memanggilnya
+                'bill' => $bilingan->id, // Tidak ada kolom 'bill' di bilingan, kita isi dengan ID
+                'jumlah' => (float) str_replace(',', '', $bilingan->wajib_bayar), // Ini adalah wajib_bayar
+                'diskon' => 0, // Bilingan tidak punya kolom diskon, kita set 0
+                'isBilingan' => true, // Penanda bahwa ini data bilingan
+            ];
+        });
+
+        // 6. Bedakan respons antara AJAX dan request biasa
+        if ($request->ajax()) {
+            return response()->json($hasilQuery);
+        }
+
+        // Kirim data ke view
+        return view('app-type.keuangan.konfirmasi-asuransi.partials.create', [
+            'query' => $hasilQuery,
+            'penjamins' => $penjamins
         ]);
     }
 
@@ -248,48 +275,78 @@ class KonfirmasiAsuransiController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
+        // 1. Validasi input lengkap
         $validated = $request->validate([
-            'tanggal' => 'required|date',
-            'penjamin_id' => 'required|exists:penjamins,id',
-            'registration_id' => 'nullable|exists:registrations,id',
-            'invoice' => 'required|string|max:50',
-            'jumlah' => 'required|string',
-            'discount' => 'nullable|string',
-            'jatuh_tempo' => 'nullable|date',
-            'keterangan' => 'nullable|string'
+            'bilingan_ids'   => 'required|array|min:1',
+            'bilingan_ids.*' => 'exists:bilingan,id',
+            'jatuh_tempo'    => 'required|integer|min:1',
+            'keterangan'     => 'nullable|string|max:500',
         ]);
 
-        // Parse the date and add the current time
-        $tanggal = Carbon::parse($validated['tanggal']);
+        $bilinganIds = $validated['bilingan_ids'];
+        $jatuhTempo = (int) $validated['jatuh_tempo'];
 
-        // Clean up monetary values
-        $validated['jumlah'] = str_replace(['.', ','], '', $validated['jumlah']);
-        $validated['discount'] = $validated['discount'] ? str_replace(['.', ','], '', $validated['discount']) : 0;
+        $keterangan = $validated['keterangan'] ?? null;
 
-        // Set the default values
-        $validated['sisa_tagihan'] = $validated['jumlah'];
-        $validated['total_dibayar'] = 0;
-        $validated['is_lunas'] = false;
-        $validated['created_by'] = Auth::id();
+        $berhasil = 0;
+        $gagal = 0;
 
-        // Add the correct datetime format with time included
-        $validated['tanggal'] = $tanggal;
-
+        // 2. Gunakan DB Transaction untuk keamanan data
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
+            foreach ($bilinganIds as $id) {
+                $bilingan = Bilingan::with('registration')->find($id);
 
-            KonfirmasiAsuransi::create($validated);
+                // Keamanan tambahan: lewati jika bilingan tidak valid atau sudah diproses
+                if (
+                    !$bilingan || !$bilingan->registration || !$bilingan->registration->penjamin_id ||
+                    KonfirmasiAsuransi::where('registration_id', $bilingan->registration_id)->exists()
+                ) {
+                    $gagal++;
+                    continue;
+                }
+
+                // 3. Hitung tanggal jatuh tempo
+                $tanggalJatuhTempo = now()->addDays($jatuhTempo)->toDateString();
+
+                // 4. Generate nomor invoice (opsional - sesuaikan dengan kebutuhan)
+                $nomorInvoice = $this->generateInvoiceNumber($bilingan->registration->penjamin_id);
+
+                // 5. Mapping data lengkap dari Bilingan ke Konfirmasi Asuransi
+                KonfirmasiAsuransi::create([
+                    'registration_id'   => $bilingan->registration_id,
+                    'penjamin_id'       => $bilingan->registration->penjamin_id,
+                    'tagihan_ke'        => $bilingan->registration->penjamin_id,
+                    'invoice'           => $nomorInvoice,           // Simpan nomor invoice
+                    'jumlah'            => (float) str_replace(',', '', $bilingan->wajib_bayar),
+                    'diskon'            => 0,
+                    'jatuh_tempo'       => $tanggalJatuhTempo,      // Simpan jatuh tempo
+                    'tanggal'           => now()->toDateString(),
+                    'keterangan'        => $keterangan,            // Simpan keterangan
+                    'status'            => 'Sudah Di Buat Tagihan',
+                    'status_pembayaran' => '-',
+                    'created_by'        => auth()->id(),
+                    'updated_by'        => auth()->id(),
+                ]);
+
+                $berhasil++;
+            }
 
             DB::commit();
 
-            return redirect()->route('keuangan.konfirmasi-asuransi.index')
-                ->with('success', 'Konfirmasi asuransi berhasil ditambahkan');
+            // Mengembalikan respons JSON untuk AJAX
+            return response()->json([
+                'success' => true,
+                'message' => "Berhasil membuat {$berhasil} Konfirmasi Asuransi dengan jatuh tempo {$jatuhTempo} hari. Gagal/Dilewati: {$gagal}."
+            ]);
         } catch (\Exception $e) {
-            DB::rollback();
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error("Gagal store Konfirmasi Asuransi: " . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem saat menyimpan data.'
+            ], 500);
         }
     }
 
