@@ -284,6 +284,76 @@ class PengajuanController extends Controller
         }
     }
 
+    // Tambahkan method ini ke dalam Controller Anda
+
+
+    public function deleteBulk(Request $request)
+    {
+        // ========================================================
+        // TIDAK ADA PARAMETER (Pengajuan $pengajuan) DI SINI
+        // ========================================================
+        try {
+            $ids = $request->input('ids');
+
+            if (!is_array($ids) || empty($ids)) {
+                return response()->json(['message' => 'Tidak ada data yang dipilih.'], 400);
+            }
+
+            // ========================================================
+            // LANGSUNG LAKUKAN QUERY BERDASARKAN ID YANG DITERIMA
+            // ========================================================
+            $pengajuans = Pengajuan::whereIn('id', $ids)->get();
+
+            if ($pengajuans->isEmpty()) {
+                // Jika koleksi kosong, berarti tidak ada ID yang valid di database.
+                // Ini kemungkinan besar adalah sumber dari pesan "No query results".
+                Log::warning('BULK DELETE FAILED (NOT FOUND): Percobaan hapus untuk ID yang tidak ada.', ['ids' => $ids]);
+                return response()->json(['message' => 'Data pengajuan yang dipilih tidak ditemukan di database.'], 404);
+            }
+
+            $cannotDelete = [];
+            $canDeleteIds = [];
+            $user = Auth::user();
+
+            foreach ($pengajuans as $pengajuan) {
+                if (in_array($pengajuan->status, ['approved', 'partial', 'closed'])) {
+                    $cannotDelete[] = $pengajuan->kode_pengajuan;
+                } else {
+                    $canDeleteIds[] = $pengajuan->id;
+                }
+            }
+
+            $deletedCount = 0;
+            if (!empty($canDeleteIds)) {
+                $deletedCount = Pengajuan::whereIn('id', $canDeleteIds)->delete();
+                Log::info('BULK DELETE SUCCESS by User: ' . $user->name, ['deleted_ids' => $canDeleteIds]);
+            }
+
+            if (!empty($cannotDelete)) {
+                Log::warning('BULK DELETE SKIPPED by User: ' . $user->name, ['skipped_codes' => $cannotDelete]);
+            }
+
+            // Logika response JSON (sudah bagus, tidak perlu diubah)
+            if ($deletedCount > 0 && !empty($cannotDelete)) {
+                return response()->json(['message' => "Berhasil menghapus {$deletedCount} pengajuan. Pengajuan dengan kode " . implode(', ', $cannotDelete) . " tidak dapat dihapus karena sudah diproses."], 200);
+            } elseif ($deletedCount > 0) {
+                return response()->json(['message' => "Berhasil menghapus {$deletedCount} pengajuan."], 200);
+            } elseif (!empty($cannotDelete)) {
+                return response()->json(['message' => 'Tidak ada pengajuan yang dapat dihapus. Semua pengajuan yang dipilih sudah diproses.'], 400);
+            } else {
+                return response()->json(['message' => 'Tidak ada pengajuan yang berhasil dihapus (kemungkinan data tidak ditemukan).'], 400);
+            }
+        } catch (\Exception $e) {
+            Log::error('BULK DELETE FAILED (EXCEPTION)', [
+                'error_message' => $e->getMessage(),
+                'user_id' => Auth::id(),
+                'ids_to_delete' => $request->input('ids', []),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['message' => 'Terjadi kesalahan internal pada server.'], 500);
+        }
+    }
+
     private function generateKodePengajuan()
     {
         $prefix = 'ADVA' . date('y') . '-';

@@ -180,43 +180,48 @@ class PertanggungJawabanController extends Controller
 
     public function laporanPj(Request $request)
     {
-
         $users = User::where('is_active', 1)->orderBy('name')->get();
-        $query = Pencairan::with(['pengajuan.pengaju', 'pertanggungjawaban']); // Hanya yang sudah cair
+        $query = Pencairan::with(['pengajuan.pengaju', 'pertanggungjawaban']);
 
         // --- FILTER ---
         if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
             $query->whereBetween('tanggal_pencairan', [$request->tanggal_awal, $request->tanggal_akhir]);
+        } elseif ($request->filled('tanggal_awal')) {
+            $query->whereDate('tanggal_pencairan', '>=', $request->tanggal_awal);
         }
-        if ($request->filled('nama_pengaju')) {
-            $query->whereHas('pengajuan.pengaju', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->nama_pengaju . '%');
+
+        // --- PERBAIKAN FILTER PENGAJU ---
+        // Sesuaikan dengan name="pengaju_id" di view
+        if ($request->filled('pengaju_id')) {
+            $query->whereHas('pengajuan', function ($q) use ($request) {
+                $q->where('pengaju_id', $request->pengaju_id);
             });
         }
 
+        // --- PROSES DATA ---
         $pencairans = $query->get()->map(function ($pencairan) {
-            // Hitung total PJ dan sisa untuk setiap pencairan
             $pencairan->total_telah_dipertanggungjawabkan = $pencairan->pertanggungjawaban->sum('total_pj');
             $pencairan->sisa = $pencairan->nominal_pencairan - $pencairan->total_telah_dipertanggungjawabkan;
-
-            // Hitung umur pencairan dalam hari (dari tanggal pencairan sampai hari ini)
-            $pencairan->umur = Carbon::parse($pencairan->tanggal_pencairan)->diffInDays(Carbon::now());
-
+            $pencairan->umur = Carbon::parse($pencairan->tanggal_pencairan)->diffInDays(now());
             return $pencairan;
         })->filter(function ($pencairan) use ($request) {
-            // Filter berdasarkan sisa dan tipe data
-            if ($request->tipe_data === 'lunas') {
+            // --- PERBAIKAN FILTER TIPE DATA ---
+            // Logika ini sekarang akan berfungsi karena view mengirim 'tipe_data'
+            if ($request->input('tipe_data') === 'lunas') {
                 return $pencairan->sisa <= 0;
             }
             // Defaultnya (atau jika tipe_data 'outstanding'), tampilkan yang masih ada sisa
             return $pencairan->sisa > 0;
         });
 
-        // Kirim data ke view
+        // --- LOGIKA RESPON AJAX ---
+        if ($request->ajax()) {
+            return response()->json(['data' => $pencairans->values()]);
+        }
+
+        // --- RESPON HALAMAN BIASA ---
         return view('app-type.keuangan.cash-advance.pertanggung-jawaban.laporan.laporan-pj', compact('pencairans', 'users'));
     }
-
-
 
     // Tambahkan method ini ke dalam PertanggungJawabanController
 

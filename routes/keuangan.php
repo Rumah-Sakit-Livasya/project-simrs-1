@@ -22,6 +22,7 @@ use App\Http\Controllers\Keuangan\PertanggungJawabanController;
 use App\Http\Controllers\keuangan\ReportAPDokterController;
 use App\Http\Controllers\keuangan\ReportAPSupplierController;
 use App\Models\keuangan\Pencairan;
+use App\Models\Keuangan\Pertanggungjawaban;
 use Illuminate\Support\Facades\Route;
 
 
@@ -288,6 +289,8 @@ Route::group(['middleware' => ['auth']], function () {
 
             Route::post('/approve-bulk', [PengajuanController::class, 'approveBulk'])
                 ->name('keuangan.cash-advance.pengajuan.approveBulk');
+            Route::post('/bulk-delete', [PengajuanController::class, 'deleteBulk'])
+                ->name('keuangan.cash-advance.pengajuan.deleteBulk');
 
             // Pencairan routes
             Route::get('/pencairan', [PencairanController::class, 'index'])
@@ -335,6 +338,13 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/laporan-detail', [PertanggungJawabanController::class, 'laporanDetail'])
                     ->middleware('can:view cash advance laporan laporan detail')
                     ->name('keuangan.cash-advance.laporan.laporan-detail');
+                Route::get('/laporan-detail', [PertanggungJawabanController::class, 'laporanDetail'])
+                    ->middleware('can:view cash advance laporan laporan detail')
+                    ->name('keuangan.cash-advance.laporan.laporan-detail');
+                Route::get('/laporan-pj/export', [PertanggungJawabanController::class, 'exportLaporanPj'])->name('keuangan.cash-advance.laporan.laporan-pj.export');
+
+                // Tambahkan route ini ke dalam file routes Anda (biasanya web.php)
+
 
                 // Laporan Detail
 

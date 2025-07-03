@@ -327,11 +327,10 @@
                                         <th>Kode PJ</th>
                                         <th>Kode Pencairan</th>
                                         <th>Nama Pengaju</th>
-                                        <th class="text-right">Total PJ</th>
-                                        <th class="text-right">Selisih</th>
+                                        <th>Total PJ</th>
+                                        <th>Sisa PJ</th>
                                         <th class="text-right">Reimburse</th>
                                         <th>User Entry</th>
-                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -360,10 +359,7 @@
                                                 {{ $pj->reimburse ?? '0' }}
                                             </td>
                                             <td>{{ optional($pj->userEntry)->name }}</td>
-                                            <td class="text-center">
-                                                <a href="#" class="btn btn-xs btn-primary"><i
-                                                        class="fal fa-eye"></i></a>
-                                            </td>
+
                                         </tr>
                                     @empty
                                         <tr>

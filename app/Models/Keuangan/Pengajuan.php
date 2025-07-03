@@ -3,7 +3,7 @@
 namespace App\Models\Keuangan;
 
 use App\Models\User;
-use App\Models\Keuangan\pencairan;
+use App\Models\Keuangan\Pencairan;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;

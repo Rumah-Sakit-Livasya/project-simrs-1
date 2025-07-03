@@ -175,10 +175,13 @@
                             </table>
 
                             <div class="mt-3">
-
-                                <button class="btn btn-success" id="btn-approve" disabled>
+                                <button class="btn btn-success mr-2" id="btn-approve" disabled>
                                     <i class="fal fa-check-circle mr-1"></i>
                                     Approve Pilihan
+                                </button>
+                                <button class="btn btn-danger" id="btn-delete" disabled>
+                                    <i class="fal fa-trash-alt mr-1"></i>
+                                    Hapus Pilihan
                                 </button>
                             </div>
                         </div>
@@ -233,6 +236,47 @@
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                                 style="display: none;"></span>
                             Setujui
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal Konfirmasi Hapus --}}
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Penghapusan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form id="deleteForm">
+                    <div class="modal-body">
+                        <div id="delete-modal-alert" class="alert alert-danger" style="display: none;"></div>
+                        <input type="hidden" name="ids" id="delete_ids">
+                        <p class="text-center">
+                            <i class="fal fa-exclamation-triangle text-warning" style="font-size: 48px;"></i>
+                        </p>
+                        <p class="text-center">
+                            Apakah Anda yakin ingin menghapus <strong><span id="delete-count">0</span></strong> pengajuan
+                            yang dipilih?
+                        </p>
+                        <div class="alert alert-warning">
+                            <i class="fal fa-info-circle mr-1"></i>
+                            <strong>Perhatian:</strong> Pengajuan yang sudah disetujui tidak dapat dihapus.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger" id="btn-submit-delete">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+                                style="display: none;"></span>
+                            <i class="fal fa-trash-alt mr-1"></i>
+                            Hapus
                         </button>
                     </div>
                 </form>
@@ -361,6 +405,7 @@
                 var checkedCount = checkedRows.length;
 
                 $('#btn-approve').prop('disabled', checkedCount === 0);
+                $('#btn-delete').prop('disabled', checkedCount === 0);
 
                 if (checkedCount === 1) {
                     var pengajuanId = checkedRows.val();
@@ -448,6 +493,67 @@
                 $('#approvalForm')[0].reset();
                 $('#modal-alert').hide();
                 $('.select2-modal').trigger('change');
+            });
+
+            // 4. LOGIKA UNTUK MODAL DELETE
+            $('#btn-delete').on('click', function() {
+                var ids = [];
+                $('.row-checkbox:checked').each(function() {
+                    ids.push($(this).val());
+                });
+
+                if (ids.length > 0) {
+                    $('#delete_ids').val(JSON.stringify(ids));
+                    $('#delete-count').text(ids.length);
+                    $('#deleteModal').modal('show');
+                } else {
+                    toastr.warning('Silakan pilih data yang akan dihapus terlebih dahulu.');
+                }
+            });
+
+            $('#deleteForm').on('submit', function(e) {
+                e.preventDefault();
+                var btn = $('#btn-submit-delete');
+                var spinner = btn.find('.spinner-border');
+                btn.prop('disabled', true);
+                spinner.show();
+                $('#delete-modal-alert').hide();
+
+                $.ajax({
+                    url: "{{ route('keuangan.cash-advance.pengajuan.deleteBulk') }}",
+                    method: 'POST',
+                    data: {
+                        ids: JSON.parse($('#delete_ids').val()),
+                        _method: 'DELETE'
+                    },
+                    success: function(response) {
+                        $('#deleteModal').modal('hide');
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        var errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr
+                            .responseJSON.message : 'Terjadi kesalahan. Silakan coba lagi.';
+                        $('#delete-modal-alert').text(errorMsg).show();
+                    },
+                    complete: function() {
+                        btn.prop('disabled', false);
+                        spinner.hide();
+                    }
+                });
+            });
+
+            $('#deleteModal').on('hidden.bs.modal', function() {
+                $('#deleteForm')[0].reset();
+                $('#delete-modal-alert').hide();
             });
         });
     </script>

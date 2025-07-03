@@ -273,8 +273,13 @@
                                 <div class="form-row justify-content-end">
                                     <button type="submit" class="btn btn-sm btn-primary mr-2"><i
                                             class="fal fa-search mr-1"></i> Cari</button>
-                                    <a href="{{ route('keuangan.cash-advance.laporan.laporan-pj') }}"
-                                        class="btn btn-sm btn-secondary mr-2"><i class="fal fa-undo mr-1"></i> Reset</a>
+
+                                    <button type="button" id="btn-reset" class="btn btn-sm btn-secondary mr-2"><i
+                                            class="fal fa-undo mr-1"></i> Reset</button>
+
+                                    <button type="button" class="btn btn-sm btn-success" id="btn-export">
+                                        <i class="fal fa-file-excel mr-2"></i> Export Excel
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -361,18 +366,136 @@
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script>
         $(document).ready(function() {
-            $('.select2').select2();
+            // 1. INISIALISASI PLUGIN
+            $('.select2').select2({
+                placeholder: "Pilih Opsi",
+                allowClear: true
+            });
             $('.datepicker').datepicker({
                 format: 'yyyy-mm-dd',
-                autoclose: true
+                autoclose: true,
+                todayHighlight: true
             });
-            $('#laporan-pj-table').DataTable({
+
+            var table = $('#laporan-pj-table').DataTable({
                 responsive: true,
                 pageLength: 25,
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [ /* Tombol Export */ ]
+                buttons: []
+            });
+
+            // Simpan data awal yang dirender oleh PHP
+            var initialData = {!! json_encode($pencairans->values()) !!};
+
+            // 2. FUNGSI UNTUK MENGGAMBAR ULANG TABEL
+            function redrawTable(data) {
+                table.clear();
+                if (data && data.length > 0) {
+                    $.each(data, function(index, item) {
+                        let aging_7 = item.umur <= 7 ? new Intl.NumberFormat('id-ID').format(item.sisa) :
+                            '-';
+                        let aging_14 = (item.umur >= 8 && item.umur <= 14) ? new Intl.NumberFormat('id-ID')
+                            .format(item.sisa) : '-';
+                        let aging_15 = item.umur >= 15 ? new Intl.NumberFormat('id-ID').format(item.sisa) :
+                            '-';
+
+                        table.row.add([
+                            index + 1,
+                            item.pengajuan?.pengaju?.name || 'N/A',
+                            item.pengajuan?.keterangan || '-',
+                            item.kode_pencairan,
+                            new Date(item.tanggal_pencairan).toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                            }),
+                            new Intl.NumberFormat('id-ID').format(item.nominal_pencairan),
+                            new Intl.NumberFormat('id-ID').format(item
+                                .total_telah_dipertanggungjawabkan),
+                            aging_7,
+                            aging_14,
+                            aging_15
+                        ]).draw(false);
+                    });
+                } else {
+                    table.draw(); // Gambar tabel kosong dengan pesan "No data available"
+                }
+            }
+
+            // Gambar tabel dengan data awal saat halaman dimuat
+            redrawTable(initialData);
+
+            // 3. EVENT HANDLER UNTUK TOMBOL-TOMBOL
+
+            // A. Event handler untuk form submit (bukan ID yang salah)
+            $('form').on('submit', function(e) {
+                e.preventDefault();
+                $('.loading-overlay').css('display', 'flex');
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: "GET",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        redrawTable(response.data);
+                        $('.loading-overlay').hide();
+                    },
+                    error: function(xhr) {
+                        console.error("Error:", xhr);
+                        alert('Gagal mengambil data.');
+                        $('.loading-overlay').hide();
+                    }
+                });
+            });
+
+            // B. TOMBOL RESET - DIPERBAIKI
+            $('#btn-reset').on('click', function(e) {
+                e.preventDefault(); // Mencegah behavior default
+
+                // Reset semua input dalam form
+                $('form')[0].reset();
+
+                // Reset select2 secara khusus
+                $('.select2').val(null).trigger('change');
+
+                // Reset datepicker
+                $('.datepicker').datepicker('setDate', null);
+
+                // Clear input values secara manual jika perlu
+                $('#tanggal_awal').val('');
+                $('#pengaju_id').val('').trigger('change');
+
+                // Tampilkan loading
+                $('.loading-overlay').css('display', 'flex');
+
+                // Lakukan AJAX request untuk memuat ulang data tanpa filter
+                $.ajax({
+                    url: "{{ route('keuangan.cash-advance.laporan.laporan-pj') }}",
+                    type: "GET",
+                    data: {}, // Data kosong = tanpa filter
+                    success: function(response) {
+                        redrawTable(response.data);
+                        $('.loading-overlay').hide();
+
+                        // Optional: Tampilkan pesan sukses
+                        console.log('Data berhasil di-reset');
+                    },
+                    error: function(xhr) {
+                        console.error("Error:", xhr);
+                        alert('Gagal mereset data.');
+                        $('.loading-overlay').hide();
+                    }
+                });
+            });
+
+            // C. Tombol Export
+            $('#btn-export').on('click', function() {
+                var formData = $('form').serialize();
+                var exportUrl = "{{ route('keuangan.cash-advance.laporan.laporan-pj.export') }}?" +
+                    formData;
+                window.location.href = exportUrl;
             });
         });
     </script>

@@ -289,6 +289,10 @@
                                                 class="fal fa-search mr-1"></i> Cari</button>
                                         <button type="button" id="btn-reset" class="btn btn-sm btn-secondary mr-2"><i
                                                 class="fal fa-undo mr-1"></i> Reset</button>
+
+                                        <button type="button" class="btn btn-sm btn-success" id="btn-export">
+                                            <i class="fal fa-file-excel mr-2"></i> Export
+                                        </button>
                                     </div>
                                 </form>
                             </div>
