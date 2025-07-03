@@ -16,9 +16,9 @@
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <label for="nama">Nama Bank</label>
-                                <input type="text" value="{{ old('nama') }}"
-                                    class="form-control @error('nama') is-invalid @enderror" id="nama"
-                                    name="nama" placeholder="Nama Bank">
+                                <input type="text" value="{{ old('name') }}"
+                                    class="form-control @error('name') is-invalid @enderror" id="name"
+                                    name="name" placeholder="Nama Bank">
                                 @error('nama')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

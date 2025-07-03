@@ -42,7 +42,7 @@
                                     @foreach ($banks as $bank)
                                         <tr>
                                             <td style="white-space: nowrap">{{ $loop->iteration }}</td>
-                                            <td style="white-space: nowrap">{{ $bank->nama }}</td>
+                                            <td style="white-space: nowrap">{{ $bank->name }}</td>
                                             <td style="white-space: nowrap">{{ $bank->pemilik }}</td>
                                             <td style="white-space: nowrap">{{ $bank->nomor }}</td>
                                             <td style="white-space: nowrap">{{ rp($bank->saldo) }}</td>
@@ -76,9 +76,9 @@
                                             </td>
                                         </tr>
 
-                                        @include('app-type.keuangan.bank.partials.update-bank')
+                                        @include('app-type.keuangan.setup.bank.partials.update-bank')
                                     @endforeach
-                                    @include('app-type.keuangan.bank.partials.create-bank')
+                                    @include('app-type.keuangan.setup.bank.partials.create-bank')
                                 </tbody>
                                 <tfoot>
                                     <tr>

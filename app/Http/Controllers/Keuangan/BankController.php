@@ -11,7 +11,7 @@ class BankController extends Controller
 {
     public function index()
     {
-        return view('app-type.keuangan.bank.index', [
+        return view('app-type.keuangan.setup.bank.index', [
             'banks' => Bank::all(),
             'chartOfAccounts' => ChartOfAccount::orderBy('id', 'asc')->get(),
         ]);
@@ -20,7 +20,7 @@ class BankController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'nama' => 'max:255|required',
+            'name' => 'max:255|required',
             'pemilik' => 'max:255|required',
             'nomor' => 'max:255|required',
             'saldo' => 'max:255|required',

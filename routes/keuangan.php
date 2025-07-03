@@ -130,13 +130,13 @@ Route::group(['middleware' => ['auth']], function () {
             // ->middleware('can:edit keuangan data kategori');
 
             // Bank
-            Route::get("/banks", [BankController::class, 'index'])
+            Route::get("/bank", [BankController::class, 'index'])
                 ->name("bank.index")
                 ->middleware('can:view keuangan data rekening');
-            Route::post("/banks", [BankController::class, 'store'])
+            Route::post("/bank", [BankController::class, 'store'])
                 ->name("bank.store");
             // ->middleware('can:tambah keuangan data rekening');
-            Route::put("/banks/{banks:id}", [BankController::class, 'update'])
+            Route::put("/bank/{banks:id}", [BankController::class, 'update'])
                 ->name("bank.update");
             // ->middleware('can:edit keuangan data rekening');
         });
@@ -353,6 +353,8 @@ Route::group(['middleware' => ['auth']], function () {
 
 
 
+
+
         route::prefix('ap-supplier')->middleware(['can:view account payable ap-supplier'])->group(function () {
             Route::get('/', [APSupplierController::class, 'index'])
                 ->name('keuangan.ap-supplier.index');
@@ -443,6 +445,8 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name('keuangan.report-ap-supplier.laporan-jatuh-tempo');
         });
     });
+
+
 
     Route::prefix('api')->group(function () {
         Route::get('/coa/group/{group_id}', [ChartOfAccountController::class, 'getByGroup'])->name('coa.byGroup');
