@@ -281,11 +281,16 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                             $si_tujuan->save();
 
                             $si->qty -= $qty;
-                            if ($si->qty == 0) { // delete if qty is 0
-                                $si->forceDelete(); // force delete
-                            } else { // update if qty is not 0
-                                $si->save();
-                            }
+                            // if ($si->qty == 0) { // delete if qty is 0
+                            //     $si->forceDelete(); // force delete
+                            // } else { // update if qty is not 0
+                            //     $si->save();
+                            // }
+
+                            // 30 June 2025
+                            // don't delete even if qty == 0
+                            // it would cause problem on related data
+                            $si->save();
 
                             continue;
                         }
@@ -454,11 +459,16 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                             $si_tujuan->save();
 
                             $si->qty -= $qty;
-                            if ($si->qty == 0) { // delete if qty is 0
-                                $si->forceDelete(); // force delete
-                            } else { // update if qty is not 0
-                                $si->save();
-                            }
+                            // if ($si->qty == 0) { // delete if qty is 0
+                            //     $si->forceDelete(); // force delete
+                            // } else { // update if qty is not 0
+                            //     $si->save();
+                            // }
+
+                            // 30 June 2025
+                            // don't delete even if qty == 0
+                            // it would cause problem on related data
+                            $si->save();
 
                             continue;
                         }

@@ -623,6 +623,7 @@
                     <th>Nama Barang</th>
                     <th width="5%">Kode Satuan</th>
                     <th width="3%">QTY</th>
+                    <th width="8%">HARGA*</th>
                     <th width="8%">NOMINAL</th>
                 </tr>
             </thead>
@@ -635,6 +636,13 @@
                         $print_head = true;
                     @endphp
                     @foreach ($db->items as $item)
+                        @php
+                            $harga = $item->barang->hna;
+                            if (isset($item->latest_price)) {
+                                $harga = $item->latest_price;
+                            }
+                            $total += $item->qty * $harga;
+                        @endphp
                         <tr>
                             @if ($print_head)
                                 <td align="center"><b>{{ tgl($db->tanggal_db) }}</b></td>
@@ -654,20 +662,21 @@
                             <td>{{ $item->barang->nama }}</td>
                             <td>{{ $item->satuan->nama }}</td>
                             <td align="right">{{ $item->qty }}</td>
-                            <td align="right">{{ rp($item->qty * $item->barang->hna) }}</td>
+                            <td align="right">{{ rp($harga) }}</td>
+                            <td align="right">{{ rp($item->qty * $harga) }}</td>
                         </tr>
-                        @php
-                            $total += $item->qty * $item->barang->hna;
-                        @endphp
                     @endforeach
                 @endforeach
 
                 <tr style="text-align: right; font-weight: bold;">
-                    <td colspan="7">Total</td>
+                    <td colspan="8">Total</td>
                     <td align="right">{{ rp($total) }}</td>
                 </tr>
             </tbody>
         </table>
+
+        <p style="font-style: italic;">*Harga berdasarkan penerimaan barang terakhir dalam periode. Jika tidak ada
+            penerimaan barang dalam periode, harga berdasarkan master data.</p>
 
     </div>
 

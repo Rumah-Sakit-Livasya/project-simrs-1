@@ -27,4 +27,9 @@ class WarehouseStockOpnameGudang extends Model implements AuditableContract
     {
         return $this->belongsTo(User::class, "finish_user_id");
     }
+
+    public function items()
+    {
+        return $this->hasMany(WarehouseStockOpnameItems::class, "sog_id");
+    }
 }

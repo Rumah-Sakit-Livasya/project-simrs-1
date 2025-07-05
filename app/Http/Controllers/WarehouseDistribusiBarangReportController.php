@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\WarehouseDistribusiBarangFarmasi;
 use App\Models\WarehouseDistribusiBarangNonFarmasi;
 use App\Models\WarehouseMasterGudang;
+use App\Models\WarehousePenerimaanBarangFarmasiItems;
+use App\Models\WarehousePenerimaanBarangNonFarmasi;
+use App\Models\WarehousePenerimaanBarangNonFarmasiItems;
 
 class WarehouseDistribusiBarangReportController extends Controller
 {
@@ -84,13 +87,55 @@ class WarehouseDistribusiBarangReportController extends Controller
         if (isset($json["jenis"])) {
             if ($json["jenis"] == "f") {
                 $dbs = $query1->get();
+                // assign "type" == "f" for every item in $dbs
+                foreach ($dbs as $db) {
+                    $db->type = "f";
+                }
             } else {
                 $dbs = $query2->get();
+                // assign "type" == "nf" for every item in $dbs
+                foreach ($dbs as $db) {
+                    $db->type = "nf";
+                }
             }
         } else {
             $dbs1 = $query1->get()->all();
             $dbs2 = $query2->get()->all();
+            // assign "type" == "f" for every item in $dbs1
+            foreach ($dbs1 as $db) {
+                $db->type = "f";
+            }
+
+            // assign "type" == "nf" for every item in $dbs2
+            foreach ($dbs2 as $db) {
+                $db->type = "nf";
+            }
             $dbs = collect(array_merge($dbs1, $dbs2));
+        }
+
+        // loop $dbs
+        foreach ($dbs as $db) {
+            foreach ($db->items as $key => $item) {
+                $barang_id = $item->barang->id;
+                $type = $db->type;
+
+                $query = WarehousePenerimaanBarangFarmasiItems::query();
+                if ($type == "nf"){
+                    $query = WarehousePenerimaanBarangNonFarmasiItems::query();
+                }
+
+                // try fetching latest price within the time range
+                $latestPrice = $query->where("barang_id", $barang_id)
+                    ->whereBetween("created_at", [$startDate, $endDate])
+                    ->orderBy("created_at", "desc")
+                    ->first();
+
+                if ($latestPrice) {
+                    $item->latest_price = $latestPrice->harga;
+                } else {
+                    $item->latest_price = null;
+                }
+            }
         }
 
         return view("pages.simrs.warehouse.distribusi-barang.report.show", compact("dbs", "startDate", "endDate"));

@@ -736,6 +736,40 @@ interface StockRequest {
     items?: StockRequestItem[]; // Array of StockRequestItem
 }
 
+interface StockOpnameItem {
+    id: number;
+    created_at: Date; // Assuming standard timestamp fields are managed by the ORM/database
+    updated_at: Date;
+    deleted_at?: Date; // Optional for soft deletion support
+    user_id: number;
+    sog_id: number;
+    si_f_id?: number;
+    si_nf_id?: number;
+    qty: number;
+    keterangan?: string;
+    status: 'draft' | 'final';
+}
+
+interface StackedStoredItemOpname {
+    actual?: number;
+    frozen: number;
+    movement: number;
+    qty: number;
+    barang_id: number;
+    satuan_id: number;
+    barang: BarangFarmasi | BarangNonFarmasi;
+    satuan: Satuan
+    type: "f" | "nf";
+    stack: StoredItemOpname[];
+}
+
+type StoredItemOpname = StoredItem & {
+    frozen: number;
+    movement: number;
+    type: "f" | "nf";
+    opname?: StockOpnameItem;
+}
+
 type PatientType = "rajal" | "ranap" | "otc";
 type SumberItem = "npr" | "pr";
 type TipePR = "all" | "normal" | "urgent";

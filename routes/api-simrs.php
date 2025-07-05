@@ -92,6 +92,7 @@ use App\Http\Controllers\WarehouseDistribusiBarangNonFarmasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\WarehouseStockAdjustmentController;
+use App\Http\Controllers\WarehouseStockOpnameDraft;
 use App\Http\Controllers\WarehouseStockOpnameGudangController;
 use App\Http\Controllers\WarehouseStockRequestNonPharmacyController;
 use App\Http\Controllers\WarehouseStockRequestPharmacyController;
@@ -330,9 +331,15 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::put("/update", [WarehouseStockAdjustmentController::class, 'update'])->name('warehouse.revaluasi-stock.stock-adjustment.update');
             });
 
-            Route::prefix("stock-opname")->group(function(){
-                Route::prefix("gudang-opname")->group(function(){
+            Route::prefix("stock-opname")->group(function () {
+                Route::prefix("gudang-opname")->group(function () {
                     Route::put("/update", [WarehouseStockOpnameGudangController::class, "update"])->name("warehouse.revaluasi-stock.stock-opname.gudang-opname.update");
+                });
+
+                Route::prefix("draft")->group(function () {
+                    Route::get("/get/opname-items/{id}", [WarehouseStockOpnameDraft::class, "get_opname_items"])->name("warehouse.revaluasi-stock.stock-opname.draft.get.opname-items");
+                    Route::get("/get/opname-item-movement/{type}/{opname_id}/{si_id}", [WarehouseStockOpnameDraft::class, "get_opname_item_movement"])->name("warehouse.revaluasi-stock.stock-opname.draft.get.opname-item-movement");
+                    Route::post("/store", [WarehouseStockOpnameDraft::class, "store"])->name("warehouse.revaluasi-stock.stock-opname.draft.store");
                 });
             });
         });

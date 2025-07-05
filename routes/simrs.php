@@ -96,6 +96,7 @@ use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseSetupMinMaxStockController;
 use App\Http\Controllers\WarehouseStockAdjustmentController;
+use App\Http\Controllers\WarehouseStockOpnameDraft;
 use App\Http\Controllers\WarehouseStockOpnameGudangController;
 use App\Http\Controllers\WarehouseStockRequestNonPharmacyController;
 use App\Http\Controllers\WarehouseStockRequestPharmacyController;
@@ -381,6 +382,10 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::prefix("stock-opname")->group(function () {
                     Route::prefix("gudang-opname")->group(function () {
                         Route::get("/", [WarehouseStockOpnameGudangController::class, "index"])->name("warehouse.revaluasi-stock.stock-opname.gudang-opname");
+                    });
+
+                    Route::prefix("draft")->group(function(){
+                        Route::get("/", [WarehouseStockOpnameDraft::class, "index"])->name("warehouse.revaluasi-stock.stock-opname.draft");
                     });
                 });
             });
