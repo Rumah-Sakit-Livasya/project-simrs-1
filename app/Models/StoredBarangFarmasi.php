@@ -29,4 +29,8 @@ class StoredBarangFarmasi extends Model implements AuditableContract
     public function adji(){
         return $this->hasMany(WarehouseStockAdjustmentItems::class, 'si_f_id');
     }
+
+    public function soi(){
+        return $this->hasMany(WarehouseStockOpnameItems::class, 'si_f_id');
+    }
 }

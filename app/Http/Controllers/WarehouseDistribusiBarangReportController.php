@@ -124,9 +124,8 @@ class WarehouseDistribusiBarangReportController extends Controller
                     $query = WarehousePenerimaanBarangNonFarmasiItems::query();
                 }
 
-                // try fetching latest price within the time range
+                // try fetching latest price from goods receival
                 $latestPrice = $query->where("barang_id", $barang_id)
-                    ->whereBetween("created_at", [$startDate, $endDate])
                     ->orderBy("created_at", "desc")
                     ->first();
 

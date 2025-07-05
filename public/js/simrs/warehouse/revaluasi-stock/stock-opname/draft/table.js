@@ -312,7 +312,7 @@ class TableHandler {
                     <td class="item-qty-final">${item.qty + (item.opname ? item.opname.qty - item.qty : 0) + item.movement}</td>
                     <td><input type="text" name="keterangan[${key}]" ${item.opname && item.opname.status == "final" ? 'readonly' : ''}
                         class="form-control item-keterangan" value="${item.opname ? item.opname.keterangan : ''}"></td>
-                    <td class="${item.opname && StatusClass[item.opname.status]}">${item.opname ? ucfirst(item.opname.status) : 'Uncounted'}</td>
+                    <td class="${item.opname && StatusClass[item.opname.status]} item-status">${item.opname ? ucfirst(item.opname.status) : 'Uncounted'}</td>
                 </tr>
             `).join('\n');
 

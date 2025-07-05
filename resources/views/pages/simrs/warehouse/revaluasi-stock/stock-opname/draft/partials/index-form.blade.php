@@ -137,6 +137,22 @@
                         </div>
                     </div>
 
+                    <div class="row justify-content-end mt-3">
+                        <div class="col-2">
+                            <button class="btn btn-primary waves-effect waves-themed" id="print-lembar-so-btn">
+                                <span class="fal fa-print mr-1"></span>
+                                Lembar SO
+                            </button>
+                        </div>
+
+                        <div class="col-2">
+                            <button class="btn btn-primary waves-effect waves-themed" id="print-selisih-stock-btn">
+                                <span class="fal fa-print mr-1"></span>
+                                Selisih Stock
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

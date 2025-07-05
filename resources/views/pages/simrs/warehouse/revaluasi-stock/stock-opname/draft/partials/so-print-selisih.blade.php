@@ -595,91 +595,69 @@
 </head>
 
 <body>
-    <!-- START LOOPING: button -->
     <div id="functions">
         <ul>
             <li><a href="#" onclick="window.print();">Print</a></li>
             <li><a href="index-fancy.html" onclick="window.close()">Close</a></li>
         </ul>
     </div>
-    <!-- END LOOPING: button -->
-    <!-- E: Functions -->
-
-    <!-- B: Print View -->
     <div id="previews">
         <h2 class="bdr">
-            Laporan Dsitribusi Barang
-            <span>Periode : {{ \Carbon\Carbon::parse($startDate)->format('d F Y') }} s/d
-                {{ \Carbon\Carbon::parse($endDate)->format('d F Y') }}</span>
+            Selisih Stok {{ $sog->gudang->nama }}<span>Dari Tanggal : {{ tgl_waktu($sog->start) }}</span>
         </h2>
-
         <table width="100%" class="bdr2 pad">
             <thead>
                 <tr>
-                    <th width="8%">Tanggal</th>
-                    <th width="10%">Kode Distribusi</th>
-                    <th width="15%">Gudang Pengirim</th>
-                    <th width="15%">Gudang Penerima</th>
+                    <th width="3%">Kode Barang</th>
                     <th>Nama Barang</th>
-                    <th width="5%">Kode Satuan</th>
-                    <th width="3%">QTY</th>
-                    <th width="8%">HARGA*</th>
-                    <th width="8%">NOMINAL</th>
+                    <th width="3%">UOM</th>
+                    <th width="5%">Stok Sistem</th>
+                    <th width="5%">Stok Fisik</th>
+                    <th width="5%">Selisih</th>
+                    <th width="10%">HNA (Satuan)</th>
+                    <th width="10%">Nominal</th>
                 </tr>
             </thead>
             <tbody>
                 @php
                     $total = 0;
                 @endphp
-                @foreach ($dbs as $db)
-                    @php
-                        $print_head = true;
-                    @endphp
-                    @foreach ($db->items as $item)
-                        @php
-                            $harga = $item->barang->hna;
-                            if (isset($item->latest_price)) {
-                                $harga = $item->latest_price;
-                            }
-                            $total += $item->qty * $harga;
-                        @endphp
-                        <tr>
-                            @if ($print_head)
-                                <td align="center"><b>{{ tgl($db->tanggal_db) }}</b></td>
-                                <td align="center"><b>{{ $db->kode_db }}</b></td>
-                                <td><b>{{ $db->asal->nama }}</b></td>
-                                <td><b>{{ $db->tujuan->nama }}</b></td>
-                                @php
-                                    $print_head = false;
-                                @endphp
-                            @else
-                                <td align="center"></td>
-                                <td align="center"></td>
-                                <td></td>
-                                <td></td>
-                            @endif
 
-                            <td>{{ $item->barang->nama }}</td>
-                            <td>{{ $item->satuan->nama }}</td>
-                            <td align="right">{{ $item->qty }}</td>
-                            <td align="right">{{ rp($harga) }}</td>
-                            <td align="right">{{ rp($item->qty * $harga) }}</td>
+
+                @foreach ($items as $item)
+                {{-- @php
+                    $item = collect($item);
+                @endphp --}}
+                    @if ($item->opname && $item->opname->qty != $item->frozen)
+                        <tr>
+                            <td>
+                                <nobr>{{ $item->pbi->item->kode }}</nobr>
+                            </td>
+                            <td>{{ $item->pbi->item->nama }}</td>
+                            <td>{{ $item->pbi->item->satuan->kode }}</td>
+                            <td align="right">{{ $item->frozen }}</td>
+                            <td align="right">{{ $item->opname->qty }}</td>
+                            <td align="right">{{ $item->opname->qty - $item->frozen }}</td>
+                            <td align="right">{{ rp($item->pbi->item->hna) }}</td>
+                            <td align="right">{{ rp($item->pbi->item->hna * ($item->opname->qty - $item->frozen)) }}
+                            </td>
                         </tr>
-                    @endforeach
+
+                        @php
+                            $total += $item->pbi->item->hna * ($item->opname->qty - $item->frozen);
+                        @endphp
+                    @endif
                 @endforeach
 
-                <tr style="text-align: right; font-weight: bold;">
-                    <td colspan="8">Total</td>
-                    <td align="right">{{ rp($total) }}</td>
-                </tr>
             </tbody>
+            <tfoot>
+                <tr style="text-align: right;">
+                    <td colspan="7">Total</td>
+                    <td>{{ rp($total) }}</td>
+                </tr>
+            </tfoot>
         </table>
-
-        <p style="font-style: italic;">*Harga berdasarkan penerimaan barang terakhir. Jika tidak ada, harga berdasarkan
-            master data.</p>
-
     </div>
-
 
 
 </body>

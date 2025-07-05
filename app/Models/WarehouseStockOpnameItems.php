@@ -17,4 +17,14 @@ class WarehouseStockOpnameItems extends Model implements AuditableContract
     {
         return $this->belongsTo(WarehouseStockOpnameGudang::class, "sog_id");
     }
+
+    public function stored()
+    {
+        // check if the column has either si_f_id or si_nf_id
+        if ($this->si_f_id) {
+            return $this->belongsTo(StoredBarangFarmasi::class, 'si_f_id');
+        } else { // si_nf_id
+            return $this->belongsTo(StoredBarangNonFarmasi::class, 'si_nf_id');
+        }
+    }
 }

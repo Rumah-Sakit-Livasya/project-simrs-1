@@ -386,6 +386,8 @@ Route::group(['middleware' => ['auth']], function () {
 
                     Route::prefix("draft")->group(function(){
                         Route::get("/", [WarehouseStockOpnameDraft::class, "index"])->name("warehouse.revaluasi-stock.stock-opname.draft");
+                        Route::get("/print-selisih/{sog_id}", [WarehouseStockOpnameDraft::class, "print_selisih"])->name("warehouse.revaluasi-stock.stock-opname.draft.print.selisih");
+                        Route::get("/print-so/{sog_id}", [WarehouseStockOpnameDraft::class, "print_so"])->name("warehouse.revaluasi-stock.stock-opname.draft.print.so");
                     });
                 });
             });

@@ -1,5 +1,6 @@
 // @ts-check
 /// <reference types="jquery" />
+/// <reference types="select2" />
 /// <reference path="../../../../../types.d.ts" />
 
 class MainClass {
@@ -45,12 +46,19 @@ class MainClass {
     #$BatchExpired;
 
     /**
+     * @type {import("select2").OptionData[]}
+     */
+    #PreviousGudangSelected;
+
+    /**
      * @type {number}
      */
     OpnameId;
 
     #API_URL = "/api/simrs/warehouse/revaluasi-stock/stock-opname/draft";
     #APIHandler = new APIHandler(this.#API_URL);
+
+    #GudangSelectedOnce = false;
 
     #Table = new TableHandler();
 
@@ -72,7 +80,54 @@ class MainClass {
 
         this.#$BatchKosong.on("change", this.#handleChildFilterChange.bind(this));
         this.#$BatchExpired.on("change", this.#handleChildFilterChange.bind(this));
+
+        this.#addEventListeners("#print-selisih-stock-btn", this.#handlePrintSelisihButtonClick);
+        this.#addEventListeners("#print-lembar-so-btn", this.#handlePrintSO);
         this.showLoading(false);
+    }
+
+    /**
+     * Handle Print Lembar SO button click
+     * @param {Event} event 
+     */
+    #handlePrintSO(event) {
+        event.preventDefault();
+        const GudangOpnameID = this.#$Gudang.val();
+        if (!GudangOpnameID) return showErrorAlertNoRefresh("Mohon pilih gudang terlebih dahulu");
+
+        const url = `/simrs/warehouse/revaluasi-stock/stock-opname/draft/print-so/${GudangOpnameID}`;
+        const width = screen.width;
+        const height = screen.height;
+        const left = width - (width / 2);
+        const top = height - (height / 2);
+        window.open(
+            url,
+            "popupWindow_printSO" + GudangOpnameID,
+            "width=" + width + ",height=" + height +
+            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+        );
+    }
+
+    /**
+     * Handle Print Selisih Stock Opname button click
+     * @param {Event} event 
+     */
+    #handlePrintSelisihButtonClick(event) {
+        event.preventDefault();
+        const GudangOpnameID = this.#$Gudang.val();
+        if (!GudangOpnameID) return showErrorAlertNoRefresh("Mohon pilih gudang terlebih dahulu");
+
+        const url = `/simrs/warehouse/revaluasi-stock/stock-opname/draft/print-selisih/${GudangOpnameID}`;
+        const width = screen.width;
+        const height = screen.height;
+        const left = width - (width / 2);
+        const top = height - (height / 2);
+        window.open(
+            url,
+            "popupWindow_printSelisihStock" + GudangOpnameID,
+            "width=" + width + ",height=" + height +
+            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+        );
     }
 
     #handleChildFilterChange() {
@@ -89,6 +144,31 @@ class MainClass {
     }
 
     async #handleGudangChange() {
+        if (this.#GudangSelectedOnce) {
+            // use sweealert2 to confirm changing gudang
+            // because if gudang is changed, all unsaved progress will be lost
+            const result = await Swal.fire({
+                title: 'Perhatian!',
+                text: 'Ganti gudang akan menghapus semua progress yang belum disimpan. Lanjutkan?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, ganti gudang',
+                cancelButtonText: 'Batal'
+            });
+            if (!result.isConfirmed) {
+                // revert gudang selection
+                let ids = this.#PreviousGudangSelected.map(item => item.id);
+                this.#$Gudang.val(ids).trigger("change");
+                return;
+            }
+        } else {
+            this.#GudangSelectedOnce = true;
+        }
+
+        this.#PreviousGudangSelected = this.#$Gudang.select2("data");
+
         this.showLoading(true, "Loading data...");
         const SOGid = /** @type {number} */(this.#$Gudang.val());
         this.OpnameId = SOGid;
@@ -193,8 +273,11 @@ class MainClass {
             const TR = /** @type {JQuery<HTMLTableRowElement>} */($(this));
             const Stock = TR.find("input.item-qty-actual");
             const StockSystem = parseInt(TR.find(".item-qty-frozen").text());
-            Stock.val(StockSystem); // set value of stock to stock_sys
-            updateChildCol(TR);
+            const Status = TR.find(".item-status");
+            if (!Status.text().toLowerCase().includes("final")) { // don't update if data is already final
+                Stock.val(StockSystem); // set value of stock to stock_sys
+                updateChildCol(TR);
+            }
         });
 
         const HeadTR = /** @type {JQuery<HTMLTableRowElement>} */ ($("tr#head" + key_head));
@@ -213,8 +296,11 @@ class MainClass {
         TableRows.each(function () {
             const TR = /** @type {JQuery<HTMLTableRowElement>} */($(this));
             const Stock = TR.find("input.item-qty-actual");
-            Stock.val(0); // set value of stock to 0
-            updateChildCol(TR);
+            const Status = TR.find(".item-status");
+            if (!Status.text().toLowerCase().includes("final")) { // don't update if data is already final
+                Stock.val(0); // set value of stock to 0
+                updateChildCol(TR);
+            }
         });
 
         const HeadTR = /** @type {JQuery<HTMLTableRowElement>} */ ($("tr#head" + key_head));
@@ -243,6 +329,19 @@ class MainClass {
         }
         this.#Table.updateHeadCol(HeadTR);
         this.showLoading(false);
+    }
+
+    /**
+     * Add event listeners
+     * @param {string} selector 
+     * @param {Function} handler 
+     * @param {string} event
+     */
+    #addEventListeners(selector, handler, event = 'click') {
+        const buttons = document.querySelectorAll(selector);
+        buttons.forEach((button) => {
+            button.addEventListener(event, handler.bind(this));
+        });
     }
 }
 

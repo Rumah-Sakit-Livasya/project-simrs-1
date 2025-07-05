@@ -595,91 +595,94 @@
 </head>
 
 <body>
-    <!-- START LOOPING: button -->
     <div id="functions">
         <ul>
             <li><a href="#" onclick="window.print();">Print</a></li>
             <li><a href="index-fancy.html" onclick="window.close()">Close</a></li>
         </ul>
     </div>
-    <!-- END LOOPING: button -->
-    <!-- E: Functions -->
-
-    <!-- B: Print View -->
     <div id="previews">
         <h2 class="bdr">
-            Laporan Dsitribusi Barang
-            <span>Periode : {{ \Carbon\Carbon::parse($startDate)->format('d F Y') }} s/d
-                {{ \Carbon\Carbon::parse($endDate)->format('d F Y') }}</span>
+            Lembar SO {{ $sog->gudang->nama }}<span>Dari Tanggal : {{ tgl_waktu($sog->start) }}</span>
         </h2>
-
         <table width="100%" class="bdr2 pad">
             <thead>
                 <tr>
-                    <th width="8%">Tanggal</th>
-                    <th width="10%">Kode Distribusi</th>
-                    <th width="15%">Gudang Pengirim</th>
-                    <th width="15%">Gudang Penerima</th>
+                    <th width="3%">Kode Barang</th>
                     <th>Nama Barang</th>
-                    <th width="5%">Kode Satuan</th>
-                    <th width="3%">QTY</th>
-                    <th width="8%">HARGA*</th>
-                    <th width="8%">NOMINAL</th>
+                    <th width="3%">UOM</th>
+                    <th width="5%">Stok Fisik</th>
                 </tr>
             </thead>
             <tbody>
                 @php
-                    $total = 0;
-                @endphp
-                @foreach ($dbs as $db)
-                    @php
-                        $print_head = true;
-                    @endphp
-                    @foreach ($db->items as $item)
-                        @php
-                            $harga = $item->barang->hna;
-                            if (isset($item->latest_price)) {
-                                $harga = $item->latest_price;
+                    $Stacks = [];
+
+                    for ($i = 0; $i < count($items); $i++) {
+                        $Item = $items[$i];
+                        $PBI = $Item['pbi'];
+                        $Barang = $PBI['item'];
+                        $Satuan = $PBI['satuan'];
+
+                        if (!isset($PBI)) {
+                            continue;
+                        }
+
+                        $Head = null;
+                        foreach ($Stacks as $stack) {
+                            if (
+                                $stack['barang_id'] === $PBI['barang_id'] &&
+                                $stack['satuan_id'] === $PBI['satuan_id'] &&
+                                $stack['type'] === $Item['type']
+                            ) {
+                                $Head = $stack;
+                                break;
                             }
-                            $total += $item->qty * $harga;
-                        @endphp
-                        <tr>
-                            @if ($print_head)
-                                <td align="center"><b>{{ tgl($db->tanggal_db) }}</b></td>
-                                <td align="center"><b>{{ $db->kode_db }}</b></td>
-                                <td><b>{{ $db->asal->nama }}</b></td>
-                                <td><b>{{ $db->tujuan->nama }}</b></td>
-                                @php
-                                    $print_head = false;
-                                @endphp
-                            @else
-                                <td align="center"></td>
-                                <td align="center"></td>
-                                <td></td>
-                                <td></td>
-                            @endif
+                        }
 
-                            <td>{{ $item->barang->nama }}</td>
-                            <td>{{ $item->satuan->nama }}</td>
-                            <td align="right">{{ $item->qty }}</td>
-                            <td align="right">{{ rp($harga) }}</td>
-                            <td align="right">{{ rp($item->qty * $harga) }}</td>
-                        </tr>
-                    @endforeach
+                        if ($Head) {
+                            array_push($Head['stack'], $Item);
+                            $Head['qty'] += $Item['qty'];
+                            $Head['movement'] += $Item['movement'];
+                            $Head['frozen'] += $Item['frozen'];
+
+                            if (!isset($Head['actual'])) {
+                                $Head['actual'] = isset($Item['opname']) ? $Item['opname']['qty'] : null;
+                            } elseif (isset($Item['opname'])) {
+                                $Head['actual'] += $Item['opname']['qty'];
+                            }
+                        } else {
+                            $Stacks[] = [
+                                'actual' => isset($Item['opname']) ? $Item['opname']['qty'] : null,
+                                'frozen' => $Item['frozen'],
+                                'movement' => $Item['movement'],
+                                'qty' => $Item['qty'],
+                                'barang_id' => $PBI['item']['id'], // Assuming item has an id attribute
+                                'satuan_id' => $PBI['satuan']['id'], // Assuming satuan has an id attribute
+                                'barang' => $Barang,
+                                'satuan' => $Satuan,
+                                'type' => $Item['type'],
+                                'stack' => [$Item],
+                            ];
+                        }
+                    }
+
+                @endphp
+
+                @foreach ($Stacks as $item)
+                    <tr>
+                        <td>
+                            <nobr>{{ $item["barang"]->kode }}</nobr>
+                        </td>
+                        <td>{{ $item["barang"]->nama }}</td>
+                        <td>{{ $item["barang"]->satuan->kode }}</td>
+                        <td align="right">{{ $item["actual"] }}</td>
+                        </td>
+                    </tr>
                 @endforeach
-
-                <tr style="text-align: right; font-weight: bold;">
-                    <td colspan="8">Total</td>
-                    <td align="right">{{ rp($total) }}</td>
-                </tr>
             </tbody>
         </table>
-
-        <p style="font-style: italic;">*Harga berdasarkan penerimaan barang terakhir. Jika tidak ada, harga berdasarkan
-            master data.</p>
-
     </div>
-
 
 
 </body>

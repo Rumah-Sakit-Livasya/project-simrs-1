@@ -33,4 +33,9 @@ class StoredBarangNonFarmasi extends Model implements AuditableContract
     {
         return $this->hasMany(WarehouseStockAdjustmentItems::class, 'si_nf_id');
     }
+
+    public function soi()
+    {
+        return $this->hasMany(WarehouseStockOpnameItems::class, 'si_nf_id');
+    }
 }
