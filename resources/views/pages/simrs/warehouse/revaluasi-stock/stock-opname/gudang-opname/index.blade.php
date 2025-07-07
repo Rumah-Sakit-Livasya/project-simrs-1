@@ -87,6 +87,7 @@
                     // Menyembunyikan preloader setelah data berhasil dimuat
                     $('#loading-spinner').hide();
                 },
+                paging: false,
                 responsive: true,
                 lengthChange: false,
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +

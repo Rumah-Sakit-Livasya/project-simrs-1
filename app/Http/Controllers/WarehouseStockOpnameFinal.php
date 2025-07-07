@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StoredBarangFarmasi;
 use App\Models\StoredBarangNonFarmasi;
+use App\Models\User;
 use App\Models\WarehouseKategoriBarang;
 use App\Models\WarehouseSatuanBarang;
 use App\Models\WarehouseStockOpnameGudang;
@@ -11,42 +12,20 @@ use App\Models\WarehouseStockOpnameItems;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class WarehouseStockOpnameDraft extends Controller
+class WarehouseStockOpnameFinal extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.index", [
+        return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.final.index", [
             "ogs" => WarehouseStockOpnameGudang::whereNull("finish")->get(),
             "kategoris" => WarehouseKategoriBarang::all(),
             "satuans" => WarehouseSatuanBarang::all()
         ]);
     }
 
-    public function get_opname_item_movement($type, $opname_id, $si_id)
-    {
-        $query = StoredBarangFarmasi::query();
-        if ($type == "nf") {
-            $query = StoredBarangNonFarmasi::query();
-        }
-
-        $item = $query->findOrFail($si_id);
-        $opname = WarehouseStockOpnameGudang::findOrFail($opname_id);
-        $audits = $item->audits()->where("created_at", ">", $opname->start)->get();
-        $movement = 0;
-        foreach ($audits as $id => $audit) {
-            $old = $audit->old_values;
-            $new = $audit->new_values;
-
-            if (isset($old["qty"]) && isset($new["qty"])) {
-                $movement += $new["qty"] - $old["qty"];
-            }
-        }
-
-        return response()->json(["movement" => $movement]);
-    }
 
     public function get_opname_items($id)
     {
@@ -161,6 +140,15 @@ class WarehouseStockOpnameDraft extends Controller
         // and sort by $item->pbi->nama_barang
         $items = array_merge($items_f->toArray(), $items_nf->toArray());
 
+        // loop $items as $item
+        // remove from $items if $item->opname == null
+        // final only shows draft / final, no uncounted
+        foreach ($items as $key => $item) {
+            if ($item['opname'] == null) {
+                unset($items[$key]);
+            }
+        }
+
         usort($items, function ($a, $b) {
             return strcmp($a['pbi']['nama_barang'], $b['pbi']['nama_barang']); // Accessing 'pbi' as an index in the array
         });
@@ -168,91 +156,6 @@ class WarehouseStockOpnameDraft extends Controller
         return response()->json($items);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        if ($request->has("drafts")) {
-            $request["drafts"] = json_decode($request["drafts"]);
-        } else {
-            // return bad request
-            return response()->json(["message" => "Draft is required"], 400);
-        }
-
-        $request->validate([
-            "drafts" => "required|array",
-            "sog_id" => "required|exists:warehouse_stock_opname_gudang,id",
-            "column" => "required|string",
-            "user_id" => "required|exists:users,id"
-        ]);
-
-        DB::beginTransaction();
-        try {
-            $sog = WarehouseStockOpnameGudang::findOrFail($request["sog_id"]);
-
-            for ($i = 0; $i < count($request["drafts"]); $i++) {
-                $draft = $request["drafts"][$i];
-
-                $query = StoredBarangFarmasi::query();
-                if ($request["column"] == "si_nf_id") {
-                    $query = StoredBarangNonFarmasi::query();
-                }
-
-                $item = $query->findOrFail($draft->si_id);
-                $audits = $item->audits()->where("created_at", ">", $sog->start)->get();
-                $movement = 0;
-                foreach ($audits as $id => $audit) {
-                    $old = $audit->old_values;
-                    $new = $audit->new_values;
-
-                    if (isset($old["qty"]) && isset($new["qty"])) {
-                        $movement += $new["qty"] - $old["qty"];
-                    }
-                }
-
-                if ($draft->qty + $movement < 0) {
-                    throw new \Exception("Stock tidak bisa kurang dari 0"); // throw exception if qty is not enough
-                }
-
-                // check if there's WarehouseStockOpnameItems
-                // with sog_id == $request["sog_id"]
-                // and $request["column"] == $draft["si_id"]
-                $warehouseStockOpnameItems = WarehouseStockOpnameItems::where("sog_id", $request["sog_id"])
-                    ->where($request["column"], $draft->si_id)
-                    ->first();
-
-                if ($warehouseStockOpnameItems) {
-                    // check if status is final or draft
-                    if ($warehouseStockOpnameItems->status == "final") {
-                        continue; // ignore updating, and don't create new
-                    }
-
-                    // update the warehouseStockOpnameItems
-                    $warehouseStockOpnameItems->update([
-                        "qty" => $draft->qty,
-                        "keterangan" => $draft->keterangan,
-                        "user_id" => $request["user_id"]
-                    ]);
-                } else {
-                    // create new warehouseStockOpnameItems
-                    WarehouseStockOpnameItems::create([
-                        "sog_id" => $request["sog_id"],
-                        $request["column"] => $draft->si_id,
-                        "qty" => $draft->qty,
-                        "keterangan" => $draft->keterangan,
-                        "user_id" => $request["user_id"]
-                    ]);
-                }
-            }
-
-            DB::commit();
-            return response()->json(["message" => "Data berhasil disimpan"], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(["success" => false, "error" => $e->getMessage()], 500);
-        }
-    }
 
     public function print_selisih($sog_id)
     {
@@ -367,7 +270,7 @@ class WarehouseStockOpnameDraft extends Controller
         // and sort by $item->pbi->nama_barang
         $items = array_merge($items_f->all(), $items_nf->all());
 
-        return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.partials.so-print-selisih", [
+        return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.final.partials.so-print-selisih", [
             "items" => $items,
             "sog" => $opname
         ]);
@@ -486,10 +389,71 @@ class WarehouseStockOpnameDraft extends Controller
         // and sort by $item->pbi->nama_barang
         $items = array_merge($items_f->all(), $items_nf->all());
 
-        return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.partials.so-print-so", [
+        return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.final.partials.so-print-so", [
             "items" => $items,
             "sog" => $opname
         ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        // return dd($request->all());
+        $validatedData = $request->validate([
+            "sog_id" => "required|exists:warehouse_stock_opname_gudang,id",
+            "user_id" => "required|exists:users,id",
+            "sio_id.*" => "required|exists:warehouse_stock_opname_item,id"
+        ]);
+
+
+
+        DB::beginTransaction();
+        try {
+            $opname = WarehouseStockOpnameGudang::findOrFail($validatedData["sog_id"]);
+
+            if (isset($opname->finish)) {
+                throw new \Exception("Opname sudah selesai");
+            }
+
+            foreach ($validatedData["sio_id"] as $key => $sio_id) {
+                $sio = WarehouseStockOpnameItems::findOrFail($sio_id);
+                if ($sio->status == "final") continue;
+
+                $item = $sio->stored;
+                $audits = $item->audits()->where("created_at", ">", $opname->start)->get();
+                $movement = 0;
+                foreach ($audits as $id => $audit) {
+                    $old = $audit->old_values;
+                    $new = $audit->new_values;
+
+                    if (isset($old["qty"]) && isset($new["qty"])) {
+                        $movement += $new["qty"] - $old["qty"];
+                    }
+                }
+
+                if ($sio->qty + $movement < 0) {
+                    throw new \Exception("Stock tidak bisa kurang dari 0"); // throw exception if qty is not enough
+                }
+
+                $sio->status = "final";
+                $sio->save();
+
+                // apply change to stored item
+                $item->qty = $sio->qty + $movement;
+                $item->save();
+            }
+
+            DB::commit(); // commit transaction if no error
+            return response()->json(["success" => true, "message" => "Data berhasil disimpan"], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "error" => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

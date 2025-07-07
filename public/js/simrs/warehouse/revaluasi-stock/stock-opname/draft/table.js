@@ -350,8 +350,8 @@ class TableHandler {
                         <th>No Batch</th>
                         <th>Tanggal Terima</th>
                         <th>Tanggal Exp</th>
-                        <th>Stock System</th>
-                        <th>Stock Actual</th>
+                        <th>System Stock</th>
+                        <th>Actual Stock</th>
                         <th>Adjustment</th>
                         <th>Pergerakan</th>
                         <th>Final Stock</th>
@@ -378,8 +378,8 @@ class TableHandler {
         // <th>Kode Barang</th>
         // <th>Nama Barang</th>
         // <th>Satuan</th>
-        // <th>Stock System</th>
-        // <th>Stock Actual</th>
+        // <th>System Stock</th>
+        // <th>Actual Stock</th>
         // <th>Adjustment</th>
         // <th>Pergerakan</th>
         // <th>Final Stock</th>

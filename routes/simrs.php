@@ -97,6 +97,7 @@ use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseSetupMinMaxStockController;
 use App\Http\Controllers\WarehouseStockAdjustmentController;
 use App\Http\Controllers\WarehouseStockOpnameDraft;
+use App\Http\Controllers\WarehouseStockOpnameFinal;
 use App\Http\Controllers\WarehouseStockOpnameGudangController;
 use App\Http\Controllers\WarehouseStockRequestNonPharmacyController;
 use App\Http\Controllers\WarehouseStockRequestPharmacyController;
@@ -384,10 +385,16 @@ Route::group(['middleware' => ['auth']], function () {
                         Route::get("/", [WarehouseStockOpnameGudangController::class, "index"])->name("warehouse.revaluasi-stock.stock-opname.gudang-opname");
                     });
 
-                    Route::prefix("draft")->group(function(){
+                    Route::prefix("draft")->group(function () {
                         Route::get("/", [WarehouseStockOpnameDraft::class, "index"])->name("warehouse.revaluasi-stock.stock-opname.draft");
                         Route::get("/print-selisih/{sog_id}", [WarehouseStockOpnameDraft::class, "print_selisih"])->name("warehouse.revaluasi-stock.stock-opname.draft.print.selisih");
                         Route::get("/print-so/{sog_id}", [WarehouseStockOpnameDraft::class, "print_so"])->name("warehouse.revaluasi-stock.stock-opname.draft.print.so");
+                    });
+
+                    Route::prefix("final")->group(function () {
+                        Route::get("/", [WarehouseStockOpnameFinal::class, "index"])->name("warehouse.revaluasi-stock.stock-opname.final");
+                        Route::get("/print-selisih/{sog_id}", [WarehouseStockOpnameFinal::class, "print_selisih"])->name("warehouse.revaluasi-stock.stock-opname.final.print.selisih");
+                        Route::get("/print-so/{sog_id}", [WarehouseStockOpnameFinal::class, "print_so"])->name("warehouse.revaluasi-stock.stock-opname.final.print.so");
                     });
                 });
             });

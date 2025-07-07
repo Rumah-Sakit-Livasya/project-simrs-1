@@ -3,6 +3,9 @@
 /// <reference types="select2" />
 /// <reference path="../../../../../types.d.ts" />
 
+// @ts-ignore
+const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
+
 class MainClass {
 
     /**
@@ -226,7 +229,7 @@ class MainClass {
         const HeadTR = /** @type {JQuery<HTMLTableRowElement>} */ ($("tr#head" + key_head));
         const Item = /** @type {StackedStoredItemOpname} */(HeadTR.data("item"));
         const Column = `si_${Item.type}_id`;
-        const ChildTR = HeadTR.next("tr").next("tr");
+        const ChildTR = HeadTR.next("tr").next("tr"); // hard coded
         const ChildTable = ChildTR.find("table.child");
         const ChildTRs = ChildTable.find("tr.child-item").toArray();
         const Body = new FormData();
@@ -237,6 +240,11 @@ class MainClass {
             const Stock = parseInt(/** @type {string} */($TR.find("input.item-qty-actual").val()));
             const Keterangan = $TR.find("input.item-keterangan");
             const SIid = $TR.data("si_id");
+            const FinalQty = $TR.find(".item-qty-final");
+
+            if (parseInt(FinalQty.text()) < 0) { // final stock can't be negative
+                return showErrorAlertNoRefresh("Ada stock final negatif! Stock tidak bisa kurang dari 0!");
+            }
 
             if (isNaN(Stock)) {
                 return showErrorAlertNoRefresh("Ada stock yang belum di isi!");
