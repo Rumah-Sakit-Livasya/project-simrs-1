@@ -14,505 +14,309 @@ use Illuminate\Support\Facades\DB;
 class WarehouseStockOpnameDraft extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display the listing of draft stock opname gudang.
+     *
+     * @return \Illuminate\View\View
      */
     public function index()
     {
         return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.index", [
-            "ogs" => WarehouseStockOpnameGudang::whereNull("finish")->get(),
+            "ogs"       => WarehouseStockOpnameGudang::whereNull("finish")->get(),
             "kategoris" => WarehouseKategoriBarang::all(),
-            "satuans" => WarehouseSatuanBarang::all()
+            "satuans"   => WarehouseSatuanBarang::all(),
         ]);
     }
 
+    /**
+     * Compute the quantity movement of a single item since the opname start.
+     *
+     * @param  string  $type    'f' for farmasi, 'nf' for non‐farmasi
+     * @param  int     $opname_id
+     * @param  int     $si_id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function get_opname_item_movement($type, $opname_id, $si_id)
     {
-        $query = StoredBarangFarmasi::query();
-        if ($type == "nf") {
-            $query = StoredBarangNonFarmasi::query();
-        }
-
-        $item = $query->findOrFail($si_id);
+        $item   = $this->findStoredItem($type, $si_id);
         $opname = WarehouseStockOpnameGudang::findOrFail($opname_id);
-        $audits = $item->audits()->where("created_at", ">", $opname->start)->get();
-        $movement = 0;
-        foreach ($audits as $id => $audit) {
-            $old = $audit->old_values;
-            $new = $audit->new_values;
 
-            if (isset($old["qty"]) && isset($new["qty"])) {
-                $movement += $new["qty"] - $old["qty"];
-            }
-        }
+        $movement = $this->calculateMovement($item, $opname->start);
 
         return response()->json(["movement" => $movement]);
     }
 
+    /**
+     * Return all items (farmasi & non‐farmasi) for an opname, 
+     * enriched with frozen stock, movement, and attached opname info.
+     *
+     * @param  int  $id  opname gudang ID
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function get_opname_items($id)
     {
-        // first, get the opname
-        $opname = WarehouseStockOpnameGudang::findOrFail($id);
+        $opname   = WarehouseStockOpnameGudang::findOrFail($id);
+        $gudangId = $opname->gudang->id;
 
-        // second, gather all items where the gudang_id == $opname->gudang->id
-        $items_f = StoredBarangFarmasi::with(["pbi", "pbi.item", "pbi.satuan", "pbi.pb"])->where("gudang_id", $opname->gudang->id)->get();
-        $items_nf = StoredBarangNonFarmasi::with(["pbi", "pbi.item", "pbi.satuan", "pbi.pb"])->where("gudang_id", $opname->gudang->id)->get();
+        $itemsF  = StoredBarangFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
+            ->where('gudang_id', $gudangId)
+            ->get();
+        $itemsNF = StoredBarangNonFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
+            ->where('gudang_id', $gudangId)
+            ->get();
 
-        // third, from audits table, track movements
-        // where the time is above $opname->start
-        // and assign attributes named "frozen", "movement", and "type"
-        foreach ($items_f as $id => $item) {
-            $item->type = "f";
-            $item->opname = null;
-            $item_opname = WarehouseStockOpnameItems::where("sog_id", $opname->id)->where("si_" . $item->type . "_id", $item->id)->first();
-            $audits = $item->audits()->where("created_at", ">", $opname->start);
+        $itemsF  = $this->attachOpnameData($itemsF, $opname);
+        $itemsNF = $this->attachOpnameData($itemsNF, $opname);
 
-            if (isset($item_opname)) {
-                $item->opname = $item_opname;
-
-                if ($item->opname->status == "final") {
-                    $audits = $audits->where("created_at", "<", $item->opname->updated_at);
-                    $last_audits = $item->audits()
-                        ->where("created_at", ">", $opname->start)
-                        ->where("created_at", "<=", $item->opname->updated_at)
-                        ->orderBy("created_at", "desc")
-                        ->get();
-
-                    foreach ($last_audits as $id => $audit) {
-                        $old = $audit->old_values;
-                        $new = $audit->new_values;
-
-                        if (isset($old["qty"]) && isset($new["qty"])) {
-                            $discount_qty = $new["qty"] - $old["qty"];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            $audits = $audits->get();
-            $movement = 0;
-            foreach ($audits as $id => $audit) {
-                $old = $audit->old_values;
-                $new = $audit->new_values;
-
-                if (isset($old["qty"]) && isset($new["qty"])) {
-                    $movement += $new["qty"] - $old["qty"];
-                }
-            }
-
-            $item->frozen = $item->qty - $movement;
-            $item->movement = $movement;
-
-            if (isset($discount_qty)) {
-                $item->frozen -= $discount_qty;
-            }
-        }
-
-        // do the same for $items_nf
-        foreach ($items_nf as $id => $item) {
-            $item->type = "nf";
-            $item->opname = null;
-            $item_opname = WarehouseStockOpnameItems::where("sog_id", $opname->id)->where("si_" . $item->type . "_id", $item->id)->first();
-            $audits = $item->audits()->where("created_at", ">", $opname->start);
-
-            if (isset($item_opname)) {
-                $item->opname = $item_opname;
-
-                if ($item->opname->status == "final") {
-                    $audits = $audits->where("created_at", "<", $item->opname->updated_at);
-                    $last_audits = $item->audits()
-                        ->where("created_at", ">", $opname->start)
-                        ->where("created_at", "<=", $item->opname->updated_at)
-                        ->orderBy("created_at", "desc")
-                        ->get();
-
-                    foreach ($last_audits as $id => $audit) {
-                        $old = $audit->old_values;
-                        $new = $audit->new_values;
-
-                        if (isset($old["qty"]) && isset($new["qty"])) {
-                            $discount_qty = $new["qty"] - $old["qty"];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            $audits = $audits->get();
-            $movement = 0;
-            foreach ($audits as $id => $audit) {
-                $old = $audit->old_values;
-                $new = $audit->new_values;
-
-                if (isset($old["qty"]) && isset($new["qty"])) {
-                    $movement += $new["qty"] - $old["qty"];
-                }
-            }
-
-            $item->frozen = $item->qty - $movement;
-            $item->movement = $movement;
-
-            if (isset($discount_qty)) {
-                $item->frozen -= $discount_qty;
-            }
-        }
-
-        // fourth, combine both items into an array
-        // and sort by $item->pbi->nama_barang
-        $items = array_merge($items_f->toArray(), $items_nf->toArray());
-
-        usort($items, function ($a, $b) {
-            return strcmp($a['pbi']['nama_barang'], $b['pbi']['nama_barang']); // Accessing 'pbi' as an index in the array
+        // Merge and sort by pbi.nama_barang
+        $merged = array_merge($itemsF->toArray(), $itemsNF->toArray());
+        usort($merged, function ($a, $b) {
+            return strcmp($a['pbi']['nama_barang'], $b['pbi']['nama_barang']);
         });
 
-        return response()->json($items);
+        return response()->json($merged);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store or update draft adjustments for multiple opname items.
+     *
+     * @param  Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
-        if ($request->has("drafts")) {
-            $request["drafts"] = json_decode($request["drafts"]);
+        // Decode JSON string if present
+        if ($request->has('drafts')) {
+            $request['drafts'] = json_decode($request['drafts']);
         } else {
-            // return bad request
-            return response()->json(["message" => "Draft is required"], 400);
+            return response()->json(['message' => 'Draft is required'], 400);
         }
 
         $request->validate([
-            "drafts" => "required|array",
-            "sog_id" => "required|exists:warehouse_stock_opname_gudang,id",
-            "column" => "required|string",
-            "user_id" => "required|exists:users,id"
+            'drafts'  => 'required|array',
+            'sog_id'  => 'required|exists:warehouse_stock_opname_gudang,id',
+            'column'  => 'required|string',
+            'user_id' => 'required|exists:users,id',
         ]);
 
         DB::beginTransaction();
         try {
-            $sog = WarehouseStockOpnameGudang::findOrFail($request["sog_id"]);
+            $opname = WarehouseStockOpnameGudang::findOrFail($request['sog_id']);
 
-            for ($i = 0; $i < count($request["drafts"]); $i++) {
-                $draft = $request["drafts"][$i];
-
-                $query = StoredBarangFarmasi::query();
-                if ($request["column"] == "si_nf_id") {
-                    $query = StoredBarangNonFarmasi::query();
-                }
-
-                $item = $query->findOrFail($draft->si_id);
-                $audits = $item->audits()->where("created_at", ">", $sog->start)->get();
-                $movement = 0;
-                foreach ($audits as $id => $audit) {
-                    $old = $audit->old_values;
-                    $new = $audit->new_values;
-
-                    if (isset($old["qty"]) && isset($new["qty"])) {
-                        $movement += $new["qty"] - $old["qty"];
-                    }
-                }
+            foreach ($request['drafts'] as $draft) {
+                $item     = $this->findStoredItemFromColumn($request['column'], $draft->si_id);
+                $movement = $this->calculateMovement($item, $opname->start);
 
                 if ($draft->qty + $movement < 0) {
-                    throw new \Exception("Stock tidak bisa kurang dari 0"); // throw exception if qty is not enough
+                    throw new \Exception('Stock tidak bisa kurang dari 0');
                 }
 
-                // check if there's WarehouseStockOpnameItems
-                // with sog_id == $request["sog_id"]
-                // and $request["column"] == $draft["si_id"]
-                $warehouseStockOpnameItems = WarehouseStockOpnameItems::where("sog_id", $request["sog_id"])
-                    ->where($request["column"], $draft->si_id)
-                    ->first();
+                $criteria = [
+                    'sog_id' => $request['sog_id'],
+                    $request['column'] => $draft->si_id,
+                ];
 
-                if ($warehouseStockOpnameItems) {
-                    // check if status is final or draft
-                    if ($warehouseStockOpnameItems->status == "final") {
-                        continue; // ignore updating, and don't create new
+                $wsItem = WarehouseStockOpnameItems::firstWhere($criteria);
+
+                if ($wsItem) {
+                    // Skip if already finalized
+                    if ($wsItem->status === 'final') {
+                        continue;
                     }
-
-                    // update the warehouseStockOpnameItems
-                    $warehouseStockOpnameItems->update([
-                        "qty" => $draft->qty,
-                        "keterangan" => $draft->keterangan,
-                        "user_id" => $request["user_id"]
+                    $wsItem->update([
+                        'qty'        => $draft->qty,
+                        'keterangan' => $draft->keterangan,
+                        'user_id'    => $request['user_id'],
                     ]);
                 } else {
-                    // create new warehouseStockOpnameItems
                     WarehouseStockOpnameItems::create([
-                        "sog_id" => $request["sog_id"],
-                        $request["column"] => $draft->si_id,
-                        "qty" => $draft->qty,
-                        "keterangan" => $draft->keterangan,
-                        "user_id" => $request["user_id"]
+                        'sog_id'     => $request['sog_id'],
+                        $request['column'] => $draft->si_id,
+                        'qty'        => $draft->qty,
+                        'keterangan' => $draft->keterangan,
+                        'user_id'    => $request['user_id'],
                     ]);
                 }
             }
 
             DB::commit();
-            return response()->json(["message" => "Data berhasil disimpan"], 200);
+            return response()->json(['message' => 'Data berhasil disimpan'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(["success" => false, "error" => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
+    /**
+     * Print the difference report (selisih) for a given opname.
+     *
+     * @param  int  $sog_id
+     * @return \Illuminate\View\View
+     */
     public function print_selisih($sog_id)
     {
-        // first, get the opname
-        $opname = WarehouseStockOpnameGudang::findOrFail($sog_id);
+        $opname   = WarehouseStockOpnameGudang::findOrFail($sog_id);
+        $gudangId = $opname->gudang->id;
 
-        // second, gather all items where the gudang_id == $opname->gudang->id
-        $items_f = StoredBarangFarmasi::with(["pbi", "pbi.item", "pbi.satuan", "pbi.pb"])->where("gudang_id", $opname->gudang->id)->get();
-        $items_nf = StoredBarangNonFarmasi::with(["pbi", "pbi.item", "pbi.satuan", "pbi.pb"])->where("gudang_id", $opname->gudang->id)->get();
+        $itemsF  = StoredBarangFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
+            ->where('gudang_id', $gudangId)
+            ->get();
+        $itemsNF = StoredBarangNonFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
+            ->where('gudang_id', $gudangId)
+            ->get();
 
-        // third, from audits table, track movements
-        // where the time is above $opname->start
-        // and assign attributes named "frozen", "movement", and "type"
-        foreach ($items_f as $id => $item) {
-            $item->type = "f";
-            $item->opname = null;
-            $item_opname = WarehouseStockOpnameItems::where("sog_id", $opname->id)->where("si_" . $item->type . "_id", $item->id)->first();
-            $audits = $item->audits()->where("created_at", ">", $opname->start);
+        $itemsF  = $this->attachOpnameData($itemsF, $opname);
+        $itemsNF = $this->attachOpnameData($itemsNF, $opname);
 
-            if (isset($item_opname)) {
-                $item->opname = $item_opname;
-
-                if ($item->opname->status == "final") {
-                    $audits = $audits->where("created_at", "<", $item->opname->updated_at);
-                    $last_audits = $item->audits()
-                        ->where("created_at", ">", $opname->start)
-                        ->where("created_at", "<=", $item->opname->updated_at)
-                        ->orderBy("created_at", "desc")
-                        ->get();
-
-                    foreach ($last_audits as $id => $audit) {
-                        $old = $audit->old_values;
-                        $new = $audit->new_values;
-
-                        if (isset($old["qty"]) && isset($new["qty"])) {
-                            $discount_qty = $new["qty"] - $old["qty"];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            $audits = $audits->get();
-            $movement = 0;
-            foreach ($audits as $id => $audit) {
-                $old = $audit->old_values;
-                $new = $audit->new_values;
-
-                if (isset($old["qty"]) && isset($new["qty"])) {
-                    $movement += $new["qty"] - $old["qty"];
-                }
-            }
-
-            $item->frozen = $item->qty - $movement;
-            $item->movement = $movement;
-
-            if (isset($discount_qty)) {
-                $item->frozen -= $discount_qty;
-            }
-        }
-
-        // do the same for $items_nf
-        foreach ($items_nf as $id => $item) {
-            $item->type = "nf";
-            $item->opname = null;
-            $item_opname = WarehouseStockOpnameItems::where("sog_id", $opname->id)->where("si_" . $item->type . "_id", $item->id)->first();
-            $audits = $item->audits()->where("created_at", ">", $opname->start);
-
-            if (isset($item_opname)) {
-                $item->opname = $item_opname;
-
-                if ($item->opname->status == "final") {
-                    $audits = $audits->where("created_at", "<", $item->opname->updated_at);
-                    $last_audits = $item->audits()
-                        ->where("created_at", ">", $opname->start)
-                        ->where("created_at", "<=", $item->opname->updated_at)
-                        ->orderBy("created_at", "desc")
-                        ->get();
-
-                    foreach ($last_audits as $id => $audit) {
-                        $old = $audit->old_values;
-                        $new = $audit->new_values;
-
-                        if (isset($old["qty"]) && isset($new["qty"])) {
-                            $discount_qty = $new["qty"] - $old["qty"];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            $audits = $audits->get();
-            $movement = 0;
-            foreach ($audits as $id => $audit) {
-                $old = $audit->old_values;
-                $new = $audit->new_values;
-
-                if (isset($old["qty"]) && isset($new["qty"])) {
-                    $movement += $new["qty"] - $old["qty"];
-                }
-            }
-
-            $item->frozen = $item->qty - $movement;
-            $item->movement = $movement;
-
-            if (isset($discount_qty)) {
-                $item->frozen -= $discount_qty;
-            }
-        }
-
-        // fourth, combine both items into an array
-        // and sort by $item->pbi->nama_barang
-        $items = array_merge($items_f->all(), $items_nf->all());
+        $items = array_merge($itemsF->all(), $itemsNF->all());
 
         return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.partials.so-print-selisih", [
-            "items" => $items,
-            "sog" => $opname
+            'items' => $items,
+            'sog'   => $opname,
         ]);
     }
 
+    /**
+     * Print the stock opname (SO) report.
+     *
+     * @param  int  $sog_id
+     * @return \Illuminate\View\View
+     */
     public function print_so($sog_id)
     {
-        // first, get the opname
-        $opname = WarehouseStockOpnameGudang::findOrFail($sog_id);
+        $opname   = WarehouseStockOpnameGudang::findOrFail($sog_id);
+        $gudangId = $opname->gudang->id;
 
-        // second, gather all items where the gudang_id == $opname->gudang->id
-        $items_f = StoredBarangFarmasi::with(["pbi", "pbi.item", "pbi.satuan", "pbi.pb"])->where("gudang_id", $opname->gudang->id)->get();
-        $items_nf = StoredBarangNonFarmasi::with(["pbi", "pbi.item", "pbi.satuan", "pbi.pb"])->where("gudang_id", $opname->gudang->id)->get();
+        $itemsF  = StoredBarangFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
+            ->where('gudang_id', $gudangId)
+            ->get();
+        $itemsNF = StoredBarangNonFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
+            ->where('gudang_id', $gudangId)
+            ->get();
 
-        // third, from audits table, track movements
-        // where the time is above $opname->start
-        // and assign attributes named "frozen", "movement", and "type"
-        foreach ($items_f as $id => $item) {
-            $item->type = "f";
-            $item->opname = null;
-            $item_opname = WarehouseStockOpnameItems::where("sog_id", $opname->id)->where("si_" . $item->type . "_id", $item->id)->first();
-            $audits = $item->audits()->where("created_at", ">", $opname->start);
+        $itemsF  = $this->attachOpnameData($itemsF, $opname);
+        $itemsNF = $this->attachOpnameData($itemsNF, $opname);
 
-            if (isset($item_opname)) {
-                $item->opname = $item_opname;
-
-                if ($item->opname->status == "final") {
-                    $audits = $audits->where("created_at", "<", $item->opname->updated_at);
-                    $last_audits = $item->audits()
-                        ->where("created_at", ">", $opname->start)
-                        ->where("created_at", "<=", $item->opname->updated_at)
-                        ->orderBy("created_at", "desc")
-                        ->get();
-
-                    foreach ($last_audits as $id => $audit) {
-                        $old = $audit->old_values;
-                        $new = $audit->new_values;
-
-                        if (isset($old["qty"]) && isset($new["qty"])) {
-                            $discount_qty = $new["qty"] - $old["qty"];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            $audits = $audits->get();
-            $movement = 0;
-            foreach ($audits as $id => $audit) {
-                $old = $audit->old_values;
-                $new = $audit->new_values;
-
-                if (isset($old["qty"]) && isset($new["qty"])) {
-                    $movement += $new["qty"] - $old["qty"];
-                }
-            }
-
-            $item->frozen = $item->qty - $movement;
-            $item->movement = $movement;
-
-            if (isset($discount_qty)) {
-                $item->frozen -= $discount_qty;
-            }
-        }
-
-        // do the same for $items_nf
-        foreach ($items_nf as $id => $item) {
-            $item->type = "nf";
-            $item->opname = null;
-            $item_opname = WarehouseStockOpnameItems::where("sog_id", $opname->id)->where("si_" . $item->type . "_id", $item->id)->first();
-            $audits = $item->audits()->where("created_at", ">", $opname->start);
-
-            if (isset($item_opname)) {
-                $item->opname = $item_opname;
-
-                if ($item->opname->status == "final") {
-                    $audits = $audits->where("created_at", "<", $item->opname->updated_at);
-                    $last_audits = $item->audits()
-                        ->where("created_at", ">", $opname->start)
-                        ->where("created_at", "<=", $item->opname->updated_at)
-                        ->orderBy("created_at", "desc")
-                        ->get();
-
-                    foreach ($last_audits as $id => $audit) {
-                        $old = $audit->old_values;
-                        $new = $audit->new_values;
-
-                        if (isset($old["qty"]) && isset($new["qty"])) {
-                            $discount_qty = $new["qty"] - $old["qty"];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            $audits = $audits->get();
-            $movement = 0;
-            foreach ($audits as $id => $audit) {
-                $old = $audit->old_values;
-                $new = $audit->new_values;
-
-                if (isset($old["qty"]) && isset($new["qty"])) {
-                    $movement += $new["qty"] - $old["qty"];
-                }
-            }
-
-            $item->frozen = $item->qty - $movement;
-            $item->movement = $movement;
-
-            if (isset($discount_qty)) {
-                $item->frozen -= $discount_qty;
-            }
-        }
-
-        // fourth, combine both items into an array
-        // and sort by $item->pbi->nama_barang
-        $items = array_merge($items_f->all(), $items_nf->all());
+        $items = array_merge($itemsF->all(), $itemsNF->all());
 
         return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.partials.so-print-so", [
-            "items" => $items,
-            "sog" => $opname
+            'items' => $items,
+            'sog'   => $opname,
         ]);
     }
 
+    // -------------------------------------------------------------------------
+    // Private helper methods
+    // -------------------------------------------------------------------------
+
     /**
-     * Display the specified resource.
+     * Find a stored item instance by type.
+     *
+     * @param  string  $type  'f' or 'nf'
+     * @param  int     $id
+     * @return \Illuminate\Database\Eloquent\Model
      */
-    public function show(string $id)
+    private function findStoredItem(string $type, int $id)
     {
-        //
+        if ($type === 'nf') {
+            return StoredBarangNonFarmasi::findOrFail($id);
+        }
+        return StoredBarangFarmasi::findOrFail($id);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Given a column name, find the corresponding stored‐item model.
+     *
+     * @param  string  $column   'si_f_id' or 'si_nf_id'
+     * @param  int     $siId
+     * @return \Illuminate\Database\Eloquent\Model
      */
-    public function update(Request $request, string $id)
+    private function findStoredItemFromColumn(string $column, int $siId)
     {
-        //
+        if ($column === 'si_nf_id') {
+            return StoredBarangNonFarmasi::findOrFail($siId);
+        }
+        return StoredBarangFarmasi::findOrFail($siId);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Calculate total movement (sum of qty diffs) since a given timestamp.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model  $item
+     * @param  \Carbon\Carbon|string               $since
+     * @return int
      */
-    public function destroy(string $id)
+    private function calculateMovement($item, $since)
     {
-        //
+        $audits = $item->audits()->where('created_at', '>', $since)->get();
+        $movement = 0;
+
+        foreach ($audits as $audit) {
+            $old = $audit->old_values;
+            $new = $audit->new_values;
+            if (isset($old['qty'], $new['qty'])) {
+                $movement += ($new['qty'] - $old['qty']);
+            }
+        }
+
+        return $movement;
     }
+
+    /**
+     * Attach 'type', 'opname', 'frozen', and 'movement' properties to each item.
+     *
+     * @param  \Illuminate\Support\Collection  $items
+     * @param  WarehouseStockOpnameGudang      $opname
+     * @return \Illuminate\Support\Collection
+     */
+    private function attachOpnameData($items, WarehouseStockOpnameGudang $opname)
+    {
+        return $items->map(function ($item) use ($opname) {
+            $typeKey = $item instanceof StoredBarangNonFarmasi ? 'nf' : 'f';
+            $item->type  = $typeKey;
+            $item->opname = null;
+
+            $sogId = $opname->id;
+            $siField = 'si_' . $typeKey . '_id';
+            $itemOpname = WarehouseStockOpnameItems::where('sog_id', $sogId)
+                ->where($siField, $item->id)
+                ->first();
+
+            // Limit audits to before finalisation if already finalized
+            $auditsQuery = $item->audits()->where('created_at', '>', $opname->start);
+            $discountQty = 0;
+
+            if ($itemOpname) {
+                $item->opname = $itemOpname;
+                if ($itemOpname->status === 'final') {
+                    $auditsQuery = $auditsQuery->where('created_at', '<', $itemOpname->updated_at);
+                    $lastAudit = $item->audits()
+                        ->where('created_at', '>', $opname->start)
+                        ->where('created_at', '<=', $itemOpname->updated_at)
+                        ->orderBy('created_at', 'desc')
+                        ->first();
+
+                    if ($lastAudit && isset($lastAudit->old_values['qty'], $lastAudit->new_values['qty'])) {
+                        $discountQty = $lastAudit->new_values['qty'] - $lastAudit->old_values['qty'];
+                    }
+                }
+            }
+
+            // Compute net movement
+            $movement = $auditsQuery->get()->reduce(function ($carry, $audit) {
+                $ov = $audit->old_values;
+                $nv = $audit->new_values;
+                return $carry + ((isset($ov['qty'], $nv['qty'])) ? ($nv['qty'] - $ov['qty']) : 0);
+            }, 0);
+
+            $item->movement = $movement;
+            $item->frozen   = $item->qty - $movement - $discountQty;
+
+            return $item;
+        });
+    }
+
+    // Empty stub methods to preserve API
+    public function show(string $id) {}
+    public function update(Request $request, string $id) {}
+    public function destroy(string $id) {}
 }

@@ -621,46 +621,51 @@
                     for ($i = 0; $i < count($items); $i++) {
                         $Item = $items[$i];
                         $PBI = $Item['pbi'];
-                        $Barang = $PBI['item'];
-                        $Satuan = $PBI['satuan'];
-
-                        if (!isset($PBI)) {
+                        if (!$PBI) {
                             continue;
                         }
 
-                        $Head = null;
-                        foreach ($Stacks as $stack) {
+                        $found = false;
+
+                        // iterate by reference!
+                        foreach ($Stacks as &$stack) {
                             if (
                                 $stack['barang_id'] === $PBI['barang_id'] &&
                                 $stack['satuan_id'] === $PBI['satuan_id'] &&
                                 $stack['type'] === $Item['type']
                             ) {
-                                $Head = $stack;
+                                // now $stack is a reference to the actual $Stacks element
+                                $stack['qty'] += $Item['qty'];
+                                $stack['movement'] += $Item['movement'];
+                                $stack['frozen'] += $Item['frozen'];
+
+                                // handle actual opname
+                                $opQty = isset($Item['opname']) ? $Item['opname']['qty'] : 0;
+                                if (isset($stack['actual'])) {
+                                    $stack['actual'] += $opQty;
+                                } else {
+                                    $stack['actual'] = $opQty;
+                                }
+
+                                $stack['stack'][] = $Item;
+                                $found = true;
                                 break;
                             }
                         }
+                        // IMPORTANT: unset the reference so it doesn’t linger
+                        unset($stack);
 
-                        if ($Head) {
-                            array_push($Head['stack'], $Item);
-                            $Head['qty'] += $Item['qty'];
-                            $Head['movement'] += $Item['movement'];
-                            $Head['frozen'] += $Item['frozen'];
-
-                            if (!isset($Head['actual'])) {
-                                $Head['actual'] = isset($Item['opname']) ? $Item['opname']['qty'] : null;
-                            } elseif (isset($Item['opname'])) {
-                                $Head['actual'] += $Item['opname']['qty'];
-                            }
-                        } else {
+                        if (!$found) {
+                            // no existing stack: create a new one
                             $Stacks[] = [
                                 'actual' => isset($Item['opname']) ? $Item['opname']['qty'] : null,
                                 'frozen' => $Item['frozen'],
                                 'movement' => $Item['movement'],
                                 'qty' => $Item['qty'],
-                                'barang_id' => $PBI['item']['id'], // Assuming item has an id attribute
-                                'satuan_id' => $PBI['satuan']['id'], // Assuming satuan has an id attribute
-                                'barang' => $Barang,
-                                'satuan' => $Satuan,
+                                'barang_id' => $PBI['item']['id'],
+                                'satuan_id' => $PBI['satuan']['id'],
+                                'barang' => $PBI['item'],
+                                'satuan' => $PBI['satuan'],
                                 'type' => $Item['type'],
                                 'stack' => [$Item],
                             ];
@@ -672,11 +677,11 @@
                 @foreach ($Stacks as $item)
                     <tr>
                         <td>
-                            <nobr>{{ $item["barang"]->kode }}</nobr>
+                            <nobr>{{ $item['barang']->kode }}</nobr>
                         </td>
-                        <td>{{ $item["barang"]->nama }}</td>
-                        <td>{{ $item["barang"]->satuan->kode }}</td>
-                        <td align="right">{{ $item["actual"] }}</td>
+                        <td>{{ $item['barang']->nama }}</td>
+                        <td>{{ $item['barang']->satuan->kode }}</td>
+                        <td align="right">{{ $item['actual'] }}</td>
                         </td>
                     </tr>
                 @endforeach
