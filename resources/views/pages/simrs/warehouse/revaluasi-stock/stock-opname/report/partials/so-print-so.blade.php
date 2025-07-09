@@ -603,7 +603,7 @@
     </div>
     <div id="previews">
         <h2 class="bdr">
-            Selisih Stok {{ $sog->gudang->nama }}<span>Dari Tanggal : {{ tgl_waktu($sog->start) }}</span>
+            Lembar SO {{ $sog->gudang->nama }}<span>Dari Tanggal : {{ tgl_waktu($sog->start) }}</span>
         </h2>
         <table width="100%" class="bdr2 pad">
             <thead>
@@ -611,57 +611,81 @@
                     <th width="3%">Kode Barang</th>
                     <th>Nama Barang</th>
                     <th width="3%">UOM</th>
-                    <th width="5%">No Batch</th>
-                    <th width="7%">Tanggal Terima</th>
-                    <th width="7%">Tanggal Expired</th>
-                    <th width="5%">Stok Sistem</th>
                     <th width="5%">Stok Fisik</th>
-                    <th width="5%">Selisih</th>
-                    <th width="10%">HNA (Satuan)</th>
-                    <th width="10%">Nominal</th>
                 </tr>
             </thead>
             <tbody>
                 @php
-                    $total = 0;
+                    $Stacks = [];
+
+                    for ($i = 0; $i < count($items); $i++) {
+                        $Item = $items[$i];
+                        $PBI = $Item['pbi'];
+                        if (!$PBI) {
+                            continue;
+                        }
+
+                        $found = false;
+
+                        // iterate by reference!
+                        foreach ($Stacks as &$stack) {
+                            if (
+                                $stack['barang_id'] === $PBI['barang_id'] &&
+                                $stack['satuan_id'] === $PBI['satuan_id'] &&
+                                $stack['type'] === $Item['type']
+                            ) {
+                                // now $stack is a reference to the actual $Stacks element
+                                $stack['qty'] += $Item['qty'];
+                                $stack['movement'] += $Item['movement'];
+                                $stack['frozen'] += $Item['frozen'];
+
+                                // handle actual opname
+                                $opQty = isset($Item['opname']) ? $Item['opname']['qty'] : 0;
+                                if (isset($stack['actual'])) {
+                                    $stack['actual'] += $opQty;
+                                } else {
+                                    $stack['actual'] = $opQty;
+                                }
+
+                                $stack['stack'][] = $Item;
+                                $found = true;
+                                break;
+                            }
+                        }
+                        // IMPORTANT: unset the reference so it doesn’t linger
+                        unset($stack);
+
+                        if (!$found) {
+                            // no existing stack: create a new one
+                            $Stacks[] = [
+                                'actual' => isset($Item['opname']) ? $Item['opname']['qty'] : null,
+                                'frozen' => $Item['frozen'],
+                                'movement' => $Item['movement'],
+                                'qty' => $Item['qty'],
+                                'barang_id' => $PBI['item']['id'],
+                                'satuan_id' => $PBI['satuan']['id'],
+                                'barang' => $PBI['item'],
+                                'satuan' => $PBI['satuan'],
+                                'type' => $Item['type'],
+                                'stack' => [$Item],
+                            ];
+                        }
+                    }
+
                 @endphp
 
-
-                @foreach ($items as $item)
-                    {{-- @php
-                    $item = collect($item);
-                @endphp --}}
-                    @if ($item->opname && $item->opname->qty != $item->frozen)
-                        <tr>
-                            <td>
-                                <nobr>{{ $item->pbi->item->kode }}</nobr>
-                            </td>
-                            <td align="center"> <b>{{ $item->pbi->item->nama }}</b></td>
-                            <td align="center">{{ $item->pbi->item->satuan->kode }}</td>
-                            <td align="center">{{ $item->pbi->batch_no }}</td>
-                            <td align="center">{{ tgl($item->pbi->pb->tanggal_terima) }}</td>
-                            <td align="center">{{ isset($item->pbi->tanggal_exp) ? tgl($item->pbi->tanggal_exp) : 'Non-perishable' }}</td>
-                            <td align="center">{{ $item->frozen }}</td>
-                            <td align="center">{{ $item->opname->qty }}</td>
-                            <td align="center">{{ $item->opname->qty - $item->frozen }}</td>
-                            <td align="right">{{ rp($item->pbi->item->hna) }}</td>
-                            <td align="right">{{ rp($item->pbi->item->hna * ($item->opname->qty - $item->frozen)) }}
-                            </td>
-                        </tr>
-
-                        @php
-                            $total += $item->pbi->item->hna * ($item->opname->qty - $item->frozen);
-                        @endphp
-                    @endif
+                @foreach ($Stacks as $item)
+                    <tr>
+                        <td>
+                            <nobr>{{ $item['barang']->kode }}</nobr>
+                        </td>
+                        <td>{{ $item['barang']->nama }}</td>
+                        <td>{{ $item['barang']->satuan->kode }}</td>
+                        <td align="right">{{ $item['actual'] }}</td>
+                        </td>
+                    </tr>
                 @endforeach
-
             </tbody>
-            <tfoot>
-                <tr style="text-align: right;">
-                    <td colspan="10">Total</td>
-                    <td>{{ rp($total) }}</td>
-                </tr>
-            </tfoot>
         </table>
     </div>
 

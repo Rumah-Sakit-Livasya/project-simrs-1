@@ -611,6 +611,9 @@
                     <th width="3%">Kode Barang</th>
                     <th>Nama Barang</th>
                     <th width="3%">UOM</th>
+                    <th width="5%">No Batch</th>
+                    <th width="7%">Tanggal Terima</th>
+                    <th width="7%">Tanggal Expired</th>
                     <th width="5%">Stok Sistem</th>
                     <th width="5%">Stok Fisik</th>
                     <th width="5%">Selisih</th>
@@ -625,7 +628,7 @@
 
 
                 @foreach ($items as $item)
-                {{-- @php
+                    {{-- @php
                     $item = collect($item);
                 @endphp --}}
                     @if ($item->opname && $item->opname->qty != $item->frozen)
@@ -633,11 +636,14 @@
                             <td>
                                 <nobr>{{ $item->pbi->item->kode }}</nobr>
                             </td>
-                            <td>{{ $item->pbi->item->nama }}</td>
-                            <td>{{ $item->pbi->item->satuan->kode }}</td>
-                            <td align="right">{{ $item->frozen }}</td>
-                            <td align="right">{{ $item->opname->qty }}</td>
-                            <td align="right">{{ $item->opname->qty - $item->frozen }}</td>
+                            <td align="center"> <b>{{ $item->pbi->item->nama }}</b></td>
+                            <td align="center">{{ $item->pbi->item->satuan->kode }}</td>
+                            <td align="center">{{ $item->pbi->batch_no }}</td>
+                            <td align="center">{{ tgl($item->pbi->pb->tanggal_terima) }}</td>
+                            <td align="center">{{ isset($item->pbi->tanggal_exp) ? tgl($item->pbi->tanggal_exp) : 'Non-perishable' }}</td>
+                            <td align="center">{{ $item->frozen }}</td>
+                            <td align="center">{{ $item->opname->qty }}</td>
+                            <td align="center">{{ $item->opname->qty - $item->frozen }}</td>
                             <td align="right">{{ rp($item->pbi->item->hna) }}</td>
                             <td align="right">{{ rp($item->pbi->item->hna * ($item->opname->qty - $item->frozen)) }}
                             </td>
@@ -652,7 +658,7 @@
             </tbody>
             <tfoot>
                 <tr style="text-align: right;">
-                    <td colspan="7">Total</td>
+                    <td colspan="10">Total</td>
                     <td>{{ rp($total) }}</td>
                 </tr>
             </tfoot>

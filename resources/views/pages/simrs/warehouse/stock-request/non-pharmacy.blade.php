@@ -33,7 +33,7 @@
 
             $('.datepicker').daterangepicker({
                 opens: 'left',
-                // startDate: '1970-01-02',
+                // startDate: moment(today).startOf('month').format('YYYY-MM-DD'),
                 // endDate: moment(today).format('YYYY-MM-DD'),
                 // timePicker: true, // Enable time selection
                 // timePicker24Hour: true, // 24-hour format

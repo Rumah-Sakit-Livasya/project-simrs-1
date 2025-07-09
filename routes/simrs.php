@@ -92,13 +92,16 @@ use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangReportController;
 use App\Http\Controllers\WarehousePurchaseRequestNonPharmacy;
 use App\Http\Controllers\WarehousePurchaseRequestPharmacy;
+use App\Http\Controllers\WarehouseReportStockStatus;
 use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseSetupMinMaxStockController;
+use App\Http\Controllers\WarehouseSORStockStatus;
 use App\Http\Controllers\WarehouseStockAdjustmentController;
 use App\Http\Controllers\WarehouseStockOpnameDraft;
 use App\Http\Controllers\WarehouseStockOpnameFinal;
 use App\Http\Controllers\WarehouseStockOpnameGudangController;
+use App\Http\Controllers\WarehouseStockOpnameReport;
 use App\Http\Controllers\WarehouseStockRequestNonPharmacyController;
 use App\Http\Controllers\WarehouseStockRequestPharmacyController;
 use App\Http\Controllers\WarehouseSupplierController;
@@ -396,7 +399,17 @@ Route::group(['middleware' => ['auth']], function () {
                         Route::get("/print-selisih/{sog_id}", [WarehouseStockOpnameFinal::class, "print_selisih"])->name("warehouse.revaluasi-stock.stock-opname.final.print.selisih");
                         Route::get("/print-so/{sog_id}", [WarehouseStockOpnameFinal::class, "print_so"])->name("warehouse.revaluasi-stock.stock-opname.final.print.so");
                     });
+
+                    Route::prefix("report")->group(function () {
+                        Route::get("/", [WarehouseStockOpnameReport::class, "index"])->name("warehouse.revaluasi-stock.stock-opname.report");
+                        Route::get("/print-selisih/{sog_id}", [WarehouseStockOpnameReport::class, "print_selisih"])->name("warehouse.revaluasi-stock.stock-opname.report.print.selisih");
+                        Route::get("/print-so/{sog_id}", [WarehouseStockOpnameReport::class, "print_so"])->name("warehouse.revaluasi-stock.stock-opname.report.print.detail");
+                    });
                 });
+            });
+
+            Route::prefix("report")->group(function () {
+                Route::get("/stock-status", [WarehouseReportStockStatus::class, "index"])->name("warehouse.report.stock-status");
             });
         });
 

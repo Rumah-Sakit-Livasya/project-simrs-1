@@ -1,22 +1,45 @@
 @extends('inc.layout')
-@section('title', 'List Approval Purchase Order (CEO)')
+@section('title', 'Stock Opname: Final')
 @section('content')
+    <style>
+        .display-none {
+            display: none;
+        }
+
+        .popover {
+            max-width: 100%;
+            max-height:
+        }
+
+        .loading-page {
+            position: absolute;
+            min-height: 100%;
+            min-width: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 0 0 4px 4px;
+            z-index: 1000;
+        }
+    </style>
     <main id="js-page-content" role="main" class="page-content">
 
-        @include('pages.simrs.procurement.approval-po.partials.ceo-form')
+        @include('pages.simrs.warehouse.revaluasi-stock.stock-opname.report.partials.index-form')
 
-        @include('pages.simrs.procurement.approval-po.partials.ceo-datatable')
+        @include('pages.simrs.warehouse.revaluasi-stock.stock-opname.report.partials.index-datatable')
     </main>
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-    </script>
+    {{-- Select 2 --}}
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    {{-- Datepicker --}}
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     {{-- Datepicker Range --}}
     <script src="/js/dependency/moment/moment.js"></script>
     <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+    </script>
 
     <script>
         var controls = {
@@ -25,6 +48,8 @@
         }
 
         $(document).ready(function() {
+            $(".select2").select2();
+
 
             /// Get the current date and time
             var today = new Date();
@@ -40,8 +65,10 @@
             // Set the default date for the datepicker
             $('#datepicker-1').daterangepicker({
                 opens: 'left',
-                startDate: moment(today).startOf('month').format('YYYY-MM-DD'),
-                endDate: moment(today).format('YYYY-MM-DD'),
+                @if (!request('tanggal_so'))
+                    startDate: moment(today).startOf('month').format('YYYY-MM-DD'),
+                    endDate: moment(today).format('YYYY-MM-DD'),
+                @endif
                 // timePicker: true, // Enable time selection
                 // timePicker24Hour: true, // 24-hour format
                 // timePickerSeconds: true, // Include seconds in time selection
@@ -75,7 +102,28 @@
                         extend: 'excelHtml5',
                         text: 'Excel',
                         titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1'
+                        className: 'btn-outline-success btn-sm mr-1',
+                        exportOptions: {
+                            columns: ':visible',
+                            format: {
+                                body: function(data, row, column, node) {
+                                    // Check if data contains a nested table
+                                    if ($(node).find('table').length > 0) {
+                                        let text = '';
+                                        $(node).find('table tr').each(function() {
+                                            let rowText = [];
+                                            $(this).find('td').each(function() {
+                                                rowText.push($(this).text().trim());
+                                            });
+                                            text += rowText.join(' | ') +
+                                            '\n'; // You can use tab or comma too
+                                        });
+                                        return text.trim();
+                                    }
+                                    return $(node).text().trim();
+                                }
+                            }
+                        }
                     },
                     {
                         extend: 'csvHtml5',
@@ -116,7 +164,7 @@
         })
     </script>
 
-
-    <script src="{{ asset('js/simrs/procurement/approval-po/ceo.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/warehouse/revaluasi-stock/stock-opname/report/index.js') }}?v={{ time() }}">
+    </script>
 
 @endsection
