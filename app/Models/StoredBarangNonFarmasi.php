@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use Carbon\Carbon;
 
 class StoredBarangNonFarmasi extends Model implements AuditableContract
 {
@@ -37,5 +38,24 @@ class StoredBarangNonFarmasi extends Model implements AuditableContract
     public function soi()
     {
         return $this->hasMany(WarehouseStockOpnameItems::class, 'si_nf_id');
+    }
+
+    public function calculateMovementSince($since): int
+    {
+        $since = Carbon::parse($since);
+
+        return $this->audits()
+            ->where('created_at', '>', $since)
+            ->get()
+            ->reduce(function ($carry, $audit) {
+                $old = $audit->old_values;
+                $new = $audit->new_values;
+
+                if (isset($old['qty'], $new['qty'])) {
+                    return $carry + ($new['qty'] - $old['qty']);
+                }
+
+                return $carry;
+            }, 0);
     }
 }

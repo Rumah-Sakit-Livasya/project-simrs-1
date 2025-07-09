@@ -38,35 +38,67 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($sas as $sa)
+                            @foreach ($items as $item)
+                                @php
+                                    $movements = $item->stored_items->sum(function ($storedItem) {
+                                        if (request('gudang_id') && request('gudang_id') !== null) {
+                                            if ($storedItem->gudang_id != request('gudang_id')) {
+                                                return 0;
+                                            }
+                                        }
+                                        return $storedItem->calculateMovementSince(request('tanggal_end') ?: now());
+                                    });
+
+                                    $pre_stock = $item->stored_items->sum(function ($storedItem) {
+                                        if (request('gudang_id') && request('gudang_id') !== null) {
+                                            if ($storedItem->gudang_id != request('gudang_id')) {
+                                                return 0;
+                                            }
+                                        }
+                                        return $storedItem->qty;
+                                    });
+
+                                    $stock = $pre_stock - $movements;
+
+                                    $expired_qty = 0;
+                                    foreach ($item->stored_items as $stored) {
+                                        if (request('gudang_id') && request('gudang_id') !== null) {
+                                            if ($stored->gudang_id !== request('gudang_id')) {
+                                                continue;
+                                            }
+                                        }
+                                        // compare date now() with $stored->pbi->tanggal_exp
+                                        $expired = \Carbon\Carbon::parse($stored->pbi->tanggal_exp)->startOfDay();
+                                        if ($expired->lt(request('tanggal_end') ?: \Carbon\Carbon::today())) {
+                                            $expired_qty += $stored->qty;
+                                        }
+                                    }
+                                @endphp
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>
-                                        {{-- <button type="button" class="btn btn-sm btn-primary" data-bs-placement="top"
+                                        <button type="button" class="btn btn-sm btn-primary" data-bs-placement="top"
                                             data-bs-toggle="popover" data-bs-title="Detail Stock Status"
                                             data-bs-html="true"
-                                            data-bs-content-id="popover-content-{{ $sa->id }}">
+                                            data-bs-content-id="popover-content-{{ $loop->iteration }}">
                                             <i class="fas fa-list text-light" style="transform: scale(1.8)"></i>
                                         </button>
-                                        <div class="display-none" id="popover-content-{{ $sa->id }}">
+                                        <div class="display-none" id="popover-content-{{ $loop->iteration }}">
                                             @include(
-                                                'pages.simrs.warehouse.revaluasi-stock.stock-adjustment.partials.sa-detail',
-                                                ['sa' => $sa]
+                                                'pages.simrs.warehouse.report.partials.stock-status-detail',
+                                                ['item' => $item]
                                             )
-                                        </div> --}}
+                                        </div>
                                     </td>
-                                    <td>{{ $sa->kode_sa }}</td>
-                                    <td>{{ tgl($sa->tanggal_sa) }}</td>
-                                    <td>{{ $sa->gudang->nama }}</td>
-                                    <td>{{ $sa->barang->nama }}</td>
-                                    <td>{{ $sa->satuan->nama }}</td>
-                                    <td>{{ $sa->keterangan }}</td>
-                                    <td>{{ $sa->authorized_user->user->employee->fullname }}
-                                        @if ($sa->authorized_user_id != $sa->user_id)
-                                            (logged in as {{ $sa->user->employee->fullname }})
-                                        @endif
+                                    <td>{{ $item->kode }}</td>
+                                    <td>{{ $item->nama }}</td>
+                                    <td>{{ $item->satuan->nama }}</td>
+                                    <td>{{ $item->kategori->nama }}</td>
+                                    <td>{{ $item->golongan->nama }}</td>
+                                    <td>{{ $stock }}
                                     </td>
-                                    <td>{{$sa->items->sum("qty")}}</td>
+                                    <td> {{ rp($stock * $item->hna) }} </td>
+                                    <td>{{ $expired_qty }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

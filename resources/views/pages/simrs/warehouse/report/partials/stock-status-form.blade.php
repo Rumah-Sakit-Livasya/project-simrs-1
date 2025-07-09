@@ -14,12 +14,9 @@
             <div class="panel-hdr">
                 <h2>
                     Form <span class="fw-300"><i>Pencarian</i></span>
-                    &nbsp; <i id="loading-spinner-head" class="fas fa-spinner fa-spin"></i>
-                    <span id="loading-message" class="text-info">Loading...</span>
                 </h2>
             </div>
             <div class="panel-container show">
-                <div id="loading-page"></div>
                 <div class="panel-content">
 
                     <form action="{{ route('warehouse.report.stock-status') }}"
@@ -30,14 +27,14 @@
                             <div class="col-xl-6">
                                 <div class="form-group">
                                     <div class="row">
-                                        <div class="col-xl-2" style="text-align: right">
+                                        <div class="col-xl-4" style="text-align: right">
                                             <label class="form-label text-end" for="tanggal_end">
                                                 Sampai Tanggal
                                             </label>
                                         </div>
                                         <div class="col-xl">
                                             <input type="date" class="form-control"
-                                                value="{{ request('tanggal_end') ? $tanggal_end : now()->format('Y-m-d') }}"
+                                                value="{{ request('tanggal_end') ? request('tanggal_end') : now()->format('Y-m-d') }}"
                                                 id="tanggal_end" placeholder="Masukkan Tanggal Akhir" autocomplete="off"
                                                 name="tanggal_end">
 
@@ -52,7 +49,7 @@
                             <div class="col-xl-6">
                                 <div class="form-group">
                                     <div class="row">
-                                        <div class="col-xl-2" style="text-align: right">
+                                        <div class="col-xl-4" style="text-align: right">
                                             <label class="form-label text-end" for="kategori_id">
                                                 Kategori Barang
                                             </label>
@@ -80,16 +77,16 @@
                             <div class="col-xl-6">
                                 <div class="form-group">
                                     <div class="row">
-                                        <div class="col-xl-2" style="text-align: right">
-                                            <label class="form-label text-end" for="nama_barang">
+                                        <div class="col-xl-4" style="text-align: right">
+                                            <label class="form-label text-end" for="nama">
                                                 Nama Barang
                                             </label>
                                         </div>
                                         <div class="col-xl">
-                                            <input type="text" value="{{ request('nama_barang') }}"
+                                            <input type="text" value="{{ request('nama') }}"
                                                 style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                class="form-control" id="nama_barang" name="nama_barang">
-                                            @error('nama_barang')
+                                                class="form-control" id="nama" name="nama">
+                                            @error('nama')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -100,16 +97,16 @@
                             <div class="col-xl-6">
                                 <div class="form-group">
                                     <div class="row">
-                                        <div class="col-xl-2" style="text-align: right">
+                                        <div class="col-xl-4" style="text-align: right">
                                             <label class="form-label text-end" for="jenis">
                                                 Jenis Barang
                                             </label>
                                         </div>
                                         <div class="col-xl">
                                             <select name="jenis" id="jenis" class="form-control">
-                                                <option value="" selected>Semua</option>
-                                                <option value="f">Farmasi</option>
-                                                <option value="nf">Non Farmasi</option>
+                                                <option value="" {{ request('jenis') == '' ? 'selected' : '' }}>Semua</option>
+                                                <option value="f" {{ request('jenis') == 'f' ? 'selected' : '' }}>Farmasi</option>
+                                                <option value="nf" {{ request('jenis') == 'nf' ? 'selected' : '' }}>Non Farmasi</option>
                                             </select>
                                         </div>
                                     </div>
@@ -121,7 +118,7 @@
                             <div class="col-xl-6">
                                 <div class="form-group">
                                     <div class="row">
-                                        <div class="col-xl-2" style="text-align: right">
+                                        <div class="col-xl-4" style="text-align: right">
                                             <label class="form-label text-end" for="golongan_id">
                                                 Golongan Barang
                                             </label>
@@ -147,17 +144,17 @@
                             <div class="col-xl-6">
                                 <div class="form-group">
                                     <div class="row">
-                                        <div class="col-xl-2" style="text-align: right">
+                                        <div class="col-xl-4" style="text-align: right">
                                             <label class="form-label text-end" for="gudang_id">
                                                 Gudang
                                             </label>
                                         </div>
                                         <div class="col-xl">
                                             <select name="gudang_id" id="gudang" class="form-control select2">
-                                                <option value="" selected hidden disabled>Pilih Gudang
+                                                <option value="" {{ request("gudang_id") == "" ? 'selected' : '' }}>Semua
                                                 </option>
                                                 @foreach ($gudangs as $gudang)
-                                                    <option value="{{ $gudang->id }}">{{ $gudang->nama }}</option>
+                                                    <option value="{{ $gudang->id }}" {{ request('gudang_id') == $gudang->id ? 'selected' : '' }}>{{ $gudang->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
