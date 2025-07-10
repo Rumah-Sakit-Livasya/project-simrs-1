@@ -18,6 +18,13 @@
                             return;
                         }
                     }
+
+                    if (request('tanggal_end') && request('tanggal_end') !== null) {
+                        if ($stored_item->pbi->created_at > request('tanggal_end')) {
+                            return;
+                        }
+                    }
+                    
                     if ($stored_item->gudang_id == $gudang->id) {
                         $movements = $stored_item->calculateMovementSince(request('tanggal_end') ?: now());
 

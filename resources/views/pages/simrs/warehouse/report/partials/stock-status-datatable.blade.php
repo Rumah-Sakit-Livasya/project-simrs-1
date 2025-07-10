@@ -46,12 +46,22 @@
                                                 return 0;
                                             }
                                         }
+                                        if (request('tanggal_end') && request('tanggal_end') !== null) {
+                                            if ($storedItem->pbi->created_at > request('tanggal_end')) {
+                                                return 0;
+                                            }
+                                        }
                                         return $storedItem->calculateMovementSince(request('tanggal_end') ?: now());
                                     });
 
                                     $pre_stock = $item->stored_items->sum(function ($storedItem) {
                                         if (request('gudang_id') && request('gudang_id') !== null) {
                                             if ($storedItem->gudang_id != request('gudang_id')) {
+                                                return 0;
+                                            }
+                                        }
+                                        if (request('tanggal_end') && request('tanggal_end') !== null) {
+                                            if ($storedItem->pbi->created_at > request('tanggal_end')) {
                                                 return 0;
                                             }
                                         }
@@ -64,6 +74,11 @@
                                     foreach ($item->stored_items as $stored) {
                                         if (request('gudang_id') && request('gudang_id') !== null) {
                                             if ($stored->gudang_id !== request('gudang_id')) {
+                                                continue;
+                                            }
+                                        }
+                                        if (request('tanggal_end') && request('tanggal_end') !== null) {
+                                            if ($stored->pbi->created_at > request('tanggal_end')) {
                                                 continue;
                                             }
                                         }
