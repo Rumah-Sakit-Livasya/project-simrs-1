@@ -21,7 +21,7 @@ return new class extends Migration
             $table->softDeletes();
             $table->date("tanggal_sa");
             $table->foreignId("user_id")->constrained("users")->comment("Current logged in user")->cascadeOnDelete();
-            $table->foreignId("authorized_user_id")->constrained("warehouse_stock_adjustment_user")->comment("Authorized user.")->cascadeOnDelete();
+            $table->foreignId("authorized_user_id")->constrained("warehouse_stock_adjustment_user", "user_id")->comment("Authorized user.")->cascadeOnDelete();
             $table->string("kode_sa");
             $table->foreignId('gudang_id')->constrained('warehouse_master_gudang', 'id');
             $table->foreignId('barang_f_id')->nullable()->constrained('warehouse_barang_farmasi', 'id')->comment('Foreign Key to WarehouseBarangFarmasi Table');

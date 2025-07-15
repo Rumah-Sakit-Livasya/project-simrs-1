@@ -20,7 +20,7 @@ class WarehouseStockAdjustment extends Model implements AuditableContract
 
     public function authorized_user()
     {
-        return $this->belongsTo(WarehouseStockAdjustmentUsers::class, "authorized_user_id");
+        return $this->belongsTo(WarehouseStockAdjustmentUsers::class, "authorized_user_id", "user_id");
     }
 
     public function items()

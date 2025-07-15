@@ -17,7 +17,7 @@
         <td>{{ $loop->iteration }}</td>
         {{-- @dd($sbs); --}}
         <td>{{ tgl($barang->pbi->pb->tanggal_terima) }}</td>
-        <td>{{ tgl($barang->pbi->tanggal_exp) }}</td>
+        <td>{{ isset($barang->pbi->tanggal_exp) ? tgl($barang->pbi->tanggal_exp) : '-' }}</td>
         <td class="kode-pb">{{ $barang->pbi->pb->kode_penerimaan }}</td>
         <td class="no-faktur">{{ $barang->pbi->pb->no_faktur }}</td>
         <td>{{ $barang->pbi->batch_no }}</td>

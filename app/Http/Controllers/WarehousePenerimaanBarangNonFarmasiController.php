@@ -5,17 +5,29 @@ namespace App\Http\Controllers;
 use App\Models\ProcurementPurchaseOrderNonPharmacy;
 use App\Models\ProcurementPurchaseOrderNonPharmacyItems;
 use App\Models\StoredBarangNonFarmasi;
+use App\Models\User;
 use App\Models\WarehouseMasterGudang;
 use App\Models\WarehousePenerimaanBarangNonFarmasi;
 use App\Models\WarehouseSupplier;
 use App\Models\WarehouseBarangNonFarmasi;
 use App\Models\WarehousePenerimaanBarangNonFarmasiItems;
+use App\Services\CreateStockArguments;
+use App\Services\GoodsStockService;
+use App\Services\GoodsType;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class WarehousePenerimaanBarangNonFarmasiController extends Controller
 {
+    protected GoodsStockService $goodsStockService;
+
+    public function __construct(GoodsStockService $goodsStockService)
+    {
+        $this->goodsStockService = $goodsStockService;
+        $this->goodsStockService->controller = $this::class;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -304,11 +316,18 @@ class WarehousePenerimaanBarangNonFarmasiController extends Controller
                         $poi->save();
                     }
 
-                    StoredBarangNonFarmasi::create([
-                        "pbi_id" => $pbi->id,
-                        "gudang_id" => $validatedData1["gudang_id"],
-                        "qty" => $validatedData2["qty"][$key]
-                    ]);
+                    // StoredBarangNonFarmasi::create([
+                    //     "pbi_id" => $pbi->id,
+                    //     "gudang_id" => $validatedData1["gudang_id"],
+                    //     "qty" => $validatedData2["qty"][$key]
+                    // ]);
+                    $user = User::findOrFail($validatedData1["user_id"]);
+                    $source = $pb;
+                    $type = GoodsType::NonPharmacy;
+                    $warehouse = WarehouseMasterGudang::findOrFail($validatedData1["gudang_id"]);
+                    $qty = $validatedData2["qty"][$key];
+                    $args = new CreateStockArguments($user, $source, $type, $warehouse, $pbi, $qty);
+                    $this->goodsStockService->createStock($args);
                 }
             }
 
@@ -471,11 +490,18 @@ class WarehousePenerimaanBarangNonFarmasiController extends Controller
                         $poi->save();
                     }
 
-                    StoredBarangNonFarmasi::create([
-                        "pbi_id" => $pbi->id,
-                        "gudang_id" => $validatedData1["gudang_id"],
-                        "qty" => $validatedData2["qty"][$key]
-                    ]);
+                    // StoredBarangNonFarmasi::create([
+                    //     "pbi_id" => $pbi->id,
+                    //     "gudang_id" => $validatedData1["gudang_id"],
+                    //     "qty" => $validatedData2["qty"][$key]
+                    // ]);
+                    $user = User::findOrFail($validatedData1["user_id"]);
+                    $source = $pb;
+                    $type = GoodsType::NonPharmacy;
+                    $warehouse = WarehouseMasterGudang::findOrFail($validatedData1["gudang_id"]);
+                    $qty = $validatedData2["qty"][$key];
+                    $args = new CreateStockArguments($user, $source, $type, $warehouse, $pbi, $qty);
+                    $this->goodsStockService->createStock($args);
                 }
 
                 $pbi->save();

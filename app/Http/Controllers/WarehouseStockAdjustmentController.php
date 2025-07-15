@@ -12,6 +12,8 @@ use App\Models\WarehouseSatuanBarang;
 use App\Models\WarehouseStockAdjustment;
 use App\Models\WarehouseStockAdjustmentItems;
 use App\Models\WarehouseStockAdjustmentUsers;
+use App\Services\GoodsStockService;
+use App\Services\IncreaseDecreaseStockArguments;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -19,6 +21,14 @@ use Illuminate\Support\Facades\DB;
 
 class WarehouseStockAdjustmentController extends Controller
 {
+    protected GoodsStockService $goodsStockService;
+
+    public function __construct(GoodsStockService $goodsStockService)
+    {
+        $this->goodsStockService = $goodsStockService;
+        $this->goodsStockService->controller = $this::class;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -320,6 +330,7 @@ class WarehouseStockAdjustmentController extends Controller
         DB::beginTransaction();
         try {
             $sa = WarehouseStockAdjustment::create($validatedData1);
+            $user = User::findOrFail($validatedData1["authorized_user_id"]);
 
             foreach ($validatedData2["qty"] as $si_id => $qty) {
                 $query = StoredBarangFarmasi::query();
@@ -334,16 +345,26 @@ class WarehouseStockAdjustmentController extends Controller
 
                 $delta = $qty - $stored_barang->qty;
 
+                if($delta == 0) continue;
+
                 WarehouseStockAdjustmentItems::create([
                     "sa_id" => $sa->id,
                     "si_" . $validatedData2["type"] . "_id" => $stored_barang->id,
                     "qty" => $delta
                 ]);
 
-                $stored_barang->update([
-                    "qty" => $qty
-                ]);
-                $stored_barang->save();
+                // $stored_barang->update([
+                //     "qty" => $qty
+                // ]);
+                // $stored_barang->save();
+
+                // use the GoodsStockService
+                $args = new IncreaseDecreaseStockArguments($user, $sa, $stored_barang, $delta);
+                if ($delta < 0) {
+                    $this->goodsStockService->increaseStock($args);
+                } else {
+                    $this->goodsStockService->decreaseStock($args);
+                }
             }
 
             DB::commit();

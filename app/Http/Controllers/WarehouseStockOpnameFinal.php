@@ -9,11 +9,22 @@ use App\Models\WarehouseKategoriBarang;
 use App\Models\WarehouseSatuanBarang;
 use App\Models\WarehouseStockOpnameGudang;
 use App\Models\WarehouseStockOpnameItems;
+use App\Services\GoodsStockService;
+use App\Services\IncreaseDecreaseStockArguments;
+use App\Services\TransferStockArguments;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class WarehouseStockOpnameFinal extends Controller
 {
+    protected GoodsStockService $goodsStockService;
+
+    public function __construct(GoodsStockService $goodsStockService)
+    {
+        $this->goodsStockService = $goodsStockService;
+        $this->goodsStockService->controller = $this::class;
+    }
+
     /**
      * Display a listing of pending opname gudang for finalization.
      *
@@ -128,6 +139,7 @@ class WarehouseStockOpnameFinal extends Controller
         DB::beginTransaction();
         try {
             $opname = WarehouseStockOpnameGudang::findOrFail($data['sog_id']);
+            $user = User::findOrFail($data['user_id']);
 
             if ($opname->finish !== null) {
                 throw new \Exception('Opname sudah selesai');
@@ -155,8 +167,16 @@ class WarehouseStockOpnameFinal extends Controller
 
                 // apply to actual stored record
                 $stored = $sio->stored;
-                $stored->qty = $sio->qty + $movement;
-                $stored->save();
+                // $stored->qty = $sio->qty + $movement;
+                // $stored->save();
+
+                // use the GoodsStockService
+                $args = new IncreaseDecreaseStockArguments($user, $opname, $stored, $movement);
+                if ($movement < 0) {
+                    $this->goodsStockService->decreaseStock($args);
+                } else {
+                    $this->goodsStockService->increaseStock($args);
+                }
             }
 
             DB::commit();

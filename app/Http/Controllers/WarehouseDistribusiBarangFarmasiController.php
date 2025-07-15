@@ -3,17 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\StoredBarangFarmasi;
+use App\Models\User;
 use App\Models\WarehouseMasterGudang;
 use App\Models\WarehouseDistribusiBarangFarmasi;
 use App\Models\WarehouseDistribusiBarangFarmasiItems;
+use App\Models\WarehousePenerimaanBarangFarmasiItems;
 use App\Models\WarehouseStockRequestPharmacy;
 use App\Models\WarehouseStockRequestPharmacyItems;
+use App\Services\CreateStockArguments;
+use App\Services\GoodsStockService;
+use App\Services\GoodsType;
+use App\Services\IncreaseDecreaseStockArguments;
+use App\Services\MoveStockArguments;
+use App\Services\TransferStockArguments;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class WarehouseDistribusiBarangFarmasiController extends Controller
 {
+    protected GoodsStockService $goodsStockService;
+
+    public function __construct(GoodsStockService $goodsStockService)
+    {
+        $this->goodsStockService = $goodsStockService;
+        $this->goodsStockService->controller = $this::class;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -214,7 +230,7 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
             $db = WarehouseDistribusiBarangFarmasi::create($validatedData1);
             $asal_gudang_id = $validatedData1["asal_gudang_id"];
             $tujuan_gudang_id = $validatedData1["tujuan_gudang_id"];
-
+            $user = User::findOrFail($validatedData1["user_id"]);
 
             foreach ($validatedData2["barang_id"] as $index => $barang_id) {
                 $satuan_id = $validatedData2["satuan_id"][$index];
@@ -276,21 +292,25 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                             }
 
                             // update existing
-                            $si_tujuan->qty += $qty;
-                            $transfered += $qty;
-                            $si_tujuan->save();
+                            // $si_tujuan->qty += $qty;
+                            // $si_tujuan->save();
+                            // $si->qty -= $qty;
+                            // $si->save();
 
-                            $si->qty -= $qty;
+                            // use the GoodsStockService
+                            $args = new TransferStockArguments($user, $db, $si, $si_tujuan, $qty);
+                            $this->goodsStockService->transferStock($args);
+                            $transfered += $qty;
+
                             // if ($si->qty == 0) { // delete if qty is 0
                             //     $si->forceDelete(); // force delete
                             // } else { // update if qty is not 0
                             //     $si->save();
                             // }
-
+                            // 
                             // 30 June 2025
                             // don't delete even if qty == 0
                             // it would cause problem on related data
-                            $si->save();
 
                             continue;
                         }
@@ -299,9 +319,14 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                         // if $si->qty + $transfered is still less than $requested_qty
                         // then update the $si->gudang_id to $tujuan_gudang_id
                         if (($si->qty + $transfered) <= $requested_qty) {
-                            $si->gudang_id = $tujuan_gudang_id;
-                            $si->save();
+                            // use the GoodsStockService
+                            $warehouse = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
+                            $args = new MoveStockArguments($user, $db, $si, $warehouse);
+                            $this->goodsStockService->moveStock($args);
                             $transfered += $si->qty;
+
+                            // $si->gudang_id = $tujuan_gudang_id;
+                            // $si->save();
                             continue;
                         }
 
@@ -311,16 +336,28 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                         // and update the existing $si->qty
                         if (($si->qty + $transfered) > $requested_qty) {
                             $remaining_qty = $requested_qty - $transfered;
-                            $si->qty -= $remaining_qty;
-                            $si->save();
-
-                            StoredBarangFarmasi::create([
-                                "pbi_id" => $si->pbi_id,
-                                "gudang_id" => $tujuan_gudang_id,
-                                "qty" => $remaining_qty
-                            ]);
-
                             $transfered = $requested_qty;
+
+                            // use the GoodsStockService
+                            // first, decrease the current stock
+                            $decrease_args = new IncreaseDecreaseStockArguments($user, $db, $si, $remaining_qty);
+                            $this->goodsStockService->decreaseStock($decrease_args);
+
+                            // then, create a new stock
+                            $type = GoodsType::Pharmacy;
+                            $warehouse = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
+                            $pbi = WarehousePenerimaanBarangFarmasiItems::findOrFail($si->pbi_id);
+                            $new_stock_args = new CreateStockArguments($user, $db, $type, $warehouse, $pbi, $remaining_qty);
+                            $this->goodsStockService->createStock($new_stock_args);
+
+                            // $si->qty -= $remaining_qty;
+                            // $si->save();
+                            // StoredBarangFarmasi::create([
+                            // "pbi_id" => $si->pbi_id,
+                            // "gudang_id" => $tujuan_gudang_id,
+                            // "qty" => $remaining_qty
+                            // ]);
+
                             continue;
                         }
                     }
@@ -372,6 +409,7 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
             $db->update($validatedData1);
             $asal_gudang_id = $validatedData1["asal_gudang_id"];
             $tujuan_gudang_id = $validatedData1["tujuan_gudang_id"];
+            $user = User::findOrFail($validatedData1["user_id"]);
 
             // $validatedData["item_id"] is a key => pair array
             // delete everything from WarehouseDistribusiBarangFarmasiItems
@@ -454,21 +492,25 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                             }
 
                             // update existing
-                            $si_tujuan->qty += $qty;
-                            $transfered += $qty;
-                            $si_tujuan->save();
+                            // $si_tujuan->qty += $qty;
+                            // $si_tujuan->save();
+                            // $si->qty -= $qty;
+                            // $si->save();
 
-                            $si->qty -= $qty;
+                            // use the GoodsStockService
+                            $args = new TransferStockArguments($user, $db, $si, $si_tujuan, $qty);
+                            $this->goodsStockService->transferStock($args);
+                            $transfered += $qty;
+
                             // if ($si->qty == 0) { // delete if qty is 0
                             //     $si->forceDelete(); // force delete
                             // } else { // update if qty is not 0
                             //     $si->save();
                             // }
-
+                            // 
                             // 30 June 2025
                             // don't delete even if qty == 0
                             // it would cause problem on related data
-                            $si->save();
 
                             continue;
                         }
@@ -477,9 +519,14 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                         // if $si->qty + $transfered is still less than $requested_qty
                         // then update the $si->gudang_id to $tujuan_gudang_id
                         if (($si->qty + $transfered) <= $requested_qty) {
-                            $si->gudang_id = $tujuan_gudang_id;
-                            $si->save();
+                            // use the GoodsStockService
+                            $warehouse = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
+                            $args = new MoveStockArguments($user, $db, $si, $warehouse);
+                            $this->goodsStockService->moveStock($args);
                             $transfered += $si->qty;
+
+                            // $si->gudang_id = $tujuan_gudang_id;
+                            // $si->save();
                             continue;
                         }
 
@@ -489,16 +536,28 @@ class WarehouseDistribusiBarangFarmasiController extends Controller
                         // and update the existing $si->qty
                         if (($si->qty + $transfered) > $requested_qty) {
                             $remaining_qty = $requested_qty - $transfered;
-                            $si->qty -= $remaining_qty;
-                            $si->save();
-
-                            StoredBarangFarmasi::create([
-                                "pbi_id" => $si->pbi_id,
-                                "gudang_id" => $tujuan_gudang_id,
-                                "qty" => $remaining_qty
-                            ]);
-
                             $transfered = $requested_qty;
+
+                            // use the GoodsStockService
+                            // first, decrease the current stock
+                            $decrease_args = new IncreaseDecreaseStockArguments($user, $db, $si, $remaining_qty);
+                            $this->goodsStockService->decreaseStock($decrease_args);
+
+                            // then, create a new stock
+                            $type = GoodsType::Pharmacy;
+                            $warehouse = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
+                            $pbi = WarehousePenerimaanBarangFarmasiItems::findOrFail($si->pbi_id);
+                            $new_stock_args = new CreateStockArguments($user, $db, $type, $warehouse, $pbi, $remaining_qty);
+                            $this->goodsStockService->createStock($new_stock_args);
+
+                            // $si->qty -= $remaining_qty;
+                            // $si->save();
+                            // StoredBarangFarmasi::create([
+                            // "pbi_id" => $si->pbi_id,
+                            // "gudang_id" => $tujuan_gudang_id,
+                            // "qty" => $remaining_qty
+                            // ]);
+
                             continue;
                         }
                     }
