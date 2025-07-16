@@ -46,5 +46,8 @@ class DatabaseSeeder extends Seeder
                 // ]);
 
                 $this->call(AccountReceivableSeeder::class);
+                $this->call([
+                        RncCenterSeeder::class,
+                ]);
         }
 }

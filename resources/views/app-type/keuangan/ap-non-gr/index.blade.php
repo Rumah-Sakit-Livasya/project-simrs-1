@@ -179,11 +179,11 @@
                                     <div class="col-md-6     mb-3">
 
                                         <div class="form-group">
-                                            <label for="tanggal_awal">Periode Akhir <span
+                                            <label for="tanggal_awal">Periode Awal <span
                                                     class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <input type="text" class="form-control datepicker" name="tanggal_awal"
-                                                    value="{{ old('tanggal_awal', date('d-m-Y')) }}" required
+                                                    value="{{ old('tanggal_awal', date('01-m-Y')) }}" required
                                                     autocomplete="off">
                                                 <div class="input-group-append"><span class="input-group-text"><i
                                                             class="fal fa-calendar"></i></span></div>

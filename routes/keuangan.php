@@ -21,6 +21,8 @@ use App\Http\Controllers\keuangan\PengajuanController;
 use App\Http\Controllers\Keuangan\PertanggungJawabanController;
 use App\Http\Controllers\keuangan\ReportAPDokterController;
 use App\Http\Controllers\keuangan\ReportAPSupplierController;
+use App\Http\Controllers\Keuangan\RncCenterController;
+use App\Http\Controllers\Keuangan\TransaksiRutinController;
 use App\Models\keuangan\Pencairan;
 use App\Models\Keuangan\Pertanggungjawaban;
 use Illuminate\Support\Facades\Route;
@@ -105,7 +107,6 @@ Route::group(['middleware' => ['auth']], function () {
             ->name("laporan-perbulan.store");
         // ->middleware('can:tambah keuangan laporan perbulan');
         Route::prefix('setup')->group(function () {
-
             Route::get("/group-chart-of-account", [GroupChartOfAccountController::class, 'index'])
                 ->name("group-chart-of-account.index")
                 ->middleware('can:view keuangan laporan perbulan');
@@ -135,11 +136,33 @@ Route::group(['middleware' => ['auth']], function () {
                 ->middleware('can:view keuangan data rekening');
             Route::post("/bank", [BankController::class, 'store'])
                 ->name("bank.store");
-            // ->middleware('can:tambah keuangan data rekening');
-            Route::put("/bank/{banks:id}", [BankController::class, 'update'])
-                ->name("bank.update");
-            // ->middleware('can:edit keuangan data rekening');
+            Route::get("/bank/{id}/edit", [BankController::class, 'edit'])
+                ->name("bank.edit")
+                ->middleware('can:edit keuangan data rekening');
+            Route::put("/bank/{id}", [BankController::class, 'update'])
+                ->name("bank.update")
+                ->middleware('can:edit keuangan data rekening');
+
+            Route::delete('bank/{id}', [BankController::class, 'destroy'])->name('bank.destroy');
+
+            // revenue
+            Route::get('/revenue-costcenter', [RncCenterController::class, 'index'])
+                ->name('revenue-costcenter.index');
+            Route::post('/revenue-costcenter', [RncCenterController::class, 'store'])
+                ->name('revenue-costcenter.store');
+            Route::put('/revenue-costcenter/{id}', [RncCenterController::class, 'update'])
+                ->name('revenue-costcenter.update');
+            Route::delete('/revenue-costcenter', [RncCenterController::class, 'destroy'])
+                ->name('revenue-costcenter.destroy');
+
+            // transaksi rutin
+            Route::get('/transaksi-rutin', [TransaksiRutinController::class, 'index'])->name('transaksi-rutin.index');
+            Route::post('/transaksi-rutin', [TransaksiRutinController::class, 'store'])->name('transaksi-rutin.store');
+            Route::put('/transaksi-rutin/{id}', [TransaksiRutinController::class, 'update'])->name('transaksi-rutin.update');
+            Route::delete('/transaksi-rutin', [TransaksiRutinController::class, 'destroy'])->name('transaksi-rutin.destroy');
         });
+
+
         Route::prefix('konfirmasi-asuransi')->middleware(['can:view account receivable konfirmasi asuransi'])->group(function () {
             // Basic CRUD
             Route::get('/', [KonfirmasiAsuransiController::class, 'index'])->name('keuangan.konfirmasi-asuransi.index');
@@ -451,5 +474,6 @@ Route::group(['middleware' => ['auth']], function () {
     Route::prefix('api')->group(function () {
         Route::get('/coa/group/{group_id}', [ChartOfAccountController::class, 'getByGroup'])->name('coa.byGroup');
         Route::get('/coa/{coa:id}', [ChartOfAccountController::class, 'show'])->name('coa.show');
+        Route::delete('/keuangan/setup/chart-of-account/{id}', [ChartOfAccountController::class, 'destroy'])->name('chart-of-account.destroy');
     });
 });

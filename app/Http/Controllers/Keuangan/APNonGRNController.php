@@ -7,6 +7,7 @@ use App\Models\Keuangan\ApSupplierHeader; // Model Header Utama
 use App\Models\Keuangan\ApNonGRNDetail;     // Model Detail Non-PO
 use App\Models\Keuangan\ChartOfAccount;
 use App\Models\Keuangan\GroupChartOfAccount;
+use App\Models\Keuangan\RncCenter;
 use App\Models\WarehouseSupplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -89,27 +90,43 @@ class APNonGRNController extends Controller
     }
 
 
-    /**
-     * Menampilkan form untuk membuat AP Non-PO baru.
-     */
     public function create()
     {
         $suppliers = WarehouseSupplier::where('aktif', 1)->orderBy('nama')->get();
 
+        // --- Logika untuk Akun Transaksi (TETAP SAMA) ---
+        $expenseGroupHeader = ChartOfAccount::where('code', '5000')->where('header', 1)->first();
+        $expenseGroupId = $expenseGroupHeader ? $expenseGroupHeader->group_id : 5;
+
         $transactionalCoas = ChartOfAccount::where('status', 1)
             ->where('header', 0)
-            ->orderBy('code')->get();
+            ->where('group_id', $expenseGroupId)
+            ->orderBy('code')
+            ->get()
+            ->unique('code');
 
-        $grupCoa = GroupChartOfAccount::orderBy('name')->get();
-        $groupedCoaDetails = $transactionalCoas->groupBy('group_id');
+        $hierarchicalCoas = [];
+        foreach ($transactionalCoas as $coa) {
+            $nameParts = explode(' - ', $coa->name, 2);
+            $groupTitle = trim($nameParts[0]);
+            $detailName = isset($nameParts[1]) ? trim($nameParts[1]) : $groupTitle;
+            $coa->detail_name = $detailName;
+            if (!isset($hierarchicalCoas[$groupTitle])) {
+                $hierarchicalCoas[$groupTitle] = [];
+            }
+            $hierarchicalCoas[$groupTitle][] = $coa;
+        }
+        ksort($hierarchicalCoas);
 
-        $costCenters = $transactionalCoas; // Atau bisa difilter lebih spesifik jika perlu
+        // --- PERUBAHAN DI SINI ---
+        // Ambil data Cost Center dari tabel rnc_centers yang aktif
+        $costCenters = RncCenter::where('is_active', 1)->orderBy('nama_rnc')->get();
+        // -------------------------
 
         return view('app-type.keuangan.ap-non-gr.partials.create', compact(
             'suppliers',
-            'grupCoa',
-            'groupedCoaDetails',
-            'costCenters'
+            'hierarchicalCoas',
+            'costCenters' // Sekarang variabel ini berisi koleksi dari RncCenter
         ));
     }
 
@@ -261,7 +278,6 @@ class APNonGRNController extends Controller
 
     public function show($id)
     {
-        // 1. Ambil data utama AP yang akan ditampilkan beserta relasinya
         $apNonGrn = ApSupplierHeader::with([
             'supplier',
             'userEntry',
@@ -274,7 +290,6 @@ class APNonGRNController extends Controller
         // 2. Ambil semua data yang dibutuhkan untuk mengisi dropdown di form
         $suppliers = WarehouseSupplier::where('aktif', 1)->orderBy('nama')->get();
 
-        // Ambil data COA yang benar-benar transactional
         $transactionalCoas = ChartOfAccount::where('status', 1)
             ->where('header', 0)
             ->orderBy('code')
@@ -284,8 +299,7 @@ class APNonGRNController extends Controller
         $grupCoa = GroupChartOfAccount::orderBy('name')->get();
         $groupedCoaDetails = $transactionalCoas->groupBy('group_id');
 
-        // Ambil cost centers yang benar (pastikan modelnya sesuai)
-        $costCenters = ChartOfAccount::orderBy('name')->get(); // Ganti dengan model yang sesuai
+        $costCenters = RncCenter::where('is_active', 1)->orderBy('nama_rnc')->get();
 
         // 3. Kirim semua data ke view (perbaiki nama view dengan menghilangkan spasi)
         return view('app-type.keuangan.ap-non-gr.partials.details', compact(

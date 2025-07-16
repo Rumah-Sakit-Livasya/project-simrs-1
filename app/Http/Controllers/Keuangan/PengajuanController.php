@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Keuangan\Pengajuan;
 use App\Models\Keuangan\PengajuanDetail;
 use Illuminate\Http\Request;
-use App\Models\User;      // Impor model User
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -23,25 +23,21 @@ class PengajuanController extends Controller
         return view('app-type.keuangan.cash-advance.pengajuan', compact('pengajuans', 'userOtorisasi'));
     }
 
-
     public function Pengajuancreate()
     {
-        $users = User::where('is_active', 1)->orderBy('name')->get(); // Sesuaikan query jika perlu
+        $users = User::where('is_active', 1)->orderBy('name')->get();
         return view('app-type.keuangan.cash-advance.pengajuan.create', compact('users'));
     }
 
     public function proses(Pengajuan $pengajuan)
     {
         $pengajuan->load('pengaju', 'userEntry');
-
         $userOtorisasi = User::where('email', 'dimas@livasya.com')->first();
-
         return view('app-type.keuangan.cash-advance.pengajuan.proses', compact('pengajuan', 'userOtorisasi'));
     }
 
     public function store(Request $request)
     {
-        // 1. Validasi Input
         $validator = Validator::make($request->all(), [
             'tanggal_pengajuan' => 'required|date',
             'pengaju_id'        => 'required|exists:users,id',
@@ -56,7 +52,6 @@ class PengajuanController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // 2. Bersihkan dan konversi nilai nominal
         $nominalValue = preg_replace('/[Rp. ]/', '', $request->nominal);
         $nominalValue = (float) $nominalValue;
 
@@ -64,10 +59,8 @@ class PengajuanController extends Controller
             return redirect()->back()->withErrors(['nominal' => 'Nominal harus lebih besar dari 0.'])->withInput();
         }
 
-        // 3. Proses Penyimpanan menggunakan Database Transaction
         DB::beginTransaction();
         try {
-            // Buat data Pengajuan (header)
             $pengajuan = Pengajuan::create([
                 'kode_pengajuan'          => $this->generateKodePengajuan(),
                 'tanggal_pengajuan'       => $request->tanggal_pengajuan,
@@ -78,10 +71,9 @@ class PengajuanController extends Controller
                 'user_entry_id'           => Auth::id(),
             ]);
 
-            // Buat SATU data PengajuanDetail
             PengajuanDetail::create([
                 'pengajuan_id' => $pengajuan->id,
-                'deskripsi'    => $request->keterangan, // Deskripsi detail diambil dari keterangan header
+                'deskripsi'    => $request->keterangan,
                 'nominal'      => $nominalValue,
             ]);
 
@@ -97,46 +89,23 @@ class PengajuanController extends Controller
         }
     }
 
-
-
-
-    // ... method-method lain (index, create, store, dll.) ...
-
-    /**
-     * Memproses approval menggunakan otorisasi Zimbra,
-     * sesuai dengan pola yang diberikan.
-     */
-    // app/Http/Controllers/keuangan/PengajuanController.php
-
-    // app/Http/Controllers/keuangan/PengajuanController.php
-
     public function approveBulk(Request $request)
     {
-        // ... validasi awal ...
-
-        $emailOtorisasi = 'dimas@livasya.com'; // Kembalikan ke email yang benar
+        $emailOtorisasi = 'dimas@livasya.com';
         $user = User::find($request->otorisasi_id);
 
         if (!$user) {
             return response()->json(['message' => 'User otorisasi tidak ditemukan.'], 404);
         }
 
-        // ==========================================================
-        // PERBAIKAN 1: Bersihkan email dari database sebelum dibandingkan
-        // ==========================================================
         $userEmailFromDB = trim($user->email);
 
         if (strtolower($userEmailFromDB) !== strtolower($emailOtorisasi)) {
             return response()->json(['message' => 'User yang dipilih tidak memiliki hak untuk melakukan persetujuan.'], 403);
         }
 
-        // ==========================================================
-        // PERBAIKAN 2: Gunakan email yang sudah dibersihkan untuk login
-        // ==========================================================
         if ($this->zimbraLogin($userEmailFromDB, $request->password)) {
-            // Otentikasi Zimbra Berhasil
             try {
-                // ... (logika update database) ...
                 $approvedCount = Pengajuan::whereIn('id', $request->ids)
                     ->where('status', 'pending')
                     ->update([
@@ -155,9 +124,195 @@ class PengajuanController extends Controller
                 return response()->json(['message' => 'Terjadi kesalahan internal saat memproses persetujuan.'], 500);
             }
         } else {
-            // Otentikasi Zimbra Gagal
             Log::error('Zimbra Login FAILED for email: ' . $userEmailFromDB);
             return response()->json(['message' => 'Password salah!'], 401);
+        }
+    }
+
+    public function reject(Request $request, Pengajuan $pengajuan)
+    {
+        $validator = Validator::make($request->all(), [
+            'otorisasi_id' => 'required|exists:users,id',
+            'password'     => 'required',
+            'rejection_reason' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        if ($pengajuan->status !== 'pending') {
+            return response()->json(['message' => 'Hanya pengajuan dengan status "Menunggu" yang bisa diproses.'], 400);
+        }
+
+        $emailOtorisasi = 'dimas@livasya.com';
+        $user = User::find($request->otorisasi_id);
+
+        if (!$user || strtolower(trim($user->email)) !== strtolower($emailOtorisasi)) {
+            return response()->json(['message' => 'User yang dipilih tidak memiliki hak untuk melakukan aksi ini.'], 403);
+        }
+
+        if ($this->zimbraLogin(trim($user->email), $request->password)) {
+            try {
+                $alasan = $request->input('rejection_reason') ?: 'Ditolak oleh atasan.';
+
+                $pengajuan->update([
+                    'status' => 'rejected',
+                    'approved_by_id' => $user->id,
+                    'approved_at' => now(),
+                    'keterangan' => $pengajuan->keterangan . ' | Alasan Ditolak: ' . $alasan,
+                ]);
+
+                return response()->json(['message' => 'Pengajuan ' . $pengajuan->kode_pengajuan . ' berhasil ditolak.']);
+            } catch (\Exception $e) {
+                Log::error('DB Update Failed during rejection: ' . $e->getMessage());
+                return response()->json(['message' => 'Terjadi kesalahan internal saat menolak pengajuan.'], 500);
+            }
+        } else {
+            return response()->json(['message' => 'Password salah!'], 401);
+        }
+    }
+
+    public function destroy(Pengajuan $pengajuan)
+    {
+        if ($pengajuan->status === 'approved' || $pengajuan->status === 'partial' || $pengajuan->status === 'closed') {
+            return redirect()->route('keuangan.cash-advance.pengajuan')->with('error', 'Pengajuan yang sudah disetujui tidak dapat dihapus.');
+        }
+
+        try {
+            $kode = $pengajuan->kode_pengajuan;
+            $pengajuan->delete();
+            return redirect()->route('keuangan.cash-advance.pengajuan')->with('success', 'Pengajuan ' . $kode . ' berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->route('keuangan.cash-advance.pengajuan')->with('error', 'Gagal menghapus data. ' . $e->getMessage());
+        }
+    }
+
+    // FIXED: Bulk Delete Method
+    public function deleteBulk(Request $request)
+    {
+        // Log incoming request for debugging
+        Log::info('Bulk delete request received', [
+            'method' => $request->method(),
+            'all_data' => $request->all(),
+            'user_id' => Auth::id()
+        ]);
+
+        // Enhanced validation
+        $validator = Validator::make($request->all(), [
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'required|integer|min:1'
+        ], [
+            'ids.required' => 'Silakan pilih data yang akan dihapus.',
+            'ids.array' => 'Format data tidak valid.',
+            'ids.min' => 'Minimal pilih 1 data untuk dihapus.',
+            'ids.*.required' => 'ID pengajuan tidak valid.',
+            'ids.*.integer' => 'ID pengajuan harus berupa angka.',
+            'ids.*.min' => 'ID pengajuan tidak valid.'
+        ]);
+
+        if ($validator->fails()) {
+            Log::warning('Validation failed in bulk delete', [
+                'errors' => $validator->errors()->toArray(),
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak valid: ' . $validator->errors()->first(),
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $ids = $request->input('ids');
+
+        // Validate that all IDs exist in database
+        $existingIds = Pengajuan::whereIn('id', $ids)->pluck('id')->toArray();
+        $missingIds = array_diff($ids, $existingIds);
+
+        if (!empty($missingIds)) {
+            Log::warning('Some IDs not found in database', [
+                'missing_ids' => $missingIds,
+                'existing_ids' => $existingIds
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Beberapa data tidak ditemukan di database.'
+            ], 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Get pengajuan data with status check
+            $pengajuans = Pengajuan::whereIn('id', $ids)->get();
+
+            if ($pengajuans->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada data yang ditemukan.'
+                ], 404);
+            }
+
+            // Filter only deletable records (pending or rejected)
+            $deletableIds = [];
+            $undeletableCount = 0;
+
+            foreach ($pengajuans as $pengajuan) {
+                if (in_array($pengajuan->status, ['pending', 'rejected'])) {
+                    $deletableIds[] = $pengajuan->id;
+                } else {
+                    $undeletableCount++;
+                }
+            }
+
+            if (empty($deletableIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada data yang dapat dihapus. Semua data sudah diproses.'
+                ], 400);
+            }
+
+            // Delete related details first
+            $detailsDeleted = PengajuanDetail::whereIn('pengajuan_id', $deletableIds)->delete();
+
+            // Delete main records
+            $deletedCount = Pengajuan::whereIn('id', $deletableIds)->delete();
+
+            DB::commit();
+
+            $message = "Berhasil menghapus {$deletedCount} data pengajuan.";
+            if ($undeletableCount > 0) {
+                $message .= " {$undeletableCount} data tidak dapat dihapus karena sudah diproses.";
+            }
+
+            Log::info('Bulk delete successful', [
+                'deleted_count' => $deletedCount,
+                'details_deleted' => $detailsDeleted,
+                'undeletable_count' => $undeletableCount,
+                'user_id' => Auth::id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'deleted_count' => $deletedCount,
+                'undeletable_count' => $undeletableCount
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Bulk delete failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ids' => $ids,
+                'user_id' => Auth::id()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -181,7 +336,6 @@ class PengajuanController extends Controller
 
         try {
             $encodedData = json_encode($data);
-
             $url = 'https://webmail.livasya.com/service/soap';
             $curl = curl_init($url);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -196,168 +350,18 @@ class PengajuanController extends Controller
             curl_close($curl);
 
             $mark = 'AUTH_FAILED';
-
-            if (strpos($result, $mark) !== false) {
-                return false; // Autentikasi gagal
-            } else {
-                // Autentikasi berhasil
-                // Anda mungkin ingin melakukan sesuatu di sini, seperti memproses respons
-                // atau mengembalikan informasi tambahan
-                return true;
-            }
+            return strpos($result, $mark) === false;
         } catch (\Exception $e) {
-            // Tangani kesalahan saat menjalankan permintaan cURL
             return false;
-        }
-    }
-
-    /**
-     * Helper function untuk otentikasi ke server ZIMBRA.
-     * Disalin dari RegistrationController.
-     */
-
-
-    public function reject(Request $request, Pengajuan $pengajuan)
-    {
-        // 1. Validasi input dari modal AJAX
-        $validator = Validator::make($request->all(), [
-            'otorisasi_id' => 'required|exists:users,id',
-            'password'     => 'required',
-            'rejection_reason' => 'nullable|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()->first()], 422);
-        }
-
-        // Cek status pengajuan
-        if ($pengajuan->status !== 'pending') {
-            return response()->json(['message' => 'Hanya pengajuan dengan status "Menunggu" yang bisa diproses.'], 400);
-        }
-
-        // 2. Otorisasi (sama seperti approveBulk)
-        $emailOtorisasi = 'dimas@livasya.com';
-        $user = User::find($request->otorisasi_id);
-
-        if (!$user || strtolower(trim($user->email)) !== strtolower($emailOtorisasi)) {
-            return response()->json(['message' => 'User yang dipilih tidak memiliki hak untuk melakukan aksi ini.'], 403);
-        }
-
-        // 3. Otentikasi Zimbra
-        if ($this->zimbraLogin(trim($user->email), $request->password)) {
-            // Otentikasi Berhasil, lanjutkan proses reject
-            try {
-                $alasan = $request->input('rejection_reason') ?: 'Ditolak oleh atasan.';
-
-                $pengajuan->update([
-                    'status' => 'rejected',
-                    'approved_by_id' => $user->id, // User yang melakukan otorisasi
-                    'approved_at' => now(),
-                    'keterangan' => $pengajuan->keterangan . ' | Alasan Ditolak: ' . $alasan,
-                ]);
-
-                return response()->json(['message' => 'Pengajuan ' . $pengajuan->kode_pengajuan . ' berhasil ditolak.']);
-            } catch (\Exception $e) {
-                Log::error('DB Update Failed during rejection: ' . $e->getMessage());
-                return response()->json(['message' => 'Terjadi kesalahan internal saat menolak pengajuan.'], 500);
-            }
-        } else {
-            // Otentikasi Gagal
-            return response()->json(['message' => 'Password salah!'], 401);
-        }
-    }
-
-
-    public function destroy(Pengajuan $pengajuan)
-    {
-        // Hanya bisa menghapus jika statusnya belum disetujui
-        if ($pengajuan->status === 'approved' || $pengajuan->status === 'partial' || $pengajuan->status === 'closed') {
-            return redirect()->route('keuangan.cash-advance.pengajuan')->with('error', 'Pengajuan yang sudah disetujui tidak dapat dihapus.');
-        }
-
-        try {
-            $kode = $pengajuan->kode_pengajuan;
-            $pengajuan->delete();
-            return redirect()->route('keuangan.cash-advance.pengajuan')->with('success', 'Pengajuan ' . $kode . ' berhasil dihapus.');
-        } catch (\Exception $e) {
-            return redirect()->route('keuangan.cash-advance.pengajuan')->with('error', 'Gagal menghapus data. ' . $e->getMessage());
-        }
-    }
-
-    // Tambahkan method ini ke dalam Controller Anda
-
-
-    public function deleteBulk(Request $request)
-    {
-        // ========================================================
-        // TIDAK ADA PARAMETER (Pengajuan $pengajuan) DI SINI
-        // ========================================================
-        try {
-            $ids = $request->input('ids');
-
-            if (!is_array($ids) || empty($ids)) {
-                return response()->json(['message' => 'Tidak ada data yang dipilih.'], 400);
-            }
-
-            // ========================================================
-            // LANGSUNG LAKUKAN QUERY BERDASARKAN ID YANG DITERIMA
-            // ========================================================
-            $pengajuans = Pengajuan::whereIn('id', $ids)->get();
-
-            if ($pengajuans->isEmpty()) {
-                // Jika koleksi kosong, berarti tidak ada ID yang valid di database.
-                // Ini kemungkinan besar adalah sumber dari pesan "No query results".
-                Log::warning('BULK DELETE FAILED (NOT FOUND): Percobaan hapus untuk ID yang tidak ada.', ['ids' => $ids]);
-                return response()->json(['message' => 'Data pengajuan yang dipilih tidak ditemukan di database.'], 404);
-            }
-
-            $cannotDelete = [];
-            $canDeleteIds = [];
-            $user = Auth::user();
-
-            foreach ($pengajuans as $pengajuan) {
-                if (in_array($pengajuan->status, ['approved', 'partial', 'closed'])) {
-                    $cannotDelete[] = $pengajuan->kode_pengajuan;
-                } else {
-                    $canDeleteIds[] = $pengajuan->id;
-                }
-            }
-
-            $deletedCount = 0;
-            if (!empty($canDeleteIds)) {
-                $deletedCount = Pengajuan::whereIn('id', $canDeleteIds)->delete();
-                Log::info('BULK DELETE SUCCESS by User: ' . $user->name, ['deleted_ids' => $canDeleteIds]);
-            }
-
-            if (!empty($cannotDelete)) {
-                Log::warning('BULK DELETE SKIPPED by User: ' . $user->name, ['skipped_codes' => $cannotDelete]);
-            }
-
-            // Logika response JSON (sudah bagus, tidak perlu diubah)
-            if ($deletedCount > 0 && !empty($cannotDelete)) {
-                return response()->json(['message' => "Berhasil menghapus {$deletedCount} pengajuan. Pengajuan dengan kode " . implode(', ', $cannotDelete) . " tidak dapat dihapus karena sudah diproses."], 200);
-            } elseif ($deletedCount > 0) {
-                return response()->json(['message' => "Berhasil menghapus {$deletedCount} pengajuan."], 200);
-            } elseif (!empty($cannotDelete)) {
-                return response()->json(['message' => 'Tidak ada pengajuan yang dapat dihapus. Semua pengajuan yang dipilih sudah diproses.'], 400);
-            } else {
-                return response()->json(['message' => 'Tidak ada pengajuan yang berhasil dihapus (kemungkinan data tidak ditemukan).'], 400);
-            }
-        } catch (\Exception $e) {
-            Log::error('BULK DELETE FAILED (EXCEPTION)', [
-                'error_message' => $e->getMessage(),
-                'user_id' => Auth::id(),
-                'ids_to_delete' => $request->input('ids', []),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json(['message' => 'Terjadi kesalahan internal pada server.'], 500);
         }
     }
 
     private function generateKodePengajuan()
     {
         $prefix = 'ADVA' . date('y') . '-';
-        $lastPengajuan = Pengajuan::where('kode_pengajuan', 'like', $prefix . '%')->orderBy('kode_pengajuan', 'desc')->first();
+        $lastPengajuan = Pengajuan::where('kode_pengajuan', 'like', $prefix . '%')
+            ->orderBy('kode_pengajuan', 'desc')
+            ->first();
         $number = 1;
         if ($lastPengajuan) {
             $lastNumber = (int) substr($lastPengajuan->kode_pengajuan, -6);

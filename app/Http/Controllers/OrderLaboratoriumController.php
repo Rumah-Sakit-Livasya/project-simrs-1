@@ -38,7 +38,7 @@ class OrderLaboratoriumController extends Controller
         ]);
 
         // first, get the order
-        $order = OrderLaboratorium::findOrFail( $validatedData['order_id']);
+        $order = OrderLaboratorium::findOrFail($validatedData['order_id']);
 
         // second, get all parameters of the order
         $parameters = $order->order_parameter_laboratorium;
@@ -54,11 +54,11 @@ class OrderLaboratoriumController extends Controller
         foreach ($parameters as $parameter) {
             // don't delete parameters with id that's smaller
             // than id of parameter that's going to be deleted
-            if($parameter->id <= $parameter_to_delete->id) continue;
+            if ($parameter->id <= $parameter_to_delete->id) continue;
 
             // if the next parameter can be ordered
             // it means there's no more sub parameter
-            if($parameter->parameter_laboratorium->is_order) break;
+            if ($parameter->parameter_laboratorium->is_order) break;
 
             // check if this parameter, as "sub_parameter_id"
             // is related to the parameter to delete, as "main_parameter_id"
@@ -109,12 +109,14 @@ class OrderLaboratoriumController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         $request->merge(['parameters' => json_decode($request->parameters, true)]);
 
         try {
             $validatedData = $request->validate([
                 'user_id' => 'required|integer',
                 'employee_id' => 'required|integer',
+                'patient_id' => 'required',
                 'registration_type' => 'string',
                 'catatan' => 'nullable|string',
                 'registration_id' => 'integer',
@@ -188,7 +190,8 @@ class OrderLaboratoriumController extends Controller
                 $orderLaboratorium = OrderLaboratorium::create([
                     'user_id' => $validatedData['user_id'],
                     'registration_id' => $validatedData['registration_id'],
-                    'dokter_laboratorium_id' => $validatedData['doctor_id'],
+                    'doctor_id' => $validatedData['doctor_id'],
+                    'patient_id' => $validatedData['patient_id'],
                     'order_date' => Carbon::now(),
                     'no_order' => $no_order,
                     'tipe_order' => $validatedData['order_type'],

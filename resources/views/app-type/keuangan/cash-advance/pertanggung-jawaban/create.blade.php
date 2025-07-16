@@ -374,7 +374,8 @@
                         groupSeparator: '.',
                         autoGroup: true,
                         digits: 0,
-                        prefix: 'Rp '
+                        prefix: 'Rp ',
+                        rightAlign: false
                     });
 
                     // Open popup window
@@ -409,65 +410,87 @@
                         }
                     };
 
-                    // Format number to Rupiah
+                    // Format number to Rupiah (original format)
                     function formatRupiah(number) {
+                        if (!number) return 'Rp 0';
                         return 'Rp ' + new Intl.NumberFormat('id-ID').format(number);
+                    }
+
+                    // Unformat Rupiah to number
+                    function unformatRupiah(rupiah) {
+                        if (!rupiah) return 0;
+                        return parseInt(rupiah.toString().replace(/[^0-9]/g, '')) || 0;
                     }
 
                     // Data options from controller
                     const tipeTransaksiOptions = {!! json_encode($tipe_transaksis) !!};
                     const costCenterOptions = {!! json_encode($cost_centers) !!};
 
-                    // Build select options
-                    function buildOptions(optionsArray) {
-                        return optionsArray.map(opt =>
-                            `<option value="${opt}">${opt}</option>`
+                    // Build select options from array of objects
+                    function buildOptions(optionsArray, valueField, textField) {
+                        let options = '<option value="">Pilih...</option>';
+                        options += optionsArray.map(opt =>
+                            `<option value="${opt[valueField]}">${opt[textField]}</option>`
                         ).join('');
+                        return options;
                     }
 
                     // Add row to table
                     function addRow(tbodyId, namePrefix) {
                         const tableBody = $('#' + tbodyId);
                         const rowCount = tableBody.find('tr').length;
+
                         const newRow = `
-                    <tr>
-                        <td>${rowCount + 1}</td>
-                        <td>
-                            <select name="${namePrefix}[${rowCount}][tipe_transaksi]" class="form-control select2-repeater" required>
-                                ${buildOptions(tipeTransaksiOptions)}
-                            </select>
-                        </td>
-                        <td>
-                            <input type="text" name="${namePrefix}[${rowCount}][keterangan]" class="form-control" required>
-                        </td>
-                        <td>
-                            <select name="${namePrefix}[${rowCount}][cost_center]" class="form-control select2-repeater">
-                                ${buildOptions(costCenterOptions)}
-                            </select>
-                        </td>
-                        <td>
-                            <input type="text" name="${namePrefix}[${rowCount}][nominal]" class="form-control nominal-input text-right" required>
-                        </td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-xs btn-danger btn-remove-row">
-                                <i class="fal fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td>${rowCount + 1}</td>
+                <td>
+                    <select name="${namePrefix}[${rowCount}][transaksi_rutin_id]" class="form-control select2-repeater" required>
+                        ${buildOptions(tipeTransaksiOptions, 'id', 'nama_transaksi')}
+                    </select>
+                </td>
+                <td>
+                    <input type="text" name="${namePrefix}[${rowCount}][keterangan]" class="form-control" required>
+                </td>
+                <td>
+                    <select name="${namePrefix}[${rowCount}][rnc_center_id]" class="form-control select2-repeater" required>
+                        ${buildOptions(costCenterOptions, 'id', 'nama_rnc')}
+                    </select>
+                </td>
+                <td>
+                    <input type="text" name="${namePrefix}[${rowCount}][nominal]" 
+                           class="form-control nominal-input text-right" 
+                           required
+                           value="0"
+                           data-inputmask="'alias': 'numeric', 'groupSeparator': '.', 'autoGroup': true, 'digits': 0, 'removeMaskOnSubmit': true">
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-xs btn-danger btn-remove-row">
+                        <i class="fal fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+
                         tableBody.append(newRow);
 
-                        // Initialize select2 and inputmask for new row
+                        // Initialize select2 for new row
                         tableBody.find('.select2-repeater').select2({
-                            width: '100%'
+                            width: '100%',
+                            placeholder: 'Pilih...'
                         });
+
+                        // Initialize inputmask for new row
                         tableBody.find('.nominal-input').inputmask({
                             alias: 'numeric',
                             groupSeparator: '.',
                             autoGroup: true,
                             digits: 0,
                             removeMaskOnSubmit: true,
-                            placeholder: '0'
+                            placeholder: '0',
+                            rightAlign: false,
+                            onBeforeMask: function(value) {
+                                return value.replace(/[^0-9]/g, '');
+                            }
                         });
                     }
 
@@ -492,15 +515,13 @@
 
                     // Calculate totals
                     function calculateTotals() {
-                        const unformat = (str) => parseInt(String(str).replace(/[^0-9]/g, '')) || 0;
-
-                        // Get remaining amount from the sisa_pj field
-                        const sisa = unformat($('#sisa_pj').val());
+                        // Get remaining amount
+                        const sisa = unformatRupiah($('#sisa_pj').val());
 
                         // Calculate PJ total
                         let totalDetail = 0;
                         $('#detail-tbody .nominal-input').each(function() {
-                            totalDetail += unformat($(this).val());
+                            totalDetail += unformatRupiah($(this).val());
                         });
 
                         // Validate PJ doesn't exceed remaining amount
@@ -513,21 +534,43 @@
 
                         $('#total-nominal').text(formatRupiah(totalDetail));
 
-                        // Calculate Reimburse total (no limit)
+                        // Calculate Reimburse total
                         let totalReimburse = 0;
                         $('#reimburse-tbody .nominal-input').each(function() {
-                            totalReimburse += unformat($(this).val());
+                            totalReimburse += unformatRupiah($(this).val());
                         });
                         $('#total-reimburse').text(formatRupiah(totalReimburse));
                     }
 
                     // Recalculate when nominal inputs change
-                    $(document).on('input', '.nominal-input', calculateTotals);
+                    $(document).on('input', '.nominal-input', function() {
+                        // Format the input value
+                        const value = unformatRupiah($(this).val());
+                        $(this).val(formatRupiah(value));
+                        calculateTotals();
+                    });
+
+                    // Form submission handling
+                    $('#form-pj').on('submit', function(e) {
+                        // Unmask all nominal values before submission
+                        $('.nominal-input').each(function() {
+                            const value = unformatRupiah($(this).val());
+                            $(this).val(value);
+                        });
+
+                        return true; // Continue with form submission
+                    });
 
                     // Add initial row if empty
                     if ($('#detail-tbody tr').length === 0) {
                         $('#btn-add-row').click();
                     }
+
+                    // Initialize first select2 elements
+                    $('.select2-repeater').select2({
+                        width: '100%',
+                        placeholder: 'Pilih...'
+                    });
                 });
             </script>
         @endsection

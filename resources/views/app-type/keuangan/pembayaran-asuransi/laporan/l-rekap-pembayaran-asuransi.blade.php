@@ -13,36 +13,32 @@
                             <form action="{{ route('laporan.l-rekap-pembayaran-asuransi.print') }}" method="get"
                                 target="_blank">
                                 @csrf
-                                <div class="row">
-                                    <div class="col-xl-6">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Periode Awal</label>
-                                            <div class="col-xl-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker"
-                                                        name="tanggal_awal" placeholder="Pilih tanggal awal"
-                                                        value="{{ request('tanggal_awal') ?? '' }}" autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl"><i
-                                                                class="fal fa-calendar"></i></span>
-                                                    </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group ">
+                                            <label class="text-center col-form-label">Periode Awal</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control datepicker" name="tanggal_awal"
+                                                    placeholder="Pilih tanggal awal"
+                                                    value="{{ request('tanggal_awal') ?? '' }}" autocomplete="off">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text fs-xl"><i
+                                                            class="fal fa-calendar"></i></span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="col-xl-6">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Periode Akhir</label>
-                                            <div class="col-xl-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker"
-                                                        name="tanggal_akhir" placeholder="Pilih tanggal akhir"
-                                                        value="{{ request('tanggal_akhir') ?? '' }}" autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl"><i
-                                                                class="fal fa-calendar"></i></span>
-                                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group ">
+                                            <label class=" text-center col-form-label">Periode Akhir</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control datepicker" name="tanggal_akhir"
+                                                    placeholder="Pilih tanggal akhir"
+                                                    value="{{ request('tanggal_akhir') ?? '' }}" autocomplete="off">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text fs-xl"><i
+                                                            class="fal fa-calendar"></i></span>
                                                 </div>
                                             </div>
                                         </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\keuangan;
 
 use App\Http\Controllers\Controller;
+use App\Models\BankPerusahaan;
 use Illuminate\Http\Request;
 use App\Models\Keuangan\Pencairan;
 use App\Models\Keuangan\Pengajuan;
@@ -10,6 +11,7 @@ use App\Models\Keuangan\Bank;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class PencairanController extends Controller
@@ -40,61 +42,123 @@ class PencairanController extends Controller
         return view('app-type.keuangan.cash-advance.pencairan.create', compact('pengajuans', 'banks'));
     }
 
-    /**
-     * Menyimpan data pencairan baru.
-     */
+
+
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validatedData = $request->validate([
+            'pengajuan_id' => 'required|exists:pengajuans,id',
             'tanggal_pencairan' => 'required|date',
-            'pengajuan_id'      => 'required|exists:pengajuans,id',
-            'bank_id'           => 'required|exists:banks,id',
-            'nominal'           => 'required|string',
-            'keterangan'        => 'nullable|string',
+            'nominal' => 'required|numeric|min:1',
+            'bank_id' => 'required|exists:banks,id',
+            'keterangan' => 'nullable|string|max:255',
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $nominalPencairan = (float) preg_replace('/[Rp. ]/', '', $request->nominal);
-
-        $pengajuan = Pengajuan::with('pencairan')->find($request->pengajuan_id);
-
-        $sudahDicairkan = $pengajuan->pencairan->sum('nominal_pencairan');
-        $sisa = $pengajuan->total_nominal_disetujui - $sudahDicairkan;
-
-        if ($nominalPencairan <= 0) {
-            return redirect()->back()->withErrors(['nominal' => 'Nominal pencairan harus lebih besar dari 0.'])->withInput();
-        }
-        if ($nominalPencairan > $sisa) {
-            return redirect()->back()->withErrors(['nominal' => 'Nominal pencairan melebihi sisa yang belum dicairkan (Sisa: Rp ' . number_format($sisa, 0, ',', '.') . ')'])->withInput();
-        }
-
         DB::beginTransaction();
+
         try {
-            Pencairan::create([
-                'kode_pencairan'    => $this->generateKodePencairan(),
-                'pengajuan_id'      => $pengajuan->id,
-                'tanggal_pencairan' => $request->tanggal_pencairan,
-                'nominal_pencairan' => $nominalPencairan,
-                'bank_id'           => $request->bank_id,
-                'keterangan'        => $request->keterangan,
-                'user_entry_id'     => Auth::id(),
-            ]);
+            // Ambil data pengajuan
+            $pengajuan = Pengajuan::findOrFail($validatedData['pengajuan_id']);
 
-            $totalDicairkanBaru = $sudahDicairkan + $nominalPencairan;
-            $status_baru = ($totalDicairkanBaru >= $pengajuan->total_nominal_disetujui) ? 'closed' : 'partial';
+            // Hitung sisa yang bisa dicairkan
+            $totalDisetujui = $pengajuan->total_nominal_disetujui;
+            $sudahDicairkan = $pengajuan->pencairan->sum('nominal_pencairan');
+            $sisa = $totalDisetujui - $sudahDicairkan;
 
-            $pengajuan->update(['status' => $status_baru]);
+            // Validasi nominal tidak melebihi sisa
+            if ($validatedData['nominal'] > $sisa) {
+                return back()->withInput()->with('error', 'Nominal pencairan melebihi sisa yang tersedia!');
+            }
+
+            // Buat pencairan baru
+            $pencairan = new Pencairan();
+            $pencairan->kode_pencairan = $this->generateKodePencairan();
+            $pencairan->pengajuan_id = $validatedData['pengajuan_id'];
+            $pencairan->tanggal_pencairan = $validatedData['tanggal_pencairan'];
+            $pencairan->nominal_pencairan = $validatedData['nominal'];
+            $pencairan->bank_id = $validatedData['bank_id'];
+            $pencairan->keterangan = $validatedData['keterangan'];
+            $pencairan->user_entry_id = auth()->id();
+            $pencairan->save();
+
+            // Update status pengajuan jika sudah dicairkan semua
+            if ($validatedData['nominal'] == $sisa) {
+                $pengajuan->status = 'closed';
+                $pengajuan->save();
+            } elseif ($pengajuan->status == 'approved') {
+                $pengajuan->status = 'partial';
+                $pengajuan->save();
+            }
 
             DB::commit();
-            return redirect()->route('keuangan.cash-advance.pencairan')->with('success', 'Pencairan berhasil disimpan.');
+
+            return redirect()->route('keuangan.cash-advance.pencairan')
+                ->with('success', 'Pencairan berhasil disimpan!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage())->withInput();
+            Log::error('Gagal menyimpan pencairan: ' . $e->getMessage());
+
+            return back()->withInput()
+                ->with('error', 'Terjadi kesalahan saat menyimpan pencairan. Silakan coba lagi.');
         }
     }
+    // public function store(Request $request)
+    // {
+    //     $validatedData = $request->validate([
+    //         'name'          => 'required|string|max:255',
+    //         'pemilik'       => 'required|string|max:255',
+    //         'nomor'         => 'required|string|max:255',
+    //         'saldo'         => 'required|numeric|min:0',
+    //         'akun_kas_bank' => 'required|exists:chart_of_accounts,id', // Pastikan nama tabel CoA benar
+    //         'akun_kliring'  => 'required|exists:chart_of_accounts,id', // Pastikan nama tabel CoA benar
+    //         'is_aktivasi'   => 'nullable', // Checkbox tidak akan dikirim jika tidak dicentang
+    //         'is_bank'       => 'nullable',
+    //     ]);
+
+    //     DB::beginTransaction();
+
+    //     try {
+    //         $bank = new Bank();
+    //         $bank->name = $validatedData['name'];
+    //         $bank->saldo_awal = $validatedData['saldo'];
+    //         $bank->total_masuk = $validatedData['saldo']; // Saldo awal dianggap sebagai pemasukan pertama
+    //         $bank->total_keluar = 0;
+    //         $bank->save();
+
+    //         // 4. Buat dan simpan data ke tabel `bank_perusahaan`
+    //         // Tabel ini berisi detail akun bank milik perusahaan
+    //         $bankPerusahaan = new BankPerusahaan();
+    //         $bankPerusahaan->nama = $validatedData['name'];
+    //         $bankPerusahaan->pemilik = $validatedData['pemilik'];
+    //         $bankPerusahaan->nomor = $validatedData['nomor'];
+    //         $bankPerusahaan->saldo = $validatedData['saldo'];
+    //         $bankPerusahaan->akun_kas_bank = $validatedData['akun_kas_bank'];
+    //         $bankPerusahaan->akun_kliring = $validatedData['akun_kliring'];
+    //         $bankPerusahaan->is_aktivasi = $request->has('is_aktivasi'); // Mengembalikan true jika dicentang
+    //         $bankPerusahaan->is_bank = $request->has('is_bank');
+
+
+    //         $bankPerusahaan->save();
+
+    //         // 5. Jika semua proses berhasil, commit transaksi
+    //         DB::commit();
+
+    //         // 6. Redirect kembali ke halaman index dengan pesan sukses
+    //         return redirect()->route('bank.index')
+    //             ->with('success', 'Bank baru berhasil ditambahkan.');
+    //     } catch (\Exception $e) {
+    //         // 7. Jika terjadi error, batalkan semua query (rollback)
+    //         DB::rollBack();
+
+    //         // Opsional: Catat error untuk debugging
+    //         Log::error('Gagal menyimpan bank baru: ' . $e->getMessage());
+
+    //         // 8. Redirect kembali ke form dengan pesan error dan input sebelumnya
+    //         return redirect()->back()
+    //             ->with('error', 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.')
+    //             ->withInput();
+    //     }
+    // }
 
     public function dataPengajuanPopup(Request $request)
     {
@@ -171,9 +235,6 @@ class PencairanController extends Controller
         // Eager load relasi yang dibutuhkan
         $pencairan->load(['pengajuan.pengaju', 'bank', 'userEntry']);
 
-        // --- PERUBAHAN DI SINI ---
-        // Panggil fungsi helper global 'terbilangRp'
-        // Kita tidak menambahkan 'Rupiah' karena di template sudah ada
         $terbilang = terbilangRp($pencairan->nominal_pencairan, false);
 
         return view('app-type.keuangan.cash-advance.pencairan.print.cash-advance-print', compact('pencairan', 'terbilang'));

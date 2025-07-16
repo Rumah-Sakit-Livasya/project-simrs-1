@@ -53,12 +53,7 @@ class KonfirmasiAsuransiController extends Controller
             }
         }
 
-        // DEFAULT: Jika tidak ada filter → tampilkan hanya tanggal hari ini
-        // if (!$hasFilters) {
-        //     $query->whereDate('tanggal', Carbon::today());
-        // }
 
-        // FILTER: Penjamin
         if ($request->has('penjamin_id') && $request->penjamin_id != '') {
             $hasFilters = true;
             $query->where('penjamin_id', $request->penjamin_id);
@@ -137,19 +132,13 @@ class KonfirmasiAsuransiController extends Controller
             $queryBuilder->whereBetween('created_at', [$startDate, $endDate]);
         }
 
-        // Filter 'status' ('Belum Dibuat Tagihan') diabaikan karena semua data
-        // bilingan di sini secara definisi adalah "Belum Dibuat Tagihan".
-        // Jika user memilih 'Sudah Dibuat Tagihan', hasilnya akan kosong.
         if ($request->input('status') == 'Sudah Di Buat Tagihan') {
             $queryBuilder->whereRaw('1 = 0'); // Trik untuk tidak menghasilkan apa-apa
         }
 
-        // 4. Eksekusi query
         $bilinganData = $queryBuilder->get();
 
-        // 5. "Menyamarkan" data Bilingan agar cocok dengan struktur KonfirmasiAsuransi
         $hasilQuery = $bilinganData->map(function ($bilingan) {
-            // Kita buat objek baru atau array yang meniru struktur KonfirmasiAsuransi
             return (object) [
                 'id' => $bilingan->id, // PENTING: ID ini adalah ID Bilingan
                 'registration' => $bilingan->registration,
@@ -161,12 +150,10 @@ class KonfirmasiAsuransiController extends Controller
             ];
         });
 
-        // 6. Bedakan respons antara AJAX dan request biasa
         if ($request->ajax()) {
             return response()->json($hasilQuery);
         }
 
-        // Kirim data ke view
         return view('app-type.keuangan.konfirmasi-asuransi.partials.create', [
             'query' => $hasilQuery,
             'penjamins' => $penjamins

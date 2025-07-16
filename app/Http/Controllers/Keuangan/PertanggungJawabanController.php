@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Keuangan;
 use App\Http\Controllers\Controller;
 use App\Models\Keuangan\Pencairan;
 use App\Models\Keuangan\Pertanggungjawaban;
+use App\Models\Keuangan\RncCenter;
+use App\Models\Keuangan\TransaksiRutin;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -19,12 +21,19 @@ class PertanggungJawabanController extends Controller
     {
         // Query dasar dengan relasi
         $query = Pertanggungjawaban::with([
-            'pencairan.pengajuan.pengaju', // Relasi bertingkat untuk mendapatkan nama pengaju
-            'details',                     // Relasi ke detail pertanggungjawaban
-            'userEntry'                    // Relasi ke user yang menginput
+            // Relasi yang sudah ada tetap dipertahankan
+            'pencairan.pengajuan.pengaju',
+            'userEntry',
+
+            // ================== PERUBAHAN DI SINI ==================
+            // Kita muat relasi 'details', dan di dalamnya kita muat lagi relasi
+            // 'transaksiRutin' dan 'rncCenter' dari setiap detail.
+            'details.transaksiRutin',
+            'details.rncCenter'
+            // =======================================================
         ]);
 
-        // Filter berdasarkan request
+        // Filter berdasarkan request (Tidak ada perubahan di bagian filter)
         if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
             $tanggalAwal = Carbon::createFromFormat('d-m-Y', $request->tanggal_awal)->startOfDay();
             $tanggalAkhir = Carbon::createFromFormat('d-m-Y', $request->tanggal_akhir)->endOfDay();
@@ -57,19 +66,21 @@ class PertanggungJawabanController extends Controller
 
         $pertanggungjawabans = $query->latest()->get();
 
-        // Jika request AJAX, return JSON
+        // Jika request AJAX, return JSON (Sudah benar, tidak perlu diubah)
         if ($request->ajax()) {
             return response()->json($pertanggungjawabans);
         }
 
-        // Jika request biasa, return view
+        // Jika request biasa, return view (Sudah benar, tidak perlu diubah)
         return view('app-type.keuangan.cash-advance.pertanggungjawaban', compact('pertanggungjawabans'));
     }
     public function pjawabanCreate(Request $request)
     {
-        // Data untuk dropdown, misal dari tabel master
-        $tipe_transaksis = ['Biaya Transport', 'Makan & Minum', 'Pembelian ATK', 'Lain-lain'];
-        $cost_centers = ['Operasional', 'Marketing', 'IT', 'HRD'];
+        $tipe_transaksis = TransaksiRutin::where('is_active', true)
+            ->get(['id', 'nama_transaksi']);
+
+        $cost_centers = RncCenter::where('is_active', true)
+            ->get(['id', 'nama_rnc']);
 
         return view('app-type.keuangan.cash-advance.pertanggung-jawaban.create', compact('tipe_transaksis', 'cost_centers'));
     }
@@ -97,70 +108,86 @@ class PertanggungJawabanController extends Controller
 
     public function store(Request $request)
     {
+        // Validasi data
         $validator = Validator::make($request->all(), [
             'tanggal_pj' => 'required|date',
             'pencairan_id' => 'required|exists:pencairans,id',
             'details' => 'required|array|min:1',
-            'details.*.tipe_transaksi' => 'required',
-            'details.*.keterangan' => 'required|string',
+            'details.*.transaksi_rutin_id' => 'required|exists:transaksi_rutins,id',
+            'details.*.rnc_center_id' => 'required|exists:rnc_centers,id',
+            'details.*.keterangan' => 'required|string|max:255',
             'details.*.nominal' => 'required|numeric|min:1',
+            // 'reimburse_details' => 'sometimes|array',
+            // 'reimburse_details.*.transaksi_rutin_id' => 'required_with:reimburse_details|exists:transaksi_rutins,id',
+            // 'reimburse_details.*.rnc_center_id' => 'required_with:reimburse_details|exists:rnc_centers,id',
+            // 'reimburse_details.*.keterangan' => 'required_with:reimburse_details|string|max:255',
+            // 'reimburse_details.*.nominal' => 'required_with:reimburse_details|numeric|min:1',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan validasi. Silakan periksa kembali data Anda.');
         }
 
         DB::beginTransaction();
         try {
             $pencairan = Pencairan::findOrFail($request->pencairan_id);
 
-            // Hitung total yang telah dipertanggungjawabkan sebelumnya
-            $totalPjSebelumnya = $pencairan->pertanggungjawaban()->sum('total_pj');
-
-            // Hitung total dari detail baru
-            $totalPjBaru = collect($request->details)->sum('nominal');
-
-            // Total setelah penambahan
-            $totalSetelahPj = $totalPjSebelumnya + $totalPjBaru;
-
-            // Validasi tidak melebihi nominal pencairan
-            if ($totalSetelahPj > $pencairan->nominal_pencairan) {
-                throw new \Exception('Total pertanggungjawaban melebihi nominal pencairan');
-            }
-
-            // Hitung selisih
-            $selisih = $pencairan->nominal_pencairan - $totalSetelahPj;
+            // Hitung total pertanggungjawaban
+            $totalPj = collect($request->details)->sum('nominal');
+            $totalReimburse = collect($request->reimburse_details ?? [])->sum('nominal');
+            $selisih = $pencairan->nominal_pencairan - $totalPj + $totalReimburse;
 
             // Buat record pertanggungjawaban
             $pj = Pertanggungjawaban::create([
                 'kode_pj' => $this->generateKodePj(),
                 'tanggal_pj' => $request->tanggal_pj,
                 'pencairan_id' => $pencairan->id,
-                'total_pj' => $totalPjBaru,
+                'total_pj' => $totalPj,
+                'total_reimburse' => $totalReimburse,
                 'selisih' => $selisih,
                 'status' => 'pending',
                 'user_entry_id' => Auth::id(),
             ]);
 
-            // Simpan detail
+            // Simpan detail pertanggungjawaban
             foreach ($request->details as $detail) {
                 $pj->details()->create([
                     'tipe' => 'pj',
-                    'tipe_transaksi' => $detail['tipe_transaksi'],
-                    'cost_center' => $detail['cost_center'] ?? null,
+                    'transaksi_rutin_id' => $detail['transaksi_rutin_id'],
+                    'rnc_center_id' => $detail['rnc_center_id'],
                     'keterangan' => $detail['keterangan'],
                     'nominal' => $detail['nominal'],
                 ]);
             }
 
+            // Simpan detail reimburse jika ada
+            if ($request->has('reimburse_details')) {
+                foreach ($request->reimburse_details as $detail) {
+                    $pj->details()->create([
+                        'tipe' => 'reimburse',
+                        'transaksi_rutin_id' => $detail['transaksi_rutin_id'],
+                        'rnc_center_id' => $detail['rnc_center_id'],
+                        'keterangan' => $detail['keterangan'],
+                        'nominal' => $detail['nominal'],
+                    ]);
+                }
+            }
+
             DB::commit();
-            return redirect()->route('keuangan.cash-advance.pertanggung-jawaban')
+
+            return redirect()
+                ->route('keuangan.cash-advance.pertanggung-jawaban')
                 ->with('success', 'Pertanggungjawaban berhasil dibuat');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Gagal: ' . $e->getMessage())
-                ->withInput();
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
 
@@ -227,13 +254,13 @@ class PertanggungJawabanController extends Controller
 
     public function laporanDetail(Request $request)
     {
-        // Query dasar dengan relasi yang dibutuhkan
         $query = Pertanggungjawaban::with([
             'pencairan.pengajuan.pengaju',
             'userEntry'
         ]);
 
-        // --- Logika Filter ---
+
+
         if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
             $query->whereHas('pencairan', function ($q) use ($request) {
                 $q->whereBetween('tanggal_pencairan', [$request->tanggal_awal, $request->tanggal_akhir]);
@@ -255,7 +282,6 @@ class PertanggungJawabanController extends Controller
 
         $pertanggungjawabans = $query->latest('tanggal_pj')->get();
 
-        // --- Handle Permintaan AJAX ---
         if ($request->ajax()) {
             return response()->json(['data' => $pertanggungjawabans]);
         }

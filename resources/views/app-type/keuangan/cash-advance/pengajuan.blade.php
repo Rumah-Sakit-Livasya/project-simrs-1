@@ -48,7 +48,8 @@
                                         <label>Periode Akhir</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control datepicker" id="tanggal_akhir"
-                                                name="tanggal_akhir" placeholder="Pilih Tanggal Akhir">
+                                                name="tanggal_akhir" placeholder="Pilih Tanggal Akhir"
+                                                value="{{ old('tanggal_akhir', date('Y-m-d')) }}">
                                             <div class="input-group-append"><span class="input-group-text fs-sm"><i
                                                         class="fal fa-calendar"></i></span></div>
                                         </div>
@@ -124,6 +125,7 @@
                             <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
                                 <thead class="bg-primary-600">
                                     <tr>
+                                        <th>No</th>
                                         <th style="width: 10px;" class="text-center"><input type="checkbox" id="select_all">
                                         </th>
                                         <th>Kode</th>
@@ -139,6 +141,8 @@
                                 <tbody>
                                     @foreach ($pengajuans as $item)
                                         <tr>
+                                            <td>{{ $loop->iteration }}</td>
+
                                             <td class="text-center">
                                                 <input type="checkbox" class="row-checkbox" value="{{ $item->id }}">
                                             </td>
@@ -297,6 +301,7 @@
     <link rel="stylesheet" href="/css/notifications/toastr/toastr.css">
 
     <script>
+        // Fixed JavaScript for bulk delete functionality
         $(document).ready(function() {
             // 1. SETUP & INISIALISASI PLUGIN
             $.ajaxSetup({
@@ -376,27 +381,6 @@
                         previous: "Sebelumnya"
                     }
                 }
-            });
-
-            $('#search-form').on('submit', function(e) {
-                e.preventDefault();
-                $('.loading-overlay').css('display', 'flex'); // Tampilkan loading
-
-                $.ajax({
-                    url: "{{ route('keuangan.ap-supplier.index') }}",
-                    type: "GET",
-                    data: $(this).serialize(), // Kirim semua data form
-                    success: function(response) {
-                        // Panggil fungsi untuk membangun ulang tabel
-                        updateTable(response);
-                        $('.loading-overlay').hide(); // Sembunyikan loading
-                    },
-                    error: function(xhr) {
-                        console.error("Error fetching data: ", xhr);
-                        toastr.error('Gagal mengambil data dari server.');
-                        $('.loading-overlay').hide(); // Sembunyikan loading
-                    }
-                });
             });
 
             // 2. LOGIKA UNTUK TOMBOL & CHECKBOX
@@ -495,12 +479,17 @@
                 $('.select2-modal').trigger('change');
             });
 
-            // 4. LOGIKA UNTUK MODAL DELETE
+            // 4. FIXED: LOGIKA UNTUK MODAL DELETE
             $('#btn-delete').on('click', function() {
                 var ids = [];
                 $('.row-checkbox:checked').each(function() {
-                    ids.push($(this).val());
+                    var id = parseInt($(this).val());
+                    if (id && !isNaN(id)) {
+                        ids.push(id);
+                    }
                 });
+
+                console.log('Selected IDs for deletion:', ids); // Debug log
 
                 if (ids.length > 0) {
                     $('#delete_ids').val(JSON.stringify(ids));
@@ -513,36 +502,100 @@
 
             $('#deleteForm').on('submit', function(e) {
                 e.preventDefault();
+
                 var btn = $('#btn-submit-delete');
                 var spinner = btn.find('.spinner-border');
+
+                // Disable button and show spinner
                 btn.prop('disabled', true);
                 spinner.show();
-                $('#delete-modal-alert').hide();
 
+                // Reset alert
+                $('#delete-modal-alert').hide().empty();
+
+                // Get selected IDs
+                var ids = [];
+                $('.row-checkbox:checked').each(function() {
+                    var id = parseInt($(this).val());
+                    if (id && !isNaN(id)) {
+                        ids.push(id);
+                    }
+                });
+
+                console.log('Final IDs to delete:', ids); // Debug log
+
+                // Client-side validation
+                if (ids.length === 0) {
+                    $('#delete-modal-alert').text('Silakan pilih data yang akan dihapus terlebih dahulu.')
+                        .show();
+                    btn.prop('disabled', false);
+                    spinner.hide();
+                    return;
+                }
+
+                // Send AJAX request
                 $.ajax({
                     url: "{{ route('keuangan.cash-advance.pengajuan.deleteBulk') }}",
                     method: 'POST',
                     data: {
-                        ids: JSON.parse($('#delete_ids').val()),
-                        _method: 'DELETE'
+                        ids: ids,
+                        _token: $('meta[name="csrf-token"]').attr('content')
                     },
-                    success: function(response) {
-                        $('#deleteModal').modal('hide');
-                        Swal.fire({
-                            title: 'Berhasil!',
-                            text: response.message,
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                location.reload();
-                            }
+                    dataType: 'json',
+                    beforeSend: function() {
+                        console.log('Sending delete request with data:', {
+                            ids: ids,
+                            _token: $('meta[name="csrf-token"]').attr('content')
                         });
                     },
-                    error: function(xhr) {
-                        var errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr
-                            .responseJSON.message : 'Terjadi kesalahan. Silakan coba lagi.';
-                        $('#delete-modal-alert').text(errorMsg).show();
+                    success: function(response) {
+                        console.log('Delete response:', response);
+
+                        if (response.success) {
+                            $('#deleteModal').modal('hide');
+
+                            // Show success message
+                            toastr.success(response.message);
+
+                            // Reload page after short delay
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            $('#delete-modal-alert').text(response.message ||
+                                'Terjadi kesalahan saat menghapus data.').show();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Delete request failed:', {
+                            status: xhr.status,
+                            responseText: xhr.responseText,
+                            error: error
+                        });
+
+                        var errorMsg = 'Terjadi kesalahan. Silakan coba lagi.';
+
+                        if (xhr.responseJSON) {
+                            if (xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            }
+
+                            if (xhr.responseJSON.errors) {
+                                var errorList = [];
+                                $.each(xhr.responseJSON.errors, function(field, messages) {
+                                    if (Array.isArray(messages)) {
+                                        errorList = errorList.concat(messages);
+                                    } else {
+                                        errorList.push(messages);
+                                    }
+                                });
+                                if (errorList.length > 0) {
+                                    errorMsg += '<br>' + errorList.join('<br>');
+                                }
+                            }
+                        }
+
+                        $('#delete-modal-alert').html(errorMsg).show();
                     },
                     complete: function() {
                         btn.prop('disabled', false);
@@ -554,7 +607,11 @@
             $('#deleteModal').on('hidden.bs.modal', function() {
                 $('#deleteForm')[0].reset();
                 $('#delete-modal-alert').hide();
+                $('#delete_ids').val('');
             });
+
+            // Initialize checkboxes state
+            checkCheckboxes();
         });
     </script>
 @endsection

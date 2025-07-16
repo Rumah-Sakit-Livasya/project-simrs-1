@@ -174,10 +174,14 @@
                                 {{-- ... (Form header Anda: Tanggal, Supplier, Kas/Bank, dll. sudah benar) ... --}}
                                 <div class="form-row">
                                     <div class="col-md-4 mb-3">
-                                        <label class="form-label" for="tanggal_pembayaran">Tanggal Pembayaran <span
+                                        <label for="tanggal_pembayaran">Tanggal Pembayaran <span
                                                 class="text-danger">*</span></label>
-                                        <input type="text" class="form-control datepicker" id="tanggal_pembayaran"
-                                            name="tanggal_pembayaran" required>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" name="tanggal_pembayaran"
+                                                value="" required autocomplete="off">
+                                            <div class="input-group-append"><span class="input-group-text"><i
+                                                        class="fal fa-calendar"></i></span></div>
+                                        </div>
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label" for="supplier_id">Supplier <span
@@ -349,16 +353,19 @@
             function parseCurrency(value) {
                 if (typeof value === 'number') return value;
                 if (typeof value !== 'string') return 0;
+                // Fungsi ini sekarang hanya untuk USER INPUT yang menggunakan format "1.000.000"
                 return parseFloat(String(value).replace(/\./g, '').replace(/,/g, '.').replace(/[^-0-9.]/g, '')) ||
-                0;
+                    0;
             }
 
             function formatCurrency(number) {
+                // Fungsi ini menerima ANGKA dan memformatnya ke string "1.000.000"
                 return new Intl.NumberFormat('id-ID').format(Math.round(parseCurrency(number)));
             }
 
             function displayCurrency(number) {
-                return 'Rp ' + formatCurrency(number);
+                // Fungsi ini menerima ANGKA dan mengembalikannya sebagai "Rp 1.000.000"
+                return 'Rp ' + new Intl.NumberFormat('id-ID').format(Math.round(number));
             }
 
             // 3. FUNGSI UTAMA KALKULASI & RENDER
@@ -370,9 +377,8 @@
                 const sisaHutangAwal = parseCurrency($row.find('.sisa-hutang-awal-display').text());
                 const pembayaran = parseCurrency($row.find('.payment-input').val());
 
-                // LOGIKA PENGURANG HUTANG: Sisa hutang akhir = Sisa Awal - HANYA Pembayaran
                 let sisaHutangAkhir = sisaHutangAwal - pembayaran;
-                sisaHutangAkhir = Math.max(0, sisaHutangAkhir); // Mencegah nilai negatif
+                sisaHutangAkhir = Math.max(0, sisaHutangAkhir);
 
                 $row.find('.sisa-akhir-display').text(displayCurrency(sisaHutangAkhir));
             }
@@ -392,12 +398,7 @@
                 });
 
                 const pembulatan = parseCurrency($('#pembulatan-input').val());
-
-                // =================================================================
-                // PERBAIKAN FINAL DI SINI: KALKULASI GRAND TOTAL
-                // LOGIKA BARU: Grand Total = (Pembayaran + Biaya Lain - Potongan) + Pembulatan
                 const grandTotal = (totalPembayaranInvoice + totalBiayaLain - totalPotongan) + pembulatan;
-                // =================================================================
 
                 $('#total-pembayaran-display').text(displayCurrency(totalPembayaranInvoice));
                 $('#total-potongan-display').text(displayCurrency(totalPotongan));
@@ -409,7 +410,6 @@
              * Merender ulang seluruh tabel invoice.
              */
             function renderInvoiceTable() {
-                // ... (Fungsi ini tidak perlu diubah, sudah benar) ...
                 const list = $('#invoice-list');
                 list.empty();
                 $('#payment-form input[name^="invoices"]').remove();
@@ -417,17 +417,23 @@
                 if (selectedInvoices.length === 0) {
                     list.html(
                         '<tr id="placeholder-row"><td colspan="9" class="text-center text-muted">Belum ada invoice dipilih.</td></tr>'
-                        );
+                    );
                 } else {
                     selectedInvoices.forEach((invoice, index) => {
-                        const sisaHutang = parseFloat(invoice.sisa_hutang);
+                        // ================== BAGIAN PERBAIKAN ADA DI SINI ==================
+                        // Gunakan parseFloat() untuk mengubah data dari server menjadi angka.
+                        // Ini akan menangani format "279000000.00" atau 279000000 dengan benar.
+                        const grandTotal = parseFloat(invoice.grand_total) || 0;
+                        const sisaHutang = parseFloat(invoice.sisa_hutang) || 0;
+                        // ===================================================================
+
                         const row = `
                         <tr data-id="${invoice.id}">
                             <input type="hidden" name="invoices[${index}][id]" value="${invoice.id}">
                             <td class="text-center"><button type="button" class="btn btn-xs btn-danger btn-remove-invoice" title="Hapus"><i class="fal fa-times"></i></button></td>
                             <td>${invoice.kode_ap}</td>
                             <td>${invoice.no_invoice_supplier}</td>
-                            <td class="text-right">${displayCurrency(invoice.grand_total)}</td>
+                            <td class="text-right">${displayCurrency(grandTotal)}</td>
                             <td class="text-right sisa-hutang-awal-display">${displayCurrency(sisaHutang)}</td>
                             <td><input type="text" name="invoices[${index}][pembayaran]" class="form-control form-control-sm text-right payment-input" value="${formatCurrency(sisaHutang)}"></td>
                             <td><input type="text" name="invoices[${index}][potongan]" class="form-control form-control-sm text-right potongan-input" value="0"></td>
@@ -444,7 +450,6 @@
             }
 
             // 4. EVENT LISTENERS
-            // ... (Semua event listener lain tidak perlu diubah, sudah benar) ...
             $('#supplier_id').on('change', function() {
                 const supplierId = $(this).val();
                 $('#btn-pilih-invoice').prop('disabled', !supplierId);
@@ -535,7 +540,6 @@
                         .text());
                     const pembayaran = parseCurrency($(this).find('.payment-input').val());
 
-                    // VALIDASI FINAL: Hanya pembayaran yang diperiksa terhadap sisa hutang.
                     if (pembayaran > sisaHutangAwal + 0.01) {
                         const kodeAp = $(this).find('td:nth-child(2)').text();
                         Swal.fire('Validasi Gagal',

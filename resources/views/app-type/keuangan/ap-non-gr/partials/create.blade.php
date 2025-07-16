@@ -284,12 +284,14 @@
                                                 <label for="due_date">Due Date <span class="text-danger">*</span></label>
                                                 <div class="input-group">
                                                     <input type="text" class="form-control datepicker" name="due_date"
-                                                        value="{{ old('due_date', date('d-m-Y', strtotime('+30 days'))) }}"
+                                                        value="{{ old('due_date', date('d-m-Y', strtotime('+1 days'))) }}"
                                                         required autocomplete="off">
                                                     <div class="input-group-append"><span class="input-group-text"><i
                                                                 class="fal fa-calendar"></i></span></div>
                                                 </div>
                                             </div>
+
+                                            {{-- Ganti bagian ini di file create.blade.php --}}
 
                                             <div class="form-group">
                                                 <label for="transaksi_coa_select">Pilih Transaksi <span
@@ -297,18 +299,24 @@
                                                 <div class="select-with-icon">
                                                     <select class="form-control select2" id="transaksi_coa_select">
                                                         <option value="">Pilih Akun...</option>
-                                                        @foreach ($grupCoa as $grup)
-                                                            @if (isset($groupedCoaDetails[$grup->id]) && $groupedCoaDetails[$grup->id]->count() > 0)
-                                                                <optgroup label="{{ $grup->name }}">
-                                                                    @foreach ($groupedCoaDetails[$grup->id] as $coa)
-                                                                        <option value="{{ $coa->id }}"
-                                                                            data-coa-name="{{ $coa->name }}">
-                                                                            {{ $coa->code }} -
-                                                                            {{ $coa->name }}</option>
-                                                                    @endforeach
-                                                                </optgroup>
-                                                            @endif
+
+                                                        {{-- Loop through the new hierarchical data from the controller --}}
+                                                        @foreach ($hierarchicalCoas as $groupName => $coas)
+                                                            <optgroup label="{{ $groupName }}">
+                                                                @foreach ($coas as $coa)
+                                                                    {{-- 
+                            - The value is the COA's ID.
+                            - data-coa-name holds the full original name for the detail table.
+                            - The displayed text is cleaner, showing only the specific detail part.
+                        --}}
+                                                                    <option value="{{ $coa->id }}"
+                                                                        data-coa-name="{{ $coa->name }}">
+                                                                        {{ $coa->code }} - {{ $coa->detail_name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </optgroup>
                                                         @endforeach
+
                                                     </select>
                                                     <button type="button" class="btn-add-icon bg-primary-600"
                                                         id="btn-add-transaction" title="Tambah Transaksi">
@@ -317,7 +325,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
                                         <!-- Kolom Kanan -->
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -350,9 +357,6 @@
                                         </div>
 
                                     </div>
-
-                                    <!-- Section untuk Pilih Akun Beban dengan Icon Tambah -->
-
 
                                 </div>
                             </div>
@@ -506,8 +510,8 @@
 
                     $('#placeholder-row').remove();
 
-                    const costCenterOptions = `{!! $costCenters->map(function ($cc) {
-                            return "<option value=\"{$cc->id}\">{$cc->name} ({$cc->code})</option>";
+                    const costCenterOptions = `{!! $costCenters->map(function ($rnc) {
+                            return "<option value=\"{$rnc->id}\">{$rnc->nama_rnc} </option>";
                         })->implode('') !!}`;
                     const newRow = `
                     <tr data-row-id="${transactionIndex}">
@@ -571,7 +575,6 @@
                         $(this).val(parseCurrency($(this).val()));
                     });
 
-                    // PPN nominal sudah dalam bentuk angka, tidak perlu di-unformat
                 });
             });
         </script>

@@ -185,9 +185,12 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="tanggal_pencairan">Tanggal Pencairan <span
                                                 class="text-danger">*</span></label>
-                                        <input type="text" class="form-control datepicker" id="tanggal_pencairan"
-                                            name="tanggal_pencairan" value="{{ old('tanggal_pencairan', date('Y-m-d')) }}"
-                                            required>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" name="tanggal_pencairan"
+                                                value="{{ old('tanggal_pencairan', date('Y-m-d')) }}">
+                                            <div class="input-group-append"><span class="input-group-text fs-sm"><i
+                                                        class="fal fa-calendar"></i></span></div>
+                                        </div>
                                     </div>
 
                                     {{-- =============================================== --}}

@@ -14,54 +14,47 @@
                             <form action="{{ route('laporan.l-umur-piutang-penjamin.print') }}" method="get"
                                 target="_blank">
                                 <div class="row">
-                                    <div class="col-xl-6">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Tgl A/R Payment</label>
-                                            <div class="col-xl-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker"
-                                                        name="tanggal_awal" placeholder="yyyy-mm-dd" autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl"><i
-                                                                class="fal fa-calendar"></i></span>
-                                                    </div>
+                                    <!-- Date Range -->
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Tgl A/R Payment</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control datepicker" name="tanggal_awal"
+                                                    autocomplete="off">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text"><i class="fal fa-calendar"></i></span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="col-xl-6">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Sampai</label>
-                                            <div class="col-xl-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker"
-                                                        name="tanggal_akhir" placeholder="yyyy-mm-dd" autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl"><i
-                                                                class="fal fa-calendar"></i></span>
-                                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Sampai</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control datepicker" name="tanggal_akhir"
+                                                    autocomplete="off">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text"><i class="fal fa-calendar"></i></span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="col-xl-6">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Penjamin</label>
-                                            <div class="col-xl-8">
-                                                <select class="form-control select2 w-100" name="penjamin_id">
-                                                    <option value="">Semua</option>
-                                                    @foreach ($penjamins as $penjamin)
-                                                        <option value="{{ $penjamin->id }}">{{ $penjamin->nama_perusahaan }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
+                                    <!-- Insurance Provider -->
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Penjamin</label>
+                                            <select class="form-control select2" name="penjamin_id">
+                                                <option value="">Semua</option>
+                                                @foreach ($penjamins as $penjamin)
+                                                    <option value="{{ $penjamin->id }}">{{ $penjamin->nama_perusahaan }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="row justify-content-end mt-3">
                                     <div class="col-auto">
                                         <button type="submit" class="btn bg-primary-600 mb-3">

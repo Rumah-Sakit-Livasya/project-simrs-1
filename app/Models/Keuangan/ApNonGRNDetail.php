@@ -26,7 +26,6 @@ class ApNonGRNDetail extends Model
      */
     public function costCenter()
     {
-        // Terhubung ke model ChartOfAccount melalui kolom 'cost_center_id'
-        return $this->belongsTo(ChartOfAccount::class, 'cost_center_id');
+        return $this->belongsTo(RncCenter::class, 'cost_center_id');
     }
 }

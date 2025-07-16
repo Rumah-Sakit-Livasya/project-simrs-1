@@ -587,11 +587,9 @@ class JasaDokterController extends Controller
                 ];
             });
 
-        // Path ke view popup, sesuaikan jika berbeda
         return view('app-type.keuangan.jasa-dokter.edit-popup', compact('jasaDokter', 'allDoctors'));
     }
 
-    // Di dalam JasaDokterController.php
     public function updatePopup(Request $request, JasaDokter $jasaDokter)
     {
         // Pastikan parameter $jasaDokter

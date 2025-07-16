@@ -6,95 +6,48 @@
             font-size: 8pt !important;
         }
 
-        .badge-waiting {
-            background-color: #f39c12;
-            color: white;
-        }
-
-        .badge-approved {
-            background-color: #00a65a;
-            color: white;
-        }
-
-        .badge-rejected {
-            background-color: #dd4b39;
-            color: white;
-        }
-
         .modal-lg {
             max-width: 800px;
         }
 
-        .panel-loading {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-        }
-
-        /* PENTING: Tambahkan CSS ini jika belum ada untuk memastikan toggle berfungsi */
-        .child-row {
-            display: none;
-            /* Sembunyikan secara default */
-        }
-
-        .dropdown-icon {
-            font-size: 14px;
-            transition: transform 0.3s ease;
-            display: inline-block;
-        }
-
-        .dropdown-icon.bxs-down-arrow {
-            transform: rotate(180deg);
-        }
-
-        /* Styling tambahan untuk memperjelas batas row */
-        .child-row td {
-            background-color: #f9f9f9;
-            border-bottom: 2px solid #ddd;
-        }
-
-        /* Pastikan table di dalam child row memiliki margin dan padding yang tepat */
-        .child-row td>div {
-            padding: 15px;
-            margin: 0;
-        }
-
-        /* Pastikan parent dan child row terhubung secara visual */
-        tr.parent-row.active {
-            border-bottom: none !important;
-        }
-
-        /* Tambahkan di bagian style */
-        .control-details {
+        /*
+                                ====================================================================
+                                CSS BARU UNTUK DETAILS CONTROL (Disalin dari Konfirmasi Asuransi)
+                                ====================================================================
+                                */
+        .details-control {
             cursor: pointer;
             text-align: center;
             width: 30px;
+            padding: 8px !important;
         }
 
-        .control-details .dropdown-icon {
-            font-size: 18px;
+        .details-control i {
             transition: transform 0.3s ease, color 0.3s ease;
-            display: inline-block;
             color: #3498db;
-            /* Warna biru */
+            font-size: 16px;
+            /* Default: Panah ke atas (chevron-up), siap untuk diexpand ke bawah */
+            transform: rotate(0deg);
         }
 
-        .control-details .dropdown-icon.bxs-up-arrow {
+        .details-control:hover i {
+            color: #2980b9;
+        }
+
+        /* Saat baris memiliki class 'dt-hasChild' (child row terbuka), putar ikon 180 derajat */
+        tr.dt-hasChild td.details-control i {
             transform: rotate(180deg);
             color: #e74c3c;
-            /* Warna merah saat terbuka */
         }
 
-        .control-details:hover .dropdown-icon {
-            color: #2980b9;
-            /* Warna biru lebih gelap saat hover */
+        td.details-control::before {
+            display: none !important;
+        }
+
+        /* Styling untuk child row content */
+        .child-row-content {
+            padding: 15px;
+            background-color: #f9f9f9;
         }
 
         /* Sembunyikan ikon sort bawaan DataTables */
@@ -104,13 +57,6 @@
         table.dataTable thead .sorting_asc_disabled:after,
         table.dataTable thead .sorting_desc_disabled:after {
             display: none !important;
-        }
-
-        /* Styling untuk child row */
-        /* Pastikan content di child row tidak overflow */
-        .child-row td>div {
-            padding: 15px;
-            width: 100%;
         }
 
         /* Styling untuk tabel di dalam child row */
@@ -135,28 +81,9 @@
             background-color: white;
         }
 
-        /* Animasi untuk transisi smooth */
-        .child-row {
-            transition: all 0.3s ease;
-        }
-
-        .child-row.show {
-            opacity: 1;
-        }
-
-        td.control-details::before {
-            display: none !important;
-        }
-
         /* Efek hover untuk row */
-        #dt-basic-example tbody tr.parent-row:hover {
+        #dt-basic-example tbody tr:hover {
             background-color: #f8f9fa;
-            cursor: pointer;
-        }
-
-        /* Warna berbeda untuk child row */
-        #dt-basic-example tbody tr.child-row:hover {
-            background-color: #f1f1f1;
         }
     </style>
 
@@ -173,9 +100,6 @@
                         <div class="panel-content">
                             <form action="{{ route('keuangan.pembayaran-asuransi.index') }}" method="get">
                                 @csrf
-
-
-
                                 <div class="row mb-3">
                                     <!-- Tanggal Periode (Dari - Sampai) -->
                                     <div class="col-md-6 mb-3">
@@ -217,8 +141,6 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <!-- Status Tagihan -->
-
                                 </div>
 
 
@@ -247,19 +169,24 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>Daftar <span class="fw-300"><i>Pembayaran Asuransi</i></span></h2>
-                        <!-- Panel toolbar tetap sama -->
+                        {{-- Panel toolbar tetap sama --}}
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
                             @if (session('success'))
-                                <!-- Alert success tetap sama -->
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                                    </button>
+                                    <strong>Sukses!</strong> {{ session('success') }}
+                                </div>
                             @endif
 
                             <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
                                 <thead class="bg-primary-600">
                                     <tr>
                                         <th>#</th>
-                                        <th class="control-details"></th>
+                                        <th style="width: 10px;"></th> {{-- MODIFIKASI: Kolom untuk ikon expand/collapse --}}
                                         <th>Tgl Transaksi</th>
                                         <th>No. Transaksi</th>
                                         <th>Penjamin</th>
@@ -271,17 +198,16 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($pembayaranAsuransi as $pembayaran)
-                                        <tr class="parent-row">
+                                        {{-- MODIFIKASI: Menggunakan data-id untuk identifikasi di JS dan hapus class parent-row --}}
+                                        <tr data-id="{{ $pembayaran->id }}">
                                             <td class="text-center">{{ $loop->iteration }}</td>
-                                            <td class="control-details text-center">
-                                                <button type="button" class="btn btn-sm btn-outline-primary toggle-detail">
-                                                    <i class="fas fa-chevron-down"></i>
-                                                </button>
-                                            </td>
+                                            {{-- MODIFIKASI: Menggunakan class dan ikon yang sama dengan Konfirmasi Asuransi --}}
+                                            <td class="details-control"><i class="fal fa-chevron-up"></i></td>
                                             <td>{{ \Carbon\Carbon::parse($pembayaran->tanggal)->format('d-m-Y') }}</td>
                                             <td>{{ $pembayaran->nomor_transaksi }}</td>
                                             <td>{{ $pembayaran->penjamin->nama_perusahaan ?? '-' }}</td>
-                                            <td class="text-right">{{ number_format($pembayaran->jumlah, 2, ',', '.') }}
+                                            <td class="text-right">
+                                                {{ 'Rp ' . number_format($pembayaran->jumlah ?? 0, 2, ',', '.') }}
                                             </td>
                                             <td>{{ $pembayaran->bank->name ?? 'KAS' }}</td>
                                             <td>{{ $pembayaran->keterangan ?? '-' }}</td>
@@ -298,70 +224,51 @@
                                                 </form>
                                             </td>
                                         </tr>
-
-                                        {{-- CHILD ROW --}}
-                                        <tr class="child-row" style="display: none;">
-                                            <td colspan="9" class="bg-light">
-                                                <div class="p-3">
-                                                    <table class="child-table table table-sm table-bordered w-75 mx-auto">
-                                                        <thead class="thead-light">
-                                                            <tr>
-                                                                <th>No RM</th>
-                                                                <th>Nama Pasien</th>
-                                                                <th>No Reg</th>
-                                                                <th>Tgl AR</th>
-                                                                <th>No Invoice</th>
-                                                                <th>Tagihan</th>
-                                                                <th>Pelunasan</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($pembayaran->details as $detail)
-                                                                @php $konfirmasi = $detail->konfirmasiasuransi; @endphp
-                                                                <tr>
-                                                                    <td>{{ $konfirmasi->registration->patient->medical_record_number ?? '-' }}
-                                                                    </td>
-                                                                    <td>{{ $konfirmasi->registration->patient->name ?? '-' }}
-                                                                    </td>
-                                                                    <td>{{ $konfirmasi->registration->registration_number ?? '-' }}
-                                                                    </td>
-                                                                    <td>{{ \Carbon\Carbon::parse($konfirmasi->tanggal)->format('d-m-Y') }}
-                                                                    </td>
-                                                                    <td>{{ $konfirmasi->invoice ?? '-' }}</td>
-                                                                    <td class="text-right">
-                                                                        {{ number_format($konfirmasi->jumlah ?? 0, 2, ',', '.') }}
-                                                                    </td>
-                                                                    <td class="text-right">
-                                                                        {{ number_format($pembayaran->jumlah ?? 0, 2, ',', '.') }}
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {{-- MODIFIKASI: Hapus Child Row statis dari sini. Akan digenerate oleh JS --}}
                                     @endforeach
                                 </tbody>
 
                             </table>
+
+                            {{-- TAMBAHAN: Template untuk Child Row (diletakkan di luar tabel, disalin dari Konfirmasi) --}}
+                            <div id="child-row-template" style="display: none;">
+                                <div class="child-row-content">
+                                    <h6 class="mb-3"><strong>Rincian untuk No. Transaksi <span
+                                                class="invoice-placeholder">{no_transaksi}</span>:</strong></h6>
+                                    <table class="child-table table table-sm table-bordered">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>No. RM</th>
+                                                <th>Nama Pasien</th>
+                                                <th>No. Registrasi</th>
+                                                <th>No. Invoice</th>
+                                                <th>Tgl. AR</th>
+                                                <th class="text-right">Tagihan Invoice</th>
+                                                <th class="text-right">Pelunasan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="detail-tbody">
+                                            {{-- Isi akan digenerate oleh JavaScript --}}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </div>
-        </div>
         </div>
     </main>
 @endsection
 
 @section('plugin')
+    {{-- Plugin scripts tetap sama --}}
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/js/dependency/moment/moment.js"></script>
-    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-   rangepicker.js"></script>
+    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
     <script src="/js/formplugins/inputmask/inputmask.bundle.js"></script>
     <script src="/js/formplugins/sweetalert2/sweetalert2.bundle.js"></script>
     <script src="/js/notifications/toastr/toastr.js"></script>
@@ -369,120 +276,147 @@
 
     <script>
         $(document).ready(function() {
-            // Inisialisasi Select2
-            $('.select2').select2({
-                placeholder: "Pilih Penjamin",
-                allowClear: true,
-                width: 'resolve'
-            });
-
-            // Inisialisasi Datepicker
+            // Inisialisasi plugin dasar
             $('.datepicker').datepicker({
                 format: 'yyyy-mm-dd',
-                todayHighlight: true,
                 autoclose: true,
-                orientation: "bottom auto"
+                todayHighlight: true
+            });
+            $('.select2').select2({
+                dropdownCssClass: "move-up"
             });
 
-            // Inisialisasi DataTable
+            // ==========================================================
+            // LOGIKA JAVASCRIPT BARU (Disalin & diadaptasi dari Konfirmasi Asuransi)
+            // ==========================================================
+
+            // 1. Siapkan data detail dalam variabel JavaScript
+            const allDetails = {!! json_encode(
+                $pembayaranAsuransi->mapWithKeys(function ($pembayaran) {
+                    return [
+                        $pembayaran->id => $pembayaran->details->map(function ($detail) use ($pembayaran) {
+                            $konfirmasi = $detail->konfirmasiasuransi;
+                            return [
+                                'rm' => optional(optional(optional($konfirmasi)->registration)->patient)->medical_record_number,
+                                'pasien' => optional(optional(optional($konfirmasi)->registration)->patient)->name,
+                                'reg_no' => optional(optional($konfirmasi)->registration)->registration_number,
+                                'invoice' => optional($konfirmasi)->invoice,
+                                'tgl_ar' => optional($konfirmasi)->tanggal
+                                    ? \Carbon\Carbon::parse($konfirmasi->tanggal)->format('d-m-Y')
+                                    : '-',
+                                'tagihan_invoice' => optional($konfirmasi)->jumlah,
+                                'pelunasan' => $pembayaran->jumlah, // Ini mungkin perlu disesuaikan jika 1 pembayaran untuk banyak invoice
+                            ];
+                        }),
+                    ];
+                }),
+            ) !!};
+
+            // 2. Inisialisasi DataTable
             var table = $('#dt-basic-example').DataTable({
                 responsive: true,
-                processing: true,
-                paging: true,
-                ordering: true,
-                searching: true,
-                lengthChange: true,
-                autoWidth: false,
-                language: {
-                    "sProcessing": "Memproses...",
-                    "sLengthMenu": "Tampilkan _MENU_ entri",
-                    "sZeroRecords": "Tidak ditemukan data yang sesuai",
-                    "sInfo": "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
-                    "sInfoEmpty": "Menampilkan 0 sampai 0 dari 0 entri",
-                    "sInfoFiltered": "(disaring dari _MAX_ entri keseluruhan)",
-                    "oPaginate": {
-                        "sFirst": "Pertama",
-                        "sPrevious": "Sebelumnya",
-                        "sNext": "Selanjutnya",
-                        "sLast": "Terakhir"
+                lengthChange: false,
+                pageLength: 20,
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [{
+                        extend: 'pdfHtml5',
+                        text: '<i class="fal fa-file-pdf mr-1"></i> PDF',
+                        className: 'btn-outline-danger btn-sm mr-1',
+                        title: 'Daftar Pembayaran Asuransi',
+                        exportOptions: {
+                            columns: [2, 3, 4, 5, 6, 7]
+                        },
+                        orientation: 'landscape'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fal fa-file-excel mr-1"></i> Excel',
+                        className: 'btn-outline-success btn-sm mr-1',
+                        title: 'Daftar Pembayaran Asuransi',
+                        exportOptions: {
+                            columns: [2, 3, 4, 5, 6, 7]
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fal fa-print mr-1"></i> Print',
+                        className: 'btn-outline-primary btn-sm',
+                        title: 'Daftar Pembayaran Asuransi',
+                        exportOptions: {
+                            columns: [2, 3, 4, 5, 6, 7]
+                        }
                     }
-                },
+                ],
                 columnDefs: [{
-                    targets: 0,
-                    className: 'text-center',
-                    orderable: false
-                }],
-                order: [
-                    [1, 'desc']
-                ]
+                    orderable: false,
+                    targets: [0, 1, 8] // Kolom #, detail, dan fungsi tidak bisa diurutkan
+                }]
             });
 
-            // Toggle untuk baris anak (child-row)
-            $('#dt-basic-example tbody').on('click', 'tr.parent-row', function() {
-                var tr = $(this);
+            // 3. Fungsi untuk memformat child row
+            function formatChildRow(no_transaksi, details) {
+                // Ambil template dari div yang kita sembunyikan
+                var template = $('#child-row-template').clone();
+                template.find('.invoice-placeholder').text(no_transaksi);
+
+                var tbody = template.find('.detail-tbody');
+                tbody.empty();
+
+                if (details && details.length > 0) {
+                    details.forEach(function(detail) {
+                        var rowHtml = `
+                        <tr>
+                            <td>${detail.rm || '-'}</td>
+                            <td>${detail.pasien || '-'}</td>
+                            <td>${detail.reg_no || '-'}</td>
+                            <td>${detail.invoice || '-'}</td>
+                            <td>${detail.tgl_ar || '-'}</td>
+                            <td class="text-right">${'Rp ' + new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(detail.tagihan_invoice || 0)}</td>
+                            <td class="text-right">${'Rp ' + new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(detail.pelunasan || 0)}</td>
+                        </tr>
+                    `;
+                        tbody.append(rowHtml);
+                    });
+                } else {
+                    tbody.append(
+                        '<tr><td colspan="7" class="text-center text-muted">Tidak ada rincian data untuk pembayaran ini.</td></tr>'
+                    );
+                }
+
+                return template.html();
+            }
+
+            // 4. Logika child row menggunakan API DataTables
+            $('#dt-basic-example tbody').on('click', 'td.details-control', function() {
+                var tr = $(this).closest('tr');
                 var row = table.row(tr);
 
-                // Jika baris sudah dibuka, tutup
                 if (row.child.isShown()) {
+                    // Baris ini sudah terbuka, tutup.
                     row.child.hide();
-                    tr.removeClass('active');
-                    tr.next('tr.child-row').remove();
+                    tr.removeClass('dt-hasChild');
                 } else {
-                    // Tutup semua child lain sebelum buka yang ini
-                    table.rows().every(function() {
-                        if (this.child.isShown()) {
-                            this.child.hide();
-                            $(this.node()).removeClass('active');
-                            $(this.node()).next('tr.child-row').remove();
-                        }
-                    });
+                    // Ambil ID pembayaran dari data attribute di TR
+                    var pembayaranId = tr.data('id');
+                    var no_transaksi = tr.find('td:eq(3)').text()
+                        .trim(); // Ambil No. Transaksi dari kolom ke-4
 
-                    // Buat konten child (bisa kamu sesuaikan dengan data)
-                    var childHtml = `
-                    <div>
-                        <table class="child-table table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Contoh Kolom A</th>
-                                    <th>Contoh Kolom B</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Data A</td>
-                                    <td>Data B</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                `;
+                    // Ambil detail dari allDetails berdasarkan ID pembayaran
+                    var details = allDetails[pembayaranId] || [];
 
-                    row.child('<tr class="child-row"><td colspan="7">' + childHtml + '</td></tr>').show();
-                    tr.addClass('active');
+                    // Buka baris dan format kontennya
+                    row.child(formatChildRow(no_transaksi, details)).show();
+                    tr.addClass('dt-hasChild');
+
+                    // Inisialisasi ulang tooltip jika ada di dalam child row
+                    $(row.child()).find('[data-toggle="tooltip"]').tooltip();
                 }
             });
 
-            // Tooltip jika diperlukan
+            // Inisialisasi Tooltip jika ada di luar child row
             $('[data-toggle="tooltip"]').tooltip();
-        });
-
-        $('#dt-basic-example').on('click', '.toggle-detail', function() {
-            var $btn = $(this);
-            var $icon = $btn.find('i');
-            var $row = $btn.closest('tr');
-            var $childRow = $row.next('.child-row');
-
-            if ($childRow.is(':visible')) {
-                $childRow.hide();
-                $icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
-            } else {
-                // Tutup semua dulu
-                $('.child-row').hide();
-                $('.toggle-detail i').removeClass('fa-chevron-up').addClass('fa-chevron-down');
-
-                $childRow.show();
-                $icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
-            }
         });
     </script>
 @endsection

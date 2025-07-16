@@ -211,8 +211,9 @@
                                     <div class="col-md-6 mb-3">
                                         <label>Tipe Pengajuan</label>
                                         <select class="form-control select2" id="tipe_pengajuan" name="tipe_pengajuan">
-                                            <option value="">Tipe_pengajuan</option>
-
+                                            <option value="">All</option>
+                                            <option value="approval">Approval</option>
+                                            <option value="Tanpa_pengajuan">Tanpa Pengajuan</option>
                                         </select>
                                     </div>
 
@@ -259,6 +260,7 @@
                             <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
                                 <thead class="bg-primary-600">
                                     <tr>
+                                        <th>No</th>
                                         <th>Tanggal</th>
                                         <th>Kode Pencairan</th>
                                         <th>Kode Pengajuan</th>
@@ -273,6 +275,7 @@
                                 <tbody>
                                     @foreach ($pencairans as $item)
                                         <tr>
+                                            <td></td>
                                             <td>{{ \Carbon\Carbon::parse($item->tanggal_pencairan)->format('d-m-Y') }}</td>
                                             <td>{{ $item->kode_pencairan }}</td>
                                             <td>{{ $item->pengajuan->kode_pengajuan ?? 'N/A' }}</td>
@@ -405,8 +408,8 @@
             var table = $('#dt-basic-example').DataTable({
                 responsive: true,
                 lengthChange: false,
-                pageLength: 20,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                pageLength: 11,
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 buttons: [{
@@ -469,6 +472,16 @@
                     }
                 }
             });
+
+            table.on('order.dt draw.dt', function() {
+                let i = 1;
+                table.cells(null, 0, {
+                    search: 'applied',
+                    order: 'applied'
+                }).every(function(cell) {
+                    this.data(i++);
+                });
+            }).draw();
 
             // Form validation and submission
             $('form[action="{{ route('keuangan.pembayaran-jasa-dokter.index') }}"]').on('submit', function(e) {

@@ -406,8 +406,10 @@
                                                         value="{{ $detail->keterangan }}">
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control form-control-sm"
-                                                        value="{{ $detail->costCenter ? $detail->costCenter->code . ' - ' . $detail->costCenter->name : 'N/A' }}">
+                                                    {{-- Menggunakan properti dari model RncCenter: kode_rnc dan nama_rnc --}}
+                                                    <input type="text" class="form-control form-control-sm bg-light"
+                                                        readonly
+                                                        value="{{ $detail->costCenter ? $detail->costCenter->kode_rnc . ' - ' . $detail->costCenter->nama_rnc : 'N/A' }}">
                                                 </td>
                                                 <td>
                                                     <input type="text" name="details[{{ $index }}][nominal]"

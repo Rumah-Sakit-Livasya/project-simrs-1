@@ -2,7 +2,6 @@
 @section('title', 'Jasa Dokter Belum Diproses')
 @section('content')
     <style>
-        /* Main styling similar to konfirmasi asuransi */
         table {
             font-size: 8pt !important;
         }
@@ -39,27 +38,82 @@
             z-index: 999;
         }
 
-        /* Form styling */
-        .form-control {
-            border: 0;
-            border-bottom: 1.9px solid #eaeaea;
-            border-radius: 0;
-            padding-left: 0;
-            padding-right: 0;
+        /* PENTING: Tambahkan CSS ini jika belum ada untuk memastikan toggle berfungsi */
+        .child-row {
+            display: none;
+            /* Sembunyikan secara default */
         }
 
-        .form-control:focus {
-            box-shadow: none;
-            border-color: #eaeaea;
+        .dropdown-icon {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+            display: inline-block;
         }
 
-        .select2-selection {
-            border: 0 !important;
-            border-bottom: 1.9px solid #eaeaea !important;
-            border-radius: 0 !important;
+        .dropdown-icon.bxs-down-arrow {
+            transform: rotate(180deg);
         }
 
-        /* Table styling */
+        /* Styling tambahan untuk memperjelas batas row */
+        .child-row td {
+            background-color: #f9f9f9;
+            border-bottom: 2px solid #ddd;
+        }
+
+        /* Pastikan table di dalam child row memiliki margin dan padding yang tepat */
+        .child-row td>div {
+            padding: 15px;
+            margin: 0;
+        }
+
+        /* Pastikan parent dan child row terhubung secara visual */
+        tr.parent-row.active {
+            border-bottom: none !important;
+        }
+
+        /* Tambahkan di bagian style */
+        .control-details {
+            cursor: pointer;
+            text-align: center;
+            width: 30px;
+        }
+
+        .control-details .dropdown-icon {
+            font-size: 18px;
+            transition: transform 0.3s ease, color 0.3s ease;
+            display: inline-block;
+            color: #3498db;
+            /* Warna biru */
+        }
+
+        .control-details .dropdown-icon.bxs-up-arrow {
+            transform: rotate(180deg);
+            color: #e74c3c;
+            /* Warna merah saat terbuka */
+        }
+
+        .control-details:hover .dropdown-icon {
+            color: #2980b9;
+            /* Warna biru lebih gelap saat hover */
+        }
+
+        /* Sembunyikan ikon sort bawaan DataTables */
+        table.dataTable thead .sorting:after,
+        table.dataTable thead .sorting_asc:after,
+        table.dataTable thead .sorting_desc:after,
+        table.dataTable thead .sorting_asc_disabled:after,
+        table.dataTable thead .sorting_desc_disabled:after {
+            display: none !important;
+        }
+
+        /* Styling untuk child row */
+        /* Pastikan content di child row tidak overflow */
+        .child-row td>div {
+            padding: 15px;
+            width: 100%;
+        }
+
+        /* Styling untuk tabel di dalam child row */
         .child-table {
             width: 98% !important;
             margin: 10px auto !important;
@@ -81,34 +135,28 @@
             background-color: white;
         }
 
-        /* Button styling */
-        .btn-outline-primary {
-            border-color: #021d39;
-            color: #021d39;
+        /* Animasi untuk transisi smooth */
+        .child-row {
+            transition: all 0.3s ease;
         }
 
-        .btn-outline-primary:hover {
-            background-color: #021d39;
-            color: white;
+        .child-row.show {
+            opacity: 1;
         }
 
-        /* Panel header styling */
-        .panel-hdr {
+        td.control-details::before {
+            display: none !important;
+        }
+
+        /* Efek hover untuk row */
+        #dt-basic-example tbody tr.parent-row:hover {
             background-color: #f8f9fa;
-            border-bottom: 1px solid #eaeaea;
+            cursor: pointer;
         }
 
-        /* Datepicker styling */
-        .datepicker-dropdown {
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Checkbox styling */
-        [type="checkbox"] {
-            position: relative;
-            width: 18px;
-            height: 18px;
+        /* Warna berbeda untuk child row */
+        #dt-basic-example tbody tr.child-row:hover {
+            background-color: #f1f1f1;
         }
     </style>
     <main id="js-page-content" role="main" class="page-content">
@@ -123,40 +171,36 @@
                         <div class="panel-content">
                             <form action="#" method="get">
                                 @csrf
-                                <div class="row">
-                                    <div class="col-xl-6">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Tanggal Bill</label>
-                                            <div class="col-xl-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker"
-                                                        name="tanggal_awal" placeholder="Pilih tanggal awal"
-                                                        value="{{ request('tanggal_awal') ?? date('Y-m-01') }}"
-                                                        autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl">
-                                                            <i class="fal fa-calendar"></i>
-                                                        </span>
-                                                    </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group ">
+                                            <label class=" text-center col-form-label">Tanggal Bill</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control datepicker" name="tanggal_awal"
+                                                    placeholder="Pilih tanggal awal"
+                                                    value="{{ request('tanggal_awal') ?? date('Y-m-01') }}"
+                                                    autocomplete="off">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text fs-xl">
+                                                        <i class="fal fa-calendar"></i>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="col-xl-6">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Sampai</label>
-                                            <div class="col-xl-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker"
-                                                        name="tanggal_akhir" placeholder="Pilih tanggal akhir"
-                                                        value="{{ request('tanggal_akhir') ?? date('Y-m-d') }}"
-                                                        autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl">
-                                                            <i class="fal fa-calendar"></i>
-                                                        </span>
-                                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group ">
+                                            <label class=" text-center col-form-label">Sampai</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control datepicker" name="tanggal_akhir"
+                                                    placeholder="Pilih tanggal akhir"
+                                                    value="{{ request('tanggal_akhir') ?? date('Y-m-d') }}"
+                                                    autocomplete="off">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text fs-xl">
+                                                        <i class="fal fa-calendar"></i>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -164,22 +208,20 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-xl-6 mt-3">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Nama Dokter</label>
-                                            <div class="col-xl-8">
-                                                <select class="form-control select2 w-100" id="dokter_id"
-                                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                    name="dokter_id">
-                                                    <option value="">Semua Dokter</option>
-                                                    @foreach ($dokters as $dokter)
-                                                        <option value="{{ $dokter->id }}"
-                                                            {{ request('dokter_id') == $dokter->id ? 'selected' : '' }}>
-                                                            {{ $dokter->employee->fullname ?? 'dr. ' . $dokter->id }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
+                                    <div class="col-md-6 mt-3">
+                                        <div class="form-group ">
+                                            <label class=" text-center col-form-label">Nama Dokter</label>
+                                            <select class="form-control select2 w-100" id="dokter_id"
+                                                style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
+                                                name="dokter_id">
+                                                <option value="">Semua Dokter</option>
+                                                @foreach ($dokters as $dokter)
+                                                    <option value="{{ $dokter->id }}"
+                                                        {{ request('dokter_id') == $dokter->id ? 'selected' : '' }}>
+                                                        {{ $dokter->employee->fullname ?? 'dr. ' . $dokter->id }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -252,40 +294,44 @@
                                         <th>JKP</th>
                                         <th>Jasa Dokter</th>
                                         <th>Status</th>
-                                        <th>Fungsi</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($data as $i => $item)
+                                    @forelse ($data as $item)
                                         <tr>
-                                            <td class="text-center">
-                                                <input type="checkbox" name="select_item[]" value="{{ $item->id }}">
+                                            <td class="text-center"><input type="checkbox" name="select_item[]"
+                                                    value="{{ $item->id }}"></td>
+                                            {{-- Kolom No akan diisi oleh DataTables --}}
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ optional($item->tagihanPasien->bilinganSatu->created_at)->format('d-m-Y') ?? '-' }}
                                             </td>
-                                            <td class="text-center">{{ $i + 1 }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($item->created_at)->format('d-m-Y') }}</td>
-                                            <td>{{ $item->registration->patient->medical_record_number ?? '-' }} /
-                                                {{ $item->registration->registration_number ?? '-' }}</td>
-                                            <td>{{ $item->registration->patient->name ?? '-' }}</td>
-                                            <td>{{ $item->detail_tagihan ?? '-' }}</td>
-                                            <td>{{ $item->registration->penjamin->nama_perusahaan ?? '-' }}</td>
-                                            <td class="text-center">{{ $item->jkp ?? '0' }}%</td>
-                                            <td class="text-right">
-                                                {{ 'Rp ' . number_format($item->jasa_dokter ?? 0, 0, ',', '.') }}</td>
                                             <td>
-                                                <span class="badge badge-waiting">{{ ucfirst($item->status) }}</span>
+                                                {{ $item->tagihanPasien->registration->patient->medical_record_number ?? '-' }}
+                                                /
+                                                {{ $item->tagihanPasien->registration->registration_number ?? '-' }}
                                             </td>
-                                            <td class="text-center">
-                                                <button class="btn btn-xs btn-outline-primary btn-detail"
-                                                    data-id="{{ $item->id }}">
-                                                    <i class="fal fa-eye"></i>
-                                                </button>
-                                                <button class="btn btn-xs btn-outline-success btn-approve"
-                                                    data-id="{{ $item->id }}">
-                                                    <i class="fal fa-check"></i>
-                                                </button>
+                                            <td>{{ $item->tagihanPasien->registration->patient->name ?? '-' }}</td>
+
+                                            {{-- PERBAIKAN: Mengganti field yang salah dari 'detail_tagihan' menjadi 'nama_tindakan' --}}
+                                            <td>{{ $item->nama_tindakan ?? '-' }}</td>
+
+                                            <td>{{ $item->tagihanPasien->registration->penjamin->nama_perusahaan ?? '-' }}
                                             </td>
+
+                                            {{-- PERBAIKAN: Memastikan format Jasa Dokter benar --}}
+                                            <td class="text-right">
+                                                {{ number_format($item->jkp ?? 0, 2, ',', '.') }}</td>
+                                            <td class="text-right">
+                                                {{ number_format($item->share_dokter ?? 0, 2, ',', '.') }}</td>
+
+                                            <td><span class="badge badge-waiting">Belum Diproses</span></td>
                                         </tr>
-                                    @endforeach
+                                    @empty
+                                        <tr>
+                                            <td colspan="10" class="text-center">Tidak ada data untuk ditampilkan.</td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
@@ -406,52 +452,22 @@
             // Initialize datatable
             var table = $('#dt-jasa-dokter').DataTable({
                 responsive: true,
-                lengthChange: false,
-                pageLength: 20,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
-                    "<'row'<'col-sm-12'tr>>" +
-                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-                buttons: [{
-                        extend: 'pdfHtml5',
-                        text: '<i class="fal fa-file-pdf mr-1"></i> PDF',
-                        className: 'btn-outline-danger btn-sm mr-1',
-                        title: 'Daftar Jasa Dokter Belum Diproses',
-                        exportOptions: {
-                            columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
-                        },
-                        orientation: 'landscape'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: '<i class="fal fa-file-excel mr-1"></i> Excel',
-                        className: 'btn-outline-success btn-sm mr-1',
-                        title: 'Daftar Jasa Dokter Belum Diproses',
-                        exportOptions: {
-                            columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="fal fa-print mr-1"></i> Print',
-                        className: 'btn-outline-primary btn-sm',
-                        title: 'Daftar Jasa Dokter Belum Diproses',
-                        exportOptions: {
-                            columns: [1, 2, 3, 4, 5, 6, 7, 8, 9]
-                        }
-                    }
+                pageLength: 25,
+                order: [
+                    [2, 'desc']
                 ],
                 columnDefs: [{
                         orderable: false,
-                        targets: [0, 10]
-                    }, // Kolom checkbox dan aksi tidak bisa diurutkan
-                    {
-                        className: 'text-right',
-                        targets: [8]
-                    }, // Kolom jumlah rata kanan
+                        targets: [0, 9]
+                    }, // Checkbox dan Aksi tidak bisa di-sort
                     {
                         className: 'text-center',
-                        targets: [0, 1, 7, 9, 10]
-                    } // Kolom checkbox, no, jkp, status, aksi rata tengah
+                        targets: [0, 1, 9]
+                    },
+                    {
+                        className: 'text-right',
+                        targets: [7]
+                    }
                 ]
             });
 

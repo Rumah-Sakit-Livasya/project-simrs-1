@@ -14,50 +14,47 @@
                                 target="_blank">
                                 @csrf
                                 <div class="row">
-                                    <div class="col-xl-6">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Periode Awal</label>
-                                            <div class="col-xl-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker"
-                                                        name="tanggal_awal" placeholder="Pilih tanggal awal"
-                                                        value="{{ request('tanggal_awal') ?? '' }}" autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl"><i
-                                                                class="fal fa-calendar"></i></span>
-                                                    </div>
+                                    <!-- Left Column -->
+                                    <div class="col-md-6">
+                                        <!-- Start Date -->
+                                        <div class="form-group mb-4">
+                                            <label class="form-label">Periode Awal</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control datepicker" name="tanggal_awal"
+                                                    placeholder="Pilih tanggal awal"
+                                                    value="{{ request('tanggal_awal') ?? '' }}" autocomplete="off">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text"><i class="fal fa-calendar"></i></span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Penjamin</label>
-                                            <div class="col-xl-8">
-                                                <select class="form-control select2 w-100" name="penjamin_id"
-                                                    style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0">
-                                                    <option value="">Semua</option>
-                                                    @foreach ($penjamins as $penjamin)
-                                                        <option value="{{ $penjamin->id }}"
-                                                            {{ request('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
-                                                            {{ $penjamin->nama_perusahaan }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
+
+                                        <!-- Insurance Provider -->
+                                        <div class="form-group mb-4">
+                                            <label class="form-label">Penjamin</label>
+                                            <select class="form-control select2" name="penjamin_id">
+                                                <option value="">Semua</option>
+                                                @foreach ($penjamins as $penjamin)
+                                                    <option value="{{ $penjamin->id }}"
+                                                        {{ request('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
+                                                        {{ $penjamin->nama_perusahaan }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
 
-                                    <div class="col-xl-6">
-                                        <div class="form-group row">
-                                            <label class="col-xl-4 text-center col-form-label">Periode Akhir</label>
-                                            <div class="col-xl-8">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control datepicker"
-                                                        name="tanggal_akhir" placeholder="Pilih tanggal akhir"
-                                                        value="{{ request('tanggal_akhir') ?? '' }}" autocomplete="off">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text fs-xl"><i
-                                                                class="fal fa-calendar"></i></span>
-                                                    </div>
+                                    <!-- Right Column -->
+                                    <div class="col-md-6">
+                                        <!-- End Date -->
+                                        <div class="form-group mb-4">
+                                            <label class="form-label">Periode Akhir</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control datepicker" name="tanggal_akhir"
+                                                    placeholder="Pilih tanggal akhir"
+                                                    value="{{ request('tanggal_akhir') ?? '' }}" autocomplete="off">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text"><i class="fal fa-calendar"></i></span>
                                                 </div>
                                             </div>
                                         </div>

@@ -45,4 +45,12 @@ class TarifTindakanMedis extends Model
     {
         return $this->belongsTo(Registration::class, 'registration_id');
     }
+
+    public function getTarif($groupPenjaminId, $kelasRawatId)
+    {
+        return $this->tarif()
+            ->where('group_penjamin_id', $groupPenjaminId)
+            ->where('kelas_rawat_id', $kelasRawatId)
+            ->first();
+    }
 }

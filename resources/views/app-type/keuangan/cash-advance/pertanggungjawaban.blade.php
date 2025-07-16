@@ -500,9 +500,9 @@
 
                         var rowHtml = `
                                 <tr>
-                                    <td>${detail.tipe_transaksi || '-'}</td>
+                                    <td>${detail.transaksi_rutin.nama_transaksi || '-'}</td>
                                     <td>${detail.keterangan || '-'}</td>
-                                    <td>${detail.cost_center || '-'}</td>
+                                    <td>${detail.rnc_center.nama_rnc || '-'}</td>
                                     <td class="text-right">${'Rp ' + new Intl.NumberFormat('id-ID').format(detail.nominal || 0)}</td>
                                 </tr>
                             `;

@@ -126,60 +126,48 @@ class Bilingan extends Model implements AuditableContract
     protected function createJasaDokter(TagihanPasien $tagihan)
     {
         try {
-            $tindakanMedis = $tagihan->tindakan_medis; // Pastikan relasi ini ada di model TagihanPasien
-            $registration = $tagihan->registration; // Pastikan relasi ini ada di model TagihanPasien
+            $registration = $this->registration; // Mengambil relasi registrasi dari bilingan ini
 
             if (!$registration) {
-                \Log::error('Missing registration relation for tagihan', ['tagihan_id' => $tagihan->id]);
-                return;
-            }
-            // tindakanMedis mungkin tidak selalu ada jika tagihan bukan dari tindakan medis spesifik,
-            // namun untuk jasa dokter, kita asumsikan ia berasal dari tindakan medis.
-            if (!$tindakanMedis) {
-                \Log::error('Missing tindakan_medis relation for tagihan, cannot determine tarif.', ['tagihan_id' => $tagihan->id]);
-                // Anda mungkin ingin default atau skip jika tidak ada tindakan_medis
-                return;
-            }
-
-
-            $tarif = $tindakanMedis->getTarif(
-                $registration->penjamin_id,
-                $registration->kelas_rawat_id
-            );
-
-            if (!$tarif) {
-                \Log::error('Tarif not found for tindakan in createJasaDokter', [
-                    'tindakan_id' => $tindakanMedis->id,
-                    'penjamin_id' => $registration->penjamin_id,
-                    'kelas_id' => $registration->kelas_rawat_id,
-                    'tagihan_id' => $tagihan->id,
-                    'bilingan_id' => $this->id
+                \Log::error('Missing registration relation for bilingan', [
+                    'bilingan_id' => $this->id,
+                    'tagihan_id' => $tagihan->id
                 ]);
                 return;
             }
 
-            // `ap_number` dan `ap_date` akan diisi nanti saat proses "Save AP Dokter"
-            // Jadi, kita tidak perlu generate $apNumber atau $apDate di sini.
+            // PERUBAHAN UTAMA: Menghitung jasa dokter sebagai 60% dari wajib_bayar
+            $persentaseJasaDokter = 0.60; // 60%
+            $wajibBayar = $tagihan->wajib_bayar;
+            $nilaiJasaDokter = $wajibBayar * $persentaseJasaDokter;
+
+            // Contoh: jika wajib_bayar = 135.000, maka nilaiJasaDokter = 135.000 * 0.60 = 81.000
+
+            \Log::info('Calculating Jasa Dokter', [
+                'wajib_bayar' => $wajibBayar,
+                'persentase' => $persentaseJasaDokter,
+                'hasil_perhitungan' => $nilaiJasaDokter
+            ]);
 
             JasaDokter::create([
                 'tagihan_pasien_id' => $tagihan->id,
                 'registration_id'   => $registration->id,
                 'bilingan_id'       => $this->id,
-                'dokter_id'         => $registration->doctor_id, // Dokter dari registrasi
-                'ap_number'         => null,                     // Akan diisi nanti
+                'dokter_id'         => $registration->doctor_id,
+                'ap_number'         => null,                     // Akan diisi nanti saat proses "Save AP Dokter"
                 'ap_date'           => null,                     // Akan diisi nanti
-                'bill_date'         => $this->created_at,        // Atau $this->updated_at / tanggal finalisasi bilingan
+                'bill_date'         => $this->updated_at,        // Menggunakan tanggal bilingan difinalisasi
                 'nama_tindakan'     => $tagihan->tagihan,        // Mengambil dari kolom 'tagihan' di TagihanPasien
-                'nominal'           => $tarif->total,
+                'nominal'           => $tagihan->nominal,
                 'diskon'            => 0,                        // Default diskon
                 'ppn_persen'        => 0,                        // Default PPN
-                'jkp'               => $tarif->jkp ?? 0,         // Ambil JKP dari tarif jika ada, atau default 0
-                'jasa_dokter'       => $tarif->share_dr,         // Ini bisa jadi sama dengan share_dokter
-                'share_dokter'      => $tarif->share_dr,
-                'status'            => 'draft',                  // Status awal adalah 'draft'
+                'jkp'               => $wajibBayar,              // JKP adalah nilai 'wajib_bayar' dari tagihan
+                'jasa_dokter'       => $nilaiJasaDokter,         // Diisi dengan hasil perhitungan 60%
+                'share_dokter'      => $nilaiJasaDokter,         // Diisi dengan hasil perhitungan 60%
+                'status'            => 'draft',                  // Status awal adalah draft
             ]);
 
-            \Log::info('JasaDokter (draft) created successfully', ['tagihan_id' => $tagihan->id, 'bilingan_id' => $this->id]);
+            \Log::info('JasaDokter (draft) created successfully', ['tagihan_id' => $tagihan->id, 'bilingan_id' => $this->id, 'calculated_share' => $nilaiJasaDokter]);
         } catch (\Exception $e) {
             \Log::error('Error creating JasaDokter (draft): ' . $e->getMessage(), [
                 'tagihan_id' => $tagihan->id,

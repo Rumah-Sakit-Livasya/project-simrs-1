@@ -10,11 +10,22 @@ use Illuminate\Http\Request;
 class ChartOfAccountController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
+        $groupCOA = GroupChartOfAccount::orderBy('id', 'asc')->get();
+
+        // ========================================================
+        //          PERBAIKAN UTAMA: HILANGKAN KOMENTAR
+        // ========================================================
+        // Variabel ini diperlukan oleh modal untuk dropdown 'Parent COA'.
+        // Kita ambil semua COA yang merupakan header.
+        $chartOfAccounts = ChartOfAccount::where('header', true)
+            ->orderBy('code', 'asc')
+            ->get();
+
         return view('app-type.keuangan.chart-of-account.index', [
-            'groupCOA' => GroupChartOfAccount::orderBy('id', 'asc')->get(),
-            'chartOfAccounts' => ChartOfAccount::orderBy('id', 'asc')->get(),
+            'groupCOA' => $groupCOA,
+            'chartOfAccounts' => $chartOfAccounts, // Kirim variabel ini ke view
         ]);
     }
 
@@ -87,30 +98,70 @@ class ChartOfAccountController extends Controller
 
     public function getByGroup($group_id)
     {
-        $coa = ChartOfAccount::with('children')
+        // Query ini sekarang akan bekerja dengan benar karena sudah ada data
+        // yang `parent_id`-nya NULL.
+        $coa = ChartOfAccount::with('childrenRecursive') // Eager load semua turunan
             ->where('group_id', $group_id)
-            ->whereNull('parent_id')
+            ->whereNull('parent_id') // Mencari "akar" dari hierarki
+            ->orderBy('code', 'asc')
             ->get();
 
+        // Kirim data yang sudah berbentuk hierarki ke fungsi format
         return response()->json($this->formatTree($coa));
     }
 
+    /**
+     * Fungsi rekursif untuk memformat data pohon agar sesuai dengan frontend.
+     */
+    private function formatTree($nodes)
+    {
+        // Pastikan semua field yang dibutuhkan oleh JavaScript ada di sini
+        return $nodes->map(function ($node) {
+            return [
+                'id' => $node->id,
+                'code' => $node->code,
+                'name' => $node->name,
+                'header' => (bool) $node->header,
+                'status' => (bool) $node->status,
+                'default' => $node->default,
+                'children' => $node->childrenRecursive->isNotEmpty() ? $this->formatTree($node->childrenRecursive) : []
+            ];
+        });
+    }
     public function show($id)
     {
         $coa = ChartOfAccount::findOrFail($id);
         return response()->json($coa);
     }
 
-    private function formatTree($nodes)
+    // private function formatTree($nodes)
+    // {
+    //     return $nodes->map(function ($node) {
+    //         return [
+    //             'id' => $node->id, // Pastikan ID disertakan
+    //             'code' => $node->code,
+    //             'name' => $node->name,
+    //             'header' => $node->header,
+    //             'children' => $node->children ? $this->formatTree($node->children) : []
+    //         ];
+    //     });
+    // }
+
+    public function getParents(Request $request)
     {
-        return $nodes->map(function ($node) {
-            return [
-                'id' => $node->id, // Pastikan ID disertakan
-                'code' => $node->code,
-                'name' => $node->name,
-                'header' => $node->header,
-                'children' => $node->children ? $this->formatTree($node->children) : []
-            ];
-        });
+        // Validasi sederhana untuk memastikan group_id adalah angka
+        $request->validate(['group_id' => 'nullable|integer']);
+
+        // Query dasar: Hanya ambil akun yang merupakan 'header'
+        $query = ChartOfAccount::where('header', true);
+
+        // Filter berdasarkan grup HANYA JIKA group_id diberikan
+        if ($request->filled('group_id')) {
+            $query->where('group_id', $request->group_id);
+        }
+
+        $parents = $query->orderBy('code')->get(['id', 'code', 'name']);
+
+        return response()->json($parents);
     }
 }
