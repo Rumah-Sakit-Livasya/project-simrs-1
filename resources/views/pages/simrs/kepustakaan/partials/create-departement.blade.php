@@ -81,7 +81,7 @@
                                     <label for="name">Nama (File/Folder) <span
                                             class="text-danger fw-bold">*</span></label>
                                     <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
-                                    <input type="text" class="form-control" id="name" name="name"
+                                    <input type="text" class="form-control" id="name" name="name" required
                                         placeholder="Masukan nama file/folder...">
                                 </div>
                             </div>

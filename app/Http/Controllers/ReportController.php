@@ -345,7 +345,9 @@ class ReportController extends Controller
             ];
 
             //ambil jumlah ontime
-            $grafik_jumlah_ontime = $employee->attendance->where('clock_in', '!=', null)->where('late_clock_in', null)->where('is_day_off', null)->count();
+            $grafik_jumlah_ontime = $employee->attendance->where('clock_in', '!=', null)
+                ->where('late_clock_in', null)->where('is_day_off', null)->count();
+
             $on_time_reports[] = [
                 Str::limit($employee->fullname, 8),
                 $grafik_jumlah_ontime,
@@ -1051,6 +1053,8 @@ class ReportController extends Controller
             $startDate = Carbon::create($currentYear - 1, 12, 26);
             $endDate = Carbon::create($currentYear, 12, 25);
 
+            // Eager load 'attendances.day_off' dan 'organization'
+            $employees = Employee::with(['attendances.day_off', 'organization'])->where('is_active', 1)->get();
             $attendances = [];
 
             // Ambil data dalam chunk kecil untuk efisiensi memori

@@ -5,7 +5,7 @@
         main {
             overflow-x: hidden;
         }
-        
+
         input[type="time"] {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -604,63 +604,63 @@
                                         </tr>
 
                                         <!-- <tr>
-                                                        <td>6</td>
-                                                        <td><input id="kolom6" name="kolom6" type="text" placeholder="Nama Obat" class="form-control reset"></td>
-                                                        <td><input id="kolom6a" name="kolom6a" type="text" placeholder="Dosis" class="form-control reset"></td>
-                                                        <td><input id="kolom6b" name="kolom6b" type="text" placeholder="Cara Pemberian" class="form-control reset"></td>
-                                                        <td><input id="kolom6c" name="kolom6c" type="text" placeholder="Waktu Pemberian" class="form-control reset"></td>
-                                                        <td><input id="kolom6d" name="kolom6d" type="text" placeholder="Lama Pemberian" class="form-control reset"></td>
-                                                        <td>
-                                                            <div class="checkbox">
-                                                            <label for="kolom6e-0">
-                                                                <input type="checkbox" name="kolom6e" id="kolom6e-0" value="1" class="a">
-                                                                Admisi
-                                                            </label>
-                                                            </div>
-                                                            <div class="checkbox">
-                                                            <label for="kolom6f-1">
-                                                                <input type="checkbox" name="kolom6f" id="kolom6f-1" value="2" class="a">
-                                                                Discharge
-                                                            </label>
-                                                            </div>
-                                                            <div class="checkbox">
-                                                            <label for="kolom6g-1">
-                                                                <input type="checkbox" name="kolom6g" id="kolom6g-1" value="3" class="a">
-                                                                Transfer
-                                                            </label>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="checkbox">
-                                                            <label for="kolom6h-0">
-                                                                <input type="checkbox" name="kolom6h" id="kolom6h-0" value="1" class="a">
-                                                                Lanjut aturan pakai sama
-                                                              </label>
-                                                            </div>
-                                                            <div class="checkbox">
-                                                            <label for="kolom6i-1">
-                                                                <input type="checkbox" name="kolom6i" id="kolom6i-1" value="2" class="a">
-                                                                Lanjut aturan pakai berubah
-                                                            </label>
-                                                            </div>
-                                                            <div class="checkbox">
-                                                            <label for="kolom6j-2">
-                                                                <input type="checkbox" name="kolom6j" id="kolom6j-2" value="3" class="a">
-                                                                STOP
-                                                            </label>
-                                                            </div>
-                                                            <div class="checkbox">
-                                                            <label for="kolom6k-3">
-                                                                <input type="checkbox" name="kolom6k" id="kolom6k-3" value="4" class="a">
-                                                                Obat Baru
-                                                            </label>
-                                                            </div>
+                                                            <td>6</td>
+                                                            <td><input id="kolom6" name="kolom6" type="text" placeholder="Nama Obat" class="form-control reset"></td>
+                                                            <td><input id="kolom6a" name="kolom6a" type="text" placeholder="Dosis" class="form-control reset"></td>
+                                                            <td><input id="kolom6b" name="kolom6b" type="text" placeholder="Cara Pemberian" class="form-control reset"></td>
+                                                            <td><input id="kolom6c" name="kolom6c" type="text" placeholder="Waktu Pemberian" class="form-control reset"></td>
+                                                            <td><input id="kolom6d" name="kolom6d" type="text" placeholder="Lama Pemberian" class="form-control reset"></td>
+                                                            <td>
+                                                                <div class="checkbox">
+                                                                <label for="kolom6e-0">
+                                                                    <input type="checkbox" name="kolom6e" id="kolom6e-0" value="1" class="a">
+                                                                    Admisi
+                                                                </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                <label for="kolom6f-1">
+                                                                    <input type="checkbox" name="kolom6f" id="kolom6f-1" value="2" class="a">
+                                                                    Discharge
+                                                                </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                <label for="kolom6g-1">
+                                                                    <input type="checkbox" name="kolom6g" id="kolom6g-1" value="3" class="a">
+                                                                    Transfer
+                                                                </label>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="checkbox">
+                                                                <label for="kolom6h-0">
+                                                                    <input type="checkbox" name="kolom6h" id="kolom6h-0" value="1" class="a">
+                                                                    Lanjut aturan pakai sama
+                                                                  </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                <label for="kolom6i-1">
+                                                                    <input type="checkbox" name="kolom6i" id="kolom6i-1" value="2" class="a">
+                                                                    Lanjut aturan pakai berubah
+                                                                </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                <label for="kolom6j-2">
+                                                                    <input type="checkbox" name="kolom6j" id="kolom6j-2" value="3" class="a">
+                                                                    STOP
+                                                                </label>
+                                                                </div>
+                                                                <div class="checkbox">
+                                                                <label for="kolom6k-3">
+                                                                    <input type="checkbox" name="kolom6k" id="kolom6k-3" value="4" class="a">
+                                                                    Obat Baru
+                                                                </label>
+                                                                </div>
+                                                                
+                                                            </td>
                                                             
-                                                        </td>
-                                                        
-                                                        <td><input id="kolom6l" name="kolom6l" type="text" placeholder="Asal Kedatangan Pasien" class="form-control reset"></td>
-                                                        <td><input id="kolom6m" name="kolom6m" type="text" placeholder="Asal Kedatangan Pasien" class="form-control reset"></td>
-                                                      </tr> -->
+                                                            <td><input id="kolom6l" name="kolom6l" type="text" placeholder="Asal Kedatangan Pasien" class="form-control reset"></td>
+                                                            <td><input id="kolom6m" name="kolom6m" type="text" placeholder="Asal Kedatangan Pasien" class="form-control reset"></td>
+                                                          </tr> -->
 
                                     </tbody>
                                 </table>
@@ -1001,16 +1001,14 @@
                                                     <option value="838">apt. Nurani Eka Gumilang, S.Farm
                                                     </option>
                                                     <option value="26">Apt. Lia Vallini, S.Farm.</option>
-                                                </select><span
-                                                    class="select2 select2-container select2-container--default"
+                                                </select><span class="select2 select2-container select2-container--default"
                                                     dir="ltr" style="width: 254px;"><span class="selection"><span
                                                             class="select2-selection select2-selection--single"
                                                             role="combobox" aria-haspopup="true" aria-expanded="false"
                                                             tabindex="0"
                                                             aria-labelledby="select2-kolom8e-container"><span
                                                                 class="select2-selection__rendered"
-                                                                id="select2-kolom8e-container"
-                                                                title=""></span><span
+                                                                id="select2-kolom8e-container" title=""></span><span
                                                                 class="select2-selection__arrow" role="presentation"><b
                                                                     role="presentation"></b></span></span></span><span
                                                         class="dropdown-wrapper" aria-hidden="true"></span></span>
@@ -1633,9 +1631,9 @@
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
 
             $('#toggle-pasien').on('click', function() {
                 var target = $('#js-slide-left'); // Mengambil elemen target berdasarkan data-target

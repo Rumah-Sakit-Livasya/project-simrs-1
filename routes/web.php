@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\ImpersonateUser;
 use App\Http\Middleware\LastSeenUser;
 use App\Models\ChecklistHarianCategory;
+use App\Models\LaporanInternal;
 use Illuminate\Support\Facades\File;
 
 // Route::get('/test', [TimeScheduleController::class, 'getEmployeesByOrganizationAndJobPosition']);
@@ -343,10 +344,21 @@ Route::middleware([LastSeenUser::class])->group(function () {
         });
 
         Route::middleware(['auth'])->group(function () {
-            Route::get('/laporan-internal', [LaporanInternalController::class, 'index']);
+            Route::get('/laporan-internal', [LaporanInternalController::class, 'index'])->name('laporan-internal')->middleware('can:view laporan internal');
+            Route::get('/laporan-internal/get/{id}', [LaporanInternalController::class, 'getLaporan'])->name('laporan-internal')->middleware('can:view laporan internal');
+            Route::post('/laporan-internal-filter', [LaporanInternalController::class, 'index'])->name('laporan-internal.filter');
             Route::post('/laporan-internal', [LaporanInternalController::class, 'store']);
+            Route::post('/laporan-internal/import', [LaporanInternalController::class, 'i`mport'])->name('laporan-internal.import');
+            Route::post('/laporan-internal/{id}', [LaporanInternalController::class, 'update']);
             Route::get('/laporan-internal-list', [LaporanInternalController::class, 'list']);
             Route::delete('/laporan-internal/{id}', [LaporanInternalController::class, 'destroy']);
+            Route::post('/laporan-internal/complete/{id}', [LaporanInternalController::class, 'complete']);
+            Route::get('/laporan-internal/export-harian', [LaporanInternalController::class, 'exportHarian'])
+                ->name('laporan.internal.export.harian');
+            Route::get('/laporan-internal/export-word-harian', [LaporanInternalController::class, 'exportWordHarian'])
+                ->name('laporan.internal.export.word');
+            Route::get('/laporan-internal/export-laporan-bulanan', [LaporanInternalController::class, 'exportPPTXHarian'])
+                ->name('laporan.internal.export.pptx');
         });
         // routes/web.php
         Route::middleware(['auth'])->group(function () {
@@ -379,6 +391,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/switchback', [SwitchUserController::class, 'switchBack'])->name('switchback');
 });
 
+
 // Testing Data
 Route::prefix('testing-data')->middleware(['auth'])->group(function () {
     // Menampilkan view testing
@@ -396,6 +409,29 @@ Route::prefix('testing-data')->middleware(['auth'])->group(function () {
     // Menghapus data testing
     Route::delete('/{id}', [TestingDataController::class, 'destroy'])->name('testing.destroy');
 });
+
+
+Route::get('/test', function () {
+    $laporanKendala = LaporanInternal::with(['organization', 'user'])
+        ->whereMonth('created_at', 5) // 5 = Mei
+        ->whereYear('created_at', 2025) // ganti tahun sesuai kebutuhan
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->groupBy(fn($item) => $item->organization->name)
+        ->reject(fn($group, $orgName) => in_array($orgName, ['Sanitasi', 'PSRS']))
+        ->map(function ($orgGroup) {
+            return $orgGroup->groupBy(fn($item) => $item->user->name)
+                ->map(function ($userGroup) {
+                    return $userGroup->groupBy(fn($item) => $item->jenis);
+                });
+        });
+
+    return view('pages.testing', [
+        'laporan' => $laporanKendala,
+    ]);
+});
+
+
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/simrs.php';

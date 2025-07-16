@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS\Poliklinik;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SIMRS\ERMController;
 use App\Models\Employee;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
@@ -28,6 +29,9 @@ class PoliklinikController extends Controller
 {
     public function index()
     {
+        $uriSegments = explode('/', request()->path());
+        $path = $uriSegments[1];
+
         $menu = request()->menu;
         $noRegist = request()->registration;
 
@@ -53,50 +57,43 @@ class PoliklinikController extends Controller
         if ($menu && $noRegist) {
             $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
 
-            $menuResponse = $this->poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration);
+            $menuResponse = ERMController::poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path);
             if ($menuResponse) {
                 return $menuResponse;
             }
+<<<<<<< HEAD
+=======
+        } else {
+            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration', 'registrations', 'path'));
+>>>>>>> 841717927d57ff76a595e6f030bf800256003f35
         }
 
         return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration', 'registrations'));
     }
 
+<<<<<<< HEAD
 
     private function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration)
     {
         Carbon::setLocale('id');
+=======
+    // public function filterPasien(Request $request)
+    // {
+    //     try {
+    //         $routePath = parse_url($request['route'], PHP_URL_PATH);
+>>>>>>> 841717927d57ff76a595e6f030bf800256003f35
 
-        // $doctors = Doctor::with('employee', 'departement')->get();
-        // $groupedDoctors = [];
-        // foreach ($doctors as $doctor) {
-        //     $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
-        // }
+    //         if ($routePath === '/simrs/igd/catatan-medis') {
+    //             $query = Registration::whereDate('registration_date', Carbon::today())->where('registration_type', 'igd');
+    //         } else {
+    //             $query = Registration::whereDate('registration_date', Carbon::today())->where('registration_type', '!=',  'igd');
+    //         }
 
-        if ($menu == 'pengkajian_perawat') {
-            $pengkajian = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
-            return view('pages.simrs.poliklinik.index', compact('registration', 'departements', 'jadwal_dokter', 'pengkajian'));
-        } elseif ($menu == 'cppt_perawat') {
-            $perawat = Employee::whereHas('organization', function ($query) {
-                $query->where('name', 'Rawat Jalan');
-            })->get();
-            return view('pages.simrs.poliklinik.perawat.cppt', compact('registration', 'departements', 'jadwal_dokter', 'perawat'));
-        } elseif ($menu == 'transfer_pasien_perawat') {
-            return view('pages.simrs.poliklinik.perawat.transfer_pasien_perawat', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'pengkajian_dokter') {
-            $pengkajianPerawat = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
-            $pengkajianDokter = PengkajianDokterRajal::where('registration_id', $registration->id)->first();
-            return view('pages.simrs.poliklinik.dokter.pengkajian', compact('registration', 'departements', 'jadwal_dokter',  'pengkajianPerawat', 'pengkajianDokter'));
-        } elseif ($menu == 'cppt_dokter') {
-            return view('pages.simrs.poliklinik.dokter.cppt', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'resume_medis_rajal') {
-            return view('pages.simrs.poliklinik.dokter.resume_medis', compact('registration', 'departements', 'jadwal_dokter'));
-        } else if ($menu == 'profil_ringkas_rajal') {
-            return view('pages.simrs.poliklinik.dokter.resume_medis', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'pengkajian_gizi') {
-            $form = FormKategori::all();
-            $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
+    //         $query->when($request->departement_id, function ($q) use ($request) {
+    //             return $q->where('departement_id', $request->departement_id);
+    //         });
 
+<<<<<<< HEAD
             return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian'));
         } elseif ($menu == 'cppt_farmasi') {
             return view('pages.simrs.poliklinik.farmasi.cppt', compact('registration', 'departements', 'jadwal_dokter'));
@@ -107,69 +104,30 @@ class PoliklinikController extends Controller
         } elseif ($menu == 'pengkajian_lanjutan') {
             $form = FormKategori::all();
             $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
+=======
+    //         $query->when($request->doctor_id, function ($q) use ($request) {
+    //             return $q->where('doctor_id', $request->doctor_id);
+    //         });
+>>>>>>> 841717927d57ff76a595e6f030bf800256003f35
 
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian'));
-        } elseif ($menu == 'tindakan_medis') {
-            $tindakan_medis = TindakanMedis::all();
-            $doctors = Doctor::with('employee', 'departements')->get();
-            // Group doctors by department
-            $groupedDoctors = [];
-            foreach ($doctors as $doctor) {
-                $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
-            }
-            $tindakan_medis_yang_dipakai = OrderTindakanMedis::where('registration_id', $registration->id)->get();
-            return view('pages.simrs.poliklinik.layanan.tindakan_medis', compact('groupedDoctors', 'registration', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai'));
-        } elseif ($menu == 'pemakaian_alat') {
-            $list_peralatan = Peralatan::all();
-            $alat_medis_yang_dipakai = OrderAlatMedis::where('registration_id', $registration->id)->get();
-            $doctors = Doctor::with('employee')
-                ->whereHas('employee')
-                ->orderBy(Employee::select('fullname')->whereColumn('employees.id', 'doctors.employee_id'))
-                ->get();
+    //         $registrations = $query->get();
 
+    //         // Render partial view sebagai HTML
+    //         $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
 
-            return view('pages.simrs.poliklinik.layanan.pemakaian_alat', compact('registration', 'departements', 'jadwal_dokter', 'list_peralatan', 'alat_medis_yang_dipakai', 'doctors'));
-        } else if ($menu == 'patologi_klinik') {
-            $order_lab = OrderLaboratorium::where('registration_id', $registration->id)->get();
-            return view('pages.simrs.poliklinik.layanan.patologi_klinik', compact('order_lab', 'registration', 'departements', 'jadwal_dokter'));
-        } else {
-            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
-        }
-
-        return null; // Jika menu tidak cocok
-    }
-
-    public function filterPasien(Request $request)
-    {
-        try {
-            $query = Registration::whereDate('registration_date', Carbon::today());
-
-            $query->when($request->departement_id, function ($q) use ($request) {
-                return $q->where('departement_id', $request->departement_id);
-            });
-
-            $query->when($request->doctor_id, function ($q) use ($request) {
-                return $q->where('doctor_id', $request->doctor_id);
-            });
-
-            $registrations = $query->get();
-
-            // Render partial view sebagai HTML
-            $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Data retrieved successfully',
-                'html' => $html
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Data retrieved successfully',
+    //             'html' => $html
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to retrieve data',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
     public function showForm(Request $request, $registrationId, $encryptedID)
     {

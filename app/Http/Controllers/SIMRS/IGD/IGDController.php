@@ -9,9 +9,11 @@ use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
+use App\Models\SIMRS\Pelayanan\Triage;
 use App\Models\SIMRS\Pengkajian\FormKategori;
 use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
+use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Peralatan\OrderAlatMedis;
 use App\Models\SIMRS\Peralatan\Peralatan;
 use App\Models\SIMRS\Registration;
@@ -23,186 +25,159 @@ class IGDController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Registration::query();
-        $menu = request()->menu;
-        $noRegist = request()->registration;
+        $query = Registration::query()
+            ->where('registration_type', 'igd');
 
-        $filters = ['medical_record_number', 'registration_number', 'registration_name'];
-        $filterApplied = false;
+        $hasFilter = false;
 
-        foreach ($filters as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
-                $filterApplied = true;
+        $simpleFilters = [
+            'registration_number' => $request->registration_number,
+        ];
+
+        // Filter langsung
+        foreach ($simpleFilters as $column => $value) {
+            if (!empty($value)) {
+                $query->where($column, 'like', '%' . $value . '%');
+                $hasFilter = true;
             }
         }
 
-        // Filter by date range
+        // Filter berdasarkan relasi patient
+        if (!empty($request->medical_record_number)) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('medical_record_number', 'like', '%' . $request->medical_record_number . '%');
+            });
+            $hasFilter = true;
+        }
+
+        // Filter berdasarkan nama pasien (relasi)
+        if (!empty($request->name)) {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%');
+            });
+            $hasFilter = true;
+        }
+
+        // Filter berdasarkan rentang tanggal
         if ($request->filled('registration_date')) {
             $dateRange = explode(' - ', $request->registration_date);
             if (count($dateRange) === 2) {
                 $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
                 $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
                 $query->whereBetween('registration_date', [$startDate, $endDate]);
-                $filterApplied = true;
+                $hasFilter = true;
             }
         }
 
-
+        // Filter berdasarkan status
         if ($request->filled('status') && $request->status !== 'all') {
-            $query->where('status', $request->status == 'aktif' ? 'aktif' : 'tutup_kunjungan');
-            $filterApplied = true;
+            $query->where('status', $request->status === 'aktif' ? 'aktif' : 'tutup_kunjungan');
+            $hasFilter = true;
         }
 
-        // Get the filtered results if any filter is applied
-        if ($filterApplied) {
-            $registration = $query->orderBy('date', 'asc')
-                ->where('registration_type', 'igd')
-                ->get();
-        } else {
-            // Return empty collection if no filters applied
-            $registration = collect();
+        // Default: jika tidak ada filter aktif, ambil data hari ini
+        if (!$hasFilter) {
+            $today = now()->format('Y-m-d');
+            $query->whereBetween('registration_date', [
+                $today . ' 00:00:00',
+                $today . ' 23:59:59',
+            ]);
         }
 
-        if ($menu && $noRegist) {
-            $query = Registration::where('date', now()->format('Y-m-d'));
-            $registration = Registration::where('registration_number', $noRegist)->first();
-            $departements = Departement::latest()->get();
-            $hariIni = Carbon::now()->translatedFormat('l');
-            $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
+        $registrations = $query->orderBy('date', 'asc')->get();
 
-            $query->when($registration->departement_id, function ($q) use ($registration) {
-                return $q->where('departement_id', $registration->departement_id);
-            });
+        return view('pages.simrs.igd.daftar-pasien', [
+            'registrations' => $registrations,
+        ]);
+    }
 
-            $query->when($registration->doctor_id, function ($q) use ($registration) {
-                return $q->where('doctor_id', $registration->doctor_id);
-            });
+    function reprotIGD()
+    {
+        $doctors = Doctor::whereHas('department_from_doctors', function ($query) {
+            $query->where('name', 'UGD');
+        })->get();
+
+        $penjamin = Penjamin::all();
+
+        return view('pages.simrs.igd.report-igd', compact('doctors', 'penjamin'));
+    }
+
+    public function getDataLaporan(Request $request)
+    {
+        try {
+            $query = Registration::query()
+                ->where('registration_type', 'igd');
+            // ->where('status', 'tutup_kunjungan');
+
+            if ($request->filled('doctor_id')) {
+                $query->where('doctor_id', $request->doctor_id);
+            }
+
+            if ($request->filled('penjamin_id')) {
+                $query->whereHas('penjamin', function ($q) use ($request) {
+                    $q->where('id', $request->penjamin_id);
+                });
+            }
+
+            if ($request->filled('awal_periode') && $request->filled('akhir_periode')) {
+                $awalPeriode = Carbon::parse($request->awal_periode)->startOfDay();
+                $akhirPeriode = Carbon::parse($request->akhir_periode)->endOfDay();
+                $query->whereBetween('registration_date', [$awalPeriode, $akhirPeriode]);
+            }
 
             $registrations = $query->get();
 
-            // Render partial view sebagai HTML
-            $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
-
-            $menuResponse = $this->poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration);
-            if ($menuResponse) {
-                return $menuResponse;
-            }
-        } else {
-            return view('pages.simrs.igd.daftar-pasien', [
-                'registrations' => $registration
+            return response()->json([
+                'success' => true,
+                'data' => $registrations,
             ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching data: ' . $e->getMessage(),
+            ], 500);
         }
     }
 
-    // public function index()
-    // {
-    //     $menu = request()->menu;
-    //     $noRegist = request()->registration;
-
-    //     $departements = Departement::latest()->get();
-    //     $hariIni = Carbon::now()->translatedFormat('l');
-    //     $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
-    //     $registration = Registration::where('registration_number', $noRegist)->first();
-
-    //     if ($menu && $noRegist) {
-    //         $query = Registration::where('date', now()->format('Y-m-d'));
-
-    //         $query->when($registration->departement_id, function ($q) use ($registration) {
-    //             return $q->where('departement_id', $registration->departement_id);
-    //         });
-
-    //         $query->when($registration->doctor_id, function ($q) use ($registration) {
-    //             return $q->where('doctor_id', $registration->doctor_id);
-    //         });
-
-    //         $registrations = $query->get();
-
-    //         // Render partial view sebagai HTML
-    //         $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
-
-    //         $menuResponse = $this->poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration);
-    //         if ($menuResponse) {
-    //             return $menuResponse;
-    //         }
-    //     } else {
-    //         return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration'));
-    //     }
-    // }
-
-    private function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration)
+    /**
+     * Show the report for IGD registrations.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\View\View
+     */
+    public function showLaporan(Request $request)
     {
-        Carbon::setLocale('id');
-
-        // $doctors = Doctor::with('employee', 'departement')->get();
-        // $groupedDoctors = [];
-        // foreach ($doctors as $doctor) {
-        //     $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
-        // }
-
-        if ($menu == 'pengkajian_perawat') {
-            $pengkajian = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
-            return view('pages.simrs.poliklinik.index', compact('registration', 'departements', 'jadwal_dokter', 'pengkajian'));
-        } elseif ($menu == 'cppt_perawat') {
-            $perawat = Employee::whereHas('organization', function ($query) {
-                $query->where('name', 'Rawat Jalan');
-            })->get();
-            return view('pages.simrs.poliklinik.perawat.cppt', compact('registration', 'departements', 'jadwal_dokter', 'perawat'));
-        } elseif ($menu == 'transfer_pasien_perawat') {
-            return view('pages.simrs.poliklinik.perawat.transfer_pasien_perawat', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'pengkajian_dokter') {
-            return view('pages.simrs.poliklinik.dokter.pengkajian', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'cppt_dokter') {
-            return view('pages.simrs.poliklinik.dokter.cppt', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'resume_medis_rajal') {
-            return view('pages.simrs.poliklinik.dokter.resume_medis', compact('registration', 'departements', 'jadwal_dokter'));
-        } else if ($menu == 'profil_ringkas_rajal') {
-            return view('pages.simrs.poliklinik.dokter.resume_medis', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'pengkajian_gizi') {
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'cppt_farmasi') {
-            return view('pages.simrs.poliklinik.farmasi.cppt', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'pengkajian_resep') {
-            return view('pages.simrs.poliklinik.farmasi.pengkajian_resep', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'rekonsiliasi_obat') {
-            return view('pages.simrs.poliklinik.farmasi.rekonsiliasi_obat', compact('registration', 'departements', 'jadwal_dokter'));
-        } elseif ($menu == 'pengkajian_lanjutan') {
-            $form = FormKategori::all();
-            $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
-
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.pengkajian_lanjutan', compact('registration', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian'));
-        } elseif ($menu == 'tindakan_medis') {
-            $tindakan_medis = TindakanMedis::all();
-            $doctors = Doctor::with('employee', 'departement')->get();
-            // Group doctors by department
-            $groupedDoctors = [];
-            foreach ($doctors as $doctor) {
-                $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
-            }
-            $tindakan_medis_yang_dipakai = OrderTindakanMedis::where('registration_id', $registration->id)->get();
-            return view('pages.simrs.poliklinik.layanan.tindakan_medis', compact('groupedDoctors', 'registration', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai'));
-        } elseif ($menu == 'pemakaian_alat') {
-            $list_peralatan = Peralatan::all();
-            $alat_medis_yang_dipakai = OrderAlatMedis::where('registration_id', $registration->id)->get();
-            $doctors = Doctor::with('employee')
-                ->whereHas('employee')
-                ->orderBy(Employee::select('fullname')->whereColumn('employees.id', 'doctors.employee_id'))
-                ->get();
-
-
-            return view('pages.simrs.poliklinik.layanan.pemakaian_alat', compact('registration', 'departements', 'jadwal_dokter', 'list_peralatan', 'alat_medis_yang_dipakai', 'doctors'));
-        } else if ($menu == 'patologi_klinik') {
-            $order_lab = OrderLaboratorium::where('registration_id', $registration->id)->get();
-            return view('pages.simrs.poliklinik.layanan.patologi_klinik', compact('order_lab', 'registration', 'departements', 'jadwal_dokter'));
-        } else {
-            return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter'));
+        $from = $request->input('awal_periode');
+        $to = $request->input('akhir_periode');
+        $from = Carbon::parse($from)->startOfDay();
+        $to = Carbon::parse($to)->endOfDay();
+        if ($from->greaterThan($to)) {
+            return redirect()->back()->withErrors(['error' => 'Tanggal awal tidak boleh lebih besar dari tanggal akhir']);
         }
 
-        return null; // Jika menu tidak cocok
-    }
+        $penjaminId = $request->input('penjamin_id');
+        $dokterId = $request->input('doctor_id');
 
-    public function catatanMedis()
-    {
-        return view('pages.simrs.igd.catatan-medis');
+        $penjaminName = $penjaminId ? Penjamin::find($penjaminId)?->nama_perusahaan : 'Semua Penjamin';
+        $dokterName = $dokterId ? Doctor::with('employee')->find($dokterId)?->employee->fullname : 'Semua Dokter';
+
+        // Query data pasien
+        $pasien = Registration::with(['doctor', 'penjamin', 'patient'])
+            ->where('registration_type', 'igd')
+            ->whereBetween('registration_date', [$from, $to])
+            ->when($dokterId, fn($q) => $q->where('doctor_id', $dokterId))
+            ->when($penjaminId, fn($q) => $q->where('penjamin_id', $penjaminId))
+            ->get()
+            ->map(function ($item) {
+                $firstVisit = Registration::where('patient_id', $item->patient_id)
+                    ->orderBy('registration_date', 'asc')
+                    ->first();
+
+                $item->is_new = $firstVisit && $firstVisit->id === $item->id;
+                return $item;
+            });
+
+
+        return view('pages.simrs.igd.partials.print-report', compact('pasien', 'from', 'to', 'penjaminId', 'dokterId', 'dokterName', 'penjaminName'));
     }
 }

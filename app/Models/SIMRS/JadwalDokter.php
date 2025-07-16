@@ -9,7 +9,8 @@ class JadwalDokter extends Model
 {
     use HasFactory;
 
-    protected $table = 'jadwal_dokter', $guarded = ['id'];
+    protected $table = 'jadwal_dokter';
+    protected $guarded = ['id'];
 
     // Relasi ke model Doctor (pivot)
     public function doctor()

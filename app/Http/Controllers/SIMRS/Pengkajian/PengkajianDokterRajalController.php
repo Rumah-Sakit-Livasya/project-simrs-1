@@ -57,7 +57,46 @@ class PengkajianDokterRajalController extends Controller
             if ($request->action_type = 'final') {
                 $validatedData['is_final'] = 1;
             }
-            $store = PengkajianDokterRajal::create($validatedData);
+
+            $pengkajian = PengkajianDokterRajal::updateOrCreate(
+                ['registration_id' => $validatedData['registration_id']],
+                $validatedData
+            );
+
+            // SIGNATURE
+            if ($request->filled('signature_image')) {
+                $imageData = $request->input('signature_image');
+                $pic = $request->input('pic');
+                $role = $request->input('role');
+                $image = str_replace('data:image/png;base64,', '', $imageData);
+                $image = str_replace(' ', '+', $image);
+                $imageName = 'ttd_' . time() . '.png';
+                $path = 'signatures/' . $imageName;
+
+                // Cek apakah sudah ada tanda tangan lama
+                $existingSignature = $pengkajian->signature;
+
+                if ($existingSignature && \Storage::disk('public')->exists($existingSignature->signature)) {
+                    \Storage::disk('public')->delete($existingSignature->signature);
+                }
+
+                // Simpan file baru ke storage
+                \Storage::disk('public')->put($path, base64_decode($image));
+
+                // Simpan ke tabel `signatures` via relasi
+                $pengkajian->signature()->updateOrCreate(
+                    [
+                        'signable_id' => $pengkajian->id,
+                        'signable_type' => get_class($pengkajian),
+                    ],
+                    [
+                        'signature' => $path,
+                        'pic' => $pic,
+                        'role' => $role,
+                    ]
+                );
+            }
+
             return response()->json(['message' => ' berhasil ditambahkan!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

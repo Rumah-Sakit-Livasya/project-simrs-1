@@ -100,11 +100,9 @@
                             <div class="row">
                                 <div class="col biodata-pasien">
                                     @if ($patient->gender == 'Laki-laki')
-                                        <img src="http://103.191.197.117:8888/real/include/avatar/man-icon.png"
-                                            style="width: 120px; height: 120px;">
+                                        <img src="/img/patient/man-icon.png" style="width: 120px; height: 120px;">
                                     @else
-                                        <img src="http://103.191.197.117:8888/real/include/avatar/woman-icon.png"
-                                            style="width: 120px; height: 120px;">
+                                        <img src="/img/patient/woman-icon.png" style="width: 120px; height: 120px;">
                                     @endif
 
                                     <h3 class="text-center mt-3 text-black">
@@ -632,11 +630,26 @@
             $('.calc-bmi').on('change', get_bmi);
 
             // Fall risk assessment
+            // Fall risk assessment
             function resiko_jatuh() {
-                var resiko_jatuh1 = document.getElementById('resiko_jatuh1').checked;
-                var resiko_jatuh2 = document.getElementById('resiko_jatuh2').checked;
-                var resiko_jatuh3 = document.getElementById('resiko_jatuh3').checked;
+                // 📝 Cek apakah elemen ada di DOM
+                var elem1 = document.getElementById('resiko_jatuh1');
+                var elem2 = document.getElementById('resiko_jatuh2');
+                var elem3 = document.getElementById('resiko_jatuh3');
+                var hasilElem = document.getElementById('resiko_jatuh_hasil');
 
+                // 📝 Jika salah satu elemen tidak ada, fungsi berhenti
+                if (!elem1 || !elem2 || !elem3 || !hasilElem) {
+                    console.warn("Element resiko jatuh tidak ditemukan di DOM.");
+                    return;
+                }
+
+                // 📝 Ambil status checkbox
+                var resiko_jatuh1 = elem1.checked;
+                var resiko_jatuh2 = elem2.checked;
+                var resiko_jatuh3 = elem3.checked;
+
+                // 📝 Logika perhitungan risiko
                 if (!resiko_jatuh1 && !resiko_jatuh2 && !resiko_jatuh3) {
                     $('#resiko_jatuh_hasil').val("Tidak Beresiko");
                 } else if (resiko_jatuh1 || resiko_jatuh2) {

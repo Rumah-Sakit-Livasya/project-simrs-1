@@ -2,7 +2,11 @@
     <div class="col-lg-6">
         <div class="row">
             <div class="col-lg-3 d-flex align-items-center">
-                <img src="http://192.168.1.253/real/include/avatar/man-icon.png" alt="" width="100%">
+                @if ($registration->patient->gender == 'Laki-laki')
+                    <img src="/img/patient/man-icon.png" alt="" width="100%">
+                @else
+                    <img src="/img/patient/woman-icon.png" alt="" width="100%">
+                @endif
             </div>
             <div class="col-lg-9">
                 <a href="#">
@@ -23,7 +27,11 @@
     <div class="col-lg-6">
         <div class="row d-flex align-items-center">
             <div class="col-lg-3 d-flex align-items-center h-100">
-                <img src="http://192.168.1.253/real/include/avatar/woman-doctor.png" alt="" width="100%">
+                @if ($registration->doctor->employee->gender == 'Laki-laki')
+                    <img src="/img/doctor/man-doctor.png" alt="" width="100%">
+                @else
+                    <img src="/img/doctor/woman-doctor.png" alt="" width="100%">
+                @endif
             </div>
             <div class="col-lg-9">
                 <a href="#">

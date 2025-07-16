@@ -148,3 +148,4 @@ DOC: if you remove pace.js from core please note on Internet Explorer some CSS a
 <script src="/js/script.js"></script>
 
 @yield('plugin')
+@yield('plugin-secondary')

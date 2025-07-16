@@ -1,5 +1,4 @@
 @extends('inc.layout')
-@se
 @section('extended-css')
     <style>
         hr {
@@ -416,7 +415,7 @@
                     },
                     error: function(xhr, status, error) {
                         $('#modal-edit-kepustakaan').modal('hide');
-                        showErrorAlert('Terjadi kesalahan: ' + error);
+                        showErrorAlertNoRefresh('Terjadi kesalahan: ' + error);
                     }
                 });
 
@@ -438,7 +437,7 @@
                     },
                     error: function(xhr, status, error) {
                         $('#modal-pindah-file-kepustakaan').modal('hide');
-                        showErrorAlert('Terjadi kesalahan: ' + error);
+                        showErrorAlertNoRefresh('Terjadi kesalahan: ' + error);
                     }
                 });
 
@@ -476,9 +475,10 @@
                             },
                             error: function(xhr, status, error) {
                                 if (xhr.status === 403) {
-                                    showErrorAlert('Password salah. Penghapusan dibatalkan.');
+                                    showErrorAlertNoRefresh(
+                                        'Password salah. Penghapusan dibatalkan.');
                                 } else {
-                                    showErrorAlert('Terjadi kesalahan: ' + error);
+                                    showErrorAlertNoRefresh('Terjadi kesalahan: ' + error);
                                 }
                             }
                         });
@@ -527,11 +527,11 @@
                             });
 
                             $('#modal-edit-kepustakaan').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
+                            showErrorAlertNoRefresh('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
                             $('#modal-edit-kepustakaan').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
+                            showErrorAlertNoRefresh('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
                     }
@@ -574,11 +574,11 @@
                             });
 
                             $('#modal-edit-kepustakaan').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
+                            showErrorAlertNoRefresh('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
                             $('#modal-edit-kepustakaan').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
+                            showErrorAlertNoRefresh('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }
                     }
@@ -627,9 +627,9 @@
                                     errorMessages += value + '\n';
                                 });
 
-                                showErrorAlert('Terjadi kesalahan:\n' + errorMessages);
+                                showErrorAlertNoRefresh('Terjadi kesalahan:\n' + errorMessages);
                             } else {
-                                showErrorAlert('Terjadi kesalahan: ' + error);
+                                showErrorAlertNoRefresh('Terjadi kesalahan: ' + error);
                                 console.log(error);
                             }
                         }

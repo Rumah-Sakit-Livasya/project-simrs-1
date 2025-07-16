@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\SIMRS\Operasi;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\GroupPenjamin;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Operasi\JenisOperasi;
 use App\Models\SIMRS\Operasi\KategoriOperasi;
 use App\Models\SIMRS\Operasi\TindakanOperasi;
@@ -58,6 +60,15 @@ class TindakanOperasiController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function tarifPersalinan($id)
+    {
+        $tindakan_operasi = TindakanOperasi::findOrFail($id);
+        $grup_penjamin = GroupPenjamin::all();
+        $kelas_rawat = KelasRawat::select('id', 'kelas')->get();
+
+        return view('pages.simrs.master-data.operasi.tarif.index', compact('tindakan_operasi', 'grup_penjamin', 'kelas_rawat'));
     }
 
     public function update(Request $request, $id)

@@ -3,8 +3,12 @@
 namespace App\Providers;
 
 use App\Console\Commands\NotifyContractExpiry;
+<<<<<<< HEAD
 use App\Models\WarehousePenerimaanBarangFarmasi;
 use App\Models\WarehousePenerimaanBarangNonFarmasi;
+=======
+use Carbon\Carbon;
+>>>>>>> 841717927d57ff76a595e6f030bf800256003f35
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
@@ -44,6 +48,9 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
         });
+
+        Carbon::setLocale('id');
+        setlocale(LC_TIME, 'id_ID');
 
         // if (!Session::has('app_type')) {
         //     Session::put('app_type', 'hr');

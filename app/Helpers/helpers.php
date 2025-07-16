@@ -604,4 +604,42 @@ class AgeComparison
         }
         return $age1->days - $age2->days;
     }
+
+    function convertSymbol($text)
+    {
+        // Daftar simbol yang akan diganti dengan kata
+        $replacements = [
+            '&' => 'dan',           // Tanda "&" diganti dengan "dan"
+            '>' => 'lebih besar dari',  // Tanda lebih besar dari
+            '<' => 'lebih kecil dari',  // Tanda lebih kecil dari
+            '=' => 'sama dengan',    // Tanda sama dengan
+            '-' => 'minus',          // Tanda minus
+            '+' => 'plus',           // Tanda plus
+            '*' => 'kali',           // Tanda kali
+            '/' => 'dibagi',         // Tanda dibagi
+            '%' => 'persen',         // Tanda persen
+            '^' => 'pangkat',        // Tanda pangkat
+            '√' => 'akar kuadrat',   // Simbol akar kuadrat
+            '∞' => 'tak terhingga',  // Simbol tak terhingga
+            '≈' => 'perkiraan',      // Simbol perkiraan
+            '≠' => 'tidak sama dengan', // Simbol tidak sama dengan
+            '≤' => 'lebih kecil atau sama dengan', // Simbol kurang dari atau sama dengan
+            '≥' => 'lebih besar atau sama dengan', // Simbol lebih besar atau sama dengan
+            '±' => 'plus-minus',      // Simbol plus-minus
+            '≡' => 'identik',        // Simbol identik
+            '∑' => 'jumlah',         // Simbol jumlah (sigma)
+            'π' => 'pi',             // Simbol pi
+            '€' => 'Euro',           // Simbol Euro
+            '$' => 'Dollar',         // Simbol Dollar
+            '£' => 'Pound',          // Simbol Pound
+            '¥' => 'Yen',            // Simbol Yen
+            '₹' => 'Rupee',          // Simbol Rupee
+            '°' => 'derajat',        // Simbol derajat
+            '✔' => 'centang',        // Simbol centang
+            '✘' => 'silang',         // Simbol silang
+        ];
+
+        // Ganti simbol-simbol di dalam teks dengan kata yang sesuai
+        return strtr($text, $replacements);
+    }
 }

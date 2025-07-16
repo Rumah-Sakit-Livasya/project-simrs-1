@@ -1,12 +1,12 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
-@include('pages.simrs.poliklinik.partials.css-sidebar-custom')
+    @include('pages.simrs.poliklinik.partials.css-sidebar-custom')
     <style>
         main {
             overflow-x: hidden;
         }
-        
+
         input[type="time"] {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -230,10 +230,10 @@
                                         </tr>
                                         <tr>
                                             <td colspan="2">Kontra indikasi</td>
-                                            <td align="center"><input type="radio" name="kontraindikasi" value="t"
-                                                    id="check_cara"></td>
-                                            <td align="center"><input type="radio" name="kontraindikasi" value="f"
-                                                    id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="kontraindikasi"
+                                                    value="t" id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="kontraindikasi"
+                                                    value="f" id="check_cara"></td>
                                             <td align="center"><input type="text" name="keterangan_kontraindikasi"
                                                     style="width: 300px;" value="" id="check_cara"></td>
                                         </tr>
@@ -285,8 +285,9 @@
                                                     value="t" id="check_cara"></td>
                                             <td align="center"><input type="radio" name="kelengkapan_identitas"
                                                     value="f" id="check_cara"></td>
-                                            <td align="center"><input type="text" name="keterangan_kelengkapan_identitas"
-                                                    style="width: 300px;" value="" id="check_cara"></td>
+                                            <td align="center"><input type="text"
+                                                    name="keterangan_kelengkapan_identitas" style="width: 300px;"
+                                                    value="" id="check_cara"></td>
                                         </tr>
                                         <tr style="background-color: #ccc; font-weight: bold; text-align: center;">
                                             <td colspan="2">FARMASETIK</td>
@@ -323,10 +324,10 @@
                                         </tr>
                                         <tr>
                                             <td colspan="2">Sediaan sesuai R/</td>
-                                            <td align="center"><input type="radio" name="sediaan_sesuai" value="t"
-                                                    id="check_cara"></td>
-                                            <td align="center"><input type="radio" name="sediaan_sesuai" value="f"
-                                                    id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="sediaan_sesuai"
+                                                    value="t" id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="sediaan_sesuai"
+                                                    value="f" id="check_cara"></td>
                                             <td align="center"><input type="text" name="keterangan_sediaan_sesuai"
                                                     style="width: 300px;" value="" id="check_cara"></td>
                                         </tr>
@@ -340,7 +341,8 @@
                                                     style="width: 300px;" value="" id="check_cara"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="3">Ket: kelengkapan identitas pasien diantaranya adalah: nama, no
+                                            <td colspan="3">Ket: kelengkapan identitas pasien diantaranya adalah: nama,
+                                                no
                                                 RM, gender, umur, jenis pasien, ruang/poli</td>
                                             <td colspan="2" align="center">Paraf petugas telaah<br><br><br><br></td>
                                         </tr>
@@ -356,15 +358,16 @@
                                                     value="t" id="check_cara"></td>
                                             <td align="center"><input type="radio" name="penelusuran_riwayat"
                                                     value="f" id="check_cara"></td>
-                                            <td align="center"><input type="text" name="keterangan_penelusuran_riwayat"
-                                                    style="width: 300px;" value="" id="check_cara"></td>
+                                            <td align="center"><input type="text"
+                                                    name="keterangan_penelusuran_riwayat" style="width: 300px;"
+                                                    value="" id="check_cara"></td>
                                         </tr>
                                         <tr>
                                             <td colspan="2">Rekonsiliasi obat</td>
-                                            <td align="center"><input type="radio" name="rekonsiliasi_obat" value="t"
-                                                    id="check_cara"></td>
-                                            <td align="center"><input type="radio" name="rekonsiliasi_obat" value="f"
-                                                    id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="rekonsiliasi_obat"
+                                                    value="t" id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="rekonsiliasi_obat"
+                                                    value="f" id="check_cara"></td>
                                             <td align="center"><input type="text" name="keterangan_rekonsiliasi_obat"
                                                     style="width: 300px;" value="" id="check_cara"></td>
                                         </tr>
@@ -463,10 +466,10 @@
                                         </tr>
                                         <tr>
                                             <td colspan="2">BENAR INDIKASI</td>
-                                            <td align="center"><input type="radio" name="benar_indikasi" value="t"
-                                                    id="check_cara"></td>
-                                            <td align="center"><input type="radio" name="benar_indikasi" value="f"
-                                                    id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="benar_indikasi"
+                                                    value="t" id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="benar_indikasi"
+                                                    value="f" id="check_cara"></td>
                                             <td align="center"><input type="text" name="ket_benar_indikasi"
                                                     style="width: 300px;" value="" id="check_cara"></td>
                                         </tr>
@@ -490,30 +493,30 @@
                                         </tr>
                                         <tr>
                                             <td colspan="2">BENAR CARA PAKAI</td>
-                                            <td align="center"><input type="radio" name="benar_cara_pakai" value="t"
-                                                    id="check_cara"></td>
-                                            <td align="center"><input type="radio" name="benar_cara_pakai" value="f"
-                                                    id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="benar_cara_pakai"
+                                                    value="t" id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="benar_cara_pakai"
+                                                    value="f" id="check_cara"></td>
                                             <td align="center"><input type="text" name="ket_benar_cara_pakai"
                                                     style="width: 300px;" value="" id="check_cara"></td>
                                         </tr>
-    
+
                                         <tr>
                                             <td colspan="2">BENAR WAKTU PAKAI</td>
-                                            <td align="center"><input type="radio" name="benar_waktu_pakai" value="t"
-                                                    id="check_cara"></td>
-                                            <td align="center"><input type="radio" name="benar_waktu_pakai" value="f"
-                                                    id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="benar_waktu_pakai"
+                                                    value="t" id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="benar_waktu_pakai"
+                                                    value="f" id="check_cara"></td>
                                             <td align="center"><input type="text" name="ket_benar_waktu_pakai"
                                                     style="width: 300px;" value="" id="check_cara"></td>
                                         </tr>
-    
+
                                         <tr>
                                             <td colspan="2">BENAR DOKUMENTASI</td>
-                                            <td align="center"><input type="radio" name="benar_dokumentasi" value="t"
-                                                    id="check_cara"></td>
-                                            <td align="center"><input type="radio" name="benar_dokumentasi" value="f"
-                                                    id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="benar_dokumentasi"
+                                                    value="t" id="check_cara"></td>
+                                            <td align="center"><input type="radio" name="benar_dokumentasi"
+                                                    value="f" id="check_cara"></td>
                                             <td align="center"><input type="text" name="ket_benar_dokumentasi"
                                                     style="width: 300px;" value="" id="check_cara"></td>
                                         </tr>
@@ -654,9 +657,9 @@
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
 
             $('#toggle-pasien').on('click', function() {
                 var target = $('#js-slide-left'); // Mengambil elemen target berdasarkan data-target

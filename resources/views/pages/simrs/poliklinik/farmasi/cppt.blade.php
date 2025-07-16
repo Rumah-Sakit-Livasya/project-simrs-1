@@ -1,12 +1,12 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
-@include('pages.simrs.poliklinik.partials.css-sidebar-custom')
+    @include('pages.simrs.poliklinik.partials.css-sidebar-custom')
     <style>
         main {
             overflow-x: hidden;
         }
-        
+
         input[type="time"] {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -163,8 +163,7 @@
                                             </div>
                                         </div>
                                         <div id="add_soap" class="panel-content collapse in" aria-expanded="true">
-                                            <form method="post" class="form-horizontal" id="fsSOAP"
-                                                autocomplete="off">
+                                            <form method="post" class="form-horizontal" id="fsSOAP" autocomplete="off">
                                                 <input type="hidden" name="registration_id"
                                                     value="{{ $registration->id }}" />
                                                 <input type="hidden" name="medical_record_number" id="noRM_cppt"
@@ -208,20 +207,22 @@
                                                             </div>
                                                             <div class="card-body p-0">
                                                                 <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="4"
-                                                                    placeholder="Keluhan Utama">Alergi obat : 
-                    Reaksi alergi obat : 
-                    Keluhan Utama : KONSULTASI
-                    PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-                    DI PUSKESMAS JATITUJUH 
-                    Riwayat Penyakit Sekarang : KONSULTASI
-                    PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-                    DI PUSKESMAS JATITUJUH 
-                    Riwayat Penyakit Dahulu : TIDAK ADA
-                    Riwayat Penyakit Keluarga : TIDAK ADA
-                    Alergi makan : 
-                    Reaksi alergi makan : 
-                    Alergi lainya : 
-                    Reaksi alergi lainya : </textarea>
+                                                                    placeholder="Keluhan Utama">
+Alergi obat : 
+Reaksi alergi obat : 
+Keluhan Utama : KONSULTASI
+PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
+DI PUSKESMAS JATITUJUH 
+Riwayat Penyakit Sekarang : KONSULTASI
+PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
+DI PUSKESMAS JATITUJUH 
+Riwayat Penyakit Dahulu : TIDAK ADA
+Riwayat Penyakit Keluarga : TIDAK ADA
+Alergi makan : 
+Reaksi alergi makan : 
+Alergi lainya : 
+Reaksi alergi lainya : 
+                                                                </textarea>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -233,13 +234,14 @@
                                                                 <span>Objective</span>
                                                             </div>
                                                             <div class="card-body p-0">
-                                                                <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">Nadi (PR): 
-                    Respirasi (RR): 
-                    Tensi (BP): 
-                    Suhu (T): 
-                    Tinggi Badan: 
-                    Berat Badan: 
-                    Skrining Nyeri:
+                                                                <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">
+Nadi (PR): 
+Respirasi (RR): 
+Tensi (BP): 
+Suhu (T): 
+Tinggi Badan: 
+Berat Badan: 
+Skrining Nyeri:
                                                             </textarea>
                                                             </div>
                                                         </div>
@@ -733,9 +735,9 @@
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
 
             $('#toggle-pasien').on('click', function() {
                 var target = $('#js-slide-left'); // Mengambil elemen target berdasarkan data-target

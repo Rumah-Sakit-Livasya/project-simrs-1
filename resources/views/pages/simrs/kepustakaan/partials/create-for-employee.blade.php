@@ -80,18 +80,18 @@
                                     <label for="name">Nama (File/Folder) <span
                                             class="text-danger fw-bold">*</span></label>
                                     <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
-                                    <input type="text" class="form-control" id="name" name="name"
+                                    <input type="text" class="form-control" id="name" name="name" required
                                         placeholder="Masukan nama file/folder...">
                                 </div>
                                 <div class="col-md-12 mt-3" id="file_upload_section">
                                     <label for="customFile">Upload (File) <span
                                             class="text-danger fw-bold">*</span></label>
                                     <div class="custom-file">
-                                        <input type="file" class="custom-file-input" name="file" id="customFile">
+                                        <input type="file" class="custom-file-input" name="file" id="customFile"
+                                            required>
                                         <label class="custom-file-label" for="customFile">Choose file</label>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>

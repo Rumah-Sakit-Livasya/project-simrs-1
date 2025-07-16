@@ -18,6 +18,8 @@ use App\Http\Controllers\ProcurementPurchaseOrderPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
 use App\Http\Controllers\ProcurementSetupSupplier;
+use App\Http\Controllers\SIMRS\AssesmentGadarController;
+use App\Http\Controllers\SIMRS\RujukAntarRSController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
 use App\Http\Controllers\WarehouseBarangFarmasiController;
 use App\Http\Controllers\WarehouseBarangNonFarmasiController;
@@ -39,15 +41,19 @@ use App\Models\ProcurementPurchaseRequestPharmacy;
 use App\Models\WarehouseKategoriBarang;
 use App\Models\WarehouseKelompokBarang;
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\CPPT\CPPTController;
 use App\Http\Controllers\SIMRS\DepartementController;
+use App\Http\Controllers\SIMRS\ERMController;
 use App\Http\Controllers\SIMRS\EthnicController;
+use App\Http\Controllers\SIMRS\EWSAnakController;
+use App\Http\Controllers\SIMRS\EWSDewasaController;
+use App\Http\Controllers\SIMRS\EWSObstetriController;
 use App\Http\Controllers\SIMRS\GrupParameterRadiologiController;
 use App\Http\Controllers\SIMRS\GrupSuplier\GrupSuplierController;
 use App\Http\Controllers\SIMRS\GrupTindakanMedisController;
 use App\Http\Controllers\SIMRS\HargaJual\MarginHargaJualController;
+use App\Http\Controllers\SIMRS\IGD\IGDController;
 use App\Http\Controllers\SIMRS\JadwalDokter\JadwalDokterController;
 use App\Http\Controllers\SIMRS\KategoriRadiologiController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
@@ -74,6 +80,7 @@ use App\Http\Controllers\SIMRS\Penjamin\PenjaminController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
+use App\Http\Controllers\SIMRS\Persalinan\TarifPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Poliklinik\LayananController;
 use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
@@ -89,6 +96,7 @@ use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Http\Controllers\WarehouseReturBarangController;
+use App\Http\Controllers\TarifOperasiController;
 use App\Models\Employee;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
@@ -384,16 +392,54 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         });
     });
 
-
-    Route::prefix('poliklinik')->group(function () {
-        Route::post('/filter-pasien', [PoliklinikController::class, 'filterPasien'])->name('poliklinik.filter-pasien');
+    Route::prefix('igd')->group(function () {
+        Route::post('/filter-pasien', [IGDController::class, 'index'])->name('igd.filter-pasien');
+        Route::prefix('laporan')->group(function () {
+            Route::match(['get', 'post'], '/', [IGDController::class, 'showLaporan'])->name('igd.laporan.show');
+            Route::post('get-data', [IGDController::class, 'getDataLaporan'])->name('igd.laporan.get-data');
+        });
     });
 
     Route::prefix('erm')->group(function () {
+        Route::post('/filter-pasien/{path}', [ERMController::class, 'filterPasien']);
+        Route::post('/save-signature/{id}', [ERMController::class, 'saveSignature'])->name('erm.save-signature');
+
+        Route::prefix('ews-anak')->group(function () {
+            Route::post('/', [EWSAnakController::class, 'store'])->name('erm.ews-anak.store');
+            Route::get('/{id}', [EWSAnakController::class, 'getData'])->name('erm.ews-anak.store');
+        });
+
+        Route::prefix('ews-dewasa')->group(function () {
+            Route::post('/', [EWSDewasaController::class, 'store'])->name('erm.ews-dewasa.store');
+            Route::get('/{id}', [EWSDewasaController::class, 'getData'])->name('erm.ews-dewasa.store');
+        });
+
+        Route::prefix('ews-obstetri')->group(function () {
+            Route::post('/', [EWSObstetriController::class, 'store'])->name('erm.ews-obstetri.store');
+            Route::get('/{id}', [EWSObstetriController::class, 'getData'])->name('erm.ews-obstetri.store');
+        });
+
+        Route::prefix('assesment-keperawatan-gadar')->group(function () {
+            Route::post('/', [AssesmentGadarController::class, 'store'])->name('erm.assesment-keperawatan-gadar.store');
+            Route::get('/{id}', [AssesmentGadarController::class, 'getData'])->name('erm.assesment-keperawatan-gadar.store');
+        });
+
+        Route::prefix('rujuk-antar-rs')->group(function () {
+            Route::post('/', [RujukAntarRSController::class, 'store'])->name('erm.rujuk-antar-rs.store');
+            Route::get('/{id}', [RujukAntarRSController::class, 'getData'])->name('erm.rujuk-antar-rs.store');
+        });
+    });
+    Route::prefix('poliklinik')->group(function () {
+        Route::post('/filter-pasien', [ERMController::class, 'filterPasien'])->name('poliklinik.filter-pasien');
+    });
+
+    Route::prefix('erm')->group(function () {
+        Route::get('/get-jadwal-dokter/{departement_id}', [CPPTController::class, 'getJadwalDokter']);
         Route::get('/dokter-pengkajian/{type}/{registration_number}/get', [PengkajianDokterRajalController::class, 'getPengkajian'])->name('pengkajian.dokter-rajal.get');
         Route::get('/perawat-pengkajian/{type}/{registration_number}/get', [PengkajianController::class, 'getPengkajianRajal'])->name('pengkajian.perawat-rajal.get');
         Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
-        Route::get('/dokter-cppt/get', [CPPTController::class, 'getCPPT'])->name('cppt.get');
+        Route::get('/dokter-cppt/get', [CPPTController::class, 'getCPPTDokter'])->name('cppt-dokter.get');
+        Route::get('/perawat-cppt/get', [CPPTController::class, 'getCPPT'])->name('cppt.get');
         Route::post('/dokter-cppt/{type}/{registration_number}/store', [CPPTController::class, 'store'])->name('cppt.dokter-rajal.store');
         Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
         Route::post('/dokter-resume-medis/store', [ResumeMedisRajalController::class, 'store'])->name('resume-medis.dokter-rajal.store');
@@ -495,8 +541,6 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             });
         });
 
-
-
         Route::prefix('penunjang-medis')->group(function () {
             Route::get('/radiologi/grup-parameter-radiologi/{id}', [GrupParameterRadiologiController::class, 'getGrupParameter'])->name('master-data.penunjang-medis.radiologi.grup-parameter.get');
             Route::post('/radiologi/grup-parameter-radiologi', [GrupParameterRadiologiController::class, 'store'])->name('master-data.penunjang-medis.radiologi.grup-parameter.store');
@@ -597,6 +641,11 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::patch('/{id}/update', [DaftarPersalinanController::class, 'update'])->name('master-data.persalinan.daftar-persalinan.update');
                 Route::delete('/{id}/delete', [DaftarPersalinanController::class, 'delete'])->name('master-data.persalinan.daftar-persalinan.delete');
             });
+
+            Route::prefix('tarif')->group(function () {
+                Route::get('/persalinan/{persalinanId}/tarif/{grupPenjaminId}', [TarifPersalinanController::class, 'getTarifPersalinan'])->name('master-data.persalinan.tarif.get');
+                Route::post('/persalinan/{persalinanId}/tarif/{grupPenjaminId}', [TarifPersalinanController::class, 'store'])->name('master-data.persalinan.tarif.store');
+            });
         });
 
         Route::prefix('operasi')->group(function () {
@@ -627,6 +676,11 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::get('/{id}', [TindakanOperasiController::class, 'getTindakan'])->name('master-data.operasi.tindakan.get');
                 Route::patch('/{id}/update', [TindakanOperasiController::class, 'update'])->name('master-data.operasi.tindakan.update');
                 Route::delete('/{id}/delete', [TindakanOperasiController::class, 'delete'])->name('master-data.operasi.tindakan.delete');
+            });
+
+            Route::prefix('tarif')->group(function () {
+                Route::get('/operasi/{operasiId}/tarif/{grupPenjaminId}', [TarifOperasiController::class, 'getTarifOperasi'])->name('master-data.operasi.tarif.get');
+                Route::post('/operasi/{operasiId}/tarif/{grupPenjaminId}', [TarifOperasiController::class, 'store'])->name('master-data.tindakan_operasi.tarif.store');
             });
         });
 

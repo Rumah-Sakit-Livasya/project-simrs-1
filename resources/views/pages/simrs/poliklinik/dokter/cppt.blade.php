@@ -1,12 +1,12 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
-@include('pages.simrs.poliklinik.partials.css-sidebar-custom')
+    @include('pages.simrs.poliklinik.partials.css-sidebar-custom')
     <style>
         main {
             overflow-x: hidden;
         }
-        
+
         input[type="time"] {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -164,8 +164,7 @@
                                             </div>
                                         </div>
                                         <div id="add_soap" class="panel-content collapse in" aria-expanded="true">
-                                            <form method="post" class="form-horizontal" id="fsSOAP"
-                                                autocomplete="off">
+                                            <form method="post" class="form-horizontal" id="fsSOAP" autocomplete="off">
                                                 <input type="hidden" name="registration_id"
                                                     value="{{ $registration->id }}" />
                                                 <input type="hidden" name="medical_record_number" id="noRM_cppt"
@@ -322,15 +321,22 @@ Skrining Nyeri:
                                                                             class="select2 form-control @error('doctor_id') is-invalid @enderror"
                                                                             name="doctor_id" id="cppt_doctor_id">
                                                                             <option value="152">BK IBU</option>
-                                                                            <option selected="selected" value="3">FARMASI RAJAL</option>
+                                                                            <option selected="selected" value="3">
+                                                                                FARMASI RAJAL</option>
                                                                             <option value="110">FARMASI RANAP</option>
-                                                                            <option value="150">OBAT KHUSUS KARYAWAN</option>
+                                                                            <option value="150">OBAT KHUSUS KARYAWAN
+                                                                            </option>
                                                                             <option value="140">PSRS</option>
                                                                         </select>
                                                                     </div>
                                                                     <div class="col-6">
-                                                                        <input type="text" name="nama_obat" id="nama_obat" class="form-control ui-autocomplete-input" placeholder="Cari Obat" autocomplete="off"><div class="form-control-line"></div>
-                                                                        <input type="hidden" name="mbid" id="mbid">
+                                                                        <input type="text" name="nama_obat"
+                                                                            id="nama_obat"
+                                                                            class="form-control ui-autocomplete-input"
+                                                                            placeholder="Cari Obat" autocomplete="off">
+                                                                        <div class="form-control-line"></div>
+                                                                        <input type="hidden" name="mbid"
+                                                                            id="mbid">
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -368,18 +374,34 @@ Skrining Nyeri:
                                                     <div class="col-12">
                                                         <table class="table table-striped">
                                                             <thead class="smooth">
-                                                            <tr>
-                                                                <th style="width: 25%;">Nama Obat</th><th style="width: 10%;">UOM</th><th style="width: 5%;">Stok</th><th style="width: 5%;">Harga</th><th style="width: 10%;">Qty</th><th style="width: 10%;">Subtotal Harga</th><th style="width: 15%">Signa</th><th style="width: 15%">Instruksi</th><th style="width: 1%;">&nbsp;</th>
-                                                            </tr>
+                                                                <tr>
+                                                                    <th style="width: 25%;">Nama Obat</th>
+                                                                    <th style="width: 10%;">UOM</th>
+                                                                    <th style="width: 5%;">Stok</th>
+                                                                    <th style="width: 5%;">Harga</th>
+                                                                    <th style="width: 10%;">Qty</th>
+                                                                    <th style="width: 10%;">Subtotal Harga</th>
+                                                                    <th style="width: 15%">Signa</th>
+                                                                    <th style="width: 15%">Instruksi</th>
+                                                                    <th style="width: 1%;">&nbsp;</th>
+                                                                </tr>
                                                             </thead>
                                                             <tbody id="table_re"></tbody>
-                                                            <tbody><tr>
-                                                                <td colspan="8" align="right">Grand Total</td><td align="right"><span id="grand_total" style="text-align: right;" class="numeric">0</span>
-                                                                    <input type="hidden" name="total_bpjs" id="total_bpjs" value="0" readonly="">
-                                                                    <input type="hidden" name="is_bpjs" id="is_bpjs" value="f" readonly="">
-                                                                </td>
-                                                            </tr>
-                                                        </tbody></table>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td colspan="8" align="right">Grand Total</td>
+                                                                    <td align="right"><span id="grand_total"
+                                                                            style="text-align: right;"
+                                                                            class="numeric">0</span>
+                                                                        <input type="hidden" name="total_bpjs"
+                                                                            id="total_bpjs" value="0"
+                                                                            readonly="">
+                                                                        <input type="hidden" name="is_bpjs"
+                                                                            id="is_bpjs" value="f" readonly="">
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
                                                     </div>
                                                 </div>
 
@@ -693,11 +715,11 @@ Skrining Nyeri:
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
-            
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
-            
+
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
+
             $('#cppt_doctor_id').select2({
                 placeholder: 'Pilih Dokter',
             });

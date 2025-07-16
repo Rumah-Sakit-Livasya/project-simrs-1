@@ -127,44 +127,56 @@ class KepustakaanController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
+        // Atur aturan validasi dasar
+        $rules = [
             'type' => 'required',
             'kategori' => 'nullable',
             'parent_id' => 'nullable',
             'organization_id' => 'nullable',
             'name' => 'required',
             'size' => 'nullable',
-            'file' => 'nullable',
-        ]);
+            'file' => 'required', // default: file wajib
+        ];
 
-        $organization = Organization::where('id', $request->organization_id)->first();
-        // return dd($organization->name);
+        // Jika tipenya folder, maka file boleh kosong
+        if ($request->input('type') === 'folder') {
+            $rules['file'] = 'nullable';
+        }
 
-        if (request()->hasFile('file')) {
-            $file = request()->file('file');
-            $fileName = Carbon::now()->timestamp . '_' . $request->name . '.' . $file->getClientOriginalExtension();
-            $kategori = \Str::slug($request->kategori) ?? 'lainnya';
-            $path = 'kepustakaan/' . $kategori . '/' . \Str::slug($organization->name);
-            // $pathFix = $file->storeAs($path, $fileName, 'private');
-            // $validatedData['file'] = $pathFix;
+        // Pesan kustom untuk masing-masing input
+        $messages = [
+            'type.required' => 'Tipe harus dipilih.',
+            'name.required' => 'Nama folder atau file harus diisi.',
+            'file.required' => 'File harus diunggah jika bukan folder.',
+        ];
 
+        $validatedData = $request->validate($rules, $messages);
 
-            // Simpan file secara manual ke storage
+        // Ambil data organisasi jika ada
+        $organization = Organization::find($request->organization_id);
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = Carbon::now()->timestamp . '_' . \Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
+            $kategori = \Str::slug($request->kategori ?? 'lainnya');
+            $orgName = $organization ? \Str::slug($organization->name) : 'umum';
+            $path = 'kepustakaan/' . $kategori . '/' . $orgName;
+
+            // Simpan file secara manual ke storage private
             $storagePath = storage_path('app/private/' . $path);
             if (!file_exists($storagePath)) {
-                mkdir($storagePath, 0755, true); // Buat folder jika belum ada
+                mkdir($storagePath, 0755, true);
             }
 
-            // Pindahkan file ke folder tujuan
             $file->move($storagePath, $fileName);
 
-            // Path relatif untuk database
+            // Simpan path relatif ke database
             $validatedData['file'] = $path . '/' . $fileName;
         }
 
         try {
-            $store = Kepustakaan::create($validatedData);
-            return response()->json(['message' => ' Folder/File ditambahkan!'], 200);
+            Kepustakaan::create($validatedData);
+            return response()->json(['message' => 'Folder/File berhasil ditambahkan!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

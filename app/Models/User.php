@@ -130,6 +130,11 @@ class User extends Authenticatable
         return $this->hasMany(Link::class);
     }
 
+    public function laporan_internal()
+    {
+        return $this->hasMany(LaporanInternal::class);
+    }
+
     public function isOnline()
     {
         return Cache::has('user-is-online-' . $this->id);

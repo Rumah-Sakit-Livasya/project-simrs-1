@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
+use App\Models\Employee;
 use App\Models\Holiday;
 use Illuminate\Http\Request;
 
@@ -19,27 +21,56 @@ class DayOffController extends Controller
             ], 404);
         }
     }
-    public function store()
+    public function store(Request $request)
     {
         try {
-            $validator = \Validator::make(request()->all(), [
+            $validator = \Validator::make($request->all(), [
                 'name' => 'required',
+                'date' => 'required|date',
             ]);
 
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
 
-            Holiday::create(request()->all());
-            //return response
-            return response()->json(['message' => 'Day Off Berhasil di Tambahkan!']);
+            // Simpan hari libur
+            Holiday::create($request->all());
+
+            // Ambil semua employee yang merupakan manajemen
+            $employeeManagement = Employee::where('is_management', 1)->get();
+
+            foreach ($employeeManagement as $employee) {
+                $existingAttendance = Attendance::where('employee_id', $employee->id)
+                    ->where('date', $request->date)
+                    ->first();
+
+                if (!$existingAttendance) {
+                    Attendance::create([
+                        'employee_id' => $employee->id,
+                        'date' => $request->date,
+                        'is_day_off' => 1,
+                        'attendance_code_id' => 37,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                } else {
+                    // Jika sudah ada, update saja
+                    $existingAttendance->update([
+                        'is_day_off' => 1,
+                        'shift_id' => 37,
+                    ]);
+                }
+            }
+
+            return response()->json(['message' => 'Day Off berhasil ditambahkan dan absensi manajemen disesuaikan.']);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'No result',
+                'error' => 'Terjadi kesalahan',
                 'errorLaravel' => $e->getMessage()
-            ], 404);
+            ], 500);
         }
     }
+
 
     public function update($id)
     {
