@@ -42,7 +42,6 @@ class PengkajianController extends Controller
 
     public function storeOrUpdatePengkajianRajal(Request $request)
     {
-<<<<<<< HEAD
         // dd($request);
         // Validate the incoming request data
         $validatedData = $request->validate([
@@ -190,24 +189,19 @@ class PengkajianController extends Controller
         }
 
         // Check if the registration type is 'rawat-jalan'
-=======
         // Ambil data registrasi
->>>>>>> 841717927d57ff76a595e6f030bf800256003f35
         $registration = Registration::find($request->registration_id);
 
         if (!$registration) {
             return response()->json(['error' => 'Registration not found.'], 404);
         }
 
-<<<<<<< HEAD
         // if ($registration->registration_type != 'rawat-jalan') {
         //     return response()->json(['error' => 'Registration type must be rawat-jalan.'], 400);
         // }
 
         // Cek apakah sudah ada data PengkajianNurseRajal
-=======
         // Cek apakah pengkajian sudah ada
->>>>>>> 841717927d57ff76a595e6f030bf800256003f35
         $existingPengkajian = $registration->pengkajian_nurse_rajal;
 
         // Siapkan data JSON
@@ -291,12 +285,9 @@ class PengkajianController extends Controller
 
         try {
             if ($existingPengkajian) {
-<<<<<<< HEAD
                 // Update data yang sudah ada
 
-=======
                 // Update existing
->>>>>>> 841717927d57ff76a595e6f030bf800256003f35
                 $data['modified_by'] = $request->user_id;
                 $existingPengkajian->update($data);
                 $pengkajian = $existingPengkajian;

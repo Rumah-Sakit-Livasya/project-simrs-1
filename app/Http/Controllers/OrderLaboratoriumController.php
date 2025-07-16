@@ -109,14 +109,12 @@ class OrderLaboratoriumController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
         $request->merge(['parameters' => json_decode($request->parameters, true)]);
 
         try {
             $validatedData = $request->validate([
                 'user_id' => 'required|integer',
                 'employee_id' => 'required|integer',
-                'patient_id' => 'required',
                 'registration_type' => 'string',
                 'catatan' => 'nullable|string',
                 'registration_id' => 'integer',
@@ -190,8 +188,7 @@ class OrderLaboratoriumController extends Controller
                 $orderLaboratorium = OrderLaboratorium::create([
                     'user_id' => $validatedData['user_id'],
                     'registration_id' => $validatedData['registration_id'],
-                    'doctor_id' => $validatedData['doctor_id'],
-                    'patient_id' => $validatedData['patient_id'],
+                    'dokter_laboratorium_id' => $validatedData['doctor_id'],
                     'order_date' => Carbon::now(),
                     'no_order' => $no_order,
                     'tipe_order' => $validatedData['order_type'],
