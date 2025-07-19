@@ -366,7 +366,9 @@ class TableHandler {
         const rows = tableElement.querySelectorAll('tbody tr');
         rows.forEach(tr => {
             const cells = tr.querySelectorAll('td');
-            if (cells[1]) cells[1].remove();
+            console.log();
+
+            if (cells[1] && cells[1].getHTML().includes("details-control")) cells[1].remove();
         });
 
         // Optional: remove child row content columns if needed
