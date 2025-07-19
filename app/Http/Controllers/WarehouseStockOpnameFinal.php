@@ -171,7 +171,7 @@ class WarehouseStockOpnameFinal extends Controller
                 // $stored->save();
 
                 // use the GoodsStockService
-                $args = new IncreaseDecreaseStockArguments($user, $opname, $stored, $movement);
+                $args = new IncreaseDecreaseStockArguments($user, $sio, $stored, $movement);
                 if ($movement < 0) {
                     $this->goodsStockService->decreaseStock($args);
                 } else {

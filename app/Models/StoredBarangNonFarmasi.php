@@ -58,4 +58,9 @@ class StoredBarangNonFarmasi extends Model implements AuditableContract
                 return $carry;
             }, 0);
     }
+
+    public function transaction_log()
+    {
+        return $this->morphMany(StockTransaction::class, 'stock', 'stock_model', 'stock_id');
+    }
 }

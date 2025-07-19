@@ -8,6 +8,7 @@ use App\Models\WarehouseKategoriBarang;
 use App\Models\WarehouseSatuanBarang;
 use App\Models\WarehouseStockOpnameGudang;
 use App\Models\WarehouseStockOpnameItems;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -129,11 +130,12 @@ class WarehouseStockOpnameDraft extends Controller
                     ]);
                 } else {
                     WarehouseStockOpnameItems::create([
-                        'sog_id'     => $request['sog_id'],
+                        'kode_so'          => $this->generate_so_code(),
+                        'sog_id'           => $request['sog_id'],
                         $request['column'] => $draft->si_id,
-                        'qty'        => $draft->qty,
-                        'keterangan' => $draft->keterangan,
-                        'user_id'    => $request['user_id'],
+                        'qty'              => $draft->qty,
+                        'keterangan'       => $draft->keterangan,
+                        'user_id'          => $request['user_id'],
                     ]);
                 }
             }
@@ -207,6 +209,24 @@ class WarehouseStockOpnameDraft extends Controller
     // -------------------------------------------------------------------------
     // Private helper methods
     // -------------------------------------------------------------------------
+
+    /**
+     * Generate a unique Stock Opname code based on current year, month, and count.
+     * @return string  Stock Opname code.
+     */
+    private function generate_so_code()
+    {
+        $date = Carbon::now();
+        $year = $date->format('y');
+        $month = $date->format('m');
+
+        $count = WarehouseStockOpnameItems::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count() + 1;
+        $count = str_pad($count, 6, '0', STR_PAD_LEFT);
+
+        return $count . "/SO" . $year . $month;
+    }
 
     /**
      * Find a stored item instance by type.

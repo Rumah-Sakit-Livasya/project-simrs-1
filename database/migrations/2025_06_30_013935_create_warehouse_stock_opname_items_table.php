@@ -19,6 +19,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->softDeletes();
+            $table->string('kode_so');
             $table->foreignId("user_id")->constrained("users")->comment("Current logged in user")->cascadeOnDelete();
             $table->foreignId("sog_id")->constrained("warehouse_stock_opname_gudang")->comment("Stock opname header")->cascadeOnDelete();
             $table->foreignId('si_f_id')->nullable()->constrained('stored_barang_farmasi', 'id')->comment('Foreign Key to StoredBarangFarmasi Table');

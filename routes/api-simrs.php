@@ -90,6 +90,7 @@ use App\Http\Controllers\SIMRS\TindakanMedisController;
 use App\Http\Controllers\WarehouseDistribusiBarangFarmasiController;
 use App\Http\Controllers\WarehouseDistribusiBarangNonFarmasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
+use App\Http\Controllers\WarehouseReportStockDetail;
 use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\WarehouseStockAdjustmentController;
 use App\Http\Controllers\WarehouseStockOpnameDraft;
@@ -347,6 +348,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                     Route::get("/get/opname-items/{id}", [WarehouseStockOpnameFinal::class, "get_opname_items"])->name("warehouse.revaluasi-stock.stock-opname.final.get.opname-items");
                     Route::post("/store", [WarehouseStockOpnameFinal::class, "store"])->name("warehouse.revaluasi-stock.stock-opname.final.store");
                 });
+            });
+        });
+
+        Route::prefix("report")->group(function () {
+            Route::prefix("stock-detail")->group(function () {
+                Route::post("/get-items", [WarehouseReportStockDetail::class, "get_items"])->name("warehouse.report.stock-detail.get-items");
+                Route::post("/get-print-template", [WarehouseReportStockDetail::class, "get_print_template"])->name("warehouse.report.stock-detail.get-print-template");
             });
         });
     });

@@ -475,11 +475,11 @@ interface BarangFarmasi {
     golongan_id: number | null;
     kelompok_id: number | null;
     satuan_id: number;
-    satuan?: Satuan;
     principal: string | null;
     harga_principal: number | null;
     diskon_principal: number | null;
 
+    satuan?: Satuan;
     golongan?: GolonganBarang;
     kategori?: KategoriBarang;
 }
@@ -538,7 +538,7 @@ interface ItemPO {
     po_id: number;
     pri_id: number | null;
     barang_id: number;
-    barang?: Barang;
+    barang?: BarangFarmasi | BarangNonFarmasi;
     kode_barang: string;
     nama_barang: string;
     unit_barang: string;
@@ -611,32 +611,6 @@ interface GolonganBarang {
     kode: string;
     nama: string;
     aktif: number;
-}
-
-interface Barang {
-    id: number;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-    nama: string;
-    kode: string;
-    keterangan: string;
-    hna: number;
-    ppn: number;
-    ppn_rajal: number;
-    ppn_ranap: number;
-    tipe: string;
-    formularium: string;
-    jenis_obat: string;
-    exp: string;
-    aktif: number;
-    kategori_id: number;
-    golongan_id: number;
-    kelompok_id: number;
-    satuan_id: number;
-    principal: string;
-    harga_principal: number;
-    diskon_principal: number;
 }
 
 interface StoredItem {
@@ -737,6 +711,7 @@ interface StockRequest {
 }
 
 interface StockOpnameItem {
+    kode_so: string;
     id: number;
     created_at: Date; // Assuming standard timestamp fields are managed by the ORM/database
     updated_at: Date;
@@ -763,6 +738,135 @@ interface StackedStoredItemOpname {
     stack: StoredItemOpname[];
 }
 
+interface Employee {
+    id: number;
+    company_id?: number;
+    organization_id?: number;
+    job_position_id?: number;
+    job_level_id?: number;
+    approval_line?: number;
+    approval_line_parent?: number;
+    employee_code?: string;
+    title?: string;
+    fullname?: string;
+    degree?: string;
+    email?: string;
+    mobile_phone?: string;
+    place_of_birth?: string;
+    birthdate?: string;
+    gender?: string;
+    marital_status?: string;
+    blood_type?: string;
+    religion?: string;
+    last_education?: string;
+    identity_type?: string;
+    identity_number?: string;
+    identity_expire_date?: string;
+    postal_code?: string;
+    citizen_id_address?: string;
+    residental_address?: string;
+    barcode?: string;
+    employment_status?: string;
+    join_date?: string;
+    end_status_date?: string;
+    resign_date?: string;
+    basic_salary?: string;
+    salary_type?: string;
+    payment_schedule?: string;
+    protate_setting?: string;
+    allowed_for_overtime?: boolean;
+    npwp?: string;
+    ptkp_status?: string;
+    tax_methode?: string;
+    tax_salary?: string;
+    taxable_date?: string;
+    employment_tax_status?: string;
+    beginning_netto?: string;
+    pph21_paid?: string;
+    bpjs_ker_number?: string;
+    npp_ker_bpjs?: string;
+}
+
+interface User {
+    id: number;
+    name: string;
+    email: string;
+    is_active: boolean;
+    avatar?: string;
+    remember_token?: string;
+    created_at: string; // Assuming this is a timestamp in ISO format
+    updated_at: string; // Assuming this is a timestamp in ISO format
+    employee?: Employee;
+}
+
+interface DistribusiBarang {
+    id: number;
+    created_at: string; // Assuming this is a timestamp in ISO format
+    updated_at: string; // Assuming this is a timestamp in ISO format
+    deleted_at: string | null; // Assuming this is a timestamp in ISO format for soft deletes
+    tanggal_db: string; // Date type for distribution date
+    user_id: number;
+    asal_gudang_id: number;
+    tujuan_gudang_id: number;
+    sr_id: number | null;
+    kode_db: string;
+    keterangan: string | null;
+    status: "draft" | "final";
+}
+
+interface ReturBarang {
+    id: number;
+    created_at: string; // Assuming this is a timestamp in ISO format
+    updated_at: string; // Assuming this is a timestamp in ISO format
+    deleted_at: string | null; // Assuming this is a timestamp in ISO format for soft deletes
+    tanggal_retur: string; // Date type for return date
+    user_id: number;
+    supplier_id: number;
+    keterangan: string | null;
+    kode_retur: string;
+    ppn: number;
+    ppn_nominal: number;
+    nominal: number;
+}
+
+
+
+interface StockTransactions {
+    id: number;
+    created_at: string; // Timestamp in ISO format
+    updated_at: string; // Timestamp in ISO format
+    stock_id: number;
+    stock_model: string;
+    source_id: number;
+    source_model: string;
+    source_controller: string;
+    event_type: "create" | "update";
+    transaction_type: "in" | "out";
+    before_qty: number | null;
+    after_qty: number;
+    before_gudang_id: number | null;
+    after_gudang_id: number;
+    performed_by: number;
+
+    stock?: StoredItem;
+    source?: StockTransactionsSources;
+    user?: User;
+    before_gudang?: MasterGudang;
+    after_gudang?: MasterGudang;
+}
+
+type StockDetails = (BarangFarmasi | BarangNonFarmasi) & {
+    qty_start: number,
+    qty_finish: number,
+    qty_in: number,
+    qty_out: number,
+    adjustment: number,
+    qty_expired: number,
+    logs: StockTransactions[],
+    stored_items: StoredItem[]
+}
+
+
 type StoredItemOpname = StoredItem & {
     frozen: number;
     movement: number;
@@ -770,6 +874,7 @@ type StoredItemOpname = StoredItem & {
     opname?: StockOpnameItem;
 }
 
+type StockTransactionsSources = PenerimaanBarang | DistribusiBarang | ReturBarang | StockOpnameItem;
 type PatientType = "rajal" | "ranap" | "otc";
 type SumberItem = "npr" | "pr";
 type TipePR = "all" | "normal" | "urgent";
