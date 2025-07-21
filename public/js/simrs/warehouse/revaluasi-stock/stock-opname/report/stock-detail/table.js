@@ -94,88 +94,6 @@ class TableHandler {
         });
     }
 
-    // /**
-    //  * Toggle show or hide child row based on applied filters
-    //  * @param {"show" | "hide"} empty 
-    //  * @param {"no" | "exp" | undefined} expired 
-    //  */
-    // toggleChildFilter(empty, expired) {
-    //     // show all child
-    //     // because if the child is hidden
-    //     // then jquery won't be able to select it
-    //     this.#$Table.rows().every(function () {
-    //         const currentTr = $(this.node());
-    //         if (!this.child.isShown()) {
-    //             this.child.show();
-    //             currentTr.addClass('shown');
-    //         }
-    //     });
-
-    //     // start filtering
-    //     const ChildTRs = $("tr.child"); // select with jquery
-    //     ChildTRs.each(function () {
-    //         const $TR = $(this);
-    //         const Item = /** @type {StoredItemOpname} */ ($TR.data("item"));
-    //         const Qty = parseInt($TR.find(".item-qty-final").text());
-
-    //         if (!expired && empty == "show") {
-    //             $TR.show();
-    //         } else {
-    //             // if empty == hide, hide items with 0 qty
-    //             if (empty == "hide" && Qty == 0) $TR.hide();
-    //             // if expired == "no", only show non-expired items or items without expired date
-    //             else if (expired == "no" && (Item.pbi?.tanggal_exp ? new Date(Item.pbi?.tanggal_exp || 0) < new Date() : false)) $TR.hide();
-    //             // if expired == "exp", only show expired items
-    //             else if (expired == "exp" && (Item.pbi?.tanggal_exp ? new Date(Item.pbi?.tanggal_exp || 0) >= new Date() : false)) $TR.hide();
-    //             else $TR.show();
-    //         }
-    //     });
-
-    //     // finally, hide all child
-    //     this.#$Table.rows().every(function () {
-    //         const currentTr = $(this.node());
-    //         if (this.child.isShown()) {
-    //             this.child.hide();
-    //             currentTr.removeClass('shown');
-    //         }
-    //     });
-    // }
-
-    // /**
-    //  * Toggle show or hide row based on applied filters
-    //  * @param {"f" | "nf" | undefined} jenis 
-    //  * @param {number | undefined} kategori_id 
-    //  * @param {number | undefined} satuan_id 
-    //  */
-    // toggleFilter(jenis, kategori_id, satuan_id) {
-    //     // First, close all child rows
-    //     this.#$Table.rows().every(function () {
-    //         const currentTr = $(this.node());
-    //         if (this.child.isShown()) {
-    //             this.child.hide();
-    //             currentTr.removeClass('shown');
-    //         }
-    //     });
-
-    //     const HeadTRs = $("tr.head");
-    //     HeadTRs.each(function () {
-    //         const $TR = $(this);
-    //         const Item = /** @type {StackedStoredItemOpname} */ ($TR.data("item"));
-    //         if (!jenis && !kategori_id && !satuan_id) {
-    //             $TR.show();
-    //         } else {
-    //             if (
-    //                 (jenis ? (Item.type == jenis) : true) &&
-    //                 (kategori_id ? (Item.barang.kategori_id == kategori_id) : true) &&
-    //                 (satuan_id ? (Item.barang.satuan_id == satuan_id) : true)
-    //             ) {
-    //                 $TR.show();
-    //             }
-    //             else $TR.hide();
-    //         }
-    //     });
-    // }
-
     /**
      * Update table with new items
      * @param {StockDetails[]} items 
@@ -366,8 +284,6 @@ class TableHandler {
         const rows = tableElement.querySelectorAll('tbody tr');
         rows.forEach(tr => {
             const cells = tr.querySelectorAll('td');
-            console.log();
-
             if (cells[1] && cells[1].getHTML().includes("details-control")) cells[1].remove();
         });
 

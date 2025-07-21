@@ -1,5 +1,9 @@
 @extends('inc.layout')
-@section('title', 'Stock Opname Report: Stock Status')
+@if (isset($barang))
+    @section('title', 'Stock Opname Report: Kartu Stok [' . $satuan->kode . '] ' . $barang->nama)
+@else
+    @section('title', 'Stock Opname Report: Kartu Stok ')
+@endif
 @section('content')
     <style>
         .display-none {
@@ -22,9 +26,9 @@
     </style>
     <main id="js-page-content" role="main" class="page-content">
 
-        @include('pages.simrs.warehouse.report.partials.stock-status-form')
+        @include('pages.simrs.warehouse.report.partials.kartu-stock-form')
 
-        @include('pages.simrs.warehouse.report.partials.stock-status-datatable')
+        @include('pages.simrs.warehouse.report.partials.kartu-stock-datatable')
     </main>
 @endsection
 @section('plugin')
@@ -139,8 +143,6 @@
             }
             new bootstrap.Popover(el, opts);
         })
-    </script>
-    <script src="{{ asset('js/simrs/warehouse/revaluasi-stock/stock-opname/report/stock-status.js') }}?v={{ time() }}">
     </script>
 
 @endsection
