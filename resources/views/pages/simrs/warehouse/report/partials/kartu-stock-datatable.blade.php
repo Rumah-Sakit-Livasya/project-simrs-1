@@ -38,10 +38,16 @@
                         </thead>
                         <tbody>
                             @if (isset($logs))
+                                @php
+                                    $total_qty = $logs->sum('stock.qty');
+                                    $count = 0;
+                                @endphp
                                 @foreach ($logs as $log)
                                     @php
                                         $move_out = false;
                                         $adjustment = $log->after_qty - $log->before_qty;
+                                        $final = $total_qty;
+                                        $before = $total_qty = $total_qty - $adjustment;
                                         $sign = $adjustment > 0 ? '+' : '';
                                         if (
                                             request('gudang_id') !== null &&
@@ -65,18 +71,21 @@
                                             $code = 'Unknown Code';
                                         }
                                     @endphp
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ tgl($log->created_at) }}</td>
-                                        <td>{{ $code }}</td>
-                                        <td>{{ $move_out ? $log->before_gudang->nama : $log->after_gudang->nama }}</td>
-                                        <td>{{ $log->source->keterangan ?? '' }}</td>
-                                        <td>{{ $log->before_qty ?: 0 }}</td>
-                                        <td>{{ !$move_out ? $sign : '' }}{{ $move_out ? -$log->before_qty : $adjustment }}
-                                        </td>
-                                        <td>{{ $move_out ? 0 : $log->after_qty }}</td>
-                                        <td>{{ $log->user->name }}</td>
-                                    </tr>
+                                    @if ($adjustment != 0)
+                                        <tr>
+                                            <td>{{ ++$count }}</td>
+                                            <td>{{ tgl($log->created_at) }}</td>
+                                            <td>{{ $code }}</td>
+                                            <td>{{ $move_out ? $log->before_gudang->nama : $log->after_gudang->nama }}
+                                            </td>
+                                            <td>{{ $log->source->keterangan ?? '' }}</td>
+                                            <td>{{ $before }}</td>
+                                            <td>{{ !$move_out ? $sign : '' }}{{ $move_out ? -$log->before_qty : $adjustment }}
+                                            </td>
+                                            <td>{{ $move_out ? 0 : $final }}</td>
+                                            <td>{{ $log->user->name }}</td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             @endif
                         </tbody>
