@@ -7,6 +7,7 @@
         body {
             overflow-x: hidden;
         }
+
         #gambar-detail-absensi {
             display: flex;
             /* Use flexbox to position images side by side */
@@ -265,12 +266,21 @@
                                                 <td>
                                                     @if (auth()->user()->hasRole('super admin'))
                                                         <a href="#" data-backdrop="static" data-keyboard="false"
+                                                            class="badge mx-1 badge-warning p-2 border-0 text-white btn-ontime"
+                                                            data-id="{{ $row->id }}" title="Edit Absensi">
+                                                            <span class="fal fa-clock ikon-ontime"></span>
+                                                            <div class="span spinner-text d-none">
+                                                                <span class="spinner-border spinner-border-sm"
+                                                                    role="status" aria-hidden="true"></span>
+                                                            </div>
+                                                        </a>
+                                                        <a href="#" data-backdrop="static" data-keyboard="false"
                                                             class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
                                                             data-id="{{ $row->id }}" title="Edit Absensi">
                                                             <span class="fal fa-pencil ikon-edit"></span>
                                                             <div class="span spinner-text d-none">
-                                                                <span class="spinner-border spinner-border-sm" role="status"
-                                                                    aria-hidden="true"></span>
+                                                                <span class="spinner-border spinner-border-sm"
+                                                                    role="status" aria-hidden="true"></span>
                                                                 Loading...
                                                             </div>
                                                         </a>
@@ -336,8 +346,8 @@
                 e.preventDefault();
                 let button = $(this);
                 let id = button.attr('data-id');
-                button.find('.ikon-edit').hide();
-                button.find('.spinner-text').removeClass('d-none');
+                button.find('.ikon-ontime').hide();
+                button.find('.spinner-text-ontime').removeClass('d-none');
 
                 $.ajax({
                     type: "GET", // Method pengiriman data bisa dengan GET atau POST
@@ -387,6 +397,35 @@
                             console.log(xhr.responseJSON.error);
                         }
                     });
+                });
+            });
+
+            $('.btn-ontime').click(function(e) {
+                e.preventDefault();
+
+                let button = $(this);
+                let id = button.attr('data-id');
+
+                button.find('.ikon-ontime').hide();
+                button.find('.spinner-text').removeClass('d-none');
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/dashboard/attendances/update/' + id + '/ontime',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        button.find('.spinner-text').addClass('d-none');
+                        button.find('.ikon-ontime').show();
+                        showSuccessAlert(response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 100);
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseJSON.error);
+                    }
                 });
             });
 
