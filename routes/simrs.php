@@ -895,6 +895,7 @@ Route::group(['middleware' => ['auth']], function () {
         |
         */
         Route::prefix('kasir')->group(function () {
+
             /*
             |--------------------------------------------------------------------------
             | Tagihan Pasien Routes

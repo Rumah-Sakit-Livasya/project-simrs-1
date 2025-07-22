@@ -120,7 +120,7 @@ return new class extends Migration
             $table->string('data_ttd2')->nullable();
             $table->string('nama_perawat_penerima')->nullable();
 
-            // pasien kembali keruang semula pasca tindakan/ prosedur 
+            // pasien kembali keruang semula pasca tindakan/ prosedur
             $table->string('pasien_kelmbali')->nullable();
             $table->string('keadaan_umum_after')->nullable();
             $table->string('td_after')->nullable();
