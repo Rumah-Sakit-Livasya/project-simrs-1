@@ -1,15 +1,3 @@
-<style>
-    canvas {
-        touch-action: none;
-    }
-</style>
-{{-- <form id="signature-form" method="post" action="/save-signature" style="display: none;">
-    @csrf
-    <input type="hidden" name="signature_image" id="signature_image">
-</form> --}}
-<!-- Modal for Signature Pad -->
-<!-- Signature Modal -->
-<!-- Modal for Signature Pad -->
 <!-- Signature Modal -->
 <div class="modal fade" id="signatureModalMany" tabindex="-1" role="dialog" aria-labelledby="signatureModalLabel"
     aria-hidden="true">
@@ -50,86 +38,104 @@
         </div>
     </div>
 </div>
-<script>
-    let currentSignatureIndex = null;
+@section('signature')
+    <script>
+        let currentIndex = null;
+        const canvas = document.getElementById('canvas-many');
+        const ctx = canvas.getContext('2d');
 
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    let painting = false;
-    let history = [];
-    let hasDrawn = false;
+        let painting = false;
+        let history = [];
+        let hasDrawn = false;
 
-    function startPosition(e) {
-        painting = true;
-        draw(e);
-    }
-
-    function endPosition() {
-        painting = false;
-        ctx.beginPath();
-        history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-    }
-
-    function draw(e) {
-        if (!painting) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#000';
-
-        ctx.lineTo(x, y);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-
-        hasDrawn = true;
-    }
-
-    function clearCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        history = [];
-        hasDrawn = false;
-    }
-
-    function undo() {
-        if (history.length > 0) {
-            ctx.putImageData(history.pop(), 0, 0);
-        }
-    }
-
-    function openSignaturePadMany(index) {
-        currentSignatureIndex = index;
-        clearCanvas();
-        $('#signatureModalMany').modal('show');
-    }
-
-    function saveSignatureMany() {
-        if (!hasDrawn) {
-            alert("Silakan buat tanda tangan terlebih dahulu.");
-            return;
+        function startPosition(e) {
+            painting = true;
+            draw(e);
         }
 
-        const dataURL = canvas.toDataURL('image/png');
-        const previews = document.querySelectorAll('#signature_preview');
-        const inputs = document.querySelectorAll('input[name="signature_image[]"]');
-
-        if (previews[currentSignatureIndex]) {
-            previews[currentSignatureIndex].src = dataURL;
-            previews[currentSignatureIndex].style.display = 'block';
+        function endPosition() {
+            painting = false;
+            ctx.beginPath();
+            history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
         }
 
-        if (inputs[currentSignatureIndex]) {
-            inputs[currentSignatureIndex].value = dataURL;
+        function draw(e) {
+            if (!painting) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+            const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+
+            hasDrawn = true;
         }
 
-        $('#signatureModalMany').modal('hide');
-    }
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            history = [];
+            hasDrawn = false;
+        }
 
-    // Bind event
-    canvas.addEventListener('mousedown', startPosition);
-    canvas.addEventListener('mouseup', endPosition);
-    canvas.addEventListener('mousemove', draw);
-</script>
+        function undo() {
+            if (history.length > 0) {
+                ctx.putImageData(history.pop(), 0, 0);
+            }
+        }
+
+        function openSignaturePadMany(index) {
+            currentIndex = index;
+            clearCanvas();
+            $('#signatureModalMany').modal('show');
+        }
+
+        function saveSignatureMany() {
+            if (!hasDrawn) {
+                alert("Silakan buat tanda tangan terlebih dahulu.");
+                return;
+            }
+
+            const dataURL = canvas.toDataURL('image/png');
+
+            // Simpan ke preview dan hidden input sesuai index
+            const preview = document.getElementById(`signature_preview_${currentIndex}`);
+            const input = document.getElementById(`signature_image_${currentIndex}`);
+
+            if (preview) {
+                preview.src = dataURL;
+                preview.style.display = 'block';
+            }
+
+            if (input) {
+                input.value = dataURL;
+            }
+
+            $('#signatureModalMany').modal('hide');
+        }
+
+        // Binding event
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', endPosition);
+        canvas.addEventListener('mousemove', draw);
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startPosition(e);
+        });
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            endPosition();
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            draw(e);
+        });
+    </script>
+@endsection

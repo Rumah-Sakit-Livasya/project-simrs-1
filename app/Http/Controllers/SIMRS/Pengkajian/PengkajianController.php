@@ -278,25 +278,53 @@ class PengkajianController extends Controller
             'nama_perawat_penerima_after' => 'nullable|string',
         ]);
 
-        // Check if the registration type is 'rawat-jalan'
-        $registration = Registration::find($validatedData['registration_id']);
-        // if ($registration->registration_type != 'rawat-jalan') {
-        //     return response()->json(['error' => 'Registration type must be rawat-jalan.'], 400);
-        // }
-
-        // Check if a TransferPasienAntarRuangan already exists for this registration
-        $existingTransfer = $registration->transfer_pasien_antar_ruangan;
-
         try {
-            if ($existingTransfer) {
-                // Update the existing TransferPasienAntarRuangan record
-                $existingTransfer->update($validatedData);
-                return response()->json(['message' => 'Data updated successfully!', 'data' => $existingTransfer]);
-            } else {
-                // Create a new TransferPasienAntarRuangan record
-                $transfer = TransferPasienAntarRuangan::create($validatedData);
-                return response()->json(['message' => 'Data saved successfully!', 'data' => $transfer], 201);
+            // Simpan atau update TransferPasienAntarRuangan
+            $transfer = TransferPasienAntarRuangan::updateOrCreate(
+                ['registration_id' => $validatedData['registration_id']],
+                $validatedData
+            );
+
+            // Hapus tanda tangan lama (jika kamu ingin replace)
+            $transfer->signatures()->delete();
+
+            // Simpan ulang semua tanda tangan jika tersedia
+            if ($request->filled('data_ttd1')) {
+                $transfer->signatures()->create([
+                    'pic' => $validatedData['nama_perawat_pengirim'] ?? auth()->user()->name,
+                    'role' => 'pengirim',
+                    'signature' => $validatedData['data_ttd1'],
+                ]);
             }
+
+            if ($request->filled('data_ttd2')) {
+                $transfer->signatures()->create([
+                    'pic' => $validatedData['nama_perawat_penerima'] ?? '-',
+                    'role' => 'penerima',
+                    'signature' => $validatedData['data_ttd2'],
+                ]);
+            }
+
+            if ($request->filled('data_ttd3')) {
+                $transfer->signatures()->create([
+                    'pic' => $validatedData['nama_perawat_pengirim_after'] ?? '-',
+                    'role' => 'pengirim_balik',
+                    'signature' => $validatedData['data_ttd3'],
+                ]);
+            }
+
+            if ($request->filled('data_ttd4')) {
+                $transfer->signatures()->create([
+                    'pic' => $validatedData['nama_perawat_penerima_after'] ?? '-',
+                    'role' => 'penerima_balik',
+                    'signature' => $validatedData['data_ttd4'],
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Data berhasil disimpan!',
+                'data' => $transfer
+            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

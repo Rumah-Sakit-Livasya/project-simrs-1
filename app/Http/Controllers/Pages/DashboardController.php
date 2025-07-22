@@ -382,6 +382,7 @@ class DashboardController extends Controller
         })->whereHas('employees', function ($query) {
             $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
         })->where('date', Carbon::now()->format('Y-m-d'))->count();
+
         $attendance_today = Attendance::where('date', Carbon::now()->format('Y-m-d'))->whereHas('employees', function ($query) {
             $query->where('is_active', 1);  // Hanya untuk karyawan yang aktif
         })->orderBy('clock_in', 'ASC')->get();

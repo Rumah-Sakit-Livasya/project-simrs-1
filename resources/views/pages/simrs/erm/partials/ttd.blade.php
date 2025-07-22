@@ -1,13 +1,3 @@
-<style>
-    canvas {
-        touch-action: none;
-    }
-</style>
-{{-- <form id="signature-form" method="post" action="/save-signature" style="display: none;">
-    @csrf
-    <input type="hidden" name="signature_image" id="signature_image">
-</form> --}}
-<!-- Modal for Signature Pad -->
 <!-- Signature Modal -->
 <div class="modal fade" id="signatureModal" tabindex="-1" role="dialog" aria-labelledby="signatureModalLabel"
     aria-hidden="true">
@@ -49,77 +39,79 @@
     </div>
 </div>
 
-<script>
-    let idSignature = null;
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    let painting = false;
-    let history = [];
-    let hasDrawn = false;
+@section('signature')
+    <script>
+        let idSignature = null;
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let painting = false;
+        let history = [];
+        let hasDrawn = false;
 
-    function startPosition(e) {
-        painting = true;
-        draw(e);
-    }
-
-    function endPosition() {
-        painting = false;
-        ctx.beginPath();
-        history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-    }
-
-    function draw(e) {
-        if (!painting) return;
-
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#000';
-
-        ctx.lineTo(x, y);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-
-        hasDrawn = true;
-    }
-
-    function clearCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        history = [];
-        hasDrawn = false;
-    }
-
-    function undo() {
-        if (history.length > 0) {
-            ctx.putImageData(history.pop(), 0, 0);
-        }
-    }
-
-    function saveSignature() {
-        if (!hasDrawn) {
-            alert("Silakan buat tanda tangan terlebih dahulu.");
-            return;
+        function startPosition(e) {
+            painting = true;
+            draw(e);
         }
 
-        const dataURL = canvas.toDataURL('image/png');
+        function endPosition() {
+            painting = false;
+            ctx.beginPath();
+            history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        }
 
-        // Tampilkan preview & simpan ke input hidden
-        $('#signature_preview').attr('src', dataURL).show();
-        // $('#signature_preview').attr('src', dataURL + '?v=' + new Date().getTime()).show();
-        $('#signature_image').val(dataURL);
+        function draw(e) {
+            if (!painting) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+
+            hasDrawn = true;
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            history = [];
+            hasDrawn = false;
+        }
+
+        function undo() {
+            if (history.length > 0) {
+                ctx.putImageData(history.pop(), 0, 0);
+            }
+        }
+
+        function saveSignature() {
+            if (!hasDrawn) {
+                alert("Silakan buat tanda tangan terlebih dahulu.");
+                return;
+            }
+
+            const dataURL = canvas.toDataURL('image/png');
+
+            // Tampilkan preview & simpan ke input hidden
+            $('#signature_preview').attr('src', dataURL).show();
+            // $('#signature_preview').attr('src', dataURL + '?v=' + new Date().getTime()).show();
+            $('#signature_image').val(dataURL);
 
 
-        // Tutup modal
-        $('#signatureModal').modal('hide');
-    }
+            // Tutup modal
+            $('#signatureModal').modal('hide');
+        }
 
 
-    // Event Binding
-    canvas.addEventListener('mousedown', startPosition);
-    canvas.addEventListener('mouseup', endPosition);
-    canvas.addEventListener('mousemove', draw);
-</script>
+        // Event Binding
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', endPosition);
+        canvas.addEventListener('mousemove', draw);
+    </script>
+@endsection

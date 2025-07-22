@@ -15,6 +15,7 @@ use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GantiDiagnosa;
 use App\Models\SIMRS\GantiDokter;
 use App\Models\SIMRS\GroupPenjamin;
+use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
@@ -155,10 +156,46 @@ class RegistrationController extends Controller
         $kelasRawatRajalId = KelasRawat::where('kelas', 'like', '%rawat jalan%')->first()->id;
 
         // Group doctors by department
+        // $groupedDoctors = [];
+        // foreach ($doctors as $doctor) {
+        //     if ($doctor->department_from_doctors->name !== 'UGD') {
+        //         $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
+        //     }
+        // }
+        // 1. Ambil hari dan jam sekarang
+        $hariIni = ucfirst(Carbon::now()->locale('id')->isoFormat('dddd')); // Contoh: 'Rabu'
+        $jamSekarang = Carbon::now()->format('H:i:s'); // Contoh: '14:33:06'
+
+        // 2. Ambil semua dokter yang sedang bertugas saat ini sesuai jadwal dan departemen
+        $jadwal_dokter = JadwalDokter::with('doctor.department_from_doctors')
+            ->where('hari', $hariIni)
+            ->where(function ($query) use ($jamSekarang) {
+                $query->where(function ($q) use ($jamSekarang) {
+                    // Jadwal normal (contoh 08:00 - 17:00)
+                    $q->whereRaw('jam_mulai <= jam_selesai')
+                        ->where('jam_mulai', '<=', $jamSekarang)
+                        ->where('jam_selesai', '>=', $jamSekarang);
+                })->orWhere(function ($q) use ($jamSekarang) {
+                    // Jadwal malam (contoh 22:00 - 06:00)
+                    $q->whereRaw('jam_mulai > jam_selesai')
+                        ->where(function ($sub) use ($jamSekarang) {
+                            $sub->where('jam_mulai', '<=', $jamSekarang)
+                                ->orWhere('jam_selesai', '>=', $jamSekarang);
+                        });
+                });
+            })
+            ->get();
+
+        // 3. Kelompokkan dokter berdasarkan nama departemen (kecuali UGD)
         $groupedDoctors = [];
-        foreach ($doctors as $doctor) {
-            if ($doctor->department_from_doctors->name !== 'UGD') {
-                $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
+
+        foreach ($jadwal_dokter as $jadwal) {
+            $doctor = $jadwal->doctor;
+
+            // Pastikan relasi department ada dan bukan 'UGD'
+            if ($doctor->department_from_doctors && $doctor->department_from_doctors->name !== 'UGD') {
+                $deptName = $doctor->department_from_doctors->name;
+                $groupedDoctors[$deptName][] = $doctor;
             }
         }
 
