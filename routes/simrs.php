@@ -92,6 +92,7 @@ use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangReportController;
 use App\Http\Controllers\WarehousePurchaseRequestNonPharmacy;
 use App\Http\Controllers\WarehousePurchaseRequestPharmacy;
+use App\Http\Controllers\WarehouseReportHistoriPerubahanMasterBarang;
 use App\Http\Controllers\WarehouseReportKartuStock;
 use App\Http\Controllers\WarehouseReportStockDetail;
 use App\Http\Controllers\WarehouseReportStockStatus;
@@ -414,6 +415,7 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get("/stock-status", [WarehouseReportStockStatus::class, "index"])->name("warehouse.report.stock-status");
                 Route::get("/stock-detail", [WarehouseReportStockDetail::class, "index"])->name('warehouse.report.stock-detail');
                 Route::get("/kartu-stok", [WarehouseReportKartuStock::class, "index"])->name('warehouse.report.kartu-stock');
+                Route::get("/histori-perubahan-master-data", [WarehouseReportHistoriPerubahanMasterBarang::class, "index"])->name('warehouse.report.histori-perubahan-master-data');
             });
         });
 

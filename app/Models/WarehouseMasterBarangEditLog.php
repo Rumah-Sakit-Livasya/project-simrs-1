@@ -17,4 +17,19 @@ class WarehouseMasterBarangEditLog extends Model
     {
         return $this->belongsTo(User::class, 'performed_by');
     }
+
+    public function satuan()
+    {
+        return $this->belongsTo(WarehouseSatuanBarang::class, "satuan_id", "id");
+    }
+
+    public function golongan()
+    {
+        return $this->belongsTo(WarehouseGolonganBarang::class, "golongan_id", "id");
+    }
+
+    public function kelompok()
+    {
+        return $this->belongsTo(WarehouseKelompokBarang::class, "kelompok_id", "id");
+    }
 }
