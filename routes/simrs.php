@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\BilinganController;
+use App\Http\Controllers\FarmasiReportStockStatus;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
@@ -272,6 +273,14 @@ Route::group(['middleware' => ['auth']], function () {
         Route::prefix('poliklinik')->group(function () {
             Route::get('/daftar-pasien', [PoliklinikController::class, 'index'])->name('poliklinik.daftar-pasien');
             Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
+        });
+
+        Route::prefix('farmasi')->group(function () {
+            Route::prefix("laporan")->group(function () {
+                Route::get("/stock-status", [FarmasiReportStockStatus::class, "index"])->name("farmasi.report.stock-status");
+                // Route::get("/stock-detail", [FarmasiReportStockDetail::class, "index"])->name('farmasi.report.stock-detail');
+                // Route::get("/kartu-stok", [FarmasiReportKartuStock::class, "index"])->name('farmasi.report.kartu-stock');
+            });
         });
 
         Route::prefix('warehouse')->group(function () {
