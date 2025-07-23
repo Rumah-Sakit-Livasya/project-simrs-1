@@ -1,31 +1,59 @@
 @extends('inc.layout')
-@section('title', 'WhatsApp Chat')
+@section('title', 'WhatsApp Messenger')
+
+{{-- Pre-load Font Awesome di section terpisah agar lebih rapi --}}
+@section('extended-css')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+@endsection
+
+
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
         {{-- Custom CSS untuk halaman chat --}}
         <style>
+            /* Layout Utama */
             .chat-container {
                 display: flex;
-                height: 80vh;
-                /* Sesuaikan tinggi sesuai kebutuhan */
+                height: 85vh;
+                /* Sedikit lebih tinggi */
                 border: 1px solid #ddd;
                 background-color: #fff;
             }
 
             .sidebar {
                 width: 35%;
-                max-width: 350px;
+                max-width: 380px;
                 border-right: 1px solid #ddd;
                 display: flex;
                 flex-direction: column;
+                background-color: #fff;
             }
 
-            .sidebar-header {
+            .main-chat {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                background-color: #e5ddd5;
+                background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+                /* Pola background WA */
+            }
+
+            /* Header */
+            .sidebar-header,
+            .chat-header {
                 padding: 1rem;
                 border-bottom: 1px solid #ddd;
-                background-color: #f8f9fa;
+                background-color: #f0f2f5;
+                flex-shrink: 0;
             }
 
+            .chat-header {
+                font-weight: 600;
+            }
+
+            /* Daftar Percakapan (Sidebar) */
             .convo-list {
                 flex-grow: 1;
                 overflow-y: auto;
@@ -38,11 +66,11 @@
                 border-bottom: 1px solid #f1f1f1;
                 text-decoration: none;
                 color: #333;
-                gap: 1rem;
+                gap: 0.75rem;
             }
 
             .convo-list a:hover {
-                background-color: #f8f9fa;
+                background-color: #f5f5f5;
             }
 
             .convo-list a.active {
@@ -50,8 +78,8 @@
             }
 
             .convo-avatar {
-                width: 40px;
-                height: 40px;
+                width: 48px;
+                height: 48px;
                 background-color: #007bff;
                 color: white;
                 border-radius: 50%;
@@ -59,9 +87,12 @@
                 align-items: center;
                 justify-content: center;
                 font-weight: bold;
+                font-size: 1.2rem;
+                flex-shrink: 0;
             }
 
             .convo-details {
+                flex-grow: 1;
                 overflow: hidden;
             }
 
@@ -72,59 +103,157 @@
                 text-overflow: ellipsis;
             }
 
-            .main-chat {
-                width: 100%;
+            .last-message {
+                color: #6c757d;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 0.9em;
+            }
+
+            .convo-meta {
                 display: flex;
                 flex-direction: column;
-                background-color: #e5ddd5;
-                /* Latar belakang seperti WA */
+                align-items: flex-end;
+                font-size: 0.75rem;
+                flex-shrink: 0;
             }
 
-            .chat-header {
-                padding: 1rem;
-                border-bottom: 1px solid #ddd;
-                font-weight: bold;
-                background-color: #f8f9fa;
+            .last-message-time {
+                color: #667781;
+                font-weight: 400;
             }
 
+            /* Riwayat Chat */
             .chat-history {
                 flex-grow: 1;
-                padding: 1rem;
+                padding: 1rem 3rem;
+                /* Beri padding lebih */
                 overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .message-wrapper {
+                display: flex;
+                margin-bottom: 2px;
+            }
+
+            .message-wrapper.out {
+                justify-content: flex-end;
+            }
+
+            .message-wrapper.in {
+                justify-content: flex-start;
             }
 
             .message {
-                max-width: 70%;
-                padding: 0.5rem 1rem;
+                max-width: 65%;
+                padding: 6px 12px;
                 border-radius: 8px;
-                margin-bottom: 10px;
                 line-height: 1.4;
                 box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+                position: relative;
             }
 
             .message-in {
                 background-color: #fff;
-                align-self: flex-start;
             }
 
             .message-out {
                 background-color: #dcf8c6;
-                align-self: flex-end;
+            }
+
+            /* Ekor gelembung chat */
+            .message-in::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -8px;
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-width: 0px 10px 10px 0;
+                border-color: transparent #fff transparent transparent;
+            }
+
+            .message-out::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                right: -8px;
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-width: 0px 0 10px 10px;
+                border-color: transparent transparent transparent #dcf8c6;
+            }
+
+            .message-content {
+                word-wrap: break-word;
+                /* Pecah kata panjang */
+            }
+
+            .message-meta {
+                display: flex;
+                align-items: center;
+                float: right;
+                margin-top: 5px;
+                margin-left: 15px;
+                /* Beri jarak dari teks */
             }
 
             .message-time {
                 font-size: 0.75em;
-                color: #999;
-                text-align: right;
-                margin-top: 5px;
+                color: #667781;
             }
 
+            .message-status {
+                font-size: 0.9em;
+                margin-left: 5px;
+                color: #8696a0;
+            }
+
+            .message-status .text-primary {
+                color: #53bdeb !important;
+            }
+
+            /* Form Balasan */
             .reply-form-wrapper {
-                padding: 1rem;
+                padding: 0.5rem 1rem;
                 border-top: 1px solid #ddd;
-                background-color: #f0f0f0;
+                background-color: #f0f2f5;
+                flex-shrink: 0;
             }
 
+            #message-input {
+                border-radius: 20px;
+                padding: 0.5rem 1rem;
+                max-height: 120px;
+                resize: none;
+                overflow-y: auto !important;
+                border: none;
+            }
+
+            #message-input:focus {
+                box-shadow: none;
+            }
+
+            .btn-circle {
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                flex-shrink: 0;
+            }
+
+            /* Placeholder */
             .chat-placeholder {
                 display: flex;
                 flex-direction: column;
@@ -144,9 +273,7 @@
 
         <div id="panel-1" class="panel">
             <div class="panel-hdr">
-                <h2>
-                    WhatsApp Messenger
-                </h2>
+                <h2>WhatsApp Messenger</h2>
             </div>
             <div class="panel-container show">
                 <div class="panel-content p-0">
@@ -158,15 +285,29 @@
                             </div>
                             <div class="convo-list">
                                 @forelse ($conversations as $convo)
+                                    {{-- HTML DIPERBAIKI: Semua elemen dibungkus dengan benar di dalam <a> --}}
                                     <a href="{{ route('whatsapp.chat', ['phoneNumber' => $convo->phone_number]) }}"
-                                        class="{{ isset($phoneNumber) && $convo->phone_number == $phoneNumber ? 'active' : '' }}">
+                                        class="d-flex {{ isset($phoneNumber) && $convo->phone_number == $phoneNumber ? 'active' : '' }}"
+                                        data-phone="{{ $convo->phone_number }}">
                                         <div class="convo-avatar">
                                             {{ strtoupper(substr($convo->contact_name ?? 'U', 0, 1)) }}
                                         </div>
                                         <div class="convo-details">
                                             <div class="convo-name">{{ $convo->contact_name ?? $convo->phone_number }}</div>
-                                            <small>Terakhir:
-                                                {{ \Carbon\Carbon::parse($convo->last_message_at)->diffForHumans() }}</small>
+                                            <small class="last-message">
+                                                @if ($convo->direction == 'out')
+                                                    <i class="fa-solid fa-check-double text-primary"></i>
+                                                    <!-- Contoh Ikon Status -->
+                                                @endif
+                                                {{ Str::limit($convo->message, 25) }}
+                                            </small>
+                                        </div>
+                                        <div class="convo-meta">
+                                            <small
+                                                class="last-message-time">{{ $convo->created_at->isToday() ? $convo->created_at->format('H:i') : $convo->created_at->format('d/m/y') }}</small>
+                                            {{-- Placeholder untuk unread count, diisi oleh JS --}}
+                                            <span class="badge badge-success badge-pill unread-badge mt-1"
+                                                style="display: none;"></span>
                                         </div>
                                     </a>
                                 @empty
@@ -184,27 +325,47 @@
                                 </div>
                                 <div class="chat-history" id="chat-history">
                                     @foreach ($messages as $message)
-                                        <div
-                                            style="display: flex; justify-content: {{ $message->direction == 'out' ? 'flex-end' : 'flex-start' }};">
+                                        <div class="message-wrapper {{ $message->direction == 'out' ? 'out' : 'in' }}">
                                             <div
                                                 class="message {{ $message->direction == 'out' ? 'message-out' : 'message-in' }}">
-                                                <div>{!! nl2br(e($message->message)) !!}</div>
-                                                <div class="message-time">{{ $message->created_at->format('H:i') }}</div>
+                                                <div class="message-content">{!! nl2br(e($message->message)) !!}</div>
+                                                <div class="message-meta">
+                                                    <span
+                                                        class="message-time">{{ $message->created_at->format('H:i') }}</span>
+                                                    @if ($message->direction == 'out')
+                                                        <span class="message-status" data-message-id="{{ $message->id }}">
+                                                            @if ($message->status == 'sending')
+                                                                <i class="fa-regular fa-clock"></i>
+                                                            @endif
+                                                            @if ($message->status == 'sent')
+                                                                <i class="fa-solid fa-check"></i>
+                                                            @endif
+                                                            @if ($message->status == 'delivered')
+                                                                <i class="fa-solid fa-check-double"></i>
+                                                            @endif
+                                                            @if ($message->status == 'read')
+                                                                <i class="fa-solid fa-check-double text-primary"></i>
+                                                            @endif
+                                                            @if ($message->status == 'failed')
+                                                                <i class="fa-solid fa-circle-exclamation text-danger"></i>
+                                                            @endif
+                                                        </span>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
                                 <div class="reply-form-wrapper">
-                                    <form action="{{ route('whatsapp.reply') }}" method="POST">
+                                    <form id="reply-form" action="{{ route('whatsapp.reply') }}" method="POST"
+                                        class="d-flex align-items-center">
                                         @csrf
                                         <input type="hidden" name="phone_number" value="{{ $phoneNumber }}">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" name="message"
-                                                placeholder="Ketik balasan..." autocomplete="off" required>
-                                            <div class="input-group-append">
-                                                <button class="btn btn-primary" type="submit">Kirim</button>
-                                            </div>
-                                        </div>
+                                        <button type="button" class="btn btn-link btn-lg text-muted mr-2"><i
+                                                class="fa-solid fa-paperclip"></i></button>
+                                        <textarea id="message-input" name="message" class="form-control" placeholder="Ketik balasan..." rows="1" required></textarea>
+                                        <button id="send-btn" class="btn btn-primary btn-circle ml-2" type="submit"><i
+                                                class="fa-solid fa-paper-plane"></i></button>
                                     </form>
                                 </div>
                             @else
@@ -227,65 +388,131 @@
         </div>
     </main>
 @endsection
-@section('plugin')
-    <script>
-        // Script auto-scroll yang sudah ada
-        document.addEventListener("DOMContentLoaded", function() {
-            var chatHistory = document.getElementById("chat-history");
-            if (chatHistory) {
-                chatHistory.scrollTop = chatHistory.scrollHeight;
-            }
-        });
-    </script>
 
-    {{-- HANYA JALANKAN JIKA USER LOGIN --}}
+@section('plugin')
+    {{-- SCRIPT UNTUK FUNGSI FORM INPUT --}}
+    @if (isset($messages))
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const messageInput = document.getElementById('message-input');
+                const form = document.getElementById('reply-form');
+
+                // Auto-scroll ke pesan terakhir saat halaman dimuat
+                const chatHistory = document.getElementById("chat-history");
+                if (chatHistory) {
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                }
+
+                // Auto-grow textarea
+                messageInput.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+
+                // Kirim form saat menekan Enter (bukan Shift+Enter)
+                messageInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (this.value.trim() !== '') {
+                            form.submit();
+                        }
+                    }
+                });
+            });
+        </script>
+    @endif
+
+    {{-- SCRIPT UNTUK REAL-TIME DENGAN LARAVEL ECHO --}}
     @auth
         <script>
-            // Fungsi untuk membuat dan menambahkan gelembung chat ke layar
-            function appendMessageToUI(message) {
-                const chatHistory = document.getElementById("chat-history");
-                if (!chatHistory) return; // Keluar jika pengguna tidak sedang di halaman chat
-
-                const messageClass = message.direction === 'out' ? 'message-out' : 'message-in';
-                const justifyContent = message.direction === 'out' ? 'flex-end' : 'flex-start';
-
-                const messageWrapper = document.createElement('div');
-                messageWrapper.style.display = 'flex';
-                messageWrapper.style.justifyContent = justifyContent;
-
-                // Menggunakan backtick (`) untuk template literal yang lebih mudah dibaca
-        messageWrapper.innerHTML = `
-                                <div class="message ${messageClass}">
-                                    <div>${message.message.replace(/\n/g, '<br>')}</div>
-                                    <div class="message-time">${new Date(message.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</div>
-                                </div>
-                            `;
-
-                chatHistory.appendChild(messageWrapper);
-                chatHistory.scrollTop = chatHistory.scrollHeight; // Auto-scroll
-            }
-
             // Ambil nomor telepon yang sedang aktif dari variabel PHP
             const activeChatPhoneNumber = "{{ $phoneNumber ?? null }}";
+            const chatHistoryEl = document.getElementById("chat-history");
+            const convoListEl = document.querySelector('.convo-list');
 
-            // Mulai mendengarkan Private Channel 'whatsapp-chat'
-            window.Echo.private('whatsapp-chat')
-                .listen('.message.new', (event) => {
-                    console.log('Pesan baru diterima dari Echo:', event.message);
+            // Fungsi untuk membuat Ikon Status
+            function getStatusIcon(status) {
+                if (status === 'sending') return '<i class="fa-regular fa-clock"></i>';
+                if (status === 'sent') return '<i class="fa-solid fa-check"></i>';
+                if (status === 'delivered') return '<i class="fa-solid fa-check-double"></i>';
+                if (status === 'read') return '<i class="fa-solid fa-check-double text-primary"></i>';
+                if (status === 'failed') return '<i class="fa-solid fa-circle-exclamation text-danger"></i>';
+                return '';
+            }
 
-                    // LOGIKA UTAMA:
-                    // Hanya tambahkan pesan ke UI jika pesan tersebut milik percakapan yang sedang dibuka.
-                    if (activeChatPhoneNumber && event.message.phone_number === activeChatPhoneNumber) {
-                        appendMessageToUI(event.message);
-                    }
+            // Fungsi untuk menambahkan gelembung chat ke UI
+            function appendMessageToUI(message) {
+                if (!chatHistoryEl) return;
 
-                    // TODO (Opsional):
-                    // 1. Tampilkan notifikasi "toast" untuk pesan yang masuk tapi tidak sedang dibuka.
-                    // 2. Perbarui daftar percakapan di sidebar (update "Terakhir: ...").
-                    // 3. Mainkan suara notifikasi.
-                    // const notifSound = new Audio('/sounds/notification.mp3');
-                    // notifSound.play();
-                });
+                const messageWrapper = document.createElement('div');
+                messageWrapper.className = `message-wrapper ${message.direction === 'out' ? 'out' : 'in'}`;
+
+                const statusHtml = message.direction === 'out' ?
+                    `<span class="message-status" data-message-id="${message.id}">${getStatusIcon(message.status)}</span>` : '';
+
+                messageWrapper.innerHTML = `
+                <div class="message ${message.direction === 'out' ? 'message-out' : 'message-in'}">
+                    <div class="message-content">${message.message.replace(/\n/g, '<br>')}</div>
+                    <div class="message-meta">
+                        <span class="message-time">${new Date(message.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                        ${statusHtml}
+                    </div>
+                </div>`;
+
+                chatHistoryEl.appendChild(messageWrapper);
+                chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight; // Auto-scroll
+            }
+
+            // Fungsi untuk mengupdate sidebar
+            function updateSidebar(message) {
+                if (!convoListEl) return;
+
+                let convoItem = convoListEl.querySelector(`a[data-phone="${message.phone_number}"]`);
+
+                if (convoItem) {
+                    // Update elemen yang ada
+                    const lastMessageEl = convoItem.querySelector('.last-message');
+                    const lastTimeEl = convoItem.querySelector('.last-message-time');
+                    let prefix = message.direction === 'out' ? `<i class="fa-solid fa-check mr-1"></i>` : '';
+
+                    lastMessageEl.innerHTML = prefix + DOMPurify.sanitize(message.message.substring(0, 25) + (message.message
+                        .length > 25 ? '...' : ''));
+                    lastTimeEl.textContent = new Date(message.created_at).toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    // Pindahkan ke paling atas
+                    convoListEl.prepend(convoItem);
+                } else {
+                    // TODO: Buat elemen percakapan baru jika belum ada di daftar
+                    // Ini bisa dilakukan dengan me-render template Blade via AJAX atau membuat HTML string
+                    window.location.reload(); // Solusi sementara: reload halaman jika ada percakapan baru
+                }
+            }
+
+            // Mulai mendengarkan Private Channel
+            if (window.Echo) {
+                window.Echo.private('whatsapp-chat')
+                    .listen('.message.new', (event) => {
+                        console.log('Pesan baru diterima:', event.message);
+
+                        // Update UI chat jika percakapan sedang aktif
+                        if (activeChatPhoneNumber && event.message.phone_number === activeChatPhoneNumber) {
+                            appendMessageToUI(event.message);
+                        } else {
+                            // Jika chat tidak aktif, mainkan suara notifikasi
+                            // Anda perlu menyediakan file audio ini di folder public/sounds
+                            // const notifSound = new Audio('/sounds/notification.mp3');
+                            // notifSound.play().catch(e => console.error("Gagal memutar suara:", e));
+                        }
+
+                        // SELALU update sidebar untuk semua pesan baru
+                        updateSidebar(event.message);
+                    });
+            }
         </script>
+        {{-- Untuk keamanan, gunakan DOMPurify jika pesan bisa mengandung HTML --}}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
     @endauth
 @endsection
