@@ -353,7 +353,11 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
 
 Route::get('/tts', [TextToSpeechController::class, 'tts'])->name('tts');
 Route::post('livasya-message', [BotMessageController::class, 'livasyaMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.verified');
-Route::post('process-message', [WhatsappController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');
+
+Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');
+
+Route::post('/whatsapp/process-message', [WhatsappController::class, 'processMessage']);
+
 Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])->middleware(CheckAuthorizationBot::class);
 // Route::get('notify-contract', [BotMessageController::class, 'notifyExpiryContract']);
 
