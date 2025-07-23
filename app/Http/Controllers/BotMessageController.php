@@ -7,21 +7,24 @@ use App\Models\Employee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BotMessageController extends Controller
 {
     public function processMessage(Request $request)
     {
-
         // Cek apakah metode POST
         if ($request->getMethod() !== 'POST') {
-            return response()->json(['error' => 1, 'data' => 'ok cuy'], 405);
+            return response()->json(['error' => 1, 'data' => 'Method Not Allowed'], 405);
         }
 
         // Ambil data dari header dan JSON
         $headers = $request->headers->all();
         $content = $request->json()->all();
+
+        // Log request untuk debugging. Ini akan sangat membantu!
+        Log::info('Webhook Received: ' . json_encode($content, JSON_PRETTY_PRINT));
 
         // Validasi header
         $key = $headers['key'][0] ?? '';
@@ -37,306 +40,359 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        // --- PERBAIKAN DIMULAI DI SINI ---
-
-        // Logika bisnis
-        // Ambil data dengan aman dari struktur JSON custom Anda
-
-        // 1. Ambil Pesan ($msg) dengan beberapa fallback untuk memastikan pesan ditemukan
-        $msg = $content['data'][1]['message']['extendedTextMessage']['text'] ??
-            ($content['data'][1]['message']['conversation'] ??
-                ($content['message'] ?? '')); // Fallback jika struktur berbeda
-
-        // 2. Ambil Nama ($nama) dari 'pushName' yang ada di log Anda
-        $nama = $content['data'][1]['pushName'] ?? 'Sahabat Livasya';
-
-        // 3. Ambil $data untuk digunakan di blok lain
-        $data = $content['data'][0] ?? []; // Ambil data spesifik seperti `shift` dari elemen pertama
-
-        // --- AKHIR PERBAIKAN ---
-
         $response = '';
-        if ($msg == '/test-kirim') {
-            $response .= 'Halo ' . $nama;
-        } else if ($msg == '/rekapabsen') {
-            $total_pegawai_rs = Employee::where('is_active', 1)->where('company_id', 1)->count();
-            $total_pegawai_pt = Employee::where('is_active', 1)->where('company_id', 2)->count();
-            $total_clockin = Attendance::whereNotNull('clock_in')
-                ->whereDate('date', Carbon::now()->format('Y-m-d'))
-                ->whereHas('employees', function ($query) {
-                    $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
-                })->count();
-            $total_no_clockin = Attendance::whereNull('clock_in')->whereNull('is_day_off')
-                ->whereDate('date', Carbon::now()->format('Y-m-d'))
-                ->whereHas('employees', function ($query) {
-                    $query->where('organization_id', '!=', 3);
-                    $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
-                })->count();
-            $total_libur = Attendance::where('is_day_off', 1)
-                ->whereNull('attendance_code_id')
-                ->whereNull('day_off_request_id')
-                ->whereDate('date', Carbon::now()->format('Y-m-d'))
-                ->whereHas('employees', function ($query) {
-                    $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
-                })->count();
-            $total_izin = 0;
-            $total_sakit = 0;
-            $total_cuti = 0;
-            $absensi_pegawai = Attendance::where('is_day_off', '!=', null)->where('date', Carbon::now()->format('Y-m-d'))->get();
-            foreach ($absensi_pegawai as $absensi) {
-                if ($absensi->attendance_code_id != null || $absensi->day_off_request_id != null) {
-                    if ($absensi->attendance_code_id == 1) {
-                        $total_izin += 1;
-                    } elseif ($absensi->attendance_code_id == 2) {
-                        $total_sakit += 1;
-                    } elseif ($absensi->attendance_code_id != 1 && $absensi->attendance_code_id != 2) {
-                        $total_cuti += 1;
-                    } elseif ($absensi->attendance_code_id == null || $absensi->attendance_code_id == "") {
-                        // Jika attendance_code_id di Attendance tidak ada, cek di DayOffRequest melalui relasi day_off
-                        if ($absensi->day_off) {
-                            // Cek apakah day_off_request memiliki attendance_code_id yang diinginkan
-                            if ($absensi->day_off->attendance_code_id == 1) {
-                                $total_izin += 1;
-                            } elseif ($absensi->day_off->attendance_code_id == 2) {
-                                $total_sakit += 1;
-                            } else {
-                                $total_cuti += 1;
+
+        // --- ROUTER UTAMA: Membedakan jenis webhook berdasarkan $content['message'] ---
+        $webhookType = $content['message'] ?? '';
+        $webhookData = $content['data'] ?? [];
+
+        $eventLoggerTypes = ['contact', 'message', 'kirim_pesan', 'update_status_pesan', 'interactive'];
+
+        if (in_array($webhookType, $eventLoggerTypes)) {
+            // --- LOGIKA BARU: Untuk menyimpan event ke database ---
+
+            switch ($webhookType) {
+                case 'contact':
+                    $nama = $webhookData['nama'] ?? '';
+                    $nomor = $webhookData['nomor'] ?? '';
+                    // TODO: Simpan kontak baru ke database Anda
+                    /* Contoh:
+                WhatsappLog::create([
+                    'event_type' => 'contact',
+                    'sender_name' => $nama,
+                    'sender_number' => $nomor,
+                ]);
+                */
+                    Log::info("Menerima kontak baru: $nama ($nomor)");
+                    break;
+
+                case 'message': // Event saat pesan MASUK
+                    $nama = $webhookData['nama'] ?? '';
+                    $nomor = $webhookData['nomor'] ?? '';
+                    $id_pesan = $webhookData['id_pesan'] ?? '';
+                    $pesan = $webhookData['pesan'] ?? '';
+                    // TODO: Simpan pesan masuk ke database Anda
+                    /* Contoh:
+                WhatsappLog::create([
+                    'event_type' => 'message_received',
+                    'message_id' => $id_pesan,
+                    'sender_name' => $nama,
+                    'sender_number' => $nomor,
+                    'message_content' => $pesan,
+                ]);
+                */
+                    Log::info("Menerima pesan masuk dari $nama: '$pesan'");
+                    break;
+
+                case 'kirim_pesan': // Event saat pesan DIKIRIM dari sistem Anda
+                    $nomor = $webhookData['nomor'] ?? '';
+                    $nama = $webhookData['nama'] ?? '';
+                    $id_pesan = $webhookData['id_pesan'] ?? '';
+                    $pesan = $webhookData['pesan'] ?? '';
+                    // TODO: Simpan log pesan keluar ke database Anda
+                    /* Contoh:
+                WhatsappLog::create([
+                    'event_type' => 'message_sent',
+                    'message_id' => $id_pesan,
+                    'recipient_name' => $nama,
+                    'recipient_number' => $nomor,
+                    'message_content' => $pesan,
+                    'status' => 'sending' // Status awal
+                ]);
+                */
+                    Log::info("Mengirim pesan ke $nama: '$pesan'");
+                    break;
+
+                case 'update_status_pesan':
+                    $id_pesan = $webhookData['id_pesan'] ?? '';
+                    $status_pesan = strtolower($webhookData['status_pesan'] ?? '');
+                    // TODO: Update status pesan di database Anda
+                    /* Contoh:
+                $logPesan = WhatsappLog::where('message_id', $id_pesan)->first();
+                if ($logPesan) {
+                    $logPesan->status = $status_pesan; // 'sent', 'delivered', 'read', 'failed'
+                    $logPesan->save();
+                }
+                */
+                    Log::info("Update status untuk pesan $id_pesan: $status_pesan");
+                    break;
+
+                case 'interactive':
+                    $pesan = $webhookData['pesan'] ?? '';
+                    $title = $webhookData['title'] ?? '';
+                    $response = "Mohon Maaf, Fitur *$title* masih dalam pengembangan.";
+                    break;
+            }
+        } else {
+            // --- LOGIKA LAMA: Untuk merespons perintah pengguna seperti /rekapabsen ---
+
+            // Ambil data dari struktur pesan masuk yang lebih kompleks
+            $msg = $content['data'][1]['message']['extendedTextMessage']['text'] ??
+                ($content['data'][1]['message']['conversation'] ?? $webhookType);
+
+            $nama = $content['data'][1]['pushName'] ?? 'Sahabat Livasya';
+
+            if ($msg == '/test-kirim') {
+                $response .= 'Halo ' . $nama;
+            } else if ($msg == '/rekapabsen') {
+                $total_pegawai_rs = Employee::where('is_active', 1)->where('company_id', 1)->count();
+                $total_pegawai_pt = Employee::where('is_active', 1)->where('company_id', 2)->count();
+                $total_clockin = Attendance::whereNotNull('clock_in')
+                    ->whereDate('date', Carbon::now()->format('Y-m-d'))
+                    ->whereHas('employees', fn($q) => $q->where('is_active', 1))->count();
+                $total_no_clockin = Attendance::whereNull('clock_in')->whereNull('is_day_off')
+                    ->whereDate('date', Carbon::now()->format('Y-m-d'))
+                    ->whereHas('employees', fn($q) => $q->where('organization_id', '!=', 3)->where('is_active', 1))->count();
+                $total_libur = Attendance::where('is_day_off', 1)
+                    ->whereNull('attendance_code_id')->whereNull('day_off_request_id')
+                    ->whereDate('date', Carbon::now()->format('Y-m-d'))
+                    ->whereHas('employees', fn($q) => $q->where('is_active', 1))->count();
+
+                $attendancesWithLeave = Attendance::with(['day_off.attendance_code', 'attendance_code'])
+                    ->whereNotNull('is_day_off')->where('date', Carbon::now()->format('Y-m-d'))
+                    ->where(fn($q) => $q->whereNotNull('attendance_code_id')->orWhereNotNull('day_off_request_id'))
+                    ->get();
+
+                $total_izin = $attendancesWithLeave->filter(fn($item) => ($item->attendance_code_id == 1) || optional($item->day_off)->attendance_code_id == 1)->count();
+                $total_sakit = $attendancesWithLeave->filter(fn($item) => ($item->attendance_code_id == 2) || optional($item->day_off)->attendance_code_id == 2)->count();
+                $total_cuti = $attendancesWithLeave->filter(fn($item) => !in_array($item->attendance_code_id ?? optional($item->day_off)->attendance_code_id, [1, 2, null]))->count();
+
+                $response = "\n\n⬛️ <b>REKAP ABSEN HARI INI:</b>\n\n";
+                $response .= "🔹 <code>Total Pegawai RS: $total_pegawai_rs </code>\n";
+                $response .= "🔹 <code>Total Pegawai PT: $total_pegawai_pt </code>\n";
+                $response .= "🔹 <code>Sudah clockin: $total_clockin </code>\n";
+                $response .= "🔹 <code>Belum clockin: $total_no_clockin </code>\n";
+                $response .= "🔹 <code>Pegawai libur: $total_libur </code>\n";
+                $response .= "🔹 <code>Pegawai Cuti: $total_cuti </code>\n";
+                $response .= "🔹 <code>Pegawai Izin: $total_izin </code>\n";
+                $response .= "🔹 <code>Pegawai Sakit: $total_sakit </code>\n\n";
+
+                $response .= "\n🟥 <b>DAFTAR PEGAWAI YANG TELAT:</b> \n\n";
+                $pegawai_telat = Attendance::with('employees')->whereNotNull('clock_in')->whereNotNull('late_clock_in')
+                    ->whereHas('employees', fn($q) => $q->where('is_active', 1)->whereNotIn('id', [1, 2, 14, 222]))
+                    ->where('date', Carbon::now()->format('Y-m-d'))->orderBy('late_clock_in')->get();
+
+                foreach ($pegawai_telat as $row) {
+                    if ($row->late_clock_in > 5 && $row->late_clock_in < 70) {
+                        $response .= "🔸" . Str::limit($row->employees->fullname, 16) . " ( " . $row->late_clock_in . " menit )\n";
+                    }
+                }
+                $response .= "\n";
+                $response .= "<b>Rekap tersebut diambil berdasarkan tanggal " . Carbon::now()->translatedFormat('d F Y h:i A') . "</b>";
+            } else if ($msg == '/tidakabsen') {
+                $response = "";
+                if (isset($data["shift"])) {
+                    if ($data["shift"] == "pagi") {
+                        // $absent_pagi_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
+                        //     ->whereHas('shift', function ($query) {
+                        //         $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
+                        //             ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
+                        //     })->whereHas('employees', function ($query) {
+                        //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                        //         $query->where('company_id', 2); // Hanya untuk karyawan PT
+                        //     })
+                        //     ->where('date', Carbon::now()->format('Y-m-d'))
+                        //     ->get();
+
+                        // $absent_pagi_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
+                        //     ->whereHas('shift', function ($query) {
+                        //         $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
+                        //             ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
+                        //     })->whereHas('employees', function ($query) {
+                        //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                        //         $query->where('company_id', 1); // Hanya untuk karyawan RS
+                        //         $query->where('organization_id', '!=', 3);
+                        //         $query->whereNotIn('id', [1, 2, 14, 222]); // Mengecualikan employee dengan ID;
+                        //     })
+                        //     ->where('date', Carbon::now()->format('Y-m-d'))
+                        //     ->get();
+
+                        // $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN PAGI ‼️ </b>\n\n";
+                        // if (isset($absent_pagi_pt)) {
+                        //     $response .= "🔻 <b>Karyawan PT: </b>\n";
+
+                        //     foreach ($absent_pagi_pt as $key => $row) {
+                        //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+                        //     }
+                        //     $response .= "\n";
+                        // }
+
+                        // if (isset($absent_pagi_rs)) {
+                        //     $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
+
+                        //     foreach ($absent_pagi_rs as $key => $row) {
+                        //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+                        //     }
+                        //     $response .= "\n";
+                        // }
+                    } else if ($data["shift"] == "siang") {
+                        // $absent_siang_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
+                        //     ->whereHas('shift', function ($query) {
+                        //         $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
+                        //             ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
+                        //     })->whereHas('employees', function ($query) {
+                        //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                        //         $query->where('company_id', 2); // Hanya untuk karyawan PT
+                        //     })
+                        //     ->where('date', Carbon::now()->format('Y-m-d'))
+                        //     ->get();
+
+                        // $absent_siang_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
+                        //     ->whereHas('shift', function ($query) {
+                        //         $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
+                        //             ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
+                        //     })->whereHas('employees', function ($query) {
+                        //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                        //         $query->where('company_id', 1); // Hanya untuk karyawan RS
+                        //     })
+                        //     ->where('date', Carbon::now()->format('Y-m-d'))
+                        //     ->get();
+
+                        // $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN SIANG ‼️ </b>\n\n";
+                        // if (isset($absent_siang_pt)) {
+                        //     $response .= "🔻 <b>Karyawan PT: </b>\n";
+
+                        //     foreach ($absent_siang_pt as $key => $row) {
+                        //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+                        //     }
+                        //     $response .= "\n";
+                        // }
+
+                        // if (isset($absent_siang_rs)) {
+                        //     $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
+
+                        //     foreach ($absent_siang_rs as $key => $row) {
+                        //         $response .= "⛔️ " . $row->employees->fullname . "\n";
+                        //     }
+                        //     $response .= "\n";
+                        // }
+                    } else if ($data["shift"] == "malam") {
+                        $absent_malam_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
+                            ->whereHas('shift')->whereHas('employees', function ($query) {
+                                $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                                $query->where('company_id', 2); // Hanya untuk karyawan PT
+                            })
+                            ->where('date', Carbon::now()->format('Y-m-d'))
+                            ->get();
+
+                        $absent_malam_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
+                            ->whereHas('shift')->whereHas('employees', function ($query) {
+                                $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                                $query->where('company_id', 1); // Hanya untuk karyawan RS
+                                $query->whereNotIn('id', [1, 2, 14, 222]);
+                            })
+                            ->where('date', Carbon::now()->format('Y-m-d'))
+                            ->get();
+
+                        $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN HARI INI ‼️ </b>\n\n";
+                        if (isset($absent_malam_pt)) {
+                            $response .= "🔻 <b>Karyawan PT: </b>\n";
+
+                            foreach ($absent_malam_pt as $key => $row) {
+                                $response .= "⛔️ " . $row->employees->fullname . "\n";
                             }
+                            $response .= "\n";
+                        }
+
+                        if (isset($absent_malam_rs)) {
+                            $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
+
+                            foreach ($absent_malam_rs as $key => $row) {
+                                $response .= "⛔️ " . $row->employees->fullname . "\n";
+                            }
+                            $response .= "\n";
                         }
                     }
                 }
-            }
 
-            $response = "\n\n⬛️ <b>REKAP ABSEN HARI INI:</b>\n\n";
-            $response .= "🔹 <code>Total Pegawai RS: $total_pegawai_rs </code>\n";
-            $response .= "🔹 <code>Total Pegawai PT: $total_pegawai_pt </code>\n";
-            $response .= "🔹 <code>Sudah clockin: $total_clockin </code>\n";
-            $response .= "🔹 <code>Belum clockin: $total_no_clockin </code>\n";
-            $response .= "🔹 <code>Pegawai libur: $total_libur </code>\n";
-            $response .= "🔹 <code>Pegawai Cuti: $total_cuti </code>\n";
-            $response .= "🔹 <code>Pegawai Izin: $total_izin </code>\n";
-            $response .= "🔹 <code>Pegawai Sakit: $total_sakit </code>\n\n";
+                $response .= "\n\n🔴 <b>DAFTAR KARYAWAN YANG LIBUR/IZIN/SAKIT/CUTI: </b>\n\n";
+                $response .= "🔻 <b>Karyawan PT: </b>\n";
+                $attendancesPT = Attendance::where('is_day_off', '!=', null)->whereHas('employees', function ($query) {
+                    $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                    $query->where('company_id', 2); // Hanya untuk karyawan PT
+                })->where('date', Carbon::now()->format('Y-m-d'))->get();
 
-
-            $response .= "\n🟥 <b>DAFTAR PEGAWAI YANG TELAT:</b> \n\n";
-            $pegawai_telat = Attendance::whereNotNull('clock_in')->whereNotNull('late_clock_in')->whereHas('employees', function ($query) {
-                $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                $query->whereNotIn('id', [1, 2, 14, 222]);
-            })->where('date', Carbon::now()->format('Y-m-d'))->orderBy('late_clock_in')->get();
-            foreach ($pegawai_telat as $key => $row) {
-                if ($row->late_clock_in > 5 && $row->late_clock_in < 70) {
-                    $response .= "🔸" . Str::limit($row->employees->fullname, $limit = 16) . " ( " . $row->late_clock_in . " menit )\n";
-                }
-            }
-
-            $response .= "\n";
-            $response .= "<b>Rekap tersebut diambil berdasarkan tanggal " . Carbon::now()->translatedFormat('d F Y h:i A') . "</b>";
-        } else if ($msg == '/tidakabsen') {
-            $response = "";
-            if (isset($data["shift"])) {
-                if ($data["shift"] == "pagi") {
-
-                    // $absent_pagi_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
-                    //     ->whereHas('shift', function ($query) {
-                    //         $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
-                    //             ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
-                    //     })->whereHas('employees', function ($query) {
-                    //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                    //         $query->where('company_id', 2); // Hanya untuk karyawan PT
-                    //     })
-                    //     ->where('date', Carbon::now()->format('Y-m-d'))
-                    //     ->get();
-
-                    // $absent_pagi_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
-                    //     ->whereHas('shift', function ($query) {
-                    //         $query->where('time_in', '>', '04:00:00') // Menambahkan kondisi time_in > 04:00:00
-                    //             ->where('time_in', '<', '09:00:00'); // Menambahkan kondisi time_in < 09:00:00
-                    //     })->whereHas('employees', function ($query) {
-                    //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                    //         $query->where('company_id', 1); // Hanya untuk karyawan RS
-                    //         $query->where('organization_id', '!=', 3);
-                    //         $query->whereNotIn('id', [1, 2, 14, 222]); // Mengecualikan employee dengan ID;
-                    //     })
-                    //     ->where('date', Carbon::now()->format('Y-m-d'))
-                    //     ->get();
-
-                    // $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN PAGI ‼️ </b>\n\n";
-                    // if (isset($absent_pagi_pt)) {
-                    //     $response .= "🔻 <b>Karyawan PT: </b>\n";
-
-                    //     foreach ($absent_pagi_pt as $key => $row) {
-                    //         $response .= "⛔️ " . $row->employees->fullname . "\n";
-                    //     }
-                    //     $response .= "\n";
-                    // }
-
-                    // if (isset($absent_pagi_rs)) {
-                    //     $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
-
-                    //     foreach ($absent_pagi_rs as $key => $row) {
-                    //         $response .= "⛔️ " . $row->employees->fullname . "\n";
-                    //     }
-                    //     $response .= "\n";
-                    // }
-                } else if ($data["shift"] == "siang") {
-                    // $absent_siang_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
-                    //     ->whereHas('shift', function ($query) {
-                    //         $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
-                    //             ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
-                    //     })->whereHas('employees', function ($query) {
-                    //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                    //         $query->where('company_id', 2); // Hanya untuk karyawan PT
-                    //     })
-                    //     ->where('date', Carbon::now()->format('Y-m-d'))
-                    //     ->get();
-
-                    // $absent_siang_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
-                    //     ->whereHas('shift', function ($query) {
-                    //         $query->where('time_in', '>', '12:00:00') // Menambahkan kondisi time_in > 04:00:00
-                    //             ->where('time_in', '<', '15:00:00'); // Menambahkan kondisi time_in < 09:00:00
-                    //     })->whereHas('employees', function ($query) {
-                    //         $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                    //         $query->where('company_id', 1); // Hanya untuk karyawan RS
-                    //     })
-                    //     ->where('date', Carbon::now()->format('Y-m-d'))
-                    //     ->get();
-
-                    // $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN SIANG ‼️ </b>\n\n";
-                    // if (isset($absent_siang_pt)) {
-                    //     $response .= "🔻 <b>Karyawan PT: </b>\n";
-
-                    //     foreach ($absent_siang_pt as $key => $row) {
-                    //         $response .= "⛔️ " . $row->employees->fullname . "\n";
-                    //     }
-                    //     $response .= "\n";
-                    // }
-
-                    // if (isset($absent_siang_rs)) {
-                    //     $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
-
-                    //     foreach ($absent_siang_rs as $key => $row) {
-                    //         $response .= "⛔️ " . $row->employees->fullname . "\n";
-                    //     }
-                    //     $response .= "\n";
-                    // }
-                } else if ($data["shift"] == "malam") {
-                    $absent_malam_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
-                        ->whereHas('shift')->whereHas('employees', function ($query) {
-                            $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                            $query->where('company_id', 2); // Hanya untuk karyawan PT
-                        })
-                        ->where('date', Carbon::now()->format('Y-m-d'))
-                        ->get();
-
-                    $absent_malam_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
-                        ->whereHas('shift')->whereHas('employees', function ($query) {
-                            $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                            $query->where('company_id', 1); // Hanya untuk karyawan RS
-                            $query->whereNotIn('id', [1, 2, 14, 222]);
-                        })
-                        ->where('date', Carbon::now()->format('Y-m-d'))
-                        ->get();
-
-                    $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN HARI INI ‼️ </b>\n\n";
-                    if (isset($absent_malam_pt)) {
-                        $response .= "🔻 <b>Karyawan PT: </b>\n";
-
-                        foreach ($absent_malam_pt as $key => $row) {
-                            $response .= "⛔️ " . $row->employees->fullname . "\n";
-                        }
-                        $response .= "\n";
-                    }
-
-                    if (isset($absent_malam_rs)) {
-                        $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
-
-                        foreach ($absent_malam_rs as $key => $row) {
-                            $response .= "⛔️ " . $row->employees->fullname . "\n";
-                        }
-                        $response .= "\n";
+                foreach ($attendancesPT as $key => $row) {
+                    if ($row->attendance_code_id != null || $row->day_off_request_id != null) {
+                        $response .= "▪️ " . $row->employees->fullname . " ( " . isset($row->attendance_code_id) ? $row->attendance_code->name : $row->day_off->attendance_code->name . " )\n";
+                    } else {
+                        $response .= "▪️ " . $row->employees->fullname . " ( Libur )\n";
                     }
                 }
-            }
+                $response .= "\n";
+                $attendancesLivasya = Attendance::where('is_day_off', '!=', null)->whereHas('employees', function ($query) {
+                    $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
+                    $query->where('company_id', 1); // Hanya untuk karyawan PT
+                })->where('date', Carbon::now()->format('Y-m-d'))->get();
 
-            $response .= "\n\n🔴 <b>DAFTAR KARYAWAN YANG LIBUR/IZIN/SAKIT/CUTI: </b>\n\n";
-            $response .= "🔻 <b>Karyawan PT: </b>\n";
-            $attendancesPT = Attendance::where('is_day_off', '!=', null)->whereHas('employees', function ($query) {
-                $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                $query->where('company_id', 2); // Hanya untuk karyawan PT
-            })->where('date', Carbon::now()->format('Y-m-d'))->get();
+                // dd($attendancesLivasya);
+                $response .= "\n🔻 <b>Karyawan RS Livasya: </b>\n";
 
-            foreach ($attendancesPT as $key => $row) {
-                if ($row->attendance_code_id != null || $row->day_off_request_id != null) {
-                    $response .= "▪️ " . $row->employees->fullname . " ( " . isset($row->attendance_code_id) ? $row->attendance_code->name : $row->day_off->attendance_code->name . " )\n";
-                } else {
+                // Array untuk pegawai dengan attendance_code_id atau day_off_request_id
+                $employeesWithAttendance = [];
+                // Array untuk pegawai dengan Libur
+                $employeesOnLeave = [];
+
+                // Memisahkan pegawai berdasarkan kondisi
+                foreach ($attendancesLivasya as $key => $row) {
+                    if ($row->attendance_code_id != null || $row->day_off_request_id != null) {
+                        $employeesWithAttendance[] = $row;
+                    } else {
+                        $employeesOnLeave[] = $row;
+                    }
+                }
+
+                // Menambahkan pegawai dengan attendance_code_id atau day_off_request_id ke dalam respons
+                foreach ($employeesWithAttendance as $row) {
+                    $response .= "<b>▪️ " . $row->employees->fullname . " ( ";
+                    if ($row->attendance_code_id != null) {
+                        $response .= $row->attendance_code->description;
+                    } else {
+                        $response .= $row->day_off->attendance_code->description;
+                    }
+                    $response .= " )</b> \n";
+                }
+                $response .= "\n";
+                // Menambahkan pegawai dengan Libur ke dalam respons
+                foreach ($employeesOnLeave as $row) {
                     $response .= "▪️ " . $row->employees->fullname . " ( Libur )\n";
                 }
+
+                $response .= "\n";
+                $response .= "<b>Rekap tersebut diambil berdasarkan tanggal " . Carbon::now()->translatedFormat('d F Y h:i A') . "</b>";
+            } else if ($msg == '/isiabsenpeg') {
+                $idTelegram = isset($data['id']) ? $data['id'] : null;
+                $usernameTelegram = $data['uname'] ?? null;
+                $nama = $data['name'] ?? null;
+                $tanggal = date("d M Y H:i:s", $data['date']);
+                $latitude = $data['latitude'] ?? null;
+                $longitude = $data['longitude'] ?? null;
+
+                $response = 'terima kasih ' . $nama . ' sudah mengisi Absensi 😍 ';
+                $response .= chr(10) . 'pada tanggal ' . date("d M Y", $data['date']) . ' jam ' . date("H:i:s", $data['date']);;
+            } else {
+                // $idTelegram = isset($data['id']) ? $data['id'] : null;
+                // $usernameTelegram = $data['username'] ?? null;
+                // $nama = $data['first_name'] ?? null;
+
+                // $error = true;
+                // $response = 'else';
+                $response  = "Halo *$nama* , \r\n";
+                $response .= "Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka.* \r\n\r\n";
+                $response .= "*Jam Operasional IGD 24 Jam.* \r\n";
+                $response .= "Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini: \r\n";
             }
-            $response .= "\n";
-            $attendancesLivasya = Attendance::where('is_day_off', '!=', null)->whereHas('employees', function ($query) {
-                $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
-                $query->where('company_id', 1); // Hanya untuk karyawan PT
-            })->where('date', Carbon::now()->format('Y-m-d'))->get();
-
-            // dd($attendancesLivasya);
-            $response .= "\n🔻 <b>Karyawan RS Livasya: </b>\n";
-
-            // Array untuk pegawai dengan attendance_code_id atau day_off_request_id
-            $employeesWithAttendance = [];
-            // Array untuk pegawai dengan Libur
-            $employeesOnLeave = [];
-
-            // Memisahkan pegawai berdasarkan kondisi
-            foreach ($attendancesLivasya as $key => $row) {
-                if ($row->attendance_code_id != null || $row->day_off_request_id != null) {
-                    $employeesWithAttendance[] = $row;
-                } else {
-                    $employeesOnLeave[] = $row;
-                }
-            }
-
-            // Menambahkan pegawai dengan attendance_code_id atau day_off_request_id ke dalam respons
-            foreach ($employeesWithAttendance as $row) {
-                $response .= "<b>▪️ " . $row->employees->fullname . " ( ";
-                if ($row->attendance_code_id != null) {
-                    $response .= $row->attendance_code->description;
-                } else {
-                    $response .= $row->day_off->attendance_code->description;
-                }
-                $response .= " )</b> \n";
-            }
-            $response .= "\n";
-            // Menambahkan pegawai dengan Libur ke dalam respons
-            foreach ($employeesOnLeave as $row) {
-                $response .= "▪️ " . $row->employees->fullname . " ( Libur )\n";
-            }
-
-            $response .= "\n";
-            $response .= "<b>Rekap tersebut diambil berdasarkan tanggal " . Carbon::now()->translatedFormat('d F Y h:i A') . "</b>";
-        } else if ($msg == '/isiabsenpeg') {
-            $idTelegram = isset($data['id']) ? $data['id'] : null;
-            $usernameTelegram = $data['uname'] ?? null;
-            $nama = $data['name'] ?? null;
-            $tanggal = date("d M Y H:i:s", $data['date']);
-            $latitude = $data['latitude'] ?? null;
-            $longitude = $data['longitude'] ?? null;
-
-            $response = 'terima kasih ' . $nama . ' sudah mengisi Absensi 😍 ';
-            $response .= chr(10) . 'pada tanggal ' . date("d M Y", $data['date']) . ' jam ' . date("H:i:s", $data['date']);;
-        } else {
-            // $idTelegram = isset($data['id']) ? $data['id'] : null;
-            // $usernameTelegram = $data['username'] ?? null;
-            // $nama = $data['first_name'] ?? null;
-
-            // $error = true;
-            // $response = 'else';
-            $response  = "Halo *$nama* , \r\n";
-            $response .= "Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka.* \r\n\r\n";
-            $response .= "*Jam Operasional IGD 24 Jam.* \r\n";
-            $response .= "Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini: \r\n";
         }
 
-        return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
+        // --- PENGIRIMAN RESPONS AKHIR ---
+
+        // Hanya kirim balasan jika variabel $response sudah diisi (misal: dari /rekapabsen atau 'interactive')
+        if (!empty($response)) {
+            return response()->json(['error' => "0", 'data' => $response]);
+        }
+
+        // Jika tidak ada balasan (misal: untuk logging), kirim status sukses agar tidak ada retry
+        return response()->json(['status' => 'success', 'message' => 'Webhook processed successfully, no reply needed.']);
     }
 
     public function livasyaMessage(Request $request)

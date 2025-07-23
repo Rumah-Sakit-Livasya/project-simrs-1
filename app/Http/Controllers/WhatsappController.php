@@ -4,237 +4,162 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\WhatsappMessage; // BARU: Menggunakan model kita
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class WhatsappController extends Controller
 {
+    // --- BARU: Metode untuk menampilkan halaman chat ---
+
     /**
-     * Mengirim pesan WhatsApp melalui API eksternal.
+     * Menampilkan daftar percakapan.
      */
-    public function sendMessage(Request $request)
+    public function index()
     {
-        // Validasi input
+        // Ambil pesan terakhir dari setiap percakapan
+        $conversations = WhatsappMessage::select('phone_number', 'contact_name', DB::raw('MAX(created_at) as last_message_at'))
+            ->groupBy('phone_number', 'contact_name')
+            ->orderBy('last_message_at', 'desc')
+            ->get();
+
+        return view('pages.whatsapp.index', compact('conversations'));
+    }
+
+    /**
+     * Menampilkan riwayat chat dengan nomor tertentu.
+     */
+    public function show($phoneNumber)
+    {
+        // Ambil semua pesan untuk nomor ini, urutkan dari yang terlama
+        $messages = WhatsappMessage::where('phone_number', $phoneNumber)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // Ambil daftar percakapan untuk sidebar
+        $conversations = WhatsappMessage::select('phone_number', 'contact_name', DB::raw('MAX(created_at) as last_message_at'))
+            ->groupBy('phone_number', 'contact_name')
+            ->orderBy('last_message_at', 'desc')
+            ->get();
+
+        $contactName = $messages->first()->contact_name ?? $phoneNumber;
+
+        return view('whatsapp.chat', compact('messages', 'conversations', 'phoneNumber', 'contactName'));
+    }
+
+    // --- BARU: Metode untuk mengirim balasan dari halaman chat ---
+
+    /**
+     * Mengirim balasan dari form di halaman chat.
+     */
+    public function reply(Request $request)
+    {
         $validated = $request->validate([
-            'nama' => 'required|string',
-            'nomor' => 'required|string|min:10|max:15',
-            'message' => 'required|string|max:255',
-            'file' => 'nullable|file',
+            'phone_number' => 'required|string',
+            'message' => 'required|string',
         ]);
 
-        // Header untuk cURL
-        $headers = [
-            'Key:KeyAbcKey',
-            'Nama:arul',
-            'Sandi:123###!!',
-        ];
+        // 1. Simpan pesan keluar ke database
+        $message = WhatsappMessage::create([
+            'phone_number' => $validated['phone_number'],
+            'message' => $validated['message'],
+            'direction' => 'out',
+            'status' => 'sending',
+        ]);
 
-        // Data untuk database
-        $dbData = [
-            'nama' => $request->nama,
-            'nomor' => $request->nomor,
-            'message' => $request->message,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
+        // 2. Kirim ke server Node.js
+        $this->_sendToNodeServer($validated['phone_number'], $validated['message']);
 
-        // Data untuk request HTTP
-        $httpData = [
-            'number' => $request->nomor,
-            'message' => $request->message,
-        ];
-
-        // Jika ada file yang diunggah
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $imageName = $request->nama . '_message_' . time() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('lampiran/whatsapp', $imageName, 'public');
-
-            // Tambahkan nama file ke data database
-            $dbData['file'] = $imageName;
-        }
-
-        // Simpan data ke database
-        DB::table('send_message_whatsapps')->insert($dbData);
-
-        // Mengirim request HTTP menggunakan cURL
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.100:3001/send-message');
-        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-        curl_setopt($curl, CURLOPT_POST, 1);
-
-        if (isset($dbData['file'])) {
-            $filePath = storage_path('app/public/' . $path);
-            $httpData['file_dikirim'] = new \CURLFile($filePath);
-        }
-
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $httpData);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-        $response = curl_exec($curl);
-        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($curl);
-        curl_close($curl);
-
-        // Penanganan respons dan kesalahan
-        if ($response === false) {
-            // cURL error
-            $errorMessage = 'cURL error: ' . $curlError;
-            return Redirect::route('whatsapp')->with('error', $errorMessage);
-        } elseif ($httpCode == 200) {
-            // Memeriksa konten respons
-            $responseJson = json_decode($response, true);
-            if ($responseJson === null) {
-                // JSON parsing error
-                $errorMessage = 'JSON parsing error: ' . json_last_error_msg();
-                return Redirect::route('whatsapp')->with('error', $errorMessage);
-            }
-            return Redirect::route('whatsapp')->with('success', 'Pesan berhasil dikirim!');
-        } else {
-            // HTTP error
-            $errorMessage = 'HTTP error: ' . $httpCode . ' - ' . $response;
-            return Redirect::route('whatsapp')->with('error', $errorMessage);
-        }
+        return back()->with('success', 'Balasan berhasil dikirim!');
     }
+
+    // --- MODIFIKASI: Menerima webhook dan menyimpan pesan masuk ---
 
     public function processMessage(Request $request)
     {
-        // Cek apakah metode POST
         if ($request->getMethod() !== 'POST') {
             return response()->json(['error' => 1, 'data' => 'Method Not Allowed'], 405);
         }
 
-        // Ambil data dari header dan JSON
         $headers = $request->headers->all();
         $content = $request->json()->all();
-
         Log::info('WhatsApp Webhook Received: ' . json_encode($content, JSON_PRETTY_PRINT));
 
-        // Validasi header custom Anda
         $key = $headers['key'][0] ?? '';
         $user = $headers['nama'][0] ?? '';
         $sandi = $headers['sandi'][0] ?? '';
-
-        $error = true;
-        if ($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!') {
-            $error = false;
-        }
-
-        if ($error) {
+        if (!($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!')) {
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        // Mengambil data dari struktur JSON webhook yang benar
-        $msg = $content['entry'][0]['changes'][0]['value']['messages'][0]['text']['body'] ?? '';
-        $nama = $content['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'] ?? 'Sahabat Livasya';
-        $data = $content['data'] ?? ($content['entry'][0]['changes'][0]['value']['messages'][0] ?? []);
+        // --- Simpan Pesan Masuk ke Database ---
+        $messageId = $content['data'][1]['key']['id'] ?? null;
+        $msg = $content['data'][1]['message']['extendedTextMessage']['text'] ??
+            ($content['data'][1]['message']['conversation'] ??
+                ($content['message'] ?? ''));
+        $nama = $content['data'][1]['pushName'] ?? 'Unknown';
+        $nomor = Str::before($content['data'][1]['key']['remoteJid'] ?? '', '@');
 
-        // Abaikan webhook yang bukan pesan teks dari pengguna
-        if (empty($msg)) {
-            return response()->json(['status' => 'success', 'message' => 'Not a user message, skipped.']);
+        // Simpan hanya jika ada pesan dan nomor yang valid
+        if (!empty($msg) && !empty($nomor)) {
+            WhatsappMessage::updateOrCreate(
+                ['message_id' => $messageId], // Cari berdasarkan message_id untuk menghindari duplikat
+                [
+                    'phone_number' => $nomor,
+                    'contact_name' => $nama,
+                    'message' => $msg,
+                    'direction' => 'in',
+                    'status' => 'read' // Anggap langsung terbaca karena masuk sistem
+                ]
+            );
         }
 
+        // --- Logika Respon Otomatis (jika ada) ---
         $response = '';
-
-        if ($msg == '/test-kirim') {
-            // ... (Logika /test-kirim Anda)
-            $response .= 'Halo ' . $nama;
-        } else if ($msg == '/rekapabsen') {
-            // ... (Semua logika /rekapabsen Anda ada di sini)
-            $total_pegawai_rs = Employee::where('is_active', 1)->where('company_id', 1)->count();
-            $total_pegawai_pt = Employee::where('is_active', 1)->where('company_id', 2)->count();
-            $total_clockin = Attendance::whereNotNull('clock_in')
-                ->whereDate('date', Carbon::now()->format('Y-m-d'))
-                ->whereHas('employees', function ($query) {
-                    $query->where('is_active', 1);
-                })->count();
-            $total_no_clockin = Attendance::whereNull('clock_in')->whereNull('is_day_off')
-                ->whereDate('date', Carbon::now()->format('Y-m-d'))
-                ->whereHas('employees', function ($query) {
-                    $query->where('organization_id', '!=', 3);
-                    $query->where('is_active', 1);
-                })->count();
-            $total_libur = Attendance::where('is_day_off', 1)
-                ->whereNull('attendance_code_id')
-                ->whereNull('day_off_request_id')
-                ->whereDate('date', Carbon::now()->format('Y-m-d'))
-                ->whereHas('employees', function ($query) {
-                    $query->where('is_active', 1);
-                })->count();
-
-            $attendancesWithLeave = Attendance::with(['day_off.attendance_code', 'attendance_code'])
-                ->whereNotNull('is_day_off')
-                ->where('date', Carbon::now()->format('Y-m-d'))
-                ->where(function ($query) {
-                    $query->whereNotNull('attendance_code_id')
-                        ->orWhereNotNull('day_off_request_id');
-                })
-                ->get();
-
-            $total_izin = $attendancesWithLeave->filter(function ($item) {
-                return ($item->attendance_code_id == 1) || ($item->day_off->attendance_code_id ?? null) == 1;
-            })->count();
-            $total_sakit = $attendancesWithLeave->filter(function ($item) {
-                return ($item->attendance_code_id == 2) || ($item->day_off->attendance_code_id ?? null) == 2;
-            })->count();
-            $total_cuti = $attendancesWithLeave->filter(function ($item) {
-                $code = $item->attendance_code_id ?? ($item->day_off->attendance_code_id ?? null);
-                return !in_array($code, [1, 2, null]);
-            })->count();
-
-
-            $response = "\n\n⬛️ <b>REKAP ABSEN HARI INI:</b>\n\n";
-            $response .= "🔹 <code>Total Pegawai RS: $total_pegawai_rs </code>\n";
-            $response .= "🔹 <code>Total Pegawai PT: $total_pegawai_pt </code>\n";
-            $response .= "🔹 <code>Sudah clockin: $total_clockin </code>\n";
-            $response .= "🔹 <code>Belum clockin: $total_no_clockin </code>\n";
-            $response .= "🔹 <code>Pegawai libur: $total_libur </code>\n";
-            $response .= "🔹 <code>Pegawai Cuti: $total_cuti </code>\n";
-            $response .= "🔹 <code>Pegawai Izin: $total_izin </code>\n";
-            $response .= "🔹 <code>Pegawai Sakit: $total_sakit </code>\n\n";
-
-            $response .= "\n🟥 <b>DAFTAR PEGAWAI YANG TELAT:</b> \n\n";
-            $pegawai_telat = Attendance::with('employees')->whereNotNull('clock_in')->whereNotNull('late_clock_in')->whereHas('employees', function ($query) {
-                $query->where('is_active', 1);
-                $query->whereNotIn('id', [1, 2, 14, 222]);
-            })->where('date', Carbon::now()->format('Y-m-d'))->orderBy('late_clock_in')->get();
-            foreach ($pegawai_telat as $key => $row) {
-                if ($row->late_clock_in > 5 && $row->late_clock_in < 70) {
-                    $response .= "🔸" . Str::limit($row->employees->fullname, $limit = 16) . " ( " . $row->late_clock_in . " menit )\n";
-                }
-            }
-
-            $response .= "\n";
-            $response .= "<b>Rekap tersebut diambil berdasarkan tanggal " . Carbon::now()->translatedFormat('d F Y H:i') . "</b>";
-        } else if ($msg == '/tidakabsen') {
-            // ... Logika untuk /tidakabsen ...
-
-        } else if ($msg == '/isiabsenpeg') {
-            // ... Logika untuk /isiabsenpeg ...
-
-        } else {
-            // --- PERUBAHAN 1: BLOK ELSE DIKOSONGKAN ---
-            // Jika tidak ada perintah yang cocok, jangan lakukan apa-apa.
-            // Biarkan variabel $response tetap kosong.
+        if ($msg == '/rekapabsen') {
+            // ... (Kode rekap absen Anda diletakkan di sini) ...
+            $response = 'Ini adalah rekap absen...'; // Ganti dengan hasil rekap Anda
+            $this->_sendToNodeServer($nomor, $response); // Kirim balasan
         }
 
-        // --- PERUBAHAN 2: HANYA KIRIM JIKA ADA RESPONS ---
-        // Cek apakah ada respons yang perlu dikirim.
-        if (!empty($response)) {
-            // Jika $response tidak kosong, kirimkan sebagai balasan.
-            return response()->json(['error' => ($error ? "1" : "0"), 'data' => $response]);
+        return response()->json(['status' => 'success', 'message' => 'Webhook processed']);
+    }
+
+    // --- PRIVATE HELPER: Fungsi untuk mengirim pesan via cURL ---
+
+    private function _sendToNodeServer($number, $message, $filePath = null)
+    {
+        $headers = ['Key:KeyAbcKey', 'Nama:arul', 'Sandi:123###!!'];
+        $httpData = ['number' => $number, 'message' => $message];
+
+        if ($filePath) {
+            $httpData['file_dikirim'] = new \CURLFile($filePath);
         }
 
-        // Jika $response kosong (karena perintah tidak dikenali),
-        // kirim response sukses tanpa data untuk memberitahu server WhatsApp
-        // bahwa pesan telah diterima, tanpa mengirim balasan ke pengguna.
-        return response()->json(['status' => 'success', 'message' => 'Command not recognized, no reply sent.']);
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => 'http://192.168.0.100:3001/send-message',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_POST => 1,
+            CURLOPT_POSTFIELDS => $httpData,
+            CURLOPT_HTTPHEADER => $headers,
+        ]);
+
+        $response = curl_exec($curl);
+        $error = curl_error($curl);
+        curl_close($curl);
+
+        if ($error) {
+            Log::error('cURL Error to Node Server: ' . $error);
+            return false;
+        }
+
+        Log::info('Response from Node Server: ' . $response);
+        return $response;
     }
 }
