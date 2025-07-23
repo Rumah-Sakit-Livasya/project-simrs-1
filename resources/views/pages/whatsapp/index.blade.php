@@ -197,6 +197,8 @@
                 /* Pecah kata panjang */
             }
 
+
+
             .message-meta {
                 display: flex;
                 align-items: center;
@@ -396,6 +398,7 @@
             document.addEventListener("DOMContentLoaded", function() {
                 const messageInput = document.getElementById('message-input');
                 const form = document.getElementById('reply-form');
+                const sendBtn = document.getElementById('send-btn');
 
                 // Auto-scroll ke pesan terakhir saat halaman dimuat
                 const chatHistory = document.getElementById("chat-history");
@@ -414,10 +417,36 @@
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
                         if (this.value.trim() !== '') {
-                            form.submit();
+                            // Memicu event 'submit' pada form
+                            form.dispatchEvent(new Event('submit', {
+                                cancelable: true
+                            }));
                         }
                     }
                 });
+
+                // >>> PERUBAHAN DIMULAI DI SINI <<<
+                // Tangani event submit form untuk mencegah pengiriman ganda
+                form.addEventListener('submit', function(e) {
+                    // Validasi sekali lagi untuk memastikan pesan tidak kosong
+                    if (messageInput.value.trim() === '') {
+                        e.preventDefault(); // Hentikan pengiriman jika kosong
+                        return;
+                    }
+
+                    // Nonaktifkan tombol kirim dan textarea
+                    sendBtn.disabled = true;
+                    messageInput.disabled = true;
+
+                    // Ganti ikon tombol kirim dengan spinner
+                    sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+                    // Lanjutkan dengan submit form.
+                    // Setelah halaman dimuat ulang (post-redirect-get),
+                    // form akan kembali dalam keadaan normal.
+                    this.submit();
+                });
+                // >>> PERUBAHAN SELESAI DI SINI <<<
             });
         </script>
     @endif
