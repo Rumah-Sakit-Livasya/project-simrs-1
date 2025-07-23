@@ -289,6 +289,9 @@
     }
 </style>
 @yield('extended-css')
+
+{{-- INI CARA YANG BENAR UNTUK VITE --}}
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 {{-- @vite('resources//app.jsx') --}}
 
 {{-- <script src="/js/jspdf.umd.min.js"></script> --}}
