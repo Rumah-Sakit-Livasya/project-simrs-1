@@ -29,6 +29,7 @@ use App\Http\Middleware\LastSeenUser;
 use App\Models\ChecklistHarianCategory;
 use App\Models\LaporanInternal;
 use Illuminate\Support\Facades\File;
+use Pusher\Pusher; // Jangan lupa tambahkan ini jika belum ada
 
 // Route::get('/test', [TimeScheduleController::class, 'getEmployeesByOrganizationAndJobPosition']);
 
@@ -213,17 +214,10 @@ Route::middleware([LastSeenUser::class])->group(function () {
             // --- Rute untuk Halaman Chat dan Balasan Pesan ---
 
             // 1. Menampilkan halaman utama dengan daftar percakapan
-            // URL: /whatsapp
-            Route::get('/', [WhatsappController::class, 'index'])->name('index');
+            // Gabungkan 'index' dan 'show' menjadi satu. {phoneNumber?} berarti opsional.
+            Route::get('/{phoneNumber?}', [WhatsappController::class, 'chatPage'])->name('chat');
 
-            // 2. Menampilkan detail percakapan dengan nomor tertentu
-            // URL: /whatsapp/chat/{phoneNumber}
-            Route::get('/chat/{phoneNumber}', [WhatsappController::class, 'show'])->name('chat');
-
-            // 3. Mengirim balasan dari form di halaman chat
-            // URL: /whatsapp/reply (method POST)
             Route::post('/reply', [WhatsappController::class, 'reply'])->name('reply');
-
             // --- Rute Lain yang Sudah Ada (diperbaiki sedikit) ---
 
             // 4. Menampilkan halaman untuk kirim broadcast (bisa diarahkan ke view yang sama atau berbeda)
@@ -434,6 +428,32 @@ Route::get('/test', function () {
         'laporan' => $laporanKendala,
     ]);
 });
+
+
+
+Route::get('/test-pusher', function () {
+    $options = [
+        'cluster' => env('PUSHER_APP_CLUSTER'),
+        'useTLS' => true,
+        // --- TAMBAHKAN BARIS INI ---
+        'curl_options' => [
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_SSL_VERIFYPEER => 0,
+        ]
+    ];
+    $pusher = new Pusher(
+        env('PUSHER_APP_KEY'),
+        env('PUSHER_APP_SECRET'),
+        env('PUSHER_APP_ID'),
+        $options
+    );
+
+    $data['message'] = 'Halo ini pesan dari Laravel!';
+    $pusher->trigger('my-channel', 'my-event', $data);
+
+    return 'Event telah dikirim (tanpa verifikasi SSL)!';
+});
+
 
 
 require __DIR__ . '/auth.php';
