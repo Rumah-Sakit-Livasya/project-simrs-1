@@ -11,17 +11,92 @@ use Illuminate\Support\Str;
 
 class WhatsappController extends Controller
 {
-    // ... (metode showChatPage, reply, sendMessage tidak perlu diubah) ...
+    // --- SATU METODE UNTUK MENAMPILKAN SEMUA HALAMAN CHAT ---
+
+    /**
+     * Menampilkan halaman chat.
+     * Menggabungkan fungsi index() dan show() menjadi satu agar lebih efisien.
+     *
+     * @param string|null $phoneNumber
+     */
     public function showChatPage($phoneNumber = null)
-    { /* ... kode Anda ... */
-    }
-    public function reply(Request $request)
-    { /* ... kode Anda ... */
-    }
-    public function sendMessage(Request $request)
-    { /* ... kode Anda ... */
+    {
+        // 1. Ambil pesan terakhir dari setiap percakapan untuk sidebar (Query yang lebih baik)
+        $subQuery = WhatsappMessage::select('phone_number', DB::raw('MAX(id) as last_message_id'))
+            ->groupBy('phone_number');
+
+        $conversations = WhatsappMessage::joinSub($subQuery, 'last_messages', function ($join) {
+            $join->on('whatsapp_messages.id', '=', 'last_messages.last_message_id');
+        })
+            ->select('whatsapp_messages.*') // Ambil semua data dari pesan terakhir
+            ->orderBy('whatsapp_messages.created_at', 'desc')
+            ->get();
+
+        $messages = null;
+        $contactName = null;
+
+        // 2. Jika ada nomor telepon yang dipilih dari URL, ambil riwayat pesannya
+        if ($phoneNumber) {
+            $messages = WhatsappMessage::where('phone_number', $phoneNumber)
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            // Ambil nama kontak dari pesan pertama atau gunakan nomor telepon
+            $contactName = $messages->first()->contact_name ?? $phoneNumber;
+        }
+
+        // 3. Kirim semua data yang relevan ke satu view yang sama
+        return view('pages.whatsapp.index', compact('conversations', 'messages', 'phoneNumber', 'contactName'));
     }
 
+
+    // --- METODE UNTUK MENGIRIM BALASAN ---
+
+    /**
+     * Mengirim balasan dari form di halaman chat.
+     * SUDAH DIPERBAIKI: Menghilangkan duplikasi pembuatan pesan.
+     */
+    public function reply(Request $request)
+    {
+        $validated = $request->validate([
+            'phone_number' => 'required|string',
+            'message' => 'required|string',
+        ]);
+
+        // LANGSUNG PANGGIL HELPER. Helper _sendToNodeServer akan menangani
+        // penyimpanan ke DB, broadcasting, dan pengiriman ke Node.js.
+        $this->_sendToNodeServer($validated['phone_number'], $validated['message']);
+
+        return back()->with('success', 'Balasan berhasil dikirim!');
+    }
+
+    /**
+     * Mengirim pesan dari form lain (misalnya, broadcast).
+     * Metode ini dipanggil oleh rute 'whatsapp.send'.
+     */
+    public function sendMessage(Request $request)
+    {
+        $validated = $request->validate([
+            // 'number' bisa berisi satu nomor atau banyak nomor dipisah koma
+            'number'  => 'required|string',
+            'message' => 'required|string',
+        ]);
+
+        // Pecah string nomor menjadi array jika ada koma
+        $numbers = explode(',', $validated['number']);
+
+        foreach ($numbers as $number) {
+            // Hilangkan spasi yang mungkin ada
+            $cleaned_number = trim($number);
+
+            if (!empty($cleaned_number)) {
+                // Gunakan helper yang sudah ada untuk mengirim pesan
+                $this->_sendToNodeServer($cleaned_number, $validated['message']);
+            }
+        }
+
+        return back()->with('success', 'Pesan broadcast berhasil dimasukkan ke antrian pengiriman!');
+    }
 
     // =====================================================================
     // === PERBAIKAN UTAMA ADA DI processMessage DAN _sendToNodeServer ===
