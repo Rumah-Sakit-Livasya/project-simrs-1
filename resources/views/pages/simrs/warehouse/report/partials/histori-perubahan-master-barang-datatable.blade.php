@@ -42,7 +42,7 @@
                             @foreach ($logs as $log)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ tgl($log->created_at) }}</td>
+                                    <td>{{ tgl_waktu($log->created_at) }}</td>
                                     <td>{{ $log->user->name }}</td>
                                     <td>{{ $log->keterangan }}</td>
                                     <td>{{ $log->kode_barang }}</td>
