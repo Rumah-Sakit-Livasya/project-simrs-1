@@ -11,7 +11,7 @@
 
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
-        {{-- Custom CSS untuk halaman chat --}}
+        {{-- ... (Semua CSS dan HTML Anda tetap sama seperti sebelumnya) ... --}}
         <style>
             /* Layout Utama */
             .chat-container {
@@ -197,8 +197,6 @@
                 /* Pecah kata panjang */
             }
 
-
-
             .message-meta {
                 display: flex;
                 align-items: center;
@@ -335,6 +333,7 @@
                                                     <span
                                                         class="message-time">{{ $message->created_at->format('H:i') }}</span>
                                                     @if ($message->direction == 'out')
+                                                        {{-- PENTING: data-message-id ditambahkan di sini --}}
                                                         <span class="message-status" data-message-id="{{ $message->id }}">
                                                             @if ($message->status == 'sending')
                                                                 <i class="fa-regular fa-clock"></i>
@@ -390,158 +389,176 @@
         </div>
     </main>
 @endsection
-
 @section('plugin')
-    {{-- SCRIPT UNTUK FUNGSI FORM INPUT --}}
+    {{-- SCRIPT UNTUK FUNGSI FORM INPUT DAN REAL-TIME --}}
     @if (isset($messages))
         <script>
             document.addEventListener("DOMContentLoaded", function() {
+                // =============================================================
+                // BAGIAN 1: FUNGSI DASAR & INTERAKSI FORM
+                // =============================================================
                 const messageInput = document.getElementById('message-input');
                 const form = document.getElementById('reply-form');
-                const sendBtn = document.getElementById('send-btn');
+                const chatHistory = document.getElementById('chat-history');
 
                 // Auto-scroll ke pesan terakhir saat halaman dimuat
-                const chatHistory = document.getElementById("chat-history");
                 if (chatHistory) {
                     chatHistory.scrollTop = chatHistory.scrollHeight;
                 }
 
-                // Auto-grow textarea
-                messageInput.addEventListener('input', function() {
-                    this.style.height = 'auto';
-                    this.style.height = (this.scrollHeight) + 'px';
-                });
+                // Auto-resize textarea
+                if (messageInput) {
+                    messageInput.addEventListener('input', function() {
+                        this.style.height = 'auto';
+                        this.style.height = (this.scrollHeight) + 'px';
+                    });
 
-                // Kirim form saat menekan Enter (bukan Shift+Enter)
-                messageInput.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        if (this.value.trim() !== '') {
-                            // Memicu event 'submit' pada form
-                            form.dispatchEvent(new Event('submit', {
-                                cancelable: true
-                            }));
+                    // Kirim form dengan Enter, buat baris baru dengan Shift+Enter
+                    messageInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            if (this.value.trim() !== '') {
+                                form.submit();
+                                this.disabled = true; // Nonaktifkan input setelah dikirim
+                            }
                         }
+                    });
+                }
+
+                // Cegah pengiriman form kosong
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        if (messageInput.value.trim() === '') {
+                            e.preventDefault();
+                        } else {
+                            document.getElementById('send-btn').disabled = true; // Nonaktifkan tombol kirim
+                        }
+                    });
+                }
+
+                // =============================================================
+                // BAGIAN 2: LOGIKA REAL-TIME DENGAN LARAVEL ECHO
+                // =============================================================
+                const activeChatPhoneNumber = "{{ $phoneNumber ?? null }}";
+
+                // ---------------------------------
+                // Fungsi Helper untuk memanipulasi UI
+                // ---------------------------------
+
+                function getStatusIconHtml(status) {
+                    if (status === 'sending') return '<i class="fa-regular fa-clock"></i>';
+                    if (status === 'sent') return '<i class="fa-solid fa-check"></i>';
+                    if (status === 'delivered') return '<i class="fa-solid fa-check-double"></i>';
+                    if (status === 'read') return '<i class="fa-solid fa-check-double text-primary"></i>';
+                    if (status === 'failed') return '<i class="fa-solid fa-circle-exclamation text-danger"></i>';
+                    return ''; // Default
+                }
+
+                function appendMessageToUI(message) {
+                    // Hanya tambahkan pesan ke UI jika nomor teleponnya cocok dengan chat yang sedang dibuka
+                    if (message.phone_number !== activeChatPhoneNumber) {
+                        console.log(
+                            `Pesan untuk ${message.phone_number} diterima, tapi tidak ditampilkan di chat aktif.`);
+                        return; // Abaikan jika bukan untuk chat ini
                     }
+
+                    const messageDirection = message.direction === 'out' ? 'out' : 'in';
+                    const messageClass = message.direction === 'out' ? 'message-out' : 'message-in';
+
+                    // Buat elemen status hanya jika pesan keluar
+                    const statusHtml = message.direction === 'out' ?
+                        `<span class="message-status" data-message-id="${message.id}">${getStatusIconHtml(message.status)}</span>` :
+                        '';
+
+                    const messageHtml = `
+                        <div class="message-wrapper ${messageDirection}" data-db-id="${message.id}">
+                            <div class="message ${messageClass}">
+                                <div class="message-content">${message.message.replace(/\n/g, '<br>')}</div>
+                                <div class="message-meta">
+                                    <span class="message-time">${new Date(message.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                                    ${statusHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    chatHistory.insertAdjacentHTML('beforeend', messageHtml);
+                    chatHistory.scrollTop = chatHistory.scrollHeight; // Auto-scroll
+                }
+
+                function updateMessageStatusUI(messageId, newStatus) {
+                    const statusElement = document.querySelector(`.message-status[data-message-id="${messageId}"]`);
+                    if (statusElement) {
+                        statusElement.innerHTML = getStatusIconHtml(newStatus);
+                        console.log(`[UI-UPDATE] Status untuk pesan ID ${messageId} diubah menjadi ${newStatus}`);
+                    }
+                }
+
+                function updateSidebar(message) {
+                    const convoLink = document.querySelector(`.convo-list a[data-phone="${message.phone_number}"]`);
+                    if (convoLink) {
+                        // Update last message
+                        const lastMessageEl = convoLink.querySelector('.last-message');
+                        if (lastMessageEl) {
+                            lastMessageEl.innerHTML = (message.direction === 'out' ?
+                                    '<i class="fa-solid fa-check-double text-primary"></i>' : '') + message.message
+                                .substring(0, 25) + '...';
+                        }
+                        // Update time
+                        const timeEl = convoLink.querySelector('.last-message-time');
+                        if (timeEl) {
+                            timeEl.textContent = new Date(message.created_at).toLocaleTimeString('id-ID', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        }
+                        // Pindahkan percakapan ke paling atas
+                        convoLink.parentElement.prepend(convoLink);
+                    } else {
+                        // Jika percakapan belum ada, muat ulang halaman untuk menampilkannya
+                        // Ini adalah cara sederhana, bisa dioptimalkan dengan membuat elemen baru via JS
+                        window.location.reload();
+                    }
+                }
+
+                // ---------------------------------
+                // Koneksi dan Listener Laravel Echo
+                // ---------------------------------
+                if (typeof window.Echo === 'undefined') {
+                    console.error('Laravel Echo tidak ditemukan! Pastikan bootstrap.js sudah dimuat.');
+                    return;
+                }
+
+                console.log('Mencoba subscribe ke channel: private-whatsapp-chat');
+                const channel = window.Echo.private('whatsapp-chat');
+
+                channel.error((error) => {
+                    console.error("Gagal subscribe ke channel:", error);
                 });
 
-                // >>> PERUBAHAN DIMULAI DI SINI <<<
-                // Tangani event submit form untuk mencegah pengiriman ganda
-                form.addEventListener('submit', function(e) {
-                    // Validasi sekali lagi untuk memastikan pesan tidak kosong
-                    if (messageInput.value.trim() === '') {
-                        e.preventDefault(); // Hentikan pengiriman jika kosong
-                        return;
-                    }
-
-                    // Nonaktifkan tombol kirim dan textarea
-                    sendBtn.disabled = true;
-                    messageInput.disabled = true;
-
-                    // Ganti ikon tombol kirim dengan spinner
-                    sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-
-                    // Lanjutkan dengan submit form.
-                    // Setelah halaman dimuat ulang (post-redirect-get),
-                    // form akan kembali dalam keadaan normal.
-                    this.submit();
+                channel.subscribed(() => {
+                    console.log("Berhasil subscribe ke channel private-whatsapp-chat!");
                 });
-                // >>> PERUBAHAN SELESAI DI SINI <<<
+
+                // Listener untuk PESAN BARU (baik masuk maupun keluar)
+                channel.listen('.NewWhatsappMessage', (event) => {
+                    console.log('[EVENT: PESAN BARU]', event.message);
+                    appendMessageToUI(event.message);
+                    updateSidebar(event.message);
+                });
+
+                // Listener untuk UPDATE STATUS PESAN KELUAR
+                channel.listen('.MessageStatusUpdated', (event) => {
+                    console.log('[EVENT: STATUS UPDATE]', event.message);
+                    updateMessageStatusUI(event.message.id, event.message.status);
+                    // Anda juga bisa update status di sidebar jika diperlukan
+                });
             });
         </script>
     @endif
 
-    {{-- SCRIPT UNTUK REAL-TIME DENGAN LARAVEL ECHO --}}
     @auth
-        <script>
-            // Ambil nomor telepon yang sedang aktif dari variabel PHP
-            const activeChatPhoneNumber = "{{ $phoneNumber ?? null }}";
-            const chatHistoryEl = document.getElementById("chat-history");
-            const convoListEl = document.querySelector('.convo-list');
-
-            // Fungsi untuk membuat Ikon Status
-            function getStatusIcon(status) {
-                if (status === 'sending') return '<i class="fa-regular fa-clock"></i>';
-                if (status === 'sent') return '<i class="fa-solid fa-check"></i>';
-                if (status === 'delivered') return '<i class="fa-solid fa-check-double"></i>';
-                if (status === 'read') return '<i class="fa-solid fa-check-double text-primary"></i>';
-                if (status === 'failed') return '<i class="fa-solid fa-circle-exclamation text-danger"></i>';
-                return '';
-            }
-
-            // Fungsi untuk menambahkan gelembung chat ke UI
-            function appendMessageToUI(message) {
-                if (!chatHistoryEl) return;
-
-                const messageWrapper = document.createElement('div');
-                messageWrapper.className = `message-wrapper ${message.direction === 'out' ? 'out' : 'in'}`;
-
-                const statusHtml = message.direction === 'out' ?
-                    `<span class="message-status" data-message-id="${message.id}">${getStatusIcon(message.status)}</span>` : '';
-
-                messageWrapper.innerHTML = `
-                <div class="message ${message.direction === 'out' ? 'message-out' : 'message-in'}">
-                    <div class="message-content">${message.message.replace(/\n/g, '<br>')}</div>
-                    <div class="message-meta">
-                        <span class="message-time">${new Date(message.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
-                        ${statusHtml}
-                    </div>
-                </div>`;
-
-                chatHistoryEl.appendChild(messageWrapper);
-                chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight; // Auto-scroll
-            }
-
-            // Fungsi untuk mengupdate sidebar
-            function updateSidebar(message) {
-                if (!convoListEl) return;
-
-                let convoItem = convoListEl.querySelector(`a[data-phone="${message.phone_number}"]`);
-
-                if (convoItem) {
-                    // Update elemen yang ada
-                    const lastMessageEl = convoItem.querySelector('.last-message');
-                    const lastTimeEl = convoItem.querySelector('.last-message-time');
-                    let prefix = message.direction === 'out' ? `<i class="fa-solid fa-check mr-1"></i>` : '';
-
-                    lastMessageEl.innerHTML = prefix + DOMPurify.sanitize(message.message.substring(0, 25) + (message.message
-                        .length > 25 ? '...' : ''));
-                    lastTimeEl.textContent = new Date(message.created_at).toLocaleTimeString('id-ID', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-
-                    // Pindahkan ke paling atas
-                    convoListEl.prepend(convoItem);
-                } else {
-                    // TODO: Buat elemen percakapan baru jika belum ada di daftar
-                    // Ini bisa dilakukan dengan me-render template Blade via AJAX atau membuat HTML string
-                    window.location.reload(); // Solusi sementara: reload halaman jika ada percakapan baru
-                }
-            }
-
-            // Mulai mendengarkan Private Channel
-            if (window.Echo) {
-                window.Echo.private('whatsapp-chat')
-                    .listen('.message.new', (event) => {
-                        console.log('Pesan baru diterima:', event.message);
-
-                        // Update UI chat jika percakapan sedang aktif
-                        if (activeChatPhoneNumber && event.message.phone_number === activeChatPhoneNumber) {
-                            appendMessageToUI(event.message);
-                        } else {
-                            // Jika chat tidak aktif, mainkan suara notifikasi
-                            // Anda perlu menyediakan file audio ini di folder public/sounds
-                            // const notifSound = new Audio('/sounds/notification.mp3');
-                            // notifSound.play().catch(e => console.error("Gagal memutar suara:", e));
-                        }
-
-                        // SELALU update sidebar untuk semua pesan baru
-                        updateSidebar(event.message);
-                    });
-            }
-        </script>
-        {{-- Untuk keamanan, gunakan DOMPurify jika pesan bisa mengandung HTML --}}
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+        {{-- DOMPurify tidak lagi diperlukan karena kita tidak menggunakan innerHTML dari sumber eksternal --}}
+        {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script> --}}
     @endauth
 @endsection

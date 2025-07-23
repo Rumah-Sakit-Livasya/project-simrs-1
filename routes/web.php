@@ -225,7 +225,6 @@ Route::middleware([LastSeenUser::class])->group(function () {
             // 2. Rute untuk mengirim balasan dari form di halaman chat
             Route::post('/reply', [WhatsappController::class, 'reply'])->name('reply');
 
-
             // --- Rute Lain yang Sudah Ada (Tidak Perlu Diubah) ---
 
             // 3. Menampilkan halaman untuk kirim broadcast
@@ -241,6 +240,9 @@ Route::middleware([LastSeenUser::class])->group(function () {
             Route::get('/group_kontak', function () {
                 return view('pages.whatsapp.group_kontak');
             })->name('group_kontak');
+
+            Route::get('/message-status/{message}', [App\Http\Controllers\WhatsappController::class, 'checkStatus'])
+                ->name('whatsapp.status');
         });
         /* END PAYROLL --------------------------------------------------------*/
 
