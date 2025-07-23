@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Stock Opname Report: Histori Perubahan Master Barang')
+@section('title', 'Warehouse Report: Histori Perubahan Master Barang')
 @section('content')
     <style>
         .display-none {

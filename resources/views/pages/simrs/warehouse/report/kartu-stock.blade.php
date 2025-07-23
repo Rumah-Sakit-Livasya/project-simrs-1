@@ -1,8 +1,8 @@
 @extends('inc.layout')
 @if (isset($barang))
-    @section('title', 'Stock Opname Report: Kartu Stok [' . $satuan->kode . '] ' . $barang->nama)
+    @section('title', 'Warehouse Report: Kartu Stok [' . $satuan->kode . '] ' . $barang->nama)
 @else
-    @section('title', 'Stock Opname Report: Kartu Stok ')
+    @section('title', 'Warehouse Report: Kartu Stok ')
 @endif
 @section('content')
     <style>
