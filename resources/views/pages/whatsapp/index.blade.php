@@ -227,10 +227,9 @@
         </div>
     </main>
 @endsection
-
 @section('plugin')
     <script>
-        // Script untuk auto-scroll ke pesan terakhir
+        // Script auto-scroll yang sudah ada
         document.addEventListener("DOMContentLoaded", function() {
             var chatHistory = document.getElementById("chat-history");
             if (chatHistory) {
@@ -238,4 +237,55 @@
             }
         });
     </script>
+
+    {{-- HANYA JALANKAN JIKA USER LOGIN --}}
+    @auth
+        <script>
+            // Fungsi untuk membuat dan menambahkan gelembung chat ke layar
+            function appendMessageToUI(message) {
+                const chatHistory = document.getElementById("chat-history");
+                if (!chatHistory) return; // Keluar jika pengguna tidak sedang di halaman chat
+
+                const messageClass = message.direction === 'out' ? 'message-out' : 'message-in';
+                const justifyContent = message.direction === 'out' ? 'flex-end' : 'flex-start';
+
+                const messageWrapper = document.createElement('div');
+                messageWrapper.style.display = 'flex';
+                messageWrapper.style.justifyContent = justifyContent;
+
+                // Menggunakan backtick (`) untuk template literal yang lebih mudah dibaca
+        messageWrapper.innerHTML = `
+                                <div class="message ${messageClass}">
+                                    <div>${message.message.replace(/\n/g, '<br>')}</div>
+                                    <div class="message-time">${new Date(message.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</div>
+                                </div>
+                            `;
+
+                chatHistory.appendChild(messageWrapper);
+                chatHistory.scrollTop = chatHistory.scrollHeight; // Auto-scroll
+            }
+
+            // Ambil nomor telepon yang sedang aktif dari variabel PHP
+            const activeChatPhoneNumber = "{{ $phoneNumber ?? null }}";
+
+            // Mulai mendengarkan Private Channel 'whatsapp-chat'
+            window.Echo.private('whatsapp-chat')
+                .listen('.message.new', (event) => {
+                    console.log('Pesan baru diterima dari Echo:', event.message);
+
+                    // LOGIKA UTAMA:
+                    // Hanya tambahkan pesan ke UI jika pesan tersebut milik percakapan yang sedang dibuka.
+                    if (activeChatPhoneNumber && event.message.phone_number === activeChatPhoneNumber) {
+                        appendMessageToUI(event.message);
+                    }
+
+                    // TODO (Opsional):
+                    // 1. Tampilkan notifikasi "toast" untuk pesan yang masuk tapi tidak sedang dibuka.
+                    // 2. Perbarui daftar percakapan di sidebar (update "Terakhir: ...").
+                    // 3. Mainkan suara notifikasi.
+                    // const notifSound = new Audio('/sounds/notification.mp3');
+                    // notifSound.play();
+                });
+        </script>
+    @endauth
 @endsection

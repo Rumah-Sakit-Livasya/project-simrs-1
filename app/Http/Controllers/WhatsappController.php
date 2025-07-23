@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewWhatsappMessage;
 use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\WhatsappMessage; // BARU: Menggunakan model kita
@@ -16,31 +17,51 @@ class WhatsappController extends Controller
 {
     // --- BARU: Metode untuk menampilkan halaman chat ---
 
+    public function chatPage($phoneNumber = null)
+    {
+        // Selalu ambil daftar percakapan untuk sidebar
+        $conversations = WhatsappMessage::select(/*...query Anda...*/)->get();
+
+        $messages = null;
+        $contactName = null;
+
+        if ($phoneNumber) {
+            // Jika ada phoneNumber, ambil pesan dan nama kontak
+            $messages = WhatsappMessage::where('phone_number', $phoneNumber)->orderBy('created_at', 'asc')->get();
+            $contactName = $messages->first()->contact_name ?? $phoneNumber;
+        }
+
+        return view('pages.whatsapp.index', compact('conversations', 'messages', 'phoneNumber', 'contactName'));
+    }
+
     /**
-     * Menampilkan daftar percakapan.
+     * Menampilkan halaman utama dengan daftar percakapan.
+     * (Dipanggil oleh route 'whatsapp.index')
      */
     public function index()
     {
-        // Ambil pesan terakhir dari setiap percakapan
         $conversations = WhatsappMessage::select('phone_number', 'contact_name', DB::raw('MAX(created_at) as last_message_at'))
             ->groupBy('phone_number', 'contact_name')
             ->orderBy('last_message_at', 'desc')
             ->get();
 
+        // Penting: Render view yang sama dengan method show, tapi tanpa $messages
+        // Ganti 'pages.whatsapp.index' dengan path view Anda yang benar.
         return view('pages.whatsapp.index', compact('conversations'));
     }
 
     /**
      * Menampilkan riwayat chat dengan nomor tertentu.
+     * (Dipanggil oleh route 'whatsapp.chat')
      */
     public function show($phoneNumber)
     {
-        // Ambil semua pesan untuk nomor ini, urutkan dari yang terlama
+        // Ambil semua pesan untuk nomor ini
         $messages = WhatsappMessage::where('phone_number', $phoneNumber)
             ->orderBy('created_at', 'asc')
             ->get();
 
-        // Ambil daftar percakapan untuk sidebar
+        // Ambil daftar percakapan untuk sidebar (kode ini perlu di method show juga)
         $conversations = WhatsappMessage::select('phone_number', 'contact_name', DB::raw('MAX(created_at) as last_message_at'))
             ->groupBy('phone_number', 'contact_name')
             ->orderBy('last_message_at', 'desc')
@@ -48,7 +69,9 @@ class WhatsappController extends Controller
 
         $contactName = $messages->first()->contact_name ?? $phoneNumber;
 
-        return view('whatsapp.chat', compact('messages', 'conversations', 'phoneNumber', 'contactName'));
+        // Penting: Render view yang sama, sekarang dengan SEMUA variabel
+        // Ganti 'pages.whatsapp.index' dengan path view Anda yang benar.
+        return view('pages.whatsapp.index', compact('messages', 'conversations', 'phoneNumber', 'contactName'));
     }
 
     // --- BARU: Metode untuk mengirim balasan dari halaman chat ---
@@ -79,60 +102,91 @@ class WhatsappController extends Controller
 
     // --- MODIFIKASI: Menerima webhook dan menyimpan pesan masuk ---
 
+    // di WhatsappController.php
     public function processMessage(Request $request)
     {
-        if ($request->getMethod() !== 'POST') {
-            return response()->json(['error' => 1, 'data' => 'Method Not Allowed'], 405);
-        }
-
-        $headers = $request->headers->all();
+        // ... (kode validasi header Anda) ...
         $content = $request->json()->all();
         Log::info('WhatsApp Webhook Received: ' . json_encode($content, JSON_PRETTY_PRINT));
 
-        $key = $headers['key'][0] ?? '';
-        $user = $headers['nama'][0] ?? '';
-        $sandi = $headers['sandi'][0] ?? '';
-        if (!($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!')) {
-            return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
+        // Ambil data dari event pertama di array 'data'
+        $eventData = $content['data'][0] ?? ($content['data'][1] ?? null);
+        if (!$eventData) {
+            return response()->json(['error' => 1, 'data' => 'No event data found'], 400);
         }
 
-        // --- Simpan Pesan Masuk ke Database ---
-        $messageId = $content['data'][1]['key']['id'] ?? null;
-        $msg = $content['data'][1]['message']['extendedTextMessage']['text'] ??
-            ($content['data'][1]['message']['conversation'] ??
-                ($content['message'] ?? ''));
-        $nama = $content['data'][1]['pushName'] ?? 'Unknown';
-        $nomor = Str::before($content['data'][1]['key']['remoteJid'] ?? '', '@');
+        $key = $eventData['key'] ?? [];
+        $messageId = $key['id'] ?? null;
+        $isFromMe = $key['fromMe'] ?? false; // <-- PENTING
+        $remoteJid = $key['remoteJid'] ?? '';
+        $nomor = Str::before($remoteJid, '@');
 
-        // Simpan hanya jika ada pesan dan nomor yang valid
-        if (!empty($msg) && !empty($nomor)) {
-            WhatsappMessage::updateOrCreate(
-                ['message_id' => $messageId], // Cari berdasarkan message_id untuk menghindari duplikat
-                [
-                    'phone_number' => $nomor,
-                    'contact_name' => $nama,
-                    'message' => $msg,
-                    'direction' => 'in',
-                    'status' => 'read' // Anggap langsung terbaca karena masuk sistem
-                ]
-            );
+        $msg = $eventData['message']['extendedTextMessage']['text'] ??
+            ($eventData['message']['conversation'] ?? '');
+
+        // Abaikan jika tidak ada pesan atau nomor
+        if (empty($msg) || empty($nomor)) {
+            return response()->json(['status' => 'ignored', 'message' => 'No message or number']);
         }
 
-        // --- Logika Respon Otomatis (jika ada) ---
-        $response = '';
-        if ($msg == '/rekapabsen') {
-            // ... (Kode rekap absen Anda diletakkan di sini) ...
-            $response = 'Ini adalah rekap absen...'; // Ganti dengan hasil rekap Anda
-            $this->_sendToNodeServer($nomor, $response); // Kirim balasan
-        }
+        // Tentukan arah pesan berdasarkan `isFromMe`
+        $direction = $isFromMe ? 'out' : 'in';
+
+        $savedMessage = WhatsappMessage::updateOrCreate(
+            ['message_id' => $messageId],
+            [
+                'phone_number' => $nomor,
+                // Jika dari kita, mungkin tidak ada pushName
+                'contact_name' => $eventData['pushName'] ?? ($isFromMe ? 'Admin' : 'Unknown'),
+                'message' => $msg,
+                'direction' => $direction, // <-- Menggunakan arah yang dinamis
+                'status' => 'read'
+            ]
+        );
+
+        // Siarkan event ke browser
+        broadcast(new NewWhatsappMessage($savedMessage))->toOthers();
 
         return response()->json(['status' => 'success', 'message' => 'Webhook processed']);
     }
 
     // --- PRIVATE HELPER: Fungsi untuk mengirim pesan via cURL ---
 
+    /**
+     * Mengirim pesan ke server Node.js dan mencatatnya di database.
+     *
+     * @param string $number Nomor tujuan
+     * @param string $message Isi pesan
+     * @param string|null $filePath Path ke file (jika ada)
+     * @return bool|string Respon dari server Node.js atau false jika gagal.
+     */
     private function _sendToNodeServer($number, $message, $filePath = null)
     {
+        // =====================================================================
+        // LANGKAH 1: SIMPAN PESAN KELUAR KE DATABASE KITA TERLEBIH DAHULU
+        // =====================================================================
+        // Ini sangat penting agar pesan yang kita kirim langsung muncul di UI.
+        $outgoingMessage = WhatsappMessage::create([
+            'phone_number' => $number,
+            'message'      => $message,
+            'direction'    => 'out', // Arahnya 'out' (keluar)
+            'status'       => 'sending', // Status awal 'sending'
+            'contact_name' => 'Admin', // Atau nama user yang sedang login
+            // message_id akan null untuk pesan keluar, ini tidak masalah
+        ]);
+
+
+        // =====================================================================
+        // LANGKAH 2: SIARKAN PESAN KELUAR INI KE BROWSER
+        // =====================================================================
+        // Ini akan membuat pesan langsung muncul di layar pengirim DAN di layar
+        // admin lain yang mungkin sedang membuka chat yang sama.
+        broadcast(new NewWhatsappMessage($outgoingMessage))->toOthers();
+
+
+        // =====================================================================
+        // LANGKAH 3: KIRIM PESAN KE SERVER NODE.JS (Kode Asli Anda)
+        // =====================================================================
         $headers = ['Key:KeyAbcKey', 'Nama:arul', 'Sandi:123###!!'];
         $httpData = ['number' => $number, 'message' => $message];
 
@@ -155,8 +209,27 @@ class WhatsappController extends Controller
         curl_close($curl);
 
         if ($error) {
+            // Jika cURL gagal, update status pesan di DB menjadi 'failed'
+            $outgoingMessage->update(['status' => 'failed']);
             Log::error('cURL Error to Node Server: ' . $error);
             return false;
+        }
+
+
+        // =====================================================================
+        // LANGKAH 4: UPDATE STATUS PESAN BERDASARKAN RESPON DARI NODE.JS
+        // =====================================================================
+        $responseDecoded = json_decode($response, true);
+        if (isset($responseDecoded['status']) && $responseDecoded['status'] === 'success') {
+            // Jika Node.js bilang sukses, update status pesan menjadi 'sent'
+            // dan simpan message_id dari WhatsApp jika ada.
+            $outgoingMessage->update([
+                'status'     => 'sent',
+                'message_id' => $responseDecoded['id'] ?? null,
+            ]);
+        } else {
+            // Jika Node.js bilang gagal, update status menjadi 'failed'
+            $outgoingMessage->update(['status' => 'failed']);
         }
 
         Log::info('Response from Node Server: ' . $response);
