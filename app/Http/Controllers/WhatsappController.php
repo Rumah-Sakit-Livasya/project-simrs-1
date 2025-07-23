@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 
@@ -118,13 +117,11 @@ class WhatsappController extends Controller
         $headers = $request->headers->all();
         $content = $request->json()->all();
 
-        // Opsional tapi sangat disarankan: Log request untuk debugging
-        Log::info('WhatsApp Webhook Received: ' . json_encode($content, JSON_PRETTY_PRINT));
-
         // Validasi header
         $key = $headers['key'][0] ?? '';
         $user = $headers['nama'][0] ?? '';
         $sandi = $headers['sandi'][0] ?? '';
+
 
         $error = true;
         if ($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!') {
@@ -135,19 +132,12 @@ class WhatsappController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        // // --- PERBAIKAN: Ambil data dari struktur JSON webhook WhatsApp yang benar ---
-        // $msg = $content['entry'][0]['changes'][0]['value']['messages'][0]['text']['body'] ?? '';
-        // $nama = $content['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'] ?? 'Sahabat Livasya';
-        // $data = $content['data'] ?? []; // Untuk kompatibilitas dengan blok /isiabsenpeg
-        // // --- AKHIR PERBAIKAN ---
+        // Logika bisnis
+        $msg = $content['message'] ?? '';
+        $data = $content['data'] ?? [];
+        $nama = $data[1]['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'] ?? 'Sahabat Livasya';
 
         $response = '';
-
-        // Abaikan webhook yang bukan pesan dari pengguna (misal: status 'delivered', 'read')
-        if (empty($msg)) {
-            return response()->json(['status' => 'success', 'message' => 'Not a user message, skipped.']);
-        }
-
         if ($msg == '/test-kirim') {
             $response .= 'Halo ' . $nama;
         } else if ($msg == '/rekapabsen') {
@@ -156,25 +146,25 @@ class WhatsappController extends Controller
             $total_clockin = Attendance::whereNotNull('clock_in')
                 ->whereDate('date', Carbon::now()->format('Y-m-d'))
                 ->whereHas('employees', function ($query) {
-                    $query->where('is_active', 1);
+                    $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
                 })->count();
             $total_no_clockin = Attendance::whereNull('clock_in')->whereNull('is_day_off')
                 ->whereDate('date', Carbon::now()->format('Y-m-d'))
                 ->whereHas('employees', function ($query) {
                     $query->where('organization_id', '!=', 3);
-                    $query->where('is_active', 1);
+                    $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
                 })->count();
             $total_libur = Attendance::where('is_day_off', 1)
                 ->whereNull('attendance_code_id')
                 ->whereNull('day_off_request_id')
                 ->whereDate('date', Carbon::now()->format('Y-m-d'))
                 ->whereHas('employees', function ($query) {
-                    $query->where('is_active', 1);
+                    $query->where('is_active', 1); // Hanya untuk karyawan yang aktif
                 })->count();
             $total_izin = 0;
             $total_sakit = 0;
             $total_cuti = 0;
-            $absensi_pegawai = Attendance::with(['day_off'])->where('is_day_off', '!=', null)->where('date', Carbon::now()->format('Y-m-d'))->get();
+            $absensi_pegawai = Attendance::where('is_day_off', '!=', null)->where('date', Carbon::now()->format('Y-m-d'))->get();
             foreach ($absensi_pegawai as $absensi) {
                 if ($absensi->attendance_code_id != null || $absensi->day_off_request_id != null) {
                     if ($absensi->attendance_code_id == 1) {
@@ -183,7 +173,7 @@ class WhatsappController extends Controller
                         $total_sakit += 1;
                     } elseif ($absensi->attendance_code_id != 1 && $absensi->attendance_code_id != 2) {
                         $total_cuti += 1;
-                    } elseif (empty($absensi->attendance_code_id)) {
+                    } elseif ($absensi->attendance_code_id == null || $absensi->attendance_code_id == "") {
                         if ($absensi->day_off) {
                             if ($absensi->day_off->attendance_code_id == 1) {
                                 $total_izin += 1;
@@ -209,7 +199,7 @@ class WhatsappController extends Controller
 
             $response .= "\n🟥 <b>DAFTAR PEGAWAI YANG TELAT:</b> \n\n";
             $pegawai_telat = Attendance::whereNotNull('clock_in')->whereNotNull('late_clock_in')->whereHas('employees', function ($query) {
-                $query->where('is_active', 1);
+                $query->where('is_active', 1); //Hanya untuk karyawan yng aktif
                 $query->whereNotIn('id', [1, 2, 14, 222]);
             })->where('date', Carbon::now()->format('Y-m-d'))->orderBy('late_clock_in')->get();
             foreach ($pegawai_telat as $key => $row) {
@@ -222,7 +212,6 @@ class WhatsappController extends Controller
             $response .= "<b>Rekap tersebut diambil berdasarkan tanggal " . Carbon::now()->translatedFormat('d F Y H:i') . "</b>";
         } else if ($msg == '/tidakabsen') {
             $response = "";
-            // Note: $data['shift'] mungkin perlu penyesuaian tergantung bagaimana data ini dikirim.
             if (isset($data["shift"])) {
                 if ($data["shift"] == "pagi") {
                     $absent_pagi_pt = Attendance::where('clock_in', null)->where('is_day_off', null)
@@ -230,16 +219,24 @@ class WhatsappController extends Controller
                             $query->where('time_in', '>', '04:00:00')
                                 ->where('time_in', '<', '09:00:00');
                         })->whereHas('employees', function ($query) {
-                            $query->where('is_active', 1)->where('company_id', 2);
-                        })->where('date', Carbon::now()->format('Y-m-d'))->get();
+                            $query->where('is_active', 1);
+                            $query->where('company_id', 2);
+                        })
+                        ->where('date', Carbon::now()->format('Y-m-d'))
+                        ->get();
 
                     $absent_pagi_rs = Attendance::where('clock_in', null)->where('is_day_off', null)
                         ->whereHas('shift', function ($query) {
                             $query->where('time_in', '>', '04:00:00')
                                 ->where('time_in', '<', '09:00:00');
                         })->whereHas('employees', function ($query) {
-                            $query->where('is_active', 1)->where('company_id', 1)->where('organization_id', '!=', 3)->whereNotIn('id', [1, 2, 14, 222]);
-                        })->where('date', Carbon::now()->format('Y-m-d'))->get();
+                            $query->where('is_active', 1);
+                            $query->where('company_id', 1);
+                            $query->where('organization_id', '!=', 3);
+                            $query->whereNotIn('id', [1, 2, 14, 222]);
+                        })
+                        ->where('date', Carbon::now()->format('Y-m-d'))
+                        ->get();
 
                     $response .= "\n🔴 <b>DAFTAR KARYAWAN YANG TIDAK ABSEN PAGI ‼️ </b>\n\n";
                     if ($absent_pagi_pt->isNotEmpty()) {
@@ -249,6 +246,7 @@ class WhatsappController extends Controller
                         }
                         $response .= "\n";
                     }
+
                     if ($absent_pagi_rs->isNotEmpty()) {
                         $response .= "🔻 <b>Karyawan RS Livasya: </b>\n";
                         foreach ($absent_pagi_rs as $key => $row) {
@@ -335,13 +333,13 @@ class WhatsappController extends Controller
             $response .= "\n\n🔴 <b>DAFTAR KARYAWAN YANG LIBUR/IZIN/SAKIT/CUTI: </b>\n\n";
             $response .= "🔻 <b>Karyawan PT: </b>\n";
             $attendancesPT = Attendance::whereNotNull('is_day_off')->whereHas('employees', function ($query) {
-                $query->where('is_active', 1)->where('company_id', 2);
+                $query->where('is_active', 1);
+                $query->where('company_id', 2);
             })->where('date', Carbon::now()->format('Y-m-d'))->get();
 
             foreach ($attendancesPT as $key => $row) {
                 if ($row->attendance_code_id != null || $row->day_off_request_id != null) {
-                    $status = isset($row->attendance_code_id) ? ($row->attendance_code->name ?? 'N/A') : ($row->day_off->attendance_code->name ?? 'N/A');
-                    $response .= "▪️ " . $row->employees->fullname . " ( " . $status . " )\n";
+                    $response .= "▪️ " . $row->employees->fullname . " ( " . isset($row->attendance_code_id) ? $row->attendance_code->name : $row->day_off->attendance_code->name . " )\n";
                 } else {
                     $response .= "▪️ " . $row->employees->fullname . " ( Libur )\n";
                 }
@@ -350,16 +348,29 @@ class WhatsappController extends Controller
 
             $response .= "\n🔻 <b>Karyawan RS Livasya: </b>\n";
             $attendancesLivasya = Attendance::whereNotNull('is_day_off')->whereHas('employees', function ($query) {
-                $query->where('is_active', 1)->where('company_id', 1);
+                $query->where('is_active', 1);
+                $query->where('company_id', 1);
             })->where('date', Carbon::now()->format('Y-m-d'))->get();
+
+            $employeesWithAttendance = [];
+            $employeesOnLeave = [];
 
             foreach ($attendancesLivasya as $row) {
                 if ($row->attendance_code_id != null || $row->day_off_request_id != null) {
-                    $status = $row->attendance_code->description ?? ($row->day_off->attendance_code->description ?? 'N/A');
-                    $response .= "<b>▪️ " . $row->employees->fullname . " ( " . $status . " )</b> \n";
+                    $employeesWithAttendance[] = $row;
                 } else {
-                    $response .= "▪️ " . $row->employees->fullname . " ( Libur )\n";
+                    $employeesOnLeave[] = $row;
                 }
+            }
+
+            foreach ($employeesWithAttendance as $row) {
+                $status = $row->attendance_code->description ?? ($row->day_off->attendance_code->description ?? 'N/A');
+                $response .= "<b>▪️ " . $row->employees->fullname . " ( " . $status . " )</b> \n";
+            }
+            $response .= "\n";
+
+            foreach ($employeesOnLeave as $row) {
+                $response .= "▪️ " . $row->employees->fullname . " ( Libur )\n";
             }
 
             $response .= "\n";
