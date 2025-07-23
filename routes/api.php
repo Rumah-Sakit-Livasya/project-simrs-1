@@ -43,6 +43,8 @@ use App\Models\AttendanceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\EmployeeLeaveController;
+use App\Http\Controllers\API\PesanController;
+use App\Http\Controllers\Api\WebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -361,5 +363,6 @@ Route::apiResource('events', EventController::class);
 Route::get('/employee-birthdays', [EventController::class, 'getEmployeeBirthdays']);
 
 Route::get('/employee-leaves/{id}', [AttendanceController::class, 'getDayOffs']);
+Route::post('/webhook/whatsapp', [WebhookController::class, 'handleWhatsapp']);
 
 require __DIR__ . '/api-simrs.php';
