@@ -37,12 +37,23 @@ class BotMessageController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        $response = json_encode($content, JSON_PRETTY_PRINT);
+        // --- PERBAIKAN DIMULAI DI SINI ---
 
         // Logika bisnis
-        $msg = $content['message'] ?? '';
-        $data = $content['data'] ?? [];
-        $nama = $data[1]['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
+        // Ambil data dengan aman dari struktur JSON custom Anda
+
+        // 1. Ambil Pesan ($msg) dengan beberapa fallback untuk memastikan pesan ditemukan
+        $msg = $content['data'][1]['message']['extendedTextMessage']['text'] ??
+            ($content['data'][1]['message']['conversation'] ??
+                ($content['message'] ?? '')); // Fallback jika struktur berbeda
+
+        // 2. Ambil Nama ($nama) dari 'pushName' yang ada di log Anda
+        $nama = $content['data'][1]['pushName'] ?? 'Sahabat Livasya';
+
+        // 3. Ambil $data untuk digunakan di blok lain
+        $data = $content['data'][0] ?? []; // Ambil data spesifik seperti `shift` dari elemen pertama
+
+        // --- AKHIR PERBAIKAN ---
 
         $response = '';
         if ($msg == '/test-kirim') {
