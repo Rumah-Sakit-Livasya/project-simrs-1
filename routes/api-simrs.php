@@ -359,6 +359,15 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         });
     });
 
+    Route::prefix('farmasi')->group(function () {
+        Route::prefix("laporan")->group(function () {
+            Route::prefix("stock-detail")->group(function () {
+                Route::post("/get-items", [WarehouseReportStockDetail::class, "get_items"])->name("warehouse.report.stock-detail.get-items");
+                Route::post("/get-print-template", [WarehouseReportStockDetail::class, "get_print_template"])->name("warehouse.report.stock-detail.get-print-template");
+            });
+        });
+    });
+
 
 
     Route::prefix("procurement")->group(function () {
