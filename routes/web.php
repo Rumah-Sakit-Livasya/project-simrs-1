@@ -206,17 +206,42 @@ Route::middleware([LastSeenUser::class])->group(function () {
     |  WHATSAPP
     |--------------------------------------------------------------------------
     */
-        Route::prefix('whatsapp')->group(function () {
-            Route::get('/', function () {
-                return view('pages.whatsapp.index');
-            })->name('whatsapp');
+        // routes/web.php
+
+        Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+
+            // --- Rute untuk Halaman Chat dan Balasan Pesan ---
+
+            // 1. Menampilkan halaman utama dengan daftar percakapan
+            // URL: /whatsapp
+            Route::get('/', [WhatsappController::class, 'index'])->name('index');
+
+            // 2. Menampilkan detail percakapan dengan nomor tertentu
+            // URL: /whatsapp/chat/{phoneNumber}
+            Route::get('/chat/{phoneNumber}', [WhatsappController::class, 'show'])->name('chat');
+
+            // 3. Mengirim balasan dari form di halaman chat
+            // URL: /whatsapp/reply (method POST)
+            Route::post('/reply', [WhatsappController::class, 'reply'])->name('reply');
+
+            // --- Rute Lain yang Sudah Ada (diperbaiki sedikit) ---
+
+            // 4. Menampilkan halaman untuk kirim broadcast (bisa diarahkan ke view yang sama atau berbeda)
+            // URL: /whatsapp/broadcast
             Route::get('/broadcast', function () {
-                return view('pages.whatsapp.index');
+                // Sebaiknya buat view terpisah untuk broadcast
+                return view('pages.whatsapp.broadcast');
             })->name('broadcast');
+
+            // 5. Mengirim pesan (digunakan oleh form broadcast/single message)
+            // URL: /whatsapp/send (method POST)
+            Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('send');
+
+            // 6. Menampilkan halaman untuk manajemen grup kontak
+            // URL: /whatsapp/group_kontak
             Route::get('/group_kontak', function () {
-                return view('pages.whatsapp.index');
+                return view('pages.whatsapp.group_kontak');
             })->name('group_kontak');
-            Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('whatsapp.send');
         });
         /* END PAYROLL --------------------------------------------------------*/
 
