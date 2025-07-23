@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 
@@ -134,11 +135,11 @@ class WhatsappController extends Controller
             return response()->json(['error' => 1, 'data' => 'gagal proses'], 403);
         }
 
-        // --- PERBAIKAN: Ambil data dari struktur JSON webhook WhatsApp yang benar ---
-        $msg = $content['entry'][0]['changes'][0]['value']['messages'][0]['text']['body'] ?? '';
-        $nama = $content['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'] ?? 'Sahabat Livasya';
-        $data = $content['data'] ?? []; // Untuk kompatibilitas dengan blok /isiabsenpeg
-        // --- AKHIR PERBAIKAN ---
+        // // --- PERBAIKAN: Ambil data dari struktur JSON webhook WhatsApp yang benar ---
+        // $msg = $content['entry'][0]['changes'][0]['value']['messages'][0]['text']['body'] ?? '';
+        // $nama = $content['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'] ?? 'Sahabat Livasya';
+        // $data = $content['data'] ?? []; // Untuk kompatibilitas dengan blok /isiabsenpeg
+        // // --- AKHIR PERBAIKAN ---
 
         $response = '';
 
