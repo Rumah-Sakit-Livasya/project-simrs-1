@@ -56,13 +56,13 @@ class BotMessageController extends Controller
                     $nama = $webhookData['nama'] ?? '';
                     $nomor = $webhookData['nomor'] ?? '';
                     // TODO: Simpan kontak baru ke database Anda
-                    /* Contoh:
-                WhatsappLog::create([
-                    'event_type' => 'contact',
-                    'sender_name' => $nama,
-                    'sender_number' => $nomor,
-                ]);
-                */
+                    //     /* Contoh:
+                    // WhatsappLog::create([
+                    //     'event_type' => 'contact',
+                    //     'sender_name' => $nama,
+                    //     'sender_number' => $nomor,
+                    // ]);
+                    // */
                     Log::info("Menerima kontak baru: $nama ($nomor)");
                     break;
 
@@ -370,18 +370,19 @@ class BotMessageController extends Controller
 
                 $response = 'terima kasih ' . $nama . ' sudah mengisi Absensi 😍 ';
                 $response .= chr(10) . 'pada tanggal ' . date("d M Y", $data['date']) . ' jam ' . date("H:i:s", $data['date']);;
-            } else {
-                // $idTelegram = isset($data['id']) ? $data['id'] : null;
-                // $usernameTelegram = $data['username'] ?? null;
-                // $nama = $data['first_name'] ?? null;
-
-                // $error = true;
-                // $response = 'else';
-                $response  = "Halo *$nama* , \r\n";
-                $response .= "Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka.* \r\n\r\n";
-                $response .= "*Jam Operasional IGD 24 Jam.* \r\n";
-                $response .= "Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini: \r\n";
             }
+            // else {
+            //     // $idTelegram = isset($data['id']) ? $data['id'] : null;
+            //     // $usernameTelegram = $data['username'] ?? null;
+            //     // $nama = $data['first_name'] ?? null;
+
+            //     // $error = true;
+            //     // $response = 'else';
+            //     $response  = "Halo *$nama* , \r\n";
+            //     $response .= "Salam sehat sahabat Livasya, terimakasih sudah menghubungi kontak Customer Service *Rumah Sakit Livasya Majalengka.* \r\n\r\n";
+            //     $response .= "*Jam Operasional IGD 24 Jam.* \r\n";
+            //     $response .= "Untuk Layanan dan informasi lainnya bisa kunjungi website official kami di www.livasya.com atau silahkan klik menu layanan dibawah ini: \r\n";
+            // }
         }
 
         // --- PENGIRIMAN RESPONS AKHIR ---

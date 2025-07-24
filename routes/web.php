@@ -461,7 +461,10 @@ Route::get('/test-pusher', function () {
     return 'Event telah dikirim (tanpa verifikasi SSL)!';
 });
 
-
+// routes/web.php
+Route::get('/test-layout', function () {
+    return view('test-layout');
+});
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/simrs.php';
