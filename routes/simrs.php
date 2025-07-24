@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\BilinganController;
+use App\Http\Controllers\FarmasiReportKartuStock;
 use App\Http\Controllers\FarmasiReportStockDetail;
 use App\Http\Controllers\FarmasiReportStockStatus;
 use App\Http\Controllers\KategoriGiziController;
@@ -280,7 +281,7 @@ Route::group(['middleware' => ['auth']], function () {
             Route::prefix("laporan")->group(function () {
                 Route::get("/stock-status", [FarmasiReportStockStatus::class, "index"])->name("farmasi.report.stock-status");
                 Route::get("/stock-detail", [FarmasiReportStockDetail::class, "index"])->name('farmasi.report.stock-detail');
-                // Route::get("/kartu-stok", [FarmasiReportKartuStock::class, "index"])->name('farmasi.report.kartu-stock');
+                Route::get("/kartu-stok", [FarmasiReportKartuStock::class, "index"])->name('farmasi.report.kartu-stock');
             });
         });
 
