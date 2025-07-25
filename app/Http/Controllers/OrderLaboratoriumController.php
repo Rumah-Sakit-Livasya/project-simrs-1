@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\OrderParameterLaboratorium;
 use App\Models\RegistrationOTC;
 use App\Models\RelasiParameterLaboratorium;
+use App\Models\SIMRS\Bilingan;
+use App\Models\SIMRS\BilinganTagihanPasien;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Penjamin;
+use App\Models\SIMRS\TagihanPasien;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -243,8 +246,61 @@ class OrderLaboratoriumController extends Controller
             'id' => 'required|integer'
         ]);
 
-        OrderLaboratorium::where('id', $validatedData['id'])
-            ->update(['status_billed' => 1]);
+        $order = OrderLaboratorium::with([
+            'registration',
+            'order_parameter_laboratorium.parameter_laboratorium'
+        ])->findOrFail($validatedData['id']);
+
+        $order->update(['is_konfirmasi' => 1]);
+
+        if (!$order->otc_id && $order->registration_id) {
+            $billing = Bilingan::firstOrCreate(
+
+                ['registration_id' => $order->registration_id],
+                [
+                    'patient_id' => $order->registration->patient_id,
+                    'status' => 'belum final',
+                    'wajib_bayar' => 0
+                ]
+            );
+
+            $totalAmount = 0;
+
+            foreach ($order->order_parameter_laboratorium as $parameter) {
+                if (!$parameter->parameter_laboratorium || $parameter->nominal_rupiah <= 0) {
+                    continue;
+                }
+
+                $tagihan = TagihanPasien::create([
+                    'user_id' => auth()->id(),
+                    'bilingan_id' => $billing->id,
+                    'registration_id' => $order->registration_id,
+                    'date' => Carbon::now(),
+                    'tagihan' => '[Biaya Laboratorium] ' . $parameter->parameter_laboratorium->parameter,
+                    'quantity' => 1,
+                    'nominal' => $parameter->nominal_rupiah,
+                    'harga' => $parameter->nominal_rupiah,
+                    'wajib_bayar' => $parameter->nominal_rupiah
+                ]);
+
+                BilinganTagihanPasien::create([
+                    'tagihan_pasien_id' => $tagihan->id,
+                    'bilingan_id' => $billing->id,
+                ]);
+
+                $totalAmount += $parameter->nominal_rupiah;
+            }
+
+            // Update the total amount in the billing if we have items
+            if ($totalAmount > 0) {
+                $billing->update(['wajib_bayar' => $totalAmount]);
+            }
+
+            // Update the billing_id in the order if needed
+            if ($order->bilingan_id !== $billing->id) {
+                $order->update(['bilingan_id' => $billing->id]);
+            }
+        }
 
         return response("ok");
     }

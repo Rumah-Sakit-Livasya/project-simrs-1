@@ -149,13 +149,10 @@ class Registration extends Model
         return $this->hasMany(OrderLaboratorium::class, 'registration_id');
     }
 
-<<<<<<< HEAD
-
     public function konfirmasi_asuransi()
     {
         return $this->hasMany(KonfirmasiAsuransi::class, 'registration_id');
     }
-
 
     public function getDoctorFullnameAttribute()
     {
@@ -167,8 +164,6 @@ class Registration extends Model
         return $this->hasMany(TagihanPasien::class, 'registration_id');
     }
 
-
-=======
     public function triage()
     {
         return $this->hasOne(Triage::class);
@@ -193,12 +188,10 @@ class Registration extends Model
     {
         return $this->hasOne(RujukAntarRS::class);
     }
->>>>>>> 841717927d57ff76a595e6f030bf800256003f35
 
     public function order_gizi()
     {
         return $this->hasMany(OrderGizi::class, 'registration_id');
-<<<<<<< HEAD
     }
 
     public function diet_gizi()
@@ -206,12 +199,7 @@ class Registration extends Model
         return $this->hasOne(DietGizi::class, 'registration_id');
     }
 
-    public function cppt()
-    {
-        return $this->hasMany(CPPT::class);
-=======
->>>>>>> 841717927d57ff76a595e6f030bf800256003f35
-    }
+
 
     // public function generateNomorRegistrasi()
     // {

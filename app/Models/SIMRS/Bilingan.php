@@ -6,6 +6,7 @@ use Carbon\Carbon;
 
 use App\Events\BillingFinalized;
 use App\Models\Keuangan\JasaDokter;
+use App\Models\OrderRadiologi;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -90,7 +91,11 @@ class Bilingan extends Model implements AuditableContract
         return $this->belongsToMany(TagihanPasien::class, 'bilingan_tagihan_pasien', 'bilingan_id', 'tagihan_pasien_id');
     }
 
-
+    // Pada model Bilingan.php
+    public function orderRadiologi()
+    {
+        return $this->hasOne(OrderRadiologi::class, 'bilingan_id', 'id');
+    }
     protected static function booted()
     {
         static::updated(function (Bilingan $bilingan) {

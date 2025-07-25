@@ -3,11 +3,13 @@
 namespace App\Models\SIMRS;
 
 use App\Models\Keuangan\JasaDokter;
+use App\Models\OrderRadiologi;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
+use Illuminate\Support\Facades\Log;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
 class TagihanPasien extends Model implements AuditableContract
@@ -32,6 +34,28 @@ class TagihanPasien extends Model implements AuditableContract
     public function getBillDateAttribute()
     {
         return $this->bilinganSatu->created_at ?? null;
+    }
+    public function order_radiologi()
+    {
+        return $this->belongsTo(OrderRadiologi::class, 'order_radiologi_id');
+    }
+    protected static function booted()
+    {
+        static::creating(function ($tagihan) {
+            // Kita periksa apakah tagihan ini terkait dengan radiologi.
+            // Anda bisa sesuaikan kondisi ini jika perlu.
+            if (str_contains(strtolower($tagihan->tipe_tagihan ?? ''), 'radiologi') || str_contains(strtolower($tagihan->tagihan ?? ''), 'radiologi')) {
+
+                // Buat stack trace menggunakan Exception, tapi jangan di-throw
+                $e = new \Exception();
+
+                // Tulis jejak lengkap ke file log Laravel
+                Log::info('--- JEJAK PEMBUATAN TAGIHAN RADIOLOGI DITEMUKAN ---');
+                Log::info('Data Tagihan:', $tagihan->toArray());
+                Log::info($e->getTraceAsString());
+                Log::info('--- AKHIR JEJAK ---');
+            }
+        });
     }
 
 
