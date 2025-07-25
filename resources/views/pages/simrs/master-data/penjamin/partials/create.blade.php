@@ -34,7 +34,7 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label for="kode">
-                                        Akhir Kerjasama <span class="text-danger fw-bold">*</span>
+                                        Akhir Kerjasama
                                     </label>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
@@ -55,7 +55,8 @@
                             </div>
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
-                                    <label for="tipe_perusahaan">Tipe Perusahaan</label>
+                                    <label for="tipe_perusahaan">Tipe Perusahaan</label> <span
+                                        class="text-danger fw-bold">*</span>
                                     <select name="tipe_perusahaan" id="tipe_perusahaan" class="form-control select2">
                                         <option value="Asuransi Non Penjamin">Asuransi Non Penjamin</option>
                                         <option value="Asuransi Penjamin">Asuransi Penjamin</option>
@@ -92,17 +93,15 @@
                                     </label>
                                     <select name="group_penjamin_id" id="group_penjamin_id"
                                         class="form-control select2">
-                                        <option value="1">Standar</option>
-                                        <option value="2">BPJS</option>
-                                        <option value="3">UMUM</option>
+                                        @foreach ($group_penjamin as $group)
+                                            <option value="{{ $group->id }}">{{ $group->name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
-                                    <label for="alamat_email">Alamat Email
-                                        <span class="text-danger fw-bold">*</span>
-                                    </label>
+                                    <label for="alamat_email">Alamat Email</label>
                                     <input type="text" id="alamat_email" class="form-control" name="alamat_email"
                                         placeholder="Masukan alamat email...">
                                 </div>
@@ -116,26 +115,21 @@
                             </div>
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
-                                    <label for="nama_kontak">Nama Kontak
-                                        <span class="text-danger fw-bold">*</span>
-                                    </label>
+                                    <label for="nama_kontak">Nama Kontak</label>
                                     <input type="text" id="nama_kontak" class="form-control" name="nama_kontak"
                                         placeholder="Masukan nama kontak...">
                                 </div>
                             </div>
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
-                                    <label for="diskon">Diskon
-                                    </label>
+                                    <label for="diskon">Diskon <span class="text-danger fw-bold">*</span></label>
                                     <input type="text" id="diskon" class="form-control" name="diskon"
-                                        placeholder="Masukan nama kontak...">
+                                        placeholder="Masukan Diskon...">
                                 </div>
                             </div>
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
-                                    <label for="jabatan">Jabatan
-                                        <span class="text-danger fw-bold">*</span>
-                                    </label>
+                                    <label for="jabatan">Jabatan</label>
                                     <input type="text" id="jabatan" class="form-control" name="jabatan"
                                         placeholder="Masukan jabatan...">
                                 </div>
@@ -163,7 +157,6 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label for="fax_kontak">Fax Kontak
-                                        <span class="text-danger fw-bold">*</span>
                                     </label>
                                     <input type="text" id="fax_kontak" class="form-control" name="fax_kontak"
                                         placeholder="Masukan fax kontak...">
@@ -172,7 +165,6 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label for="alamat">Alamat
-                                        <span class="text-danger fw-bold">*</span>
                                     </label>
                                     <input type="text" id="alamat" class="form-control" name="alamat"
                                         placeholder="Masukan fax kontak...">
@@ -181,7 +173,6 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label for="alamat_tagihan">Alamat Tagihan
-                                        <span class="text-danger fw-bold">*</span>
                                     </label>
                                     <input type="text" id="alamat_tagihan" class="form-control"
                                         name="alamat_tagihan" placeholder="Masukan fax kontak...">
@@ -190,7 +181,6 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label for="telepon_kontak">Telepon Kontak
-                                        <span class="text-danger fw-bold">*</span>
                                     </label>
                                     <input type="text" id="telepon_kontak" class="form-control"
                                         name="telepon_kontak" placeholder="Masukan telepon kontak...">
@@ -199,7 +189,6 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label for="email_kontak">Email Kontak
-                                        <span class="text-danger fw-bold">*</span>
                                     </label>
                                     <input type="text" id="email_kontak" class="form-control" name="email_kontak"
                                         placeholder="Masukan fax kontak...">
@@ -208,7 +197,6 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label for="kota">Kota
-                                        <span class="text-danger fw-bold">*</span>
                                     </label>
                                     <input type="text" id="kota" class="form-control" name="kota"
                                         placeholder="Masukan fax kontak...">
@@ -234,7 +222,6 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label for="kode_pos">Kode Pos
-                                        <span class="text-danger fw-bold">*</span>
                                     </label>
                                     <input type="text" id="kode_pos" class="form-control" name="kode_pos"
                                         placeholder="Masukan fax kontak...">
@@ -261,7 +248,6 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-group">
                                     <label for="keterangan">Keterangan
-                                        <span class="text-danger fw-bold">*</span>
                                     </label>
                                     <input type="text" id="keterangan" class="form-control" name="keterangan"
                                         placeholder="Masukan fax kontak...">

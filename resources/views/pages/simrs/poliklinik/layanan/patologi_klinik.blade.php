@@ -141,7 +141,7 @@
                             <div id="alert-pengkajian"></div>
                             <h2 class="font-weight-bold">
                                 DAFTAR ORDER
-                            </h4>
+                                </h4>
                         </header>
                         <hr style="border-color: #868686; margin-top: 30px; margin-bottom: 30px;">
                         <div class="row">
@@ -165,7 +165,7 @@
                                         </thead>
                                         <tbody>
                                             <!-- Rows will be added here dynamically -->
-                                           
+
                                         </tbody>
                                     </table>
                                 </div>
@@ -181,12 +181,12 @@
                             <div id="alert-pengkajian"></div>
                             <h2 class="font-weight-bold">
                                 <i class="mdi mdi-flask-outline mdi-24px"></i> ORDER LABORATORIUM
-                            </h4>
+                                </h4>
                         </header>
                         <hr style="border-color: #868686; margin-top: 30px; margin-bottom: 30px;">
 
                         <form action="javascript:void(0)" method="POST" id="form_order_lab">
-                            
+
                         </form>
                     </div>
                 </div>
@@ -211,9 +211,9 @@
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
             $('#dt-basic-example').dataTable({
                 responsive: false,
             });

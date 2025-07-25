@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SIMRS\Penjamin;
 
 use App\Models\SIMRS\Penjamin;
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\GroupPenjamin;
 use Illuminate\Http\Request;
 
 class PenjaminController extends Controller
@@ -16,7 +17,8 @@ class PenjaminController extends Controller
     public function index()
     {
         $penjamin = Penjamin::all();
-        return view('pages.simrs.master-data.penjamin.index', compact('penjamin'));
+        $group_penjamin = GroupPenjamin::all();
+        return view('pages.simrs.master-data.penjamin.index', compact('penjamin', 'group_penjamin'));
     }
 
     /**
@@ -24,10 +26,7 @@ class PenjaminController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-        
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.

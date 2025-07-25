@@ -420,15 +420,15 @@
                                                     </td>
                                                     <td style="white-space: nowrap">
                                                         <span
-                                                            class="badge {{ $row->shift->name == 'dayoff' || $row->shift->name == 'National Holiday' ? 'badge-danger' : 'badge-secondary' }} badge-pill">
-                                                            {{ $row->shift->name }}
+                                                            class="badge {{ in_array(optional($row->shift)->name, ['dayoff', 'National Holiday']) ? 'badge-danger' : 'badge-secondary' }} badge-pill">
+                                                            {{ optional($row->shift)->name ?? '-' }}
                                                         </span>
                                                     </td>
                                                     <td style="white-space: nowrap">
-                                                        {{ $row->shift->time_in }}
+                                                        {{ optional($row->shift)->time_in ?? '-' }}
                                                     </td>
                                                     <td style="white-space: nowrap">
-                                                        {{ $row->shift->time_out }}
+                                                        {{ optional($row->shift)->time_out ?? '-' }}
                                                     </td>
                                                     @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
                                                         <td>

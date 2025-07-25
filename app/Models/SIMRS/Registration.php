@@ -10,6 +10,8 @@ use App\Models\OrderRadiologi;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Keuangan\Kasir;
+use App\Models\SIMRS\Pelayanan\RujukAntarRS;
+use App\Models\SIMRS\Pelayanan\Triage;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
@@ -119,10 +121,6 @@ class Registration extends Model implements AuditableContract
     protected static function boot()
     {
         parent::boot();
-
-        // static::creating(function ($model) {
-        //     $model->registrasi = $model->generateNomorRegistrasi();
-        // });
     }
 
 
@@ -139,6 +137,31 @@ class Registration extends Model implements AuditableContract
     public function order_laboratorium()
     {
         return $this->hasMany(OrderLaboratorium::class, 'registration_id');
+    }
+
+    public function triage()
+    {
+        return $this->hasOne(Triage::class);
+    }
+
+    public function cppt()
+    {
+        return $this->hasMany(CPPT::class);
+    }
+
+    public function ews_anak()
+    {
+        return $this->hasOne(EWSAnak::class);
+    }
+
+    public function assesment_gadar()
+    {
+        return $this->hasOne(AssesmentKeperawatanGadar::class);
+    }
+
+    public function rujuk_antar_rs()
+    {
+        return $this->hasOne(RujukAntarRS::class);
     }
 
     public function order_gizi()

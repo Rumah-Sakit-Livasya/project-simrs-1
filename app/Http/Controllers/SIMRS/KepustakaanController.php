@@ -24,8 +24,9 @@ class KepustakaanController extends Controller
 
         $organizations = Organization::all();
         $breadcrumbs = collect();
+        $view = 'parent';
 
-        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'organizations', 'childrenFolder'));
+        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'organizations', 'childrenFolder', 'view'));
     }
 
     public function showFolder($encryptedId)
@@ -48,11 +49,42 @@ class KepustakaanController extends Controller
                 ->orderByRaw("CASE WHEN type = 'folder' THEN 1 ELSE 2 END")
                 ->orderBy('name', 'asc')
                 ->get();
+
+            $organizationFolder = Organization::pluck('id')
+                ->toArray();
+            $organizations = Organization::all();
         } else {
+            $organizations = Organization::where('id', auth()->user()->employee->organization_id)->get();
+            // Ambil semua organisasi anak secara rekursif
+            function getChildOrganizationIds($organization)
+            {
+                $ids = [];
+
+                foreach ($organization->child_structures as $childStructure) {
+                    $childOrg = $childStructure->organization;
+                    if ($childOrg) {
+                        $ids[] = $childOrg->id;
+                        $ids = array_merge($ids, getChildOrganizationIds($childOrg)); // Rekursif
+                    }
+                }
+
+                return $ids;
+            }
+
+            // Inisialisasi array organisasi
+            $organizationFolder = [];
+
+            // Organisasi utama dari user
+            $currentOrganization = auth()->user()->employee->organization;
+            $organizationFolder[] = $currentOrganization->id;
+
+            // Tambahkan semua anak organisasi (rekursif)
+            $organizationFolder = array_merge($organizationFolder, getChildOrganizationIds($currentOrganization));
+            // Query kepustakaan
             $kepustakaan = Kepustakaan::where('parent_id', $folder->id)
-                ->where(function ($query) {
-                    $query->where('organization_id', auth()->user()->employee->organization_id)
-                        ->orWhere('organization_id', null)
+                ->where(function ($query) use ($organizationFolder) {
+                    $query->whereNull('organization_id')
+                        ->orWhereIn('organization_id', $organizationFolder)
                         ->orWhereIn('organization_id', [25, 26, 27]);
                 })
                 ->orderByRaw("CASE WHEN type = 'folder' THEN 1 ELSE 2 END")
@@ -60,13 +92,9 @@ class KepustakaanController extends Controller
                 ->get();
         }
 
-        if (auth()->user()->hasRole('super admin') || auth()->user()->can('master kepustakaan')) {
-            $organizations = Organization::all();
-        } else {
-            $organizations = Organization::where('id', auth()->user()->employee->organization_id)->first();
-        }
 
-        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'folder', 'organizations', 'childrenFolder'));
+        $view = 'child';
+        return view('pages.simrs.kepustakaan.index', compact('kepustakaan', 'breadcrumbs', 'organizations', 'organizationFolder', 'folder', 'childrenFolder', 'view'));
     }
 
     public function getKepustakaan($encryptedId)
@@ -99,44 +127,56 @@ class KepustakaanController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
+        // Atur aturan validasi dasar
+        $rules = [
             'type' => 'required',
             'kategori' => 'nullable',
             'parent_id' => 'nullable',
             'organization_id' => 'nullable',
             'name' => 'required',
             'size' => 'nullable',
-            'file' => 'nullable',
-        ]);
+            'file' => 'required', // default: file wajib
+        ];
 
-        $organization = Organization::where('id', $request->organization_id)->first();
-        return dd($organization->name);
+        // Jika tipenya folder, maka file boleh kosong
+        if ($request->input('type') === 'folder') {
+            $rules['file'] = 'nullable';
+        }
 
-        if (request()->hasFile('file')) {
-            $file = request()->file('file');
-            $fileName = Carbon::now()->timestamp . '_' . $request->name . '.' . $file->getClientOriginalExtension();
-            $kategori = \Str::slug($request->kategori) ?? 'lainnya';
-            $path = 'kepustakaan/' . $kategori . '/' . \Str::slug($organization->name);
-            // $pathFix = $file->storeAs($path, $fileName, 'private');
-            // $validatedData['file'] = $pathFix;
+        // Pesan kustom untuk masing-masing input
+        $messages = [
+            'type.required' => 'Tipe harus dipilih.',
+            'name.required' => 'Nama folder atau file harus diisi.',
+            'file.required' => 'File harus diunggah jika bukan folder.',
+        ];
 
+        $validatedData = $request->validate($rules, $messages);
 
-            // Simpan file secara manual ke storage
+        // Ambil data organisasi jika ada
+        $organization = Organization::find($request->organization_id);
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = Carbon::now()->timestamp . '_' . \Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
+            $kategori = \Str::slug($request->kategori ?? 'lainnya');
+            $orgName = $organization ? \Str::slug($organization->name) : 'umum';
+            $path = 'kepustakaan/' . $kategori . '/' . $orgName;
+
+            // Simpan file secara manual ke storage private
             $storagePath = storage_path('app/private/' . $path);
             if (!file_exists($storagePath)) {
-                mkdir($storagePath, 0755, true); // Buat folder jika belum ada
+                mkdir($storagePath, 0755, true);
             }
 
-            // Pindahkan file ke folder tujuan
             $file->move($storagePath, $fileName);
 
-            // Path relatif untuk database
+            // Simpan path relatif ke database
             $validatedData['file'] = $path . '/' . $fileName;
         }
 
         try {
-            $store = Kepustakaan::create($validatedData);
-            return response()->json(['message' => ' Folder/File ditambahkan!'], 200);
+            Kepustakaan::create($validatedData);
+            return response()->json(['message' => 'Folder/File berhasil ditambahkan!'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

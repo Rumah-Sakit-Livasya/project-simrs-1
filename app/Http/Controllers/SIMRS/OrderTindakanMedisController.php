@@ -71,6 +71,13 @@ class OrderTindakanMedisController extends Controller
                 $validatedData['diskon_dokter'] = true;
             }
 
+            $bilingan = Bilingan::firstOrCreate([
+                'registration_id' => $validatedData['registration_id']
+            ], [
+                'status' => 'belum final',
+                'is_paid' => 0,
+            ]);
+
             // Simpan tindakan medis
             $medicalAction = OrderTindakanMedis::create($validatedData);
 
@@ -83,12 +90,6 @@ class OrderTindakanMedisController extends Controller
             }
 
             // Periksa apakah bilingan sudah ada
-            $bilingan = Bilingan::firstOrCreate([
-                'registration_id' => $validatedData['registration_id']
-            ], [
-                'status' => 'belum final',
-                'is_paid' => 0,
-            ]);
 
             // return dd($bilingan);
 

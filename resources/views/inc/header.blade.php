@@ -211,12 +211,12 @@
         margin-top: 80px !important;
     }
 
-    #daftar-pasien-poli ul {
+    #daftar-pasien ul {
         padding: 0px;
         margin-top: 20px;
     }
 
-    #daftar-pasien-poli li {
+    #daftar-pasien li {
         display: grid;
         grid-template-columns: 45px 1fr;
         grid-template-rows: repeat(3, 20px);
@@ -227,7 +227,7 @@
         padding: 7px;
     }
 
-    #daftar-pasien-poli li .number {
+    #daftar-pasien li .number {
         grid-row: 1 / 8;
         font-size: 1.5rem;
         align-self: center;
@@ -235,7 +235,7 @@
         color: #3f51b5;
     }
 
-    #daftar-pasien-poli li .patient-name {
+    #daftar-pasien li .patient-name {
         color: #3366b9;
         font-size: 0.95rem;
         align-self: center;
@@ -245,14 +245,14 @@
         font-weight: 400;
     }
 
-    #daftar-pasien-poli li .birth {
+    #daftar-pasien li .birth {
         color: #fd3995;
         font-size: 0.7rem;
         align-self: center;
         font-weight: 400;
     }
 
-    #daftar-pasien-poli li .rm {
+    #daftar-pasien li .rm {
         font-size: 0.75rem;
         font-weight: 400;
         color: #6c757d;

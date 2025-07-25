@@ -69,6 +69,7 @@
                     method: 'GET',
                     dataType: 'json', // Pastikan respons diuraikan sebagai JSON
                     success: function(response) {
+                        $('#modal-tambah-tindakan').modal('hide');
                         console.log('Respons get-medical-actions:', response);
                         if (response.success) {
                             const data = response.data;
@@ -258,6 +259,8 @@
 
             // Fungsi untuk menambahkan tindakan medis baru ke tabel
             function addMedicalAction(data) {
+                console.log(data);
+
                 const doctorName = data.doctor?.employee?.fullname || 'Tidak Diketahui';
                 const actionName = data.tindakan_medis?.nama_tindakan || 'Tidak Diketahui';
                 const className = data.departement?.name || 'Tidak Diketahui';
@@ -311,19 +314,13 @@
                             'content') // Pastikan CSRF token tersedia
                     },
                     success: function(response) {
-                        console.log('Respons order-tindakan-medis:', response);
-                        if (response.success) {
-                            // Tambahkan tindakan medis baru ke tabel
-                            addMedicalAction(response.data);
-                            // Reset form
-                            $('#store-form')[0].reset();
-                            $('#store-form select').val(null).trigger('change');
-                            showSuccessAlert('Tindakan medis berhasil ditambahkan!');
-                            $('#modal-tambah-tindakan').modal('hide');
-                        } else {
-                            showErrorAlertNoRefresh('Gagal menambahkan tindakan medis: ' +
-                                response.message);
-                        }
+                        $('#modal-tambah-tindakan').modal('hide');
+                        // Tambahkan tindakan medis baru ke tabel
+                        addMedicalAction(response.data);
+                        // Reset form
+                        $('#store-form')[0].reset();
+                        $('#store-form select').val(null).trigger('change');
+                        showSuccessAlert('Tindakan medis berhasil ditambahkan!');
                     },
                     error: function(xhr) {
                         $('#modal-tambah-tindakan').modal('hide');

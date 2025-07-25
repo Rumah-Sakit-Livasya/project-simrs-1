@@ -167,6 +167,9 @@
                 $.ajax({
                     url: url,
                     type: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: $(this).serialize(), // Ambil semua data dari form
                     success: function(response) {
                         if (response.data.length > 0) {

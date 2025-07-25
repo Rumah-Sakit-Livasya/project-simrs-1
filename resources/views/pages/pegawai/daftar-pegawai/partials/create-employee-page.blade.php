@@ -374,6 +374,20 @@
                         </select>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input " id="is_management"
+                                    value="on" name="is_management">
+                                <label class="custom-control-label" for="is_management">Management?</label>
+                            </div>
+                            @error('is_management')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="btn-next mt-3 text-right">
                 <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-secondary btn-prev">Sebelumnya</a>

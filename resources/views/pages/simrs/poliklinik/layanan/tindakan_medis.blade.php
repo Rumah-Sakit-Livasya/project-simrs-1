@@ -336,9 +336,9 @@
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
 
             $('.js-thead-colors a').on('click', function() {
                 var theadColor = $(this).attr("data-bg");

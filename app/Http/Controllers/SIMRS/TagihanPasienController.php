@@ -7,9 +7,13 @@ use App\Models\Employee;
 use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\OrderTindakanMedis;
+use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
+use App\Models\TarifTindakanMedis;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TagihanPasienController extends Controller
 {
@@ -39,8 +43,16 @@ class TagihanPasienController extends Controller
             });
         }
 
+        // Format Date
+        $registrationDate = old('registration_date') ?? request('registration_date');
+        $startDate = $endDate = now()->format('Y-m-d');
+
+        if ($registrationDate && strpos($registrationDate, ' - ') !== false) {
+            [$startDate, $endDate] = explode(' - ', $registrationDate);
+        }
+
         $tagihan_pasien = $query->get();
-        return view('pages.simrs.keuangan.kasir.index', compact('tagihan_pasien'));
+        return view('pages.simrs.keuangan.kasir.index', compact('tagihan_pasien', 'startDate', 'endDate', 'registrationDate'));
     }
 
     public function store(Request $request)
@@ -58,9 +70,12 @@ class TagihanPasienController extends Controller
             'registration_id' => 'required|integer',
             'user_id' => 'required|integer',
         ]);
+
         $tindakan = TindakanMedis::where('id', $request->tindakan_id)->first();
         if ($validatedData['tipe_tagihan'] == "Biaya Tindakan Medis") {
             $validatedData['tagihan'] =  "[Tindakan Medis] " . $tindakan->nama_tindakan;
+            $validatedData['type'] = "Tindakan Medis";
+            $validatedData['tindakan_medis_id'] = $tindakan->id;
         }
 
         try {
@@ -95,6 +110,10 @@ class TagihanPasienController extends Controller
     {
         try {
             $tagihan = TagihanPasien::findOrFail($id);
+            if ($tagihan->tindakan_medis_id) {
+                // return dd($tagihan->tindakan_medis);
+            }
+            // return dd($tagihan->registration);
             $tagihan->delete();
 
             return response()->json([
@@ -142,7 +161,7 @@ class TagihanPasienController extends Controller
             ]); // Return data in the expected format for DataTables
         } catch (\Exception $e) {
             \Log::error('Error fetching data for DataTables: ' . $e->getMessage());
-            return response()->json(['error' => 'Data could not be retrieved.'], 500); // Return error response
+            return response()->json(['error' => 'Data could not be retrieved 10000.'], 500); // Return error response
         }
     }
 
@@ -157,7 +176,6 @@ class TagihanPasienController extends Controller
         }
     }
 
-    // Method to update the TagihanPasien data
     public function updateTagihan(Request $request, $id)
     {
         $validatedData = $request->validate([
@@ -175,15 +193,137 @@ class TagihanPasienController extends Controller
 
         try {
             $tagihan = TagihanPasien::findOrFail($id);
+
             if (is_null($tagihan->nominal_awal)) {
                 $tagihan->nominal_awal = $tagihan->nominal;
             }
+
             $tagihan->update($validatedData);
+
+            // Ambil semua tagihan pasien dengan registration_id dan bilingan_id yang sama
+            $totalWajibBayar = TagihanPasien::where('registration_id', $tagihan->registration_id)
+                ->where('bilingan_id', $tagihan->bilingan_id)
+                ->sum('wajib_bayar');
+
+            // Update kolom wajib_bayar di tabel Bilingan
+            $bilingan = Bilingan::find($tagihan->bilingan_id);
+            if ($bilingan) {
+                $bilingan->wajib_bayar = $totalWajibBayar;
+                $bilingan->save();
+            }
 
             return response()->json(['success' => 'Data updated successfully.']);
         } catch (\Exception $e) {
             \Log::error('Error updating data: ' . $e->getMessage());
             return response()->json(['error' => 'Data could not be updated. Reason: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function updateDisc($id)
+    {
+        try {
+            $tipeDiskon = request()->input('tipe_diskon');
+            $tagihan = TagihanPasien::findOrFail($id);
+
+            // Simpan nominal awal jika belum ada
+            if (is_null($tagihan->nominal_awal)) {
+                $tagihan->nominal_awal = $tagihan->nominal;
+                $tagihan->save();
+            }
+
+            $tindakan = $tagihan->tindakan_medis;
+            $group_penjamin_id = $tagihan->registration->penjamin->group_penjamin_id;
+            $kelas_id = $tagihan->registration->kelas_rawat_id;
+
+            $tarif = $tindakan->tarifTindakanMedis($group_penjamin_id, $kelas_id);
+
+            $disc = [
+                'share_rs' => (int) str_replace('.', '', $tarif['share_rs']),
+                'share_dr' => (int) str_replace('.', '', $tarif['share_dr']),
+                'total'    => (int) str_replace('.', '', $tarif['total']),
+            ];
+
+            $diskon = 0;
+            if ($tipeDiskon === 'Dokter') {
+                $diskon = $disc['share_dr'] * $tagihan->quantity;
+            } elseif ($tipeDiskon === 'Rumah Sakit') {
+                $diskon = $disc['share_rs'] * $tagihan->quantity;
+            } elseif ($tipeDiskon === 'All') {
+                $diskon = $disc['total'] * $tagihan->quantity;
+            }
+
+            $totalNominal = $tagihan->nominal_awal * $tagihan->quantity;
+
+            // Tambahan diskon dari input user (%)
+            $diskonPersen = ($tagihan->disc ?? 0) / 100 * $totalNominal;
+
+            // Tambahan jaminan dari input user (%)
+            $jaminanPersen = ($tagihan->jamin ?? 0) / 100 * $totalNominal;
+
+            // Total diskon dan jaminan
+            $totalDiskon = $diskon + $diskonPersen;
+            $totalJaminan = ($tagihan->jaminan_rp ?? 0) + $jaminanPersen;
+
+            // Hitung wajib bayar akhir
+            $wajibBayar = $totalNominal - $totalDiskon - $totalJaminan;
+            $wajibBayar = max(0, $wajibBayar);
+
+            // Update data tagihan
+            $tagihan->update([
+                'tipe_diskon' => $tipeDiskon,
+                'diskon' => $diskon,
+                'diskon_rp' => $diskon,
+                'wajib_bayar' => $wajibBayar,
+            ]);
+
+            // Hitung ulang total wajib_bayar untuk Bilingan
+            $totalWajibBayar = TagihanPasien::where('registration_id', $tagihan->registration_id)
+                ->where('bilingan_id', $tagihan->bilingan_id)
+                ->sum('wajib_bayar');
+
+            // Update ke model Bilingan
+            $bilingan = Bilingan::find($tagihan->bilingan_id);
+            if ($bilingan) {
+                $bilingan->wajib_bayar = $totalWajibBayar;
+                $bilingan->save();
+            }
+
+            return response()->json([
+                'success' => true,
+                'diskon' => $diskon,
+                'wajib_bayar' => $wajibBayar,
+                'total_nominal' => $totalNominal
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error updating discount: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function getTarifShare($id)
+    {
+        try {
+            $tagihan = TagihanPasien::find($id);
+            $tindakan = $tagihan->tindakan_medis;
+            $group_penjamin_id = $tagihan->registration->penjamin->group_penjamin_id;
+            $kelas_id = $tagihan->registration->kelas_rawat_id;
+
+            $tarif = $tindakan->tarifTindakanMedis($group_penjamin_id, $kelas_id);
+
+            $result = [
+                'share_rs' => (int) str_replace('.', '', $tarif['share_rs']),
+                'share_dr' => (int) str_replace('.', '', $tarif['share_dr']),
+                'total'    => (int) str_replace('.', '', $tarif['total']),
+            ];
+
+            return response()->json(['success' => true, 'tarif' => $result]);
+        } catch (\Exception $e) {
+            \Log::error('Error getting tarif: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 }

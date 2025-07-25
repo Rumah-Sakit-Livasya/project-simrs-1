@@ -27,6 +27,7 @@ use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\Depo\StokRequestController;
 use App\Http\Controllers\SIMRS\Depo\UnitCostController as DepoUnitCostController;
 use App\Http\Controllers\SIMRS\Dokter\DokterController;
+use App\Http\Controllers\SIMRS\ERMController;
 use App\Http\Controllers\SIMRS\EthnicController;
 use App\Http\Controllers\SIMRS\Farmasi\FarmasiController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
@@ -39,7 +40,6 @@ use App\Http\Controllers\SIMRS\HargaJual\MarginHargaJualController;
 use App\Http\Controllers\SIMRS\IGD\IGDController;
 use App\Http\Controllers\SIMRS\Insiden\InsidenController;
 use App\Http\Controllers\SIMRS\JadwalDokter\JadwalDokterController;
-use App\Http\Controllers\SIMRS\Kasir\KasirController;
 use App\Http\Controllers\SIMRS\KelasRawatController;
 use App\Http\Controllers\SIMRS\KepustakaanController;
 use App\Http\Controllers\SIMRS\Laboratorium\GrupParameterLaboratoriumController;
@@ -71,6 +71,7 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TagihanPasienController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Http\Controllers\SIMRS\TriageController;
 use App\Http\Controllers\SIMRS\Warehouse\DistribusiBarangController;
 use App\Http\Controllers\SIMRS\Warehouse\MasterDataWarehouseController;
 use App\Http\Controllers\SIMRS\Warehouse\PenerimaanBarangController;
@@ -117,6 +118,7 @@ use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\WarehouseKategoriBarang;
 use App\Models\WarehouseZatAktif;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -130,151 +132,313 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['middleware' => ['auth']], function () {
-    Route::get('/search-patients', [PatientController::class, 'search'])->name('patients.search');
+    /*
+    |--------------------------------------------------------------------------
+    | Patient Registration and Search Routes
+    |--------------------------------------------------------------------------
+    |
+    | Routes for patient registration, medical record management and bed data.
+    | Includes search functionality, new patient registration, and bed availability.
+    | All routes require authentication.
+    |
+    */
 
-    Route::get('/daftar-rekam-medis', [PatientController::class, 'daftar_rm'])->name('pendaftaran.pasien.daftar_rm');
-    Route::get('/pendaftaran-pasien-baru', [PatientController::class, 'pendaftaran_pasien_baru'])->name('pendaftaran.pasien.pendaftaran_pasien_baru');
-    Route::post('/pendaftaran-pasien-baru', [PatientController::class, 'simpan_pendaftaran_pasien'])->name('simpan.pendaftaran.pasien');
-    Route::get('/patients/{patient}', [PatientController::class, 'detail_patient'])->name('detail.pendaftaran.pasien');
-    Route::get('/patients/{patient:id}/edit', [PatientController::class, 'edit_pendaftaran_pasien'])->name('edit.pendaftaran.pasien');
-    Route::post('/patients/{patient:id}/', [PatientController::class, 'update_pendaftaran_pasien'])->name('update.pendaftaran.pasien');
-    Route::get('/patients/{patient:id}/print', [PatientController::class, 'print_identitas_pasien'])->name('print.identitas.pasien');
-    Route::get('/patients/{patient:id}/print-kartu', [PatientController::class, 'print_kartu_pasien'])->name('print.kartu.pasien');
-    Route::get('/patients/{patient:id}/history', [PatientController::class, 'history_kunjungan_pasien'])->name('history.kunjungan.pasien');
-    Route::get('/data', [PatientController::class, 'getData'])->name('data.route');
-    Route::get('/beds/get-data', [RegistrationController::class, 'getDataBed'])->name('beds.getData');
+    // Patient search endpoint
+    Route::get('/search-patients', [PatientController::class, 'search'])
+        ->name('patients.search');
 
-    Route::get('/daftar-registrasi-pasien', [RegistrationController::class, 'index'])->name('pendaftaran.daftar_registrasi_pasien');
-    Route::get('/daftar-registrasi-pasien/{registrations:id}', [RegistrationController::class, 'show'])->name('detail.registrasi.pasien');
-    Route::post('/daftar-registrasi-pasien/{registrations:id}/batal-register', [RegistrationController::class, 'batal_register'])->name('batal.register');
-    Route::post('/daftar-registrasi-pasien/{registrations:id}/batal-keluar', [RegistrationController::class, 'batal_keluar'])->name('batal.keluar');
-    Route::post('/daftar-registrasi-pasien/{registrations:id}/tutup-kunjungan', [RegistrationController::class, 'tutup_kunjungan'])->name('tutup.kunjungan');
-    Route::post('/daftar-registrasi-pasien/{registrations:id}/ganti-dpjp', [RegistrationController::class, 'ganti_dpjp'])->name('ganti.dpjp');
-    Route::post('/daftar-registrasi-pasien/{registrations:id}/ganti-diagnosa', [RegistrationController::class, 'ganti_diagnosa'])->name('ganti.diagnosa');
+    // Get bed availability data
+    Route::get('/beds/get-data', [RegistrationController::class, 'getDataBed'])
+        ->name('beds.getData');
 
-    Route::get('/patients/{patient:id}/{registrasi}', [RegistrationController::class, 'create'])->name('form.registrasi'); // Pendaftaran Poli / Ranap / IGD
-    Route::post('/patients/simpan/registrasi', [RegistrationController::class, 'store'])->name('simpan.registrasi'); // Aksi Pendaftaran Poli / Ranap / IGD
-    // Route::post('/patients/{id}/{registrasi}', [RegistrationController::class, 'store'])->name('simpan.registrasi.rajal');
-    // Route::post('/patients/{patient:id}/{registrasi}', [PatientController::class, 'store_registrasi'])->name('simpan.registrasi.rawat.jalan');
+    // Medical records listing
+    Route::get('/daftar-rekam-medis', [PatientController::class, 'daftar_rm'])
+        ->name('pendaftaran.pasien.daftar_rm');
 
-    //Master Data
-    // //Pegawai
-    // Route::get('/tipe-pegawai', [TipePegawaiController::class, 'index'])->name('master.data.pegawai.tipe-pegawai');
-    // Route::post('/tipe-pegawai/tambah', [TipePegawaiController::class, 'store'])->name('master.data.pegawai.tipe-pegawai.tambah');
-    // Route::put('/tipe-pegawai/update/{tipe_pegawai:id}', [TipePegawaiController::class, 'update'])->name('master.data.pegawai.tipe-pegawai.update');
-    // Route::get('/tipe-pegawai/delete/{tipe_pegawai:id}', [TipePegawaiController::class, 'destroy'])->name('master.data.pegawai.tipe-pegawai.destroy');
+    // New patient registration form
+    Route::get('/pendaftaran-pasien-baru', [PatientController::class, 'pendaftaran_pasien_baru'])
+        ->name('pendaftaran.pasien.pendaftaran_pasien_baru');
 
-    // Route::get('/pegawai', [PegawaiController::class, 'index'])->name('master.data.pegawai');
-    // Route::post('/pegawai/tambah', [PegawaiController::class, 'store'])->name('master.data.pegawai.tambah');
-    // Route::put('/pegawai/edit/{pegawai:id}', [PegawaiController::class, 'update'])->name('master.data.pegawai.update');
-    // Route::get('/pegawai/delete/{pegawai:id}', [PegawaiController::class, 'destroy'])->name('master.data.pegawai.destroy');
+    // Save new patient registration
+    Route::post('/pendaftaran-pasien-baru', [PatientController::class, 'simpan_pendaftaran_pasien'])
+        ->name('simpan.pendaftaran.pasien');
 
-    // //Users
-    // Route::get('/users', [UserController::class, 'list_data_user'])->name('master.data.user.akses.list.data.user');
-    // Route::post('/user/tambah', [UserController::class, 'store'])->name('master.data.user.akses.list.data.user.tambah');
-    // Route::put('/user/edit/{user:id}', [UserController::class, 'update'])->name('master.data.user.akses.list.data.user.update');
-    // Route::get('/user/delete/{user:id}', [UserController::class, 'destroy'])->name('master.data.user.akses.list.data.user.destroy');
+    // Get patient data
+    Route::get('/data', [PatientController::class, 'getData'])
+        ->name('data.route');
 
-    // //Role
-    // Route::get('/role', [RoleController::class, 'index'])->name('master.data.user.akses.role');
-    // Route::post('/role', [RoleController::class, 'store'])->name('master.data.user.akses.role.tambah');
-    // Route::put('/role/edit/{role:id}', [RoleController::class, 'update'])->name('master.data.user.akses.role.update');
-    // Route::get('/role/delete/{role:id}', [RoleController::class, 'destroy'])->name('master.data.user.akses.role.destroy');
+    /*
+    |--------------------------------------------------------------------------
+    | Patient Management Routes
+    |--------------------------------------------------------------------------
+    |
+    | Routes for managing patient data including:
+    | - Viewing patient details and history
+    | - Editing patient information
+    | - Printing patient documents and cards
+    | - Patient registration for services
+    |
+    */
+    Route::prefix('patients')->group(function () {
+        // View patient details
+        Route::get('/{patient}', [PatientController::class, 'detail_patient'])
+            ->name('detail.pendaftaran.pasien');
 
-    // Route::get('/departements', [DepartementController::class, 'index'])->name('master.data.setup.departement.index');
-    // Route::get('/tambah-departement', [DepartementController::class, 'create'])->name('master.data.setup.tambah.departement');
-    // Route::post('/tambah-departement', [DepartementController::class, 'store'])->name('master.data.setup.simpan.tambah.departement');
+        // Edit patient information
+        Route::get('/{patient:id}/edit', [PatientController::class, 'edit_pendaftaran_pasien'])
+            ->name('edit.pendaftaran.pasien');
+        Route::post('/{patient:id}/', [PatientController::class, 'update_pendaftaran_pasien'])
+            ->name('update.pendaftaran.pasien');
 
+        // Print patient documents
+        Route::get('/{patient:id}/print', [PatientController::class, 'print_identitas_pasien'])
+            ->name('print.identitas.pasien');
+        Route::get('/{patient:id}/print-kartu', [PatientController::class, 'print_kartu_pasien'])
+            ->name('print.kartu.pasien');
+
+        // View patient visit history
+        Route::get('/{patient:id}/history', [PatientController::class, 'history_kunjungan_pasien'])
+            ->name('history.kunjungan.pasien');
+
+        // Patient registration routes
+        Route::get('/{patient:id}/{registrasi}', [RegistrationController::class, 'create'])
+            ->name('form.registrasi'); // Registration form for Outpatient/Inpatient/ER
+        Route::post('/simpan/registrasi', [RegistrationController::class, 'store'])
+            ->name('simpan.registrasi'); // Process registration
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Patient Registration Routes
+    |--------------------------------------------------------------------------
+    |
+    | Routes for managing patient registrations including:
+    | - Viewing registration list
+    | - Registration details
+    | - Canceling registrations
+    | - Closing visits
+    | - Changing primary doctor and diagnosis
+    |
+    */
+    Route::prefix('daftar-registrasi-pasien')->group(function () {
+        Route::get('/', [RegistrationController::class, 'index'])
+            ->name('pendaftaran.daftar_registrasi_pasien');
+
+        Route::get('/{registrations:id}', [RegistrationController::class, 'show'])
+            ->name('detail.registrasi.pasien');
+
+        Route::post('/{registrations:id}/batal-register', [RegistrationController::class, 'batal_register'])
+            ->name('batal.register');
+
+        Route::post('/{registrations:id}/batal-keluar', [RegistrationController::class, 'batal_keluar'])
+            ->name('batal.keluar');
+
+        Route::post('/{registrations:id}/tutup-kunjungan', [RegistrationController::class, 'tutup_kunjungan'])
+            ->name('tutup.kunjungan');
+
+        Route::post('/{registrations:id}/ganti-dpjp', [RegistrationController::class, 'ganti_dpjp'])
+            ->name('ganti.dpjp');
+
+        Route::post('/{registrations:id}/ganti-diagnosa', [RegistrationController::class, 'ganti_diagnosa'])
+            ->name('ganti.diagnosa');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | SIMRS Routes
+    |--------------------------------------------------------------------------
+    |
+    | Routes for the main SIMRS (Hospital Information System) functionality.
+    | Contains routes for various hospital modules like:
+    | - Dashboard
+    | - Master Data Management
+    | - Clinical Services (Outpatient, Inpatient, ER)
+    | - Support Services (Radiology, Laboratory, Pharmacy)
+    | - Administrative Functions
+    |
+    */
     Route::prefix('simrs')->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dashboard Route
+        |--------------------------------------------------------------------------
+        |
+        | Main dashboard route for the SIMRS application.
+        | Displays overview and summary of hospital information system.
+        |
+        */
         Route::get('/dashboard', function () {
             return view('app-type.simrs.dashboard');
-        })->name('dashboard.simrs');
+        })
+            ->name('dashboard.simrs');
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Master Data Routes
+        |--------------------------------------------------------------------------
+        |
+        | Routes for managing master data including:
+        | - Setup configurations (admin fees, stamps, wards, rooms, etc)
+        | - Medical services (procedures, groups)
+        | - Support services (radiology, laboratory)
+        | - Equipment and facilities
+        | - Maternity and surgery
+        | - Suppliers and insurance
+        | - Doctor schedules and pricing
+        |
+        */
         Route::prefix('/master-data')->group(function () {
+            // Setup and configuration routes
             Route::prefix('setup')->group(function () {
+                // Inpatient administration fees
                 Route::prefix('biaya-administrasi-ranap')->group(function () {
-                    Route::get('/', [BiayaAdministrasiRawatInapController::class, 'index'])->name('master-data.setup.biaya-administrasi-ranap');
+                    Route::get('/', [BiayaAdministrasiRawatInapController::class, 'index'])
+                        ->name('master-data.setup.biaya-administrasi-ranap');
                 });
 
-                Route::get('/biaya-materai', [BiayaMateraiController::class, 'index'])->name('master-data.setup.biaya-materai');
-                Route::get('/kelas-rawat', [KelasRawatController::class, 'index'])->name('master-data.setup.kelas-rawat');
-                Route::get('/rooms/{kelas:id}', [RoomController::class, 'index'])->name('master-data.setup.rooms');
-                Route::get('/beds/{room:id}', [BedController::class, 'index'])->name('master-data.setup.beds');
+                // Basic setup routes (stamp duty, wards, rooms, beds)
+                Route::get('/biaya-materai', [BiayaMateraiController::class, 'index'])
+                    ->name('master-data.setup.biaya-materai');
+                Route::get('/kelas-rawat', [KelasRawatController::class, 'index'])
+                    ->name('master-data.setup.kelas-rawat');
+                Route::get('/rooms/{kelas:id}', [RoomController::class, 'index'])
+                    ->name('master-data.setup.rooms');
+                Route::get('/beds/{room:id}', [BedController::class, 'index'])
+                    ->name('master-data.setup.beds');
 
-                Route::get('departemen', [DepartementController::class, 'index'])->name('master-data.setup.departemen.index');
-                Route::get('departemen/tambah', [DepartementController::class, 'tambah'])->name('master-data.setup.departemen.tambah');
+                // Department management
+                Route::get('departemen', [DepartementController::class, 'index'])
+                    ->name('master-data.setup.departemen.index');
+                Route::get('departemen/tambah', [DepartementController::class, 'tambah'])
+                    ->name('master-data.setup.departemen.tambah');
 
-                Route::get('/tarif-registrasi-layanan', [TarifRegistrasiController::class, 'index'])->name('master-data.setup.tarif-registrasi.index');
-                Route::get('/tarif-registrasi-layanan/{id}/set-tarif', [TarifRegistrasiController::class, 'setTarif'])->name('master-data.setup.tarif-registrasi.set-tarif');
-                Route::get('/tarif-registrasi-layanan/{id}/set-departement', [TarifRegistrasiController::class, 'setDepartement'])->name('master-data.setup.tarif-registrasi.set-departement');
+                // Registration fee setup
+                Route::get('/tarif-registrasi-layanan', [TarifRegistrasiController::class, 'index'])
+                    ->name('master-data.setup.tarif-registrasi.index');
+                Route::get('/tarif-registrasi-layanan/{id}/set-tarif', [TarifRegistrasiController::class, 'setTarif'])
+                    ->name('master-data.setup.tarif-registrasi.set-tarif');
+                Route::get('/tarif-registrasi-layanan/{id}/set-departement', [TarifRegistrasiController::class, 'setDepartement'])
+                    ->name('master-data.setup.tarif-registrasi.set-departement');
 
-                Route::get('/form-builder', [FormBuilderController::class, 'index'])->name('master-data.setup.form-builder');
-                Route::get('/form-builder/tambah', [FormBuilderController::class, 'create'])->name('master-data.setup.form-builder.tambah');
+                // Form builder routes
+                Route::get('/form-builder', [FormBuilderController::class, 'index'])
+                    ->name('master-data.setup.form-builder');
+                Route::get('/form-builder/tambah', [FormBuilderController::class, 'create'])
+                    ->name('master-data.setup.form-builder.tambah');
 
+                // Ethnicity management
                 Route::prefix('ethnics')->group(function () {
-                    Route::get('/', [EthnicController::class, 'index'])->name('master-data.ethnics');
+                    Route::get('/', [EthnicController::class, 'index'])
+                        ->name('master-data.ethnics');
                 });
             });
+
+            // Medical services routes
             Route::prefix('layanan-medis')->group(function () {
-                Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])->name('master-data.layanan-medis.tindakan-medis');
-                Route::get('/grup-tindakan-medis', [GrupTindakanMedisController::class, 'index'])->name('master-data.layanan-medis.grup-tindakan-medis');
+                Route::get('/tindakan-medis', [TindakanMedisController::class, 'index'])
+                    ->name('master-data.layanan-medis.tindakan-medis');
+                Route::get('/grup-tindakan-medis', [GrupTindakanMedisController::class, 'index'])
+                    ->name('master-data.layanan-medis.grup-tindakan-medis');
             });
 
+            // Medical support services routes
             Route::prefix('penunjang-medis')->group(function () {
+                // Radiology routes
                 Route::prefix('radiologi')->group(function () {
-                    Route::get('/grup-parameter', [GrupParameterRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.grup-parameter');
-                    Route::get('/kategori', [KategoriRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.kategori');
-                    Route::get('/parameter', [ParameterRadiologiController::class, 'index'])->name('master-data.penunjang-medis.radiologi.parameter');
-                    Route::get('/parameter/{id}/tarif', [ParameterRadiologiController::class, 'tarifParameter'])->name('master-data.penunjang-medis.radiologi.parameter.tarif');
+                    Route::get('/grup-parameter', [GrupParameterRadiologiController::class, 'index'])
+                        ->name('master-data.penunjang-medis.radiologi.grup-parameter');
+                    Route::get('/kategori', [KategoriRadiologiController::class, 'index'])
+                        ->name('master-data.penunjang-medis.radiologi.kategori');
+                    Route::get('/parameter', [ParameterRadiologiController::class, 'index'])
+                        ->name('master-data.penunjang-medis.radiologi.parameter');
+                    Route::get('/parameter/{id}/tarif', [ParameterRadiologiController::class, 'tarifParameter'])
+                        ->name('master-data.penunjang-medis.radiologi.parameter.tarif');
                 });
+
+                // Laboratory routes
                 Route::prefix('laboratorium')->group(function () {
-                    Route::get('/grup-parameter', [GrupParameterLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.grup-parameter');
-                    Route::get('/kategori', [KategoriLaboratorumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.kategori');
-                    Route::get('/parameter', [ParameterLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.parameter');
-                    Route::get('/parameter/{id}/tarif', [ParameterLaboratoriumController::class, 'tarifParameter'])->name('master-data.penunjang-medis.laboratorium.parameter.tarif');
-                    Route::get('/nilai-normal', [NilaiNormalLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.nilai-parameter');
-                    Route::get('/tipe', [TipeLaboratoriumController::class, 'index'])->name('master-data.penunjang-medis.laboratorium.tipe');
+                    Route::get('/grup-parameter', [GrupParameterLaboratoriumController::class, 'index'])
+                        ->name('master-data.penunjang-medis.laboratorium.grup-parameter');
+                    Route::get('/kategori', [KategoriLaboratorumController::class, 'index'])
+                        ->name('master-data.penunjang-medis.laboratorium.kategori');
+                    Route::get('/parameter', [ParameterLaboratoriumController::class, 'index'])
+                        ->name('master-data.penunjang-medis.laboratorium.parameter');
+                    Route::get('/parameter/{id}/tarif', [ParameterLaboratoriumController::class, 'tarifParameter'])
+                        ->name('master-data.penunjang-medis.laboratorium.parameter.tarif');
+                    Route::get('/nilai-normal', [NilaiNormalLaboratoriumController::class, 'index'])
+                        ->name('master-data.penunjang-medis.laboratorium.nilai-parameter');
+                    Route::get('/tipe', [TipeLaboratoriumController::class, 'index'])
+                        ->name('master-data.penunjang-medis.laboratorium.tipe');
                 });
             });
 
+            // Equipment management routes
             Route::prefix('peralatan')->group(function () {
-                Route::get('/', [PeralatanController::class, 'index'])->name('master-data.peralatan');
-                Route::get('{id}/tarif', [PeralatanController::class, 'tarifPeralatan'])->name('master-data.peralatan.tarif');
+                Route::get('/', [PeralatanController::class, 'index'])
+                    ->name('master-data.peralatan');
+                Route::get('{id}/tarif', [PeralatanController::class, 'tarifPeralatan'])
+                    ->name('master-data.peralatan.tarif');
             });
 
+            // Maternity routes
             Route::prefix('persalinan')->group(function () {
-                Route::get('/kategori', [KategoriPersalinanController::class, 'index'])->name('master-data.persalinan.kategori.index');
-                Route::get('/tipe', [TipePersalinanController::class, 'index'])->name('master-data.persalinan.tipe');
-                Route::get('/daftar-persalinan', [DaftarPersalinanController::class, 'index'])->name('master-data.persalinan.daftar');
+                Route::get('/kategori', [KategoriPersalinanController::class, 'index'])
+                    ->name('master-data.persalinan.kategori.index');
+                Route::get('/tipe', [TipePersalinanController::class, 'index'])
+                    ->name('master-data.persalinan.tipe');
+                Route::get('/daftar-persalinan', [DaftarPersalinanController::class, 'index'])
+                    ->name('master-data.persalinan.daftar');
+                Route::get('/persalinan/{id}/tarif', [DaftarPersalinanController::class, 'tarifPersalinan'])
+                    ->name('master-data.persalinan.tarif.index');
             });
 
+            // Surgery routes
             Route::prefix('operasi')->group(function () {
-                Route::get('/kategori', [KategoriOperasiController::class, 'index'])->name('master-data.operasi.kategori.index');
-                Route::get('/tipe', [TipeOperasiController::class, 'index'])->name('master-data.operasi.tipe');
-                Route::get('/jenis', [JenisOperasiController::class, 'index'])->name('master-data.operasi.jenis');
-                Route::get('/tindakan', [TindakanOperasiController::class, 'index'])->name('master-data.operasi.tindakan');
+                Route::get('/kategori', [KategoriOperasiController::class, 'index'])
+                    ->name('master-data.operasi.kategori.index');
+                Route::get('/tipe', [TipeOperasiController::class, 'index'])
+                    ->name('master-data.operasi.tipe');
+                Route::get('/jenis', [JenisOperasiController::class, 'index'])
+                    ->name('master-data.operasi.jenis');
+                Route::get('/tindakan', [TindakanOperasiController::class, 'index'])
+                    ->name('master-data.operasi.tindakan');
+                Route::get('/tindakan/{id}/tarif', [TindakanOperasiController::class, 'tarifPersalinan'])
+                    ->name('master-data.operasi.tarif');
             });
 
+            // Supplier group routes
             Route::prefix('grup-suplier')->group(function () {
-                Route::get('/', [GrupSuplierController::class, 'index'])->name('master-data.grup-suplier.index');
+                Route::get('/', [GrupSuplierController::class, 'index'])
+                    ->name('master-data.grup-suplier.index');
             });
 
+            // Insurance provider routes
             Route::prefix('penjamin')->group(function () {
-                Route::get('/', [PenjaminController::class, 'index'])->name('master-data.penjamin.index');
+                Route::get('/', [PenjaminController::class, 'index'])
+                    ->name('master-data.penjamin.index');
             });
 
+            // Doctor schedule routes
             Route::prefix('jadwal-dokter')->group(function () {
-                Route::get('setting', [JadwalDokterController::class, 'index'])->name('master-data.jadwal-dokter.index');
+                Route::get('setting', [JadwalDokterController::class, 'index'])
+                    ->name('master-data.jadwal-dokter.index');
             });
 
+            // Selling price routes
             Route::prefix('harga-jual')->group(function () {
-                Route::get('margin', [MarginHargaJualController::class, 'index'])->name('master-date.setup.harga-jual.margin.index');
+                Route::get('margin', [MarginHargaJualController::class, 'index'])
+                    ->name('master-date.setup.harga-jual.margin.index');
             });
         });
 
         Route::prefix('poliklinik')->group(function () {
-            Route::get('/daftar-pasien', [PoliklinikController::class, 'index'])->name('poliklinik.daftar-pasien');
-            Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
+            Route::get('/daftar-pasien', [ERMController::class, 'catatanMedis'])
+                ->name('poliklinik.daftar-pasien');
+
+            Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])
+                ->name('poliklinik.pengkajian-lanjutan.show');
         });
 
         Route::prefix('farmasi')->group(function () {
@@ -500,56 +664,120 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
         Route::prefix('igd')->group(function () {
-            Route::get('/daftar-pasien', [IGDController::class, 'index'])->name('igd.daftar-pasien');
-            Route::get('/catatan-medis', [IGDController::class, 'catatanMedis'])->name('igd.catatan-medis');
-            Route::prefix('/reports')->group(function () {
-                Route::get('igd', [IGDController::class, 'reprotIGD'])->name('igd.reports');
-                Route::get('rekap-per-dokter', [IGDController::class, 'rekapPerDokter'])->name('igd.reports.rekap-per-dokter');
+            Route::get('/daftar-pasien', [IGDController::class, 'index'])
+                ->name('igd.daftar-pasien');
+
+            Route::post('/daftar-pasien/filter', [IGDController::class, 'index'])
+                ->name('igd.daftar-pasien.filter');
+
+            Route::post('/daftar-pasien', [TriageController::class, 'store'])
+                ->name('igd.triage.store');
+
+            Route::get('/triage/{id}', [TriageController::class, 'get'])
+                ->name('igd.triage.get');
+
+            Route::get('/catatan-medis', [ERMController::class, 'catatanMedis'])
+                ->name('igd.catatan-medis');
+
+            Route::prefix('/laporan')->group(function () {
+                Route::get('/', [IGDController::class, 'reprotIGD'])
+                    ->name('igd.reports');
+
+                Route::get('rekap-per-dokter', [IGDController::class, 'rekapPerDokter'])
+                    ->name('igd.reports.rekap-per-dokter');
             });
         });
 
         Route::prefix('rawat-inap')->group(function () {
-            Route::get('/daftar-pasien', [IGDController::class, 'index'])->name('rawat-inap.daftar-pasien');
-            Route::get('/catatan-medis', [IGDController::class, 'catatanMedis'])->name('rawat-inap.catatan-medis');
+            Route::get('/daftar-pasien', [IGDController::class, 'index'])
+                ->name('rawat-inap.daftar-pasien');
+
+            Route::get('/catatan-medis', [ERMController::class, 'catatanMedis'])
+                ->name('rawat-inap.catatan-medis');
+
             Route::prefix('/reports')->group(function () {
-                Route::get('rawat-inap', [IGDController::class, 'reprotIGD'])->name('rawat-inap.reports');
-                Route::get('laporan-per-tanggal', [IGDController::class, 'reportPerTanggal'])->name('rawat-inap.reports.per-tanggal');
-                Route::get('transfer', [IGDController::class, 'reportTransfer'])->name('rawat-inap.reports.transfer');
-                Route::get('pasien-aktif', [IGDController::class, 'reportPasienAktif'])->name('rawat-inap.reports.pasien-aktif');
+                Route::get('rawat-inap', [IGDController::class, 'reprotIGD'])
+                    ->name('rawat-inap.reports');
+
+                Route::get('laporan-per-tanggal', [IGDController::class, 'reportPerTanggal'])
+                    ->name('rawat-inap.reports.per-tanggal');
+
+                Route::get('transfer', [IGDController::class, 'reportTransfer'])
+                    ->name('rawat-inap.reports.transfer');
+
+                Route::get('pasien-aktif', [IGDController::class, 'reportPasienAktif'])
+                    ->name('rawat-inap.reports.pasien-aktif');
             });
         });
 
         Route::prefix('vk')->group(function () {
-            Route::get('/daftar-pasien', [IGDController::class, 'index'])->name('vk.daftar-pasien');
+            Route::get('/daftar-pasien', [IGDController::class, 'index'])
+                ->name('vk.daftar-pasien');
+
             Route::prefix('reports')->group(function () {
-                Route::get('order-pasien', [IGDController::class, 'orderPasien'])->name('vk.reports.order-pasien');
-                Route::get('rekap-kunjungan', [IGDController::class, 'rekapKunjungan'])->name('vk.reports.rekap-kunjungan');
-                Route::get('10-besar-tindakan', [IGDController::class, '10BesarTindakan'])->name('vk.reports.10-besar-tindakan');
+                Route::get('order-pasien', [IGDController::class, 'orderPasien'])
+                    ->name('vk.reports.order-pasien');
+
+                Route::get('rekap-kunjungan', [IGDController::class, 'rekapKunjungan'])
+                    ->name('vk.reports.rekap-kunjungan');
+
+                Route::get('10-besar-tindakan', [IGDController::class, '10BesarTindakan'])
+                    ->name('vk.reports.10-besar-tindakan');
             });
         });
 
         Route::prefix('ok')->group(function () {
-            Route::get('/daftar-pasien', [IGDController::class, 'index'])->name('ok.daftar-pasien');
+            Route::get('/daftar-pasien', [IGDController::class, 'index'])
+                ->name('ok.daftar-pasien');
+
             Route::prefix('reports')->group(function () {
-                Route::get('order-pasien', [IGDController::class, 'orderPasien'])->name('ok.reports.order-pasien');
-                Route::get('rekap-kunjungan', [IGDController::class, 'rekapKunjungan'])->name('ok.reports.rekap-kunjungan');
-                Route::get('10-besar-tindakan', [IGDController::class, '10BesarTindakan'])->name('ok.reports.10-besar-tindakan');
+                Route::get('order-pasien', [IGDController::class, 'orderPasien'])
+                    ->name('ok.reports.order-pasien');
+
+                Route::get('rekap-kunjungan', [IGDController::class, 'rekapKunjungan'])
+                    ->name('ok.reports.rekap-kunjungan');
+
+                Route::get('10-besar-tindakan', [IGDController::class, '10BesarTindakan'])
+                    ->name('ok.reports.10-besar-tindakan');
             });
         });
 
         Route::prefix('radiologi')->group(function () {
-            Route::get('list-order', [RadiologiController::class, 'index'])->name('radiologi.list-order');
-            Route::get('simulasi-harga', [RadiologiController::class, 'simulasiHarga'])->name('radiologi.simulasi-harga');
-            Route::get('template-hasil', [RadiologiController::class, 'templateHasil'])->name('radiologi.template-hasil');
-            Route::get('laporan', [RadiologiController::class, 'report'])->name('radiologi.report');
-            Route::get('laporan-view/{fromDate}/{endDate}/{tipe_rawat}/{group_parameter}/{penjamin}/{radiografer}', [RadiologiController::class, 'reportView'])->name('radiologi.report.view');
-            Route::get('nota-order/{id}', [RadiologiController::class, 'notaOrder'])->name('radiologi.nota-order');
-            Route::get('hasil-order/{id}', [RadiologiController::class, 'hasilOrder'])->name('radiologi.hasil-order');
-            Route::get('label-order/{id}', [RadiologiController::class, 'labelOrder'])->name('radiologi.label-order');
-            Route::get('edit-order/{id}', [RadiologiController::class, 'editOrder'])->name('radiologi.edit-order');
-            Route::get('edit-hasil-parameter/{id}', [RadiologiController::class, 'editHasilParameter'])->name('radiologi.edit-hasil-parameter');
-            Route::get("order", [RadiologiController::class, 'order'])->name('radiologi.order');
-            Route::get("popup/pilih-pasien/{poli}", [RadiologiController::class, 'popupPilihPasien'])->name('radiologi.popup.pilih-pasien');
+            Route::get('list-order', [RadiologiController::class, 'index'])
+                ->name('radiologi.list-order');
+
+            Route::get('simulasi-harga', [RadiologiController::class, 'simulasiHarga'])
+                ->name('radiologi.simulasi-harga');
+
+            Route::get('template-hasil', [RadiologiController::class, 'templateHasil'])
+                ->name('radiologi.template-hasil');
+
+            Route::get('laporan', [RadiologiController::class, 'report'])
+                ->name('radiologi.report');
+
+            Route::get('laporan-view/{fromDate}/{endDate}/{tipe_rawat}/{group_parameter}/{penjamin}/{radiografer}', [RadiologiController::class, 'reportView'])
+                ->name('radiologi.report.view');
+
+            Route::get('nota-order/{id}', [RadiologiController::class, 'notaOrder'])
+                ->name('radiologi.nota-order');
+
+            Route::get('hasil-order/{id}', [RadiologiController::class, 'hasilOrder'])
+                ->name('radiologi.hasil-order');
+
+            Route::get('label-order/{id}', [RadiologiController::class, 'labelOrder'])
+                ->name('radiologi.label-order');
+
+            Route::get('edit-order/{id}', [RadiologiController::class, 'editOrder'])
+                ->name('radiologi.edit-order');
+
+            Route::get('edit-hasil-parameter/{id}', [RadiologiController::class, 'editHasilParameter'])
+                ->name('radiologi.edit-hasil-parameter');
+
+            Route::get("order", [RadiologiController::class, 'order'])
+                ->name('radiologi.order');
+
+            Route::get("popup/pilih-pasien/{poli}", [RadiologiController::class, 'popupPilihPasien'])
+                ->name('radiologi.popup.pilih-pasien');
         });
 
         Route::prefix('laboratorium')->group(function () {
@@ -565,17 +793,24 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get("popup/pilih-pasien/{poli}", [LaboratoriumController::class, 'popupPilihPasien'])->name('laboratorium.popup.pilih-pasien');
             Route::get('laporan-parameter-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}', [LaboratoriumController::class, 'reportParameterView'])->name('laboratorium.report-parameter.view');
             Route::get('laporan-pasien-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}/{parameter}', [LaboratoriumController::class, 'reportPatientView'])->name('laboratorium.report-patient.view');
+
         });
 
         Route::prefix('dokter')->group(function () {
-            Route::get('/daftar-pasien', [DokterController::class, 'index'])->name('dokter.daftar-pasien');
-            Route::get('/template-soap', [DokterController::class, 'templateSOAP'])->name('dokter.template-soap');
+            Route::get('/daftar-pasien', [DokterController::class, 'index'])
+                ->name('dokter.daftar-pasien');
+
+            Route::get('/template-soap', [DokterController::class, 'templateSOAP'])
+                ->name('dokter.template-soap');
         });
 
         Route::prefix('gizi')->group(function () {
             Route::prefix('daftar-pasien')->group(function () {
-                Route::get('list-pasien', [GiziController::class, 'index'])->name('gizi.daftar-pasien.list-pasien');
-                Route::get('list-order-gizi', [OrderGiziController::class, 'index'])->name('gizi.daftar-order.list-order-gizi');
+                Route::get('list-pasien', [GiziController::class, 'index'])
+                    ->name('gizi.daftar-pasien.list-pasien');
+
+                Route::get('list-order-gizi', [OrderGiziController::class, 'index'])
+                    ->name('gizi.daftar-order.list-order-gizi');
             });
 
             Route::prefix("popup")->group(function () {
@@ -585,10 +820,13 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get("/bulk-label/{order_ids}", [OrderGiziController::class, 'bulk_label'])->name('gizi.popup.bulk-label');
                 Route::get("/print-nota/{order_ids}", [OrderGiziController::class, 'print_nota'])->name('gizi.popup.print-nota');
                 Route::get("/edit/{order_ids}", [OrderGiziController::class, 'edit'])->name('gizi.popup.edit-order');
+
             });
 
             Route::prefix('reports')->group(function () {
-                Route::get('/', [GiziController::class, 'reports'])->name('gizi.reports');
+                Route::get('/', [GiziController::class, 'reports'])
+                    ->name('gizi.reports');
+
                 Route::get('/view/{startDate}/{endDate}/{kategori_id}/{food_id}/{status_payment}/{waktu_makan}/{untuk}', [GiziController::class, 'reports_view'])
                     ->name('gizi.reports.view');
             });
@@ -598,24 +836,43 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('daftar-makanan', [MakananGiziController::class, 'index'])->name('gizi.master-data.daftar-makanan');
                 Route::get('daftar-menu', [MenuGiziController::class, 'index'])->name('gizi.master-data.daftar-menu');
                 Route::get('jam-makan', [JamMakanGiziController::class, 'index'])->name('gizi.master-data.jam-makan');
+
             });
         });
 
         Route::prefix('farmasi')->group(function () {
-            Route::get('transaksi-resep', [FarmasiController::class, 'transaksiResep'])->name('farmasi.transaksi-resep');
-            Route::get('retur-resep', [FarmasiController::class, 'returResep'])->name('farmasi.retur-resep');
-            Route::get('reponse-time', [FarmasiController::class, 'responseTime'])->name('farmasi.reponse-time');
+            Route::get('transaksi-resep', [FarmasiController::class, 'transaksiResep'])
+                ->name('farmasi.transaksi-resep');
+
+            Route::get('retur-resep', [FarmasiController::class, 'returResep'])
+                ->name('farmasi.retur-resep');
+
+            Route::get('reponse-time', [FarmasiController::class, 'responseTime'])
+                ->name('farmasi.reponse-time');
+
 
             Route::prefix('reports')->group(function () {
-                Route::get('stock-status', [FarmasiController::class, 'stokStatus'])->name('farmasi.reports.stock-status');
-                Route::get('stock-detail', [FarmasiController::class, 'stockDetail'])->name('farmasi.reports.stock-detail');
-                Route::get('kartu-stok', [FarmasiController::class, 'kartu-stok'])->name('farmasi.reports.kartu-stok');
-                Route::get('penjualan', [FarmasiController::class, 'reportPenjualan'])->name('farmasi.reports.penjualan');
-                Route::get('rekap-penjualan', [FarmasiController::class, 'reportRekapPenjualan'])->name('farmasi.reports.rekap-penjualan');
-                Route::get('embalase', [FarmasiController::class, 'embalase'])->name('farmasi.reports.embalase');
+                Route::get('stock-status', [FarmasiController::class, 'stokStatus'])
+                    ->name('farmasi.reports.stock-status');
+
+                Route::get('stock-detail', [FarmasiController::class, 'stockDetail'])
+                    ->name('farmasi.reports.stock-detail');
+
+                Route::get('kartu-stok', [FarmasiController::class, 'kartu-stok'])
+                    ->name('farmasi.reports.kartu-stok');
+
+                Route::get('penjualan', [FarmasiController::class, 'reportPenjualan'])
+                    ->name('farmasi.reports.penjualan');
+
+                Route::get('rekap-penjualan', [FarmasiController::class, 'reportRekapPenjualan'])
+                    ->name('farmasi.reports.rekap-penjualan');
+
+                Route::get('embalase', [FarmasiController::class, 'embalase'])
+                    ->name('farmasi.reports.embalase');
             });
 
-            Route::get('antrian', [FarmasiController::class, 'antrian'])->name('farmasi.antrian');
+            Route::get('antrian', [FarmasiController::class, 'antrian'])
+                ->name('farmasi.antrian');
         });
 
         // Route::prefix('warehouse')->group(function () {
@@ -679,25 +936,36 @@ Route::group(['middleware' => ['auth']], function () {
         //     });
         // });
 
+
         Route::prefix('depo')->group(function () {
             Route::prefix('stok-request')->group(function () {
-                Route::get('farmasi', [StokRequestController::class, 'farmasi'])->name('depo.stok-request.farmasi');
-                Route::get('non-farmasi', [StokRequestController::class, 'nonFarmasi'])->name('depo.stok-request-non-farmasi');
+                Route::get('farmasi', [StokRequestController::class, 'farmasi'])
+                    ->name('depo.stok-request.farmasi');
+
+                Route::get('non-farmasi', [StokRequestController::class, 'nonFarmasi'])
+                    ->name('depo.stok-request-non-farmasi');
             });
 
             Route::prefix('distribusi-barang')->group(function () {
-                Route::get('farmasi', [StokRequestController::class, 'farmasi'])->name('depo.distribusi-barang.farmasi');
-                Route::get('non-farmasi', [StokRequestController::class, 'nonFarmasi'])->name('depo.distribusi-barang.non-farmasi');
+                Route::get('farmasi', [StokRequestController::class, 'farmasi'])
+                    ->name('depo.distribusi-barang.farmasi');
+
+                Route::get('non-farmasi', [StokRequestController::class, 'nonFarmasi'])
+                    ->name('depo.distribusi-barang.non-farmasi');
             });
 
             Route::prefix('unit-cost')->group(function () {
-                Route::get('farmasi', [DepoUnitCostController::class, 'farmasi'])->name('depo.unit-cost.farmasi');
-                Route::get('nonFarmasi', [DepoUnitCostController::class, 'farmasi'])->name('depo.unit-cost.non-farmasi');
+                Route::get('farmasi', [DepoUnitCostController::class, 'farmasi'])
+                    ->name('depo.unit-cost.farmasi');
+
+                Route::get('nonFarmasi', [DepoUnitCostController::class, 'farmasi'])
+                    ->name('depo.unit-cost.non-farmasi');
             });
         });
 
         Route::prefix('insiden')->group(function () {
-            Route::get('/', [InsidenController::class, 'index'])->name('insiden');
+            Route::get('/', [InsidenController::class, 'index'])
+                ->name('insiden');
         });
 
         // Route::prefix('procurement')->group(function () {
@@ -734,65 +1002,153 @@ Route::group(['middleware' => ['auth']], function () {
         //     });
         // });
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | BPJS Routes
+        |--------------------------------------------------------------------------
+        |
+        | Group of routes for the "BPJS" section of the SIMRS application.
+        | Includes bridging Vclaim, registration, and claim management.
+        |
+        */
         Route::prefix('bpjs')->group(function () {
             Route::prefix('bridging-vclaim')->group(function () {
-                Route::get('list-registrasi-sep', [BridgingVclaimController::class, 'listRegistrasiSEP'])->name('bpjs.bridging-vclaim.list-registrasi-sep');
-                Route::get('persetujuan-sep', [BridgingVclaimController::class, 'persetujuanSEP'])->name('bpjs.bridging-vclaim.persetujuan-sep');
-                Route::get('rujukan', [BridgingVclaimController::class, 'rujukan'])->name('bpjs.bridging-vclaim.rujukan');
-                Route::get('lembar-pengajuan-klaim', [BridgingVclaimController::class, 'lembarPengajuanKlaim'])->name('bpjs.bridging-vclaim.lembar-pengajuan-klaim');
-                Route::get('detail-sep', [BridgingVclaimController::class, 'detailSEP'])->name('bpjs.bridging-vclaim.detail-sep');
-                Route::get('detail-sep', [BridgingVclaimController::class, 'detailSEP'])->name('bpjs.bridging-vclaim.detail-sep');
+                Route::get('list-registrasi-sep', [BridgingVclaimController::class, 'listRegistrasiSEP'])
+                    ->name('bpjs.bridging-vclaim.list-registrasi-sep');
+
+                Route::get('persetujuan-sep', [BridgingVclaimController::class, 'persetujuanSEP'])
+                    ->name('bpjs.bridging-vclaim.persetujuan-sep');
+
+                Route::get('rujukan', [BridgingVclaimController::class, 'rujukan'])
+                    ->name('bpjs.bridging-vclaim.rujukan');
+
+                Route::get('lembar-pengajuan-klaim', [BridgingVclaimController::class, 'lembarPengajuanKlaim'])
+                    ->name('bpjs.bridging-vclaim.lembar-pengajuan-klaim');
+
+                Route::get('detail-sep', [BridgingVclaimController::class, 'detailSEP'])
+                    ->name('bpjs.bridging-vclaim.detail-sep');
+
+                Route::get('detail-sep', [BridgingVclaimController::class, 'detailSEP'])
+                    ->name('bpjs.bridging-vclaim.detail-sep');
             });
         });
 
-        // Route::prefix('kasir')->group(function() {
-        //     Route::get('tagihan-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
-        //     Route::get('transaksi-non-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
-        //     Route::get('setoran-kasir', [KasirController::class, 'index'])->name('laboratorium.list-order');
-        //     Route::prefix('reports')->group(function() {
-        //     Route::get('penerimaan-kasir', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
-        //     Route::get('rekap-penerimaan-kasir', [KasirController::class, 'pasienPerPemeriksaan'])->name('laboratorium.psdirn-per-permintaan');
-        //     Route::get('laboratorium', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
-        //     });
-        //     Route::get('simulasi-harga', [IGDController::class, 'simulasiHarga'])->name('laboratorium.simulasi-harga');
-        // });
-
         Route::prefix('kepustakaan')->group(function () {
-            Route::get('/list', [KepustakaanController::class, 'index'])->name('kepustakaan.index');
-            Route::get('/{id}', [KepustakaanController::class, 'showFolder'])->name('kepustakaan.folder');
-            Route::get('/download/{id}', [KepustakaanController::class, 'downloadFile'])->name('kepustakaan.download');
+            Route::get('/list', [KepustakaanController::class, 'index'])
+                ->name('kepustakaan.index');
+
+            Route::get('/{id}', [KepustakaanController::class, 'showFolder'])
+                ->name('kepustakaan.folder');
+
+            Route::get('/download/{id}', [KepustakaanController::class, 'downloadFile'])
+                ->name('kepustakaan.download');
         });
 
-
+        /*
+        |--------------------------------------------------------------------------
+        | Kasir Routes
+        |--------------------------------------------------------------------------
+        |
+        | Group of routes for the "kasir" section of the SIMRS application.
+        | Includes billing operations, patient charges, down payments, and receipts.
+        |
+        */
         Route::prefix('kasir')->group(function () {
-            Route::get('/tagihan-pasien', [TagihanPasienController::class, 'index'])->name('tagihan.pasien.index');
-            Route::post('/tagihan-pasien', [TagihanPasienController::class, 'store'])->name('tagihan.pasien.store');
-            Route::get('/get-nominal-awal/{id}', [TagihanPasienController::class, 'getNominalAwal'])->name('tagihan.pasien.get.nominal');
-            Route::get('/tagihan-pasien/{id}', [TagihanPasienController::class, 'detailTagihan'])->name('tagihan.pasien.detail');
-            Route::delete('/tagihan-pasien/{id}', [TagihanPasienController::class, 'destroyTagihan'])->name('tagihan.pasien.destroy');
-            Route::get('/tagihan-pasien/data/{id}', [TagihanPasienController::class, 'getData'])->name('tagihan.pasien.data');
-            Route::put('/tagihan-pasien/update/{id}', [TagihanPasienController::class, 'updateTagihan'])->name('tagihan.pasien.update');
-            Route::get('/bilingan/data/{id}/', [BilinganController::class, 'getData'])->name('bilingan.pasien.data');
-            Route::put('/bilingan/update-status/{id}', [BilinganController::class, 'updateBilinganStatus'])->name('bilingan.update.status');
-            Route::get('/down-payment/data/{id}', [BilinganController::class, 'getDownPaymentData'])->name('down.payment.data');
-            Route::post('/down-payment', [BilinganController::class, 'storeDownPayment'])->name('down.payment.store');
-            Route::delete('/down-payment/{id}', [BilinganController::class, 'destroyDownPayment'])->name('down.payment.destroy');
-            Route::post('/pembayaran-tagihan', [BilinganController::class, 'storePembayaranTagihan'])->name('pembayaran.tagihan.store');
-            Route::get('/print-bill/{id}', [BilinganController::class, 'printBill'])->name('print.bill');
-            Route::get('/print-kwitansi/{id}', [BilinganController::class, 'printKwitansi'])->name('print.kwitansi');
+            /*
+            |--------------------------------------------------------------------------
+            | Tagihan Pasien Routes
+            |--------------------------------------------------------------------------
+            |
+            | Routes for managing patient billing.
+            | Includes listing, storing, viewing details, updating, and deleting bills.
+            |
+            */
+            Route::prefix('tagihan-pasien')->group(function () {
+                Route::get('/', [TagihanPasienController::class, 'index'])
+                    ->name('tagihan.pasien.index');
+
+                Route::post('/', [TagihanPasienController::class, 'store'])
+                    ->name('tagihan.pasien.store');
+
+                Route::get('/{id}', [TagihanPasienController::class, 'detailTagihan'])
+                    ->name('tagihan.pasien.detail');
+
+                Route::delete('/{id}', [TagihanPasienController::class, 'destroyTagihan'])
+                    ->name('tagihan.pasien.destroy');
+
+                Route::get('/{id}/tarif', [TagihanPasienController::class, 'getTarifShare']);
+                Route::get('/data/{id}', [TagihanPasienController::class, 'getData'])
+                    ->name('tagihan.pasien.data');
+
+                Route::post('/search', [TagihanPasienController::class, 'index'])
+                    ->name('tagihan.pasien.search');
+
+                Route::put('/update-disc/{id}', [TagihanPasienController::class, 'updateDisc'])
+                    ->name('tagihan.pasien.diskon');
+
+                Route::put('/update/{id}', [TagihanPasienController::class, 'updateTagihan'])
+                    ->name('tagihan.pasien.update');
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Bilingan Routes
+            |--------------------------------------------------------------------------
+            |
+            | Routes for handling billing confirmations (bilingan).
+            | Includes fetching data and updating billing status.
+            |
+            */
+            Route::prefix('bilingan')->group(function () {
+                Route::get('/data/{id}/', [BilinganController::class, 'getData'])
+                    ->name('bilingan.pasien.data');
+
+                Route::put('/update-status/{id}', [BilinganController::class, 'updateBilinganStatus'])
+                    ->name('bilingan.update.status');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Down Payment Routes
+            |--------------------------------------------------------------------------
+            |
+            | Routes for managing down payments.
+            | Includes storing, retrieving, and deleting down payment entries.
+            |
+            */
+            Route::prefix('down-payment')->group(function () {
+                Route::get('/data/{id}', [BilinganController::class, 'getDownPaymentData'])
+                    ->name('down.payment.data');
+
+                Route::post('/', [BilinganController::class, 'storeDownPayment'])
+                    ->name('down.payment.store');
+
+                Route::delete('/{id}', [BilinganController::class, 'destroyDownPayment'])
+                    ->name('down.payment.destroy');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Other Billing Utility Routes
+            |--------------------------------------------------------------------------
+            |
+            | Additional routes for patient billing utilities such as
+            | fetching initial bill amount, processing payment, and printing documents.
+            |
+            */
+            Route::get('/get-nominal-awal/{id}', [TagihanPasienController::class, 'getNominalAwal'])
+                ->name('tagihan.pasien.get.nominal');
+
+            Route::post('/pembayaran-tagihan', [BilinganController::class, 'storePembayaranTagihan'])
+                ->name('pembayaran.tagihan.store');
+
+            Route::get('/print-bill/{id}', [BilinganController::class, 'printBill'])
+                ->name('print.bill');
+
+            Route::get('/print-kwitansi/{id}', [BilinganController::class, 'printKwitansi'])
+                ->name('print.kwitansi');
         });
     });
-    // Route::get('/rnc', [RevenueAndCostCenterController::class, 'index'])->name('master.data.setup.rnc.index');
-    // Route::post('/rnc', [RevenueAndCostCenterController::class, 'store'])->name('master.data.setup.rnc.store');
-    // Route::put('/rnc', [RevenueAndCostCenterController::class, 'update'])->name('master.data.setup.rnc.update');
-
-    // Route::get('/master-rl', [MasterRLController::class, 'index'])->name('master.data.setup.rl');
-    // Route::post('/master-rl/tambah', [MasterRLController::class, 'store'])->name('master.data.setup.rl.tambah');
-    // Route::put('/master-rl/edit/{master_r_l:id}', [MasterRLController::class, 'update'])->name('master.data.setup.rl.update');
-    // Route::get('/master-rl/delete/{master_r_l:id}', [MasterRLController::class, 'destroy'])->name('master.data.setup.rl.delete');
-
-    // Route::get('/master-layanan-rl', [MasterLayananRLController::class, 'index'])->name('master.data.setup.layanan.rl');
-    // Route::post('/master-layanan-rl/tambah', [MasterLayananRLController::class, 'store'])->name('master.data.setup.layanan.rl.tambah');
-    // Route::put('/master-layanan-rl/edit/{master_layanan_r_l:id}', [MasterLayananRLController::class, 'update'])->name('master.data.setup.layanan.rl.update');
-    // Route::get('/master-layanan-rl/delete/{master_layanan_r_l:id}', [MasterLayananRLController::class, 'destroy'])->name('master.data.setup.layanan.rl.delete');
 });

@@ -15,6 +15,13 @@
                 <i class="ni ni-menu"></i>
             </a>
         </li>
+        @if ($routePrefix == 'igd')
+            <li class="nav-item dropdown">
+                <a class="dropdown-item nav-link"
+                    href="{{ route($routePrefix . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'triage']) }}"
+                    role="tab">Triage</a>
+            </li>
+        @endif
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
                 aria-haspopup="true" aria-expanded="false">Perawat</a>

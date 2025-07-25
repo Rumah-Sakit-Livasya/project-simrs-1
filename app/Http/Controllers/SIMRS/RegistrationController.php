@@ -15,6 +15,7 @@ use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\GantiDiagnosa;
 use App\Models\SIMRS\GantiDokter;
 use App\Models\SIMRS\GroupPenjamin;
+use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
@@ -46,6 +47,7 @@ class RegistrationController extends Controller
             // Cari data registrasi berdasarkan ID
             $registration = Registration::findOrFail($id);
             $tindakan_medis = TindakanMedis::all();
+
             // Buat response dengan data yang sesuai
             return response()->json([
                 'success' => true,
@@ -54,7 +56,7 @@ class RegistrationController extends Controller
                     // 'tanggal_tindakan' => $registration->tanggal_tindakan,
                     'dokter_id' => $registration->doctor_id,
                     'departement_id' => $registration->departement_id,
-                    'kelas_id' => $registration->registration_type,
+                    'kelas_id' => intval($registration->kelas_rawat_id),
                     'tindakan_medis' => $tindakan_medis
                 ],
             ], 200);
@@ -154,9 +156,47 @@ class RegistrationController extends Controller
         $kelasRawatRajalId = KelasRawat::where('kelas', 'like', '%rawat jalan%')->first()->id;
 
         // Group doctors by department
+        // $groupedDoctors = [];
+        // foreach ($doctors as $doctor) {
+        //     if ($doctor->department_from_doctors->name !== 'UGD') {
+        //         $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
+        //     }
+        // }
+        // 1. Ambil hari dan jam sekarang
+        $hariIni = ucfirst(Carbon::now()->locale('id')->isoFormat('dddd')); // Contoh: 'Rabu'
+        $jamSekarang = Carbon::now()->format('H:i:s'); // Contoh: '14:33:06'
+
+        // 2. Ambil semua dokter yang sedang bertugas saat ini sesuai jadwal dan departemen
+        $jadwal_dokter = JadwalDokter::with('doctor.department_from_doctors')
+            ->where('hari', $hariIni)
+            ->where(function ($query) use ($jamSekarang) {
+                $query->where(function ($q) use ($jamSekarang) {
+                    // Jadwal normal (contoh 08:00 - 17:00)
+                    $q->whereRaw('jam_mulai <= jam_selesai')
+                        ->where('jam_mulai', '<=', $jamSekarang)
+                        ->where('jam_selesai', '>=', $jamSekarang);
+                })->orWhere(function ($q) use ($jamSekarang) {
+                    // Jadwal malam (contoh 22:00 - 06:00)
+                    $q->whereRaw('jam_mulai > jam_selesai')
+                        ->where(function ($sub) use ($jamSekarang) {
+                            $sub->where('jam_mulai', '<=', $jamSekarang)
+                                ->orWhere('jam_selesai', '>=', $jamSekarang);
+                        });
+                });
+            })
+            ->get();
+
+        // 3. Kelompokkan dokter berdasarkan nama departemen (kecuali UGD)
         $groupedDoctors = [];
-        foreach ($doctors as $doctor) {
-            $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
+
+        foreach ($jadwal_dokter as $jadwal) {
+            $doctor = $jadwal->doctor;
+
+            // Pastikan relasi department ada dan bukan 'UGD'
+            if ($doctor->department_from_doctors && $doctor->department_from_doctors->name !== 'UGD') {
+                $deptName = $doctor->department_from_doctors->name;
+                $groupedDoctors[$deptName][] = $doctor;
+            }
         }
 
         $doctorsIGD = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
@@ -361,6 +401,18 @@ class RegistrationController extends Controller
             $validatedData['date'] = Carbon::now();
             $validatedData['status'] = 'aktif';
 
+            if ($request->registration_type == 'rawat-jalan' || $request->registration_type == 'igd') {
+                $kelas_rawat = KelasRawat::where('kelas', 'like', '%Rawat Jalan%')->first();
+                if ($kelas_rawat) {
+                    $validatedData['kelas_rawat_id'] = $kelas_rawat->id;
+                }
+            } else if ($request->registration_type == 'rawat-inap') {
+                $kelas_rawat = KelasRawat::where('kelas', 'like', '%Rawat Inap%')->first();
+                if ($kelas_rawat) {
+                    $validatedData['kelas_rawat_id'] = $kelas_rawat->id;
+                }
+            }
+
             // Set department based on registration type
             $validatedData['departement_id'] = $this->getDepartmentId($validatedData);
 
@@ -377,18 +429,22 @@ class RegistrationController extends Controller
             // Create registration
             $registration = Registration::create($validatedData);
 
-            // Create billing
-            $billing = Bilingan::create([
-                'registration_id' => $registration->id,
-                'patient_id' => $request->patient_id,
-                'status' => 'belum final'
-            ]);
+            $gruop_penjamin_id = Penjamin::find($request->penjamin_id)->group_penjamin->id;
 
             // Add registration fee for outpatient visits
             if ($validatedData['registration_type'] == 'rawat-jalan') {
-                $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $request->penjamin_id)
+
+                $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $gruop_penjamin_id)
                     ->where('tarif_registrasi_id', 1)
                     ->first()->harga;
+
+                // Create billing
+                $billing = Bilingan::create([
+                    'registration_id' => $registration->id,
+                    'patient_id' => $request->patient_id,
+                    'status' => 'belum final',
+                    'wajib_bayar' => $hargaTarifAdmin
+                ]);
 
                 // Add registration fee to billing details
                 $tagihanPasien = TagihanPasien::create([
@@ -401,8 +457,42 @@ class RegistrationController extends Controller
                     'nominal' => $hargaTarifAdmin,
                     'quantity' => 1,
                     'harga' => $hargaTarifAdmin,
-                    'total' => $hargaTarifAdmin
+                    'wajib_bayar' => $hargaTarifAdmin
                 ]);
+
+
+                BilinganTagihanPasien::create([
+                    'tagihan_pasien_id' => $tagihanPasien->id,
+                    'bilingan_id' => $billing->id,
+                ]);
+            } else if ($validatedData['registration_type'] == 'igd') {
+
+                $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $gruop_penjamin_id)
+                    ->where('tarif_registrasi_id', 3) // Masih Statis
+                    ->first()->harga;
+
+                // Create billing
+                $billing = Bilingan::create([
+                    'registration_id' => $registration->id,
+                    'patient_id' => $request->patient_id,
+                    'status' => 'belum final',
+                    'wajib_bayar' => $hargaTarifAdmin
+                ]);
+
+                // Add registration fee to billing details
+                $tagihanPasien = TagihanPasien::create([
+                    'user_id' => auth()->user()->id,
+                    'bilingan_id' => $billing->id,
+                    'registration_id' => $registration->id,
+                    'date' => Carbon::now(),
+                    'tagihan' => "[Biaya Administrasi] UGD",
+                    // 'detail_tagihan' => $fee->nama_tarif,
+                    'nominal' => $hargaTarifAdmin,
+                    'quantity' => 1,
+                    'harga' => $hargaTarifAdmin,
+                    'wajib_bayar' => $hargaTarifAdmin
+                ]);
+
 
                 BilinganTagihanPasien::create([
                     'tagihan_pasien_id' => $tagihanPasien->id,
@@ -563,6 +653,7 @@ class RegistrationController extends Controller
         ]);
 
         $credentials = $request->only('email', 'password');
+
         // Attempt Zimbra login if local authentication fails
         if ($this->zimbraLogin($credentials['email'], $credentials['password'])) {
             // Zimbra authentication successful
@@ -571,15 +662,31 @@ class RegistrationController extends Controller
             if ($user == null) {
                 return back()->with('error', 'User tidak ditemukan!');
             }
+
             // Find the registration record
             $registration = Registration::findOrFail($id);
 
-            // Kosongkan Bed
+            // Cek apakah ada bilingan dan tagihan pasien
+            if ($registration->bilingan) {
+                $bilingan = $registration->bilingan;
+
+                // Hapus semua tagihan pasien yang terkait dengan bilingan
+                if ($bilingan->tagihan_pasien) {
+                    foreach ($bilingan->tagihan_pasien as $tagihan) {
+                        $tagihan->delete();
+                    }
+                }
+
+                // Hapus data biling jika semua tagihan telah terhapus
+                $bilingan->delete();
+            }
+
+            // Kosongkan Bed jika rawat inap
             if ($registration['registration_type'] == 'rawat-inap') {
                 $this->removePatientFromBed($registration->patient->bed->id, $registration->patient->id);
             }
 
-            // Create a new BatalRegister entry
+            // Buat entri baru untuk pembatalan pendaftaran
             BatalRegister::create([
                 'registration_id' => $registration->id,
                 'user_id' => auth()->user()->id,
@@ -587,16 +694,14 @@ class RegistrationController extends Controller
                 'alasan' => $request->alasan,
             ]);
 
-            // // Delete the registration record and its related data
-            // $registration->delete();
-
-            // Update the status of the registration
+            // Update status registrasi menjadi "batal"
             $registration->update([
                 'status' => 'batal',
                 'registration_close_date' => Carbon::now()
             ]);
 
-            return redirect()->route('detail.pendaftaran.pasien', $registration->patient->id)->with('success', 'Registration has been cancelled successfully.');
+            return redirect()->route('detail.pendaftaran.pasien', $registration->patient->id)
+                ->with('success', 'Registration has been cancelled successfully.');
         } else {
             return back()->with('error', 'Email atau Password salah!');
         }

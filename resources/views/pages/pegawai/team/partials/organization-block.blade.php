@@ -8,13 +8,22 @@
         <div class="d-flex flex-wrap demo demo-h-spacing mt-3 mb-3">
             @foreach ($organization->employees as $employee)
                 <div class="rounded-pill bg-white shadow-sm p-2 border-faded mr-3 d-flex align-items-center">
-                    <img src="{{ $employee->foto && Storage::exists('employee/profile/' . $employee->foto)
+                    <a href="{{ $employee->foto && Storage::exists('employee/profile/' . $employee->foto)
                         ? asset('storage/employee/profile/' . $employee->foto)
                         : ($employee->gender == 'Laki-laki'
                             ? '/img/demo/avatars/avatar-c.png'
                             : '/img/demo/avatars/avatar-p.png') }}"
-                        alt="{{ $employee->fullname }}" class="img-thumbnail rounded-circle"
-                        style="width: 5rem; height: 5rem; object-fit: cover;">
+                        data-lightbox="employee-{{ $organization->id }}" data-title="{{ $employee->fullname }}">
+
+                        <img src="{{ $employee->foto && Storage::exists('employee/profile/' . $employee->foto)
+                            ? asset('storage/employee/profile/' . $employee->foto)
+                            : ($employee->gender == 'Laki-laki'
+                                ? '/img/demo/avatars/avatar-c.png'
+                                : '/img/demo/avatars/avatar-p.png') }}"
+                            alt="{{ $employee->fullname }}" class="img-thumbnail rounded-circle"
+                            style="width: 5rem; height: 5rem; object-fit: cover;">
+                    </a>
+
                     <div class="ml-2">
                         <h5 class="m-0">{{ $employee->fullname }} ({{ $employee->jobLevel->name }})</h5>
                         <small>{{ $employee->jobPosition->name }}</small><br>

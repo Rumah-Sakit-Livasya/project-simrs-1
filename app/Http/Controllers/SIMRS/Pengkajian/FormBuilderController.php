@@ -25,14 +25,15 @@ class FormBuilderController extends Controller
     {
 
         $validatedData = $request->validate([
-           'nama_form' => 'required',
-           'form_kategori_id' => 'required',
-           'form_source' => 'required',
-           'is_active' => 'nullable' 
+            'nama_form' => 'required',
+            'form_kategori_id' => 'required',
+            'form_source' => 'required',
+            'is_active' => 'nullable'
         ]);
 
         try {
             $validatedData['created_by'] = auth()->user()->id;
+            $validatedData['modify_by'] = auth()->user()->id;
             $store = FormTemplate::create($validatedData);
             return response()->json(['message' => ' berhasil ditambahkan!'], 200);
         } catch (\Exception $e) {

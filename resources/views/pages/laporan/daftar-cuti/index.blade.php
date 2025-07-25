@@ -63,9 +63,12 @@
                                         <!-- Mengubah input menjadi select2 -->
                                         <select class="select2 form-control @error('tahun') is-invalid @enderror"
                                             name="tahun" id="tahun">
-                                            <option value="2024" {{$currentYear == '2024' ? 'selected' : ''}}>2024</option>
-                                            <option value="2025" {{$currentYear == '2025' ? 'selected' : ''}}>2025</option>
-                                            <option value="2026" {{$currentYear == '2026' ? 'selected' : ''}}>2026</option>
+                                            <option value="2024" {{ $currentYear == '2024' ? 'selected' : '' }}>2024
+                                            </option>
+                                            <option value="2025" {{ $currentYear == '2025' ? 'selected' : '' }}>2025
+                                            </option>
+                                            <option value="2026" {{ $currentYear == '2026' ? 'selected' : '' }}>2026
+                                            </option>
                                         </select>
                                         @error('tahun')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -120,25 +123,26 @@
                                                     {{ $loop->iteration }}
                                                 </th>
                                                 <th style="white-space: nowrap">
-                                                    {{$row['employee_name']}}
+                                                    {{ $row['employee_name'] }}
                                                 </th>
                                                 <th style="white-space: nowrap">
-                                                    {{$row['organization_name']}}
+                                                    {{ $row['organization_name'] }}
                                                 </th>
                                                 <th style="white-space: nowrap">
-                                                    {{$row['total_izin']}}
+                                                    {{ $row['total_izin'] }}
                                                 </th>
                                                 <th style="white-space: nowrap">
-                                                    {{$row['total_sakit']}}
+                                                    {{ $row['total_sakit'] }}
                                                 </th>
                                                 <th style="white-space: nowrap">
-                                                    {{$row['total_cuti']}}
+                                                    {{ $row['total_cuti'] }}
                                                 </th>
                                                 <th style="white-space: nowrap">
-                                                    {{$row['sisa_ct']}}
+                                                    {{ $row['sisa_ct'] }}
                                                 </th>
                                                 <th style="white-space: nowrap">
-                                                    <a href="{{route('reports.dayOffReq.detail', ['id' => $row['employee_id'], 'tahun' => $currentYear])}}" class="btn btn-primary">
+                                                    <a href="{{ route('reports.dayOffReq.detail', ['id' => $row['employee_id'], 'tahun' => $currentYear]) }}"
+                                                        class="btn btn-primary">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                 </th>

@@ -139,47 +139,6 @@
                 });
             });
 
-            $(document).on('click', '.delete-btn', function(e) {
-                e.preventDefault();
-                const tagihanId = $(this).data('id');
-                Swal.fire({
-                    title: 'Apakah Anda yakin?',
-                    text: 'Data tagihan pasien akan dihapus.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, hapus!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '/simrs/kasir/tagihan-pasien/' + tagihanId,
-                            type: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            success: function(response) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Terhapus!',
-                                    text: 'Data tagihan pasien telah dihapus.'
-                                });
-                                $('#tagihanTable').DataTable().ajax.reload();
-                            },
-                            error: function(xhr) {
-                                console.error('Error deleting tagihan:', xhr
-                                    .responseText);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Gagal',
-                                    text: 'Terjadi kesalahan saat menghapus data.'
-                                });
-                            }
-                        });
-                    }
-                });
-            });
-
             const registrationId = {{ $bilingan->registration->id }}; // Ganti dengan ID registrasi yang sesuai
             const bilinganId = {{ $bilingan->id }}; // Ganti dengan ID registrasi yang sesuai
             loadRegistrationData(registrationId);
@@ -338,7 +297,7 @@
                             },
                             success: function(response) {
                                 let quantity = parseInt($('#quantity').val()) || 1;
-                                let total = response.harga * quantity;
+                                let total = response.harga;
                                 $('#nominal').val(total.toLocaleString('id-ID'));
                             },
                             error: function(xhr) {

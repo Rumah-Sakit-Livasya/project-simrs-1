@@ -18,7 +18,7 @@
                     <div class="panel-container show">
                         <div class="panel-content">
 
-                            <form action="" method="post">
+                            <form action="{{ route('tagihan.pasien.search') }}" method="post">
                                 @csrf
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
@@ -302,12 +302,8 @@
             // Set the default date for the datepicker
             $('#datepicker-1').daterangepicker({
                 opens: 'left',
-                startDate: moment(
-                    "{{ (old('registration_date') ? explode(' - ', old('registration_date'))[0] : request('registration_date')) ? explode(' - ', request('registration_date'))[0] : now()->format('Y-m-d') }}",
-                    'YYYY-MM-DD'),
-                endDate: moment(
-                    "{{ (old('registration_date') ? explode(' - ', old('registration_date'))[1] : request('registration_date')) ? explode(' - ', request('registration_date'))[1] : now()->format('Y-m-d') }}",
-                    'YYYY-MM-DD'),
+                startDate: moment("{{ $startDate }}", 'YYYY-MM-DD'),
+                endDate: moment("{{ $endDate }}", 'YYYY-MM-DD'),
                 locale: {
                     format: 'YYYY-MM-DD',
                     separator: ' - ',

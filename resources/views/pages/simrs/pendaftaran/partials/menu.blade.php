@@ -46,7 +46,8 @@
                 <div class="dropdown-menu">
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian</a>
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">CPPT</a>
-                    <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian Resep</a>
+                    <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Pengkajian
+                        Resep</a>
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Form Meso</a>
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Profil Obat</a>
                     <a class="dropdown-item" data-toggle="tab" href="#tab_default-2" role="tab">Form

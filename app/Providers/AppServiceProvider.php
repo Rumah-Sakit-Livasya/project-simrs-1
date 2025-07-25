@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Console\Commands\NotifyContractExpiry;
+use Carbon\Carbon;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
@@ -37,6 +38,9 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
         });
+
+        Carbon::setLocale('id');
+        setlocale(LC_TIME, 'id_ID');
 
         // if (!Session::has('app_type')) {
         //     Session::put('app_type', 'hr');

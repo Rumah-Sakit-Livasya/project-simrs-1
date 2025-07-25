@@ -38,4 +38,9 @@ class OrderTindakanMedis extends Model
     {
         return $this->belongsTo(Doctor::class, 'doctor_id');
     }
+
+    public function bilingan()
+    {
+        return $this->belongsToMany(Bilingan::class, 'order_tindakan_medis_bilingan');
+    }
 }

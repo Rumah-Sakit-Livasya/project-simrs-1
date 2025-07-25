@@ -437,6 +437,7 @@
                                                         <div class="card-body">
                                                             <h5 class="card-title">
                                                                 {{ $employees->firstWhere('organization_id', $organizationId)->organization->name }}
+                                                                {{ $organizationId }}
                                                             </h5>
                                                             <p class="card-text">
                                                                 {{ $employees->where('organization_id', $organizationId)->count() }}
@@ -454,6 +455,7 @@
                                                                     <h5 class="modal-title"
                                                                         id="organizationModalLabel{{ $organizationId }}">
                                                                         {{ $employees->firstWhere('organization_id', $organizationId)->organization->name }}
+                                                                        {}
                                                                     </h5>
                                                                     <button type="button" class="close"
                                                                         data-dismiss="modal" aria-label="Close">
@@ -487,95 +489,109 @@
                 </div>
             </div>
         </div>
-
         <div class="row">
-            <div class="col-md-12">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="m-0 font-weight-bold text-primary">URL Shortener</h6>
+            <div class="col-lg-6 mt-0 mb-2">
+                <div id="panel-2" class="panel h-100">
+                    <div>
+                        <h2 class="panel-heading">Daftar Pegawai Habis Kontrak Bulan Ini</h2>
                     </div>
-                    <div class="card-body">
-                        <!-- Form Create Short URL -->
-                        <form id="shortenForm" method="POST" action="{{ route('dashboard.url_shortener.store') }}">
-                            @csrf
-                            <div class="form-row">
-                                <div class="col-md-8 mb-3">
-                                    <label for="original_url">URL Asli</label>
-                                    <input type="url" class="form-control" id="original_url" name="original_url"
-                                        required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="custom_code">Kode Kustom (opsional)</label>
-                                    <input type="text" class="form-control" id="custom_code" name="custom_code">
-                                </div>
-                                <div class="col-md-1 mb-3 d-flex align-items-end">
-                                    <button type="submit" class="btn btn-primary">Buat</button>
-                                </div>
-                            </div>
-                        </form>
-
-                        <!-- Hasil Short URL -->
-                        @if (session('short_url'))
-                            <div class="alert alert-success mt-3">
-                                <p>Short URL berhasil dibuat:</p>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" value="{{ session('short_url') }}"
-                                        id="shortUrlInput" readonly>
-                                    <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="button"
-                                            onclick="copyShortUrl()">
-                                            <i class="fas fa-copy"></i> Salin
-                                        </button>
+                    <div class="panel-container show">
+                        <div class="panel-content pt-3" style="overflow-y: auto; max-height: 400px; white-space: nowrap;">
+                            @if ($pegawaiHabisKontrakBulanIni->isEmpty())
+                                <p class="text-center">Tidak ada data karyawan.</p>
+                            @else
+                                <div style="white-space: nowrap;">
+                                    <div class="demography-report">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                @foreach ($pegawaiHabisKontrakBulanIni as $pegawai)
+                                                    <div
+                                                        class="daftar-pegawai d-flex align-items-center ml-1 mr-1 p-2 border rounded shadow-sm">
+                                                        @if ($pegawai->foto != null && Storage::exists('employee/profile/' . $pegawai->foto))
+                                                            <img src="{{ asset('storage/employee/profile/' . $pegawai->foto) }}"
+                                                                class="rounded-circle mr-2" alt=""
+                                                                style="width: 60px; height: 60px; object-fit: cover; z-index: 100;">
+                                                        @else
+                                                            <img src="{{ $pegawai->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
+                                                                class="rounded-circle mr-2" alt=""
+                                                                style="width: 60px; z-index: 100;">
+                                                        @endif
+                                                        <div class="flex-grow-1">
+                                                            <div class="name font-weight-bold">
+                                                                {{ $pegawai->fullname }}
+                                                            </div>
+                                                            <div class="organization text-muted">
+                                                                {{ $pegawai->organization->name }}
+                                                            </div>
+                                                            <div class="birthday text-muted">
+                                                                {{ formatTanggalBulan($pegawai->end_status_date) }}
+                                                            </div>
+                                                        </div>
+                                                        <a href="https://wa.me/{{ phone($pegawai->mobile_phone) }}"
+                                                            class="badge badge-success p-2" target="_blank"><i
+                                                                class='bx bxl-whatsapp m-0'></i></a>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
-
-                    <!-- Daftar Link -->
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Daftar Link Saya</h6>
+                </div>
+            </div>
+            <div class="col-lg-6 mt-0 mb-2">
+                <div id="panel-2" class="panel h-100">
+                    <div>
+                        <h2 class="panel-heading">Top 10 Pegawai Paling Lama Mengabdi di Livasya</h2>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="linksTable" width="100%" cellspacing="0">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>URL Asli</th>
-                                        <th>Short URL</th>
-                                        <th>Kode</th>
-                                        <th>Klik</th>
-                                        <th>Dibuat</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($links as $link)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td class="text-truncate" style="max-width: 200px;">
-                                                <a href="{{ $link->original_url }}"
-                                                    target="_blank">{{ $link->original_url }}</a>
-                                            </td>
-                                            <td>
-                                                <a href="{{ url('/links/' . $link->short_code) }}" target="_blank">
-                                                    {{ url('/links/' . $link->short_code) }}
-                                                </a>
-                                            </td>
-                                            <td>{{ $link->short_code }}</td>
-                                            <td>{{ $link->clicks }}</td>
-                                            <td>{{ $link->created_at->format('d/m/Y H:i') }}</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-danger delete-link"
-                                                    data-id="{{ $link->id }}">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                    <div class="panel-container show">
+                        <div class="panel-content pt-3" style="overflow-y: auto; max-height: 400px; white-space: nowrap;">
+                            @if ($PegawaiTerlama->isEmpty())
+                                <p class="text-center">Tidak ada data karyawan.</p>
+                            @else
+                                <div style="white-space: nowrap;">
+                                    <div class="demography-report">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                @foreach ($PegawaiTerlama as $pegawai)
+                                                    <div
+                                                        class="daftar-pegawai d-flex align-items-center ml-1 mr-1 p-2 border rounded shadow-sm">
+                                                        @if ($pegawai->foto != null && Storage::exists('employee/profile/' . $pegawai->foto))
+                                                            <img src="{{ asset('storage/employee/profile/' . $pegawai->foto) }}"
+                                                                class="rounded-circle mr-2" alt=""
+                                                                style="width: 60px; height: 60px; object-fit: cover; z-index: 100;">
+                                                        @else
+                                                            <img src="{{ $pegawai->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
+                                                                class="rounded-circle mr-2" alt=""
+                                                                style="width: 60px; z-index: 100;">
+                                                        @endif
+                                                        <div class="flex-grow-1">
+                                                            <div class="name font-weight-bold">
+                                                                {{ $pegawai->fullname }}
+                                                            </div>
+                                                            <div class="organization text-muted">
+                                                                {{ $pegawai->organization->name }}
+                                                            </div>
+                                                            <div class="birthday text-muted">
+                                                                Bergabung
+                                                                {{ \Carbon\Carbon::parse($pegawai->join_date)->diffForHumans() }}
+                                                                <br>
+                                                                pada
+                                                                {{ tgl($pegawai->join_date) }}
+                                                            </div>
+                                                        </div>
+                                                        <a href="https://wa.me/{{ phone($pegawai->mobile_phone) }}"
+                                                            class="badge badge-success p-2" target="_blank"><i
+                                                                class='bx bxl-whatsapp m-0'></i></a>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -810,6 +826,100 @@
                                 </div>
                                 {{-- </div> --}}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">URL Shortener</h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Form Create Short URL -->
+                        <form id="shortenForm" method="POST" action="{{ route('dashboard.url_shortener.store') }}">
+                            @csrf
+                            <div class="form-row">
+                                <div class="col-md-8 mb-3">
+                                    <label for="original_url">URL Asli</label>
+                                    <input type="url" class="form-control" id="original_url" name="original_url"
+                                        required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="custom_code">Kode Kustom (opsional)</label>
+                                    <input type="text" class="form-control" id="custom_code" name="custom_code">
+                                </div>
+                                <div class="col-md-1 mb-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary">Buat</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Hasil Short URL -->
+                        @if (session('short_url'))
+                            <div class="alert alert-success mt-3">
+                                <p>Short URL berhasil dibuat:</p>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" value="{{ session('short_url') }}"
+                                        id="shortUrlInput" readonly>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            onclick="copyShortUrl()">
+                                            <i class="fas fa-copy"></i> Salin
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Daftar Link -->
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Daftar Link Saya</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="linksTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>URL Asli</th>
+                                        <th>Short URL</th>
+                                        <th>Kode</th>
+                                        <th>Klik</th>
+                                        <th>Dibuat</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($links as $link)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td class="text-truncate" style="max-width: 200px;">
+                                                <a href="{{ $link->original_url }}"
+                                                    target="_blank">{{ $link->original_url }}</a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ url('/links/' . $link->short_code) }}" target="_blank">
+                                                    {{ url('/links/' . $link->short_code) }}
+                                                </a>
+                                            </td>
+                                            <td>{{ $link->short_code }}</td>
+                                            <td>{{ $link->clicks }}</td>
+                                            <td>{{ $link->created_at->format('d/m/Y H:i') }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-danger delete-link"
+                                                    data-id="{{ $link->id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

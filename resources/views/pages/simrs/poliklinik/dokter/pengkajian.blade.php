@@ -157,7 +157,8 @@
                                         <label class="text-primary" for="pr">Nadi (PR)</label>
                                         <div class="input-group">
                                             <div class="input-group">
-                                                <input id="pr" type="text" name="pr" class="form-control" value="{{$registration?->pengkajian_nurse_rajal?->pr}}">
+                                                <input id="pr" type="text" name="pr" class="form-control"
+                                                    value="{{ $registration?->pengkajian_nurse_rajal?->pr }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">x/menit</span>
                                                 </div>
@@ -169,8 +170,8 @@
                                     <div class="form-group">
                                         <label for="rr" class="text-primary">Respirasi (RR)</label>
                                         <div class="input-group">
-                                            <input class="form-control numeric" id="rr" name="rr"
-                                                type="text" value="{{$registration?->pengkajian_nurse_rajal?->rr}}">
+                                            <input class="form-control numeric" id="rr" name="rr" type="text"
+                                                value="{{ $registration?->pengkajian_nurse_rajal?->rr }}">
                                             <div class="input-group-append">
                                                 <span class="input-group-text">x/menit</span>
                                             </div>
@@ -182,7 +183,8 @@
                                         <label for="body_height">Tinggi Badan (cm)</label>
                                         <div class="input-group">
                                             <input class="form-control numeric calc-bmi-pd" id="body_height"
-                                                name="body_height" type="text" value="{{$registration?->pengkajian_nurse_rajal?->body_height}}">
+                                                name="body_height" type="text"
+                                                value="{{ $registration?->pengkajian_nurse_rajal?->body_height }}">
                                             <div class="input-group-append">
                                                 <span class="input-group-text">cm</span>
                                             </div>
@@ -194,7 +196,8 @@
                                         <label for="body_weight">Berat Badan (kg)</label>
                                         <div class="input-group">
                                             <input class="form-control numeric calc-bmi-pd" id="body_weight"
-                                                name="body_weight" type="text" value="{{$registration?->pengkajian_nurse_rajal?->body_weight}}">
+                                                name="body_weight" type="text"
+                                                value="{{ $registration?->pengkajian_nurse_rajal?->body_weight }}">
                                             <div class="input-group-append">
                                                 <span class="input-group-text">kg</span>
                                             </div>
@@ -209,8 +212,8 @@
                                     <div class="form-group">
                                         <label for="bp">Tensi (BP)</label>
                                         <div class="input-group">
-                                            <input class="form-control numeric" id="bp" name="bp"
-                                                type="text" value="{{$registration?->pengkajian_nurse_rajal?->bp}}">
+                                            <input class="form-control numeric" id="bp" name="bp" type="text"
+                                                value="{{ $registration?->pengkajian_nurse_rajal?->bp }}">
                                             <div class="input-group-append">
                                                 <span class="input-group-text">mmHg</span>
                                             </div>
@@ -621,7 +624,7 @@
 @endsection
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-    @include('pages.simrs.poliklinik.partials.js-filter')
+    @include('pages.simrs.poliklinik.partials.action-js.pengkajian-dokter')
     <script>
         $(document).ready(function() {
             $('body').addClass('layout-composed');
@@ -633,9 +636,9 @@
                 placeholder: 'Pilih Klinik',
             });
 
-            $('#doctor_id').select2({
-                placeholder: 'Pilih Dokter',
-            });
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
 
             $('#toggle-pasien').on('click', function() {
                 var target = $('#js-slide-left'); // Mengambil elemen target berdasarkan data-target
@@ -653,5 +656,4 @@
             });
         });
     </script>
-    @include('pages.simrs.poliklinik.partials.action-js.pengkajian-dokter')
 @endsection

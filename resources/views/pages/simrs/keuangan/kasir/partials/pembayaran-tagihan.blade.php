@@ -37,8 +37,7 @@
                         </div>
                         <div class="card-body">
                             <input type="text" class="form-control" id="wajibBayar" name="wajib_bayar"
-                                value="{{ number_format($bilingan->wajib_bayar ?? 0, 0, ',', '.') }}"
-                                placeholder="Total Tagihan Pasien" readonly />
+                                value="{{ $bilingan->wajib_bayar ?? 0 }}" placeholder="Total Tagihan Pasien" readonly />
                         </div>
                     </div>
                 </div>
@@ -49,7 +48,7 @@
                         </div>
                         <div class="card-body">
                             <input type="text" class="form-control" id="dpPasien" name="dp_pasien"
-                                value="{{ number_format($bilingan->down_payment ? ($bilingan->down_payment->isNotEmpty() ? $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') : 0) : 0, 0, ',', '.') }}"
+                                value="{{ $bilingan->down_payment ? ($bilingan->down_payment->isNotEmpty() ? $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') : 0) : 0 }}"
                                 placeholder="Masukkan DP Pasien" readonly />
                         </div>
                     </div>
@@ -61,8 +60,9 @@
                         </div>
                         <div class="card-body">
                             <input type="text" class="form-control" id="sisaTagihan" name="sisa_tagihan"
-                                value="{{ number_format(($bilingan->wajib_bayar ?? 0) - ($bilingan->down_payment ? ($bilingan->down_payment->isNotEmpty() ? $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') : 0) : 0), 0, ',', '.') }}"
-                                placeholder="Masukkan Sisa Tagihan" readonly />
+                                value="{{ ($bilingan->wajib_bayar ?? 0) - ($bilingan->down_payment ? ($bilingan->down_payment->isNotEmpty() ? $bilingan->down_payment->where('tipe', 'Down Payment')->sum('nominal') : 0) : 0) }}"
+                                placeholder="Masukkan Sisa Tagihan" disabled />
+
                         </div>
                     </div>
                 </div>
@@ -75,8 +75,10 @@
                             <div class="card-title text-white">Tunai</div>
                         </div>
                         <div class="card-body">
-                            <input type="text" class="form-control" id="tunai" name="tunai"
-                                placeholder="Masukkan Tunai" onkeyup="updateTotalBayarAndKembalian(this)" />
+                            <input type="number" class="form-control" id="tunai" name="tunai" data-payment
+                                onwheel="this.blur()" onkeyup="updateTotalBayarAndKembalian(this)"
+                                ondblclick="isiDenganSisaTagihan(this)">
+
                         </div>
                     </div>
                 </div>
@@ -97,8 +99,8 @@
                             <div class="card-title text-white">Kembalian</div>
                         </div>
                         <div class="card-body">
-                            <input type="text" class="form-control" id="kembalian" name="kembalian"
-                                placeholder="Masukkan Kembalian" readonly />
+                            <input type="number" min="0" class="form-control" id="kembalian" name="kembalian"
+                                onwheel="this.blur()" placeholder="Masukkan Kembalian" readonly />
                         </div>
                     </div>
                 </div>
@@ -132,87 +134,129 @@
                                             <tbody>
                                                 <tr>
                                                     <td>
-                                                        <select class="form-select select2"
-                                                            onkeyup="updateTotalBayarAndKembalian(this)">
-                                                            <option></option>
-                                                            <option>MANDIRI</option>
-                                                            <option>BCA</option>
-                                                            <option>BNI</option>
+                                                        <select class="form-select select2 mesin-edc"
+                                                            name="bank_perusahaan_id_cc[]"
+                                                            onchange="toggleInputs(this)">
+                                                            <option value=""></option>
+                                                            @foreach (\App\Models\BankPerusahaan::all() as $item)
+                                                                <option value="{{ $item->id }}">{{ $item->nama }}
+                                                                </option>
+                                                            @endforeach
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <select class="form-select select2"
+                                                        <select class="form-select select2" name="tipe_cc[]"
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                             <option></option>
                                                             <option>Debit Card</option>
                                                             <option>Credit Card</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" class="form-control"
+                                                    <td>
+                                                        <input type="text" class="form-control cc-number"
+                                                            name="cc_number_cc[]" disabled
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                     </td>
-                                                    <td><input type="text" class="form-control"
+                                                    <td>
+                                                        <input type="text" class="form-control auth-number"
+                                                            name="auth_number_cc[]" disabled
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                     </td>
-                                                    <td><input type="text" class="form-control"
+                                                    <td>
+                                                        <input type="text" class="form-control batch-number"
+                                                            name="batch_cc[]" disabled
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                     </td>
-                                                    <td><input type="text" class="form-control"
-                                                            onkeyup="updateTotalBayarAndKembalian(this)">
+                                                    <td>
+                                                        <input type="number" class="form-control nominal-input"
+                                                            name="nominal_cc[]" disabled data-payment
+                                                            onwheel="this.blur()"
+                                                            onkeyup="updateTotalBayarAndKembalian(this)"
+                                                            ondblclick="isiDenganSisaTagihan(this)">
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td><select class="form-select select2"
-                                                            onkeyup="updateTotalBayarAndKembalian(this)">
-                                                            <option></option>
-                                                            <option>MANDIRI</option>
-                                                            <option>BCA</option>
-                                                            <option>BNI</option>
-                                                        </select></td>
-                                                    <td><select class="form-select select2"
+                                                    <td>
+                                                        <select class="form-select select2 mesin-edc"
+                                                            name="bank_perusahaan_id_cc[]"
+                                                            onchange="toggleInputs(this)">
+                                                            <option value=""></option>
+                                                            @foreach (\App\Models\BankPerusahaan::all() as $item)
+                                                                <option value="{{ $item->id }}">
+                                                                    {{ $item->nama }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td><select class="form-select select2" name="tipe_cc[]"
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                             <option></option>
                                                             <option>Debit Card</option>
                                                             <option>Credit Card</option>
                                                         </select></td>
-                                                    <td><input type="text" class="form-control"
+                                                    <td>
+                                                        <input type="text" class="form-control cc-number" disabled
+                                                            name="cc_number_cc[]"
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                     </td>
-                                                    <td><input type="text" class="form-control"
+                                                    <td>
+                                                        <input type="text" class="form-control auth-number"
+                                                            name="auth_number_cc[]" disabled
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                     </td>
-                                                    <td><input type="text" class="form-control"
+                                                    <td>
+                                                        <input type="text" class="form-control batch-number"
+                                                            name="batch_cc[]" disabled
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                     </td>
-                                                    <td><input type="text" class="form-control"
-                                                            onkeyup="updateTotalBayarAndKembalian(this)">
+                                                    <td>
+                                                        <input type="number" class="form-control nominal-input"
+                                                            name="nominal_cc[]" disabled data-payment
+                                                            onwheel="this.blur()"
+                                                            onkeyup="updateTotalBayarAndKembalian(this)"
+                                                            ondblclick="isiDenganSisaTagihan(this)">
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td><select class="form-select select2"
-                                                            onkeyup="updateTotalBayarAndKembalian(this)">
-                                                            <option></option>
-                                                            <option>MANDIRI</option>
-                                                            <option>BCA</option>
-                                                            <option>BNI</option>
-                                                        </select></td>
-                                                    <td><select class="form-select select2"
+                                                    <td>
+                                                        <select class="form-select select2 mesin-edc"
+                                                            name="bank_perusahaan_id_cc[]"
+                                                            onchange="toggleInputs(this)">
+                                                            <option value=""></option>
+                                                            @foreach (\App\Models\BankPerusahaan::all() as $item)
+                                                                <option value="{{ $item->id }}">
+                                                                    {{ $item->nama }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td><select class="form-select select2" name="tipe_cc[]"
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                             <option></option>
                                                             <option>Debit Card</option>
                                                             <option>Credit Card</option>
                                                         </select></td>
-                                                    <td><input type="text" class="form-control"
+                                                    <td>
+                                                        <input type="text" class="form-control cc-number" disabled
+                                                            name="cc_number_cc[]"
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                     </td>
-                                                    <td><input type="text" class="form-control"
+                                                    <td>
+                                                        <input type="text" class="form-control auth-number"
+                                                            name="auth_number_cc[]" disabled
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                     </td>
-                                                    <td><input type="text" class="form-control"
+                                                    <td>
+                                                        <input type="text" class="form-control batch-number"
+                                                            name="batch_cc[]" disabled
                                                             onkeyup="updateTotalBayarAndKembalian(this)">
                                                     </td>
-                                                    <td><input type="text" class="form-control"
-                                                            onkeyup="updateTotalBayarAndKembalian(this)">
+                                                    <td>
+                                                        <input type="number" class="form-control nominal-input"
+                                                            name="nominal_cc[]" disabled data-payment
+                                                            onwheel="this.blur()"
+                                                            onkeyup="updateTotalBayarAndKembalian(this)"
+                                                            ondblclick="isiDenganSisaTagihan(this)">
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -226,31 +270,36 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <label class="form-label">Bank RS</label>
-                                                <select class="form-select select2">
-                                                    <option>Bank RS A</option>
-                                                    <option>Bank RS B</option>
+                                                <select class="form-select select2" name="bank_perusahaan_id_tf">
+                                                    <option value=""></option>
+                                                    @foreach (\App\Models\BankPerusahaan::all() as $item)
+                                                        <option value="{{ $item->id }}">{{ $item->nama }}
+                                                        </option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Bank Pengirim</label>
-                                                <input type="text" class="form-control">
+                                                <input type="text" class="form-control" name="bank_pengirim_tf">
                                             </div>
                                             <div class="col-md-6 mt-2">
                                                 <label class="form-label">Nominal
                                                     Transfer</label>
-                                                <input type="text" class="form-control"
-                                                    onkeyup="updateTotalBayarAndKembalian(this)">
+                                                <input type="number" min="0" name="nominal_tf"
+                                                    class="form-control nominal-input" data-payment
+                                                    onwheel="this.blur()" onkeyup="updateTotalBayarAndKembalian(this)"
+                                                    ondblclick="isiDenganSisaTagihan(this)">
                                             </div>
                                             <div class="col-md-6 mt-2">
                                                 <label class="form-label">No. Rek
                                                     Pengirim</label>
-                                                <input type="text" class="form-control">
+                                                <input type="text" class="form-control" name="norek_pengirim_tf">
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="card mb-3">
+                                {{-- <div class="card mb-3">
                                     <div class="card-header">Ditanggung Dokter</div>
                                     <div class="card-body">
                                         <div class="row">
@@ -270,7 +319,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="card mb-3">
                                     <div class="card-header">Ditanggung Karyawan</div>
                                     <div class="card-body">
@@ -290,7 +338,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>
@@ -310,11 +358,12 @@
                     </button>
                 </div>
                 <div class="col text-right">
-                    <button type="submit" class="btn btn-primary ms-2">
-                        <i class="fas fa-money-bill-alt"></i> Bayar
+                    <button type="submit" class="btn btn-primary ms-2" id="btn-bayar">
+                        <i class="fas fa-money-bill-alt me-1"></i> Bayar
                     </button>
                 </div>
             </div>
+
         </form>
     @else
         <div class="row">
@@ -341,6 +390,81 @@
 </div>
 @section('plugin-pembayaran-tagihan')
     <script>
+        function toggleInputs(selectEl) {
+            const row = selectEl.closest('tr');
+
+            const ccInput = row.querySelector('.cc-number');
+            const authInput = row.querySelector('.auth-number');
+            const batchInput = row.querySelector('.batch-number');
+            const nominalInput = row.querySelector('.nominal-input');
+
+            const isSelected = selectEl.value.trim() !== '';
+
+            [ccInput, authInput, batchInput, nominalInput].forEach(input => {
+                input.disabled = !isSelected;
+                if (!isSelected) input.value = '';
+            });
+        }
+
+        // Saat halaman pertama kali dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.edc-select').forEach(select => {
+                toggleInputs(select); // jalankan agar semua input disable kalau belum ada value
+            });
+
+            // DP Pasien = Total Bayar
+            const dpPasien = document.getElementById('dpPasien');
+            const totalBayar = document.getElementById('totalBayar');
+
+            if (dpPasien && totalBayar) {
+                totalBayar.value = dpPasien.value;
+            }
+
+            // Button Bayar
+            const bayarBtn = document.getElementById('btn-bayar');
+            const form = bayarBtn.closest('form');
+            form.addEventListener('submit', function(e) {
+                // Disable button
+                bayarBtn.disabled = true;
+                // Ganti isi button jadi loading
+                bayarBtn.innerHTML =
+                    `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Memproses...`;
+            });
+        });
+
+        function updateTotalBayarAndKembalian(inputElement) {
+            const wajibBayar = Number($('#wajibBayar').val()) || 0;
+            const dpPasien = Number($('#dpPasien').val()) || 0;
+            const tunai = Number($('#tunai').val()) || 0;
+            let totalBayar = dpPasien;
+
+            // Jumlahkan semua input dengan data-payment
+            $('input[data-payment]').each(function() {
+                totalBayar += Number($(this).val()) || 0;
+            });
+
+            $('#totalBayar').val(totalBayar);
+
+            // Hitung kembalian, tapi pastikan minimal 0
+            const kembalian = Math.max(0, totalBayar - wajibBayar);
+            $('#kembalian').val(kembalian);
+
+            // Hitung dan tampilkan sisa tagihan, minimal 0
+            const sisaTagihan = Math.max(0, wajibBayar - totalBayar - dpPasien);
+            $('#sisaTagihan').val(sisaTagihan);
+        }
+
+        function isiDenganSisaTagihan(inputElement) {
+            const sisaTagihan = Number($('#sisaTagihan').val()) || 0;
+
+            if (sisaTagihan <= 0) return;
+
+            inputElement.value = sisaTagihan;
+
+            updateTotalBayarAndKembalian(inputElement);
+        }
+
+
         $(document).ready(function() {
             if ($('#bilinganTable').length) {
                 $('#bilinganTable').DataTable({

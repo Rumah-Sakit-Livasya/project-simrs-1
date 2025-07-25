@@ -13,6 +13,10 @@ class TindakanMedis extends Model
 
     protected $fillable = ['grup_tindakan_medis_id', 'kode', 'nama_tindakan', 'nama_billing', 'is_konsul', 'auto_charge', 'is_vaksin', 'mapping_rl_13', 'mapping_rl_34'];
 
+    public function tagihan_pasien()
+    {
+        return $this->hasOne(TagihanPasien::class);
+    }
 
     public function order_tindakan_medis()
     {
@@ -23,6 +27,7 @@ class TindakanMedis extends Model
     {
         return $this->belongsTo(GrupTindakanMedis::class);
     }
+
     public function tarifTindakanMedis($groupPenjaminId, $kelasRawatId)
     {
         return TarifTindakanMedis::where('tindakan_medis_id', $this->id)

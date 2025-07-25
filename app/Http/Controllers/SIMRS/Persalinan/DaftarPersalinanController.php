@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\SIMRS\Persalinan;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\GroupPenjamin;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Persalinan\DaftarPersalinan;
 use Illuminate\Http\Request;
 
@@ -52,6 +54,15 @@ class DaftarPersalinanController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function tarifPersalinan($id)
+    {
+        $persalinan = DaftarPersalinan::findOrFail($id);
+        $grup_penjamin = GroupPenjamin::all();
+        $kelas_rawat = KelasRawat::select('id', 'kelas')->get();
+
+        return view('pages.simrs.master-data.persalinan.tarif.index', compact('persalinan', 'grup_penjamin', 'kelas_rawat'));
     }
 
     public function update(Request $request, $id)

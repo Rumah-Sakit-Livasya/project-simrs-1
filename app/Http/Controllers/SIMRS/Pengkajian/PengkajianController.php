@@ -42,167 +42,17 @@ class PengkajianController extends Controller
 
     public function storeOrUpdatePengkajianRajal(Request $request)
     {
-        // dd($request);
-        // Validate the incoming request data
-        // $validatedData = $request->validate([
-        //     'user_id' => 'required|exists:users,id',
-        //     'registration_id' => 'required|exists:registrations,id',
-        //     'tgl_masuk' => 'nullable|date',
-        //     'jam_masuk' => 'nullable',
-        //     'tgl_dilayani' => 'nullable|date',
-        //     'jam_dilayani' => 'nullable',
-        //     'keluhan_utama' => 'nullable|string',
-        //     'pr' => 'nullable|string',
-        //     'rr' => 'nullable|string',
-        //     'bp' => 'nullable|string',
-        //     'temperatur' => 'nullable|string',
-        //     'body_height' => 'nullable|string',
-        //     'body_weight' => 'nullable|string',
-        //     'bmi' => 'nullable|string',
-        //     'kat_bmi' => 'nullable|string',
-        //     'sp02' => 'nullable|string',
-        //     'lingkar_kepala' => 'nullable|string',
-        //     'diagnosa_keperawatan' => 'nullable|string',
-        //     'rencana_tindak_lanjut' => 'nullable|string',
-        //     'alergi_obat' => 'nullable|string',
-        //     'ket_alergi_obat' => 'nullable|string',
-        //     'reaksi_alergi_obat' => 'nullable|string',
-        //     'alergi_makanan' => 'nullable|string',
-        //     'ket_alergi_makanan' => 'nullable|string',
-        //     'reaksi_alergi_makanan' => 'nullable|string',
-        //     'alergi_lainnya' => 'nullable|string',
-        //     'ket_alergi_lainnya' => 'nullable|string',
-        //     'reaksi_alergi_lainnya' => 'nullable|string',
-        //     'gelang' => 'nullable|boolean',
-        //     'skor_nyeri' => 'nullable|string',
-        //     'provokatif' => 'nullable|string',
-        //     'quality' => 'nullable|string',
-        //     'region' => 'nullable|string',
-        //     'time' => 'nullable|string',
-        //     'nyeri' => 'nullable|string',
-        //     'nyeri_hilang' => 'nullable|string',
-        //     'penurunan_bb' => 'nullable|string',
-        //     'asupan_makan' => 'nullable|string',
-        //     'kondisi_khusus1' => 'nullable|string',
-        //     'kondisi_khusus2' => 'nullable|string',
-        //     'kondisi_khusus3' => 'nullable|string',
-        //     'kondisi_khusus4' => 'nullable|string',
-        //     'kondisi_khusus5' => 'nullable|string',
-        //     'kondisi_khusus6' => 'nullable|string',
-        //     'kondisi_khusus7' => 'nullable|string',
-        //     'kondisi_khusus8' => 'nullable|string',
-        //     'imunisasi_dasar1' => 'nullable|string',
-        //     'imunisasi_dasar2' => 'nullable|string',
-        //     'imunisasi_dasar3' => 'nullable|string',
-        //     'imunisasi_dasar4' => 'nullable|string',
-        //     'imunisasi_dasar5' => 'nullable|string',
-        //     'resiko_jatuh1' => 'nullable|string',
-        //     'resiko_jatuh2' => 'nullable|string',
-        //     'resiko_jatuh3' => 'nullable|string',
-
-        //     //======== RIWAYAT PSIKOSOSIAL, SPIRITUAL & KEPERCAYAAN =========
-        //     'status_psikologis' => 'nullable|string',
-        //     'status_spiritual' => 'nullable|string',
-        //     'masalah_prilaku' => 'nullable|string',
-        //     'hub_dengan_keluarga' => 'nullable|string',
-        //     'tempat_tinggal' => 'nullable|string',
-        //     'kerabat_dihub' => 'nullable|string',
-        //     'no_kontak_kerabat' => 'nullable|string',
-        //     'status_perkawinan' => 'nullable|string',
-        //     'pekerjaan' => 'nullable|string',
-        //     'penghasilan' => 'nullable|string',
-        //     'pendidikan' => 'nullable|string',
-
-        //     //======== KEBUTUHAN EDUKASI =========
-        //     'hambatan_belajar1' => 'nullable|string',
-        //     'hambatan_belajar2' => 'nullable|string',
-        //     'hambatan_belajar3' => 'nullable|string',
-        //     'hambatan_belajar4' => 'nullable|string',
-        //     'hambatan_belajar5' => 'nullable|string',
-        //     'hambatan_belajar6' => 'nullable|string',
-        //     'hambatan_belajar7' => 'nullable|string',
-        //     'hambatan_belajar8' => 'nullable|string',
-        //     'hambatan_belajar9' => 'nullable|string',
-        //     'hambatan_lainnya' => 'nullable|string',
-        //     'kebutuhan_penerjemah' => 'nullable|string',
-        //     'kebuthan_pembelajaran1' => 'nullable|string',
-        //     'kebuthan_pembelajaran2' => 'nullable|string',
-        //     'kebuthan_pembelajaran3' => 'nullable|string',
-        //     'kebuthan_pembelajaran4' => 'nullable|string',
-        //     'kebuthan_pembelajaran5' => 'nullable|string',
-        //     'kebuthan_pembelajaran6' => 'nullable|string',
-        //     'kebuthan_pembelajaran7' => 'nullable|string',
-        //     'pembelajaran_lainnya' => 'nullable|string',
-        //     'kebuthan_pembelajaran1' => 'nullable|string',
-
-        //     //======== Assesment fungsional =========
-        //     'sensorik_penglihatan' => 'nullable|string',
-        //     'sensorik_penciuman' => 'nullable|string',
-        //     'sensorik_pendengaran' => 'nullable|string',
-
-        //     //======== Kognitif =========
-        //     'kognitif' => 'nullable|string',
-
-        //     //======== Motorik =========
-        //     'motorik_aktifitas' => 'nullable|string',
-        //     'motorik_berjalan' => 'nullable|string',
-        // ]);
-        // // Daftar semua checkbox yang diharapkan
-        // $checkboxes = [
-        //     'hambatan_belajar1',
-        //     'hambatan_belajar2',
-        //     'hambatan_belajar3',
-        //     'hambatan_belajar4',
-        //     'hambatan_belajar5',
-        //     'hambatan_belajar6',
-        //     'hambatan_belajar7',
-        //     'hambatan_belajar8',
-        //     'hambatan_belajar9',
-        //     'kebuthan_pembelajaran1',
-        //     'kebuthan_pembelajaran2',
-        //     'kebuthan_pembelajaran3',
-        //     'kebuthan_pembelajaran4',
-        //     'kebuthan_pembelajaran5',
-        //     'kebuthan_pembelajaran6',
-        //     'kebuthan_pembelajaran7',
-        //     'kondisi_khusus1',
-        //     'kondisi_khusus2',
-        //     'kondisi_khusus3',
-        //     'kondisi_khusus4',
-        //     'kondisi_khusus5',
-        //     'kondisi_khusus6',
-        //     'kondisi_khusus7',
-        //     'kondisi_khusus8',
-        //     'imunisasi_dasar1',
-        //     'imunisasi_dasar2',
-        //     'imunisasi_dasar3',
-        //     'imunisasi_dasar4',
-        //     'imunisasi_dasar5',
-        //     'resiko_jatuh1',
-        //     'resiko_jatuh2',
-        //     'resiko_jatuh3',
-        // ];
-
-        // // Mengatur nilai ke null jika tidak ada request
-        // foreach ($checkboxes as $key) {
-        //     $validatedData[$key] = $validatedData[$key] ?? null; // Jika tidak ada nilai, set ke null
-        // }
-
-        // Check if the registration type is 'rawat-jalan'
+        // Ambil data registrasi
         $registration = Registration::find($request->registration_id);
 
         if (!$registration) {
             return response()->json(['error' => 'Registration not found.'], 404);
         }
 
-        if ($registration->registration_type != 'rawat-jalan') {
-            return response()->json(['error' => 'Registration type must be rawat-jalan.'], 400);
-        }
-
-        // Cek apakah sudah ada data PengkajianNurseRajal
+        // Cek apakah pengkajian sudah ada
         $existingPengkajian = $registration->pengkajian_nurse_rajal;
 
-        // Konversi array menjadi JSON
+        // Siapkan data JSON
         $sensorik = json_encode([
             'sensorik_penglihatan' => $request->sensorik_penglihatan,
             'sensorik_penciuman' => $request->sensorik_penciuman,
@@ -214,86 +64,124 @@ class PengkajianController extends Controller
             'motorik_berjalan' => $request->motorik_berjalan,
         ]);
 
-        // Data yang akan disimpan
-        $data = [
-            'tgl_masuk' => $request->tgl_masuk,
-            'jam_masuk' => $request->jam_masuk,
-            'tgl_dilayani' => $request->tgl_dilayani,
-            'jam_dilayani' => $request->jam_dilayani,
-            'keluhan_utama' => $request->keluhan_utama,
-            'pr' => $request->pr,
-            'rr' => $request->rr,
-            'bp' => $request->bp,
-            'temperatur' => $request->temperatur,
-            'body_height' => $request->body_height,
-            'body_weight' => $request->body_weight,
-            'bmi' => $request->bmi,
-            'kat_bmi' => $request->kat_bmi,
-            'sp02' => $request->sp02,
-            'lingkar_kepala' => $request->lingkar_kepala,
-            'diagnosa_keperawatan' => $request->diagnosa_keperawatan,
-            'rencana_tindak_lanjut' => $request->rencana_tindak_lanjut,
-            'alergi_obat' => $request->alergi_obat,
-            'ket_alergi_obat' => $request->ket_alergi_obat,
-            'ket_alergi_makanan' => $request->ket_alergi_makanan,
-            'alergi_makanan' => $request->alergi_makanan,
-            'ket_alergi_lainnya' => $request->ket_alergi_lainnya,
-            'alergi_lainnya' => $request->alergi_lainnya,
-            'reaksi_alergi_obat' => $request->reaksi_alergi_obat,
-            'reaksi_alergi_makanan' => $request->reaksi_alergi_makanan,
-            'reaksi_alergi_lainnya' => $request->reaksi_alergi_lainnya,
-            'gelang' => $request->gelang ? true : false,
-            'skor_nyeri' => $request->skor_nyeri,
-            'provokatif' => $request->provokatif,
-            'quality' => $request->quality,
-            'region' => $request->region,
-            'time' => $request->time,
-            'nyeri' => $request->nyeri,
-            'nyeri_hilang' => $request->nyeri_hilang,
-            'penurunan_bb' => $request->penurunan_bb,
-            'asupan_makan' => $request->asupan_makan,
-            'kondisi_khusus' => json_encode($request->kondisi_khusus),
-            'imunisasi_dasar' => json_encode($request->imunisasi_dasar),
-            'hasil_resiko_jatuh' => $request->hasil_resiko_jatuh,
-            'status_psikologis' => $request->status_psikologis,
-            'status_spiritual' => $request->status_spiritual,
-            'masalah_prilaku' => $request->masalah_prilaku,
-            'kekerasan_dialami' => $request->kekerasan_dialami,
-            'hub_dengan_keluarga' => $request->hub_dengan_keluarga,
-            'tempat_tinggal' => $request->tempat_tinggal,
-            'kerabat_dihub' => $request->kerabat_dihub,
-            'no_kontak_kerabat' => $request->no_kontak_kerabat,
-            'penghasilan' => $request->penghasilan,
-            'hambatan_belajar' => json_encode($request->hambatan_belajar),
-            'hambatan_lainnya' => $request->hambatan_lainnya,
-            'kebutuhan_penerjemah' => $request->kebutuhan_penerjemah,
-            'kebutuhan_pembelajaran' => json_encode($request->kebutuhan_pembelajaran), // Format JSON
-            'pembelajaran_lainnya' => $request->pembelajaran_lainnya,
-            'kognitif' => $request->kognitif,
-            'registration_id' => $request->registration_id,
-            'user_id' => $request->user_id,
-            'sensorik' => $sensorik, // Sudah dalam format JSON
-            'motorik' => $motorik, // Sudah dalam format JSON
-            'updated_at' => now(),
-        ];
+        // Siapkan data utama
+        $data = $request->only([
+            'tgl_masuk',
+            'jam_masuk',
+            'tgl_dilayani',
+            'jam_dilayani',
+            'keluhan_utama',
+            'pr',
+            'rr',
+            'bp',
+            'temperatur',
+            'body_height',
+            'body_weight',
+            'bmi',
+            'kat_bmi',
+            'sp02',
+            'lingkar_kepala',
+            'diagnosa_keperawatan',
+            'rencana_tindak_lanjut',
+            'alergi_obat',
+            'ket_alergi_obat',
+            'alergi_makanan',
+            'ket_alergi_makanan',
+            'alergi_lainnya',
+            'ket_alergi_lainnya',
+            'reaksi_alergi_obat',
+            'reaksi_alergi_makanan',
+            'reaksi_alergi_lainnya',
+            'skor_nyeri',
+            'provokatif',
+            'quality',
+            'region',
+            'time',
+            'nyeri',
+            'nyeri_hilang',
+            'penurunan_bb',
+            'asupan_makan',
+            'status_psikologis',
+            'status_spiritual',
+            'masalah_prilaku',
+            'kekerasan_dialami',
+            'hub_dengan_keluarga',
+            'tempat_tinggal',
+            'kerabat_dihub',
+            'no_kontak_kerabat',
+            'penghasilan',
+            'hambatan_lainnya',
+            'kebutuhan_penerjemah',
+            'pembelajaran_lainnya',
+            'kognitif',
+            'registration_id',
+            'user_id'
+        ]);
+
+        // Boolean
+        $data['gelang'] = $request->boolean('gelang');
+
+        // Data JSON kompleks
+        $data['kondisi_khusus'] = json_encode($request->kondisi_khusus);
+        $data['imunisasi_dasar'] = json_encode($request->imunisasi_dasar);
+        $data['resiko_jatuh'] = json_encode($request->resiko_jatuh);
+        $data['hambatan_belajar'] = json_encode($request->hambatan_belajar);
+        $data['kebutuhan_pembelajaran'] = json_encode($request->kebutuhan_pembelajaran);
+        $data['sensorik'] = $sensorik;
+        $data['motorik'] = $motorik;
+        $data['updated_at'] = now();
 
         try {
             if ($existingPengkajian) {
-                // Update data yang sudah ada
-                
+                // Update existing
                 $data['modified_by'] = $request->user_id;
                 $existingPengkajian->update($data);
-                return response()->json(['message' => 'Data updated successfully!', 'data' => $existingPengkajian]);
+                $pengkajian = $existingPengkajian;
             } else {
-                // Buat data baru
+                // Create new
                 $data['created_by'] = $request->user_id;
                 $pengkajian = PengkajianNurseRajal::create($data);
-                return response()->json(['message' => 'Data saved successfully!', 'data' => $pengkajian], 201);
             }
+
+            // Handle signature jika ada
+            if ($request->filled('signature_image')) {
+                $imageData = $request->input('signature_image');
+                $image = base64_decode(str_replace('data:image/png;base64,', '', str_replace(' ', '+', $imageData)));
+                $imageName = 'ttd_' . time() . '.png';
+                $path = 'signatures/' . $imageName;
+
+                // Hapus tanda tangan lama jika ada
+                if ($pengkajian->signature && \Storage::disk('public')->exists($pengkajian->signature->signature)) {
+                    \Storage::disk('public')->delete($pengkajian->signature->signature);
+                }
+
+                // Simpan file baru
+                \Storage::disk('public')->put($path, $image);
+
+                // Simpan/Update relasi signature
+                $pengkajian->signature()->updateOrCreate(
+                    [
+                        'signable_id' => $pengkajian->id,
+                        'signable_type' => get_class($pengkajian),
+                    ],
+                    [
+                        'signature' => $path,
+                        'pic' => $request->input('pic'),
+                        'role' => $request->input('role'),
+                    ]
+                );
+            }
+
+            return response()->json([
+                'message' => 'Data saved successfully!',
+                'data' => $pengkajian,
+            ], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+
     public function storeOrUpdateTransferPasienAntarRuangan(Request $request)
     {
         $request['user_id'] = auth()->user()->id;
@@ -390,25 +278,53 @@ class PengkajianController extends Controller
             'nama_perawat_penerima_after' => 'nullable|string',
         ]);
 
-        // Check if the registration type is 'rawat-jalan'
-        $registration = Registration::find($validatedData['registration_id']);
-        // if ($registration->registration_type != 'rawat-jalan') {
-        //     return response()->json(['error' => 'Registration type must be rawat-jalan.'], 400);
-        // }
-
-        // Check if a TransferPasienAntarRuangan already exists for this registration
-        $existingTransfer = $registration->transfer_pasien_antar_ruangan;
-
         try {
-            if ($existingTransfer) {
-                // Update the existing TransferPasienAntarRuangan record
-                $existingTransfer->update($validatedData);
-                return response()->json(['message' => 'Data updated successfully!', 'data' => $existingTransfer]);
-            } else {
-                // Create a new TransferPasienAntarRuangan record
-                $transfer = TransferPasienAntarRuangan::create($validatedData);
-                return response()->json(['message' => 'Data saved successfully!', 'data' => $transfer], 201);
+            // Simpan atau update TransferPasienAntarRuangan
+            $transfer = TransferPasienAntarRuangan::updateOrCreate(
+                ['registration_id' => $validatedData['registration_id']],
+                $validatedData
+            );
+
+            // Hapus tanda tangan lama (jika kamu ingin replace)
+            $transfer->signatures()->delete();
+
+            // Simpan ulang semua tanda tangan jika tersedia
+            if ($request->filled('data_ttd1')) {
+                $transfer->signatures()->create([
+                    'pic' => $validatedData['nama_perawat_pengirim'] ?? auth()->user()->name,
+                    'role' => 'pengirim',
+                    'signature' => $validatedData['data_ttd1'],
+                ]);
             }
+
+            if ($request->filled('data_ttd2')) {
+                $transfer->signatures()->create([
+                    'pic' => $validatedData['nama_perawat_penerima'] ?? '-',
+                    'role' => 'penerima',
+                    'signature' => $validatedData['data_ttd2'],
+                ]);
+            }
+
+            if ($request->filled('data_ttd3')) {
+                $transfer->signatures()->create([
+                    'pic' => $validatedData['nama_perawat_pengirim_after'] ?? '-',
+                    'role' => 'pengirim_balik',
+                    'signature' => $validatedData['data_ttd3'],
+                ]);
+            }
+
+            if ($request->filled('data_ttd4')) {
+                $transfer->signatures()->create([
+                    'pic' => $validatedData['nama_perawat_penerima_after'] ?? '-',
+                    'role' => 'penerima_balik',
+                    'signature' => $validatedData['data_ttd4'],
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Data berhasil disimpan!',
+                'data' => $transfer
+            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

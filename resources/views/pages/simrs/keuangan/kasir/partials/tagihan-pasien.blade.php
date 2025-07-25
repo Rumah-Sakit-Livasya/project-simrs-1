@@ -62,40 +62,159 @@
 
 @section('plugin-tagihan-pasien')
     <script>
-        function formatRupiah(angka) {
-            return angka < 0 ? '-' + Math.abs(angka).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/[^0-9.]/g,
-                '') : angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/[^0-9.]/g, '');
-        }
+        // function formatRupiah(angka) {
+        //     const numericValue = parseFloat(angka) || 0;
+        //     return numericValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        // }
 
         function updateTotalBayarAndKembalian(nominal) {
-            const tunai = parseFloat(nominal.value.replace(/\./g, '').replace(/[^0-9]/g, ''));
-            document.getElementById('totalBayar').value = formatRupiah(tunai);
+            // const tunai = parseFloat(nominal.value.replace(/\./g, '').replace(/[^0-9]/g, ''));
+            const tunai = parseFloat(nominal.value);
+            // document.getElementById('totalBayar').value = formatRupiah(tunai);
+            document.getElementById('totalBayar').value = tunai;
             updateKembalian();
         }
 
+        function updateRowCalculations($row) {
+            const tagihanId = $row.find('.edit-input').data('id'); // Ambil id tagihan dari input baris
+
+            // Ambil quantity dan nominal sekarang
+            const quantity = parseFloat($row.find('.input-quantity').val()) || 0;
+            const nominal = $row.find('.input-nominal').val();
+            const disc = parseFloat($row.find('.input-disc').val()) || 0;
+            const jamin = parseFloat($row.find('.input-jamin').val()) || 0;
+            const jaminanRp = $row.find('.input-jaminan-rp').val() || 0;
+
+            // Ambil tarif diskon dari backend
+            $.ajax({
+                url: `/simrs/kasir/tagihan-pasien/${tagihanId}/tarif`,
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        const tarif = response.tarif;
+                        const tipeDiskon = $row.find('.select2[data-column="tipe_diskon"]').val();
+
+                        let diskonRp = 0;
+                        if (tipeDiskon === 'Dokter') {
+                            diskonRp = tarif.share_dr * quantity;
+                        } else if (tipeDiskon === 'Rumah Sakit') {
+                            diskonRp = tarif.share_rs * quantity;
+                        } else if (tipeDiskon === 'All') {
+                            diskonRp = tarif.total * quantity;
+                        }
+
+                        const totalNominal = nominal * quantity;
+                        const diskonPercent = totalNominal * (disc / 100);
+                        const jaminPercent = totalNominal * (jamin / 100);
+
+                        const totalDiskon = diskonRp + diskonPercent;
+                        const totalJaminan = jaminanRp + jaminPercent;
+
+                        const wajibBayar = Math.max(0, totalNominal - totalDiskon - totalJaminan);
+
+                        // Update input
+                        $row.find('.input-diskon-rp').val(diskonRp);
+                        $row.find('.input-wajib-bayar').val(wajibBayar);
+                    } else {
+                        console.error('Gagal mengambil tarif:', response.error);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error AJAX:', xhr.responseText);
+                }
+            });
+        }
+
+
+        function updateTotalWajibBayar() {
+            let totalWajibBayar = 0;
+            $('#tagihanTable .input-wajib-bayar').each(function() {
+                // totalWajibBayar += reverseFormat($(this).val());
+                totalWajibBayar += $(this).val();
+            });
+            return totalWajibBayar;
+        }
+
+        function calculateDiskonRp($row, tagihanId, callback) {
+            $.ajax({
+                url: `/simrs/kasir/tagihan-pasien/${tagihanId}/tarif`,
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        const tarif = response.tarif;
+                        const quantity = parseFloat($row.find('.input-quantity').val()) || 0;
+                        const tipeDiskon = $row.find('.select2[data-column="tipe_diskon"]').val();
+
+                        let diskon = 0;
+                        if (tipeDiskon === 'Dokter') {
+                            diskon = tarif.share_dr * quantity;
+                        } else if (tipeDiskon === 'Rumah Sakit') {
+                            diskon = tarif.share_rs * quantity;
+                        } else if (tipeDiskon === 'All') {
+                            diskon = tarif.total * quantity;
+                        }
+
+                        if (typeof callback === 'function') {
+                            callback(diskon);
+                        }
+                    } else {
+                        console.error('Gagal mendapatkan tarif:', response.error);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error fetching tarif:', xhr.responseText);
+                }
+            });
+        }
+
+
+        // Fungsi untuk menghitung wajib bayar
+        function calculateWajibBayar(row) {
+            var $row = $(row);
+            var quantity = parseFloat($row.find('.input-quantity').val()) || 1;
+            var discPercent = parseFloat($row.find('.input-disc').val()) || 0;
+            var jaminPercent = parseFloat($row.find('.input-jamin').val()) || 0;
+            // var nominal = reverseFormat($row.find('.input-nominal').val());
+            // var diskonRp = reverseFormat($row.find('.input-diskon-rp').val());
+            // var jaminRp = reverseFormat($row.find('.input-jaminan-rp').val());
+            var nominal = $row.find('.input-nominal').val();
+            var diskonRp = $row.find('.input-diskon-rp').val();
+            var jaminRp = $row.find('.input-jaminan-rp').val();
+
+            var totalNominal = nominal * quantity;
+            var diskonFromPercent = totalNominal * (discPercent / 100);
+            var totalDiskon = diskonFromPercent + diskonRp;
+            var jaminanFromPercent = totalNominal * (jaminPercent / 100);
+            var totalJaminan = jaminanFromPercent + jaminRp;
+            var wajibBayar = totalNominal - totalDiskon - totalJaminan;
+
+            return Math.max(0, wajibBayar);
+        }
+
         function updateKembalian() {
-            const totalBayar = parseFloat(document.getElementById('totalBayar').value.replace(/\./g, '').replace(/[^0-9]/g,
-                ''));
-            const sisaTagihan = parseFloat(document.querySelector('input[placeholder="Masukkan Sisa Tagihan"]').value
-                .replace(/\./g, '').replace(/[^0-9]/g, ''));
+            // const totalBayar = parseFloat(document.getElementById('totalBayar').value.replace(/\./g, '').replace(/[^0-9]/g, ''));
+            const totalBayar = parseFloat(document.getElementById('totalBayar').value, '');
+            // const sisaTagihan = parseFloat(document.querySelector('input[placeholder="Masukkan Sisa Tagihan"]').value.replace(/\./g, '').replace(/[^0-9]/g, ''));
+            const sisaTagihan = parseFloat(document.querySelector('input[placeholder="Masukkan Sisa Tagihan"]').value, '');
             const kembalian = totalBayar - sisaTagihan;
-            document.getElementById('kembalian').value = formatRupiah(kembalian);
+            // document.getElementById('kembalian').value = formatRupiah(kembalian);
+            document.getElementById('kembalian').value = kembalian;
         }
 
-        function formatAngka(input) {
-            var value = input.value.replace(/\D/g, '');
-            var formattedValue = '';
+        // function formatAngka(input) {
+        //     var value = input.value.replace(/\D/g, '');
+        //     var formattedValue = '';
 
-            if (value.length > 6) {
-                value = value.substr(0, 6);
-            }
+        //     if (value.length > 6) {
+        //         value = value.substr(0, 6);
+        //     }
 
-            if (value.length > 0) {
-                formattedValue = value.match(/.{1,2}/g).join('-');
-            }
+        //     if (value.length > 0) {
+        //         formattedValue = value.match(/.{1,2}/g).join('-');
+        //     }
 
-            input.value = formattedValue;
-        }
+        //     input.value = formattedValue;
+        // }
 
         // Fungsi formatRupiah yang konsisten
         function reverseFormat(angka) {
@@ -113,12 +232,16 @@
                     column: column,
                     value: value, // Nilai sudah dalam format angka (10000)
                     quantity: quantity,
-                    nominal: reverseFormat(nominal),
+                    // nominal: reverseFormat(nominal),
+                    // diskon_rp: reverseFormat(discountRp),
+                    // jaminan_rp: reverseFormat(jaminRp),
+                    // wajib_bayar: reverseFormat(wajibBayar),
+                    nominal: nominal,
+                    diskon_rp: discountRp,
+                    jaminan_rp: jaminRp,
+                    wajib_bayar: wajibBayar,
                     disc: discountPercent,
-                    diskon_rp: reverseFormat(discountRp),
                     jamin: jaminPercent,
-                    jaminan_rp: reverseFormat(jaminRp),
-                    wajib_bayar: reverseFormat(wajibBayar),
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
@@ -167,7 +290,8 @@
 
                     // Nominal Field
                     var $nominal = $row.find('.input-nominal');
-                    var nominal = parseFloat($nominal.val().replace(/\./g, ''));
+                    // var nominal = parseFloat($nominal.val().replace(/\./g, ''));
+                    var nominal = parseFloat($nominal.val());
                     if (!$nominal.attr('data-unit')) {
                         $nominal.attr('data-unit', nominal);
                     }
@@ -180,7 +304,8 @@
                     }
 
                     var $diskonRp = $row.find('.input-diskon-rp');
-                    var diskonRpValue = parseFloat($diskonRp.val().replace(/\./g, ''));
+                    // var diskonRpValue = parseFloat($diskonRp.val().replace(/\./g, ''));
+                    var diskonRpValue = parseFloat($diskonRp.val());
                     if (!$diskonRp.attr('data-unit')) {
                         $diskonRp.attr('data-unit', diskonRpValue);
                     }
@@ -192,7 +317,8 @@
                     }
 
                     var $jaminanRp = $row.find('.input-jaminan-rp');
-                    var jaminanRpValue = parseFloat($jaminanRp.val().replace(/\./g, ''));
+                    // var jaminanRpValue = parseFloat($jaminanRp.val().replace(/\./g, ''));
+                    var jaminanRpValue = parseFloat($jaminanRp.val());
                     if (!$jaminanRp.attr('data-unit')) {
                         $jaminanRp.attr('data-unit', jaminanRpValue);
                     }
@@ -202,9 +328,11 @@
 
                     // Retrieve discount and jamin values for calculation
                     var discPercent = parseFloat($disc.val());
-                    var diskonRp = parseFloat($diskonRp.val().replace(/\./g, ''));
+                    // var diskonRp = parseFloat($diskonRp.val().replace(/\./g, ''));
+                    var diskonRp = parseFloat($diskonRp.val());
                     var jaminPercent = parseFloat($jamin.val());
-                    var jaminRp = parseFloat($jaminanRp.val().replace(/\./g, ''));
+                    // var jaminRp = parseFloat($jaminanRp.val().replace(/\./g, ''));
+                    var jaminRp = parseFloat($jaminanRp.val());
 
                     // Calculate total nominal and then discount and jaminan
                     var totalNominal = nominal * quantity;
@@ -215,7 +343,8 @@
 
                     // Set the formatted value to the wajib bayar input
                     var $wajib = $row.find('.input-wajib-bayar');
-                    $wajib.val(formatRupiah(wajibBayar));
+                    // $wajib.val(formatRupiah(wajibBayar));
+                    $wajib.val(wajibBayar);
                     if (!$wajib.attr('data-unit')) {
                         $wajib.attr('data-unit', wajibBayar);
                     }
@@ -223,78 +352,53 @@
             });
 
             // Update nominal, wajib bayar, discount and jamin preview when quantity or related inputs are changed
-            $(document).on('input',
-                '.input-quantity, .input-disc, .input-diskon-rp, .input-jamin, .input-jaminan-rp',
-                function() {
-                    var $row = $(this).closest('tr');
-                    var quantity = parseFloat($row.find('.input-quantity').val());
+            // Event handler untuk perubahan nilai
+            $(document).on('input', '.input-quantity, .input-disc, .input-jamin, .input-jaminan-rp', function() {
+                const $row = $(this).closest('tr');
+                updateRowCalculations($row);
+            });
 
-                    // Retrieve data nominal_awal from database if not available in the DOM attribute
-                    var id = $row.find('.edit-input').first().data('id');
-                    var nominalAwalAttr = $row.find('.input-nominal').attr('data-nominal_awal');
-                    if (nominalAwalAttr == null || nominalAwalAttr === '') {
-                        $.ajax({
-                            url: '/simrs/kasir/get-nominal-awal/' + id,
-                            type: 'GET',
-                            async: false, // using synchronous call for immediate result
-                            success: function(response) {
-                                nominalAwalAttr = response.nominal_awal;
-                                $row.find('.input-nominal').attr('data-nominal_awal',
-                                    nominalAwalAttr);
-                            },
-                            error: function() {
-                                nominalAwalAttr = '';
-                            }
+
+            // Event handler untuk perubahan tipe diskon
+            $(document).on('change', '.select2[data-column="tipe_diskon"]', function() {
+                var $row = $(this).closest('tr');
+                var tagihanId = $(this).data('id');
+
+                $.ajax({
+                    url: '/simrs/kasir/tagihan-pasien/update-disc/' + tagihanId,
+                    type: 'PUT',
+                    data: {
+                        tipe_diskon: $(this).val(),
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // $row.find('.input-diskon-rp').val(formatRupiah(response.diskon));
+                            $row.find('.input-diskon-rp').val(response.diskon);
+                            updateRowCalculations($row);
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Diskon berhasil diperbarui',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Error: ' + (xhr.responseJSON?.error || xhr
+                                .statusText),
+                            showConfirmButton: false,
+                            timer: 3000
                         });
                     }
-
-                    // Determine unit price: if nominal_awal exists, use it; otherwise fall back to data-unit
-                    var unitPrice = nominalAwalAttr != null && nominalAwalAttr !== '' ?
-                        parseFloat(nominalAwalAttr) :
-                        parseFloat($row.find('.input-nominal').attr('data-unit'));
-
-                    // Update total nominal based on unit price (quantity * unitPrice)
-                    var totalNominal = quantity * (nominalAwalAttr !== null && nominalAwalAttr !== '' ?
-                        parseFloat(nominalAwalAttr) : unitPrice);
-                    $row.find('.input-nominal').val(totalNominal ? totalNominal.toLocaleString('id-ID') : '');
-
-                    // Format discount and jamin inputs
-                    var discVal = $row.find('.input-disc').val().replace(/[^0-9]/g, '');
-                    var disc = discVal ? parseFloat(discVal) : 0;
-                    if (discVal) {
-                        $row.find('.input-disc').val(disc.toLocaleString('id-ID'));
-                    }
-
-                    var diskonRpVal = $row.find('.input-diskon-rp').val().replace(/[^0-9]/g, '');
-                    var diskonRp = diskonRpVal ? parseFloat(diskonRpVal) : 0;
-                    if (diskonRpVal) {
-                        $row.find('.input-diskon-rp').val(diskonRp.toLocaleString('id-ID'));
-                    }
-
-                    var jaminVal = $row.find('.input-jamin').val().replace(/[^0-9]/g, '');
-                    var jamin = jaminVal ? parseFloat(jaminVal) : 0;
-                    if (jaminVal) {
-                        $row.find('.input-jamin').val(jamin.toLocaleString('id-ID'));
-                    }
-
-                    var jaminanRpVal = $row.find('.input-jaminan-rp').val().replace(/[^0-9]/g, '');
-                    var jaminanRp = jaminanRpVal ? parseFloat(jaminanRpVal) : 0;
-                    if (jaminanRpVal) {
-                        $row.find('.input-jaminan-rp').val(jaminanRp.toLocaleString('id-ID'));
-                    }
-
-                    // Calculate wajib bayar.
-                    var wajibBayar = 0;
-                    if (disc === 0 && diskonRp === 0 && jamin === 0 && jaminanRp === 0) {
-                        wajibBayar = totalNominal;
-                    } else {
-                        wajibBayar = totalNominal - ((totalNominal * (disc / 100)) + diskonRp) - ((
-                            totalNominal * (jamin / 100)) + jaminanRp);
-                        if (wajibBayar <= 0) wajibBayar = 0;
-                    }
-
-                    $row.find('.input-wajib-bayar').val(wajibBayar ? wajibBayar.toLocaleString('id-ID') : '0');
                 });
+            });
 
             // Bind keydown event on .edit-input only once to handle Enter key press
             $(document).off('keydown', '.edit-input').on('keydown', '.edit-input', function(e) {
@@ -309,7 +413,8 @@
                         var column = $(this).data('column');
                         var value = $(this).val();
                         if ($(this).hasClass('format-currency')) {
-                            value = value.replace(/\./g, '').replace(/[^0-9]/g, '');
+                            // value = value.replace(/\./g, '').replace(/[^0-9]/g, '');
+                            value = value;
                         }
                         rowData[column] = value;
                     });
@@ -405,8 +510,11 @@
                         name: 'nominal',
                         className: 'nominal',
                         render: function(data, type, row) {
+                            // return '<input type="text" readonly class="form-control edit-input input-nominal format-currency" value="' +
+                            //     (data ? parseFloat(data).toLocaleString('id-ID') : '') +
+                            //     '" data-column="nominal" data-id="' + row.id + '">';
                             return '<input type="text" readonly class="form-control edit-input input-nominal format-currency" value="' +
-                                (data ? parseFloat(data).toLocaleString('id-ID') : '') +
+                                (data ? parseFloat(data) : '') +
                                 '" data-column="nominal" data-id="' + row.id + '">';
                         }
                     },
@@ -433,8 +541,11 @@
                         name: 'disc',
                         className: 'disc',
                         render: function(data, type, row) {
+                            // return '<input type="text" class="form-control edit-input input-disc format-currency" value="' +
+                            //     (data ? parseFloat(data).toLocaleString('id-ID') : '') +
+                            //     '" data-column="disc" data-id="' + row.id + '">';
                             return '<input type="text" class="form-control edit-input input-disc format-currency" value="' +
-                                (data ? parseFloat(data).toLocaleString('id-ID') : '') +
+                                (data ? parseFloat(data) : '') +
                                 '" data-column="disc" data-id="' + row.id + '">';
                         }
                     },
@@ -443,8 +554,11 @@
                         name: 'diskon_rp',
                         className: 'diskon-rp',
                         render: function(data, type, row) {
+                            // return '<input type="text" class="form-control edit-input input-diskon-rp format-currency" value="' +
+                            //     (data ? parseFloat(data).toLocaleString('id-ID') : '') +
+                            //     '" data-column="diskon_rp" data-id="' + row.id + '">';
                             return '<input type="text" class="form-control edit-input input-diskon-rp format-currency" value="' +
-                                (data ? parseFloat(data).toLocaleString('id-ID') : '') +
+                                (data ? parseFloat(data) : '') +
                                 '" data-column="diskon_rp" data-id="' + row.id + '">';
                         }
                     },
@@ -462,8 +576,11 @@
                         name: 'jaminan_rp',
                         className: 'jaminan-rp',
                         render: function(data, type, row) {
+                            // return '<input type="text" class="form-control edit-input input-jaminan-rp format-currency" value="' +
+                            //     (data ? parseFloat(data).toLocaleString('id-ID') : '') +
+                            //     '" data-column="jaminan_rp" data-id="' + row.id + '">';
                             return '<input type="text" class="form-control edit-input input-jaminan-rp format-currency" value="' +
-                                (data ? parseFloat(data).toLocaleString('id-ID') : '') +
+                                (data ? parseFloat(data) : '') +
                                 '" data-column="jaminan_rp" data-id="' + row.id + '">';
                         }
                     },
@@ -472,8 +589,11 @@
                         name: 'wajib_bayar',
                         className: 'wajib-bayar',
                         render: function(data, type, row) {
+                            // return '<input type="text" readonly class="form-control edit-input input-wajib-bayar format-currency" value="' +
+                            //     (data ? parseFloat(data).toLocaleString('id-ID') : '') +
+                            //     '" data-column="wajib_bayar" data-id="' + row.id + '">';
                             return '<input type="text" readonly class="form-control edit-input input-wajib-bayar format-currency" value="' +
-                                (data ? parseFloat(data).toLocaleString('id-ID') : '') +
+                                (data ? parseFloat(data) : '') +
                                 '" data-column="wajib_bayar" data-id="' + row.id + '">';
                         }
                     }
@@ -492,18 +612,18 @@
 
             runDatePicker();
 
-            $(document).on('input', '.number-input', function() {
-                let value = $(this).val().replace(/[^0-9]/g, '');
-            });
+            // $(document).on('input', '.number-input', function() {
+            //     let value = $(this).val().replace(/[^0-9]/g, '');
+            // });
 
-            $(document).on('input', '.format-currency', function() {
-                let value = $(this).val().replace(/[^0-9]/g, '');
-                if (value) {
-                    $(this).val(parseInt(value).toLocaleString('id-ID'));
-                } else {
-                    $(this).val('');
-                }
-            });
+            // $(document).on('input', '.format-currency', function() {
+            //     let value = $(this).val().replace(/[^0-9]/g, '');
+            //     if (value) {
+            //         $(this).val(parseInt(value).toLocaleString('id-ID'));
+            //     } else {
+            //         $(this).val('');
+            //     }
+            // });
 
             $(function() {
                 $('#tipe-diskon').select2();
@@ -540,11 +660,52 @@
             $('#tagihanTable').on('draw.dt', function() {
                 let totalNominal = 0;
                 $('#tagihanTable .input-wajib-bayar').each(function() {
-                    const value = parseFloat($(this).val().replace(/\./g, '').replace(/[^0-9]/g,
-                        '')) || 0;
+                    // const value = parseFloat($(this).val().replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
+                    const value = parseFloat($(this).val()) || 0;
                     totalNominal += value;
                 });
                 wajibBayar = totalNominal;
+            });
+
+            $(document).on('click', '.delete-btn', function(e) {
+                e.preventDefault();
+                const tagihanId = $(this).data('id');
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: 'Data tagihan pasien akan dihapus.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/simrs/kasir/tagihan-pasien/' + tagihanId,
+                            type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Terhapus!',
+                                    text: 'Data tagihan pasien telah dihapus.'
+                                });
+                                $('#tagihanTable').DataTable().ajax.reload();
+                            },
+                            error: function(xhr) {
+                                console.error('Error deleting tagihan:', xhr
+                                    .responseText);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: 'Terjadi kesalahan saat menghapus data.'
+                                });
+                            }
+                        });
+                    }
+                });
             });
 
             $('#save-final').on('click', function() {

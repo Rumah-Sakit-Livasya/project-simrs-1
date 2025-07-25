@@ -301,6 +301,7 @@ class EmployeeController extends Controller
                     'bank_id' => 'nullable',
                     'account_number' => 'nullable',
                     'account_holder_name' => 'nullable',
+                    'is_management' => 'nullable',
                 ],
                 [
                     'fullname.required' => 'Nama Harus di isi!',
@@ -512,5 +513,16 @@ class EmployeeController extends Controller
                 'text' => $doctor->fullname
             ];
         }));
+    }
+
+    // Toggle Management
+    public function toggleManagement(Request $request, $id)
+    {
+        $employee = Employee::findOrFail($id);
+
+        $employee->is_management = $request->input('is_management');
+        $employee->save();
+
+        return response()->json(['success' => true]);
     }
 }
