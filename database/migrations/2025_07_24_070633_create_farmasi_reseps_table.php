@@ -35,6 +35,7 @@ return new class extends Migration
             $table->boolean('bmhp')->default(false);
             $table->boolean('kronis')->default(false);
             $table->boolean('billed')->default(false);
+            $table->boolean('handed')->default(false);
             $table->boolean('dispensing')->default(false);
         });
     }

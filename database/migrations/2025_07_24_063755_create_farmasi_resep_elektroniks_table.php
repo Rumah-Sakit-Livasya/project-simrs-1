@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('kode_re')->unique();
             $table->string('resep_manual')->nullable();
             $table->integer('total');
+            $table->boolean('processed')->default(false);
         });
     }
 
