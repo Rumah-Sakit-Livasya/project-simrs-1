@@ -26,6 +26,7 @@ use App\Models\SIMRS\Peralatan\Peralatan;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\ResumeMedisRajal\ResumeMedisRajal;
 use App\Models\SIMRS\TindakanMedis;
+use App\Models\WarehouseMasterGudang;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -269,7 +270,8 @@ class ERMController extends Controller
             case 'cppt_dokter':
                 $dokter = Employee::where('is_doctor', 1)->get();
                 $pengkajian = CPPT::where('registration_id', $registration->id)->first();
-                return view('pages.simrs.erm.form.dokter.cppt-dokter', compact('registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
+                $gudangs = WarehouseMasterGudang::where('apotek', 1)->where('warehouse', 0)->get();
+                return view('pages.simrs.erm.form.dokter.cppt-dokter', compact('gudangs', 'registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
 
             case 'resume_medis':
                 $dokter = Employee::where('is_doctor', 1)->get();
