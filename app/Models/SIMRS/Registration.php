@@ -174,11 +174,6 @@ class Registration extends Model implements AuditableContract
         return $this->hasOne(DietGizi::class, 'registration_id');
     }
 
-    public function cppt()
-    {
-        return $this->hasMany(CPPT::class);
-    }
-
     // public function generateNomorRegistrasi()
     // {
     //     $date = Carbon::now();
