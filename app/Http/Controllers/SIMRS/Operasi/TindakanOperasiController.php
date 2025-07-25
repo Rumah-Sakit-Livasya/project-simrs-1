@@ -8,6 +8,8 @@ use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Operasi\JenisOperasi;
 use App\Models\SIMRS\Operasi\KategoriOperasi;
 use App\Models\SIMRS\Operasi\TindakanOperasi;
+use App\Models\SIMRS\Registration;
+use App\Models\SIMRS\Room;
 use Illuminate\Http\Request;
 
 class TindakanOperasiController extends Controller
@@ -99,5 +101,20 @@ class TindakanOperasiController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+    public function createOrderOperasi($registrationId)
+    {
+        $registration = Registration::findOrFail($registrationId);
+
+        $data = [
+            'registration' => $registration,
+            'ruangan' => Room::all(),
+            'kelas' => KelasRawat::all(),
+            'jenisOperasi' => JenisOperasi::all(),
+            'kategoriOperasi' => KategoriOperasi::all(),
+            'tindakanOperasi' => TindakanOperasi::all()
+        ];
+
+        return view('your.view.name', $data);
     }
 }

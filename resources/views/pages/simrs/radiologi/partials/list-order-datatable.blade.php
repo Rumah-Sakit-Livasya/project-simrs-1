@@ -319,7 +319,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($order->status_billed == 1)
+                                        @if ($order->is_konfirmasi == 1)
                                             <a class="mdi mdi-printer pointer mdi-24px text-success nota-btn"
                                                 title="Print Nota Order" data-id="{{ $order->id }}"></a>
                                         @else

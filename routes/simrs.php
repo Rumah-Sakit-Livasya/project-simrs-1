@@ -50,6 +50,7 @@ use App\Http\Controllers\SIMRS\Laboratorium\TipeLaboratoriumController;
 use App\Http\Controllers\SIMRS\Laboratorium\ParameterLaboratoriumController;
 use App\Http\Controllers\SIMRS\Operasi\JenisOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\KategoriOperasiController;
+use App\Http\Controllers\SIMRS\Operasi\OperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TindakanOperasiController;
 use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
@@ -727,8 +728,11 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
         Route::prefix('ok')->group(function () {
-            Route::get('/daftar-pasien', [IGDController::class, 'index'])
-                ->name('ok.daftar-pasien');
+            Route::get('/daftar-pasien', [OperasiController::class, 'index'])->name('ok.daftar-pasien');
+            Route::get('/prosedure/{orderId}', [OperasiController::class, 'prosedure'])->name('ok.prosedure');
+            Route::get('/prosedur/{order}/create', [OperasiController::class, 'createProsedur'])->name('ok.prosedur.create');
+            Route::post('/prosedur/store', [OperasiController::class, 'storeProsedur'])->name('ok.prosedur.store');
+
 
             Route::prefix('reports')->group(function () {
                 Route::get('order-pasien', [IGDController::class, 'orderPasien'])
@@ -1149,6 +1153,37 @@ Route::group(['middleware' => ['auth']], function () {
 
             Route::get('/print-kwitansi/{id}', [BilinganController::class, 'printKwitansi'])
                 ->name('print.kwitansi');
+        });
+
+        Route::prefix('operasi')->group(function () {
+            // Menyimpan Order dari modal di halaman registrasi
+            Route::post('order/store', [OperasiController::class, 'storeOrder'])->name('operasi.order.store');
+            Route::get('/operasi/{orderId}/detail', [OperasiController::class, 'getOrderDetail']);
+
+            // Halaman utama untuk melihat daftar semua order operasi
+            Route::get('list-order', [OperasiController::class, 'listOrder'])->name('operasi.list-order');
+            // +++ KODE BARU +++
+            // Tambahkan {orderId} untuk menerima parameter dari URL
+
+            // Halaman detail untuk satu order, di mana nanti ada manajemen prosedur, dll.
+            Route::get('detail-order/{orderId}', [OperasiController::class, 'show'])->name('operasi.detail-order');
+
+            // Route untuk mencetak dokumen (misal: nota, informed consent, dll)
+            Route::get('nota-order/{orderId}', [OperasiController::class, 'notaOrder'])->name('operasi.nota-order');
+            Route::get('/api/simrs/get-order-operasi/{registrationId}', [OperasiController::class, 'getOrderOperasi']);
+            Route::get('/api/simrs/get-tindakan-operasi/{registrationId}', [OperasiController::class, 'getTindakanOperasi']);
+            Route::get('/operasi/order/data/{registrationId}', [OperasiController::class, 'getOrderOperasi'])
+                ->name('operasi.order.data');
+
+            // Route untuk mengambil data tindakan operasi (AJAX)
+            Route::get('/operasi/tindakan/data/{registrationId}', [OperasiController::class, 'getTindakanOperasi'])
+                ->name('operasi.tindakan.data');
+
+            // Route untuk delete order (opsional)
+            Route::delete('/operasi/order/delete', [OperasiController::class, 'deleteOrder'])
+                ->name('operasi.order.delete');
+            // Route untuk API (jika dibutuhkan oleh DataTables atau JS lainnya)
+            // Route::get('data-order/{orderId}', [OperasiController::class, 'getOrderData'])->name('operasi.data-order');
         });
     });
 });

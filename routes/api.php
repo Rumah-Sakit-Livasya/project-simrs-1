@@ -362,4 +362,12 @@ Route::get('/employee-birthdays', [EventController::class, 'getEmployeeBirthdays
 
 Route::get('/employee-leaves/{id}', [AttendanceController::class, 'getDayOffs']);
 
+
+Route::prefix('api')->group(function () {
+    Route::get('/coa/group/{group_id}', [ChartOfAccountController::class, 'getByGroup'])->name('coa.byGroup');
+    Route::get('/coa/{coa:id}', [ChartOfAccountController::class, 'show'])->name('coa.show');
+
+    Route::get('/coa/parents', [ChartOfAccountController::class, 'getParents'])->name('coa.parents');
+});
+
 require __DIR__ . '/api-simrs.php';

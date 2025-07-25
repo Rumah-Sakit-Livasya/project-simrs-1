@@ -40,21 +40,21 @@ class PoliklinikController extends Controller
         $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
         $registration = Registration::where('registration_number', $noRegist)->first();
 
-
         $query = Registration::whereDate('registration_date', Carbon::today());
 
-        $query->when(isset($registration->departement_id), function ($q) use ($registration) {
-            return $q->where('departement_id', $registration->departement_id);
-        });
+        if ($registration) {
+            $query->when($registration->departement_id, function ($q) use ($registration) {
+                return $q->where('departement_id', $registration->departement_id);
+            });
 
-        $query->when(isset($registration->doctor_id), function ($q) use ($registration) {
-            return $q->where('doctor_id', $registration->doctor_id);
-        });
+            $query->when($registration->doctor_id, function ($q) use ($registration) {
+                return $q->where('doctor_id', $registration->doctor_id);
+            });
+        }
 
         $registrations = $query->get();
 
         if ($menu && $noRegist) {
-            // Render partial view sebagai HTML
             $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
 
             $menuResponse = ERMController::poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path);
@@ -64,45 +64,47 @@ class PoliklinikController extends Controller
         } else {
             return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration', 'registrations', 'path'));
         }
+
+        return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration', 'registrations'));
     }
 
-    // public function filterPasien(Request $request)
-    // {
-    //     try {
-    //         $routePath = parse_url($request['route'], PHP_URL_PATH);
+    public function filterPasien(Request $request)
+    {
+        try {
+            $routePath = parse_url($request['route'], PHP_URL_PATH);
 
-    //         if ($routePath === '/simrs/igd/catatan-medis') {
-    //             $query = Registration::whereDate('registration_date', Carbon::today())->where('registration_type', 'igd');
-    //         } else {
-    //             $query = Registration::whereDate('registration_date', Carbon::today())->where('registration_type', '!=',  'igd');
-    //         }
+            if ($routePath === '/simrs/igd/catatan-medis') {
+                $query = Registration::whereDate('registration_date', Carbon::today())->where('registration_type', 'igd');
+            } else {
+                $query = Registration::whereDate('registration_date', Carbon::today())->where('registration_type', '!=',  'igd');
+            }
 
-    //         $query->when($request->departement_id, function ($q) use ($request) {
-    //             return $q->where('departement_id', $request->departement_id);
-    //         });
+            $query->when($request->departement_id, function ($q) use ($request) {
+                return $q->where('departement_id', $request->departement_id);
+            });
 
-    //         $query->when($request->doctor_id, function ($q) use ($request) {
-    //             return $q->where('doctor_id', $request->doctor_id);
-    //         });
+            $query->when($request->doctor_id, function ($q) use ($request) {
+                return $q->where('doctor_id', $request->doctor_id);
+            });
 
-    //         $registrations = $query->get();
+            $registrations = $query->get();
 
-    //         // Render partial view sebagai HTML
-    //         $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
+            // Render partial view sebagai HTML
+            $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
 
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Data retrieved successfully',
-    //             'html' => $html
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to retrieve data',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
+            return response()->json([
+                'success' => true,
+                'message' => 'Data retrieved successfully',
+                'html' => $html
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     public function showForm(Request $request, $registrationId, $encryptedID)
     {

@@ -23,6 +23,11 @@ class ChartOfAccount extends Model
         return $this->hasMany(ChartOfAccount::class, 'parent_id');
     }
 
+    public function childrenRecursive()
+    {
+        return $this->children()->with('childrenRecursive');
+    }
+
     public function parent()
     {
         return $this->belongsTo(ChartOfAccount::class, 'parent_id');
@@ -62,5 +67,4 @@ class ChartOfAccount extends Model
     {
         return $this->hasMany(WarehouseKategoriBarang::class, 'coa_adjustment_so', 'id');
     }
-
 }

@@ -443,6 +443,14 @@
                         {{-- Tindakan Medis --}}
                         @include('pages.simrs.pendaftaran.partials.tindakan-medis')
                     </div>
+                    <div id="operasi" style="display: none;">
+                        {{-- Operasi --}}
+                        @include('pages.simrs.pendaftaran.partials.operasi')
+                    </div>
+
+                    <div id="persalinan" style="display: none;">
+                        @include('pages.simrs.pendaftaran.partials.persalinan')
+                    </div>
                     <div id="radiologi" style="display: none;">
                         {{-- Radiologi --}}
                         @include('pages.simrs.pendaftaran.partials.radiologi')
@@ -451,8 +459,11 @@
                         {{-- Laboratorium --}}
                         @include('pages.simrs.pendaftaran.partials.laboratorium')
                     </div>
+
+
                 </div>
             </div>
+        </div>
         </div>
 
         </div>
@@ -500,6 +511,9 @@
                         break;
                     case 'laboratorium':
                         $('#laboratorium').show();
+                        break;
+                    case 'operasi':
+                        $('#operasi').show();
                         break;
                 }
 
@@ -679,6 +693,8 @@
     @yield('script-radiologi')
     @yield('script-tindakan-medis')
     @yield('script-laboratorium')
+    @yield('script-operasi')
+    @yield('script-vk')
 
     <script>
         let idSignature = null;

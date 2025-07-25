@@ -20,6 +20,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SurveiKebersihanKamarController;
 use App\Http\Controllers\SwitchUserController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TestingDataController;
 use App\Http\Controllers\UrlShortenerController;
 use App\Http\Controllers\WhatsappController;
 use Illuminate\Support\Facades\Artisan;
@@ -390,6 +391,26 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/switchback', [SwitchUserController::class, 'switchBack'])->name('switchback');
 });
 
+
+// Testing Data
+Route::prefix('testing-data')->middleware(['auth'])->group(function () {
+    // Menampilkan view testing
+    Route::get('/', [TestingDataController::class, 'index'])->name('testing.index');
+
+    // Mengambil data testing untuk update
+    Route::get('/{id}/get', [TestingDataController::class, 'getData'])->name('testing.getData');
+
+    // Menyimpan data testing
+    Route::post('/', [TestingDataController::class, 'store'])->name('testing.store');
+
+    // Mengupdate data testing
+    Route::put('/{id}', [TestingDataController::class, 'update'])->name('testing.update');
+
+    // Menghapus data testing
+    Route::delete('/{id}', [TestingDataController::class, 'destroy'])->name('testing.destroy');
+});
+
+
 Route::get('/test', function () {
     $laporanKendala = LaporanInternal::with(['organization', 'user'])
         ->whereMonth('created_at', 5) // 5 = Mei
@@ -409,6 +430,7 @@ Route::get('/test', function () {
         'laporan' => $laporanKendala,
     ]);
 });
+
 
 
 require __DIR__ . '/auth.php';
