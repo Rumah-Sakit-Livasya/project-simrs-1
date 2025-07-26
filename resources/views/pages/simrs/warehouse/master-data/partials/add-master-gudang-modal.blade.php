@@ -43,7 +43,7 @@
                                     <input class="form-check-input" type="checkbox" name="apotek"
                                         id="apotek" value="1" {{ old('apotek') ? 'checked' : '' }}>
                                     <label class="form-check-label" for="apotek">
-                                        Apotek
+                                        Gudang adalah Apotek
                                     </label>
                                 </div>
                             </td>
@@ -56,7 +56,20 @@
                                     <input class="form-check-input" type="checkbox" name="warehouse"
                                         id="warehouse" value="1" {{ old('warehouse') ? 'checked' : '' }}>
                                     <label class="form-check-label" for="warehouse">
-                                        Warehouse
+                                        Gudang adalah penyimpanan
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Default Apotek</td>
+                            <td>:</td>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="apotek_default"
+                                        id="apotek_default" value="1" {{ old('apotek_default') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="apotek_default">
+                                        Dilihat dokter + apoteker (hanya bisa satu)
                                     </label>
                                 </div>
                             </td>

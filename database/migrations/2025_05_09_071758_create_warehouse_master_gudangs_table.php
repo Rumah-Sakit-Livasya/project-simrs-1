@@ -25,6 +25,7 @@ return new class extends Migration
             $table->boolean('warehouse')->default(false);
             $table->boolean('aktif')->default(true);
             $table->boolean("freeze")->default(false);
+            $table->boolean('apotek_default')->default(false);
         });
     }
 

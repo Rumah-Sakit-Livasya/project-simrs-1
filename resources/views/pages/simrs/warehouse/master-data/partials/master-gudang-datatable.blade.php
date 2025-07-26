@@ -29,6 +29,7 @@
                                 <th>Nama Gudang</th>
                                 <th>Cost Center</th>
                                 <th>Apotek?</th>
+                                <th>Default Apotek?</th>
                                 <th>Warehouse?</th>
                                 <th>Aktif?</th>
                                 <th>Aksi</th>
@@ -41,6 +42,7 @@
                                     <td>{{ $master_gudang->nama }}</td>
                                     <td>{{ $master_gudang->cost_center }}</td>
                                     <td>{{ $master_gudang->apotek ? 'Ya' : 'Tidak' }}</td>
+                                    <td>{{ $master_gudang->apotek_default ? 'Ya' : 'Tidak' }}</td>
                                     <td>{{ $master_gudang->warehouse ? 'Ya' : 'Tidak' }}</td>
                                     <td>{{ $master_gudang->aktif ? 'Aktif' : 'Non Aktif' }}</td>
                                     <td>
@@ -67,6 +69,7 @@
                                 <th>Nama Gudang</th>
                                 <th>Cost Center</th>
                                 <th>Apotek?</th>
+                                <th>Default Apotek?</th>
                                 <th>Warehouse?</th>
                                 <th>Aktif?</th>
                                 <th>Aksi</th>

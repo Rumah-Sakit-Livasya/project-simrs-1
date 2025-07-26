@@ -62,6 +62,19 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>Default Apotek</td>
+                            <td>:</td>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="apotek_default"
+                                        id="apotek_default" value="1" {{ $master_gudang->apotek_default ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="apotek_default">
+                                        Dilihat dokter + apoteker (hanya bisa satu)
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
                             <td>Status Aktif</td>
                             <td>:</td>
                             <td>
