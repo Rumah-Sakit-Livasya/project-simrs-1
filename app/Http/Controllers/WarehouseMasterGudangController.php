@@ -57,7 +57,6 @@ class WarehouseMasterGudangController extends Controller
         ]);
 
         $validatedData = $request->validate([
-            'id' => 'required|integer',
             'nama' => 'required|string|max:255',
             'cost_center' => 'required|string|max:255',
             'apotek' => 'boolean',

@@ -12,7 +12,7 @@
 
                     <table style="width: 100%">
                         <tr>
-                            <td>Nama Kelompok</td>
+                            <td>Nama Gudang</td>
                             <td>:</td>
                             <td>
                                 <input type="text" value="{{ $master_gudang->nama }}"
