@@ -225,76 +225,229 @@
             </div>
         </div>
     </main>
-    @include('pages.simrs.erm.partials.ttd-many')
     @include('pages.simrs.erm.partials.ttd')
+    @include('pages.simrs.erm.partials.ttd-many')
 @endsection
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
-        function openSignaturePad(index, target) {
-            $('#btn_save_ttd').attr('data-target', target);
-            $('#signatureModal').modal('show');
-        }
+        // =====================================================================
+        // JAVASCRIPT UNTUK TANDA TANGAN (DIGABUNG & FUNGSIONAL)
+        // =====================================================================
 
-        function saveSignature() {
-            if (!hasDrawn) {
-                alert("Silakan buat tanda tangan terlebih dahulu.");
-                return;
+        // --- LOGIC UNTUK MODAL TANDA TANGAN TUNGGAL (#signatureModal) ---
+        const canvasSingle = document.getElementById('canvas');
+        if (canvasSingle) {
+            const ctxSingle = canvasSingle.getContext('2d');
+            let paintingSingle = false;
+            let historySingle = [];
+            let hasDrawnSingle = false;
+            let currentPrefixSingle = null; // Variabel global untuk menyimpan prefix yang aktif
+
+            function startPositionSingle(e) {
+                e.preventDefault();
+                paintingSingle = true;
+                drawSingle(e);
             }
 
-            const dataURL = canvas.toDataURL('image/png');
-            const target = $('#btn_save_ttd').attr('data-target');
-
-            // Simpan base64 ke input hidden
-            $('#signature_image').val(dataURL);
-
-            // Tampilkan preview image
-            $('#signature_preview').attr('src', dataURL).show();
-
-            // Tutup modal dan bersihkan canvas
-            $('#signatureModal').modal('hide');
-            clearCanvas();
-        }
-
-        let currentSignatureIndex = null;
-
-        function openSignaturePadMany(index) {
-            currentSignatureIndex = index;
-
-            // Tampilkan modal
-            $('#signatureModalMany').data('target-index', index).modal('show');
-
-            // Atur data-index di canvas
-            const canvasMany = document.getElementById('canvas-many');
-            if (canvasMany) {
-                canvasMany.setAttribute('data-index', index);
-                clearCanvas(); // bersihkan canvas sebelum mulai tanda tangan baru
-            }
-        }
-
-
-        function saveSignatureMany() {
-            if (!hasDrawn) {
-                alert("Silakan buat tanda tangan terlebih dahulu.");
-                return;
+            function endPositionSingle(e) {
+                e.preventDefault();
+                if (!paintingSingle) return;
+                paintingSingle = false;
+                ctxSingle.beginPath();
+                // Simpan state setelah goresan selesai
+                historySingle.push(ctxSingle.getImageData(0, 0, canvasSingle.width, canvasSingle.height));
             }
 
-            const dataURL = canvas.toDataURL('image/png');
+            function drawSingle(e) {
+                if (!paintingSingle) return;
+                const rect = canvasSingle.getBoundingClientRect();
+                const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+                const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
 
-            // Masukkan ke input sesuai index
-            document.querySelectorAll('input[name="signature_image[]"]')[currentSignatureIndex].value = dataURL;
+                ctxSingle.lineWidth = 3;
+                ctxSingle.lineCap = 'round';
+                ctxSingle.strokeStyle = '#000';
 
-            // Tampilkan preview (jika kamu pakai ID dinamis, sesuaikan)
-            const previews = document.querySelectorAll('#signature_preview');
-            if (previews[currentSignatureIndex]) {
-                previews[currentSignatureIndex].src = dataURL;
-                previews[currentSignatureIndex].style.display = 'block';
+                ctxSingle.lineTo(x, y);
+                ctxSingle.stroke();
+                ctxSingle.beginPath();
+                ctxSingle.moveTo(x, y);
+                hasDrawnSingle = true;
             }
 
-            $('#signatureModalMany').modal('hide');
+            function clearCanvasSingle() {
+                ctxSingle.clearRect(0, 0, canvasSingle.width, canvasSingle.height);
+                historySingle = [];
+                hasDrawnSingle = false;
+            }
+
+            function undoSingle() {
+                if (historySingle.length > 0) {
+                    historySingle.pop(); // Hapus state terakhir
+                    if (historySingle.length > 0) {
+                        ctxSingle.putImageData(historySingle[historySingle.length - 1], 0, 0); // Muat state sebelumnya
+                    } else {
+                        clearCanvasSingle(); // Jika tidak ada histori lagi, bersihkan kanvas
+                    }
+                }
+            }
+
+            /**
+             * Membuka modal tanda tangan tunggal.
+             * @param {string} prefix - Prefix unik untuk menargetkan elemen input dan preview yang benar.
+             */
+            function openSignatureSinglePad(prefix) {
+                currentPrefixSingle = prefix; // Simpan prefix yang diklik
+                clearCanvasSingle();
+                $('#signatureModal').modal('show');
+            }
+
+            function saveSignatureSingle() {
+                if (!hasDrawnSingle) {
+                    alert("Silakan buat tanda tangan terlebih dahulu.");
+                    return;
+                }
+                if (!currentPrefixSingle) {
+                    console.error("Tidak ada prefix yang aktif untuk menyimpan tanda tangan.");
+                    return;
+                }
+
+                const dataURL = canvasSingle.toDataURL('image/png');
+
+                // Gunakan prefix yang tersimpan untuk menargetkan elemen yang benar
+                const preview = document.getElementById(`signature_preview_${currentPrefixSingle}`);
+                const input = document.getElementById(`signature_image_${currentPrefixSingle}`);
+
+                if (preview) {
+                    preview.src = dataURL;
+                    preview.style.display = 'block'; // <-- INI BARIS YANG HILANG
+                }
+                if (input) {
+                    input.value = dataURL;
+                }
+
+                // Tutup modal
+                $('#signatureModal').modal('hide');
+            }
+
+            // Event Binding untuk canvas tunggal
+            canvasSingle.addEventListener('mousedown', startPositionSingle);
+            canvasSingle.addEventListener('mouseup', endPositionSingle);
+            canvasSingle.addEventListener('mousemove', drawSingle);
+            canvasSingle.addEventListener('touchstart', startPositionSingle, {
+                passive: false
+            });
+            canvasSingle.addEventListener('touchend', endPositionSingle, {
+                passive: false
+            });
+            canvasSingle.addEventListener('touchmove', drawSingle, {
+                passive: false
+            });
         }
 
 
+        // --- LOGIC UNTUK MODAL TANDA TANGAN BANYAK (#signatureModalMany) ---
+        const canvasMany = document.getElementById('canvas-many');
+        if (canvasMany) {
+            const ctxMany = canvasMany.getContext('2d');
+            let paintingMany = false;
+            let historyMany = [];
+            let hasDrawnMany = false;
+            let currentIndexMany = null;
+
+            function startPositionMany(e) {
+                e.preventDefault();
+                paintingMany = true;
+                drawMany(e);
+            }
+
+            function endPositionMany(e) {
+                e.preventDefault();
+                if (!paintingMany) return;
+                paintingMany = false;
+                ctxMany.beginPath();
+                historyMany.push(ctxMany.getImageData(0, 0, canvasMany.width, canvasMany.height));
+            }
+
+            function drawMany(e) {
+                if (!paintingMany) return;
+                const rect = canvasMany.getBoundingClientRect();
+                const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+                const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+
+                ctxMany.lineWidth = 3;
+                ctxMany.lineCap = 'round';
+                ctxMany.strokeStyle = '#000';
+                ctxMany.lineTo(x, y);
+                ctxMany.stroke();
+                ctxMany.beginPath();
+                ctxMany.moveTo(x, y);
+                hasDrawnMany = true;
+            }
+
+            function clearCanvasMany() {
+                ctxMany.clearRect(0, 0, canvasMany.width, canvasMany.height);
+                historyMany = [];
+                hasDrawnMany = false;
+            }
+
+            function undoMany() {
+                if (historyMany.length > 0) {
+                    historyMany.pop();
+                    if (historyMany.length > 0) {
+                        ctxMany.putImageData(historyMany[historyMany.length - 1], 0, 0);
+                    } else {
+                        clearCanvasMany();
+                    }
+                }
+            }
+
+            function openSignaturePadMany(index) {
+                currentIndexMany = index;
+                clearCanvasMany();
+                $('#signatureModalMany').modal('show');
+            }
+
+            function saveSignatureMany() {
+                if (!hasDrawnMany) {
+                    alert("Silakan buat tanda tangan terlebih dahulu.");
+                    return;
+                }
+                const dataURL = canvasMany.toDataURL('image/png');
+
+                const preview = document.getElementById(`signature_preview_${currentIndexMany}`);
+                const input = document.getElementById(`signature_image_${currentIndexMany}`);
+
+                if (preview) {
+                    preview.src = dataURL;
+                    preview.style.display = 'block'; // <- Logika ini sudah ada dan benar
+                }
+                if (input) {
+                    input.value = dataURL;
+                }
+
+                $('#signatureModalMany').modal('hide');
+            }
+
+            // Event Binding untuk canvas banyak
+            canvasMany.addEventListener('mousedown', startPositionMany);
+            canvasMany.addEventListener('mouseup', endPositionMany);
+            canvasMany.addEventListener('mousemove', drawMany);
+            canvasMany.addEventListener('touchstart', startPositionMany, {
+                passive: false
+            });
+            canvasMany.addEventListener('touchend', endPositionMany, {
+                passive: false
+            });
+            canvasMany.addEventListener('touchmove', drawMany, {
+                passive: false
+            });
+        }
+
+        // =====================================================================
+        // SCRIPT INISIALISASI HALAMAN (jQuery)
+        // =====================================================================
         $(document).ready(function() {
             const pengkajian = @json($pengkajian ?? []);
 
@@ -415,8 +568,6 @@
             //                 '<p class="text-center mt-3">Sedang memuat...</p>'); // Tambahkan loading
             //         },
             //         success: function(response) {
-
-
             //             if (response.success) {
             //                 $('#daftar-pasien .col-12').html(response.html);
             //             } else {
@@ -431,6 +582,17 @@
             //     });
             // }
         });
+
+        // =====================================================================
+        // FUNGSI LAMA UNTUK KOMPATIBILITAS MUNDUR (JIKA DIPERLUKAN)
+        // =====================================================================
+        function openSignaturePad(index, target) {
+            console.warn(
+                "Fungsi 'openSignaturePad' sudah usang. Gunakan 'openSignatureSinglePad(prefix)'. Membuka dengan prefix 'default'."
+            );
+            // Fallback: panggil fungsi baru dengan prefix default
+            openSignatureSinglePad('default');
+        }
     </script>
     @yield('signature')
     @yield('plugin-erm')

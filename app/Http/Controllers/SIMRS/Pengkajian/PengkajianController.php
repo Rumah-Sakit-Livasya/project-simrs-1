@@ -8,6 +8,8 @@ use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\TransferPasienAntarRuangan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class PengkajianController extends Controller
 {
@@ -181,30 +183,22 @@ class PengkajianController extends Controller
         }
     }
 
-
+    /**
+     * Menyimpan atau memperbarui data transfer pasien beserta tanda tangannya.
+     */
     public function storeOrUpdateTransferPasienAntarRuangan(Request $request)
     {
-        $request['user_id'] = auth()->user()->id;
-        // Validate the incoming request data
+        // 1. VALIDASI DATA DENGAN ATURAN YANG DIPERBAIKI
         $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'registration_id' => 'required|exists:registrations,id',
             'tgl' => 'nullable|string',
             'jam' => 'nullable|string',
             'tgl_masuk_pasien' => 'nullable|string',
             'jam_masuk_pasien' => 'nullable|string',
-            'asesmen' => 'nullable|string',
-            'masalah_keperawatan' => 'nullable|string',
             'dokter' => 'nullable|string',
-            'dokter2' => 'nullable|string',
-            'dokter3' => 'nullable|string',
             'ruangan_asal' => 'nullable|string',
-            'kelas_asal' => 'nullable|string',
             'ruangan_pindah' => 'nullable|string',
-            'kelas_pindah' => 'nullable|string',
-            'tiba_diruangan' => 'nullable|string',
             'keluhan_utama' => 'nullable|string',
-            'kondisi_pasien' => 'nullable|string',
             'keadaan_umum' => 'nullable|string',
             'keadaan_umum_gcs' => 'nullable|string',
             'ket_gcs' => 'nullable|string',
@@ -217,29 +211,8 @@ class PengkajianController extends Controller
             'spo2' => 'nullable|string',
             'status_nyeri' => 'nullable|string',
             'tindakan' => 'nullable|string',
-            'ket_lainnya' => 'nullable|string',
-            'app_lainnya' => 'nullable|string',
-            'app_lainnya_text' => 'nullable|string',
-            'kesadaran' => 'nullable|string',
-            'mpp' => 'nullable|string',
-            'rj' => 'nullable|string',
-            'kti' => 'nullable|string',
-            'mpi' => 'nullable',
-            'ap' => 'nullable',
-            'ap_nama' => 'nullable|string',
-            'ap_hubungan' => 'nullable|string',
-            'alasan_pdh_temuan_anamesis' => 'nullable|string',
-            'sfp' => 'nullable|string',
-            'pmp_kuro' => 'nullable|string',
-            'pmp_text' => 'nullable|string',
-            'pmp_cateter_urine' => 'nullable|string',
-            'pmp_ngt' => 'nullable|string',
             'pemeriksaan_penunjang' => 'nullable|string',
-            'intervensi_tindakan' => 'nullable|string',
             'diet' => 'nullable|string',
-            'ptsp_infus' => 'nullable|string',
-            'ptsp_infus_text' => 'nullable|string',
-            'ptsp_infus_tetesan' => 'nullable|string',
             'resep1' => 'nullable|string',
             'jam_pemberian1' => 'nullable|string',
             'resep2' => 'nullable|string',
@@ -260,73 +233,87 @@ class PengkajianController extends Controller
             'jam_pemberian9' => 'nullable|string',
             'resep10' => 'nullable|string',
             'jam_pemberian10' => 'nullable|string',
-            'data_ttd1' => 'nullable|string',
-            'nama_perawat_pengirim' => 'nullable|string',
-            'data_ttd2' => 'nullable|string',
-            'nama_perawat_penerima' => 'nullable|string',
             'pasien_kelmbali' => 'nullable|string',
             'keadaan_umum_after' => 'nullable|string',
-            'td_after' => 'nullable |string',
+            'td_after' => 'nullable|string',
             'nd_after' => 'nullable|string',
             'rr_after' => 'nullable|string',
             'sb_after' => 'nullable|string',
             'rj_after' => 'nullable|string',
             'diet_after' => 'nullable|string',
-            'data_ttd3' => 'nullable|string',
-            'nama_perawat_pengirim_after' => 'nullable|string',
-            'data_ttd4' => 'nullable|string',
-            'nama_perawat_penerima_after' => 'nullable|string',
+
+            // PERBAIKAN: Ubah 'required_with' menjadi 'nullable'
+            'data_ttd1' => 'nullable|array',
+            'data_ttd1.pic' => 'nullable|string',
+            'data_ttd1.signature_image' => 'nullable|string',
+
+            'data_ttd2' => 'nullable|array',
+            'data_ttd2.pic' => 'nullable|string',
+            'data_ttd2.signature_image' => 'nullable|string',
+
+            'data_ttd3' => 'nullable|array',
+            'data_ttd3.pic' => 'nullable|string',
+            'data_ttd3.signature_image' => 'nullable|string',
+
+            'data_ttd4' => 'nullable|array',
+            'data_ttd4.pic' => 'nullable|string',
+            'data_ttd4.signature_image' => 'nullable|string',
         ]);
 
+        // 2. GUNAKAN DATABASE TRANSACTION
+        DB::beginTransaction();
         try {
-            // Simpan atau update TransferPasienAntarRuangan
+            // Simpan data utama form
+            $transferData = $request->except(['data_ttd1', 'data_ttd2', 'data_ttd3', 'data_ttd4', '_token', '_method']);
+            $transferData['user_id'] = auth()->id();
+
             $transfer = TransferPasienAntarRuangan::updateOrCreate(
                 ['registration_id' => $validatedData['registration_id']],
-                $validatedData
+                $transferData
             );
 
-            // Hapus tanda tangan lama (jika kamu ingin replace)
-            $transfer->signatures()->delete();
+            // =====================================================================
+            // KUNCI PERBAIKAN: LOGIKA PENYIMPANAN TANDA TANGAN YANG CERDAS
+            // =====================================================================
+            $signatureMap = [
+                'data_ttd1' => 'pengirim',
+                'data_ttd2' => 'penerima',
+                'data_ttd3' => 'pengirim_balik',
+                'data_ttd4' => 'penerima_balik',
+            ];
 
-            // Simpan ulang semua tanda tangan jika tersedia
-            if ($request->filled('data_ttd1')) {
-                $transfer->signatures()->create([
-                    'pic' => $validatedData['nama_perawat_pengirim'] ?? auth()->user()->name,
-                    'role' => 'pengirim',
-                    'signature' => $validatedData['data_ttd1'],
-                ]);
+            // Baris '$transfer->signatures()->delete()' telah DIHAPUS.
+
+            foreach ($signatureMap as $requestKey => $role) {
+                $signatureData = $request->input($requestKey);
+
+                // Proses HANYA JIKA ada gambar base64 BARU yang dikirim untuk slot ini
+                if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                    // Ada gambar baru, maka kita proses dan simpan/update
+                    $path = $this->saveSignature($signatureData['signature_image']);
+
+                    // updateOrCreate akan memperbarui TTD yang ada (berdasarkan role) atau membuat yang baru.
+                    $transfer->signatures()->updateOrCreate(
+                        ['role' => $role], // Kunci untuk mencari
+                        [
+                            'pic'       => $signatureData['pic'] ?? auth()->user()->name,
+                            'signature' => $path, // Simpan path baru
+                        ]
+                    );
+                }
+                // JIKA tidak ada gambar baru, JANGAN LAKUKAN APA-APA.
+                // Data lama di database akan tetap aman.
             }
 
-            if ($request->filled('data_ttd2')) {
-                $transfer->signatures()->create([
-                    'pic' => $validatedData['nama_perawat_penerima'] ?? '-',
-                    'role' => 'penerima',
-                    'signature' => $validatedData['data_ttd2'],
-                ]);
-            }
-
-            if ($request->filled('data_ttd3')) {
-                $transfer->signatures()->create([
-                    'pic' => $validatedData['nama_perawat_pengirim_after'] ?? '-',
-                    'role' => 'pengirim_balik',
-                    'signature' => $validatedData['data_ttd3'],
-                ]);
-            }
-
-            if ($request->filled('data_ttd4')) {
-                $transfer->signatures()->create([
-                    'pic' => $validatedData['nama_perawat_penerima_after'] ?? '-',
-                    'role' => 'penerima_balik',
-                    'signature' => $validatedData['data_ttd4'],
-                ]);
-            }
+            DB::commit();
 
             return response()->json([
-                'message' => 'Data berhasil disimpan!',
-                'data' => $transfer
+                'message' => 'Data transfer pasien berhasil disimpan!',
+                'data' => $transfer->load('signatures')
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            DB::rollBack();
+            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
 
@@ -368,5 +355,34 @@ class PengkajianController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Helper function untuk menyimpan gambar tanda tangan dari data base64.
+     *
+     * @param string $base64Image Data gambar dalam format base64
+     * @return string Path file yang disimpan
+     */
+    private function saveSignature($base64Image)
+    {
+        if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $type)) {
+            $imageData = substr($base64Image, strpos($base64Image, ',') + 1);
+            $type = strtolower($type[1]);
+            if (!in_array($type, ['jpg', 'jpeg', 'gif', 'png'])) {
+                throw new \Exception('Tipe gambar tidak valid.');
+            }
+            $imageData = base64_decode($imageData);
+            if ($imageData === false) {
+                throw new \Exception('Gagal decode base64.');
+            }
+        } else {
+            throw new \Exception('Format data URI base64 tidak valid.');
+        }
+
+        // Buat nama file yang unik di dalam folder 'signatures'
+        $fileName = 'signatures/' . uniqid() . '_' . time() . '.' . $type;
+
+        Storage::disk('public')->put($fileName, $imageData);
+        return $fileName;
     }
 }
