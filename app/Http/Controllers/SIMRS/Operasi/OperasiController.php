@@ -8,6 +8,7 @@ use App\Models\SIMRS\Operasi\ProsedurOperasi;
 use App\Models\SIMRS\Operasi\TindakanOperasi;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Operasi\JenisOperasi;
 use App\Models\SIMRS\Operasi\KategoriOperasi;
 use App\Models\SIMRS\Operasi\TipeOperasi;
 use App\Models\SIMRS\Room;
@@ -171,14 +172,7 @@ class OperasiController extends Controller
     }
 
     // Method lainnya tetap sama...
-    public function createOrder($registrationId)
-    {
-        return view('simrs.operasi.create_order', [
-            'registration' => \App\Models\SIMRS\Registration::findOrFail($registrationId),
-            'doctors' => Doctor::all(),
-            'tindakanOperasi' => TindakanOperasi::all()
-        ]);
-    }
+
 
     public function listOrder(Request $request)
     {
@@ -207,10 +201,11 @@ class OperasiController extends Controller
         $order->load('registration.patient', 'tipeOperasi', 'kelasRawat', 'kategoriOperasi', 'registration.penjamin');
 
         // Ambil semua data master untuk dropdown
+        $jenis_operasi = JenisOperasi::all(); // contoh
         $ruangan_operasi = Room::all(); // contoh
         $doctors = Doctor::all();
         $tindakan_operasi = TindakanOperasi::all();
-        $kategori_operasi = KategoriOperasi::all();
+        $JenisOperasi = JenisOperasi::all();
         $tipe_operasi = KategoriOperasi::all();
         $kelas_rawat = KelasRawat::all();
 
@@ -218,62 +213,173 @@ class OperasiController extends Controller
             'order' => $order,
             'doctors' => $doctors,
             'tindakan_operasi' => $tindakan_operasi,
-            'kategori_operasi' => $kategori_operasi,
+            'Jenis_operasi' => $jenis_operasi,
             'ruangan_operasi' => $ruangan_operasi,
             'tipe_operasi' => $tipe_operasi,
+            'jenis_operasi' => $jenis_operasi,
             'kelas_rawat' => $kelas_rawat,
         ]);
     }
 
+    public function getTindakanByJenis($jenisId)
+    {
+        $tindakan = TindakanOperasi::where('jenis_operasi_id', $jenisId)
+            ->select('id', 'kode_operasi', 'nama_operasi', 'jenis_operasi_id')
+            ->get();
+
+        return response()->json($tindakan);
+    }
+
+
+    // public function storeProsedur(Request $request)
+    // {
+    //     try {
+    //         $validated = $request->validate([
+    //             'order_operasi_id' => 'required|exists:order_operasi,id',
+
+    //             // Data jadwal operasi yang bisa diubah
+    //             'tgl_operasi' => 'required|date',
+    //             'ruangan_id' => 'nullable|exists:rooms,id',
+    //             'tipe_operasi_id' => 'required|exists:tipe_operasi,id',
+    //             'tipe_penggunaan' => 'required|in:UMUM,ELEKTIF',
+    //             'kelas_rawat_id' => 'required|exists:kelas_rawat,id',
+    //             'kategori_operasi_id' => 'required|exists:kategori_operasi,id',
+    //             'tindakan_id' => 'required|exists:tindakan_operasi,id',
+
+    //             // Tim operasi - sesuai dengan field di migration dan form
+    //             'dokter_operator_id' => 'required|exists:doctors,id',
+    //             'ass_dokter_operator_id' => 'nullable|exists:doctors,id',
+    //             'dokter_anastesi_id' => 'nullable|exists:doctors,id',
+    //             'ass_dokter_anastesi_id' => 'required|exists:doctors,id',
+    //             'dokter_resusitator_id' => 'nullable|exists:doctors,id',
+    //             'dokter_tambahan_id' => 'nullable|exists:doctors,id',
+
+    //             // Data operasi
+    //             'laporan_operasi' => 'required|string|min:10',
+    //             'status' => 'required|in:rencana,selesai',
+    //         ], [
+    //             // Custom error messages
+    //             'order_operasi_id.required' => 'Order operasi tidak ditemukan.',
+    //             'order_operasi_id.exists' => 'Order operasi tidak valid.',
+    //             'tgl_operasi.required' => 'Tanggal operasi harus diisi.',
+    //             'tgl_operasi.date' => 'Format tanggal operasi tidak valid.',
+    //             'tipe_operasi_id.required' => 'Tipe operasi harus dipilih.',
+    //             'tipe_penggunaan.required' => 'Tipe penggunaan harus dipilih.',
+    //             'kelas_rawat_id.required' => 'Kelas rawat harus dipilih.',
+    //             'kategori_operasi_id.required' => 'Kategori operasi harus dipilih.',
+    //             'tindakan_id.required' => 'Tindakan operasi harus dipilih.',
+    //             'tindakan_id.exists' => 'Tindakan operasi tidak valid.',
+    //             'dokter_operator_id.required' => 'Dokter operator harus dipilih.',
+    //             'dokter_operator_id.exists' => 'Dokter operator tidak valid.',
+    //             'ass_dokter_anastesi_id.required' => 'Asisten dokter anestesi harus dipilih.',
+    //             'ass_dokter_anastesi_id.exists' => 'Asisten dokter anestesi tidak valid.',
+    //             'laporan_operasi.required' => 'Laporan operasi harus diisi.',
+    //             'laporan_operasi.min' => 'Laporan operasi minimal 10 karakter.',
+    //             'status.required' => 'Status harus dipilih.',
+    //             'status.in' => 'Status tidak valid.',
+    //         ]);
+
+    //         // Update data order operasi jika ada perubahan
+    //         $orderData = [
+    //             'tgl_operasi' => $validated['tgl_operasi'],
+    //             'ruangan_id' => $validated['ruangan_id'],
+    //             'tipe_operasi_id' => $validated['tipe_operasi_id'],
+    //             'kelas_rawat_id' => $validated['kelas_rawat_id'],
+    //             'kategori_operasi_id' => $validated['kategori_operasi_id'],
+    //         ];
+
+    //         $order = OrderOperasi::findOrFail($validated['order_operasi_id']);
+    //         $order->update($orderData);
+
+    //         // Ambil data untuk prosedur operasi
+    //         $prosedurData = collect($validated)->except([
+    //             'tgl_operasi',
+    //             'ruangan_id',
+    //             'tipe_operasi_id',
+    //             'tipe_penggunaan',
+    //             'kelas_rawat_id',
+    //             'kategori_operasi_id'
+    //         ])->toArray();
+
+    //         // Tambahkan field audit
+    //         $prosedurData['created_by'] = auth()->id();
+
+    //         // Set waktu mulai jika status selesai
+    //         if ($prosedurData['status'] === 'selesai') {
+    //             $prosedurData['waktu_mulai'] = now();
+    //             $prosedurData['waktu_selesai'] = now();
+    //         } else {
+    //             $prosedurData['waktu_mulai'] = now();
+    //         }
+
+    //         // Buat record prosedur operasi
+    //         $prosedur = ProsedurOperasi::create($prosedurData);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Tindakan operasi berhasil disimpan.',
+    //             'data' => [
+    //                 'id' => $prosedur->id,
+    //                 'status' => $prosedur->status
+    //             ]
+    //         ]);
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'errors' => $e->errors(),
+    //             'message' => 'Data yang dimasukkan tidak valid.'
+    //         ], 422);
+    //     } catch (\Exception $e) {
+    //         // Log error untuk debugging
+    //         \Log::error('Error storing prosedur operasi: ' . $e->getMessage(), [
+    //             'request_data' => $request->all(),
+    //             'user_id' => auth()->id()
+    //         ]);
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan server: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+
     public function storeProsedur(Request $request)
     {
         try {
+            // Sementara, validasi dikendurkan untuk testing
             $validated = $request->validate([
                 'order_operasi_id' => 'required|exists:order_operasi,id',
 
-                // Data jadwal operasi yang bisa diubah
                 'tgl_operasi' => 'required|date',
                 'ruangan_id' => 'nullable|exists:rooms,id',
                 'tipe_operasi_id' => 'required|exists:tipe_operasi,id',
                 'tipe_penggunaan' => 'required|in:UMUM,ELEKTIF',
                 'kelas_rawat_id' => 'required|exists:kelas_rawat,id',
                 'kategori_operasi_id' => 'required|exists:kategori_operasi,id',
-                'tindakan_id' => 'required|exists:tindakan_operasi,id',
+                // 'tindakan_id' => 'nullable|exists:tindakan_operasi,id',
 
-                // Tim operasi - sesuai dengan field di migration dan form
                 'dokter_operator_id' => 'required|exists:doctors,id',
                 'ass_dokter_operator_id' => 'nullable|exists:doctors,id',
                 'dokter_anastesi_id' => 'nullable|exists:doctors,id',
-                'ass_dokter_anastesi_id' => 'required|exists:doctors,id',
+                'ass_dokter_anastesi_id' => 'nullable|exists:doctors,id',
                 'dokter_resusitator_id' => 'nullable|exists:doctors,id',
                 'dokter_tambahan_id' => 'nullable|exists:doctors,id',
 
-                // Data operasi
-                'laporan_operasi' => 'required|string|min:10',
+                'laporan_operasi' => 'nullable|string|min:0',
                 'status' => 'required|in:rencana,selesai',
-            ], [
-                // Custom error messages
-                'order_operasi_id.required' => 'Order operasi tidak ditemukan.',
-                'order_operasi_id.exists' => 'Order operasi tidak valid.',
-                'tgl_operasi.required' => 'Tanggal operasi harus diisi.',
-                'tgl_operasi.date' => 'Format tanggal operasi tidak valid.',
-                'tipe_operasi_id.required' => 'Tipe operasi harus dipilih.',
-                'tipe_penggunaan.required' => 'Tipe penggunaan harus dipilih.',
-                'kelas_rawat_id.required' => 'Kelas rawat harus dipilih.',
-                'kategori_operasi_id.required' => 'Kategori operasi harus dipilih.',
-                'tindakan_id.required' => 'Tindakan operasi harus dipilih.',
-                'tindakan_id.exists' => 'Tindakan operasi tidak valid.',
-                'dokter_operator_id.required' => 'Dokter operator harus dipilih.',
-                'dokter_operator_id.exists' => 'Dokter operator tidak valid.',
-                'ass_dokter_anastesi_id.required' => 'Asisten dokter anestesi harus dipilih.',
-                'ass_dokter_anastesi_id.exists' => 'Asisten dokter anestesi tidak valid.',
-                'laporan_operasi.required' => 'Laporan operasi harus diisi.',
-                'laporan_operasi.min' => 'Laporan operasi minimal 10 karakter.',
-                'status.required' => 'Status harus dipilih.',
-                'status.in' => 'Status tidak valid.',
             ]);
 
-            // Update data order operasi jika ada perubahan
+            // Data dummy jika belum dikirim
+            if (empty($validated['laporan_operasi'])) {
+                $validated['laporan_operasi'] = 'Belum ada laporan (dummy data)';
+            }
+
+            if (empty($validated['tindakan_id'])) {
+                $validated['tindakan_id'] = 1; // isi dengan ID tindakan dummy jika perlu
+            }
+
+            // Update order_operasi
             $orderData = [
                 'tgl_operasi' => $validated['tgl_operasi'],
                 'ruangan_id' => $validated['ruangan_id'],
@@ -285,20 +391,17 @@ class OperasiController extends Controller
             $order = OrderOperasi::findOrFail($validated['order_operasi_id']);
             $order->update($orderData);
 
-            // Ambil data untuk prosedur operasi
+            // Ambil sisa data untuk prosedur operasi
             $prosedurData = collect($validated)->except([
                 'tgl_operasi',
                 'ruangan_id',
                 'tipe_operasi_id',
-                'tipe_penggunaan',
                 'kelas_rawat_id',
                 'kategori_operasi_id'
             ])->toArray();
 
-            // Tambahkan field audit
             $prosedurData['created_by'] = auth()->id();
 
-            // Set waktu mulai jika status selesai
             if ($prosedurData['status'] === 'selesai') {
                 $prosedurData['waktu_mulai'] = now();
                 $prosedurData['waktu_selesai'] = now();
@@ -306,12 +409,11 @@ class OperasiController extends Controller
                 $prosedurData['waktu_mulai'] = now();
             }
 
-            // Buat record prosedur operasi
             $prosedur = ProsedurOperasi::create($prosedurData);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Tindakan operasi berhasil disimpan.',
+                'message' => 'Tindakan operasi (dummy) berhasil disimpan.',
                 'data' => [
                     'id' => $prosedur->id,
                     'status' => $prosedur->status
@@ -321,18 +423,17 @@ class OperasiController extends Controller
             return response()->json([
                 'success' => false,
                 'errors' => $e->errors(),
-                'message' => 'Data yang dimasukkan tidak valid.'
+                'message' => 'Validasi gagal.'
             ], 422);
         } catch (\Exception $e) {
-            // Log error untuk debugging
-            \Log::error('Error storing prosedur operasi: ' . $e->getMessage(), [
+            \Log::error('Error dummy store prosedur: ' . $e->getMessage(), [
                 'request_data' => $request->all(),
                 'user_id' => auth()->id()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan server: ' . $e->getMessage()
+                'message' => 'Server error: ' . $e->getMessage()
             ], 500);
         }
     }

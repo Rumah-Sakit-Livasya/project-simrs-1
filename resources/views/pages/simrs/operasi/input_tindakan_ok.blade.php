@@ -24,7 +24,7 @@
             color: #333;
         }
 
-        label.required:after {
+        label.:after {
             content: " *";
             color: red;
         }
@@ -57,15 +57,14 @@
                                 {{-- SEKSI: Data Jadwal Operasi --}}
                                 <h5 class="frame-heading">Data Jadwal Operasi</h5>
                                 <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom required">Jadwal Operasi</label>
+                                    <label class="col-md-2 col-form-label form-label-custom ">Jadwal Operasi</label>
                                     <div class="col-md-4">
                                         <input type="datetime-local" class="form-control" name="tgl_operasi"
-                                            value="{{ \Carbon\Carbon::parse($order->tgl_operasi)->format('Y-m-d\TH:i') }}"
-                                            required>
+                                            value="{{ \Carbon\Carbon::parse($order->tgl_operasi)->format('Y-m-d\TH:i') }}">
                                     </div>
-                                    <label class="col-md-2 col-form-label form-label-custom required">Ruang Operasi</label>
+                                    <label class="col-md-2 col-form-label form-label-custom ">Ruang Operasi</label>
                                     <div class="col-md-4">
-                                        <select class="form-control select2" name="ruangan_id" required>
+                                        <select class="form-control select2" name="ruangan_id">
                                             <option value="">Pilih Ruang Operasi</option>
                                             @if (is_iterable($ruangan_operasi))
                                                 @foreach ($ruangan_operasi as $ruangan)
@@ -82,9 +81,9 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom required">Tipe Operasi</label>
+                                    <label class="col-md-2 col-form-label form-label-custom ">Tipe Operasi</label>
                                     <div class="col-md-4">
-                                        <select class="form-control select2" name="tipe_operasi_id" required>
+                                        <select class="form-control select2" name="tipe_operasi_id">
                                             <option value="">Pilih Tipe Operasi</option>
                                             @foreach ($tipe_operasi as $tipe)
                                                 <option value="{{ $tipe->id }}"
@@ -94,10 +93,10 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <label class="col-md-2 col-form-label form-label-custom required">Tipe
+                                    <label class="col-md-2 col-form-label form-label-custom ">Tipe
                                         Penggunaan</label>
                                     <div class="col-md-4">
-                                        <select class="form-control select2" name="tipe_penggunaan" required>
+                                        <select class="form-control select2" name="tipe_penggunaan">
                                             <option value="">Pilih Tipe Penggunaan</option>
                                             <option value="UMUM"
                                                 {{ $order->registration->penjamin_id == 1 || str_contains(strtoupper($order->registration->penjamin->nama_perusahaan ?? ''), 'UMUM') ? 'selected' : '' }}>
@@ -111,9 +110,9 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom required">Kelas</label>
+                                    <label class="col-md-2 col-form-label form-label-custom ">Kelas</label>
                                     <div class="col-md-4">
-                                        <select class="form-control select2" name="kelas_rawat_id" required>
+                                        <select class="form-control select2" name="kelas_rawat_id">
                                             <option value="">Pilih Kelas</option>
                                             @foreach ($kelas_rawat as $kelas)
                                                 <option value="{{ $kelas->id }}"
@@ -128,10 +127,10 @@
                                 {{-- SEKSI: Tim Operasi --}}
                                 <h5 class="frame-heading mt-4">Tim Operasi</h5>
                                 <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom required">Dokter
+                                    <label class="col-md-2 col-form-label form-label-custom ">Dokter
                                         Operator</label>
                                     <div class="col-md-4">
-                                        <select class="form-control select2" name="dokter_operator_id" required>
+                                        <select class="form-control select2" name="dokter_operator_id">
                                             <option value="" disabled selected>Pilih Dokter Operator</option>
                                             @foreach ($doctors as $doctor)
                                                 <option value="{{ $doctor->id }}">{{ $doctor->fullname }}</option>
@@ -158,10 +157,10 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <label class="col-md-2 col-form-label form-label-custom required">Ass. Dokter
+                                    <label class="col-md-2 col-form-label form-label-custom ">Ass. Dokter
                                         Anestesi</label>
                                     <div class="col-md-4">
-                                        <select class="form-control select2" name="ass_dokter_anastesi_id" required>
+                                        <select class="form-control select2" name="ass_dokter_anastesi_id">
                                             <option value="" disabled selected>Pilih Asisten Anestesi</option>
                                             @foreach ($doctors as $doctor)
                                                 <option value="{{ $doctor->id }}">{{ $doctor->fullname }}</option>
@@ -193,40 +192,32 @@
                                 </div>
 
                                 {{-- SEKSI: Tindakan Operasi --}}
-                                <h5 class="frame-heading mt-4">Tindakan Operasi</h5>
                                 <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom required">Kategori
-                                        Operasi</label>
+                                    <label class="col-md-2 col-form-label form-label-custom">Jenis Operasi</label>
                                     <div class="col-md-4">
-                                        <select class="form-control select2" name="kategori_operasi_id"
-                                            id="kategori_operasi_id" required>
-                                            <option value="">Pilih Kategori Operasi</option>
-                                            @foreach ($kategori_operasi as $kategori)
-                                                <option value="{{ $kategori->id }}"
-                                                    {{ $order->kategori_operasi_id == $kategori->id ? 'selected' : '' }}>
-                                                    {{ $kategori->nama_kategori }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <label class="col-md-2 col-form-label form-label-custom required">Tindakan
-                                        Operasi</label>
-                                    <div class="col-md-4">
-                                        <select class="form-control select2" name="tindakan_id" id="tindakan_operasi_id"
-                                            required>
-                                            <option value="" disabled selected>Pilih Tindakan</option>
-                                            @foreach ($tindakan_operasi as $tindakan)
-                                                <option value="{{ $tindakan->id }}"
-                                                    data-kategori="{{ $tindakan->kategori_operasi_id }}">
-                                                    {{ $tindakan->nama_tindakan }}
-                                                </option>
+                                        <select class="form-control select2" id="jenis_operasi_id"
+                                            name="jenis_operasi_id">
+                                            <option value="">Pilih Jenis Operasi</option>
+                                            @foreach ($jenis_operasi as $jenis)
+                                                <option value="{{ $jenis->id }}">{{ $jenis->jenis }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                 </div>
+
+                                <div class="form-group row">
+                                    <label class="col-md-2 col-form-label form-label-custom">Tindakan Operasi</label>
+                                    <div class="col-md-10">
+                                        <select class="form-control select2" id="tindakan_operasi_id" name="tindakan_id"
+                                            disabled>
+                                            <option value="">Pilih Tindakan</option>
+                                            <!-- Options akan diisi via JavaScript -->
+                                        </select>
+                                    </div>
+                                </div>
                                 <div class="form-group">
-                                    <label for="laporan_operasi" class="required">Laporan Operasi (Singkat)</label>
-                                    <textarea class="form-control" name="laporan_operasi" rows="3" required
+                                    <label for="laporan_operasi" class="">Laporan Operasi (Singkat)</label>
+                                    <textarea class="form-control" name="laporan_operasi" rows="3"
                                         placeholder="Jelaskan secara singkat prosedur yang dilakukan..."></textarea>
                                 </div>
 
@@ -259,39 +250,44 @@
             $('.select2').select2({
                 placeholder: "Pilih...",
                 allowClear: true,
-                // Jika halaman ini dibuka di pop-up, seringkali dropdownnya tersembunyi
-                // di belakang panel. Gunakan dropdownParent untuk mengatasinya.
-                // Cari parent terdekat yang sesuai, misal panel atau form itu sendiri.
                 dropdownParent: $('#panel-form-tindakan')
             });
 
-            // Filter tindakan operasi berdasarkan kategori operasi
-            $('#kategori_operasi_id').on('change', function() {
-                var kategoriId = $(this).val();
+            // Ketika Jenis Operasi dipilih
+            $('#jenis_operasi_id').change(function() {
+                var jenisId = $(this).val();
                 var tindakanSelect = $('#tindakan_operasi_id');
 
-                // Reset dan kosongkan dropdown tindakan
-                tindakanSelect.val('').trigger('change');
-                tindakanSelect.find('option:not(:first)').hide();
+                tindakanSelect.empty().append('<option value="">Pilih Tindakan</option>');
+                tindakanSelect.prop('disabled', true);
 
-                if (kategoriId) {
-                    // Tampilkan hanya tindakan yang sesuai dengan kategori
-                    tindakanSelect.find('option[data-kategori="' + kategoriId + '"]').show();
-                } else {
-                    // Tampilkan semua tindakan jika tidak ada kategori dipilih
-                    tindakanSelect.find('option').show();
+                if (jenisId) {
+                    $.ajax({
+                        url: '/operasi/get-tindakan-by-jenis/' + jenisId,
+                        type: 'GET',
+                        success: function(data) {
+                            if (data.length > 0) {
+                                $.each(data, function(key, item) {
+                                    tindakanSelect.append(
+                                        '<option value="' + item.id + '">' +
+                                        item.nama_operasi + ' (' + item
+                                        .kode_operasi + ')' +
+                                        '</option>'
+                                    );
+                                });
+                                tindakanSelect.prop('disabled', false);
+                            } else {
+                                tindakanSelect.append(
+                                    '<option value="" >Tidak ada tindakan</option>');
+                            }
+                            tindakanSelect.trigger('change');
+                        },
+                        error: function() {
+                            console.error('Gagal memuat tindakan operasi');
+                        }
+                    });
                 }
-
-                // Refresh Select2
-                tindakanSelect.select2({
-                    placeholder: "Pilih Tindakan...",
-                    allowClear: true,
-                    dropdownParent: $('#panel-form-tindakan')
-                });
             });
-
-            // Trigger change saat halaman load untuk set initial state
-            $('#kategori_operasi_id').trigger('change');
 
             // AJAX submit form
             $('#form-tindakan').on('submit', function(e) {
@@ -309,17 +305,13 @@
                         .val(),
                     success: function(response) {
                         if (response.success) {
-                            // Cek jika halaman ini dibuka dari window lain (pop-up)
                             if (window.opener && !window.opener.closed) {
-                                // Refresh halaman parent
                                 window.opener.location.reload();
                             }
-                            // Tutup jendela pop-up saat ini
                             window.close();
                         }
                     },
                     error: function(xhr) {
-                        // Aktifkan kembali tombol jika error
                         $('button[type="submit"]').prop('disabled', false).removeClass(
                             'disabled');
 
@@ -333,7 +325,6 @@
                             errorMessage = xhr.responseJSON.message ||
                                 "Gagal menyimpan data. Periksa kembali isian Anda.";
                         }
-                        // Tampilkan pesan error
                         alert(errorMessage);
                     }
                 });
