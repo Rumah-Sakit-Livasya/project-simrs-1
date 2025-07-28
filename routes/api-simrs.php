@@ -519,6 +519,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
     Route::prefix('poliklinik')->group(function () {
         Route::post('/filter-pasien', [ERMController::class, 'filterPasien'])->name('poliklinik.filter-pasien');
+        Route::get('/obat/{gudang_id}', [ERMController::class, 'get_obat'])->name('poliklinik.get-obat');
     });
 
     Route::prefix('erm')->group(function () {
