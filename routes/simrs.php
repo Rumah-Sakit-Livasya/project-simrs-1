@@ -5,6 +5,7 @@ use App\Http\Controllers\BilinganController;
 use App\Http\Controllers\FarmasiReportKartuStock;
 use App\Http\Controllers\FarmasiReportStockDetail;
 use App\Http\Controllers\FarmasiReportStockStatus;
+use App\Http\Controllers\FarmasiResepController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
@@ -847,7 +848,7 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
         Route::prefix('farmasi')->group(function () {
-            Route::get('transaksi-resep', [FarmasiController::class, 'transaksiResep'])
+            Route::get('transaksi-resep', [FarmasiResepController::class, 'index'])
                 ->name('farmasi.transaksi-resep');
 
             Route::get('retur-resep', [FarmasiController::class, 'returResep'])

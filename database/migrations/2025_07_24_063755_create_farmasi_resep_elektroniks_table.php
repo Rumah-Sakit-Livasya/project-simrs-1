@@ -19,6 +19,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->softDeletes();
+            $table->foreignId('cppt_id')->constrained('cppt')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('registration_id')->nullable()->constrained('registrations')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('gudang_id')->nullable()->constrained('warehouse_master_gudang')->onUpdate('cascade')->onDelete('cascade');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FarmasiResep;
+use App\Models\WarehouseMasterGudang;
 use Illuminate\Http\Request;
 
 class FarmasiResepController extends Controller
@@ -12,7 +13,9 @@ class FarmasiResepController extends Controller
      */
     public function index()
     {
-        //
+        return view("pages.simrs.farmasi.transaksi-resep.index", [
+            'gudangs' => WarehouseMasterGudang::where("apotek", 1)->where("warehouse", 0)->get()
+        ]);
     }
 
     /**

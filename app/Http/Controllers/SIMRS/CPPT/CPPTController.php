@@ -189,7 +189,7 @@ class CPPTController extends Controller
 
                 // Hapus tanda tangan lama jika ada
                 if ($cppt->signature && \Storage::disk('public')->exists($cppt->signature->signature)) {
-                    \Storage::disk('public')->delete($cppt->signature->signature);
+                \Storage::disk('public')->delete($cppt->signature->signature);
                 }
 
                 // Simpan file baru
@@ -213,6 +213,7 @@ class CPPTController extends Controller
             if ($request->has('resep_manual') || $request->has('gudang_id')) {
                 if (!$request->has("gudang_id")) { // manual recipe only
                     FarmasiResepElektronik::create([
+                        'cppt_id' => $cppt->id,
                         'user_id' => auth()->user()->id,
                         'kode_re' => $this->generate_pharmacy_re_code(),
                         'total' => 0,
@@ -226,6 +227,7 @@ class CPPTController extends Controller
                     }
 
                     $re = FarmasiResepElektronik::create([
+                        'cppt_id' => $cppt->id,
                         'user_id' => auth()->user()->id,
                         'kode_re' => $this->generate_pharmacy_re_code(),
                         'total' => $total,
