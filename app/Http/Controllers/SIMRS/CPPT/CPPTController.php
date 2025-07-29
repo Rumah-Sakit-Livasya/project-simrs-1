@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\SIMRS\CPPT;
 
 use App\Http\Controllers\Controller;
+use App\Models\FarmasiResepElektronik;
+use App\Models\FarmasiResepElektronikItems;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\Registration;
+use App\Models\WarehouseBarangFarmasi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CPPTController extends Controller
 {
@@ -126,6 +130,20 @@ class CPPTController extends Controller
         }
     }
 
+    private function generate_pharmacy_re_code()
+    {
+        $date = Carbon::now();
+        $year = $date->format('y');
+        $month = $date->format('m');
+
+        $count = FarmasiResepElektronik::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count() + 1;
+        $count = str_pad($count, 6, '0', STR_PAD_LEFT);
+
+        return "REJ" . $year . $month . $count;
+    }
+
     public function store(Request $request, $type, $registration_number)
     {
         $validatedData = $request->validate([
@@ -142,6 +160,8 @@ class CPPTController extends Controller
             'medical_record_number' => 'required'
         ]);
 
+
+        DB::beginTransaction();
         try {
             $registration_type = Registration::find($request->registration_id)->registration_type;
             $validatedData['user_id'] = auth()->user()->id;
@@ -189,8 +209,60 @@ class CPPTController extends Controller
                 );
             }
 
+            // farmasi rajal
+            if ($request->has('resep_manual') || $request->has('gudang_id')) {
+                if (!$request->has("gudang_id")) { // manual recipe only
+                    FarmasiResepElektronik::create([
+                        'user_id' => auth()->user()->id,
+                        'kode_re' => $this->generate_pharmacy_re_code(),
+                        'total' => 0,
+                        'resep_manual' => $request->get('resep_manual'),
+                        'registration_id' => $validatedData['registration_id']
+                    ]);
+                } else {
+                    $total = $request->get('total_harga_obat');
+                    if($total == null) {
+                        throw new \Exception("Total harga obat tidak boleh kosong");
+                    }
+
+                    $re = FarmasiResepElektronik::create([
+                        'user_id' => auth()->user()->id,
+                        'kode_re' => $this->generate_pharmacy_re_code(),
+                        'total' => $total,
+                        'resep_manual' => $request->has('resep_manual') ? $request->get('resep_manual') : null,
+                        'registration_id' => $validatedData['registration_id']
+                    ]);
+
+                    $barang_ids = $request->get('barang_id');
+                    $qtys = $request->get('qty');
+                    $hargas = $request->get('hna');
+                    $subtotals = $request->get('subtotal');
+                    $instruksi_obats = $request->get('instruksi_obat');
+                    $signas = $request->get('signa');
+                    if (!$barang_ids || !$qtys || !$hargas || !$subtotals || !$instruksi_obats || !$signas) {
+                        throw new \Exception("Field tidak lengkap");
+                    }
+
+                    foreach ($barang_ids as $key => $barang_id) {
+                        FarmasiResepElektronikItems::create([
+                            're_id' => $re->id,
+                            'barang_id' => $barang_id,
+                            'satuan_id' => WarehouseBarangFarmasi::findOrFail($barang_id)->satuan_id,
+                            'qty' => $qtys[$key],
+                            'harga' => $hargas[$key],
+                            'subtotal' => $subtotals[$key],
+                            // signa, instruksi
+                            'instruksi' => $instruksi_obats[$key],
+                            'signa' => $signas[$key],
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
             return response()->json(['message' => ' berhasil ditambahkan!'], 200);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

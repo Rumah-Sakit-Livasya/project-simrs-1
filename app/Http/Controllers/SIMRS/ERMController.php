@@ -274,7 +274,7 @@ class ERMController extends Controller
                 $pengkajian = CPPT::where('registration_id', $registration->id)->first();
                 $gudangs = WarehouseMasterGudang::where('apotek', 1)->where('warehouse', 0)->get();
                 $default_apotek = WarehouseMasterGudang::select('id')->where('apotek_default', 1)->first();
-                $barangs = WarehouseBarangFarmasi::with(["stored_items"])->get();
+                $barangs = WarehouseBarangFarmasi::with(["stored_items", "satuan"])->get();
                 return view('pages.simrs.erm.form.dokter.cppt-dokter', compact('gudangs', 'barangs', 'default_apotek', 'registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
 
             case 'resume_medis':

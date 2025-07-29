@@ -196,7 +196,7 @@ Skrining Nyeri:
                                                             class="loading-message loading text-warning">Loading...</span>
                                                     </div>
                                                     <div class="card-body p-0">
-                                                    <div class="loading" id="loading-page"></div>
+                                                        <div class="loading" id="loading-page"></div>
                                                         <div class="row p-2">
                                                             @if (!isset($default_apotek))
                                                                 <div class="col-6">
@@ -230,10 +230,13 @@ Skrining Nyeri:
                                                                                 $default_apotek->id,
                                                                             );
                                                                             $qty = $items->sum('qty');
+                                                                            $barang->qty = $qty;
                                                                         @endphp
                                                                         @if ($qty > 0)
                                                                             <option value="{{ $barang->id }}"
-                                                                                data-qty="{{ $qty }}">
+                                                                                class="obat"
+                                                                                data-qty="{{ $qty }}"
+                                                                                data-item="{{ json_encode($barang) }}">
                                                                                 {{ $barang->nama }} (Stock:
                                                                                 {{ $qty }})</option>
                                                                         @endif
@@ -253,15 +256,15 @@ Skrining Nyeri:
                                         <table class="table table-striped">
                                             <thead class="smooth">
                                                 <tr>
+                                                    <th style="width: 1%;">Aksi</th>
                                                     <th style="width: 25%;">Nama Obat</th>
                                                     <th style="width: 10%;">UOM</th>
                                                     <th style="width: 5%;">Stok</th>
-                                                    <th style="width: 5%;">Harga</th>
                                                     <th style="width: 10%;">Qty</th>
-                                                    <th style="width: 10%;">Subtotal Harga</th>
+                                                    <th style="width: 5%;">Harga</th>
                                                     <th style="width: 15%">Signa</th>
                                                     <th style="width: 15%">Instruksi</th>
-                                                    <th style="width: 1%;">&nbsp;</th>
+                                                    <th style="width: 10%;">Subtotal Harga</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="table_re"></tbody>
@@ -270,6 +273,8 @@ Skrining Nyeri:
                                                     <td colspan="8" align="right">Grand Total</td>
                                                     <td align="right"><span id="grand_total" style="text-align: right;"
                                                             class="numeric">0</span>
+                                                        <input type="hidden" name="total_harga_obat" id="total_harga_obat"
+                                                            value="0" readonly="">
                                                         <input type="hidden" name="total_bpjs" id="total_bpjs"
                                                             value="0" readonly="">
                                                         <input type="hidden" name="is_bpjs" id="is_bpjs"
@@ -435,7 +440,7 @@ Skrining Nyeri:
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
-    <script src="{{ asset('js/simrs/erm/form/dokter/cppt.js') }}"></script>
+    <script src="{{ asset('js/simrs/erm/form/dokter/cppt.js') }}?time={{ now() }}"></script>
 
     <script>
         $(document).ready(function() {

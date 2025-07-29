@@ -21,7 +21,7 @@ return new class extends Migration
             $table->softDeletes();
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('registration_id')->nullable()->constrained('registrations')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('gudang_id')->constrained('warehouse_master_gudang')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('gudang_id')->nullable()->constrained('warehouse_master_gudang')->onUpdate('cascade')->onDelete('cascade');
             $table->string('kode_re')->unique();
             $table->string('resep_manual')->nullable();
             $table->integer('total');

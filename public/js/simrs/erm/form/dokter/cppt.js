@@ -12,11 +12,96 @@ class CPPTDokterClass {
     #$BarangSelect = $("#cppt_barang_id");
     #$Loadings = $(".loading");
     #$LoadingsMessage = $(".loading-message");
+    #$GrandTotalDisplay = $("#grand_total");
+    #$GrandTotal = $("#total_harga_obat");
     #API_URL = "/api/simrs/poliklinik";
 
     constructor() {
         this.#showLoading(false);
-        this.#$GudangSelect.on('select2:select', (e) => this.#handleGudangSelect.bind(this, e)())
+        this.#$GudangSelect.on('select2:select', (e) => this.#handleGudangSelect.bind(this, e)());
+        this.#$BarangSelect.on('select2:select', (e) => this.#handleBarangSelect.bind(this, e)());
+    }
+
+    /**
+     * Handle gudang change
+     * @param {Select2.Event<HTMLElement, Select2.DataParams>} event 
+     */
+    #handleBarangSelect(event) {
+        event.preventDefault();
+        // get selected id
+        const selectedId = event.params.data.id;
+
+        // unselect the select2
+        // @ts-ignore
+        this.#$BarangSelect.val(null).trigger('change');
+
+        //get data-item
+        const $option = $(`option[value='${selectedId}'].obat`);
+        
+        const item = /** @type {BarangFarmasi & {qty: number}} */ ($option.data('item'));
+        
+
+        // <th style="width: 1%;">Aksi</th>
+        // <th style="width: 25%;">Nama Obat</th>
+        // <th style="width: 10%;">UOM</th>
+        // <th style="width: 5%;">Stok</th>
+        // <th style="width: 10%;">Qty</th>
+        // <th style="width: 5%;">Harga</th>
+        // <th style="width: 15%">Signa</th>
+        // <th style="width: 15%">Instruksi</th>
+        // <th style="width: 10%;">Subtotal Harga</th>
+
+        const key = Math.round(Math.random() * 100000);
+
+        // insert to this.#$Table
+        this.#$Table.append(/*html*/`
+                <tr id="item${key}" class="item-obat">
+                    <input type="hidden" name="hna[${key}]" value="${item.hna}">
+                    <input type="hidden" name="barang_id[${key}]" value="${item.id}">
+                    <input type="hidden" name="subtotal[${key}]" value="${item.hna}">
+
+                    <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
+                        title="Hapus" onclick="CPPTDokter.deleteItem(${key})"></a></td>
+                    <td>${item.nama}</td>
+                    <td>${item.satuan?.kode}</td>
+                    <td>${item.qty}</td>
+                    <td><input type="number" name="qty[${key}]" min="1" step="1" class="form-control" value="1" max="${item.qty}"
+                    onkeyup="CPPTDokter.refreshTotal()" onchange="CPPTDokter.refreshTotal()"></td>
+                    <td>${this.#rp(item.hna)}</td>
+                    <td><input type="text" name="signa[${key}]" class="form-control"></td>
+                    <td><input type="text" name="instruksi_obat[${key}]" class="form-control"></td>
+                    <td class="subtotal">${this.#rp(item.hna)}</td>
+                </tr>
+            `);
+        
+        this.refreshTotal();
+    }
+
+    refreshTotal() {
+        let total = 0;
+        this.#$Table.find("tr.item-obat").each((i, tr) => {
+            const qtyEl = $(tr).find("input[name^=qty]");
+            const hnaEl = $(tr).find("input[name^=hna]");
+            if (!qtyEl || !hnaEl ) return;
+
+            const qty = parseInt(String(qtyEl.val()));
+            const hna = parseInt(String(hnaEl.val()));
+            if (isNaN(qty) || isNaN(hna)) return;
+
+            const subtotal = qty * hna;
+
+            total += subtotal;
+            $(tr).find("td.subtotal").text(this.#rp(subtotal));
+            $(tr).find("input[name^=subtotal]").val(subtotal);
+        });
+
+        this.#$GrandTotalDisplay.text(this.#rp(total));
+        this.#$GrandTotal.val(total);
+    }
+
+    deleteItem(key) {
+        this.#$Table.find("#item" + key).remove();
+        this.refreshTotal();
     }
 
     /**
@@ -36,7 +121,12 @@ class CPPTDokterClass {
                 this.#$BarangSelect.empty();
                 this.#$BarangSelect.append(new Option("", ""));
                 response.items.forEach(item => {
-                    this.#$BarangSelect.append(new Option(`${item.nama} (Stock: ${item.qty})`, item.id));
+                    // this.#$BarangSelect.append(new Option(`${item.nama} (Stock: ${item.qty})`, item.id));
+                    this.#$BarangSelect.append($(/*html*/`
+                            <option value="${item.id}" data-item='${JSON.stringify(item)}' class="obat">
+                                ${item.nama} (Stock: ${item.qty})
+                            </option>
+                        `));
                 });
                 this.#$BarangSelect.trigger('change'); // trigger change event to update select2
             })
@@ -59,6 +149,16 @@ class CPPTDokterClass {
         } else {
             this.#$LoadingsMessage.text('Loading...');
         }
+    }
+
+    /**
+     * Format angka menjadi mata uang rupiah
+     * @param {number} amount 
+     * @returns 
+     */
+    #rp(amount) {
+        const formattedAmount = 'Rp ' + amount.toLocaleString('id-ID');
+        return formattedAmount;
     }
 
     /**
