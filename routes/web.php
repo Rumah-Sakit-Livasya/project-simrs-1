@@ -30,6 +30,7 @@ use App\Http\Middleware\LastSeenUser;
 use App\Models\ChecklistHarianCategory;
 use App\Models\LaporanInternal;
 use Illuminate\Support\Facades\File;
+use Pusher\Pusher; // Jangan lupa tambahkan ini jika belum ada
 
 // Route::get('/test', [TimeScheduleController::class, 'getEmployeesByOrganizationAndJobPosition']);
 
@@ -207,17 +208,42 @@ Route::middleware([LastSeenUser::class])->group(function () {
     |  WHATSAPP
     |--------------------------------------------------------------------------
     */
-        Route::prefix('whatsapp')->group(function () {
-            Route::get('/', function () {
-                return view('pages.whatsapp.index');
-            })->name('whatsapp');
+        // routes/web.php
+
+        // routes/web.php
+
+        Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+
+            // --- Rute untuk Halaman Chat dan Balasan Pesan ---
+
+            // 1. Rute utama untuk menampilkan halaman chat.
+            //    MENUNJUK KE METODE BARU: showChatPage
+            //    Parameter {phoneNumber?} membuatnya bisa menangani:
+            //    - /whatsapp (halaman utama)
+            //    - /whatsapp/62812345 (halaman chat spesifik)
+            Route::get('/{phoneNumber?}', [WhatsappController::class, 'showChatPage'])->name('chat');
+
+            // 2. Rute untuk mengirim balasan dari form di halaman chat
+            Route::post('/reply', [WhatsappController::class, 'reply'])->name('reply');
+
+            // --- Rute Lain yang Sudah Ada (Tidak Perlu Diubah) ---
+
+            // 3. Menampilkan halaman untuk kirim broadcast
             Route::get('/broadcast', function () {
-                return view('pages.whatsapp.index');
+                return view('pages.whatsapp.broadcast');
             })->name('broadcast');
+
+            // 4. Mengirim pesan (dari form broadcast, dll.)
+            //    Rute ini sudah benar, kita hanya perlu menambahkan metodenya di controller.
+            Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('send');
+
+            // 5. Menampilkan halaman untuk manajemen grup kontak
             Route::get('/group_kontak', function () {
-                return view('pages.whatsapp.index');
+                return view('pages.whatsapp.group_kontak');
             })->name('group_kontak');
-            Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('whatsapp.send');
+
+            Route::get('/message-status/{message}', [App\Http\Controllers\WhatsappController::class, 'checkStatus'])
+                ->name('whatsapp.status');
         });
         /* END PAYROLL --------------------------------------------------------*/
 
@@ -432,6 +458,34 @@ Route::get('/test', function () {
 });
 
 
+
+Route::get('/test-pusher', function () {
+    $options = [
+        'cluster' => env('PUSHER_APP_CLUSTER'),
+        'useTLS' => true,
+        // --- TAMBAHKAN BARIS INI ---
+        'curl_options' => [
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_SSL_VERIFYPEER => 0,
+        ]
+    ];
+    $pusher = new Pusher(
+        env('PUSHER_APP_KEY'),
+        env('PUSHER_APP_SECRET'),
+        env('PUSHER_APP_ID'),
+        $options
+    );
+
+    $data['message'] = 'Halo ini pesan dari Laravel!';
+    $pusher->trigger('my-channel', 'my-event', $data);
+
+    return 'Event telah dikirim (tanpa verifikasi SSL)!';
+});
+
+// routes/web.php
+Route::get('/test-layout', function () {
+    return view('test-layout');
+});
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/simrs.php';
