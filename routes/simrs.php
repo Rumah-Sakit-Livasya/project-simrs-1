@@ -41,11 +41,13 @@ use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
 use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
+use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
+use App\Http\Controllers\SIMRS\UtilityController;
 use App\Http\Controllers\SIMRS\Procurement\ApprovalPOController;
 use App\Http\Controllers\SIMRS\Procurement\ApprovalPRController;
 use App\Http\Controllers\SIMRS\Procurement\PurchaseOrderController;
@@ -93,6 +95,9 @@ Route::group(['middleware' => ['auth']], function () {
     // Patient search endpoint
     Route::get('/search-patients', [PatientController::class, 'search'])
         ->name('patients.search');
+
+    Route::get('/utility/signature-pad', [UtilityController::class, 'showSignaturePad'])->name('utility.signature.pad');
+
 
     // Get bed availability data
     Route::get('/beds/get-data', [RegistrationController::class, 'getDataBed'])
@@ -275,6 +280,10 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/form-builder/tambah', [FormBuilderController::class, 'create'])
                     ->name('master-data.setup.form-builder.tambah');
 
+                // Route baru untuk menampilkan halaman edit
+                Route::get('/form-builder/{id}/edit', [FormBuilderController::class, 'edit'])
+                    ->name('master-data.setup.form-builder.edit');
+
                 // Ethnicity management
                 Route::prefix('ethnics')->group(function () {
                     Route::get('/', [EthnicController::class, 'index'])
@@ -380,12 +389,50 @@ Route::group(['middleware' => ['auth']], function () {
             });
         });
 
-        Route::prefix('poliklinik')->group(function () {
+        Route::prefix('poliklinik')->name('poliklinik.')->group(function () {
+            // Rute utama untuk daftar pasien poliklinik
             Route::get('/daftar-pasien', [ERMController::class, 'catatanMedis'])
-                ->name('poliklinik.daftar-pasien');
+                ->name('daftar-pasien');
 
-            Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])
-                ->name('poliklinik.pengkajian-lanjutan.show');
+            // === Grup Rute untuk Pengkajian Lanjutan ===
+            // Mengelompokkan semua rute terkait pengkajian lanjutan agar lebih rapi.
+            Route::prefix('pengkajian-lanjutan')->name('pengkajian-lanjutan.')->group(function () {
+
+                // AKSI: Menampilkan halaman form BARU untuk diisi (CREATE)
+                // URL: /poliklinik/pengkajian-lanjutan/create/{registration_id}/{template_id}
+                // Ini adalah rute Anda yang sudah ada, disempurnakan.
+                Route::get('/create/{registration_id}/{template_id}', [PoliklinikController::class, 'showForm'])
+                    ->name('create');
+
+                // AKSI: Menyimpan data dari form BARU (STORE)
+                // URL: /poliklinik/pengkajian-lanjutan
+                // Method: POST
+                Route::post('/', [PengkajianController::class, 'storeOrUpdatePengkajianLanjutan'])
+                    ->name('store');
+
+                // AKSI: Menampilkan halaman form yang SUDAH DIISI untuk dilihat/dicetak (SHOW)
+                // URL: /poliklinik/pengkajian-lanjutan/{pengkajianLanjutan}
+                // Menggunakan Route Model Binding untuk mengambil data secara otomatis.
+                Route::get('/{pengkajianLanjutan}', [PoliklinikController::class, 'showFilledForm']) // Anda perlu membuat method ini
+                    ->name('show');
+
+                // AKSI: Menampilkan halaman form yang SUDAH DIISI untuk diedit (EDIT)
+                // URL: /poliklinik/pengkajian-lanjutan/{pengkajianLanjutan}/edit
+                Route::get('/{pengkajianLanjutan}/edit', [PoliklinikController::class, 'editFilledForm']) // Anda perlu membuat method ini
+                    ->name('edit');
+
+                // AKSI: Memperbarui data dari form yang DIEDIT (UPDATE)
+                // URL: /poliklinik/pengkajian-lanjutan/{pengkajianLanjutan}
+                // Method: PUT
+                Route::put('/{pengkajianLanjutan}', [PengkajianController::class, 'storeOrUpdatePengkajianLanjutan'])
+                    ->name('update');
+
+                // AKSI: Menghapus data pengkajian (DESTROY)
+                // URL: /poliklinik/pengkajian-lanjutan/{pengkajianLanjutan}
+                // Method: DELETE
+                Route::delete('/{pengkajianLanjutan}', [PengkajianController::class, 'destroyPengkajianLanjutan']) // Anda perlu membuat method ini
+                    ->name('destroy');
+            });
         });
 
         Route::prefix('igd')->group(function () {

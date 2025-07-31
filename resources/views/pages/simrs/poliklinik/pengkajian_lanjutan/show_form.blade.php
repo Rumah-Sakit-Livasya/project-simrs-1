@@ -1,119 +1,186 @@
-@extends('inc.layout-no-side')
+@extends('inc.layout-no-side') {{-- Sesuaikan dengan layout Anda --}}
 @section('content')
-    <style>
-        .form-control2 {
-            border-left: none;
-            border-right: none;
-            border-top: none;
-            borerder-bottom: 1px solid #ced4da !important;
-            width: 100%;
-        }
-    </style>
-    <form action="#" method="POST">
+    <form id="create-new-form" method="POST">
         @csrf
-        @method('post')
+        {{-- Variabel $formTemplate di sini berisi string HTML mentah dari controller --}}
         {!! $formTemplate !!}
     </form>
 
     <div class="mt-3">
         <div class="card">
-            <div class="card-body d-flex justify-content-between">
-                <!-- Tombol Print di Kiri -->
-                <a href="#!" class="btn btn-primary waves-effect waves-light" {dis_none}="">
-                    <span class="mdi mdi-printer print-pengkajian" data-pkid="" data-pregid="216320" data-ftid="155"
-                        data-printtype="{print_type}" data-link="{link}"> Print</span>
-                </a>
-
-                <!-- Tombol Simpan di Kanan -->
+            <div class="card-body d-flex justify-content-end">
                 <div>
                     <button type="button" class="btn btn-warning waves-effect waves-light save-form text-white"
-                        data-dismiss="modal" data-status="0">
-                        <span class="mdi mdi-content-save"></span> Simpan (draft)
+                        data-status="0">
+                        <i class="fas fa-save"></i> Simpan (Draft)
                     </button>
-                    <button type="button" class="btn btn-success btn-save-final waves-effect waves-light save-form"
-                        data-dismiss="modal" data-status="1">
-                        <span class="mdi mdi-content-save"></span> Simpan (final)
+                    <button type="button" class="btn btn-success waves-effect waves-light save-form" data-status="1">
+                        <i class="fas fa-check-circle"></i> Simpan (Final)
                     </button>
                 </div>
             </div>
         </div>
     </div>
 @endsection
-
 @section('plugin')
+    {{-- 1. MUAT LIBRARY SIGNATURE PAD DARI INTERNET (CDN) --}}
+    {{-- Ganti link lama Anda dengan yang ini --}}
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
     <script type="text/javascript">
+        // FUNGSI GLOBAL UNTUK DIPANGGIL OLEH POPUP
+        window.updateSignature = function(inputTargetId, previewTargetId, dataUrl) {
+            const input = document.getElementById(inputTargetId);
+            const preview = document.getElementById(previewTargetId);
+            const placeholder = preview.nextElementSibling; // Asumsi placeholder adalah elemen setelah gambar
+
+            if (input && preview) {
+                input.value = dataUrl;
+                preview.src = dataUrl;
+                preview.style.display = 'block';
+                if (placeholder) placeholder.style.display = 'none';
+            }
+        };
+    </script>
+
+    <script script type="text/javascript">
         $(document).ready(function() {
-            $('.save-form').on('click', function() {
-                let status = $(this).data('status');
-                let formData = new FormData();
+            $('body').on('click', '.open-signature-popup', function() {
+                const inputTarget = $(this).data('input-target');
+                const previewTarget = $(this).data('preview-target');
+                const url =
+                    `{{ route('utility.signature.pad') }}?inputTarget=${inputTarget}&previewTarget=${previewTarget}`;
+                window.open(url, 'SignatureWindow',
+                    `width=${window.screen.width},height=${window.screen.height},scrollbars=yes,resizable=yes,fullscreen=yes`
+                    );
+            });
 
-                // Append all form data
-                $('form').each(function() {
-                    let form = $(this).closest('form')[0];
-                    let formElements = form.elements;
-                    for (let i = 0; i < formElements.length; i++) {
-                        if (formElements[i].name) {
-                            if (formElements[i].type === 'radio' && !formElements[i].checked) {
-                                continue;
-                            }
-                            formData.append(formElements[i].name, formElements[i].value);
+            const signaturePads = {};
+
+            // Helper function untuk resize canvas
+            // Pastikan ini didefinisikan di luar loop
+            function resizeCanvas(canvas) {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                // Set ukuran CSS secara eksplisit jika belum ada, ini penting!
+                if (!canvas.style.width) {
+                    canvas.style.width = '100%';
+                }
+                if (!canvas.style.height) {
+                    canvas.style.height = '150px';
+                }
+
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width * ratio;
+                canvas.height = rect.height * ratio;
+                const ctx = canvas.getContext("2d");
+                ctx.scale(ratio, ratio);
+                // Setelah resize, data yang ada hilang, jadi perlu clear
+                if (signaturePads[canvas.id]) {
+                    signaturePads[canvas.id].clear();
+                }
+            }
+
+            @if (isset($signaturePadInitializers) && !empty($signaturePadInitializers))
+                const initializers = @json($signaturePadInitializers);
+
+                initializers.forEach(function(init) {
+                    const canvas = document.getElementById(init.canvasId);
+                    const clearButton = document.getElementById(init.clearButtonId);
+                    const hiddenInput = document.getElementById(init.hiddenInputId);
+
+                    // Jika elemen canvas tidak ditemukan, hentikan dan beri log
+                    if (!canvas) {
+                        console.error('Elemen Canvas dengan ID "' + init.canvasId + '" tidak ditemukan!');
+                        return; // Lanjut ke initializer berikutnya
+                    }
+
+                    // Buat instance signature pad
+                    const signaturePad = new SignaturePad(canvas, {
+                        backgroundColor: 'rgb(255, 255, 255)'
+                    });
+
+                    // Simpan instance untuk referensi, gunakan ID canvas sebagai key
+                    signaturePads[canvas.id] = signaturePad;
+
+                    // Saat selesai menggambar, simpan data base64
+                    signaturePad.onEnd = function() {
+                        if (!signaturePad.isEmpty()) {
+                            hiddenInput.value = signaturePad.toDataURL('image/png');
+                        } else {
+                            hiddenInput.value = '';
                         }
-                    }
-                });
+                    };
 
-                formData.append('form_template_id', '{{ $formTemplateId }}');
-                formData.append('registration_id', '{{ $registrationId }}');
-                formData.append('status', status);
-                formData.append('_token', '{{ csrf_token() }}'); // Add CSRF token
-
-                $.ajax({
-                    url: "{{ route('pengkajian.lanjutan.store') }}",
-                    method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'Data has been saved successfully.',
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.close();
-                            }
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'An error occurred while saving the data.',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                });
-
-                $('#impersonateModal').on('shown.bs.modal', function() {
-                    $('#impersonate').select2({
-                        placeholder: "Select a user",
-                        dropdownParent: $('#impersonateModal'),
-                        allowClear: true,
+                    // Fungsi tombol clear
+                    clearButton.addEventListener('click', function() {
+                        signaturePad.clear();
+                        hiddenInput.value = '';
                     });
                 });
 
-                $('.employeeId').click(function() {
-                    var employeeId = $(this).data('employee-id');
-                    var width = screen.width;
-                    var height = screen.height;
-                    var popupWindow = window.open('/dashboard/attendances/employee/' + employeeId +
-                        '/payroll',
-                        'popupWindow',
-                        'width=' + width + ',height=' + height + ',scrollbars=yes');
+                // Panggil resize untuk semua canvas SETELAH loop inisialisasi selesai
+                // Ini memastikan semua elemen sudah ada di DOM dan terukur
+                Object.keys(signaturePads).forEach(function(canvasId) {
+                    const canvasElement = document.getElementById(canvasId);
+                    resizeCanvas(canvasElement);
+                });
 
-                    popupWindow.onbeforeunload = function() {
-                        location.reload();
-                    };
+                // Tambahkan event listener untuk resize window
+                window.addEventListener("resize", function() {
+                    Object.keys(signaturePads).forEach(function(canvasId) {
+                        const canvasElement = document.getElementById(canvasId);
+                        resizeCanvas(canvasElement);
+                    });
+                });
+            @endif
+
+
+            // Logika Simpan (TIDAK BERUBAH)
+            $('.save-form').on('click', function(e) {
+                e.preventDefault();
+
+                let isFinal = $(this).data('status') == 1;
+                const form = $('#create-new-form');
+                const formValues = {};
+                const formDataArray = form.serializeArray();
+
+                $.each(formDataArray, function(i, field) {
+                    if (field.name.endsWith('[]')) {
+                        let cleanName = field.name.slice(0, -2);
+                        if (!formValues[cleanName]) {
+                            formValues[cleanName] = [];
+                        }
+                        formValues[cleanName].push(field.value);
+                    } else if (field.name !== '_token') {
+                        formValues[field.name] = field.value;
+                    }
+                });
+
+                const payload = {
+                    registration_id: '{{ $registrationId }}',
+                    form_template_id: '{{ $formTemplateId }}',
+                    form_values: formValues,
+                    is_final: isFinal
+                };
+
+                $.ajax({
+                    url: "{{ route('poliklinik.pengkajian-lanjutan.store') }}",
+                    method: 'POST',
+                    contentType: 'application/json',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    data: JSON.stringify(payload),
+                    success: function(response) {
+                        Swal.fire('Berhasil!', response.message, 'success').then(() => {
+                            if (window.opener) window.opener.location.reload();
+                            window.close();
+                        });
+                    },
+                    error: function(xhr) {
+                        let errorMessage = xhr.responseJSON ? xhr.responseJSON.message :
+                            'Terjadi kesalahan.';
+                        Swal.fire('Error!', errorMessage, 'error');
+                    }
                 });
             });
         });

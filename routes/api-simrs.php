@@ -313,8 +313,14 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             });
 
             Route::prefix('form-builder')->group(function () {
-                Route::post('store', [FormBuilderController::class, 'store']);
+                // Beri nama pada rute store agar bisa dipanggil dengan route()
+                Route::post('store', [FormBuilderController::class, 'store'])->name('api.form-builder.store');
+
+                // Sebaiknya beri nama juga pada rute lainnya untuk konsistensi
+                Route::post('{id}/update', [FormBuilderController::class, 'update'])->name('api.form-builder.update');
+                Route::delete('{id}/delete', [FormBuilderController::class, 'destroy'])->name('api.form-builder.destroy');
             });
+
 
             Route::prefix('ethnics')->group(function () {
                 Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');

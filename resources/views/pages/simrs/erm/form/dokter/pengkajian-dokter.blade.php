@@ -422,16 +422,14 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-12 px-3">
-                            @include('pages.simrs.erm.partials.signature-field', [
-                                'judul' => 'Dokter, ',
-                                'pic' => $registration->doctor->employee->fullname,
-                                'role' => 'Dokter',
-                            ])
-                        </div>
-                    </div>
-
+                    {{-- Contoh pemanggilan yang sudah diperbaiki --}}
+                    @include('pages.simrs.erm.partials.signature-field', [
+                        'judul' => 'Perawat,',
+                        'pic' => auth()->user()->employee->fullname,
+                        'role' => 'dokter',
+                        'prefix' => 'pengkajian_dokter', // Berikan prefix unik
+                        'signature_model' => $pengkajian?->signature, // Kirim model data tanda tangan yang relevan
+                    ])
 
                     <div class="row">
                         <div class="col-md-12 px-3">
