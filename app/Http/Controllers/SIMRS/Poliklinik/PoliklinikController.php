@@ -1,29 +1,21 @@
 <?php
 
+// File: app/Http/Controllers/SIMRS/Poliklinik/PoliklinikController.php
+
 namespace App\Http\Controllers\SIMRS\Poliklinik;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\SIMRS\ERMController;
-use App\Models\Employee;
 use App\Models\SIMRS\Departement;
-use App\Models\SIMRS\Doctor;
-use App\Models\SIMRS\ERM\TindakanMedisRajal;
 use App\Models\SIMRS\JadwalDokter;
-use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
-use App\Models\SIMRS\Laboratorium\ParameterLaboratorium;
-use App\Models\SIMRS\OrderTindakanMedis;
-use App\Models\SIMRS\Pengkajian\FormKategori;
 use App\Models\SIMRS\Pengkajian\FormTemplate;
-use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
-use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
-use App\Models\SIMRS\Peralatan\OrderAlatMedis;
-use App\Models\SIMRS\Peralatan\Peralatan;
 use App\Models\SIMRS\Registration;
-use App\Models\SIMRS\TindakanMedis;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
-use PhpOffice\PhpSpreadsheet\Reader\Xls\Color\BIFF5;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 
 class PoliklinikController extends Controller
 {
@@ -40,7 +32,6 @@ class PoliklinikController extends Controller
         $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
         $registration = Registration::where('registration_number', $noRegist)->first();
 
-
         $query = Registration::whereDate('registration_date', Carbon::today());
 
         $query->when(isset($registration->departement_id), function ($q) use ($registration) {
@@ -54,9 +45,6 @@ class PoliklinikController extends Controller
         $registrations = $query->get();
 
         if ($menu && $noRegist) {
-            // Render partial view sebagai HTML
-            $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
-
             $menuResponse = ERMController::poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path);
             if ($menuResponse) {
                 return $menuResponse;
@@ -65,44 +53,6 @@ class PoliklinikController extends Controller
             return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'registration', 'registrations', 'path'));
         }
     }
-
-    // public function filterPasien(Request $request)
-    // {
-    //     try {
-    //         $routePath = parse_url($request['route'], PHP_URL_PATH);
-
-    //         if ($routePath === '/simrs/igd/catatan-medis') {
-    //             $query = Registration::whereDate('registration_date', Carbon::today())->where('registration_type', 'igd');
-    //         } else {
-    //             $query = Registration::whereDate('registration_date', Carbon::today())->where('registration_type', '!=',  'igd');
-    //         }
-
-    //         $query->when($request->departement_id, function ($q) use ($request) {
-    //             return $q->where('departement_id', $request->departement_id);
-    //         });
-
-    //         $query->when($request->doctor_id, function ($q) use ($request) {
-    //             return $q->where('doctor_id', $request->doctor_id);
-    //         });
-
-    //         $registrations = $query->get();
-
-    //         // Render partial view sebagai HTML
-    //         $html = view('pages.simrs.poliklinik.partials.list-pasien', compact('registrations'))->render();
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Data retrieved successfully',
-    //             'html' => $html
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to retrieve data',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
 
     public function showForm(Request $request, $registrationId, $encryptedID)
     {
@@ -133,9 +83,105 @@ class PoliklinikController extends Controller
             }
             $formTemplateId = $id;
 
-            return view('pages.simrs.poliklinik.pengkajian_lanjutan.show_form', compact('formTemplate', 'formTemplateId', 'registrationId'));
+            // Pastikan view yang dituju benar
+            // return view('pages.simrs.poliklinik.pengkajian_lanjutan.show_form', compact('formTemplate', 'formTemplateId', 'registrationId'));
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.show_form', [
+                'formTemplate'     => $formTemplate->form_source, // Kirim source HTML
+                'formTemplateId'   => $id, // Kirim ID template
+                'registrationId'   => $registrationId // Kirim ID registrasi
+            ]);
+        } catch (Exception $e) {
+            Log::error('Gagal menampilkan form baru: ' . $e->getMessage());
+            abort(404, 'Data template form atau registrasi tidak ditemukan.');
+        }
+    }
+
+
+    // ==========================================================
+    // METHOD BARU UNTUK MELIHAT DAN MENGEDIT FORM YANG SUDAH DIISI
+    // ==========================================================
+
+    /**
+     * Menampilkan halaman form yang sudah diisi dalam mode LIHAT/CETAK (read-only).
+     * Method ini dipanggil oleh route `poliklinik.pengkajian-lanjutan.show`.
+     *
+     * @param PengkajianLanjutan $pengkajianLanjutan Instance model dari Route Model Binding.
+     * @return View
+     */
+    public function showFilledForm(PengkajianLanjutan $pengkajianLanjutan): View
+    {
+        // Panggil helper method dengan flag isEditMode = false
+        return $this->prepareAndShowForm($pengkajianLanjutan, false);
+    }
+
+    /**
+     * Menampilkan halaman form yang sudah diisi dalam mode EDIT.
+     * Method ini dipanggil oleh route `poliklinik.pengkajian-lanjutan.edit`.
+     *
+     * @param PengkajianLanjutan $pengkajianLanjutan Instance model dari Route Model Binding.
+     * @return \Illuminate\Http\RedirectResponse|View
+     */
+    public function editFilledForm(PengkajianLanjutan $pengkajianLanjutan)
+    {
+        // Aturan Bisnis: Jangan izinkan edit jika form sudah difinalisasi.
+        if ($pengkajianLanjutan->is_final) {
+            // Redirect kembali ke halaman sebelumnya dengan pesan error.
+            return back()->with('error', 'Form yang sudah difinalisasi tidak dapat diubah lagi.');
+        }
+
+        // Panggil helper method dengan flag isEditMode = true
+        return $this->prepareAndShowForm($pengkajianLanjutan, true);
+    }
+
+    /**
+     * Private helper method untuk menghindari duplikasi kode.
+     * Method ini menyiapkan semua data yang dibutuhkan dan merender view.
+     *
+     * @param PengkajianLanjutan $pengkajian
+     * @param boolean $isEditMode
+     * @return View
+     */
+    /**
+     * Private helper method untuk menghindari duplikasi kode.
+     *
+     * @param PengkajianLanjutan $pengkajian
+     * @param boolean $isEditMode
+     * @return \Illuminate\View\View
+     */
+    private function prepareAndShowForm(PengkajianLanjutan $pengkajian, bool $isEditMode): \Illuminate\View\View
+    {
+        try {
+            // 1. Eager Load relasi untuk mencegah N+1 Query Problem.
+            $pengkajian->load(['form_template', 'registration.patient', 'creator', 'editor']);
+
+            // 2. [DIPERBAIKI] Logika aman untuk menangani 'form_values'.
+            // Variabel ini akan menampung hasil akhir.
+            $formValues = [];
+
+            // Ambil data mentah dari model.
+            $sourceData = $pengkajian->form_values;
+
+            // Cek tipe datanya.
+            if (is_string($sourceData)) {
+                // Jika masih berupa string JSON, maka kita decode.
+                $formValues = json_decode($sourceData, true) ?? [];
+            } elseif (is_array($sourceData)) {
+                // Jika sudah berupa array (karena casting model berhasil), langsung gunakan.
+                $formValues = $sourceData;
+            }
+            // Jika null atau tipe lain, $formValues akan tetap menjadi array kosong, sehingga aman.
+
+            // 3. Render view yang BENAR untuk menampilkan/mengedit form yang sudah diisi.
+            return view('pages.simrs.poliklinik.pengkajian_lanjutan.show', [ // <-- DIUBAH DI SINI
+                'pengkajian'    => $pengkajian,
+                'formTemplate'  => $pengkajian->form_template,
+                'formValues'    => $formValues,
+                'isEditMode'    => $isEditMode,
+            ]);
         } catch (\Exception $e) {
-            abort(404, 'Data tidak ditemukan.');
+            // Tangani error jika terjadi masalah
+            \Illuminate\Support\Facades\Log::error('Gagal memuat form pengkajian lanjutan: ' . $e->getMessage());
+            abort(500, 'Terjadi kesalahan saat memuat data form. Silakan coba lagi nanti.');
         }
     }
 }

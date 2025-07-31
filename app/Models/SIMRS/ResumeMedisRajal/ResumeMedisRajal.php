@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS\ResumeMedisRajal;
 
+use App\Models\Signature;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,5 +18,10 @@ class ResumeMedisRajal extends Model implements Auditable
     public function registration()
     {
         return $this->belongsTo(Registration::class, 'registration_id');
+    }
+
+    public function signature()
+    {
+        return $this->morphOne(Signature::class, 'signable');
     }
 }

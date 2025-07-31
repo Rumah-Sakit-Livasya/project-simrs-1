@@ -968,10 +968,13 @@
 
                     </div>
 
+                    {{-- Contoh pemanggilan yang sudah diperbaiki --}}
                     @include('pages.simrs.erm.partials.signature-field', [
                         'judul' => 'Perawat,',
                         'pic' => auth()->user()->employee->fullname,
                         'role' => 'perawat',
+                        'prefix' => 'pengkajian_nurse', // Berikan prefix unik
+                        'signature_model' => $pengkajian?->signature, // Kirim model data tanda tangan yang relevan
                     ])
 
                     <div class="row mt-5">

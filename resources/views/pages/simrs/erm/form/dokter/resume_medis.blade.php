@@ -306,9 +306,11 @@
                                                 </td>
                                                 <td style="width: 65%">
                                                     @include('pages.simrs.erm.partials.signature-field', [
-                                                        'judul' => 'Dokter yang memeriksa,',
-                                                        'pic' => $registration->doctor->employee->fullname,
-                                                        'role' => 'perawat',
+                                                        'judul' => 'Dokter,',
+                                                        'pic' => auth()->user()->employee->fullname,
+                                                        'role' => 'dokter',
+                                                        'prefix' => 'resume_medis_dokter', // Berikan prefix unik
+                                                        'signature_model' => $pengkajian?->signature, // Kirim model data tanda tangan yang relevan
                                                     ])
                                                 </td>
                                                 <td style="width: 10%">
@@ -379,9 +381,8 @@
 
         // Close the panel if the backdrop is clicked
         $('.slide-backdrop').on('click', function() {
-        $('#js-slide-left').removeClass('slide-on-mobile-left-show');
-        $(this).removeClass('show');
-        });
+            $('#js-slide-left').removeClass('slide-on-mobile-left-show');
+            $(this).removeClass('show');
         });
     </script>
 @endsection

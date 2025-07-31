@@ -39,21 +39,40 @@
                     </div>
 
                     <div class="col-12" style="margin-bottom: 100px;">
+                        {{-- File: pages/simrs/erm/index.blade.php (Bagian yang diubah) --}}
                         @foreach ($daftar_pengkajian as $item)
                             <div class="card mb-2">
                                 <div class="card-body d-flex justify-content-between align-items-center">
                                     <div class="nama-form">
-                                        {{ $item->form_template->nama_form }}
+                                        {{ $item->form_template->nama_form }} <br>
+                                        <small class="text-muted">Diisi oleh: {{ $item->created_by }} pada
+                                            {{ $item->created_at->format('d-m-Y H:i') }}</small>
                                     </div>
                                     <div class="action-form">
-                                        <i class="fas fa-print mr-2 text-primary"></i>
-                                        <i class="fas fa-pencil mr-2 text-warning"></i>
-                                        <i class="fas fa-trash text-danger"></i>
+                                        {{-- Tautan untuk Print dan Edit --}}
+                                        <a href="{{ route('poliklinik.pengkajian-lanjutan.show', $item->id) }}"
+                                            target="_blank" title="Lihat & Cetak Form">
+                                            <i class="fas fa-print mr-2 text-primary"></i>
+                                        </a>
+                                        <a href="{{ route('poliklinik.pengkajian-lanjutan.edit', $item->id) }}"
+                                            target="_blank" title="Edit Form">
+                                            <i class="fas fa-pencil mr-2 text-warning"></i>
+                                        </a>
+                                        {{-- Tambahkan form untuk delete jika perlu --}}
+                                        {{-- Tombol Hapus dengan form --}}
+                                        <form action="{{ route('poliklinik.pengkajian-lanjutan.destroy', $item->id) }}"
+                                            method="POST" class="d-inline form-hapus">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-link text-danger p-0 m-0"
+                                                title="Hapus Form">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                         @endforeach
-
                     </div>
                 </div>
             </div>
@@ -84,7 +103,7 @@
                     // Panggil route yang sudah dienkripsi dari Blade
                     let registrationId = "{{ $registration->id }}"; // Ambil registration ID dari Blade
                     let url =
-                        "{{ route('poliklinik.pengkajian-lanjutan.show', [':registrationId', ':encryptedId']) }}"
+                        "{{ route('poliklinik.pengkajian-lanjutan.create', [':registrationId', ':encryptedId']) }}"
                         .replace(':encryptedId', btoa(idForm)) // Enkripsi dengan Base64
                         .replace(':registrationId', registrationId); // Tambahkan registration ID
 
@@ -105,6 +124,25 @@
                     alert('Silakan pilih departement terlebih dahulu.');
                 }
             });
+        });
+
+        $('.form-hapus').on('submit', function(e) {
+            e.preventDefault();
+            var form = this;
+            Swal.fire({
+                title: 'Anda Yakin?',
+                text: "Data yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            })
         });
     </script>
 @endsection
