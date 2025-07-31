@@ -2,9 +2,12 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\DietGizi;
 use App\Models\OrderGizi;
 use App\Models\SIMRS\BatalRegister;
 use App\Models\Employee;
+use App\Models\keuangan\JasaDokter;
+use App\Models\Keuangan\KonfirmasiAsuransi;
 use App\Models\OrderRadiologi;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
@@ -16,6 +19,7 @@ use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\TransferPasienAntarRuangan;
 use App\Models\SIMRS\ResumeMedisRajal\ResumeMedisRajal;
+use App\Models\getTotalTarifMedis;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,9 +28,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class Registration extends Model implements AuditableContract
+class Registration extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
 
@@ -40,7 +44,6 @@ class Registration extends Model implements AuditableContract
         return $this->belongsTo(KelasRawat::class);
     }
 
-    // Define the relationship to Bilingan
     public function bilingan()
     {
         return $this->hasOne(Bilingan::class, 'registration_id');
@@ -77,10 +80,18 @@ class Registration extends Model implements AuditableContract
         return $this->belongsTo(Departement::class);
     }
 
+    // public function penjamin()
+    // {
+    //     return $this->belongsTo(Penjamin::class);
+    // }
+
     public function penjamin()
     {
-        return $this->belongsTo(Penjamin::class);
+        return $this->belongsTo(Penjamin::class, 'penjamin_id');
     }
+
+
+
 
     public function user()
     {
@@ -138,6 +149,21 @@ class Registration extends Model implements AuditableContract
         return $this->hasMany(OrderLaboratorium::class, 'registration_id');
     }
 
+    public function konfirmasi_asuransi()
+    {
+        return $this->hasMany(KonfirmasiAsuransi::class, 'registration_id');
+    }
+
+    public function getDoctorFullnameAttribute()
+    {
+        return $this->doctor->employee->fullname ?? null;
+    }
+
+    public function tagihan_pasien()
+    {
+        return $this->hasMany(TagihanPasien::class, 'registration_id');
+    }
+
     public function triage()
     {
         return $this->hasOne(Triage::class);
@@ -168,6 +194,13 @@ class Registration extends Model implements AuditableContract
         return $this->hasMany(OrderGizi::class, 'registration_id');
     }
 
+    public function diet_gizi()
+    {
+        return $this->hasOne(DietGizi::class, 'registration_id');
+    }
+
+
+
     // public function generateNomorRegistrasi()
     // {
     //     $date = Carbon::now();
@@ -180,4 +213,9 @@ class Registration extends Model implements AuditableContract
 
     //     return $year . $month . $day . $count;
     // }
+
+    public function jasaDokter()
+    {
+        return $this->hasMany(JasaDokter::class, 'registration_id');
+    }
 }

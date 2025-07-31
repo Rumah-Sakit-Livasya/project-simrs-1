@@ -396,7 +396,7 @@ interface MakananGizi {
     aktif: number;
 }
 
-interface OrderMakananGizi{
+interface OrderMakananGizi {
     id: number;
     created_at: string;
     updated_at: string;
@@ -426,4 +426,247 @@ interface OrderGizi {
     foods: OrderMakananGizi[];
 }
 
+interface Satuan {
+    id: number;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+    kode: string;
+    nama: string;
+    aktif: number;
+}
+
+interface BarangFarmasi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    kode: string;
+    keterangan: string | null;
+    hna: number;
+    ppn: number;
+    ppn_rajal: number;
+    ppn_ranap: number;
+    tipe: "FN" | "NFN";
+    formularium: "RS" | "NRS";
+    jenis_obat: "paten" | "generik" | null;
+    exp: "1w" | "2w" | "3w" | "1mo" | "2mo" | "3mo" | "6mo" | null;
+    aktif: boolean;
+    kategori_id: number;
+    golongan_id: number | null;
+    kelompok_id: number | null;
+    satuan_id: number;
+    satuan?: Satuan;
+    principal: string | null;
+    harga_principal: number | null;
+    diskon_principal: number | null;
+}
+
+interface BarangNonFarmasi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    kode: string;
+    keterangan: string | null;
+    hna: number;
+    ppn: number;
+    aktif: boolean;
+    jual_pasien: boolean;
+    kategori_id: number;
+    golongan_id: number | null;
+    kelompok_id: number | null;
+    satuan_id: number;
+    satuan?: Satuan;
+}
+
+interface MasterGudang {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    cost_center: string;
+    apotek: boolean;
+    warehouse: boolean;
+    aktif: boolean;
+}
+
+interface MinMaxStock {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    barang_f_id: number;
+    barang_nf_id: number;
+    gudang_id: number;
+    min: number;
+    max: number;
+}
+
+interface ItemPO {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    po_id: number;
+    pri_id: number | null;
+    barang_id: number;
+    barang?: Barang;
+    kode_barang: string;
+    nama_barang: string;
+    unit_barang: string;
+    harga_barang: number;
+    qty: number;
+    qty_bonus: number;
+    subtotal: number;
+    discount_nominal: number;
+    qty_received: number;
+}
+
+interface Supplier {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    kategori: string;
+    nama: string;
+    alamat: string;
+    phone: string;
+    fax: string;
+    email: string;
+    contact_person: string;
+    contact_person_phone?: string | null;
+    contact_person_email: string;
+    no_rek: string;
+    bank: string;
+    top?: string | null;
+    tipe_top: string;
+    ppn: number;
+    aktif: number;
+}
+
+interface PurchaseOrder {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    kode_po: string;
+    user_id: number;
+    app_user_id: number;
+    ceo_app_user_id: number;
+    supplier_id: number;
+    tanggal_po: string;
+    tanggal_app: string;
+    tanggal_app_ceo: string;
+    tanggal_kirim: string;
+    is_auto: number;
+    top: string;
+    tipe_top: string;
+    tipe: string;
+    status: string;
+    approval: string;
+    approval_ceo: string;
+    ppn: number;
+    nominal: number;
+    pic_terima: string;
+    keterangan: string;
+    keterangan_approval?: string | null;
+    keterangan_approval_ceo?: string | null;
+    items?: ItemPO[];
+    supplier: Supplier;
+}
+
+interface Barang {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    kode: string;
+    keterangan: string;
+    hna: number;
+    ppn: number;
+    ppn_rajal: number;
+    ppn_ranap: number;
+    tipe: string;
+    formularium: string;
+    jenis_obat: string;
+    exp: string;
+    aktif: number;
+    kategori_id: number;
+    golongan_id: number;
+    kelompok_id: number;
+    satuan_id: number;
+    principal: string;
+    harga_principal: number;
+    diskon_principal: number;
+}
+
+interface StoredItem {
+    id: number;
+    created_at: string; // Assuming it's in ISO 8601 format
+    updated_at: string; // Assuming it's in ISO 8601 format
+    deleted_at: string | null; // Assuming a nullable timestamp or null if deleted_at is unset
+    pbi_id: number;
+    gudang_id: number;
+    qty: number;
+
+    pbi?: PenerimaanBarangItem;
+}
+
+interface PenerimaanBarangItem {
+    id: number;
+    created_at: string; // Assuming it's in ISO 8601 format
+    updated_at: string; // Assuming it's in ISO 8601 format
+    deleted_at: string | null; // Nullable timestamp or null if deleted_at is unset
+    pb_id: number;
+    poi_id: number;
+    barang_id: number;
+    satuan_id: number;
+    nama_barang: string;
+    kode_barang: string;
+    unit_barang: string;
+    batch_no: string;
+    tanggal_exp: string | null; // Nullable if it's a date or can be unset
+    qty: number;
+    harga: number;
+    diskon_nominal: number;
+    subtotal: number;
+    is_bonus: number;
+
+    pb?: PenerimaanBarang;
+}
+
+interface PenerimaanBarang {
+    id: number;
+    created_at: string; // Assuming it's in ISO 8601 format
+    updated_at: string; // Assuming it's in ISO 8601 format
+    deleted_at: string | null; // Nullable timestamp or null if deleted_at is unset
+    tanggal_terima: string; // Expected to be a date in string format
+    tanggal_faktur: string | null; //Nullable if it has associated data, otherwise can be null/undefined
+    kode_penerimaan: string;
+    no_faktur: string;
+    pic_penerima: string; // Typically the recipient's name or ID as string
+    keterangan: string;
+    ppn: number;
+    ppn_nominal: number;
+    materai: number;
+    diskon_faktur: number;
+    total: number;
+    total_final: number;
+    user_id: number;
+    gudang_id: number;
+    supplier_id: number;
+    po_id: number;
+    tipe_bayar: string;
+    tipe_terima: "po" | "non_po"; // Depending on your actual data, you can make it more specific
+    status: string;
+    kas: string | null; // Nullable if not all entries contain this field or set to undefined
+}
+
 type PatientType = "rajal" | "ranap" | "otc";
+type SumberItem = "npr" | "pr";
+type TipePR = "all" | "normal" | "urgent";

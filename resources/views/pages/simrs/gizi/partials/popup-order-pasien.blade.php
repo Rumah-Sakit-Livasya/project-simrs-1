@@ -98,14 +98,14 @@
                                     <tr>
                                         <td>Waktu Makan</td>
                                         <td>
-                                            <label for="waktu_makan_pagi"><input type="radio" name="waktu_makan"
-                                                    id="waktu_makan_pagi" value="pagi">Pagi</label>
-
-                                            <label for="waktu_makan_siang"><input type="radio" name="waktu_makan"
-                                                    id="waktu_makan_siang" value="siang">Siang</label>
-
-                                            <label for="waktu_makan_sore"><input type="radio" name="waktu_makan"
-                                                    id="waktu_makan_sore" value="sore">Sore</label>
+                                            <select class="select2 form-control w-100" name="waktu_makan">
+                                                <option value=""></option>
+                                                @foreach ($jam_makans as $jam_makan)
+                                                    <option value="{{ $jam_makan->nama }}">
+                                                        {{ $jam_makan->nama }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </td>
                                     </tr>
 

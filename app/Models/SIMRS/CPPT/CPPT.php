@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS\CPPT;
 
+
 use App\Models\Signature;
 use App\Models\SIMRS\Registration;
 use App\Models\User;
@@ -15,6 +16,7 @@ class CPPT extends Model implements AuditableContract
     use HasFactory, Auditable;
 
     protected $table = 'cppt', $guarded = ['id'];
+
 
     public function user()
     {

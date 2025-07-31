@@ -1,15 +1,45 @@
 <?php
 
 use App\Http\Controllers\API\EmployeeController;
+use App\Http\Controllers\JamMakanGiziController;
+use App\Http\Controllers\DietGiziController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\ProcurementPOApprovalCEO;
+use App\Http\Controllers\ProcurementPOApprovalNonPharmacy;
+use App\Http\Controllers\ProcurementPOApprovalPharmacy;
+use App\Http\Controllers\ProcurementPRApprovalNonPharmacy;
+use App\Http\Controllers\ProcurementPRApprovalPharmacy;
+use App\Http\Controllers\ProcurementPurchaseOrderNonPharmacyController;
+use App\Http\Controllers\ProcurementPurchaseOrderPharmacyController;
+use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
+use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
+use App\Http\Controllers\ProcurementSetupSupplier;
 use App\Http\Controllers\SIMRS\AssesmentGadarController;
 use App\Http\Controllers\SIMRS\RujukAntarRSController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
+use App\Http\Controllers\WarehouseBarangFarmasiController;
+use App\Http\Controllers\WarehouseBarangNonFarmasiController;
+use App\Http\Controllers\WarehouseGolonganBarangController;
+use App\Http\Controllers\WarehouseKategoriBarangController;
+use App\Http\Controllers\WarehouseKelompokBarangController;
+use App\Http\Controllers\WarehouseMasterGudangController;
+use App\Http\Controllers\WarehousePabrikController;
+use App\Http\Controllers\WarehousePenerimaanBarangFarmasiController;
+use App\Http\Controllers\WarehousePurchaseRequestNonPharmacy;
+use App\Http\Controllers\WarehousePurchaseRequestPharmacy;
+use App\Http\Controllers\WarehouseSatuanBarangController;
+use App\Http\Controllers\WarehouseSetupMinMaxStockController;
+use App\Http\Controllers\WarehouseSupplierController;
+use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\OrderParameterLaboratorium;
+use App\Models\ProcurementPurchaseRequestNonPharmacy;
+use App\Models\ProcurementPurchaseRequestPharmacy;
+use App\Models\WarehouseKategoriBarang;
+use App\Models\WarehouseKelompokBarang;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SIMRS\BedController;
 use App\Http\Controllers\SIMRS\CPPT\CPPTController;
@@ -64,6 +94,8 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
+use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
+use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\TarifOperasiController;
 use App\Models\Employee;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
@@ -133,6 +165,194 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::post('/store', [MenuGiziController::class, 'store'])->name('menu.gizi.store');
             Route::put('/update/{id}/', [MenuGiziController::class, 'update'])->name('menu.gizi.update');
             Route::delete('/destroy/{id}/', [MenuGiziController::class, 'destroy'])->name('menu.gizi.destroy');
+        });
+
+        Route::prefix('jam-makan')->group(function () {
+            Route::post('/store', [JamMakanGiziController::class, 'store'])->name('jam-makan.gizi.store');
+            Route::put('/update/{id}/', [JamMakanGiziController::class, 'update'])->name('jam-makan.gizi.update');
+            Route::delete('/destroy/{id}/', [JamMakanGiziController::class, 'destroy'])->name('jam-makan.gizi.destroy');
+        });
+
+        Route::prefix('auto-diet')->group(function () {
+            Route::get('/store', [DietGiziController::class, 'store'])->name('auto-diet.gizi.store');
+            Route::put('/update/{id}/', [DietGiziController::class, 'update'])->name('auto-diet.gizi.update');
+            Route::delete('/destroy/{id}/', [DietGiziController::class, 'destroy'])->name('auto-diet.gizi.destroy');
+        });
+    });
+
+    Route::prefix("warehouse")->group(function () {
+        Route::prefix("master-data")->group(function () {
+            Route::prefix("zat-aktif")->group(function () {
+                Route::post('/store', [WarehouseZatAktifController::class, 'store'])->name('warehouse.master-data.zat-aktif.store');
+                Route::put('/update/{id}/', [WarehouseZatAktifController::class, 'update'])->name('warehouse.master-data.zat-aktif.update');
+                Route::delete('/destroy/{id}/', [WarehouseZatAktifController::class, 'destroy'])->name('warehouse.master-data.zat-aktif.destroy');
+            });
+
+            Route::prefix("satuan-barang")->group(function () {
+                Route::post('/store', [WarehouseSatuanBarangController::class, 'store'])->name('warehouse.master-data.satuan-barang.store');
+                Route::put('/update/{id}/', [WarehouseSatuanBarangController::class, 'update'])->name('warehouse.master-data.satuan-barang.update');
+                Route::delete('/destroy/{id}/', [WarehouseSatuanBarangController::class, 'destroy'])->name('warehouse.master-data.satuan-barang.destroy');
+            });
+
+            Route::prefix("kelompok-barang")->group(function () {
+                Route::post('/store', [WarehouseKelompokBarangController::class, 'store'])->name('warehouse.master-data.kelompok-barang.store');
+                Route::put('/update/{id}/', [WarehouseKelompokBarangController::class, 'update'])->name('warehouse.master-data.kelompok-barang.update');
+                Route::delete('/destroy/{id}/', [WarehouseKelompokBarangController::class, 'destroy'])->name('warehouse.master-data.kelompok-barang.destroy');
+            });
+
+            Route::prefix("kategori-barang")->group(function () {
+                Route::post('/store', [WarehouseKategoriBarangController::class, 'store'])->name('warehouse.master-data.kategori-barang.store');
+                Route::put('/update/{id}/', [WarehouseKategoriBarangController::class, 'update'])->name('warehouse.master-data.kategori-barang.update');
+                Route::delete('/destroy/{id}/', [WarehouseKategoriBarangController::class, 'destroy'])->name('warehouse.master-data.kategori-barang.destroy');
+            });
+
+            Route::prefix("golongan-barang")->group(function () {
+                Route::post('/store', [WarehouseGolonganBarangController::class, 'store'])->name('warehouse.master-data.golongan-barang.store');
+                Route::put('/update/{id}/', [WarehouseGolonganBarangController::class, 'update'])->name('warehouse.master-data.golongan-barang.update');
+                Route::delete('/destroy/{id}/', [WarehouseGolonganBarangController::class, 'destroy'])->name('warehouse.master-data.golongan-barang.destroy');
+            });
+
+            Route::prefix("master-gudang")->group(function () {
+                Route::post('/store', [WarehouseMasterGudangController::class, 'store'])->name('warehouse.master-data.master-gudang.store');
+                Route::put('/update/{id}/', [WarehouseMasterGudangController::class, 'update'])->name('warehouse.master-data.master-gudang.update');
+                Route::delete('/destroy/{id}/', [WarehouseMasterGudangController::class, 'destroy'])->name('warehouse.master-data.master-gudang.destroy');
+            });
+
+            Route::prefix("pabrik")->group(function () {
+                Route::post('/store', [WarehousePabrikController::class, 'store'])->name('warehouse.master-data.pabrik.store');
+                Route::put('/update/{id}/', [WarehousePabrikController::class, 'update'])->name('warehouse.master-data.pabrik.update');
+                Route::delete('/destroy/{id}/', [WarehousePabrikController::class, 'destroy'])->name('warehouse.master-data.pabrik.destroy');
+            });
+
+            Route::prefix("supplier")->group(function () {
+                Route::post('/store', [WarehouseSupplierController::class, 'store'])->name('warehouse.master-data.supplier.store');
+                Route::put('/update/{id}/', [WarehouseSupplierController::class, 'update'])->name('warehouse.master-data.supplier.update');
+                Route::delete('/destroy/{id}/', [WarehouseSupplierController::class, 'destroy'])->name('warehouse.master-data.supplier.destroy');
+            });
+
+            Route::prefix("barang-non-farmasi")->group(function () {
+                Route::post('/store', [WarehouseBarangNonFarmasiController::class, 'store'])->name('warehouse.master-data.barang-non-farmasi.store');
+                Route::put('/update/{id}/', [WarehouseBarangNonFarmasiController::class, 'update'])->name('warehouse.master-data.barang-non-farmasi.update');
+                Route::delete('/destroy/{id}/', [WarehouseBarangNonFarmasiController::class, 'destroy'])->name('warehouse.master-data.barang-non-farmasi.destroy');
+            });
+
+            Route::prefix("barang-farmasi")->group(function () {
+                Route::post('/store', [WarehouseBarangFarmasiController::class, 'store'])->name('warehouse.master-data.barang-farmasi.store');
+                Route::put('/update/{id}/', [WarehouseBarangFarmasiController::class, 'update'])->name('warehouse.master-data.barang-farmasi.update');
+                Route::delete('/destroy/{id}/', [WarehouseBarangFarmasiController::class, 'destroy'])->name('warehouse.master-data.barang-farmasi.destroy');
+            });
+
+            Route::prefix("setup-min-max-stock")->group(function () {
+                Route::post('/store', [WarehouseSetupMinMaxStockController::class, 'store'])->name('warehouse.master-data.setup-min-max-stock.store');
+                // Route::put('/update/{id}/', [WarehouseSetupMinMaxStockController::class, 'update'])->name('warehouse.master-data.setup-min-max-stock.update');
+                // Route::delete('/destroy/{id}/', [WarehouseSetupMinMaxStockController::class, 'destroy'])->name('warehouse.master-data.setup-min-max-stock.destroy');
+
+                Route::prefix("get")->group(function () {
+                    Route::get('/gudang/{id}/', [WarehouseSetupMinMaxStockController::class, 'get_gudang'])->name('warehouse.master-data.setup-min-max-stock.get.gudang');
+                });
+            });
+        });
+
+        Route::prefix("purchase-request")->group(function () {
+            Route::prefix("pharmacy")->group(function () {
+                Route::post("/store", [WarehousePurchaseRequestPharmacy::class, 'store'])->name('warehouse.purchase-request.pharmacy.store');
+                Route::put("/update/{id}", [WarehousePurchaseRequestPharmacy::class, 'update'])->name('warehouse.purchase-request.pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehousePurchaseRequestPharmacy::class, 'destroy'])->name('warehouse.purchase-request.pharmacy.delete');
+                Route::get("/get/item-gudang/{gudang_id}", [WarehousePurchaseRequestPharmacy::class, 'get_item_gudang'])->name('warehouse.purchase-request.pharmacy.get.item-gudang');
+            });
+
+            Route::prefix("non-pharmacy")->group(function () {
+                Route::post("/store", [WarehousePurchaseRequestNonPharmacy::class, 'store'])->name('warehouse.purchase-request.non-pharmacy.store');
+                Route::put("/update/{id}", [WarehousePurchaseRequestNonPharmacy::class, 'update'])->name('warehouse.purchase-request.non-pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehousePurchaseRequestNonPharmacy::class, 'destroy'])->name('warehouse.purchase-request.non-pharmacy.delete');
+                Route::get("/get/item-gudang/{gudang_id}", [WarehousePurchaseRequestNonPharmacy::class, 'get_item_gudang'])->name('warehouse.purchase-request.non-pharmacy.get.item-gudang');
+            });
+        });
+
+        Route::prefix("penerimaan-barang")->group(function () {
+            Route::prefix("pharmacy")->group(function () {
+                Route::post("/store", [WarehousePenerimaanBarangFarmasiController::class, 'store'])->name('warehouse.penerimaan-barang.pharmacy.store');
+                Route::put("/update/{id}", [WarehousePenerimaanBarangFarmasiController::class, 'update'])->name('warehouse.penerimaan-barang.pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehousePenerimaanBarangFarmasiController::class, 'destroy'])->name('warehouse.penerimaan-barang.pharmacy.delete');
+            });
+
+            Route::prefix("non-pharmacy")->group(function () {
+                Route::post("/store", [WarehousePenerimaanBarangNonFarmasiController::class, 'store'])->name('warehouse.penerimaan-barang.non-pharmacy.store');
+                Route::put("/update/{id}", [WarehousePenerimaanBarangNonFarmasiController::class, 'update'])->name('warehouse.penerimaan-barang.non-pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehousePenerimaanBarangNonFarmasiController::class, 'destroy'])->name('warehouse.penerimaan-barang.non-pharmacy.delete');
+            });
+
+            Route::prefix("retur-barang")->group(function () {
+                Route::post("/store", [WarehouseReturBarangController::class, 'store'])->name('warehouse.penerimaan-barang.retur-barang.store');
+                Route::delete("/destroy/{id}", [WarehouseReturBarangController::class, 'destroy'])->name('warehouse.penerimaan-barang.retur-barang.delete');
+                Route::get("/get/item-supplier/{supplier_id}", [WarehouseReturBarangController::class, 'get_items'])->name('warehouse.penerimaan-barang.retur-barang.get.items');
+            });
+        });
+    });
+
+    Route::prefix("procurement")->group(function () {
+        Route::prefix("purchase-request")->group(function () {
+            Route::prefix("pharmacy")->group(function () {
+                Route::post("/store", [ProcurementPurchaseRequestPharmacyController::class, 'store'])->name('procurement.purchase-request.pharmacy.store');
+                Route::put("/update/{id}", [ProcurementPurchaseRequestPharmacyController::class, 'update'])->name('procurement.purchase-request.pharmacy.update');
+                Route::delete("/destroy/{id}", [ProcurementPurchaseRequestPharmacyController::class, 'destroy'])->name('procurement.purchase-request.pharmacy.delete');
+                Route::get("/get/item-gudang/", [ProcurementPurchaseRequestPharmacyController::class, 'get_item_gudang'])->name('procurement.purchase-request.pharmacy.get.item-gudang');
+            });
+
+            Route::prefix("non-pharmacy")->group(function () {
+                Route::post("/store", [ProcurementPurchaseRequestNonPharmacyController::class, 'store'])->name('procurement.purchase-request.non-pharmacy.store');
+                Route::put("/update/{id}", [ProcurementPurchaseRequestNonPharmacyController::class, 'update'])->name('procurement.purchase-request.non-pharmacy.update');
+                Route::delete("/destroy/{id}", [ProcurementPurchaseRequestNonPharmacyController::class, 'destroy'])->name('procurement.purchase-request.non-pharmacy.delete');
+                Route::get("/get/item-gudang/{gudang_id}", [ProcurementPurchaseRequestNonPharmacyController::class, 'get_item_gudang'])->name('procurement.purchase-request.non-pharmacy.get.item-gudang');
+            });
+        });
+
+        Route::prefix("approval-pr")->group(function () {
+            Route::prefix("pharmacy")->group(function () {
+                Route::put("/update/{id}", [ProcurementPRApprovalPharmacy::class, 'update'])->name('procurement.approval-pr.pharmacy.update');
+            });
+
+            Route::prefix("non-pharmacy")->group(callback: function () {
+                Route::put("/update/{id}", [ProcurementPRApprovalNonPharmacy::class, 'update'])->name('procurement.approval-pr.non-pharmacy.update');
+            });
+        });
+
+        Route::prefix("purchase-order")->group(function () {
+            Route::prefix("pharmacy")->group(function () {
+                Route::post("/store", [ProcurementPurchaseOrderPharmacyController::class, 'store'])->name('procurement.purchase-order.pharmacy.store');
+                Route::put("/update/{id}", [ProcurementPurchaseOrderPharmacyController::class, 'update'])->name('procurement.purchase-order.pharmacy.update');
+                Route::delete("/destroy/{id}", [ProcurementPurchaseOrderPharmacyController::class, 'destroy'])->name('procurement.purchase-order.pharmacy.delete');
+                Route::patch("/get/items/", [ProcurementPurchaseOrderPharmacyController::class, 'get_items'])->name('procurement.purchase-order.pharmacy.get.items');
+            });
+
+            Route::prefix("non-pharmacy")->group(function () {
+                Route::post("/store", [ProcurementPurchaseOrderNonPharmacyController::class, 'store'])->name('procurement.purchase-order.non-pharmacy.store');
+                Route::put("/update/{id}", [ProcurementPurchaseOrderNonPharmacyController::class, 'update'])->name('procurement.purchase-order.non-pharmacy.update');
+                Route::delete("/destroy/{id}", [ProcurementPurchaseOrderNonPharmacyController::class, 'destroy'])->name('procurement.purchase-order.non-pharmacy.delete');
+                Route::patch("/get/items/", [ProcurementPurchaseOrderNonPharmacyController::class, 'get_items'])->name('procurement.purchase-order.non-pharmacy.get.items');
+            });
+        });
+
+        Route::prefix("approval-po")->group(function () {
+            Route::prefix("pharmacy")->group(function () {
+                Route::put("/update/{id}", [ProcurementPOApprovalPharmacy::class, 'update'])->name('procurement.approval-po.pharmacy.update');
+            });
+
+            Route::prefix("non-pharmacy")->group(callback: function () {
+                Route::put("/update/{id}", [ProcurementPOApprovalNonPharmacy::class, 'update'])->name('procurement.approval-po.non-pharmacy.update');
+            });
+
+            Route::prefix("ceo")->group(callback: function () {
+                Route::put("/update/{id}", [ProcurementPOApprovalCEO::class, 'update'])->name('procurement.approval-po.ceo.update');
+            });
+        });
+
+        Route::prefix("setup")->group(function () {
+            Route::prefix("supplier")->group(function () {
+                Route::post('/store', [ProcurementSetupSupplier::class, 'store'])->name('procurement.setup.supplier.store');
+                Route::put('/update/{id}/', [ProcurementSetupSupplier::class, 'update'])->name('procurement.setup.supplier.update');
+                Route::delete('/destroy/{id}/', [ProcurementSetupSupplier::class, 'destroy'])->name('procurement.setup.supplier.destroy');
+            });
         });
     });
 

@@ -15,13 +15,13 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Contracts\Permission;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements Auditable
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles {
         HasRoles::hasPermissionTo as traitHasPermissionTo;
     }
 
-    use \OwenIt\Auditing\Auditable;
+    // use \OwenIt\Auditing\Auditable;
 
     /**
      * The attributes that are mass assignable.
@@ -143,5 +143,40 @@ class User extends Authenticatable implements Auditable
     public function lastSeenHuman()
     {
         return $this->last_seen ? \Carbon\Carbon::parse($this->last_seen)->diffForHumans() : 'Belum pernah online';
+    }
+
+    public function pr_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseRequestPharmacy::class, 'user_id');
+    }
+
+    public function pr_non_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseRequestNonPharmacy::class, 'user_id');
+    }
+
+    public function app_pr_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseRequestPharmacy::class, 'app_user_id');
+    }
+
+    public function app_pr_non_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseRequestNonPharmacy::class, 'app_user_id');
+    }
+
+    public function po_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseOrderPharmacy::class, 'user_id');
+    }
+
+    public function po_non_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseOrderNonPharmacy::class, 'user_id');
+    }
+
+    public function rb()
+    {
+        return $this->hasMany(WarehouseReturBarang::class, 'user_id');
     }
 }

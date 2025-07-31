@@ -17,6 +17,7 @@ return new class extends Migration
     {
         Schema::create('kategori_gizi', function (Blueprint $table) {
             $table->id();
+            $table->softDeletes();
             $table->timestamps();
             $table->string("nama");
             $table->boolean("aktif");

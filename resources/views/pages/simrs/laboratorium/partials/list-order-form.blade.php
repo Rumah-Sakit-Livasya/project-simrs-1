@@ -15,6 +15,7 @@
                         <div class="row justify-content-center">
                             <div class="col-xl-4">
                                 <div class="form-group">
+
                                     <div class="row">
                                         <div class="col-xl-4" style="text-align: right">
                                             <label for="registration_date">Tgl. Registrasi</label>
@@ -130,7 +131,8 @@
                             </div>
 
                             <div class="col-xl-3">
-                                <a href="{{ route('laboratorium.order') }}" class="btn btn-primary waves-effect waves-themed">
+                                <a href="{{ route('laboratorium.order') }}"
+                                    class="btn btn-primary waves-effect waves-themed">
                                     <span class="fal fa-plus mr-1"></span>
                                     Order Baru
                                 </a>

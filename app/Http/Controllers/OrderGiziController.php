@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JamMakanGizi;
 use App\Models\KategoriGizi;
 use App\Models\MakananGizi;
 use App\Models\MakananMenuGizi;
@@ -86,6 +87,7 @@ class OrderGiziController extends Controller
         return view($view, [
             'registration' => $registration,
             'categories' => KategoriGizi::all(),
+            'jam_makans' => JamMakanGizi::all(),
             'menus' => MenuGizi::all(),
             'foods' => MakananGizi::all(),
             'menu_foods' => MakananMenuGizi::all()
@@ -105,7 +107,7 @@ class OrderGiziController extends Controller
             "nama_pemesan" => "required|string|max:255",
             "tanggal_order" => "required|date",
             "kategori_id" => "required|integer",
-            "waktu_makan" => "nullable|string|in:pagi,siang,sore",
+            "waktu_makan" => "nullable|string",
             "ditagihkan" => "required|boolean",
             "digabung" => "required|boolean",
             "foods_id" => "required|array",

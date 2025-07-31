@@ -6,7 +6,9 @@ use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Models\PembayaranCreditCard;
 use App\Models\PembayaranTransfer;
 use App\Models\SIMRS\Bilingan;
+use App\Models\OrderRadiologi;
 use App\Models\SIMRS\DownPayment;
+use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\PembayaranTagihan;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
@@ -192,36 +194,50 @@ class BilinganController extends Controller
         $validatedData['jaminan'] = $validatedData['jaminan'] ?? 0;
 
         try {
-            // Simpan pembayaran utama
+            //     // Simpan pembayaran utama
             $pembayaranTagihan = PembayaranTagihan::create($validatedData);
 
-            // Simpan data kartu kredit
-            if ($request->has('bank_perusahaan_id_cc')) {
-                foreach ($request->bank_perusahaan_id_cc as $index => $bankId) {
-                    PembayaranCreditCard::create([
-                        'pembayaran_tagihan_id' => $pembayaranTagihan->id,
-                        'bank_perusahaan_id'    => $bankId,
-                        'tipe'                  => $request->tipe_cc[$index] ?? null,
-                        'cc_number'             => $request->cc_number_cc[$index] ?? null,
-                        'auth_number'           => $request->auth_number_cc[$index] ?? null,
-                        'batch'                 => $request->batch_cc[$index] ?? null,
-                        'nominal'               => $request->nominal_cc[$index] ?? 0,
-                    ]);
-                }
-            }
+            //     // Simpan data kartu kredit
+            //     if ($request->has('bank_perusahaan_id_cc')) {
+            //         foreach ($request->bank_perusahaan_id_cc as $index => $bankId) {
+            //             $creditCardData = [
+            //                 'pembayaran_tagihan_id' => $pembayaranTagihan->id,
+            //                 'bank_perusahaan_id'    => $bankId ?? '-',
+            //                 'tipe'                  => $request->tipe_cc[$index] ?? '-',
+            //                 'cc_number'             => $request->cc_number_cc[$index] ?? '-',
+            //                 'auth_number'          => $request->auth_number_cc[$index] ?? '-',
+            //                 'batch'                 => $request->batch_cc[$index] ?? '-',
+            //                 'nominal'               => $request->nominal_cc[$index] ?? 0,
+            //             ];
 
-            // Simpan data transfer
-            if ($request->filled('bank_perusahaan_id_tf') && $request->filled('nominal_tf')) {
-                PembayaranTransfer::create([
-                    'pembayaran_tagihan_id' => $pembayaranTagihan->id,
-                    'bank_perusahaan_id'    => $request->bank_perusahaan_id_tf,
-                    'bank_pengirim'         => $request->bank_pengirim_tf,
-                    'norek_pengirim'        => $request->norek_pengirim_tf,
-                    'nominal'               => $request->nominal_tf,
-                ]);
-            }
+            //             // Filter out '-' values if you want to allow database defaults to take over
+            //             $creditCardData = array_filter($creditCardData, function ($value) {
+            //                 return $value !== null;
+            //             });
 
-            // Update status pembayaran di tabel Bilingan
+            //             PembayaranCreditCard::create($creditCardData);
+            //         }
+            //     }
+
+            //     // Simpan data transfer
+            //     if ($request->filled('bank_perusahaan_id_tf') && $request->filled('nominal_tf')) {
+            //         $transferData = [
+            //             'pembayaran_tagihan_id' => $pembayaranTagihan->id,
+            //             'bank_perusahaan_id'    => $request->bank_perusahaan_id_tf,
+            //             'bank_pengirim'         => $request->bank_pengirim_tf ?? null,
+            //             'norek_pengirim'        => $request->norek_pengirim_tf ?? null,
+            //             'nominal'               => $request->nominal_tf,
+            //         ];
+
+            //         // Filter out null values if needed
+            //         $transferData = array_filter($transferData, function ($value) {
+            //             return $value !== null;
+            //         });
+
+            //         PembayaranTransfer::create($transferData);
+            //     }
+
+            //     // Update status pembayaran di tabel Bilingan
             $bilingan = Bilingan::find($validatedData['bilingan_id']);
             if ($bilingan) {
                 $updateData = ['is_paid' => 1];
@@ -229,6 +245,20 @@ class BilinganController extends Controller
                     $updateData['keterangan'] = $validatedData['keterangan'];
                 }
                 $bilingan->update($updateData);
+            }
+
+            if ($bilingan->registration) {
+                $registrationId = $bilingan->registration->id;
+
+                // Update semua 'order_radiologi' yang terkait dengan registrasi ini
+                OrderRadiologi::where('registration_id', $registrationId)
+                    ->update(['status_billed' => true]);
+            }
+            if ($bilingan->registration) {
+                $registrationId = $bilingan->registration->id;
+
+                OrderLaboratorium::where('registration_id', $registrationId)
+                    ->update(['status_billed' => true]);
             }
 
             return response()->json([
