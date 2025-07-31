@@ -47,6 +47,7 @@ use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
+use App\Http\Controllers\SIMRS\UtilityController;
 use App\Http\Controllers\SIMRS\Procurement\ApprovalPOController;
 use App\Http\Controllers\SIMRS\Procurement\ApprovalPRController;
 use App\Http\Controllers\SIMRS\Procurement\PurchaseOrderController;
@@ -94,6 +95,9 @@ Route::group(['middleware' => ['auth']], function () {
     // Patient search endpoint
     Route::get('/search-patients', [PatientController::class, 'search'])
         ->name('patients.search');
+
+    Route::get('/utility/signature-pad', [UtilityController::class, 'showSignaturePad'])->name('utility.signature.pad');
+
 
     // Get bed availability data
     Route::get('/beds/get-data', [RegistrationController::class, 'getDataBed'])
@@ -275,6 +279,10 @@ Route::group(['middleware' => ['auth']], function () {
                     ->name('master-data.setup.form-builder');
                 Route::get('/form-builder/tambah', [FormBuilderController::class, 'create'])
                     ->name('master-data.setup.form-builder.tambah');
+
+                // Route baru untuk menampilkan halaman edit
+                Route::get('/form-builder/{id}/edit', [FormBuilderController::class, 'edit'])
+                    ->name('master-data.setup.form-builder.edit');
 
                 // Ethnicity management
                 Route::prefix('ethnics')->group(function () {

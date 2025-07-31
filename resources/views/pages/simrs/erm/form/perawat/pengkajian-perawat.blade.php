@@ -480,7 +480,9 @@
                         kondisi
                         khusus</label>
                     @php
-                        $kondisi_khusus_terpilih = json_decode($pengkajian?->kondisi_khusus ?? '[]', true);
+                        $kondisi_khusus_terpilih = is_array($pengkajian?->kondisi_khusus)
+                            ? $pengkajian?->kondisi_khusus
+                            : json_decode($pengkajian?->kondisi_khusus ?? '[]', true);
                     @endphp
 
                     <div class="row mt-3">
@@ -504,7 +506,14 @@
                         <h4 class="mt-5 font-weight-bold">RIWAYAT IMUNISASI DASAR</h4>
                     </header>
                     @php
-                        $imunisasi_dasar_terpilih = json_decode($pengkajian?->imunisasi_dasar ?? '[]', true);
+                        $imunisasi_dasar_terpilih = [];
+                        if ($pengkajian?->imunisasi_dasar) {
+                            if (is_string($pengkajian->imunisasi_dasar)) {
+                                $imunisasi_dasar_terpilih = json_decode($pengkajian->imunisasi_dasar, true) ?? [];
+                            } else {
+                                $imunisasi_dasar_terpilih = $pengkajian->imunisasi_dasar;
+                            }
+                        }
                     @endphp
 
                     <div class="row mt-3">
@@ -528,7 +537,9 @@
                         <h4 class="mt-5 font-weight-bold">SKRINING RESIKO JATUH - GET UP & GO</h4>
                     </header>
                     @php
-                        $resiko_jatuh_terpilih = json_decode($pengkajian?->resiko_jatuh ?? '[]', true);
+                        $resiko_jatuh_terpilih = is_array($pengkajian?->resiko_jatuh)
+                            ? $pengkajian->resiko_jatuh
+                            : json_decode($pengkajian?->resiko_jatuh ?? '[]', true);
                     @endphp
 
                     <div class="row mt-3">
@@ -719,7 +730,12 @@
                     </header>
                     <div class="row mt-3">
                         @php
-                            $hambatan_belajar_terpilih = json_decode($pengkajian?->hambatan_belajar ?? '[]', true);
+                            // Handle case where hambatan_belajar might be array or string
+                            $hambatan_belajar = $pengkajian?->hambatan_belajar;
+                            $hambatan_belajar_terpilih = is_array($hambatan_belajar)
+                                ? $hambatan_belajar
+                                : json_decode($hambatan_belajar ?? '[]', true);
+
                             $options = [
                                 'Pendengaran',
                                 'Penglihatan',
@@ -772,10 +788,12 @@
                                 pembelajaran</label>
                         </div>
                         @php
-                            $kebutuhan_pembelajaran_terpilih = json_decode(
-                                $pengkajian?->kebutuhan_pembelajaran ?? '[]',
-                                true,
-                            ); // Data dari database
+                            // Handle case where kebutuhan_pembelajaran might be array or string
+                            $kebutuhan_pembelajaran = $pengkajian?->kebutuhan_pembelajaran;
+                            $kebutuhan_pembelajaran_terpilih = is_array($kebutuhan_pembelajaran)
+                                ? $kebutuhan_pembelajaran
+                                : json_decode($kebutuhan_pembelajaran ?? '[]', true);
+
                             $options = [
                                 'Diagnosa managemen',
                                 'Obat-obatan',
@@ -824,26 +842,23 @@
                     </header>
                     <div class="row mt-3">
                         @php
-                            if ($pengkajian) {
-                                $data = json_decode($pengkajian->sensorik, true);
-
-                                if (json_last_error() !== JSON_ERROR_NONE) {
-                                    dd('JSON Error: ' . json_last_error_msg());
-                                }
-                            } else {
-                                $data = [];
+                            // 1. Logika pengambilan data yang lebih baik
+                            $sensorik_data = [];
+                            if (!empty($pengkajian?->sensorik)) {
+                                $sensorik_data = is_array($pengkajian->sensorik)
+                                    ? $pengkajian->sensorik // Jika sudah array (karena casting), langsung gunakan
+                                    : json_decode($pengkajian->sensorik, true) ?? []; // Jika masih string, decode
                             }
 
-                            $opsi = [
+                            $opsi_sensorik = [
                                 'sensorik_penglihatan' => ['Normal', 'Kabur', 'Kaca Mata', 'Lensa Kontak'],
                                 'sensorik_penciuman' => ['Normal', 'Tidak'],
                                 'sensorik_pendengaran' => ['Normal', 'Tuli Ka / Ki', 'Ada alat bantu dengar ka/ki'],
                             ];
-
                         @endphp
                         <table class="table">
                             <tbody>
-                                @foreach ($opsi as $kategori => $listOpsional)
+                                @foreach ($opsi_sensorik as $kategori => $listOpsional)
                                     <tr>
                                         <td>{{ Str::of($kategori)->after('sensorik_')->ucfirst() }}
                                         </td>
@@ -852,8 +867,8 @@
                                                 <div class="custom-control custom-radio custom-control-inline">
                                                     <input name="{{ $kategori }}" id="{{ $kategori . $i }}"
                                                         value="{{ $opsiValue }}" data-skor="{{ $i }}"
-                                                        class="custom-control-input" type="radio"
-                                                        @checked(($data[$kategori] ?? '') == $opsiValue)>
+                                                        class="custom-control-input" type="radio" {{-- 2. Gunakan variabel baru dan cek dengan @checked --}}
+                                                        @checked(($sensorik_data[$kategori] ?? null) == $opsiValue)>
                                                     <label class="custom-control-label" for="{{ $kategori . $i }}">
                                                         {{ $opsiValue }}
                                                     </label>
@@ -864,7 +879,6 @@
                                 @endforeach
                             </tbody>
                         </table>
-
                     </div>
 
                     <header class="text-danger">
@@ -921,14 +935,12 @@
                     </header>
                     <div class="row mt-3">
                         @php
-                            if ($pengkajian) {
-                                $data = json_decode($pengkajian->motorik, true);
-
-                                if (json_last_error() !== JSON_ERROR_NONE) {
-                                    dd('JSON Error: ' . json_last_error_msg());
-                                }
-                            } else {
-                                $data = [];
+                            // 1. Logika pengambilan data yang lebih baik untuk motorik
+                            $motorik_data = [];
+                            if (!empty($pengkajian?->motorik)) {
+                                $motorik_data = is_array($pengkajian->motorik)
+                                    ? $pengkajian->motorik // Jika sudah array, langsung gunakan
+                                    : json_decode($pengkajian->motorik, true) ?? []; // Jika masih string, decode
                             }
 
                             $opsiMotorik = [
@@ -952,8 +964,8 @@
                                                 <div class="custom-control custom-radio">
                                                     <input name="{{ $kategori }}" id="{{ $kategori . $i }}"
                                                         value="{{ $opsiValue }}" data-skor="{{ $i }}"
-                                                        class="custom-control-input" type="radio"
-                                                        @checked(($data[$kategori] ?? '') == $opsiValue)>
+                                                        class="custom-control-input" type="radio" {{-- 2. Gunakan variabel baru dan cek dengan @checked --}}
+                                                        @checked(($motorik_data[$kategori] ?? null) == $opsiValue)>
                                                     <label class="custom-control-label text-primary"
                                                         for="{{ $kategori . $i }}">
                                                         {{ $opsiValue }}
@@ -965,7 +977,6 @@
                                 @endforeach
                             </tbody>
                         </table>
-
                     </div>
 
                     {{-- Contoh pemanggilan yang sudah diperbaiki --}}

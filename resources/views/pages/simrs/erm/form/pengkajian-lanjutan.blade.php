@@ -1,12 +1,16 @@
+{{-- resources/views/pages/simrs/erm/form/pengkajian-lanjutan.blade.php --}}
 @extends('pages.simrs.erm.index')
+
 @section('erm')
+
     {{-- content start --}}
-    @if (isset($registration) || $registration != null)
+    @if (isset($registration) && $registration != null)
         <div class="tab-content p-3">
             <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
                 @include('pages.simrs.poliklinik.partials.detail-pasien')
                 <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
                 <div class="row">
+                    {{-- Bagian untuk Menambah Form Baru (sudah benar menggunakan popup) --}}
                     <div class="col-12">
                         <table class="table table-borderless">
                             <tbody>
@@ -19,6 +23,7 @@
                                             <label class="mt-2">:</label>
                                         </td>
                                         <td style="width: 50%;">
+                                            {{-- ID select dibuat unik berdasarkan ID kategori --}}
                                             <select class="select2 form-control" name="form_id"
                                                 id="form_id_{{ $item->id }}">
                                                 <option value=""></option>
@@ -38,27 +43,42 @@
                         </table>
                     </div>
 
+                    {{-- Bagian untuk Menampilkan Daftar Form yang Sudah Diisi --}}
                     <div class="col-12" style="margin-bottom: 100px;">
-                        {{-- File: pages/simrs/erm/index.blade.php (Bagian yang diubah) --}}
-                        @foreach ($daftar_pengkajian as $item)
+                        <h5 class="mt-4 mb-3">Dokumen yang Sudah Diisi</h5>
+                        @forelse ($daftar_pengkajian as $item)
                             <div class="card mb-2">
                                 <div class="card-body d-flex justify-content-between align-items-center">
                                     <div class="nama-form">
-                                        {{ $item->form_template->nama_form }} <br>
-                                        <small class="text-muted">Diisi oleh: {{ $item->created_by }} pada
-                                            {{ $item->created_at->format('d-m-Y H:i') }}</small>
+                                        {{ $item->form_template->nama_form ?? 'Nama Form Tidak Ditemukan' }} <br>
+                                        <small class="text-muted">Diisi oleh: {{ $item->creator->name ?? 'N/A' }} pada
+                                            {{ $item->created_at->format('d-m-Y H:i') }}
+                                            @if ($item->is_final)
+                                                <span class="badge bg-success ms-1">Final</span>
+                                            @else
+                                                <span class="badge bg-warning ms-1">Draft</span>
+                                            @endif
+                                        </small>
                                     </div>
                                     <div class="action-form">
-                                        {{-- Tautan untuk Print dan Edit --}}
-                                        <a href="{{ route('poliklinik.pengkajian-lanjutan.show', $item->id) }}"
-                                            target="_blank" title="Lihat & Cetak Form">
-                                            <i class="fas fa-print mr-2 text-primary"></i>
-                                        </a>
-                                        <a href="{{ route('poliklinik.pengkajian-lanjutan.edit', $item->id) }}"
-                                            target="_blank" title="Edit Form">
-                                            <i class="fas fa-pencil mr-2 text-warning"></i>
-                                        </a>
-                                        {{-- Tambahkan form untuk delete jika perlu --}}
+                                        {{-- [DIUBAH] Tombol untuk Lihat/Cetak (Membuka Popup) --}}
+                                        <button type="button"
+                                            class="btn btn-link text-primary p-0 m-0 me-2 open-form-popup"
+                                            data-url="{{ route('poliklinik.pengkajian-lanjutan.show', $item->id) }}"
+                                            title="Lihat & Cetak Form">
+                                            <i class="fas fa-print"></i>
+                                        </button>
+
+                                        {{-- [DIUBAH] Tombol untuk Edit (Membuka Popup), hanya jika belum final --}}
+                                        @if (!$item->is_final)
+                                            <button type="button"
+                                                class="btn btn-link text-warning p-0 m-0 me-2 open-form-popup"
+                                                data-url="{{ route('poliklinik.pengkajian-lanjutan.edit', $item->id) }}"
+                                                title="Edit Form">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </button>
+                                        @endif
+
                                         {{-- Tombol Hapus dengan form --}}
                                         <form action="{{ route('poliklinik.pengkajian-lanjutan.destroy', $item->id) }}"
                                             method="POST" class="d-inline form-hapus">
@@ -72,77 +92,105 @@
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        @empty
+                            <div class="alert alert-info">
+                                Belum ada dokumen yang diisi untuk pasien ini.
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
         </div>
     @endif
 @endsection
+
 @section('plugin-erm')
-    <script script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            // Inisialisasi awal (jika ada)
             $('body').addClass('layout-composed');
             $('.select2').select2({
-                placeholder: 'Pilih Item',
+                placeholder: 'Pilih Form',
             });
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
-            // $('#doctor_id').select2({
-            //     placeholder: 'Pilih Dokter',
-            // });
 
+            // =========================================================
+            // FUNGSI UNTUK MEMBUKA POPUP JENDELA BARU
+            // =========================================================
+            function openPopupWindow(url, title = 'formWindow') {
+                // Get the screen dimensions
+                const screenWidth = window.screen.width;
+                const screenHeight = window.screen.height;
+
+                const popupWindow = window.open(
+                    url,
+                    title,
+                    `width=${screenWidth},height=${screenHeight},top=0,left=0,scrollbars=yes,resizable=yes,fullscreen=yes`
+                );
+
+                if (window.focus) {
+                    popupWindow.focus();
+                }
+                return popupWindow;
+            }
+
+            // =========================================================
+            // EVENT LISTENER UNTUK TOMBOL-TOMBOL
+            // =========================================================
+
+            // 1. Tombol "Tambah" Form Baru
             $('.tambah-form').on('click', function(e) {
                 e.preventDefault();
-
-                let idForm = $(this).closest('tr').find('select').val();
+                let selectElement = $(this).closest('tr').find('select');
+                let idForm = selectElement.val();
 
                 if (idForm) {
-                    // Panggil route yang sudah dienkripsi dari Blade
-                    let registrationId = "{{ $registration->id }}"; // Ambil registration ID dari Blade
+                    let registrationId = "{{ $registration->id ?? '' }}";
+                    if (!registrationId) {
+                        Swal.fire('Error', 'ID Registrasi tidak ditemukan.', 'error');
+                        return;
+                    }
+                    // Enkripsi ID form dengan Base64 di sisi client
+                    let encryptedId = btoa(idForm);
                     let url =
                         "{{ route('poliklinik.pengkajian-lanjutan.create', [':registrationId', ':encryptedId']) }}"
-                        .replace(':encryptedId', btoa(idForm)) // Enkripsi dengan Base64
-                        .replace(':registrationId', registrationId); // Tambahkan registration ID
+                        .replace(':registrationId', registrationId)
+                        .replace(':encryptedId', encryptedId);
 
-                    // Ukuran popup
-                    let popupWidth = 1200;
-                    let popupHeight = 600;
-
-                    // Hitung posisi tengah
-                    let screenWidth = window.screen.width;
-                    let screenHeight = window.screen.height;
-                    let left = (screenWidth - popupWidth) / 2;
-                    let top = (screenHeight - popupHeight) / 2.8;
-
-                    // Buka popup di tengah
-                    window.open(url, '_blank',
-                        `width=${popupWidth},height=${popupHeight},top=${top},left=${left}`);
+                    openPopupWindow(url, 'createFormWindow');
                 } else {
-                    alert('Silakan pilih departement terlebih dahulu.');
+                    Swal.fire('Perhatian', 'Silakan pilih jenis form terlebih dahulu.', 'warning');
                 }
             });
-        });
 
-        $('.form-hapus').on('submit', function(e) {
-            e.preventDefault();
-            var form = this;
-            Swal.fire({
-                title: 'Anda Yakin?',
-                text: "Data yang dihapus tidak dapat dikembalikan!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            })
+            // 2. Tombol "Lihat/Edit" dari Daftar Form yang Sudah Ada
+            $('.open-form-popup').on('click', function() {
+                const url = $(this).data('url');
+                openPopupWindow(url, 'viewEditFormWindow');
+            });
+
+            // 3. Tombol "Hapus" dengan konfirmasi Swal
+            $('.form-hapus').on('submit', function(e) {
+                e.preventDefault();
+                var form = this;
+                Swal.fire({
+                    title: 'Anda Yakin?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                })
+            });
         });
     </script>
 @endsection

@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Tambah Form Template')
+@section('title', 'Edit Form Template')
 @section('extended-css')
     <style>
         hr {
@@ -15,7 +15,8 @@
             width: 100% !important;
         }
     </style>
-    <style src="{{ asset('summernote-0.9.0/summernote-bs4.min.css') }}"></style>
+    {{-- Path untuk Summernote CSS --}}
+    <link href="{{ asset('summernote-0.9.0/summernote-bs4.min.css') }}" rel="stylesheet">
 @endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
@@ -24,32 +25,33 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Buat Formulir
+                            Edit Formulir: <strong>{{ $formTemplate->nama_form }}</strong>
                         </h2>
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content" id="filter-wrapper">
 
-                            <form action="#" method="POST" id="store-form">
+                            <form action="#" method="POST" id="update-form">
                                 @csrf
+                                {{-- Kita tidak perlu @method('PUT') karena menggunakan AJAX dengan POST --}}
                                 <div class="row">
-                                    {{-- Kolom Nama Formulir & Status tidak berubah --}}
                                     <div class="col-md-4 mb-3">
                                         <div class="form-group">
                                             <label for="nama_form" class="form-label">Nama Formulir</label>
                                             <input type="text" name="nama_form" id="nama_form" class="form-control"
-                                                required>
+                                                value="{{ old('nama_form', $formTemplate->nama_form) }}">
                                         </div>
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <div class="form-group">
                                             <label for="form_kategori_id" class="form-label">Kategori Formulir</label>
-                                            <select class="form-control" name="form_kategori_id" id="form_kategori_id"
-                                                required>
-                                                {{-- [UBAH] Tambahkan option kosong untuk placeholder --}}
-                                                <option></option>
+                                            <select class="form-control select2" name="form_kategori_id"
+                                                id="form_kategori_id">
                                                 @foreach ($kategori as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->nama_kategori }}</option>
+                                                    <option value="{{ $item->id }}"
+                                                        {{ old('form_kategori_id', $formTemplate->form_kategori_id) == $item->id ? 'selected' : '' }}>
+                                                        {{ $item->nama_kategori }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -57,20 +59,23 @@
                                     <div class="col-md-4 mb-3">
                                         <div class="form-group">
                                             <label for="is_active" class="form-label">Status</label>
-                                            <select class="form-control" name="is_active" id="is_active" required>
-                                                <option value="1">Aktif</option>
-                                                <option value="0">Tidak Aktif</option>
+                                            <select class="form-control select2" name="is_active" id="is_active">
+                                                <option value="1"
+                                                    {{ old('is_active', $formTemplate->is_active) == 1 ? 'selected' : '' }}>
+                                                    Aktif</option>
+                                                <option value="0"
+                                                    {{ old('is_active', $formTemplate->is_active) == 0 ? 'selected' : '' }}>
+                                                    Tidak Aktif</option>
                                             </select>
                                         </div>
                                     </div>
-                                    {{-- Sisa form tidak berubah --}}
                                     <div class="col-md-12 mb-3">
                                         <label for="summernote" class="form-label mb-2">Isi Formulir</label>
-                                        <textarea name="form_source" id="summernote" class="form-control" rows="10"></textarea>
+                                        <textarea name="form_source" id="summernote" class="form-control" rows="10">{{ old('form_source', $formTemplate->form_source) }}</textarea>
                                     </div>
                                     <div class="col-md-12">
                                         <button type="submit" class="btn btn-block mt-2 btn-primary">
-                                            <i class="fas fa-save mr-1"></i> Simpan
+                                            <i class="fas fa-save mr-1"></i> Update
                                         </button>
                                     </div>
                                 </div>
@@ -83,80 +88,61 @@
         </div>
     </main>
 @endsection
-
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    {{-- Path untuk Summernote JS --}}
     <script src="{{ asset('summernote-0.9.0/summernote-bs4.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-            // Inisialisasi untuk Kategori Formulir
-            $('#form_kategori_id').select2({
-                placeholder: "Pilih atau ketik kategori baru",
-                // Ini adalah kunci untuk mengaktifkan fitur select-or-create.
-                // Pengguna bisa memilih dari daftar atau mengetikkan nilai baru.
-                tags: true
-            });
-
-            // Inisialisasi untuk Status (tanpa tagging)
-            $('#is_active').select2({
-                placeholder: "Pilih status"
-            });
-
-            // Inisialisasi summernote
+            $('.select2').select2();
             $('#summernote').summernote({
-                height: 200,
-                toolbar: [
-                    ['style', ['style']],
-                    ['font', ['bold', 'italic', 'underline', 'clear']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['insert', ['link', 'table']],
-                    ['view', ['fullscreen', 'codeview']]
-                ]
+                height: 300 // Atur tinggi editor
             });
 
-            // Handler untuk submit form
-            $('#store-form').on('submit', function(e) {
+            $('#update-form').on('submit', function(e) {
                 e.preventDefault();
 
-                // Pastikan summernote mengupdate textarea sebelum serialisasi
-                $('#summernote').summernote('code');
-
                 var formData = $(this).serialize();
+                // Dapatkan ID dari data form template yang di-pass dari controller
+                var formId = "{{ $formTemplate->id }}";
 
                 $.ajax({
-                    url: '{{ route('api.form-builder.store') }}',
-                    type: 'POST',
+                    // ==========================================================
+                    // INI BAGIAN YANG DIPERBARUI
+                    // Sesuaikan URL dengan rute API Anda yang baru
+                    url: '/api/simrs/master-data/setup/form-builder/' + formId + '/update',
+                    // ==========================================================
+                    type: 'POST', // Menggunakan POST
                     data: formData,
                     beforeSend: function() {
-                        $('button[type="submit"]').prop('disabled', true).html(
-                            '<i class="fas fa-spinner fa-spin"></i> Menyimpan...');
+                        // Tambahkan loading state jika perlu
+                        // contoh: $('button[type="submit"]').prop('disabled', true);
                     },
                     success: function(response) {
-                        alert(response.message ||
-                            'Formulir berhasil disimpan!'); // Fallback message
-
-                        // Arahkan ke halaman daftar formulir
-                        window.location.href =
-                            '{{ route('master-data.setup.form-builder') }}';
+                        showSuccessAlert(response.message);
+                        // Redirect ke halaman index setelah berhasil
+                        setTimeout(() => {
+                            window.location.href =
+                                "{{ route('master-data.setup.form-builder') }}";
+                        }, 1000);
                     },
-                    error: function(xhr) {
-                        var errorMessages = 'Terjadi kesalahan:\n\n';
-                        if (xhr.status === 422) { // Error validasi
+                    error: function(xhr, status, error) {
+                        if (xhr.status === 422) {
                             var errors = xhr.responseJSON.errors;
+                            var errorMessages = '';
                             $.each(errors, function(key, value) {
-                                errorMessages += '- ' + value[0] + '\n';
+                                errorMessages += value + '\n';
                             });
-                        } else { // Error server lainnya
-                            errorMessages += xhr.responseJSON.message ||
-                                'Tidak dapat terhubung ke server.';
+                            showErrorAlert('Terjadi kesalahan validasi:\n' + errorMessages);
+                        } else {
+                            showErrorAlert('Terjadi kesalahan server: ' + error);
                         }
-                        alert(errorMessages);
                     },
                     complete: function() {
-                        $('button[type="submit"]').prop('disabled', false).html(
-                            '<i class="fas fa-save mr-1"></i> Simpan');
+                        // Hapus loading state
+                        // contoh: $('button[type="submit"]').prop('disabled', false);
                     }
                 });
             });
