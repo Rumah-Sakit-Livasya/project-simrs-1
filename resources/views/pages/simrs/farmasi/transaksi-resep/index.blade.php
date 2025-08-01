@@ -45,7 +45,8 @@
             // Set the default date for the datepicker
             $('#datepicker-1').daterangepicker({
                 opens: 'left',
-                startDate: moment(today).startOf('month').format('YYYY-MM-DD'),
+                // startDate: moment(today).startOf('month').format('YYYY-MM-DD'),
+                startDate: moment(today).format('YYYY-MM-DD'),
                 endDate: moment(today).format('YYYY-MM-DD'),
                 // timePicker: true, // Enable time selection
                 // timePicker24Hour: true, // 24-hour format

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Model;
 
 class FarmasiResepElektronik extends Model
@@ -9,4 +10,8 @@ class FarmasiResepElektronik extends Model
 
     protected $guarded = ['id'];
 
+    public function registration()
+    {
+        return $this->belongsTo(Registration::class, 'registration_id');
+    }
 }

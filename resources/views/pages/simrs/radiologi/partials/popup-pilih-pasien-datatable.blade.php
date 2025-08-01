@@ -15,7 +15,7 @@
         <div id="panel-1" class="panel">
             <div class="panel-hdr">
                 <h2>
-                    Daftar <span class="fw-300"><i>Order Radiologi</i></span>
+                    Daftar <span class="fw-300"><i>Registrasi Pasien</i></span>
                 </h2>
             </div>
             <div class="panel-container show">

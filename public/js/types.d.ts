@@ -131,10 +131,10 @@ interface Registration {
     deleted_at: string | null;
     created_at: string;
     updated_at: string;
-    penjamin: Penjamin;
-    patient: Patient;
-    doctor: Doctor;
-    departement: Departement;
+    penjamin?: Penjamin;
+    patient?: Patient;
+    doctor?: Doctor;
+    departement?: Departement;
 }
 
 interface Penjamin {
@@ -218,8 +218,8 @@ interface Doctor {
     deleted_at: string | null;
     created_at: string;
     updated_at: string;
-    employee: Employee;
-    department_from_doctors: DepartmentFromDoctors;
+    employee?: Employee;
+    department_from_doctors?: DepartmentFromDoctors;
 }
 
 interface Employee {

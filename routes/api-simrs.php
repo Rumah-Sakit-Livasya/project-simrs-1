@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\DietGiziController;
+use App\Http\Controllers\FarmasiResepController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
@@ -186,6 +187,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::get('/store', [DietGiziController::class, 'store'])->name('auto-diet.gizi.store');
             Route::put('/update/{id}/', [DietGiziController::class, 'update'])->name('auto-diet.gizi.update');
             Route::delete('/destroy/{id}/', [DietGiziController::class, 'destroy'])->name('auto-diet.gizi.destroy');
+        });
+    });
+
+    Route::prefix("farmasi")->group(function () {
+        Route::prefix("transaksi-resep")->group(function () {
+            Route::post("/store", [FarmasiResepController::class, 'store'])->name("farmasi.transaksi-resep.store");
+            Route::get('/obat/{gudang_id}', [ERMController::class, 'get_obat'])->name('farmasi.get-obat');
         });
     });
 

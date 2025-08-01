@@ -19,13 +19,13 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->softDeletes();
+            $table->dateTime('order_date');
             $table->foreignId('registration_id')->nullable()->constrained('registrations')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('otc_id')->nullable()->constrained('registration_otc')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('re_id')->nullable()->constrained('farmasi_resep_elektroniks')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('dokter_id')->constrained('employees')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('gudang_id')->constrained('warehouse_master_gudang')->onUpdate('cascade')->onDelete('cascade');
-            $table->dateTime('order_date');
             $table->string('kode_resep')->unique();
             $table->string('alamat')->nullable();
             $table->string('resep_manual')->nullable();

@@ -97,7 +97,7 @@
 <script>
     function pilihPasien(registration) {
         if(window.opener){
-            window.opener.postMessage({data: registration}, "*")
+            window.opener.postMessage({data: registration, type:"patient"}, "*")
         } else{
             alert("window.opener is not defined");
         }

@@ -800,7 +800,6 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get("popup/pilih-pasien/{poli}", [LaboratoriumController::class, 'popupPilihPasien'])->name('laboratorium.popup.pilih-pasien');
             Route::get('laporan-parameter-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}', [LaboratoriumController::class, 'reportParameterView'])->name('laboratorium.report-parameter.view');
             Route::get('laporan-pasien-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}/{parameter}', [LaboratoriumController::class, 'reportPatientView'])->name('laboratorium.report-patient.view');
-
         });
 
         Route::prefix('dokter')->group(function () {
@@ -827,7 +826,6 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get("/bulk-label/{order_ids}", [OrderGiziController::class, 'bulk_label'])->name('gizi.popup.bulk-label');
                 Route::get("/print-nota/{order_ids}", [OrderGiziController::class, 'print_nota'])->name('gizi.popup.print-nota');
                 Route::get("/edit/{order_ids}", [OrderGiziController::class, 'edit'])->name('gizi.popup.edit-order');
-
             });
 
             Route::prefix('reports')->group(function () {
@@ -843,13 +841,19 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('daftar-makanan', [MakananGiziController::class, 'index'])->name('gizi.master-data.daftar-makanan');
                 Route::get('daftar-menu', [MenuGiziController::class, 'index'])->name('gizi.master-data.daftar-menu');
                 Route::get('jam-makan', [JamMakanGiziController::class, 'index'])->name('gizi.master-data.jam-makan');
-
             });
         });
 
         Route::prefix('farmasi')->group(function () {
-            Route::get('transaksi-resep', [FarmasiResepController::class, 'index'])
-                ->name('farmasi.transaksi-resep');
+            Route::prefix('transaksi-resep')->group(function () {
+                Route::get('/', [FarmasiResepController::class, 'index'])->name('farmasi.transaksi-resep');
+                Route::get('/create', [FarmasiResepController::class, 'create'])->name('farmasi.transaksi-resep.create');
+                Route::get("popup/pilih-pasien/{poli}", [FarmasiResepController::class, 'popupPilihPasien'])->name('farmasi.transaksi-resep.popup.pilih-pasien');
+                Route::get("popup/pilih-dokter", [FarmasiResepController::class, 'popupPilihDokter'])->name('farmasi.transaksi-resep.popup.pilih-dokter');
+                Route::get("popup/resep-elektronik", [FarmasiResepController::class, 'popupResepElektronik'])->name('farmasi.transaksi-resep.popup.resep-elektronik');
+            });
+
+
 
             Route::get('retur-resep', [FarmasiController::class, 'returResep'])
                 ->name('farmasi.retur-resep');
