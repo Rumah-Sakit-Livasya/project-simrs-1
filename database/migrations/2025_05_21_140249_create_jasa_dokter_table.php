@@ -17,7 +17,7 @@ return new class extends Migration {
 
             // Informasi tindakan
             $table->string('nama_tindakan')->nullable();
-            $table->decimal('nominal', 15, 2);
+            // $table->decimal('nominal', 15, 2);
             $table->decimal('diskon', 15, 2)->default(0);
 
             // Pajak & hasil
