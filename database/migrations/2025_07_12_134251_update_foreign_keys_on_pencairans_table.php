@@ -9,19 +9,30 @@ class UpdateForeignKeysOnPencairansTable extends Migration
     public function up()
     {
         Schema::table('pencairans', function (Blueprint $table) {
-            // CUKUP langsung tambahkan foreign key
+            // Drop existing foreign key first
+            $table->dropForeign('pencairans_pengajuan_id_foreign');
+
+            // Re-add foreign key with restrict instead of cascade
             $table->foreign('pengajuan_id')
                 ->references('id')
-                ->on('pengajuans') // ✅ sesuai nama tabel asli
-                ->onDelete('cascade');
+                ->on('pengajuans')
+                ->onDelete('restrict')
+                ->name('fk_pencairans_pengajuan_id'); // Give unique constraint name
         });
     }
 
     public function down()
     {
         Schema::table('pencairans', function (Blueprint $table) {
-            // Drop foreign key jika ingin rollback
-            $table->dropForeign(['pengajuan_id']);
+            // Drop foreign key
+            $table->dropForeign('fk_pencairans_pengajuan_id');
+
+            // Restore original foreign key with cascade
+            $table->foreign('pengajuan_id')
+                ->references('id')
+                ->on('pengajuans')
+                ->onDelete('cascade')
+                ->name('fk_pencairans_pengajuan_id'); // Use same unique name
         });
     }
 }

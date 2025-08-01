@@ -16,9 +16,10 @@ return new class extends Migration
             $table->foreignId('grup_parameter_radiologi_id')->references('id')->on('grup_parameter_radiologi')->cascadeOnDelete();
             $table->foreignId('kategori_radiologi_id')->references('id')->on('kategori_radiologi')->cascadeOnDelete();
             $table->string('parameter');
-            $table->integer('kode')->unique();
+
             $table->boolean('is_reverse')->nullable();
             $table->boolean('is_kontras')->nullable();
+            $table->integer('kode')->unique();
             $table->softDeletes();
             $table->timestamps();
         });
