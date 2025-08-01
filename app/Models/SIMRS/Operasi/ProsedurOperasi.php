@@ -14,29 +14,14 @@ class ProsedurOperasi extends Model
 
     protected $table = 'prosedur_operasi';
 
-    protected $fillable = [
-        'order_operasi_id',
-        'tindakan_id',
-        'dokter_operator_id',
-        'ass_dokter_operator_id',
-        'dokter_anastesi_id',
-        'ass_dokter_anastesi_id',
-        'dokter_resusitator_id',
-        'dokter_tambahan_id',
-        'laporan_operasi',
-        'komplikasi',
-        'status',
-        'waktu_mulai',
-        'waktu_selesai',
-        'created_by',
-        'updated_by'
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'waktu_mulai' => 'datetime',
         'waktu_selesai' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'dokter_tambahan_ids' => 'array',
         'deleted_at' => 'datetime'
     ];
 

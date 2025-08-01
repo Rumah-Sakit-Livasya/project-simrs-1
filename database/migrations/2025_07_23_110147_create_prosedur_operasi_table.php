@@ -22,10 +22,6 @@ return new class extends Migration
             $table->foreignId('dokter_operator_id')
                 ->constrained('doctors');
 
-            $table->foreignId('ass_dokter_operator_id')
-                ->nullable()
-                ->constrained('doctors');
-
             $table->foreignId('dokter_anastesi_id')
                 ->nullable()
                 ->constrained('doctors');
@@ -43,9 +39,7 @@ return new class extends Migration
                 ->constrained('doctors');
 
             // Data operasi
-            $table->text('laporan_operasi');
             $table->text('komplikasi')->nullable();
-            $table->enum('status', ['rencana', 'berlangsung', 'selesai', 'batal'])->default('rencana');
 
             // Waktu operasi
             $table->timestamp('waktu_mulai')->nullable();
@@ -59,7 +53,6 @@ return new class extends Migration
             $table->timestamps();
 
             // Indexes untuk performance
-            $table->index(['order_operasi_id', 'status']);
             $table->index(['dokter_operator_id', 'waktu_mulai']);
         });
     }

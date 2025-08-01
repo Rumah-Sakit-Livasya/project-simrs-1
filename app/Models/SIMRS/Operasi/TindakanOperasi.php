@@ -21,4 +21,21 @@ class TindakanOperasi extends Model
     {
         return $this->belongsTo(KategoriOperasi::class, 'kategori_operasi_id');
     }
+
+    public function scopeByJenisOperasi($query, $jenisId)
+    {
+        return $query->where('jenis_operasi_id', $jenisId);
+    }
+
+    // Scope untuk filter berdasarkan kategori operasi
+    public function scopeByKategoriOperasi($query, $kategoriId)
+    {
+        return $query->where('kategori_operasi_id', $kategoriId);
+    }
+
+    // Accessor untuk nama lengkap
+    public function getNamaLengkapAttribute()
+    {
+        return $this->nama_operasi . ' (' . $this->kode_operasi . ')';
+    }
 }
