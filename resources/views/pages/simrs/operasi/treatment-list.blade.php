@@ -88,52 +88,16 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Tindakan</th>
-                                        <th>Dokter Operator</th>
-                                        <th>Waktu Mulai</th>
-                                        <th>Waktu Selesai</th>
+                                        <th>Tipe Operasi</th>
+                                        <th>Tipe Penggunaan</th>
+                                        <th>Dokter</th>
+                                        <th>Tgl. Tindakan</th>
+                                        <th>User Create</th>
                                         <th>Status</th>
-                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{-- Data akan diisi dari server-side atau client-side,
-                                         jika client-side, loop di sini. --}}
-                                    @foreach ($order->prosedurOperasi as $key => $prosedur)
-                                        <tr>
-                                            <td>{{ $key + 1 }}</td>
-                                            <td>{{ $prosedur->tindakanOperasi->nama_tindakan ?? 'N/A' }}</td>
-                                            <td>{{ $prosedur->dokterOperator->fullname ?? 'N/A' }}</td>
-                                            <td>{{ $prosedur->waktu_mulai ? \Carbon\Carbon::parse($prosedur->waktu_mulai)->format('d-m-Y H:i') : '-' }}
-                                            </td>
-                                            <td>{{ $prosedur->waktu_selesai ? \Carbon\Carbon::parse($prosedur->waktu_selesai)->format('d-m-Y H:i') : '-' }}
-                                            </td>
-                                            <td>
-                                                @php
-                                                    $statusClass = 'secondary';
-                                                    if ($prosedur->status == 'selesai') {
-                                                        $statusClass = 'success';
-                                                    }
-                                                    if ($prosedur->status == 'berlangsung') {
-                                                        $statusClass = 'info';
-                                                    }
-                                                    if ($prosedur->status == 'rencana') {
-                                                        $statusClass = 'warning';
-                                                    }
-                                                    if ($prosedur->status == 'batal') {
-                                                        $statusClass = 'danger';
-                                                    }
-                                                @endphp
-                                                <span
-                                                    class="badge badge-{{ $statusClass }}">{{ ucfirst($prosedur->status) }}</span>
-                                            </td>
-                                            <td>
-                                                <a href="#" class="btn btn-xs btn-icon btn-warning"
-                                                    title="Edit Tindakan"><i class="fal fa-edit"></i></a>
-                                                <a href="#" class="btn btn-xs btn-icon btn-danger"
-                                                    title="Hapus Tindakan"><i class="fal fa-trash-alt"></i></a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
+
                                 </tbody>
                             </table>
                         </div>
@@ -183,7 +147,7 @@
 
                 window.open(url, 'InputTindakanOperasi',
                     `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`
-                    );
+                );
             });
         });
     </script>

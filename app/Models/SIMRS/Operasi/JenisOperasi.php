@@ -14,4 +14,12 @@ class JenisOperasi extends Model
     {
         return $this->hasMany(TindakanOperasi::class, 'jenis_operasi_id');
     }
+
+    public function getKategoriOperasi()
+    {
+        return KategoriOperasi::whereIn(
+            'id',
+            $this->tindakanOperasi()->distinct()->pluck('kategori_operasi_id')
+        )->get();
+    }
 }

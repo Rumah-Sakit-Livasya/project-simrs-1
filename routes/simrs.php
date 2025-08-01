@@ -636,8 +636,11 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/prosedure/{orderId}', [OperasiController::class, 'prosedure'])->name('ok.prosedure');
             Route::get('/prosedur/{order}/create', [OperasiController::class, 'createProsedur'])->name('ok.prosedur.create');
             Route::post('/prosedur/store', [OperasiController::class, 'storeProsedur'])->name('ok.prosedur.store');
-            Route::get('/prosedur/get-jenis-by-kategori/{kategoriId}', [OperasiController::class, 'getJenisByKategori']);
-            Route::get('/prosedur/get-tindakan-by-jenis/{jenisId}', [OperasiController::class, 'getTindakanByJenis']);
+            Route::get('/prosedur/get-jenis-by-kategori/{kategoriId}', [OperasiController::class, 'getJenisByKategori'])->name('ok.prosedur.get-jenis-by-kategori');
+            Route::get('/prosedur/get-tindakan-by-jenis/{jenisId}', [OperasiController::class, 'getTindakanByJenis'])->name('ok.prosedur.get-tindakan-by-jenis');
+            // Tambahkan route ini di dalam group route operasi
+            Route::delete('/prosedur/{prosedurId}', [OperasiController::class, 'deleteProsedur'])->name('ok.prosedur.delete');
+
 
 
             Route::prefix('reports')->group(function () {

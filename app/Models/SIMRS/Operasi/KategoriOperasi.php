@@ -16,4 +16,13 @@ class KategoriOperasi extends Model
     {
         return $this->hasMany(TindakanOperasi::class, 'kategori_operasi_id');
     }
+
+    public function jenisOperasi()
+    {
+        return $this->belongsTo(JenisOperasi::class, 'jenis_operasi_id');
+    }
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('urutan');
+    }
 }
