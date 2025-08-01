@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('kelas_rawat_id')->constrained('kelas_rawat')->onDelete('cascade');
             $table->foreignId('group_penjamin_id')->constrained('group_penjamin')->onDelete('cascade');
             $table->foreignId('persalinan_id')->constrained('daftar_persalinan')->onDelete('cascade');
+            // $table->foreignId('persalinan_id')->constrained('persalinan')->onDelete('cascade');
 
             // Operator
             $table->decimal('operator_dokter', 15, 2)->default(0);

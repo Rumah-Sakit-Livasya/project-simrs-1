@@ -470,6 +470,100 @@
                 </div>
             </div>
         </div>
+        {{-- START: Daftar Pegawai yang Telat --}}
+        <div class="row mt-4">
+            <div class="col-xl-12">
+                <div id="panel-late" class="panel">
+                    <div class="panel-hdr">
+                        <h2>
+                            Daftar Pegawai yang Telat
+                        </h2>
+                    </div>
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <div class="table-responsive">
+                                <table id="dt-late-in" class="table table-bordered table-hover table-striped w-100">
+                                    <thead>
+                                        <tr>
+                                            <th style="white-space: nowrap">Nama</th>
+                                            <th style="white-space: nowrap">Tanggal</th>
+                                            <th style="white-space: nowrap">Shift</th>
+                                            <th style="white-space: nowrap">Time In</th>
+                                            <th style="white-space: nowrap">Clock In</th>
+                                            <th style="white-space: nowrap">Keterlambatan (Menit)</th>
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
+                                                <th style="white-space: nowrap">Action</th>
+                                            @endif
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($attendance_today as $row)
+                                            @if ($row->clock_in && $row->late_clock_in)
+                                                <tr>
+                                                    <td style="white-space: nowrap">
+                                                        <a href="{{ route('monitoring.attendances.show', $row->employee_id) }}"
+                                                            class="link_nama">
+                                                            {{ $row->employees->fullname }}
+                                                        </a>
+                                                    </td>
+                                                    <td style="white-space: nowrap">
+                                                        {{ \Carbon\Carbon::parse($row->date)->translatedFormat('D, j M Y') }}
+                                                    </td>
+                                                    <td style="white-space: nowrap">
+                                                        <span
+                                                            class="badge {{ in_array(optional($row->shift)->name, ['dayoff', 'National Holiday']) ? 'badge-danger' : 'badge-secondary' }} badge-pill">
+                                                            {{ optional($row->shift)->name ?? '-' }}
+                                                        </span>
+                                                    </td>
+                                                    <td style="white-space: nowrap">
+                                                        {{ optional($row->shift)->time_in ?? '-' }}
+                                                    </td>
+                                                    <td style="white-space: nowrap" class="text-danger">
+                                                        {{ \Carbon\Carbon::parse($row->clock_in)->format('H:i') }}
+                                                    </td>
+                                                    <td style="white-space: nowrap" class="text-danger">
+                                                        {{ $row->late_clock_in }} Menit
+                                                    </td>
+                                                    @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
+                                                        <td>
+                                                            <a href="#" data-backdrop="static"
+                                                                data-keyboard="false"
+                                                                class="badge mx-1 badge-success p-2 border-0 text-white btn-edit"
+                                                                data-id="{{ $row->id }}" title="Edit Absensi">
+                                                                <span class="fal fa-pencil ikon-edit"></span>
+                                                                <div class="span spinner-text d-none">
+                                                                    <span class="spinner-border spinner-border-sm"
+                                                                        role="status" aria-hidden="true"></span>
+                                                                    Loading...
+                                                                </div>
+                                                            </a>
+                                                        </td>
+                                                    @endif
+                                                </tr>
+                                            @endif
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th style="white-space: nowrap">Nama</th>
+                                            <th style="white-space: nowrap">Tanggal</th>
+                                            <th style="white-space: nowrap">Shift</th>
+                                            <th style="white-space: nowrap">Time In</th>
+                                            <th style="white-space: nowrap">Clock In</th>
+                                            <th style="white-space: nowrap">Keterlambatan (Menit)</th>
+                                            @if (auth()->user()->hasRole('super admin') || auth()->user()->can('monitoring edit absensi'))
+                                                <th style="white-space: nowrap">Action</th>
+                                            @endif
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{-- END: Daftar Pegawai yang Telat --}}
         @if (auth()->user()->hasRole('super admin') ||
                 auth()->user()->can('monitoring edit absensi') ||
                 auth()->user()->can('monitoring detail absensi'))
@@ -706,7 +800,7 @@
                                 const map = L.map(mapElement).setView([0, 0], 13);
                                 L.tileLayer(
                                     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                     }).addTo(map);
 
                                 // Set view to actual coordinates after the map is added to the DOM

@@ -11,9 +11,14 @@
             <ul>
                 @foreach ($registrations as $registration)
                     @php
+                        $menu = request('menu');
+                        if (!$menu) {
+                            $menu = $path === 'igd' ? 'triage' : 'pengkajian_perawat';
+                        }
+
                         $query = http_build_query([
                             'registration' => $registration->registration_number,
-                            'menu' => request('menu') ?? $path === 'igd' ? 'triage' : 'pengkajian_perawat',
+                            'menu' => $menu,
                         ]);
                     @endphp
                     @if ($path === 'igd')

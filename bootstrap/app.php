@@ -24,6 +24,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.api' => \App\Http\Middleware\AuthenticatedApi::class,
         ]);
     })
+    // >>>>> PENAMBAHAN DIMULAI DI SINI <<<<<
+    ->withProviders([
+        // Daftarkan provider Anda yang lain di sini jika perlu,
+        // tapi untuk kasus ini, kita hanya butuh BroadcastServiceProvider.
+        App\Providers\BroadcastServiceProvider::class,
+    ])
+    // >>>>> PENAMBAHAN SELESAI DI SINI <<<<<
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

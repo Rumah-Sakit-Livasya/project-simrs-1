@@ -57,11 +57,13 @@ use App\Http\Controllers\SIMRS\Operasi\TipeOperasiController;
 use App\Http\Controllers\SIMRS\RegistrationController;
 use App\Http\Controllers\SIMRS\PatientController;
 use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
+use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
+use App\Http\Controllers\SIMRS\UtilityController;
 use App\Http\Controllers\SIMRS\Procurement\ApprovalPOController;
 use App\Http\Controllers\SIMRS\Procurement\ApprovalPRController;
 use App\Http\Controllers\SIMRS\Procurement\PurchaseOrderController;
@@ -148,6 +150,9 @@ Route::group(['middleware' => ['auth']], function () {
     // Patient search endpoint
     Route::get('/search-patients', [PatientController::class, 'search'])
         ->name('patients.search');
+
+    Route::get('/utility/signature-pad', [UtilityController::class, 'showSignaturePad'])->name('utility.signature.pad');
+
 
     // Get bed availability data
     Route::get('/beds/get-data', [RegistrationController::class, 'getDataBed'])
@@ -330,6 +335,10 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/form-builder/tambah', [FormBuilderController::class, 'create'])
                     ->name('master-data.setup.form-builder.tambah');
 
+                // Route baru untuk menampilkan halaman edit
+                Route::get('/form-builder/{id}/edit', [FormBuilderController::class, 'edit'])
+                    ->name('master-data.setup.form-builder.edit');
+
                 // Ethnicity management
                 Route::prefix('ethnics')->group(function () {
                     Route::get('/', [EthnicController::class, 'index'])
@@ -436,11 +445,8 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
         Route::prefix('poliklinik')->group(function () {
-            Route::get('/daftar-pasien', [ERMController::class, 'catatanMedis'])
-                ->name('poliklinik.daftar-pasien');
-
-            Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])
-                ->name('poliklinik.pengkajian-lanjutan.show');
+            Route::get('/daftar-pasien', [ERMController::class, 'catatanMedis'])->name('poliklinik.daftar-pasien');
+            Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
         });
 
         Route::prefix('farmasi')->group(function () {
@@ -1013,7 +1019,6 @@ Route::group(['middleware' => ['auth']], function () {
         //     });
         // });
 
-
         /*
         |--------------------------------------------------------------------------
         | BPJS Routes
@@ -1045,121 +1050,44 @@ Route::group(['middleware' => ['auth']], function () {
             });
         });
 
+        // Route::prefix('kasir')->group(function() {
+        //     Route::get('tagihan-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
+        //     Route::get('transaksi-non-pasien', [KasirController::class, 'index'])->name('laboratorium.list-order');
+        //     Route::get('setoran-kasir', [KasirController::class, 'index'])->name('laboratorium.list-order');
+        //     Route::prefix('reports')->group(function() {
+        //     Route::get('penerimaan-kasir', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
+        //     Route::get('rekap-penerimaan-kasir', [KasirController::class, 'pasienPerPemeriksaan'])->name('laboratorium.psdirn-per-permintaan');
+        //     Route::get('laboratorium', [KasirController::class, 'parametrPemeriksaan'])->name('laboratorium.parameter-pemeriksaan');
+        //     });
+        //     Route::get('simulasi-harga', [IGDController::class, 'simulasiHarga'])->name('laboratorium.simulasi-harga');
+        // });
+
         Route::prefix('kepustakaan')->group(function () {
-            Route::get('/list', [KepustakaanController::class, 'index'])
-                ->name('kepustakaan.index');
-
-            Route::get('/{id}', [KepustakaanController::class, 'showFolder'])
-                ->name('kepustakaan.folder');
-
-            Route::get('/download/{id}', [KepustakaanController::class, 'downloadFile'])
-                ->name('kepustakaan.download');
+            Route::get('/list', [KepustakaanController::class, 'index'])->name('kepustakaan.index');
+            Route::get('/{id}', [KepustakaanController::class, 'showFolder'])->name('kepustakaan.folder');
+            Route::get('/download/{id}', [KepustakaanController::class, 'downloadFile'])->name('kepustakaan.download');
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Kasir Routes
-        |--------------------------------------------------------------------------
-        |
-        | Group of routes for the "kasir" section of the SIMRS application.
-        | Includes billing operations, patient charges, down payments, and receipts.
-        |
-        */
+
         Route::prefix('kasir')->group(function () {
-            /*
-            |--------------------------------------------------------------------------
-            | Tagihan Pasien Routes
-            |--------------------------------------------------------------------------
-            |
-            | Routes for managing patient billing.
-            | Includes listing, storing, viewing details, updating, and deleting bills.
-            |
-            */
-            Route::prefix('tagihan-pasien')->group(function () {
-                Route::get('/', [TagihanPasienController::class, 'index'])
-                    ->name('tagihan.pasien.index');
-
-                Route::post('/', [TagihanPasienController::class, 'store'])
-                    ->name('tagihan.pasien.store');
-
-                Route::get('/{id}', [TagihanPasienController::class, 'detailTagihan'])
-                    ->name('tagihan.pasien.detail');
-
-                Route::delete('/{id}', [TagihanPasienController::class, 'destroyTagihan'])
-                    ->name('tagihan.pasien.destroy');
-
-                Route::get('/{id}/tarif', [TagihanPasienController::class, 'getTarifShare']);
-                Route::get('/data/{id}', [TagihanPasienController::class, 'getData'])
-                    ->name('tagihan.pasien.data');
-
-                Route::post('/search', [TagihanPasienController::class, 'index'])
-                    ->name('tagihan.pasien.search');
-
-                Route::put('/update-disc/{id}', [TagihanPasienController::class, 'updateDisc'])
-                    ->name('tagihan.pasien.diskon');
-
-                Route::put('/update/{id}', [TagihanPasienController::class, 'updateTagihan'])
-                    ->name('tagihan.pasien.update');
-            });
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Bilingan Routes
-            |--------------------------------------------------------------------------
-            |
-            | Routes for handling billing confirmations (bilingan).
-            | Includes fetching data and updating billing status.
-            |
-            */
-            Route::prefix('bilingan')->group(function () {
-                Route::get('/data/{id}/', [BilinganController::class, 'getData'])
-                    ->name('bilingan.pasien.data');
-
-                Route::put('/update-status/{id}', [BilinganController::class, 'updateBilinganStatus'])
-                    ->name('bilingan.update.status');
-            });
-
-            /*
-            |--------------------------------------------------------------------------
-            | Down Payment Routes
-            |--------------------------------------------------------------------------
-            |
-            | Routes for managing down payments.
-            | Includes storing, retrieving, and deleting down payment entries.
-            |
-            */
-            Route::prefix('down-payment')->group(function () {
-                Route::get('/data/{id}', [BilinganController::class, 'getDownPaymentData'])
-                    ->name('down.payment.data');
-
-                Route::post('/', [BilinganController::class, 'storeDownPayment'])
-                    ->name('down.payment.store');
-
-                Route::delete('/{id}', [BilinganController::class, 'destroyDownPayment'])
-                    ->name('down.payment.destroy');
-            });
-
-            /*
-            |--------------------------------------------------------------------------
-            | Other Billing Utility Routes
-            |--------------------------------------------------------------------------
-            |
-            | Additional routes for patient billing utilities such as
-            | fetching initial bill amount, processing payment, and printing documents.
-            |
-            */
-            Route::get('/get-nominal-awal/{id}', [TagihanPasienController::class, 'getNominalAwal'])
-                ->name('tagihan.pasien.get.nominal');
-
-            Route::post('/pembayaran-tagihan', [BilinganController::class, 'storePembayaranTagihan'])
-                ->name('pembayaran.tagihan.store');
-
-            Route::get('/print-bill/{id}', [BilinganController::class, 'printBill'])
-                ->name('print.bill');
-
-            Route::get('/print-kwitansi/{id}', [BilinganController::class, 'printKwitansi'])
-                ->name('print.kwitansi');
+            Route::get('/tagihan-pasien', [TagihanPasienController::class, 'index'])->name('tagihan.pasien.index');
+            Route::post('/tagihan-pasien/search', [TagihanPasienController::class, 'index'])->name('tagihan.pasien.search');
+            Route::put('/tagihan-pasien/update-disc/{id}', [TagihanPasienController::class, 'updateDisc'])->name('tagihan.pasien.diskon');
+            Route::post('/tagihan-pasien', [TagihanPasienController::class, 'store'])->name('tagihan.pasien.store');
+            Route::get('/get-nominal-awal/{id}', [TagihanPasienController::class, 'getNominalAwal'])->name('tagihan.pasien.get.nominal');
+            Route::get('/tagihan-pasien/{id}', [TagihanPasienController::class, 'detailTagihan'])->name('tagihan.pasien.detail');
+            Route::delete('/tagihan-pasien/{id}', [TagihanPasienController::class, 'destroyTagihan'])->name('tagihan.pasien.destroy');
+            Route::get('/tagihan-pasien/data/{id}', [TagihanPasienController::class, 'getData'])->name('tagihan.pasien.data');
+            Route::put('/tagihan-pasien/update/{id}', [TagihanPasienController::class, 'updateTagihan'])->name('tagihan.pasien.update');
+            Route::get('/bilingan/data/{id}/', [BilinganController::class, 'getData'])->name('bilingan.pasien.data');
+            Route::put('/bilingan/update-status/{id}', [BilinganController::class, 'updateBilinganStatus'])->name('bilingan.update.status');
+            Route::get('/down-payment/data/{id}', [BilinganController::class, 'getDownPaymentData'])->name('down.payment.data');
+            Route::post('/down-payment', [BilinganController::class, 'storeDownPayment'])->name('down.payment.store');
+            Route::delete('/down-payment/{id}', [BilinganController::class, 'destroyDownPayment'])->name('down.payment.destroy');
+            Route::post('/pembayaran-tagihan', [BilinganController::class, 'storePembayaranTagihan'])->name('pembayaran.tagihan.store');
+            Route::get('/print-bill/{id}', [BilinganController::class, 'printBill'])->name('print.bill');
+            Route::get('/print-kwitansi/{id}', [BilinganController::class, 'printKwitansi'])->name('print.kwitansi');
+            Route::get('/tagihan-pasien/{id}/tarif', [TagihanPasienController::class, 'getTarifShare']);
         });
 
         Route::prefix('operasi')->group(function () {

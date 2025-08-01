@@ -91,6 +91,7 @@
                                         <thead>
                                             <tr>
                                                 <th style="white-space: nowrap">No</th>
+                                                <th style="white-space: nowrap">NIP</th>
                                                 <th style="white-space: nowrap">employee</th>
                                                 <th style="white-space: nowrap">Basic Salary</th>
                                                 <th style="white-space: nowrap">Allowance</th>
@@ -104,6 +105,7 @@
                                             @foreach ($payrolls as $payroll)
                                                 <tr>
                                                     <td>{{ $loop->iteration }}</td>
+                                                    <td>{{ $payroll->employee->employee_code }}</td>
                                                     <td>
                                                         <div class="row">
                                                             <div class="col-2">

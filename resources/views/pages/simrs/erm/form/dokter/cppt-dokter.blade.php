@@ -76,19 +76,19 @@
                                                     </div>
                                                     <div class="card-body p-0">
                                                         <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="4"
-                                                            placeholder="Keluhan Utama">Alergi obat : 
-Reaksi alergi obat : 
+                                                            placeholder="Keluhan Utama">Alergi obat :
+Reaksi alergi obat :
 Keluhan Utama : KONSULTASI
 PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-DI PUSKESMAS JATITUJUH 
+DI PUSKESMAS JATITUJUH
 Riwayat Penyakit Sekarang : KONSULTASI
 PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-DI PUSKESMAS JATITUJUH 
+DI PUSKESMAS JATITUJUH
 Riwayat Penyakit Dahulu : TIDAK ADA
 Riwayat Penyakit Keluarga : TIDAK ADA
-Alergi makan : 
-Reaksi alergi makan : 
-Alergi lainya : 
+Alergi makan :
+Reaksi alergi makan :
+Alergi lainya :
 Reaksi alergi lainya : </textarea>
                                                     </div>
                                                 </div>
@@ -101,12 +101,12 @@ Reaksi alergi lainya : </textarea>
                                                         <span>Objective</span>
                                                     </div>
                                                     <div class="card-body p-0">
-                                                        <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">Nadi (PR): 
-Respirasi (RR): 
-Tensi (BP): 
-Suhu (T): 
-Tinggi Badan: 
-Berat Badan: 
+                                                        <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">Nadi (PR):
+Respirasi (RR):
+Tensi (BP):
+Suhu (T):
+Tinggi Badan:
+Berat Badan:
 Skrining Nyeri:
                                                             </textarea>
                                                     </div>
@@ -249,6 +249,27 @@ Skrining Nyeri:
                                                 </div>
                                             </div>
                                         </div>
+
+                                        @include('pages.simrs.erm.partials.signature-field', [
+                                            'judul' => 'Dokter,',
+                                            'pic' => auth()->user()->employee->fullname,
+                                            'role' => 'dokter',
+                                            'prefix' => 'cppt_dokter', // Berikan prefix unik
+                                            'signature_model' => $pengkajian?->signature, // Kirim model data tanda tangan yang relevan
+                                        ])
+
+
+                                        <!-- Action Buttons -->
+                                        <div class="d-flex justify-content-between mt-4">
+                                            <button type="button" class="btn btn-outline-secondary" id="tutup">
+                                                <span class="mdi mdi-arrow-up-bold-circle-outline"></span> Tutup
+                                            </button>
+                                            <button type="submit" class="btn btn-primary btn-saves-soap" id="bsSOAP"
+                                                name="save">
+                                                <span class="mdi mdi-content-save"></span> Simpan
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
 
                                 <div class="row">

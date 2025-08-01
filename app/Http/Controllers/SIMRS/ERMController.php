@@ -17,6 +17,7 @@ use App\Models\SIMRS\OrderTindakanMedis;
 use App\Models\SIMRS\Pelayanan\RujukAntarRS;
 use App\Models\SIMRS\Pelayanan\Triage;
 use App\Models\SIMRS\Pengkajian\FormKategori;
+use App\Models\SIMRS\Pengkajian\FormTemplate;
 use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
@@ -30,8 +31,11 @@ use App\Models\StoredBarangFarmasi;
 use App\Models\WarehouseBarangFarmasi;
 use App\Models\WarehouseMasterGudang;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
 
 class ERMController extends Controller
 {

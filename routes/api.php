@@ -44,6 +44,9 @@ use App\Models\AttendanceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\EmployeeLeaveController;
+use App\Http\Controllers\API\PesanController;
+use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\WhatsappController;
 
 /*
 |--------------------------------------------------------------------------
@@ -350,7 +353,12 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
 
 Route::get('/tts', [TextToSpeechController::class, 'tts'])->name('tts');
 Route::post('livasya-message', [BotMessageController::class, 'livasyaMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.verified');
+
 Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');
+
+Route::post('/whatsapp/process-message', [WhatsappController::class, 'processMessage']);
+Route::post('/whatsapp/confirm-sent', [WhatsappController::class, 'confirmSent'])->name('whatsapp.confirmSent');
+
 Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])->middleware(CheckAuthorizationBot::class);
 // Route::get('notify-contract', [BotMessageController::class, 'notifyExpiryContract']);
 
@@ -361,6 +369,7 @@ Route::apiResource('events', EventController::class);
 Route::get('/employee-birthdays', [EventController::class, 'getEmployeeBirthdays']);
 
 Route::get('/employee-leaves/{id}', [AttendanceController::class, 'getDayOffs']);
+Route::post('/webhook/whatsapp', [WebhookController::class, 'handleWhatsapp']);
 
 
 Route::prefix('api')->group(function () {
