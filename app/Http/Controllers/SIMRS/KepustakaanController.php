@@ -463,43 +463,52 @@ class KepustakaanController extends Controller
     //     ));
     // }
 
+    // app/Http-v2025/Controllers/SIMRS/KepustakaanController.php
+
     public function laporanDashboard(Request $request)
     {
         $selectedYear = (int) $request->input('year', Carbon::now()->year);
         $selectedMonth = (int) $request->input('month', Carbon::now()->month);
 
-        // $organizations = Organization::where('is_active', 1)->orderBy('name', 'asc')->get();
-        $organizations = Organization::orderBy('name', 'asc')->get();
+        // 1. Ambil organisasi yang sudah terurut (tidak ada perubahan di sini)
+        $orderedOrganizations = Organization::getAllOrderedByHierarchy();
 
-        // UPDATE: Gunakan kolom 'year' dan 'month' untuk filter
-        $submittedOrganizationIds = Kepustakaan::where('kategori', 'Laporan')
+        // --- PERUBAHAN UTAMA ADA DI SINI ---
+        // 2. Filter koleksi untuk mengecualikan nama 'FITBOSS' dan 'PT'
+        // Kita gunakan `->filter()` dari Laravel Collection.
+        // Define excluded organization names in an array for easy maintenance
+        $excludedNames = [
+            'fitboss',
+            'pt',
+            'driver',
+        ];
+
+        $filteredOrganizations = $orderedOrganizations->filter(function ($org) use ($excludedNames) {
+            $lowerCaseName = strtolower($org['name']);
+            return !in_array($lowerCaseName, $excludedNames);
+        });
+        // Ambil hanya ID dari organisasi yang SUDAH DIFILTER
+        $organizationIdsInOrder = $filteredOrganizations->pluck('id')->toArray();
+
+        // 3. Filter laporan (tidak ada perubahan di sini, tapi sekarang menggunakan ID yang sudah difilter)
+        $submissions = Kepustakaan::where('kategori', 'Laporan')
             ->where('type', 'file')
-            ->where('year', $selectedYear)   // <-- Ganti dari whereYear()
-            ->where('month', $selectedMonth) // <-- Ganti dari whereMonth()
-            ->whereNotNull('organization_id')
-            ->pluck('organization_id')
-            ->unique()
-            ->toArray();
+            ->where('year', $selectedYear)
+            ->where('month', $selectedMonth)
+            ->whereIn('organization_id', $organizationIdsInOrder)
+            ->latest('created_at')
+            ->get()
+            ->keyBy('organization_id');
 
-        // ... (sisa logika sama, tapi query di bawah juga diubah) ...
+        // 4. Bangun reportStatus berdasarkan organisasi yang SUDAH DIFILTER
         $reportStatus = [];
-        foreach ($organizations as $org) {
-            $status = in_array($org->id, $submittedOrganizationIds);
-            $submissionData = null;
-
-            if ($status) {
-                // UPDATE: Gunakan 'year' dan 'month' juga di sini
-                $submissionData = Kepustakaan::where('organization_id', $org->id)
-                    ->where('kategori', 'Laporan')
-                    ->where('type', 'file')
-                    ->where('year', $selectedYear)   // <-- Ganti
-                    ->where('month', $selectedMonth) // <-- Ganti
-                    ->latest('created_at')
-                    ->first();
-            }
+        // Loop melalui koleksi organisasi yang SUDAH DIFILTER
+        foreach ($filteredOrganizations as $org) {
+            $submissionData = $submissions->get($org['id']);
+            $status = !is_null($submissionData);
 
             $reportStatus[] = [
-                'organization_name' => $org->name,
+                'organization_name' => $org['prefixed_name'],
                 'status' => $status,
                 'submission' => $submissionData,
             ];
