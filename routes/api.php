@@ -37,6 +37,7 @@ use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
 use App\Http\Controllers\Keuangan\CategoryController;
+use App\Http\Controllers\Keuangan\ChartOfAccountController;
 use App\Http\Controllers\SIMRS\TextToSpeech\TextToSpeechController;
 use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\AttendanceRequest;
@@ -350,7 +351,6 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
     Route::get('user/getByName', [UserController::class, 'getByName'])->name('user.getByName');
 });
 
-
 Route::get('/tts', [TextToSpeechController::class, 'tts'])->name('tts');
 Route::post('livasya-message', [BotMessageController::class, 'livasyaMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.verified');
 
@@ -370,5 +370,13 @@ Route::get('/employee-birthdays', [EventController::class, 'getEmployeeBirthdays
 
 Route::get('/employee-leaves/{id}', [AttendanceController::class, 'getDayOffs']);
 Route::post('/webhook/whatsapp', [WebhookController::class, 'handleWhatsapp']);
+
+
+Route::prefix('api')->group(function () {
+    Route::get('/coa/group/{group_id}', [ChartOfAccountController::class, 'getByGroup'])->name('coa.byGroup');
+    Route::get('/coa/{coa:id}', [ChartOfAccountController::class, 'show'])->name('coa.show');
+
+    Route::get('/coa/parents', [ChartOfAccountController::class, 'getParents'])->name('coa.parents');
+});
 
 require __DIR__ . '/api-simrs.php';

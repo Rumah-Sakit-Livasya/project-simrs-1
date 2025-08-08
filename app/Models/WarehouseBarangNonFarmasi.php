@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+
+class WarehouseBarangNonFarmasi extends Model implements AuditableContract
+{
+    use Auditable, SoftDeletes;
+    protected $table = "warehouse_barang_non_farmasi";
+    protected $guarded = ["id"];
+
+    public function satuan()
+    {
+        return $this->belongsTo(WarehouseSatuanBarang::class, "satuan_id", "id");
+    }
+
+    public function kategori()
+    {
+        return $this->belongsTo(WarehouseKategoriBarang::class, "kategori_id", "id");
+    }
+
+    public function golongan()
+    {
+        return $this->belongsTo(WarehouseGolonganBarang::class, "golongan_id", "id");
+    }
+
+    public function kelompok()
+    {
+        return $this->belongsTo(WarehouseKelompokBarang::class, "kelompok_id", "id");
+    }
+
+    public function satuan_tambahan()
+    {
+        return $this->hasMany(WarehouseSatuanTambahanBarangNonFarmasi::class, "barang_id", "id");
+    }
+
+    public function smms()
+    {
+        return $this->hasMany(WarehouseSetupMinMaxStock::class, "barang_nf_id", "id");
+    }
+
+    public function pr_non_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseRequestNonPharmacyItems::class, "barang_id", "id");
+    }
+
+    public function po_non_pharmacy()
+    {
+        return $this->hasMany(ProcurementPurchaseOrderNonPharmacyItems::class, "barang_id", "id");
+    }
+
+    public function pb_non_pharmacy()
+    {
+        return $this->hasMany(WarehousePenerimaanBarangNonFarmasiItems::class, "barang_id", "id");
+    }
+
+    public function sr_non_pharmacy()
+    {
+        return $this->hasMany(WarehouseStockRequestNonPharmacyItems::class, "barang_id", "id");
+    }
+
+    public function db_pharmacy()
+    {
+        return $this->hasMany(WarehouseDistribusiBarangNonFarmasiItems::class, "barang_id", "id");
+    }
+
+    public function stock_adjustment()
+    {
+        return $this->hasMany(WarehouseStockAdjustment::class, "barang_nf_id", "id");
+    }
+
+    public function stored_items()
+    {
+        return $this->hasManyThrough(StoredBarangNonFarmasi::class, WarehousePenerimaanBarangNonFarmasiItems::class, "barang_id", "pbi_id");
+    }
+
+    public function getGudangsAttribute()
+    {
+        return $this->pb_non_pharmacy
+            ->flatMap(function ($pbi) {
+                return $pbi->stored_items->map(function ($item) {
+                    return $item->gudang;
+                });
+            })
+            ->unique('id') // Optional: avoid duplicates
+            ->values();
+    }
+}

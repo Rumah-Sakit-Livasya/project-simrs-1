@@ -18,10 +18,7 @@ class OrderLaboratorium extends Model
     use SoftDeletes;
 
     protected $guarded = [
-        'id',
-        'deleted_at',
-        'created_at',
-        'updated_at'
+        'id'
     ];
 
     public function registration_otc()

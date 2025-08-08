@@ -1,4 +1,5 @@
-<div class="modal fade edit-modal" id="editModal{{ $menu->id }}" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+<div class="modal fade edit-modal" id="editModal{{ $menu->id }}" tabindex="-1" aria-labelledby="addModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <form action="{{ route('menu.gizi.update', ['id' => $menu->id]) }}" method="POST">
@@ -42,6 +43,21 @@
                                         Non Aktif
                                     </label>
                                 </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Kategori</td>
+                            <td>:</td>
+                            <td>
+                                <select class="select2 form-control w-100" name="kategori_id">
+                                    <option value=""></option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}" {{ $category->id == $menu->kategori_id ? 'selected' : '' }}>
+                                            {{ $category->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </td>
                         </tr>
 
@@ -121,6 +137,7 @@
     // on document ready
     // use vanilla js
     document.addEventListener('DOMContentLoaded', function() {
-        window["handler_#editModal" + {{ $menu->id }}] = new ModalMenuGiziHandler("#editModal" + {{ $menu->id }});
+        window["handler_#editModal" + {{ $menu->id }}] = new ModalMenuGiziHandler("#editModal" +
+            {{ $menu->id }});
     });
 </script>

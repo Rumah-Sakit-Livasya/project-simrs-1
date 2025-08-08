@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KategoriGizi;
 use App\Models\MakananGizi;
 use App\Models\MakananMenuGizi;
 use App\Models\MenuGizi;
@@ -30,7 +31,8 @@ class MenuGiziController extends Controller
 
         return view('pages.simrs.gizi.menu', [
             'menus' => $result,
-            'foods' => MakananGizi::all()
+            'foods' => MakananGizi::all(),
+            'categories' => KategoriGizi::all()
         ]);
     }
 
@@ -51,6 +53,7 @@ class MenuGiziController extends Controller
             'nama' => 'required|string|max:255',
             'aktif' => 'required|boolean',
             'harga' => 'required|integer',
+            'kategori_id' => 'required|integer',
             'foods_status' => 'required|array',
             'foods_status.*' => 'required|boolean',
             'foods_id' => 'required|array',
@@ -95,6 +98,7 @@ class MenuGiziController extends Controller
             'nama' => 'required|string|max:255',
             'aktif' => 'required|boolean',
             'harga' => 'required|integer',
+            'kategori_id' => 'required|integer',
             'foods_status' => 'required|array',
             'foods_status.*' => 'required|boolean',
             'foods_id' => 'required|array',

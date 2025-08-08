@@ -131,6 +131,7 @@
             width: 18.7%;
         }
     </style>
+
 @endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">

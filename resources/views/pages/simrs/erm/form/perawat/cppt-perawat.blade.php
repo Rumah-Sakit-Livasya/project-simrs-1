@@ -150,6 +150,8 @@ Terapi / Tindakan :
                                             'judul' => 'Perawat,',
                                             'pic' => auth()->user()->employee->fullname,
                                             'role' => 'perawat',
+                                            'prefix' => 'cppt_perawat', // Berikan prefix unik
+                                            'signature_model' => $pengkajian?->signature, // Kirim model data tanda tangan yang relevan
                                         ])
 
                                         <!-- Action Buttons -->

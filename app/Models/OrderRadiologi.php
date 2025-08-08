@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\SIMRS\Bilingan;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\ParameterRadiologi;
 use App\Models\SIMRS\Registration;
@@ -34,6 +35,12 @@ class OrderRadiologi extends Model
     public function parameter_radiologi()
     {
         return $this->belongsToMany(ParameterRadiologi::class, 'order_parameter_radiologi');
+    }
+
+    // Pada model OrderRadiologi.php
+    public function bilingan()
+    {
+        return $this->belongsTo(Bilingan::class, 'bilingan_id');
     }
 
     public function order_parameter_radiologi()

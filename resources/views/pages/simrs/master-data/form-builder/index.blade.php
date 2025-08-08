@@ -1,5 +1,6 @@
 @extends('inc.layout')
-@section('title', 'Tipe Operasi')
+{{-- Ganti Judul --}}
+@section('title', 'Manajemen Form Template')
 @section('extended-css')
     <style>
         hr {
@@ -23,7 +24,6 @@
         #filter-wrapper .form-label {
             margin-bottom: 0;
             width: 100px;
-            /* Atur lebar label agar semua label sejajar */
         }
 
         #filter-wrapper .form-control {
@@ -42,7 +42,6 @@
 
             #filter-wrapper .form-label {
                 width: auto;
-                /* Biarkan lebar label mengikuti konten */
                 margin-bottom: 0.5rem;
             }
 
@@ -54,6 +53,7 @@
 @endsection
 @section('content')
     <main id="js-page-content" role="main" class="page-content">
+        {{-- Panel Pencarian --}}
         <div class="row justify-content-center">
             <div class="col-xl-10">
                 <div id="panel-1" class="panel">
@@ -64,15 +64,17 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content" id="filter-wrapper">
-
-                            <form action="#" method="get">
-                                @csrf
+                            {{-- Ganti action ke route index saat ini --}}
+                            <form action="{{ route('master-data.setup.form-builder') }}" method="get">
+                                {{-- Tidak perlu @csrf untuk GET request --}}
                                 <div class="row">
                                     <div class="col-md-12 mb-3">
                                         <div class="form-group d-flex align-items-center">
-                                            <label for="nama_tindakan_1" class="form-label">Nama</label>
-                                            <input type="text" width="100%" name="nama_tindakan" id="nama_tindakan_1"
-                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0">
+                                            <label for="nama_form_search" class="form-label">Nama Form</label>
+                                            {{-- Ganti id dan name agar sesuai --}}
+                                            <input type="text" width="100%" name="nama_form" id="nama_form_search"
+                                                class="form-control rounded-0 border-top-0 border-left-0 border-right-0 p-0"
+                                                value="{{ request('nama_form') }}">
                                         </div>
                                     </div>
                                     <div class="col-md-12">
@@ -88,19 +90,19 @@
             </div>
         </div>
 
+        {{-- Panel Tabel Data --}}
         <div class="row">
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Form Templates
+                            Daftar Form Template
                         </h2>
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
                             <div class="table-responsive">
                                 <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
-                                    <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
                                     <thead class="bg-primary-600">
                                         <tr>
                                             <th>Nama Form</th>
@@ -116,18 +118,23 @@
                                                     {{ $row->nama_form }}
                                                 </td>
                                                 <td style="vertical-align: middle">
-                                                    {{ $row->kategori?->nama_kategori }}
+                                                    {{ $row->kategori?->nama_kategori ?? 'N/A' }}
                                                 </td>
                                                 <td style="vertical-align: middle">
-                                                    {{ $row->is_active == 1 ? 'Aktif' : 'Tidak Aktif' }}
+                                                    @if ($row->is_active == 1)
+                                                        <span class="badge badge-success">Aktif</span>
+                                                    @else
+                                                        <span class="badge badge-danger">Tidak Aktif</span>
+                                                    @endif
                                                 </td>
                                                 <td>
-                                                    <button class="btn btn-sm btn-success px-2 py-1 btn-edit"
-                                                        data-id="{{ $row->id }}">
-                                                        <i class="fas fa-pencil"></i>
-                                                    </button>
+                                                    {{-- Ganti button menjadi anchor (link) untuk edit --}}
+                                                    <a href="{{ route('master-data.setup.form-builder.edit', $row->id) }}"
+                                                        class="btn btn-sm btn-warning px-2 py-1" title="Edit">
+                                                        <i class="fas fa-pencil-alt"></i>
+                                                    </a>
                                                     <button class="btn btn-sm btn-danger px-2 py-1 btn-delete"
-                                                        data-id="{{ $row->id }}">
+                                                        data-id="{{ $row->id }}" title="Hapus">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </td>
@@ -138,8 +145,7 @@
                                         <tr>
                                             <th colspan="4" class="text-center">
                                                 <a href="{{ route('master-data.setup.form-builder.tambah') }}"
-                                                    class="btn btn-outline-primary waves-effect waves-themed"
-                                                    id="btn-tambah-tipe">
+                                                    class="btn btn-outline-primary waves-effect waves-themed">
                                                     <span class="fal fa-plus-circle"></span>
                                                     Tambah Form Template
                                                 </a>
@@ -160,246 +166,105 @@
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
+
+    {{-- =================================================================== --}}
+    {{-- JAVASCRIPT YANG SUDAH DIPERBAIKI --}}
+    {{-- =================================================================== --}}
     <script>
         $(document).ready(function() {
-            let tipeId = null;
-            $('#loading-spinner').show();
+            // Mengambil CSRF token dari meta tag untuk keamanan AJAX
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-            $('#btn-tambah-tipe').click(function() {
-                $('#modal-tambah-tipe').modal('show');
-            });
+            // Hapus semua kode JS yang tidak relevan (AJAX untuk 'tipe operasi')
 
-            $('#dt-basic-example .form-control').on('change', function() {
-                // Ambil nilai input yang berubah
-                let value = $(this).val();
-                let name = $(this).attr('name');
-                let tipeId = name.match(/\[(.*?)\]/)[1]; // Ambil ID dari atribut name
-
-                // Gunakan template URL dan ganti placeholder dengan ID yang sesuai
-                let url = '{{ route('master-data.operasi.tipe.update.column', ':tipeId') }}';
-                url = url.replace(':tipeId', tipeId);
-
-                // Kirimkan data menggunakan AJAX
-                $.ajax({
-                    url: url, // URL yang sudah termasuk ID
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}', // Tambahkan CSRF token untuk keamanan
-                        field: $(this).attr('id'), // Nama field yang ingin diupdate
-                        value: value // Nilai baru dari input
-                    },
-                    success: function(response) {
-                        showSuccessAlert('Data berhasil diperbarui');
-                    },
-                    error: function(xhr) {
-                        showErrorAlert('Terjadi kesalahan saat memperbarui data');
-                    }
-                });
-            });
-
-            $('.btn-edit').click(function() {
-                console.log('clicked');
-                $('#modal-edit-tipe').modal('show');
-                tipeId = $(this).attr('data-id');
-                $('#modal-edit-tipe form').attr('data-id', tipeId);
-
-                $.ajax({
-                    url: '/api/simrs/master-data/operasi/tipe/' +
-                        tipeId,
-                    type: 'GET',
-                    success: function(response) {
-                        $('#modal-edit-tipe input[name="tipe"]').val(response.tipe);
-                        $('#modal-edit-tipe input[name="operator"]').val(response
-                            .operator);
-                        $('#modal-edit-tipe input[name="anestesi"]').val(response
-                            .anestesi);
-                        $('#modal-edit-tipe input[name="resusitasi"]').val(response
-                            .resusitasi);
-                        $('#modal-edit-tipe input[name="dokter_tambahan"]').val(
-                            response
-                            .dokter_tambahan);
-                        $('#modal-edit-tipe input[name="alat"]').val(response.alat);
-                        $('#modal-edit-tipe input[name="ruangan"]').val(response
-                            .ruangan);
-                    },
-                    error: function(xhr, status, error) {
-                        $('#modal-edit-tipe').modal('hide');
-                        showErrorAlert('Terjadi kesalahan: ' + error);
-                    }
-                });
-
-            });
-
+            // Event handler untuk tombol Hapus
             $('.btn-delete').click(function() {
-                var tipeId = $(this).attr('data-id');
+                var formId = $(this).data('id');
+                var button = $(this); // Simpan referensi tombol
 
-                // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
-                var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
+                // Menggunakan SweetAlert untuk konfirmasi yang lebih baik (opsional, ganti dengan confirm() jika tidak ada)
+                Swal.fire({
+                    title: 'Anda Yakin?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Jika pengguna mengklik "Ya", lakukan AJAX request
+                        $.ajax({
+                            url: '/api/simrs/master-data/setup/form-builder/' + formId +
+                                '/delete', // URL API yang benar
+                            type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken // Kirim CSRF token di header
+                            },
+                            beforeSend: function() {
+                                // Menonaktifkan tombol untuk mencegah klik ganda
+                                button.prop('disabled', true);
+                            },
+                            success: function(response) {
+                                Swal.fire('Dihapus!', response.message, 'success');
 
-                if (userConfirmed) {
-                    // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
-                    $.ajax({
-                        url: '/api/simrs/master-data/operasi/tipe/' +
-                            tipeId +
-                            '/delete',
-                        type: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken
-                        },
-                        success: function(response) {
-                            showSuccessAlert(response.message);
-
-                            setTimeout(() => {
-                                console.log('Reloading the page now.');
-                                window.location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr, status, error) {
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                        }
-                    });
-                } else {
-                    console.log('Penghapusan dibatalkan oleh pengguna.');
-                }
-            });
-
-            $('#update-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
-
-                var formData = $(this).serialize();
-                tipeId = $(this).attr('data-id');
-                $.ajax({
-                    url: '/api/simrs/master-data/operasi/tipe/' +
-                        tipeId +
-                        '/update',
-                    type: 'PATCH',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#update-form').find('.ikon-edit').hide();
-                        $('#update-form').find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        $('#modal-edit-tipe').modal('hide');
-                        showSuccessAlert(response.message);
-
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
-                    },
-                    error: function(xhr, status, error) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
-                            });
-
-                            $('#modal-edit-tipe').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
-                        } else {
-                            $('#modal-edit-tipe').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
-                        }
+                                // Hapus baris dari tabel tanpa perlu reload halaman
+                                button.closest('tr').remove();
+                            },
+                            error: function(xhr, status, error) {
+                                Swal.fire('Gagal!', 'Terjadi kesalahan: ' + xhr
+                                    .responseJSON.message, 'error');
+                            },
+                            complete: function() {
+                                // Mengaktifkan kembali tombol
+                                button.prop('disabled', false);
+                            }
+                        });
                     }
-                });
+                })
             });
 
-            $('#store-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
-
-                var formData = $(this).serialize(); // Mengambil semua data dari form
-
-                $.ajax({
-                    url: '/api/simrs/master-data/operasi/tipe',
-                    type: 'POST',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#store-form').find('.ikon-tambah').hide();
-                        $('#store-form').find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        $('#modal-tambah-tipe').modal('hide');
-                        showSuccessAlert(response.message);
-
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
-                    },
-                    error: function(xhr, status, error) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
-                            });
-
-                            $('#modal-tambah-tipe').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
-                        } else {
-                            $('#modal-tambah-tipe').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
-                        }
-                    }
-                });
-            });
-
-            // initialize datatable
+            // Inisialisasi DataTable
             $('#dt-basic-example').DataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
-                },
-                responsive: false, // Responsif diaktifkan
-                scrollX: true, // Tambahkan scroll horizontal
+                responsive: false,
+                scrollX: true,
                 lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end buttons-container'B>>" +
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'B>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 buttons: [{
                         extend: 'pdfHtml5',
                         text: 'PDF',
                         titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-danger btn-sm mr-1'
                     },
                     {
                         extend: 'excelHtml5',
                         text: 'Excel',
                         titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-success btn-sm mr-1'
                     },
                     {
                         extend: 'csvHtml5',
                         text: 'CSV',
                         titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-primary btn-sm mr-1'
                     },
                     {
                         extend: 'copyHtml5',
                         text: 'Copy',
                         titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-primary btn-sm mr-1'
                     },
                     {
                         extend: 'print',
                         text: 'Print',
                         titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm custom-margin'
+                        className: 'btn-outline-primary btn-sm'
                     }
                 ]
             });
-
         });
     </script>
 @endsection

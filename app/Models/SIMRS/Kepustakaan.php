@@ -11,7 +11,8 @@ class Kepustakaan extends Model implements \OwenIt\Auditing\Contracts\Auditable
 {
     use HasFactory, SoftDeletes, Auditable;
 
-    protected $table = 'kepustakaan', $fillable = ['name', 'organization_id', 'kategori', 'type', 'parent_id', 'size', 'file'];
+    protected $table = 'kepustakaan';
+    protected $fillable = ['name', 'organization_id', 'kategori', 'month', 'year', 'type', 'parent_id', 'size', 'file'];
 
     // Relasi ke parent
     public function parent()

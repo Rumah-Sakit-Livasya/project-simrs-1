@@ -7,7 +7,7 @@
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="addModalLabel">Tambah Menu</h1>
                 </div>
-                <div class="modal-body">
+            <div class="modal-body">
 
                     <table style="width: 100%">
                         <tr>
@@ -41,6 +41,21 @@
                                         Non Aktif
                                     </label>
                                 </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Kategori</td>
+                            <td>:</td>
+                            <td>
+                                <select class="select2 form-control w-100" name="kategori_id">
+                                    <option value=""></option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">
+                                            {{ $category->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </td>
                         </tr>
 

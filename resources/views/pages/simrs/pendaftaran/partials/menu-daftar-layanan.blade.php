@@ -11,15 +11,17 @@
                 <ul id="patient-menu-icon">
                     <li class="text-center">
                         @if ($registration->registration_type == 'rawat-jalan')
-                            <a href="{{route('poliklinik.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number])}}">
-                        @elseif($registration->registration_type == 'rawat-inap')
-                            <a href="{{route('rawat-inap.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number])}}">
-                        @elseif($registration->registration_type == 'igd')
-                            <a href="{{route('igd.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number])}}">
+                            <a
+                                href="{{ route('poliklinik.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number]) }}">
+                            @elseif($registration->registration_type == 'rawat-inap')
+                                <a
+                                    href="{{ route('rawat-inap.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number]) }}">
+                                @elseif($registration->registration_type == 'igd')
+                                    <a
+                                        href="{{ route('igd.daftar-pasien', ['menu' => 'pengkajian_perawat', 'registration' => $registration->registration_number]) }}">
                         @endif
                         <center>
-                            <div class="circle-menu waves-effect pink accent-2"
-                                data-layanan="pengkajian-nurse-rajal">
+                            <div class="circle-menu waves-effect pink accent-2" data-layanan="pengkajian-nurse-rajal">
                                 <i class="mdi mdi-clipboard-pulse"></i>
                             </div>
                             <span>Catatan Medis</span>
@@ -74,14 +76,13 @@
                         <span>BMHP</span>
                     </li>
                     <li>
-                        <div class="circle-menu waves-effect light-green accent-3 menu-layanan"
-                            data-layanan="operasi/data_treatment">
+                        <div class="circle-menu waves-effect light-green accent-3 menu-layanan" data-layanan="operasi">
                             <i class="mdi mdi-heart-pulse"></i>
                         </div>
                         <span>Operasi (OK)</span>
                     </li>
                     <li>
-                        <div class="circle-menu waves-effect teal menu-layanan" data-layanan="persalinan/index">
+                        <div class="circle-menu waves-effect teal menu-layanan" data-layanan="persalinan">
                             <i class="mdi mdi-seat-flat-angled"></i>
                         </div>
                         <span>Persalinan (VK)</span>

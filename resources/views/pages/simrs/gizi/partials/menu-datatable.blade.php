@@ -28,6 +28,7 @@
                                 <th>#</th>
                                 <th>Detail</th>
                                 <th>Nama Menu</th>
+                                <th>Kategori</th>
                                 <th>Harga</th>
                                 <th>Aktif?</th>
                                 <th>Aksi</th>
@@ -39,8 +40,7 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-primary" data-bs-placement="top"
-                                            data-bs-toggle="popover" data-bs-title="Detail Menu"
-                                            data-bs-html="true"
+                                            data-bs-toggle="popover" data-bs-title="Detail Menu" data-bs-html="true"
                                             data-bs-content-id="popover-content-{{ $menu->id }}">
                                             <i class="fas fa-list text-light" style="transform: scale(1.8)"></i>
                                         </button>
@@ -54,6 +54,9 @@
                                         {{ $menu->nama }}
                                     </td>
                                     <td>
+                                        {{ $menu->category->nama }}
+                                    </td>
+                                    <td>
                                         {{ rp($menu->harga) }}
                                     </td>
                                     <td>
@@ -63,8 +66,10 @@
                                         <a class="mdi mdi-pencil pointer mdi-24px text-secondary edit-btn"
                                             data-bs-toggle="modal" data-bs-target="#editModal{{ $menu->id }}"
                                             title="Edit" data-id="{{ $menu->id }}"></a>
-                                            
-                                        
+
+                                        @include('pages.simrs.gizi.partials.edit-menu-modal', [
+                                            'menu' => $menu,
+                                        ])
 
                                         <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn" title="Hapus"
                                             data-id="{{ $menu->id }}"></a>
@@ -77,6 +82,7 @@
                                 <th>#</th>
                                 <th>Detail</th>
                                 <th>Nama Menu</th>
+                                <th>Kategori</th>
                                 <th>Harga</th>
                                 <th>Aktif?</th>
                                 <th>Aksi</th>
@@ -89,10 +95,6 @@
         </div>
     </div>
 </div>
-
-@include('pages.simrs.gizi.partials.edit-menu-modal', [
-                                            'menu' => $menu,
-                                        ])
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
