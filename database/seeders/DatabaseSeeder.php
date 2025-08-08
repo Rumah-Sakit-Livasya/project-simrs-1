@@ -14,8 +14,8 @@ class DatabaseSeeder extends Seeder
         public function run(): void
         {
                 // Aktifkan sesuai kebutuhan:
-                $this->call(GroupCOASeeders::class);
-                $this->call(ChartOfAccountSeeders::class);
+                // $this->call(GroupCOASeeders::class);
+                // $this->call(ChartOfAccountSeeders::class);
 
                 // $this->call(EthnicSeeder::class);
                 // Target::factory()->count(100)->create();
@@ -45,9 +45,23 @@ class DatabaseSeeder extends Seeder
                 //     ['id' => 2, 'nama' => 'Pengeluaran', 'created_at' => now(), 'updated_at' => now()],
                 // ]);
 
-                $this->call(AccountReceivableSeeder::class);
+                // $this->call(AccountReceivableSeeder::class);
+                // $this->call([
+                //         RncCenterSeeder::class,
+                // ]);
+
                 $this->call([
-                        RncCenterSeeder::class,
+                        // 1. Seeder untuk tabel pendukung
+                        KategoriPersalinanSeeder::class,
+                        TipePersalinanSeeder::class,
+                        // KelasRawatSeeder::class,
+                        // GroupPenjaminSeeder::class,
+
+                        // 2. Seeder untuk data persalinan
+                        PersalinanCompleteSeeder::class,
+
+                        // 3. Seeder untuk tarif (opsional - bisa dijalankan terpisah karena data besar)
+                        // CompleteTarifPersalinanSeeder::class,
                 ]);
         }
 }

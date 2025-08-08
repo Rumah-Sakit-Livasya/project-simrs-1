@@ -2,6 +2,91 @@
 @section('title', 'Input Tindakan Operasi')
 
 @section('content')
+    <style>
+        .form-label-custom {
+            font-weight: 500;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+            color: #495057;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-size: 10px;
+        }
+
+        .frame-heading {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .doctor-select-container {
+            margin-bottom: 0.5rem;
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
+
+        .panel-content {
+            padding: 1.5rem;
+        }
+
+        .required:after {
+            content: " *";
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .form-control {
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .btn {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .form-text {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .compact-row {
+            margin-bottom: 0.75rem;
+        }
+
+        .section-divider {
+            border-top: 1px solid #e9ecef;
+            margin: 2rem 0 1.5rem 0;
+            padding-top: 1rem;
+        }
+
+        .team-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .team-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+    </style>
+
     <main id="js-page-content" role="main" class="page-content">
         <div class="row">
             <div class="col-xl-12">
@@ -11,47 +96,23 @@
                             <i class="fal fa-heart-medical mr-2"></i> Input <span class="fw-300"><i>Tindakan
                                     Operasi</i></span>
                         </h2>
-                        <div class="panel-toolbar">
-                            <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip"
-                                data-offset="0,10" data-original-title="Collapse"></button>
-                            <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip"
-                                data-offset="0,10" data-original-title="Fullscreen"></button>
-                        </div>
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            {{-- Patient Information Header --}}
-
-
                             <form action="{{ route('ok.prosedur.store') }}" method="POST" id="form-tindakan">
                                 @csrf
                                 <input type="hidden" name="order_operasi_id" value="{{ $order->id }}">
 
                                 {{-- SEKSI: Data Jadwal Operasi --}}
                                 <h5 class="frame-heading">Data Jadwal Operasi</h5>
-                                <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom required">Jadwal Operasi</label>
-                                    <div class="col-md-4">
+                                <div class="form-group row compact-row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label-custom required">Jadwal Operasi</label>
                                         <input type="datetime-local" class="form-control" name="tgl_operasi" required
                                             value="{{ \Carbon\Carbon::parse($order->tgl_operasi)->format('Y-m-d\TH:i') }}">
                                     </div>
-                                    <label class="col-md-2 col-form-label form-label-custom required">Ruang Operasi</label>
-                                    <div class="col-md-4">
-                                        <select class="form-control select2" name="ruangan_id" required>
-                                            <option value="">Pilih Ruang Operasi</option>
-                                            @foreach ($ruangan_operasi as $ruangan)
-                                                <option value="{{ $ruangan->id }}"
-                                                    {{ $order->ruangan_id == $ruangan->id ? 'selected' : '' }}>
-                                                    {{ $ruangan->nama_ruangan }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom required">Kategori
-                                        Operasi</label>
-                                    <div class="col-md-4">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label-custom required">Kategori Operasi</label>
                                         <select class="form-control select2" id="kategori_operasi_id"
                                             name="kategori_operasi_id" required>
                                             <option value="">Pilih Kategori Operasi</option>
@@ -63,22 +124,8 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <label class="col-md-2 col-form-label form-label-custom required">Tipe Operasi</label>
-                                    <div class="col-md-4">
-                                        <select class="form-control select2" name="tipe_operasi_id" required>
-                                            <option value="">Pilih Tipe Operasi</option>
-                                            @foreach ($tipe_operasi as $tipe)
-                                                <option value="{{ $tipe->id }}"
-                                                    {{ $order->tipe_operasi_id == $tipe->id ? 'selected' : '' }}>
-                                                    {{ $tipe->tipe }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom required">Kelas</label>
-                                    <div class="col-md-4">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label-custom required">Kelas</label>
                                         <select class="form-control select2" name="kelas_rawat_id" required>
                                             <option value="">Pilih Kelas</option>
                                             @foreach ($kelas_rawat as $kelas)
@@ -89,259 +136,271 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <label class="col-md-2 col-form-label form-label-custom">Tipe Penggunaan</label>
-                                    <div class="col-md-4">
-                                        <select class="form-control select2" name="tipe_penggunaan" required>
-                                            <option value="UMUM"
-                                                {{ old('tipe_penggunaan', 'UMUM') == 'UMUM' ? 'selected' : '' }}>UMUM
-                                            </option>
-                                            <option value="ELEKTIF"
-                                                {{ old('tipe_penggunaan') == 'ELEKTIF' ? 'selected' : '' }}>ELEKTIF
-                                            </option>
-                                        </select>
+                                </div>
+
+                                {{-- SEKSI: Tindakan Operasi --}}
+                                <div class="section-divider">
+                                    <h5 class="frame-heading">Tindakan Operasi</h5>
+                                    <div class="form-group row compact-row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label-custom required">Jenis Operasi</label>
+                                            <select class="form-control select2" id="jenis_operasi_id"
+                                                name="jenis_operasi_id" required>
+                                                <option value="">Pilih Jenis Operasi</option>
+                                                @if ($order->kategori_operasi_id)
+                                                    @foreach ($jenis_operasi->where('kategori_operasi_id', $order->kategori_operasi_id) as $jenis)
+                                                        <option value="{{ $jenis->id }}"
+                                                            {{ $order->jenis_operasi_id == $jenis->id ? 'selected' : '' }}>
+                                                            {{ $jenis->jenis }}
+                                                        </option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label-custom required">Tindakan Operasi</label>
+                                            <select class="form-control select2" id="tindakan_operasi_id"
+                                                name="tindakan_operasi_id" required>
+                                                <option value="">Pilih Tindakan Operasi</option>
+                                                @if ($order->kategori_operasi_id && $order->jenis_operasi_id)
+                                                    @foreach ($tindakan_operasi->where('kategori_operasi_id', $order->kategori_operasi_id)->where('jenis_operasi_id', $order->jenis_operasi_id) as $tindakan)
+                                                        <option value="{{ $tindakan->id }}"
+                                                            {{ optional($order->prosedur)->tindakan_operasi_id == $tindakan->id ? 'selected' : '' }}>
+                                                            {{ $tindakan->nama_operasi }}
+                                                        </option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label-custom required">Tipe Penggunaan</label>
+                                            <select class="form-control select2" name="tipe_penggunaan" required>
+                                                @foreach ($tipe_operasi as $tipe)
+                                                    <option value="{{ $tipe->id }}"
+                                                        {{ $order->tipe_operasi_id == $tipe->id ? 'selected' : '' }}>
+                                                        {{ $tipe->tipe }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
 
                                 {{-- SEKSI: Tim Operasi --}}
-                                <h5 class="frame-heading mt-4">Tim Operasi</h5>
+                                <div class="section-divider">
+                                    <h5 class="frame-heading">Tim Operasi</h5>
 
-                                {{-- Dokter Operator --}}
-                                <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom required">Dokter
-                                        Operator</label>
-                                    <div class="col-md-10">
-                                        <div class="doctor-select-container mb-2">
-                                            <select class="form-control select2 dokter-operator" name="dokter_operator_id"
-                                                required>
-                                                <option value="">Pilih Dokter Operator</option>
-                                                @foreach ($doctors as $doctor)
-                                                    <option value="{{ $doctor['id'] }}"
-                                                        {{ optional($order->prosedur)->dokter_operator_id == $doctor['id'] ? 'selected' : '' }}
-                                                        data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                        data-departement="{{ $doctor['departement'] }}">
-                                                        {{ $doctor['fullname'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+                                    {{-- Tim Dokter Operator --}}
+                                    <div class="team-section">
+                                        <div class="team-title">
+                                            <i class="fal fa-user-md mr-2"></i>Tim Dokter Operator
                                         </div>
-                                        <small class="form-text text-muted">Pilih dokter utama yang akan melakukan
-                                            operasi</small>
+                                        <div class="form-group row compact-row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label-custom required">Dokter Operator</label>
+                                                <select class="form-control select2 dokter-operator"
+                                                    name="dokter_operator_id" required>
+                                                    <option value="">Pilih Dokter Operator</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->dokter_operator_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="form-text text-muted">Pilih dokter utama yang akan melakukan
+                                                    operasi</small>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label-custom">Dokter Resusitator</label>
+                                                <select class="form-control select2" name="dokter_resusitator_id">
+                                                    <option value="">Pilih Dokter Resusitator</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->dokter_resusitator_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="form-text text-muted">Opsional - Dokter resusitator</small>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label-custom">Dokter Anestesi</label>
+                                                <select class="form-control select2" name="dokter_anastesi_id">
+                                                    <option value="">Pilih Dokter Anestesi</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->dokter_anastesi_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="form-text text-muted">Opsional - Dokter anestesi</small>
+                                            </div>
+                                        </div>
+
+                                        {{-- Asisten Dokter Operator --}}
+                                        <div class="form-group row compact-row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label-custom">Ass. Dokter Operator 1</label>
+                                                <select class="form-control select2" name="ass_dokter_operator_1_id">
+                                                    <option value="">Pilih Asisten Operator 1</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->ass_dokter_operator_1_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label-custom">Ass. Dokter Operator 2</label>
+                                                <select class="form-control select2" name="ass_dokter_operator_2_id">
+                                                    <option value="">Pilih Asisten Operator 2</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->ass_dokter_operator_2_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label-custom">Ass. Dokter Operator 3</label>
+                                                <select class="form-control select2" name="ass_dokter_operator_3_id">
+                                                    <option value="">Pilih Asisten Operator 3</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->ass_dokter_operator_3_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <small class="form-text text-muted">Opsional - Asisten dokter operator
+                                                    (maksimal 3)</small>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {{-- Asisten Dokter Operator --}}
-                                <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom">Ass. Dokter Operator</label>
-                                    <div class="col-md-10">
-                                        <div class="doctor-select-container mb-2">
-                                            <select class="form-control select2" name="ass_dokter_operator_1_id">
-                                                <option value="">Pilih Asisten Operator 1</option>
-                                                @foreach ($doctors as $doctor)
-                                                    <option value="{{ $doctor['id'] }}"
-                                                        {{ optional($order->prosedur)->ass_dokter_operator_1_id == $doctor['id'] ? 'selected' : '' }}
-                                                        data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                        data-departement="{{ $doctor['departement'] }}">
-                                                        {{ $doctor['fullname'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+                                    {{-- Tim Dokter Anestesi --}}
+                                    <div class="team-section">
+                                        <div class="team-title">
+                                            <i class="fal fa-syringe mr-2"></i>Tim Dokter Anestesi
+                                        </div>
+                                        <div class="form-group row compact-row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label-custom">Ass. Dokter Anestesi</label>
+                                                <select class="form-control select2" name="ass_dokter_anastesi_id">
+                                                    <option value="">Pilih Asisten Anestesi</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->ass_dokter_anastesi_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
 
-                                        <div class="doctor-select-container mb-2">
-                                            <select class="form-control select2" name="ass_dokter_operator_2_id">
-                                                <option value="">Pilih Asisten Operator 2</option>
-                                                @foreach ($doctors as $doctor)
-                                                    <option value="{{ $doctor['id'] }}"
-                                                        {{ optional($order->prosedur)->ass_dokter_operator_2_id == $doctor['id'] ? 'selected' : '' }}
-                                                        data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                        data-departement="{{ $doctor['departement'] }}">
-                                                        {{ $doctor['fullname'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+                                        {{-- Dokter Tambahan (Ass. Dokter Anestesi Tambahan) --}}
+                                        <div class="form-group row compact-row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label-custom">Ass. Anestesi Tambahan 1</label>
+                                                <select class="form-control select2" name="dokter_tambahan_1_id">
+                                                    <option value="">Pilih Ass. Anestesi Tambahan 1</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->dokter_tambahan_1_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label-custom">Ass. Anestesi Tambahan 2</label>
+                                                <select class="form-control select2" name="dokter_tambahan_2_id">
+                                                    <option value="">Pilih Ass. Anestesi Tambahan 2</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->dokter_tambahan_2_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label-custom">Ass. Anestesi Tambahan 3</label>
+                                                <select class="form-control select2" name="dokter_tambahan_3_id">
+                                                    <option value="">Pilih Ass. Anestesi Tambahan 3</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->dokter_tambahan_3_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
-
-                                        <div class="doctor-select-container">
-                                            <select class="form-control select2" name="ass_dokter_operator_3_id">
-                                                <option value="">Pilih Asisten Operator 3</option>
-                                                @foreach ($doctors as $doctor)
-                                                    <option value="{{ $doctor['id'] }}"
-                                                        {{ optional($order->prosedur)->ass_dokter_operator_3_id == $doctor['id'] ? 'selected' : '' }}
-                                                        data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                        data-departement="{{ $doctor['departement'] }}">
-                                                        {{ $doctor['fullname'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+                                        <div class="form-group row compact-row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label-custom">Ass. Anestesi Tambahan 4</label>
+                                                <select class="form-control select2" name="dokter_tambahan_4_id">
+                                                    <option value="">Pilih Ass. Anestesi Tambahan 4</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->dokter_tambahan_4_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label-custom">Ass. Anestesi Tambahan 5</label>
+                                                <select class="form-control select2" name="dokter_tambahan_5_id">
+                                                    <option value="">Pilih Ass. Anestesi Tambahan 5</option>
+                                                    @foreach ($doctors as $doctor)
+                                                        <option value="{{ $doctor['id'] }}"
+                                                            {{ optional($order->prosedur)->dokter_tambahan_5_id == $doctor['id'] ? 'selected' : '' }}
+                                                            data-kode="{{ $doctor['kode_dpjp'] }}"
+                                                            data-departement="{{ $doctor['departement'] }}">
+                                                            {{ $doctor['fullname'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
-                                        <small class="form-text text-muted">Opsional - Asisten dokter operator (maksimal
-                                            3)</small>
-                                    </div>
-                                </div>
-
-                                {{-- Dokter Anestesi dan Resusitator --}}
-                                <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom">Dokter Anestesi</label>
-                                    <div class="col-md-4">
-                                        <select class="form-control select2" name="dokter_anastesi_id">
-                                            <option value="">Pilih Dokter Anestesi</option>
-                                            @foreach ($doctors as $doctor)
-                                                <option value="{{ $doctor['id'] }}"
-                                                    {{ optional($order->prosedur)->dokter_anastesi_id == $doctor['id'] ? 'selected' : '' }}
-                                                    data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                    data-departement="{{ $doctor['departement'] }}">
-                                                    {{ $doctor['fullname'] }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <small class="form-text text-muted">Opsional - Dokter anestesi</small>
-                                    </div>
-
-                                    <label class="col-md-2 col-form-label form-label-custom">Ass. Dokter Anestesi</label>
-                                    <div class="col-md-4">
-                                        <select class="form-control select2" name="ass_dokter_anastesi_id">
-                                            <option value="">Pilih Asisten Anestesi</option>
-                                            @foreach ($doctors as $doctor)
-                                                <option value="{{ $doctor['id'] }}"
-                                                    {{ optional($order->prosedur)->ass_dokter_anastesi_id == $doctor['id'] ? 'selected' : '' }}
-                                                    data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                    data-departement="{{ $doctor['departement'] }}">
-                                                    {{ $doctor['fullname'] }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <small class="form-text text-muted">Opsional - Asisten dokter anestesi</small>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom">Dokter Resusitator</label>
-                                    <div class="col-md-4">
-                                        <select class="form-control select2" name="dokter_resusitator_id">
-                                            <option value="">Pilih Dokter Resusitator</option>
-                                            @foreach ($doctors as $doctor)
-                                                <option value="{{ $doctor['id'] }}"
-                                                    {{ optional($order->prosedur)->dokter_resusitator_id == $doctor['id'] ? 'selected' : '' }}
-                                                    data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                    data-departement="{{ $doctor['departement'] }}">
-                                                    {{ $doctor['fullname'] }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <small class="form-text text-muted">Opsional - Dokter resusitator</small>
-                                    </div>
-                                </div>
-
-                                {{-- Dokter Tambahan --}}
-                                <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom">Dokter Tambahan</label>
-                                    <div class="col-md-10">
-                                        <div class="doctor-select-container mb-2">
-                                            <select class="form-control select2" name="dokter_tambahan_1_id">
-                                                <option value="">Pilih Dokter Tambahan 1</option>
-                                                @foreach ($doctors as $doctor)
-                                                    <option value="{{ $doctor['id'] }}"
-                                                        {{ optional($order->prosedur)->dokter_tambahan_1_id == $doctor['id'] ? 'selected' : '' }}
-                                                        data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                        data-departement="{{ $doctor['departement'] }}">
-                                                        {{ $doctor['fullname'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <small class="form-text text-muted">Opsional - Asisten dokter anestesi
+                                                    tambahan (maksimal 5)</small>
+                                            </div>
                                         </div>
-
-                                        <div class="doctor-select-container mb-2">
-                                            <select class="form-control select2" name="dokter_tambahan_2_id">
-                                                <option value="">Pilih Dokter Tambahan 2</option>
-                                                @foreach ($doctors as $doctor)
-                                                    <option value="{{ $doctor['id'] }}"
-                                                        {{ optional($order->prosedur)->dokter_tambahan_2_id == $doctor['id'] ? 'selected' : '' }}
-                                                        data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                        data-departement="{{ $doctor['departement'] }}">
-                                                        {{ $doctor['fullname'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-                                        <div class="doctor-select-container mb-2">
-                                            <select class="form-control select2" name="dokter_tambahan_3_id">
-                                                <option value="">Pilih Dokter Tambahan 3</option>
-                                                @foreach ($doctors as $doctor)
-                                                    <option value="{{ $doctor['id'] }}"
-                                                        {{ optional($order->prosedur)->dokter_tambahan_3_id == $doctor['id'] ? 'selected' : '' }}
-                                                        data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                        data-departement="{{ $doctor['departement'] }}">
-                                                        {{ $doctor['fullname'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-                                        <div class="doctor-select-container mb-2">
-                                            <select class="form-control select2" name="dokter_tambahan_4_id">
-                                                <option value="">Pilih Dokter Tambahan 4</option>
-                                                @foreach ($doctors as $doctor)
-                                                    <option value="{{ $doctor['id'] }}"
-                                                        {{ optional($order->prosedur)->dokter_tambahan_4_id == $doctor['id'] ? 'selected' : '' }}
-                                                        data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                        data-departement="{{ $doctor['departement'] }}">
-                                                        {{ $doctor['fullname'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-                                        <div class="doctor-select-container">
-                                            <select class="form-control select2" name="dokter_tambahan_5_id">
-                                                <option value="">Pilih Dokter Tambahan 5</option>
-                                                @foreach ($doctors as $doctor)
-                                                    <option value="{{ $doctor['id'] }}"
-                                                        {{ optional($order->prosedur)->dokter_tambahan_5_id == $doctor['id'] ? 'selected' : '' }}
-                                                        data-kode="{{ $doctor['kode_dpjp'] }}"
-                                                        data-departement="{{ $doctor['departement'] }}">
-                                                        {{ $doctor['fullname'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <small class="form-text text-muted">Opsional - Dokter tambahan (maksimal 5)</small>
-                                    </div>
-                                </div>
-
-                                {{-- SEKSI: Tindakan Operasi --}}
-                                <h5 class="frame-heading">Tindakan Operasi</h5>
-                                <div class="form-group row">
-                                    <label class="col-md-2 col-form-label form-label-custom required">Jenis Operasi</label>
-                                    <div class="col-md-4">
-                                        <select class="form-control select2" id="jenis_operasi_id"
-                                            name="jenis_operasi_id" required>
-                                            <option value="">Pilih Jenis Operasi</option>
-                                            @if ($order->kategori_operasi_id)
-                                                @foreach ($jenis_operasi->where('kategori_operasi_id', $order->kategori_operasi_id) as $jenis)
-                                                    <option value="{{ $jenis->id }}"
-                                                        {{ $order->jenis_operasi_id == $jenis->id ? 'selected' : '' }}>
-                                                        {{ $jenis->jenis }}
-                                                    </option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                    </div>
-                                    <label class="col-md-2 col-form-label form-label-custom required">Tindakan
-                                        Operasi</label>
-                                    <div class="col-md-4">
-                                        <select class="form-control select2" id="tindakan_operasi_id"
-                                            name="tindakan_operasi_id" required>
-                                            <option value="">Pilih Tindakan Operasi</option>
-                                            @if ($order->kategori_operasi_id && $order->jenis_operasi_id)
-                                                @foreach ($tindakan_operasi->where('kategori_operasi_id', $order->kategori_operasi_id)->where('jenis_operasi_id', $order->jenis_operasi_id) as $tindakan)
-                                                    <option value="{{ $tindakan->id }}"
-                                                        {{ optional($order->prosedur)->tindakan_operasi_id == $tindakan->id ? 'selected' : '' }}>
-                                                        {{ $tindakan->nama_operasi }}
-                                                    </option>
-                                                @endforeach
-                                            @endif
-                                        </select>
                                     </div>
                                 </div>
 

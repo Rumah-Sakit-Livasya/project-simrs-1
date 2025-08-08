@@ -2,10 +2,6 @@
 
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\BilinganController;
-use App\Http\Controllers\FarmasiReportKartuStock;
-use App\Http\Controllers\FarmasiReportStockDetail;
-use App\Http\Controllers\FarmasiReportStockStatus;
-use App\Http\Controllers\FarmasiResepController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
@@ -87,9 +83,6 @@ use App\Http\Controllers\SIMRS\Warehouse\UnitCostController;
 use App\Http\Controllers\SIMRS\Warehouse\WarehouseController;
 use App\Http\Controllers\WarehouseBarangFarmasiController;
 use App\Http\Controllers\WarehouseBarangNonFarmasiController;
-use App\Http\Controllers\WarehouseDistribusiBarangFarmasiController;
-use App\Http\Controllers\WarehouseDistribusiBarangNonFarmasiController;
-use App\Http\Controllers\WarehouseDistribusiBarangReportController;
 use App\Http\Controllers\WarehouseGolonganBarangController;
 use App\Http\Controllers\WarehouseKategoriBarangController;
 use App\Http\Controllers\WarehouseKelompokBarangController;
@@ -100,21 +93,9 @@ use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangReportController;
 use App\Http\Controllers\WarehousePurchaseRequestNonPharmacy;
 use App\Http\Controllers\WarehousePurchaseRequestPharmacy;
-use App\Http\Controllers\WarehouseReportHistoriPerubahanMasterBarang;
-use App\Http\Controllers\WarehouseReportKartuStock;
-use App\Http\Controllers\WarehouseReportStockDetail;
-use App\Http\Controllers\WarehouseReportStockStatus;
 use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\WarehouseSatuanBarangController;
 use App\Http\Controllers\WarehouseSetupMinMaxStockController;
-use App\Http\Controllers\WarehouseSORStockStatus;
-use App\Http\Controllers\WarehouseStockAdjustmentController;
-use App\Http\Controllers\WarehouseStockOpnameDraft;
-use App\Http\Controllers\WarehouseStockOpnameFinal;
-use App\Http\Controllers\WarehouseStockOpnameGudangController;
-use App\Http\Controllers\WarehouseStockOpnameReport;
-use App\Http\Controllers\WarehouseStockRequestNonPharmacyController;
-use App\Http\Controllers\WarehouseStockRequestPharmacyController;
 use App\Http\Controllers\WarehouseSupplierController;
 use App\Http\Controllers\WarehouseZatAktifController;
 use App\Models\ProcurementPurchaseRequestPharmacy;
@@ -315,21 +296,11 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/beds/{room:id}', [BedController::class, 'index'])
                     ->name('master-data.setup.beds');
 
-                Route::prefix('departemen')
-                    ->name('master-data.setup.departemen.')
-                    ->group(function () {
-
-                        Route::get('/', [DepartementController::class, 'index'])->name('index'); // URL: /departemen
-
-                        Route::get('/tambah', [DepartementController::class, 'tambah'])->name('tambah'); // URL: /departemen/tambah
-
-                        Route::post('/store', [DepartementController::class, 'store'])->name('store'); // URL: /departemen/store
-
-                        // Rute untuk Import
-                        // Route::get('/import', [DepartementController::class, 'showImportForm'])->name('import.form'); // URL: /departemen/import
-
-                        Route::post('/import', [DepartementController::class, 'import'])->name('import'); // URL: /departemen/import (method POST)
-                    });
+                // Department management
+                Route::get('departemen', [DepartementController::class, 'index'])
+                    ->name('master-data.setup.departemen.index');
+                Route::get('departemen/tambah', [DepartementController::class, 'tambah'])
+                    ->name('master-data.setup.departemen.tambah');
 
                 // Registration fee setup
                 Route::get('/tarif-registrasi-layanan', [TarifRegistrasiController::class, 'index'])
@@ -459,14 +430,6 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
         });
 
-        Route::prefix('farmasi')->group(function () {
-            Route::prefix("laporan")->group(function () {
-                Route::get("/stock-status", [FarmasiReportStockStatus::class, "index"])->name("farmasi.report.stock-status");
-                Route::get("/stock-detail", [FarmasiReportStockDetail::class, "index"])->name('farmasi.report.stock-detail');
-                Route::get("/kartu-stok", [FarmasiReportKartuStock::class, "index"])->name('farmasi.report.kartu-stock');
-            });
-        });
-
         Route::prefix('warehouse')->group(function () {
             Route::prefix('master-data')->group(function () {
                 Route::get('zat-aktif', [WarehouseZatAktifController::class, 'index'])->name('warehouse.master-data.zat-aktif');
@@ -531,84 +494,8 @@ Route::group(['middleware' => ['auth']], function () {
 
                 Route::prefix("report")->group(function () {
                     Route::get("/", [WarehousePenerimaanBarangReportController::class, "index"])->name("warehouse.penerimaan-barang.report");
-                    Route::get("show/{type}/{json}", [WarehousePenerimaanBarangReportController::class, "show"])->name("warehouse.penerimaan-barang.report.show");
+                    Route::get("rekap", [WarehousePenerimaanBarangReportController::class, "rekap"])->name("warehouse.penerimaan-barang.report.rekap");
                 });
-            });
-
-            Route::prefix("stock-request")->group(function () {
-                Route::prefix("pharmacy")->group(function () {
-                    Route::get("/", [WarehouseStockRequestPharmacyController::class, "index"])->name("warehouse.stock-request.pharmacy");
-                    Route::get("/create", [WarehouseStockRequestPharmacyController::class, "create"])->name("warehouse.stock-request.pharmacy.create");
-                    Route::get("/print/{id}", [WarehouseStockRequestPharmacyController::class, "print"])->name("warehouse.stock-request.pharmacy.print");
-                    Route::get("/edit/{id}", [WarehouseStockRequestPharmacyController::class, "edit"])->name("warehouse.stock-request.pharmacy.edit");
-                });
-
-                Route::prefix("non-pharmacy")->group(function () {
-                    Route::get("/", [WarehouseStockRequestNonPharmacyController::class, "index"])->name("warehouse.stock-request.non-pharmacy");
-                    Route::get("/create", [WarehouseStockRequestNonPharmacyController::class, "create"])->name("warehouse.stock-request.non-pharmacy.create");
-                    Route::get("/print/{id}", [WarehouseStockRequestNonPharmacyController::class, "print"])->name("warehouse.stock-request.non-pharmacy.print");
-                    Route::get("/edit/{id}", [WarehouseStockRequestNonPharmacyController::class, "edit"])->name("warehouse.stock-request.non-pharmacy.edit");
-                });
-            });
-
-            Route::prefix("distribusi-barang")->group(function () {
-                Route::prefix("pharmacy")->group(function () {
-                    Route::get("/", [WarehouseDistribusiBarangFarmasiController::class, "index"])->name("warehouse.distribusi-barang.pharmacy");
-                    Route::get("/create", [WarehouseDistribusiBarangFarmasiController::class, "create"])->name("warehouse.distribusi-barang.pharmacy.create");
-                    Route::get("/print/{id}", [WarehouseDistribusiBarangFarmasiController::class, "print"])->name("warehouse.distribusi-barang.pharmacy.print");
-                    Route::get("/edit/{id}", [WarehouseDistribusiBarangFarmasiController::class, "edit"])->name("warehouse.distribusi-barang.pharmacy.edit");
-                });
-
-                Route::prefix("non-pharmacy")->group(function () {
-                    Route::get("/", [WarehouseDistribusiBarangNonFarmasiController::class, "index"])->name("warehouse.distribusi-barang.non-pharmacy");
-                    Route::get("/create", [WarehouseDistribusiBarangNonFarmasiController::class, "create"])->name("warehouse.distribusi-barang.non-pharmacy.create");
-                    Route::get("/print/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, "print"])->name("warehouse.distribusi-barang.non-pharmacy.print");
-                    Route::get("/edit/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, "edit"])->name("warehouse.distribusi-barang.non-pharmacy.edit");
-                });
-
-                Route::prefix("report")->group(function () {
-                    Route::get("/", [WarehouseDistribusiBarangReportController::class, "index"])->name("warehouse.distribusi-barang.report");
-                    Route::get("show/{json}", [WarehouseDistribusiBarangReportController::class, "show"])->name("warehouse.distribusi-barang.report.show");
-                });
-            });
-
-            Route::prefix("revaluasi-stock")->group(function () {
-                Route::prefix("stock-adjustment")->group(function () {
-                    Route::get("/", [WarehouseStockAdjustmentController::class, "index"])->name("warehouse.revaluasi-stock.stock-adjustment");
-                    Route::get("/create/{token}", [WarehouseStockAdjustmentController::class, "create"])->name("warehouse.revaluasi-stock.stock-adjustment.create");
-                    Route::get("/edit/{gudang_id}/{barang_id}/{satuan_id}/{type}/{token}", [WarehouseStockAdjustmentController::class, "edit"])->name("warehouse.revaluasi-stock.stock-adjustment.edit");
-                });
-
-                Route::prefix("stock-opname")->group(function () {
-                    Route::prefix("gudang-opname")->group(function () {
-                        Route::get("/", [WarehouseStockOpnameGudangController::class, "index"])->name("warehouse.revaluasi-stock.stock-opname.gudang-opname");
-                    });
-
-                    Route::prefix("draft")->group(function () {
-                        Route::get("/", [WarehouseStockOpnameDraft::class, "index"])->name("warehouse.revaluasi-stock.stock-opname.draft");
-                        Route::get("/print-selisih/{sog_id}", [WarehouseStockOpnameDraft::class, "print_selisih"])->name("warehouse.revaluasi-stock.stock-opname.draft.print.selisih");
-                        Route::get("/print-so/{sog_id}", [WarehouseStockOpnameDraft::class, "print_so"])->name("warehouse.revaluasi-stock.stock-opname.draft.print.so");
-                    });
-
-                    Route::prefix("final")->group(function () {
-                        Route::get("/", [WarehouseStockOpnameFinal::class, "index"])->name("warehouse.revaluasi-stock.stock-opname.final");
-                        Route::get("/print-selisih/{sog_id}", [WarehouseStockOpnameFinal::class, "print_selisih"])->name("warehouse.revaluasi-stock.stock-opname.final.print.selisih");
-                        Route::get("/print-so/{sog_id}", [WarehouseStockOpnameFinal::class, "print_so"])->name("warehouse.revaluasi-stock.stock-opname.final.print.so");
-                    });
-
-                    Route::prefix("report")->group(function () {
-                        Route::get("/", [WarehouseStockOpnameReport::class, "index"])->name("warehouse.revaluasi-stock.stock-opname.report");
-                        Route::get("/print-selisih/{sog_id}", [WarehouseStockOpnameReport::class, "print_selisih"])->name("warehouse.revaluasi-stock.stock-opname.report.print.selisih");
-                        Route::get("/print-so/{sog_id}", [WarehouseStockOpnameReport::class, "print_so"])->name("warehouse.revaluasi-stock.stock-opname.report.print.detail");
-                    });
-                });
-            });
-
-            Route::prefix("report")->group(function () {
-                Route::get("/stock-status", [WarehouseReportStockStatus::class, "index"])->name("warehouse.report.stock-status");
-                Route::get("/stock-detail", [WarehouseReportStockDetail::class, "index"])->name('warehouse.report.stock-detail');
-                Route::get("/kartu-stok", [WarehouseReportKartuStock::class, "index"])->name('warehouse.report.kartu-stock');
-                Route::get("/histori-perubahan-master-data", [WarehouseReportHistoriPerubahanMasterBarang::class, "index"])->name('warehouse.report.histori-perubahan-master-data');
             });
         });
 
@@ -751,15 +638,10 @@ Route::group(['middleware' => ['auth']], function () {
             Route::post('/prosedur/store', [OperasiController::class, 'storeProsedur'])->name('ok.prosedur.store');
             Route::get('/prosedur/get-jenis-by-kategori/{kategoriId}', [OperasiController::class, 'getJenisByKategori'])->name('ok.prosedur.get-jenis-by-kategori');
             Route::get('/prosedur/get-tindakan-by-jenis/{jenisId}', [OperasiController::class, 'getTindakanByJenis'])->name('ok.prosedur.get-tindakan-by-jenis');
+            Route::get('/prosedur/{order}/{prosedur}/edit', [OperasiController::class, 'editProsedur'])->name('ok.prosedur.edit');
+            Route::put('/prosedur/{prosedur}/update', [OperasiController::class, 'updateProsedur'])->name('ok.prosedur.update');
             // Tambahkan route ini di dalam group route operasi
             Route::delete('/prosedur/{prosedurId}', [OperasiController::class, 'deleteProsedur'])->name('ok.prosedur.delete');
-
-            // Tampilkan form edit prosedur
-            Route::get('/prosedur/{order}/edit/{prosedur}', [OperasiController::class, 'editProsedur'])->name('ok.prosedur.edit');
-
-            // Proses update prosedur (via POST/PATCH/PUT)
-            Route::put('/prosedur/{prosedur}', [OperasiController::class, 'updateProsedur'])->name('ok.prosedur.update');
-
 
 
 
@@ -813,19 +695,43 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name('radiologi.popup.pilih-pasien');
         });
 
+
         Route::prefix('laboratorium')->group(function () {
-            Route::get('list-order', [LaboratoriumController::class, 'index'])->name('laboratorium.list-order');
-            Route::get('label-order/{id}', [LaboratoriumController::class, 'labelOrder'])->name('laboratorium.label-order');
-            Route::get('hasil-order/{id}', [LaboratoriumController::class, 'hasilOrder'])->name('laboratorium.hasil-order');
-            Route::get('edit-order/{id}', [LaboratoriumController::class, 'editOrder'])->name('laboratorium.edit-order');
-            Route::get('nota-order/{id}', [LaboratoriumController::class, 'notaOrder'])->name('laboratorium.nota-order');
-            Route::get('simulasi-harga', [LaboratoriumController::class, 'simulasiHarga'])->name('laboratorium.simulasi-harga');
-            Route::get("order", [LaboratoriumController::class, 'order'])->name('laboratorium.order');
-            Route::get('laporan/parameter-pemeriksaan', [LaboratoriumController::class, 'reportParameter'])->name('laboratorium.report.parameter');
-            Route::get('laporan/pasien-per-pemeriksaan', [LaboratoriumController::class, 'reportPatient'])->name('laboratorium.report.patient');
-            Route::get("popup/pilih-pasien/{poli}", [LaboratoriumController::class, 'popupPilihPasien'])->name('laboratorium.popup.pilih-pasien');
-            Route::get('laporan-parameter-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}', [LaboratoriumController::class, 'reportParameterView'])->name('laboratorium.report-parameter.view');
-            Route::get('laporan-pasien-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}/{parameter}', [LaboratoriumController::class, 'reportPatientView'])->name('laboratorium.report-patient.view');
+            Route::get('list-order', [LaboratoriumController::class, 'index'])
+                ->name('laboratorium.list-order');
+
+            Route::get('label-order/{id}', [LaboratoriumController::class, 'labelOrder'])
+                ->name('laboratorium.label-order');
+
+            Route::get('hasil-order/{id}', [LaboratoriumController::class, 'hasilOrder'])
+                ->name('laboratorium.hasil-order');
+
+            Route::get('edit-order/{id}', [LaboratoriumController::class, 'editOrder'])
+                ->name('laboratorium.edit-order');
+
+            Route::get('nota-order/{id}', [LaboratoriumController::class, 'notaOrder'])
+                ->name('laboratorium.nota-order');
+
+            Route::get('simulasi-harga', [LaboratoriumController::class, 'simulasiHarga'])
+                ->name('laboratorium.simulasi-harga');
+
+            Route::get("order", [LaboratoriumController::class, 'order'])
+                ->name('laboratorium.order');
+
+            Route::get('laporan/parameter-pemeriksaan', [LaboratoriumController::class, 'reportParameter'])
+                ->name('laboratorium.report.parameter');
+
+            Route::get('laporan/pasien-per-pemeriksaan', [LaboratoriumController::class, 'reportPatient'])
+                ->name('laboratorium.report.patient');
+
+            Route::get("popup/pilih-pasien/{poli}", [LaboratoriumController::class, 'popupPilihPasien'])
+                ->name('laboratorium.popup.pilih-pasien');
+
+            Route::get('laporan-parameter-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}', [LaboratoriumController::class, 'reportParameterView'])
+                ->name('laboratorium.report-parameter.view');
+
+            Route::get('laporan-pasien-view/{fromDate}/{endDate}/{tipe_rawat}/{penjamin}/{parameter}', [LaboratoriumController::class, 'reportPatientView'])
+                ->name('laboratorium.report-patient.view');
         });
 
         Route::prefix('dokter')->group(function () {
@@ -871,15 +777,8 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
         Route::prefix('farmasi')->group(function () {
-            Route::prefix('transaksi-resep')->group(function () {
-                Route::get('/', [FarmasiResepController::class, 'index'])->name('farmasi.transaksi-resep');
-                Route::get('/create', [FarmasiResepController::class, 'create'])->name('farmasi.transaksi-resep.create');
-                Route::get("popup/pilih-pasien/{poli}", [FarmasiResepController::class, 'popupPilihPasien'])->name('farmasi.transaksi-resep.popup.pilih-pasien');
-                Route::get("popup/pilih-dokter", [FarmasiResepController::class, 'popupPilihDokter'])->name('farmasi.transaksi-resep.popup.pilih-dokter');
-                Route::get("popup/resep-elektronik", [FarmasiResepController::class, 'popupResepElektronik'])->name('farmasi.transaksi-resep.popup.resep-elektronik');
-            });
-
-
+            Route::get('transaksi-resep', [FarmasiController::class, 'transaksiResep'])
+                ->name('farmasi.transaksi-resep');
 
             Route::get('retur-resep', [FarmasiController::class, 'returResep'])
                 ->name('farmasi.retur-resep');
@@ -972,7 +871,6 @@ Route::group(['middleware' => ['auth']], function () {
         //         Route::get('template-paket', [MasterDataWarehouseController::class, 'templatePaket'])->name('warehouse.master-data.template-paket');
         //     });
         // });
-
 
         Route::prefix('depo')->group(function () {
             Route::prefix('stok-request')->group(function () {
@@ -1111,33 +1009,25 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
         Route::prefix('operasi')->group(function () {
-            // Menyimpan Order dari modal di halaman registrasi
             Route::post('order/store', [OperasiController::class, 'storeOrder'])->name('operasi.order.store');
             Route::get('/operasi/{orderId}/detail', [OperasiController::class, 'getOrderDetail']);
-
-            // Halaman utama untuk melihat daftar semua order operasi
             Route::get('list-order', [OperasiController::class, 'listOrder'])->name('operasi.list-order');
-            // +++ KODE BARU +++
-            // Tambahkan {orderId} untuk menerima parameter dari URL
 
-            // Halaman detail untuk satu order, di mana nanti ada manajemen prosedur, dll.
             Route::get('detail-order/{orderId}', [OperasiController::class, 'show'])->name('operasi.detail-order');
-
-            // Route untuk mencetak dokumen (misal: nota, informed consent, dll)
             Route::get('nota-order/{orderId}', [OperasiController::class, 'notaOrder'])->name('operasi.nota-order');
             Route::get('/api/simrs/get-order-operasi/{registrationId}', [OperasiController::class, 'getOrderOperasi']);
             Route::get('/api/simrs/get-tindakan-operasi/{registrationId}', [OperasiController::class, 'getTindakanOperasi']);
             Route::get('/operasi/order/data/{registrationId}', [OperasiController::class, 'getOrderOperasi'])
                 ->name('operasi.order.data');
+            Route::get('operasi/prosedur/data/{registrationId}', [OperasiController::class, 'getProsedurdata'])->name('operasi.prosedur.data');
 
-            Route::get('operasi/prosedur/data/{registrationId}', [OperasiController::class, 'getProsedurData'])->name('operasi.prosedur.data');
+
 
             Route::get('/operasi/tindakan/data/{registrationId}', [OperasiController::class, 'getTindakanOperasi'])
                 ->name('operasi.tindakan.data');
 
             Route::delete('/operasi/order/delete', [OperasiController::class, 'deleteOrder'])
                 ->name('operasi.order.delete');
-            // Route::get('data-order/{orderId}', [OperasiController::class, 'getOrderData'])->name('operasi.data-order');
         });
     });
 });
