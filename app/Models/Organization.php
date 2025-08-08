@@ -24,62 +24,73 @@ class Organization extends Model
 
     // app/Models/Organization.php
 
+    // app/Models/Organization.php
+
     public static function getAllOrderedByHierarchy(): Collection
     {
-        // --- PERUBAHAN UTAMA DIMULAI DI SINI ---
-
-        // 1. Definisikan nama-nama unit yang ingin Anda jadikan level teratas (akar baru).
-        // Urutan di dalam array ini akan menentukan urutan di laporan.
+        // Bagian ini tidak perlu diubah
         $newRootNames = [
             'Pelayanan Medis',
             'Penunjang Medis',
             'Sub Bagian Keuangan',
             'Sub Bagian Umum',
-            'Sub Bagian SDM, Kesekretariatan, Humas & Marketing', // Tambahkan yang lain jika perlu
-            'SOD' // Tambahkan yang lain jika perlu
+            'Sub Bagian SDM, Kesekretariatan, Humas & Marketing',
         ];
 
-        // 2. Ambil objek Organization berdasarkan nama-nama di atas.
-        // Gunakan `whereIn` untuk efisiensi dan `orderByRaw(FIELD(...))` untuk menjaga urutan.
         $newRootOrganizations = self::whereIn('name', $newRootNames)
             ->orderByRaw("FIELD(name, '" . implode("','", $newRootNames) . "')")
             ->get();
 
+        // --- PERUBAHAN UTAMA 1: Definisikan Peta Nama Tampilan ---
+        // Di sini kita definisikan nama apa yang akan diubah menjadi apa.
+        $displayNameMap = [
+            'Pelayanan Medis' => 'Kepala Seksi Pelayanan Medis',
+            'Penunjang Medis' => 'Kepala Seksi Penunjang Medis',
+            'Sub Bagian Keuangan' => 'Kepala Sub Bagian Keuangan',
+            'Sub Bagian Umum' => 'Kepala Sub Bagian Umum & Rumah Tangga',
+            'Sub Bagian SDM, Kesekretariatan, Humas & Marketing' => 'Kepala Sub Bagian SDM, Kesekretariatan, Humas & Marketing',
+            // Anda bisa menambahkan 'terjemahan' lain di sini jika perlu
+        ];
+
         $sortedList = [];
         $processedIds = [];
 
-        // Fungsi rekursif (traverse) tidak perlu diubah, ia akan bekerja dengan akar baru
-        $traverse = function (Organization $organization, int $depth) use (&$sortedList, &$traverse, &$processedIds) {
+        // Pastikan $displayNameMap dimasukkan ke dalam scope fungsi traverse
+        $traverse = function (Organization $organization, int $depth) use (&$sortedList, &$traverse, &$processedIds, $displayNameMap) {
             if (in_array($organization->id, $processedIds)) {
                 return;
             }
             $processedIds[] = $organization->id;
 
+            // --- PERUBAHAN UTAMA 2: Gunakan Peta Nama ---
+            $originalName = $organization->name;
+            // Cek apakah nama asli ada di dalam peta. Jika ada, gunakan nama baru.
+            // Jika tidak, gunakan nama asli (fallback).
+            $displayName = $displayNameMap[$originalName] ?? $originalName;
+
             $sortedList[] = [
                 'id'            => $organization->id,
-                'name'          => $organization->name,
+                'name'          => $displayName, // Gunakan nama tampilan baru
                 'depth'         => $depth,
-                'prefixed_name' => str_repeat('— ', $depth) . $organization->name,
+                'prefixed_name' => str_repeat('— ', $depth) . $displayName, // Gunakan nama tampilan baru juga di sini
             ];
 
-            // Urutkan anak-anak berdasarkan nama secara default
+            // Bagian ini tidak perlu diubah
             $childrenStructures = $organization->child_structures()->with('organization')->get()
                 ->sortBy(function ($structure) {
-                    // Pastikan ada organization sebelum mencoba mengakses nama
                     return $structure->organization ? $structure->organization->name : '';
                 });
 
             foreach ($childrenStructures as $childStructure) {
-                // Pastikan ada organization sebelum melakukan rekursi
                 if ($childStructure->organization) {
                     $traverse($childStructure->organization, $depth + 1);
                 }
             }
         };
 
-        // 3. Mulai penelusuran dari setiap "akar baru" yang sudah kita definisikan dan urutkan.
+        // Bagian ini tidak perlu diubah
         foreach ($newRootOrganizations as $root) {
-            $traverse($root, 0); // Mulai dari level 0
+            $traverse($root, 0);
         }
 
         return collect($sortedList);
