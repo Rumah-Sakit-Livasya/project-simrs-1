@@ -143,7 +143,7 @@
     <div class="panel-hdr">
         <h2>
             <i class="fas fa-heart-pulse mr-2 text-danger"></i>
-            Tindakan Operasi (Sudah Dilaksanakan)
+            Tindakan Operasi
         </h2>
     </div>
     <div class="panel-container show">
@@ -253,32 +253,32 @@
             processing: true,
             serverSide: false,
             ajax: {
-                url: "{{ route('operasi.tindakan.data', $registration->id) }}", // Route untuk get data tindakan
+                url: "{{ route('operasi.prosedur.data', $registration->id) }}", // Route untuk get data tindakan
                 type: 'GET',
                 dataSrc: 'data'
             },
             columns: [{
-                    data: 'tindakan_name',
+                    data: 'tindakan_nama',
                     name: 'tindakan'
                 },
                 {
-                    data: 'tipe_operasi_name',
+                    data: 'tipe_operasi',
                     name: 'tipe_operasi'
                 },
                 {
-                    data: 'kategori_operasi_name',
+                    data: 'kategori_operasi',
                     name: 'kategori_operasi'
                 },
                 {
-                    data: 'dokter_name',
-                    name: 'dokter'
+                    data: 'dokter_operator',
+                    name: 'dokter_operator'
                 },
                 {
-                    data: 'tgl_tindakan_formatted',
+                    data: 'tgl_tindakan',
                     name: 'tgl_tindakan'
                 },
                 {
-                    data: 'user_create_name',
+                    data: 'user_create',
                     name: 'user_create'
                 },
                 {
@@ -289,21 +289,14 @@
                         let statusText = '';
 
                         switch (data) {
-                            case 'rencana':
+                            case 'Draft':
                                 badgeClass = 'badge-warning';
-                                statusText = 'Rencana';
+                                statusText = 'Draft';
                                 break;
-                            case 'selesai':
+                            case 'Final':
                                 badgeClass = 'badge-success';
-                                statusText = 'Selesai';
+                                statusText = 'Final';
                                 break;
-                            case 'batal':
-                                badgeClass = 'badge-danger';
-                                statusText = 'Batal';
-                                break;
-                            default:
-                                badgeClass = 'badge-secondary';
-                                statusText = data;
                         }
 
                         return `<span class="badge ${badgeClass}">${statusText}</span>`;

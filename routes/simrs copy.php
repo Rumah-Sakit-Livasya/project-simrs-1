@@ -638,15 +638,10 @@ Route::group(['middleware' => ['auth']], function () {
             Route::post('/prosedur/store', [OperasiController::class, 'storeProsedur'])->name('ok.prosedur.store');
             Route::get('/prosedur/get-jenis-by-kategori/{kategoriId}', [OperasiController::class, 'getJenisByKategori'])->name('ok.prosedur.get-jenis-by-kategori');
             Route::get('/prosedur/get-tindakan-by-jenis/{jenisId}', [OperasiController::class, 'getTindakanByJenis'])->name('ok.prosedur.get-tindakan-by-jenis');
+            Route::get('/prosedur/{order}/{prosedur}/edit', [OperasiController::class, 'editProsedur'])->name('ok.prosedur.edit');
+            Route::put('/prosedur/{prosedur}/update', [OperasiController::class, 'updateProsedur'])->name('ok.prosedur.update');
             // Tambahkan route ini di dalam group route operasi
             Route::delete('/prosedur/{prosedurId}', [OperasiController::class, 'deleteProsedur'])->name('ok.prosedur.delete');
-
-            // Tampilkan form edit prosedur
-            Route::get('/prosedur/{order}/edit/{prosedur}', [OperasiController::class, 'editProsedur'])->name('ok.prosedur.edit');
-
-            // Proses update prosedur (via POST/PATCH/PUT)
-            Route::put('/prosedur/{prosedur}', [OperasiController::class, 'updateProsedur'])->name('ok.prosedur.update');
-
 
 
 
@@ -1014,33 +1009,25 @@ Route::group(['middleware' => ['auth']], function () {
         });
 
         Route::prefix('operasi')->group(function () {
-            // Menyimpan Order dari modal di halaman registrasi
             Route::post('order/store', [OperasiController::class, 'storeOrder'])->name('operasi.order.store');
             Route::get('/operasi/{orderId}/detail', [OperasiController::class, 'getOrderDetail']);
-
-            // Halaman utama untuk melihat daftar semua order operasi
             Route::get('list-order', [OperasiController::class, 'listOrder'])->name('operasi.list-order');
-            // +++ KODE BARU +++
-            // Tambahkan {orderId} untuk menerima parameter dari URL
 
-            // Halaman detail untuk satu order, di mana nanti ada manajemen prosedur, dll.
             Route::get('detail-order/{orderId}', [OperasiController::class, 'show'])->name('operasi.detail-order');
-
-            // Route untuk mencetak dokumen (misal: nota, informed consent, dll)
             Route::get('nota-order/{orderId}', [OperasiController::class, 'notaOrder'])->name('operasi.nota-order');
             Route::get('/api/simrs/get-order-operasi/{registrationId}', [OperasiController::class, 'getOrderOperasi']);
             Route::get('/api/simrs/get-tindakan-operasi/{registrationId}', [OperasiController::class, 'getTindakanOperasi']);
             Route::get('/operasi/order/data/{registrationId}', [OperasiController::class, 'getOrderOperasi'])
                 ->name('operasi.order.data');
+            Route::get('operasi/prosedur/data/{registrationId}', [OperasiController::class, 'getProsedurdata'])->name('operasi.prosedur.data');
 
-            Route::get('operasi/prosedur/data/{registrationId}', [OperasiController::class, 'getProsedurData'])->name('operasi.prosedur.data');
+
 
             Route::get('/operasi/tindakan/data/{registrationId}', [OperasiController::class, 'getTindakanOperasi'])
                 ->name('operasi.tindakan.data');
 
             Route::delete('/operasi/order/delete', [OperasiController::class, 'deleteOrder'])
                 ->name('operasi.order.delete');
-            // Route::get('data-order/{orderId}', [OperasiController::class, 'getOrderData'])->name('operasi.data-order');
         });
     });
 });

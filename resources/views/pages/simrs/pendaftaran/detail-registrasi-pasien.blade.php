@@ -443,7 +443,7 @@
                         {{-- Tindakan Medis --}}
                         @include('pages.simrs.pendaftaran.partials.tindakan-medis')
                     </div>
-                    <div id="operasi" style="display: none;">
+                    <div id="operasi" style="display: none; padding: 15px;">
                         {{-- Operasi --}}
                         @include('pages.simrs.pendaftaran.partials.operasi')
                     </div>
