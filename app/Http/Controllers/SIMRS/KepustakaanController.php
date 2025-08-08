@@ -489,6 +489,7 @@ class KepustakaanController extends Controller
             'rawat inap',
             'umum rumah tangga',
             'gardener',
+            'sod',
         ];
 
         $filteredOrganizations = $orderedOrganizations->filter(function ($org) use ($excludedNames) {

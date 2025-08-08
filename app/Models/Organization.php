@@ -20,17 +20,41 @@ class Organization extends Model
      *
      * @return \Illuminate\Support\Collection
      */
+    // app/Models/Organization.php
+
+    // app/Models/Organization.php
+
     public static function getAllOrderedByHierarchy(): Collection
     {
-        // 1. Temukan semua organisasi yang tidak memiliki induk (akar/root)
-        // Organisasi yang tidak pernah menjadi 'child_organization' di tabel Structure
-        $rootOrganizations = self::whereDoesntHave('parent_structures')->get();
+        // --- PERUBAHAN UTAMA DIMULAI DI SINI ---
+
+        // 1. Definisikan nama-nama unit yang ingin Anda jadikan level teratas (akar baru).
+        // Urutan di dalam array ini akan menentukan urutan di laporan.
+        $newRootNames = [
+            'Pelayanan Medis',
+            'Penunjang Medis',
+            'Sub Bagian Keuangan',
+            'Sub Bagian Umum',
+            'Sub Bagian SDM, Kesekretariatan, Humas & Marketing', // Tambahkan yang lain jika perlu
+            'SOD' // Tambahkan yang lain jika perlu
+        ];
+
+        // 2. Ambil objek Organization berdasarkan nama-nama di atas.
+        // Gunakan `whereIn` untuk efisiensi dan `orderByRaw(FIELD(...))` untuk menjaga urutan.
+        $newRootOrganizations = self::whereIn('name', $newRootNames)
+            ->orderByRaw("FIELD(name, '" . implode("','", $newRootNames) . "')")
+            ->get();
 
         $sortedList = [];
+        $processedIds = [];
 
-        // 2. Buat fungsi rekursif untuk menelusuri anak-anak
-        $traverse = function (Organization $organization, int $depth) use (&$sortedList, &$traverse) {
-            // Tambahkan organisasi saat ini ke dalam daftar
+        // Fungsi rekursif (traverse) tidak perlu diubah, ia akan bekerja dengan akar baru
+        $traverse = function (Organization $organization, int $depth) use (&$sortedList, &$traverse, &$processedIds) {
+            if (in_array($organization->id, $processedIds)) {
+                return;
+            }
+            $processedIds[] = $organization->id;
+
             $sortedList[] = [
                 'id'            => $organization->id,
                 'name'          => $organization->name,
@@ -38,16 +62,23 @@ class Organization extends Model
                 'prefixed_name' => str_repeat('— ', $depth) . $organization->name,
             ];
 
-            // Telusuri setiap anak dari organisasi saat ini
-            // Kita perlu me-load relasi 'organization' untuk menghindari N+1 query problem
-            foreach ($organization->child_structures()->with('organization')->get() as $childStructure) {
-                // Panggil kembali fungsi ini untuk anak, dengan menambah level kedalaman
-                $traverse($childStructure->organization, $depth + 1);
+            // Urutkan anak-anak berdasarkan nama secara default
+            $childrenStructures = $organization->child_structures()->with('organization')->get()
+                ->sortBy(function ($structure) {
+                    // Pastikan ada organization sebelum mencoba mengakses nama
+                    return $structure->organization ? $structure->organization->name : '';
+                });
+
+            foreach ($childrenStructures as $childStructure) {
+                // Pastikan ada organization sebelum melakukan rekursi
+                if ($childStructure->organization) {
+                    $traverse($childStructure->organization, $depth + 1);
+                }
             }
         };
 
-        // 3. Mulai penelusuran dari setiap organisasi akar
-        foreach ($rootOrganizations as $root) {
+        // 3. Mulai penelusuran dari setiap "akar baru" yang sudah kita definisikan dan urutkan.
+        foreach ($newRootOrganizations as $root) {
             $traverse($root, 0); // Mulai dari level 0
         }
 
