@@ -470,13 +470,97 @@ class KepustakaanController extends Controller
         $selectedYear = (int) $request->input('year', Carbon::now()->year);
         $selectedMonth = (int) $request->input('month', Carbon::now()->month);
 
-        // 1. Ambil organisasi yang sudah terurut (tidak ada perubahan di sini)
+        // ===================================================================
+        // LANGKAH 1: Buat Daftar Unit Gabungan (Master List)
+        // ===================================================================
+
+        // 1a. Ambil hierarki organisasi dari database
         $orderedOrganizations = Organization::getAllOrderedByHierarchy();
 
-        // --- PERUBAHAN UTAMA ADA DI SINI ---
-        // 2. Filter koleksi untuk mengecualikan nama 'FITBOSS' dan 'PT'
-        // Kita gunakan `->filter()` dari Laravel Collection.
-        // Define excluded organization names in an array for easy maintenance
+        // 1b. Ambil "unit virtual" dari folder Kepustakaan
+        $parentFolderUmum = Kepustakaan::where('name', 'Kepala Sub Bagian Umum & Rumah Tangga')->first();
+        $virtualUnits = collect();
+        if ($parentFolderUmum) {
+            $virtualUnits = Kepustakaan::where('parent_id', $parentFolderUmum->id)
+                ->where('type', 'folder')
+                ->whereIn('name', ['Laundry', 'Kebersihan'])
+                ->get();
+        }
+
+        // 1c. Gabungkan menjadi satu daftar master
+        $masterUnitList = collect();
+        $virtualUnitMap = []; // Peta untuk menghubungkan folder ID ke ID unit virtual
+
+        foreach ($orderedOrganizations as $org) {
+            $masterUnitList->push([
+                'id' => $org['id'],
+                'is_virtual' => false,
+                'organization_name' => $org['prefixed_name'],
+                'original_name' => $org['name'], // Simpan nama asli untuk filtering
+            ]);
+
+            if ($org['name'] === 'Kepala Sub Bagian Umum & Rumah Tangga') {
+                foreach ($virtualUnits as $virtualUnit) {
+                    $virtualId = 'virtual_' . $virtualUnit->id;
+                    $masterUnitList->push([
+                        'id' => $virtualId,
+                        'is_virtual' => true,
+                        'organization_name' => str_repeat('— ', $org['depth'] + 1) . $virtualUnit->name,
+                        'original_name' => $virtualUnit->name,
+                    ]);
+                    $virtualUnitMap[$virtualUnit->id] = $virtualId; // Buat peta: folder_id => virtual_id
+                }
+            }
+        }
+
+        // ===================================================================
+        // LANGKAH 2: Buat Peta Status Pengiriman (Submission Map)
+        // ===================================================================
+
+        // 2a. Ambil SEMUA file laporan yang relevan dalam satu query
+        $allSubmissions = Kepustakaan::where('kategori', 'Laporan')
+            ->where('type', 'file')
+            ->where('year', $selectedYear)
+            ->where('month', '>=', $selectedMonth)
+            ->get();
+
+        // 2b. Proses setiap file untuk membangun peta status
+        $submissionMap = [];
+        foreach ($allSubmissions as $submission) {
+            // Tandai unit PENGUNGGAH sebagai 'sudah mengirim'
+            if ($submission->organization_id) {
+                $submissionMap[$submission->organization_id] = $submission;
+            }
+
+            // Tandai unit FOLDER TUJUAN sebagai 'sudah mengirim'
+            if ($submission->parent_id && isset($virtualUnitMap[$submission->parent_id])) {
+                $virtualId = $virtualUnitMap[$submission->parent_id];
+                $submissionMap[$virtualId] = $submission;
+            }
+        }
+
+        // ===================================================================
+        // LANGKAH 3: Bangun Hasil Akhir Menggunakan Peta Status
+        // ===================================================================
+
+        $reportStatus = [];
+        foreach ($masterUnitList as $unit) {
+            // Cari status unit ini di dalam peta yang sudah kita buat
+            $submissionData = $submissionMap[$unit['id']] ?? null;
+            $status = !is_null($submissionData);
+
+            $reportStatus[] = [
+                'organization_name' => $unit['organization_name'],
+                'original_name' => $unit['original_name'], // Kirim nama asli untuk filtering
+                'status' => $status,
+                'submission' => $submissionData,
+            ];
+        }
+
+        // ===================================================================
+        // LANGKAH 4: Filter Hasil Akhir
+        // ===================================================================
+
         $excludedNames = [
             'fitboss',
             'pt',
@@ -492,41 +576,14 @@ class KepustakaanController extends Controller
             'sod',
         ];
 
-        $filteredOrganizations = $orderedOrganizations->filter(function ($org) use ($excludedNames) {
-            $lowerCaseName = strtolower($org['name']);
-            return !in_array($lowerCaseName, $excludedNames);
+        $finalReportStatus = array_filter($reportStatus, function ($report) use ($excludedNames) {
+            return !in_array(strtolower($report['original_name']), $excludedNames);
         });
-        // Ambil hanya ID dari organisasi yang SUDAH DIFILTER
-        $organizationIdsInOrder = $filteredOrganizations->pluck('id')->toArray();
 
-        // 3. Filter laporan (tidak ada perubahan di sini, tapi sekarang menggunakan ID yang sudah difilter)
-        $submissions = Kepustakaan::where('kategori', 'Laporan')
-            ->where('type', 'file')
-            ->where('year', $selectedYear)
-            ->where('month', $selectedMonth)
-            ->whereIn('organization_id', $organizationIdsInOrder)
-            ->latest('created_at')
-            ->get()
-            ->keyBy('organization_id');
-
-        // 4. Bangun reportStatus berdasarkan organisasi yang SUDAH DIFILTER
-        $reportStatus = [];
-        // Loop melalui koleksi organisasi yang SUDAH DIFILTER
-        foreach ($filteredOrganizations as $org) {
-            $submissionData = $submissions->get($org['id']);
-            $status = !is_null($submissionData);
-
-            $reportStatus[] = [
-                'organization_name' => $org['prefixed_name'],
-                'status' => $status,
-                'submission' => $submissionData,
-            ];
-        }
-
-        return view('pages.simrs.kepustakaan.laporan_dashboard', compact(
-            'reportStatus',
-            'selectedYear',
-            'selectedMonth'
-        ));
+        return view('pages.simrs.kepustakaan.laporan_dashboard', [
+            'reportStatus' => $finalReportStatus,
+            'selectedYear' => $selectedYear,
+            'selectedMonth' => $selectedMonth,
+        ]);
     }
 }
