@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Inventaris\RoomMaintenance;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class Organization extends Model
 {
@@ -12,6 +13,46 @@ class Organization extends Model
     protected $fillable = [
         'name'
     ];
+
+    /**
+     * Mengambil semua organisasi dan mengurutkannya berdasarkan hierarki.
+     * Menghasilkan Collection yang berisi array asosiatif.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getAllOrderedByHierarchy(): Collection
+    {
+        // 1. Temukan semua organisasi yang tidak memiliki induk (akar/root)
+        // Organisasi yang tidak pernah menjadi 'child_organization' di tabel Structure
+        $rootOrganizations = self::whereDoesntHave('parent_structures')->get();
+
+        $sortedList = [];
+
+        // 2. Buat fungsi rekursif untuk menelusuri anak-anak
+        $traverse = function (Organization $organization, int $depth) use (&$sortedList, &$traverse) {
+            // Tambahkan organisasi saat ini ke dalam daftar
+            $sortedList[] = [
+                'id'            => $organization->id,
+                'name'          => $organization->name,
+                'depth'         => $depth,
+                'prefixed_name' => str_repeat('— ', $depth) . $organization->name,
+            ];
+
+            // Telusuri setiap anak dari organisasi saat ini
+            // Kita perlu me-load relasi 'organization' untuk menghindari N+1 query problem
+            foreach ($organization->child_structures()->with('organization')->get() as $childStructure) {
+                // Panggil kembali fungsi ini untuk anak, dengan menambah level kedalaman
+                $traverse($childStructure->organization, $depth + 1);
+            }
+        };
+
+        // 3. Mulai penelusuran dari setiap organisasi akar
+        foreach ($rootOrganizations as $root) {
+            $traverse($root, 0); // Mulai dari level 0
+        }
+
+        return collect($sortedList);
+    }
 
     public function getAllChildAssociative()
     {
