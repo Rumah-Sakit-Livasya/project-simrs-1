@@ -482,12 +482,12 @@ class KepustakaanController extends Controller
             'pt',
             'driver',
             'dokter',
-            'Gudang Farmasi',
-            'Farmasi Ranap',
-            'Farmasi Rajal',
-            'Rawat Inap 2',
-            'Rawat Inap',
-            'SOD',
+            'gudang farmasi',
+            'farmasi ranap',
+            'farmasi rajal',
+            'rawat inap 2',
+            'rawat inap',
+            'sod',
         ];
 
         $filteredOrganizations = $orderedOrganizations->filter(function ($org) use ($excludedNames) {
