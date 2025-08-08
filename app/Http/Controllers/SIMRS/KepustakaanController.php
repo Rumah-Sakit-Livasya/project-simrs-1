@@ -481,6 +481,13 @@ class KepustakaanController extends Controller
             'fitboss',
             'pt',
             'driver',
+            'dokter',
+            'Gudang Farmasi',
+            'Farmasi Ranap',
+            'Farmasi Rajal',
+            'Rawat Inap 2',
+            'Rawat Inap',
+            'SOD',
         ];
 
         $filteredOrganizations = $orderedOrganizations->filter(function ($org) use ($excludedNames) {
