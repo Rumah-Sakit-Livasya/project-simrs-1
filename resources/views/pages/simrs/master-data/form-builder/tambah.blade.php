@@ -21,6 +21,15 @@
     <main id="js-page-content" role="main" class="page-content">
         <div class="row justify-content-center">
             <div class="col-xl-12">
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <a href="{{ route('master-data.setup.form-builder') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left mr-1"></i> Kembali
+                        </a>
+                    </div>
+                </div>
+
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
@@ -34,14 +43,24 @@
                                 @csrf
                                 <div class="row">
                                     {{-- Kolom Nama Formulir & Status tidak berubah --}}
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="nama_form" class="form-label">Nama Formulir</label>
                                             <input type="text" name="nama_form" id="nama_form" class="form-control"
                                                 required>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
+                                        <div class="form-group">
+                                            <label for="tipe_form" class="form-label">Tipe Formulir</label>
+                                            <select class="form-control" name="tipe_form" id="tipe_form" required>
+                                                <option value="rawat-jalan">Rawat Jalan</option>
+                                                <option value="rawat-inap">Rawat Inap</option>
+                                                <option value="all">Semua</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="form_kategori_id" class="form-label">Kategori Formulir</label>
                                             <select class="form-control" name="form_kategori_id" id="form_kategori_id"
@@ -54,7 +73,8 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 mb-3">
+
+                                    <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="is_active" class="form-label">Status</label>
                                             <select class="form-control" name="is_active" id="is_active" required>
@@ -66,7 +86,7 @@
                                     {{-- Sisa form tidak berubah --}}
                                     <div class="col-md-12 mb-3">
                                         <label for="summernote" class="form-label mb-2">Isi Formulir</label>
-                                        <textarea name="form_source" id="summernote" class="form-control" rows="10"></textarea>
+                                        <textarea name="form_source" id="summernote" class="form-control" rows="20"></textarea>
                                     </div>
                                     <div class="col-md-12">
                                         <button type="submit" class="btn btn-block mt-2 btn-primary">
@@ -92,6 +112,13 @@
     <script>
         $(document).ready(function() {
             // Inisialisasi untuk Kategori Formulir
+            $('#tipe_form').select2({
+                placeholder: "Pilih Tipe Formulir",
+                // Ini adalah kunci untuk mengaktifkan fitur select-or-create.
+                // Pengguna bisa memilih dari daftar atau mengetikkan nilai baru.
+                tags: true
+            });
+
             $('#form_kategori_id').select2({
                 placeholder: "Pilih atau ketik kategori baru",
                 // Ini adalah kunci untuk mengaktifkan fitur select-or-create.

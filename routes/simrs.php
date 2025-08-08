@@ -315,11 +315,21 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get('/beds/{room:id}', [BedController::class, 'index'])
                     ->name('master-data.setup.beds');
 
-                // Department management
-                Route::get('departemen', [DepartementController::class, 'index'])
-                    ->name('master-data.setup.departemen.index');
-                Route::get('departemen/tambah', [DepartementController::class, 'tambah'])
-                    ->name('master-data.setup.departemen.tambah');
+                Route::prefix('departemen')
+                    ->name('master-data.setup.departemen.')
+                    ->group(function () {
+
+                        Route::get('/', [DepartementController::class, 'index'])->name('index'); // URL: /departemen
+
+                        Route::get('/tambah', [DepartementController::class, 'tambah'])->name('tambah'); // URL: /departemen/tambah
+
+                        Route::post('/store', [DepartementController::class, 'store'])->name('store'); // URL: /departemen/store
+
+                        // Rute untuk Import
+                        // Route::get('/import', [DepartementController::class, 'showImportForm'])->name('import.form'); // URL: /departemen/import
+
+                        Route::post('/import', [DepartementController::class, 'import'])->name('import'); // URL: /departemen/import (method POST)
+                    });
 
                 // Registration fee setup
                 Route::get('/tarif-registrasi-layanan', [TarifRegistrasiController::class, 'index'])
