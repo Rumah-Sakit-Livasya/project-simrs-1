@@ -190,7 +190,8 @@ class LaporanInternalController extends Controller
             ->when(!Auth::user()->hasRole('superadmin'), function ($query) {
                 $query->where('user_id', Auth::user()->id);
             })
-            ->where('organization_id', Auth::user()->employee->organization_id);
+            ->where('organization_id', Auth::user()->employee->organization_id)
+            ->latest(); // Add latest() to order by created_at desc
         // ->where('organization_id', $request->organization);
 
         // Apply filters if provided
