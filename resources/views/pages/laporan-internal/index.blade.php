@@ -973,7 +973,7 @@
 
         // initialize datatable
         $(document).ready(function() {
-            $('#laporanTable').DataTable({
+            var table = $('#laporanTable').DataTable({
                 "drawCallback": function(settings) {
                     // Menyembunyikan preloader setelah data berhasil dimuat
                     $('#loading-spinner').hide();
