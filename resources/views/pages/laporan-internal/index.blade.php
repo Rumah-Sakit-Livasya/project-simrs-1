@@ -221,59 +221,199 @@
                 }
             });
 
-            // Initialize datepicker
-            $('.datepicker').datepicker({
-                format: 'yyyy-mm-dd',
-                autoclose: true,
-                todayHighlight: true
-            });
-
             // Set today's date as default
             $('.datepicker').datepicker('setDate', new Date());
 
-            // Initialize DataTable with local language config
+            // Helper functions (jika belum ada, pastikan fungsi ini tersedia)
+            // Fungsi ini diperlukan untuk render kolom 'respon_time'
+            function parseTime(timeStr) {
+                if (typeof timeStr === 'string' && /^\d{2}:\d{2}:\d{2}$/.test(timeStr)) {
+                    const [hours, minutes, seconds] = timeStr.split(':');
+                    const date = new Date();
+                    date.setHours(hours, minutes, seconds, 0);
+                    return date;
+                }
+                return new Date(timeStr);
+            }
+
+            function formatDuration(diffInMillis) {
+                if (isNaN(diffInMillis) || diffInMillis < 0) return '<span class="text-danger">Invalid</span>';
+                const hours = Math.floor(diffInMillis / 3600000);
+                const minutes = Math.floor((diffInMillis % 3600000) / 60000);
+                const seconds = Math.floor((diffInMillis % 60000) / 1000);
+                let durationText = '';
+                if (hours > 0) durationText += `${hours} jam `;
+                if (minutes > 0) durationText += `${minutes} menit `;
+                if (seconds > 0 || durationText === '') durationText += `${seconds} detik`;
+                return durationText.trim();
+            }
+
+            // Initialize DataTable with AJAX
+            // Initialize DataTable with AJAX
             var table = $('#laporanTable').DataTable({
-                "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
-                    $('#loading-spinner').hide();
+                // 1. AKTIFKAN SERVER-SIDE PROCESSING
+                processing: true, // Menampilkan indikator "Processing..." saat data dimuat
+                serverSide: true, // Mengaktifkan mode server-side
+
+                // 2. TENTUKAN SUMBER DATA AJAX
+                ajax: {
+                    url: "/laporan-internal-list", // URL endpoint API Anda
+                    type: "GET", // Metode request
+                    // Anda dapat menambahkan data tambahan di sini jika perlu
+                    data: function(d) {
+                        // Contoh jika Anda punya filter tambahan di halaman
+                        // d.status_filter = $('#statusFilter').val();
+                        // d.user_filter = $('#userFilter').val();
+                    },
+                    error: function(xhr, error, code) {
+                        // Handle jika terjadi error saat mengambil data
+                        console.error("Gagal memuat data dari server:", xhr.responseText);
+                        // Mungkin tampilkan notifikasi error kepada pengguna
+                    }
                 },
+
+                // 3. DEFINISIKAN KOLOM UNTUK MEMETAKAN DATA JSON
+                columns: [{
+                        data: null,
+                        name: 'no',
+                        orderable: false,
+                        searchable: false,
+                        render: (data, type, row, meta) => meta.row + meta.settings._iDisplayStart + 1
+                    },
+                    {
+                        data: 'tanggal',
+                        name: 'tanggal',
+                        render: data => new Date(data).toLocaleDateString('id-ID', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        })
+                    },
+                    {
+                        data: 'jenis',
+                        name: 'jenis',
+                        render: data =>
+                            `<span class="badge ${data === 'kegiatan' ? 'bg-success' : 'bg-warning'}">${data === 'kegiatan' ? 'Kegiatan' : 'Kendala'}</span>`
+                    },
+                    {
+                        data: 'kegiatan',
+                        name: 'kegiatan'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        render: data => {
+                            let badgeClass = 'bg-secondary';
+                            if (data === 'selesai') badgeClass = 'bg-success';
+                            else if (data === 'diproses') badgeClass = 'bg-primary';
+                            else if (data === 'baru') badgeClass = 'bg-info';
+                            else if (data === 'ditolak') badgeClass = 'bg-danger';
+                            return `<span class="badge ${badgeClass}">${data}</span>`;
+                        }
+                    },
+                    {
+                        data: 'keterangan',
+                        name: 'keterangan',
+                        render: data => data ?? '-'
+                    },
+
+                    // --- Kolom Kondisional untuk IT ---
+                    @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)')
+                        {
+                            data: 'jam_masuk',
+                            name: 'jam_masuk',
+                            render: data => data ? new Date(parseTime(data)).toLocaleTimeString(
+                                'id-ID', {
+                                    hour12: false
+                                }) : '-'
+                        }, {
+                            data: 'jam_diproses',
+                            name: 'jam_diproses',
+                            render: data => data ? new Date(parseTime(data)).toLocaleTimeString(
+                                'id-ID', {
+                                    hour12: false
+                                }) : '-'
+                        }, {
+                            data: null,
+                            name: 'respon_time',
+                            orderable: false,
+                            searchable: false,
+                            render: (data, type, row) => {
+                                if (row.jam_masuk && row.jam_diproses) {
+                                    return formatDuration(Math.abs(parseTime(row.jam_diproses) -
+                                        parseTime(row.jam_masuk)));
+                                }
+                                return '-';
+                            }
+                        },
+                    @endif
+
+                    {
+                        data: 'fullname',
+                        name: 'fullname',
+                        render: data => data ?? '-'
+                    },
+                    {
+                        data: 'id',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        render: (data, type, row) => {
+                            // Logika untuk membuat tombol aksi
+                            // Ganti dengan fungsi render tombol Anda yang sudah ada
+                            return `<div class="btn-group">
+                                    <button class="btn btn-sm btn-primary" onclick="editLaporan(${data})"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteLaporan(${data})"><i class="fas fa-trash"></i></button>
+                                </div>`;
+                        }
+                    }
+                ],
+
+                // 4. PERTAHANKAN KONFIGURASI TAMPILAN ANDA
                 responsive: false, // Responsif diaktifkan
                 scrollX: true, // Tambahkan scroll horizontal
                 lengthChange: false,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end buttons-container'B>>" +
+                // DOM dipertahankan sesuai permintaan Anda
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'B>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                // Tombol dipertahankan sesuai permintaan Anda
                 buttons: [{
                         extend: 'pdfHtml5',
                         text: 'PDF',
                         titleAttr: 'Generate PDF',
-                        className: 'btn-outline-danger btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-danger btn-sm mr-1'
                     },
                     {
                         extend: 'excelHtml5',
                         text: 'Excel',
                         titleAttr: 'Generate Excel',
-                        className: 'btn-outline-success btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-success btn-sm mr-1'
                     },
                     {
                         extend: 'csvHtml5',
                         text: 'CSV',
                         titleAttr: 'Generate CSV',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-primary btn-sm mr-1'
                     },
                     {
                         extend: 'copyHtml5',
                         text: 'Copy',
                         titleAttr: 'Copy to clipboard',
-                        className: 'btn-outline-primary btn-sm mr-1 custom-margin'
+                        className: 'btn-outline-primary btn-sm mr-1'
                     },
                     {
                         extend: 'print',
                         text: 'Print',
                         titleAttr: 'Print Table',
-                        className: 'btn-outline-primary btn-sm custom-margin'
+                        className: 'btn-outline-primary btn-sm'
                     }
-                ]
+                ],
+                // Hapus callback ini karena 'processing: true' sudah menangani indikator loading
+                // "drawCallback": function(settings) {
+                //     $('#loading-spinner').hide();
+                // },
             });
 
             // var table = $('#laporanTable').DataTable({
