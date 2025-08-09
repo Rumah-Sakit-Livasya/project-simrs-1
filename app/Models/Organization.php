@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Inventaris\RoomMaintenance;
+use App\Models\SIMRS\Kepustakaan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -141,5 +142,10 @@ class Organization extends Model
     public function checklist_harian()
     {
         return $this->hasMany(ChecklistHarian::class);
+    }
+
+    public function kepustakaan()
+    {
+        return $this->hasMany(Kepustakaan::class);
     }
 }

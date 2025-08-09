@@ -464,6 +464,7 @@ class KepustakaanController extends Controller
     // }
 
     // app/Http-v2025/Controllers/SIMRS/KepustakaanController.php
+    // app/Http/Controllers/SIMRS/KepustakaanController.php
 
     public function laporanDashboard(Request $request)
     {
@@ -471,95 +472,97 @@ class KepustakaanController extends Controller
         $selectedMonth = (int) $request->input('month', Carbon::now()->month);
 
         // ===================================================================
-        // LANGKAH 1: Buat Daftar Unit Gabungan (Master List)
+        // LANGKAH 1: Ambil dan Siapkan Data Unit
         // ===================================================================
 
-        // 1a. Ambil hierarki organisasi dari database
+        // 1a. Ambil hierarki organisasi utama
         $orderedOrganizations = Organization::getAllOrderedByHierarchy();
 
-        // 1b. Ambil "unit virtual" dari folder Kepustakaan
-        $parentFolderUmum = Kepustakaan::where('name', 'Kepala Sub Bagian Umum & Rumah Tangga')->first();
+        // 1b. Dapatkan ID organisasi 'Sub Bagian Umum' untuk referensi
+        $subBagianUmumOrg = Organization::where('name', 'Sub Bagian Umum')->first();
+
+        // 1c. Ambil unit virtual dari Kepustakaan
         $virtualUnits = collect();
-        if ($parentFolderUmum) {
-            $virtualUnits = Kepustakaan::where('parent_id', $parentFolderUmum->id)
+        if ($subBagianUmumOrg) {
+            // Cari folder "Unit Laundry" dan "Unit Kebersihan" yang dimiliki oleh ANAK dari "Sub Bagian Umum"
+            $childOrgIds = $subBagianUmumOrg->child_structures()->pluck('child_organization')->toArray();
+            $virtualUnits = Kepustakaan::whereIn('organization_id', $childOrgIds)
+                ->whereIn('name', ['Unit Laundry', 'Unit Kebersihan'])
                 ->where('type', 'folder')
-                ->whereIn('name', ['Laundry', 'Kebersihan'])
                 ->get();
         }
 
-        // 1c. Gabungkan menjadi satu daftar master
-        $masterUnitList = collect();
-        $virtualUnitMap = []; // Peta untuk menghubungkan folder ID ke ID unit virtual
+        // ===================================================================
+        // LANGKAH 2: Bangun Daftar Unit Gabungan (Master List)
+        // ===================================================================
 
+        $masterUnitList = collect();
         foreach ($orderedOrganizations as $org) {
             $masterUnitList->push([
                 'id' => $org['id'],
                 'is_virtual' => false,
                 'organization_name' => $org['prefixed_name'],
-                'original_name' => $org['name'], // Simpan nama asli untuk filtering
+                'original_name' => $org['name'],
             ]);
 
-            if ($org['name'] === 'Kepala Sub Bagian Umum & Rumah Tangga') {
+            // Sisipkan unit virtual di bawah 'Sub Bagian Umum'
+            if ($subBagianUmumOrg && $org['id'] === $subBagianUmumOrg->id) {
                 foreach ($virtualUnits as $virtualUnit) {
-                    $virtualId = 'virtual_' . $virtualUnit->id;
                     $masterUnitList->push([
-                        'id' => $virtualId,
+                        'id' => 'virtual_' . $virtualUnit->id, // ID unik, misal: 'virtual_53'
                         'is_virtual' => true,
                         'organization_name' => str_repeat('— ', $org['depth'] + 1) . $virtualUnit->name,
                         'original_name' => $virtualUnit->name,
                     ]);
-                    $virtualUnitMap[$virtualUnit->id] = $virtualId; // Buat peta: folder_id => virtual_id
                 }
             }
         }
 
         // ===================================================================
-        // LANGKAH 2: Buat Peta Status Pengiriman (Submission Map)
+        // LANGKAH 3: Cek Status Laporan dengan Efisien
         // ===================================================================
 
-        // 2a. Ambil SEMUA file laporan yang relevan dalam satu query
+        // 3a. Ambil ID dari semua unit nyata dan ID folder dari semua unit virtual
+        $realOrgIds = $masterUnitList->where('is_virtual', false)->pluck('id')->toArray();
+        $virtualFolderIds = $virtualUnits->pluck('id')->toArray();
+
+        // 3b. Ambil SEMUA file laporan yang relevan dalam SATU QUERY
         $allSubmissions = Kepustakaan::where('kategori', 'Laporan')
             ->where('type', 'file')
             ->where('year', $selectedYear)
-            ->where('month', '>=', $selectedMonth)
+            ->where('month', $selectedMonth)
             ->get();
 
-        // 2b. Proses setiap file untuk membangun peta status
+        // 3c. Buat Peta Status Pengiriman yang Cerdas
         $submissionMap = [];
         foreach ($allSubmissions as $submission) {
             // Tandai unit PENGUNGGAH sebagai 'sudah mengirim'
             if ($submission->organization_id) {
                 $submissionMap[$submission->organization_id] = $submission;
             }
-
-            // Tandai unit FOLDER TUJUAN sebagai 'sudah mengirim'
-            if ($submission->parent_id && isset($virtualUnitMap[$submission->parent_id])) {
-                $virtualId = $virtualUnitMap[$submission->parent_id];
+            // Tandai unit FOLDER TUJUAN (jika folder itu adalah unit virtual) sebagai 'sudah mengirim'
+            if ($submission->parent_id && in_array($submission->parent_id, $virtualFolderIds)) {
+                $virtualId = 'virtual_' . $submission->parent_id;
                 $submissionMap[$virtualId] = $submission;
             }
         }
 
         // ===================================================================
-        // LANGKAH 3: Bangun Hasil Akhir Menggunakan Peta Status
+        // LANGKAH 4: Bangun dan Filter Hasil Akhir
         // ===================================================================
 
         $reportStatus = [];
         foreach ($masterUnitList as $unit) {
-            // Cari status unit ini di dalam peta yang sudah kita buat
             $submissionData = $submissionMap[$unit['id']] ?? null;
             $status = !is_null($submissionData);
 
             $reportStatus[] = [
                 'organization_name' => $unit['organization_name'],
-                'original_name' => $unit['original_name'], // Kirim nama asli untuk filtering
+                'original_name' => $unit['original_name'],
                 'status' => $status,
                 'submission' => $submissionData,
             ];
         }
-
-        // ===================================================================
-        // LANGKAH 4: Filter Hasil Akhir
-        // ===================================================================
 
         $excludedNames = [
             'fitboss',
