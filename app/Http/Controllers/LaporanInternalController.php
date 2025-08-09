@@ -187,7 +187,7 @@ class LaporanInternalController extends Controller
     {
         // Build base query with eager loading
         $query = LaporanInternal::with('user.employee')
-            ->when(!Auth::user()->hasRole('superadmin'), function ($query) {
+            ->when(!Auth::user()->hasRole('super admin'), function ($query) {
                 $query->where('user_id', Auth::user()->id);
             })
             ->where('organization_id', Auth::user()->employee->organization_id)
