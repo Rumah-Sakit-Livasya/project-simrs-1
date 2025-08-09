@@ -488,9 +488,11 @@ class KepustakaanController extends Controller
             $childOrgIds = $subBagianUmumOrg->child_structures()->pluck('child_organization')->toArray();
             $virtualUnits = Kepustakaan::whereIn('organization_id', $childOrgIds)
                 ->whereIn('name', ['Unit Laundry', 'Unit Kebersihan'])
+                ->where('kategori', 'Laporan')
                 ->where('type', 'folder')
                 ->get();
         }
+
 
         // ===================================================================
         // LANGKAH 2: Bangun Daftar Unit Gabungan (Master List)
@@ -536,14 +538,38 @@ class KepustakaanController extends Controller
         // 3c. Buat Peta Status Pengiriman yang Cerdas
         $submissionMap = [];
         foreach ($allSubmissions as $submission) {
-            // Tandai unit PENGUNGGAH sebagai 'sudah mengirim'
+            // Handle real organization submissions
             if ($submission->organization_id) {
-                $submissionMap[$submission->organization_id] = $submission;
+                // Check if this is not a virtual unit's submission
+                $isVirtualUnitSubmission = false;
+                if ($submission->parent_id) {
+                    $currentFolder = Kepustakaan::find($submission->parent_id);
+                    while ($currentFolder) {
+                        if (in_array($currentFolder->id, $virtualFolderIds)) {
+                            $isVirtualUnitSubmission = true;
+                            break;
+                        }
+                        $currentFolder = $currentFolder->parent;
+                    }
+                }
+
+                // Only map if not a virtual unit's submission
+                if (!$isVirtualUnitSubmission) {
+                    $submissionMap[$submission->organization_id] = $submission;
+                }
             }
-            // Tandai unit FOLDER TUJUAN (jika folder itu adalah unit virtual) sebagai 'sudah mengirim'
-            if ($submission->parent_id && in_array($submission->parent_id, $virtualFolderIds)) {
-                $virtualId = 'virtual_' . $submission->parent_id;
-                $submissionMap[$virtualId] = $submission;
+
+            // Handle virtual unit submissions
+            if ($submission->parent_id) {
+                $currentFolder = Kepustakaan::find($submission->parent_id);
+                while ($currentFolder) {
+                    if (in_array($currentFolder->id, $virtualFolderIds)) {
+                        $virtualId = 'virtual_' . $currentFolder->id;
+                        $submissionMap[$virtualId] = $submission;
+                        break;
+                    }
+                    $currentFolder = $currentFolder->parent;
+                }
             }
         }
 
