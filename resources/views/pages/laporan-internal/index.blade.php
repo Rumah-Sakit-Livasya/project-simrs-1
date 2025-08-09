@@ -222,7 +222,11 @@
             });
 
             // Set today's date as default
-            $('.datepicker').datepicker('setDate', new Date());
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true
+            }).datepicker('setDate', new Date());
 
             // Helper functions (jika belum ada, pastikan fungsi ini tersedia)
             // Fungsi ini diperlukan untuk render kolom 'respon_time'
@@ -248,7 +252,6 @@
                 return durationText.trim();
             }
 
-            // Initialize DataTable with AJAX
             // Initialize DataTable with AJAX
             var table = $('#laporanTable').DataTable({
                 // 1. AKTIFKAN SERVER-SIDE PROCESSING
