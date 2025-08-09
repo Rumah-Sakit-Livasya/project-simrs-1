@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -29,5 +30,11 @@ class Kepustakaan extends Model implements \OwenIt\Auditing\Contracts\Auditable
     public function allChildren()
     {
         return $this->children()->with('allChildren')->where('type', 'folder');
+    }
+
+    // Relasi ke organization
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class, 'organization_id');
     }
 }
