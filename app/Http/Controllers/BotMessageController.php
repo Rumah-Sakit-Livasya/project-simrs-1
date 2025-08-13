@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\UploadFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -922,49 +923,86 @@ class BotMessageController extends Controller
         }
     }
 
-    // function sendInteractiveMessage($recipient)
-    // {
-    //     $whatsappApiUrl = "https://graph.facebook.com/v19.0/{phone_number_id}/messages";
-    //     $accessToken = "{your_access_token}";
+    public function notifyExpiryDocumentToHRD(Request $request)
+    {
+        // Pastikan method POST
+        if ($request->getMethod() !== 'POST') {
+            return response()->json(['error' => 1, 'data' => 'Method tidak diizinkan'], 405);
+        }
 
-    //     $payload = [
-    //         "messaging_product" => "whatsapp",
-    //         "recipient_type" => "individual",
-    //         "to" => $recipient, // Nomor WhatsApp penerima
-    //         "type" => "interactive",
-    //         "interactive" => [
-    //             "type" => "list",
-    //             "body" => [
-    //                 "text" => "Silakan pilih layanan yang Anda butuhkan:"
-    //             ],
-    //             "action" => [
-    //                 "button" => "Pilih",
-    //                 "sections" => [
-    //                     [
-    //                         "title" => "Layanan Kami",
-    //                         "rows" => [
-    //                             [
-    //                                 "id" => "/jadwal_praktek",
-    //                                 "title" => "Jadwal Praktek Dokter"
-    //                             ],
-    //                             [
-    //                                 "id" => "/info_rawat_inap",
-    //                                 "title" => "Info Rawat Inap"
-    //                             ],
-    //                             [
-    //                                 "id" => "/info_poli",
-    //                                 "title" => "Pendaftaran Poliklinik"
-    //                             ]
-    //                         ]
-    //                     ]
-    //                 ]
-    //             ]
-    //         ]
-    //     ];
+        // Validasi header
+        $headers = $request->headers->all();
+        $key = $headers['key'][0] ?? '';
+        $user = $headers['nama'][0] ?? '';
+        $sandi = $headers['sandi'][0] ?? '';
 
-    //     $response = Http::withToken($accessToken)
-    //         ->post($whatsappApiUrl, $payload);
+        if (!($key == 'KeyAbcKey' && $user == 'arul' && $sandi == '123###!!')) {
+            return response()->json(['error' => 1, 'data' => 'Gagal proses'], 403);
+        }
 
-    //     return $response->json();
-    // }
+        $today = \Carbon\Carbon::now();
+        $expiryThreshold = $today->copy()->addDays(30); // H-30
+
+        // Ambil dokumen yang hampir habis masa berlakunya
+        $documents = UploadFile::whereNotNull('expire')
+            ->whereDate('expire', '<=', $expiryThreshold)
+            ->whereDate('expire', '>=', $today)
+            ->orderBy('expire', 'asc')
+            ->get();
+
+        if ($documents->isEmpty()) {
+            return response()->json(['message' => 'Tidak ada dokumen yang hampir kadaluarsa']);
+        }
+
+        // Ambil list HRD
+        $hrdList = Employee::where('organization_id', 31)->whereNotNull('mobile_phone')->get();
+
+        $headersCurl = [
+            'Key:KeyAbcKey',
+            'Nama:arul',
+            'Sandi:123###!!',
+        ];
+
+        $responses = [];
+
+        // Buat message untuk HRD
+        $messageHRD = "*DAFTAR DOKUMEN KEPEGAWAIAN HAMPIR KADALUARSA*\n\n";
+        foreach ($documents as $doc) {
+            $employeeName = $doc->employee->fullname ?? '-';
+            $expireDate = \Carbon\Carbon::parse($doc->expire)->locale('id')->isoFormat('DD MMMM YYYY');
+            $messageHRD .= "🔸 {$doc->nama} ({$employeeName}) akan berakhir pada {$expireDate}\n";
+        }
+        $messageHRD .= "\n_Reported automatic by: Smart HR_";
+
+        // Kirim notifikasi ke semua HRD
+        foreach ($hrdList as $hrd) {
+            $httpDataHRD = [
+                'number' => formatNomorIndo($hrd->mobile_phone),
+                'message' => $messageHRD,
+            ];
+
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, 'http://192.168.0.100:3001/send-message');
+            curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $httpDataHRD);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headersCurl);
+
+            $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($curl);
+            curl_close($curl);
+
+            $responses[] = [
+                'employee_id' => $hrd->id,
+                'number' => $httpDataHRD['number'],
+                'http_code' => $httpCode,
+                'response' => $response,
+                'error' => $curlError,
+            ];
+        }
+
+        return response()->json(['results' => $responses]);
+    }
 }
