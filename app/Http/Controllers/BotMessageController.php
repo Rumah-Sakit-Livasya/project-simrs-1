@@ -955,7 +955,7 @@ class BotMessageController extends Controller
         }
 
         // Ambil list HRD
-        $hrdList = Employee::where('organization_id', 31)->whereNotNull('mobile_phone')->get();
+        $hrdList = Employee::where('organization_id', 31)->whereNotNull('mobile_phone')->where('is_active', 1)->get();
 
         $headersCurl = [
             'Key:KeyAbcKey',
