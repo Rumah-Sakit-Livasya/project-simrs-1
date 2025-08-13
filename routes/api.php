@@ -360,6 +360,7 @@ Route::post('/whatsapp/process-message', [WhatsappController::class, 'processMes
 Route::post('/whatsapp/confirm-sent', [WhatsappController::class, 'confirmSent'])->name('whatsapp.confirmSent');
 
 Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])->middleware(CheckAuthorizationBot::class);
+Route::post('notify-expiry-document', [BotMessageController::class, 'notifyExpiryDocumentToHRD'])->middleware(CheckAuthorizationBot::class);
 // Route::get('notify-contract', [BotMessageController::class, 'notifyExpiryContract']);
 
 // Keuangan
