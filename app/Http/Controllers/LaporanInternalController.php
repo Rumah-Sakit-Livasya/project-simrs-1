@@ -185,14 +185,37 @@ class LaporanInternalController extends Controller
 
     public function list(Request $request)
     {
+        // Ambil user dan organisasi user saat ini
+        $user = Auth::user();
+        $userOrg = $user->employee->organization ?? null;
+
+        // Dapatkan semua ID organisasi dalam hierarki (termasuk parent dan semua child)
+        $organizationIds = [];
+        if ($userOrg) {
+            $organizationIds[] = $userOrg->id;
+            if (method_exists($userOrg, 'getAllChildIds')) {
+                $organizationIds = array_merge($organizationIds, $userOrg->getAllChildIds());
+            } else {
+                $organizationIds = [$userOrg->id];
+            }
+        }
+
         // Build base query with eager loading
         $query = LaporanInternal::with('user.employee')
-            ->when(!Auth::user()->hasRole('super admin'), function ($query) {
-                $query->where('user_id', Auth::user()->id);
-            })
-            ->where('organization_id', Auth::user()->employee->organization_id)
-            ->latest(); // Add latest() to order by created_at desc
-        // ->where('organization_id', $request->organization);
+            ->when(!$user->hasRole('super admin'), function ($query) use ($user, $organizationIds) {
+                $query->whereIn('organization_id', $organizationIds);
+            });
+
+        // Jika user adalah staff, tampilkan hanya laporan internal miliknya sendiri
+        // kecuali jika dia penanggung jawab atau manager
+        if ($user->hasRole('employee')) {
+            // Cek apakah user juga punya role penanggung jawab atau manager
+            if (!($user->hasRole('pj') || $user->hasRole('manager'))) {
+                $query->where('user_id', $user->id);
+            }
+        }
+
+        $query->latest();
 
         // Apply filters if provided
         $filters = ['jenis', 'status', 'tanggal'];
@@ -208,7 +231,7 @@ class LaporanInternalController extends Controller
 
         // Filter by user if provided
         if ($request->filled('user_id')) {
-            $query->whereIn('user_id', $request->user_id);
+            $query->whereIn('user_id', (array) $request->user_id);
         }
 
         // Return DataTable with custom columns
