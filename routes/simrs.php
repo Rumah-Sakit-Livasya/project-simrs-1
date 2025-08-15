@@ -6,6 +6,7 @@ use App\Http\Controllers\FarmasiReportKartuStock;
 use App\Http\Controllers\FarmasiReportStockDetail;
 use App\Http\Controllers\FarmasiReportStockStatus;
 use App\Http\Controllers\FarmasiResepController;
+use App\Http\Controllers\FarmasiSignaController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
@@ -382,6 +383,11 @@ Route::group(['middleware' => ['auth']], function () {
                         ->name('master-data.penunjang-medis.laboratorium.nilai-parameter');
                     Route::get('/tipe', [TipeLaboratoriumController::class, 'index'])
                         ->name('master-data.penunjang-medis.laboratorium.tipe');
+                });
+
+                // Pharmacy routes
+                Route::prefix("farmasi")->group(function () {
+                    Route::get("/signa", [FarmasiSignaController::class, "index"])->name("master-data.penunjang-medis.farmasi.signa");
                 });
             });
 
@@ -860,6 +866,7 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get("popup/pilih-pasien/{poli}", [FarmasiResepController::class, 'popupPilihPasien'])->name('farmasi.transaksi-resep.popup.pilih-pasien');
                 Route::get("popup/pilih-dokter", [FarmasiResepController::class, 'popupPilihDokter'])->name('farmasi.transaksi-resep.popup.pilih-dokter');
                 Route::get("popup/resep-elektronik", [FarmasiResepController::class, 'popupResepElektronik'])->name('farmasi.transaksi-resep.popup.resep-elektronik');
+                Route::get("popup/telaah-resep-raw/{json}", [FarmasiResepController::class, 'telaahResepRaw'])->name('farmasi.transaksi-resep.popup.telaah-resep-raw');
             });
 
 

@@ -421,7 +421,7 @@ class RegistrationController extends Controller
                 }
             } else if ($request->registration_type == 'rawat-inap') {
                 $kelas_rawat = KelasRawat::where('kelas', 'like', '%Rawat Inap%')->first();
-                Log::info('Kelas rawat for rawat-inap:', $kelas_rawat ? $kelas_rawat->toArray() : 'NOT FOUND');
+                // Log::info('Kelas rawat for rawat-inap:', $kelas_rawat ? $kelas_rawat->toArray() : 'NOT FOUND');
                 if ($kelas_rawat) {
                     $validatedData['kelas_rawat_id'] = $kelas_rawat->id;
                 } else {

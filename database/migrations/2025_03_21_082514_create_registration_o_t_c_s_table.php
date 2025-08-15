@@ -17,12 +17,12 @@ return new class extends Migration
             $table->foreignId('employee_id');
             $table->foreignId('penjamin_id');
             $table->foreignId('departement_id');
-            $table->enum("tipe_pasien", ["rawat-jalan", "rawat-inap", "otc"]);
+            $table->enum("tipe_pasien", ["rawat-jalan", "rawat-inap", "otc"])->default("otc");
             $table->text('nama_pasien');
-            $table->date('date_of_birth');
+            $table->date('date_of_birth')->nullable();
             $table->foreignId("patient_id")->nullable();
-            $table->text('poly_ruang');
-            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);
+            $table->text('poly_ruang')->nullable();
+            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan'])->nullable();
             $table->string('order_date');
             $table->string('registration_number');
             $table->foreignId('doctor_id')->nullable()->constrained('doctors')->nullOnDelete();

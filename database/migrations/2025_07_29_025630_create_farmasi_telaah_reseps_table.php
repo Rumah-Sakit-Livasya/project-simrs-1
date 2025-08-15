@@ -21,29 +21,17 @@ return new class extends Migration
             $table->softDeletes();
             $table->foreignId('resep_id')->constrained('farmasi_reseps', 'id')->onDelete('cascade');
             
-            $table->boolean("resep_kejelasan_tulisan")->default(false);
-            $table->boolean("resep_benar_pasien")->default(false);
-            $table->boolean("resep_benar_nama_obat")->default(false);
-            $table->boolean("resep_benar_dosis")->default(false);
-            $table->boolean("resep_benar_waktu_dan_frekeunsi_pemberian")->default(false);
-            $table->boolean("resep_benar_rute_dan_cara_pemberian")->default(false);
-            $table->boolean("resep_ada_alergi_dengan_obat_yang_diresepkan")->default(false);
-            $table->boolean("resep_ada_duplikat_obat")->default(false);
-            $table->boolean("resep_interaksi_obat_yang_mungkin_terjadi")->default(false);
-            $table->boolean("resep_hal_lain_yang_mungkin_terjadi")->default(false);
-            $table->boolean("resep_hal_lain_yang_merupakan_masalah_dengan_obat")->default(false);
-
-            $table->boolean("obat_kejelasan_tulisan")->default(false);
-            $table->boolean("obat_benar_pasien")->default(false);
-            $table->boolean("obat_benar_nama_obat")->default(false);
-            $table->boolean("obat_benar_dosis")->default(false);
-            $table->boolean("obat_benar_waktu_dan_frekeunsi_pemberian")->default(false);
-            $table->boolean("obat_benar_rute_dan_cara_pemberian")->default(false);
-            $table->boolean("obat_ada_alergi_dengan_obat_yang_diresepkan")->default(false);
-            $table->boolean("obat_ada_duplikat_obat")->default(false);
-            $table->boolean("obat_interaksi_obat_yang_mungkin_terjadi")->default(false);
-            $table->boolean("obat_hal_lain_yang_mungkin_terjadi")->default(false);
-            $table->boolean("obat_hal_lain_yang_merupakan_masalah_dengan_obat")->default(false);
+            $table->boolean("kejelasan_tulisan")->default(false);
+            $table->boolean("benar_pasien")->default(false);
+            $table->boolean("benar_nama_obat")->default(false);
+            $table->boolean("benar_dosis")->default(false);
+            $table->boolean("benar_waktu_dan_frekeunsi_pemberian")->default(false);
+            $table->boolean("benar_rute_dan_cara_pemberian")->default(false);
+            $table->boolean("ada_alergi_dengan_obat_yang_diresepkan")->default(false);
+            $table->boolean("ada_duplikat_obat")->default(false);
+            $table->boolean("interaksi_obat_yang_mungkin_terjadi")->default(false);
+            $table->boolean("hal_lain_yang_mungkin_terjadi")->default(false);
+            $table->boolean("hal_lain_yang_merupakan_masalah_dengan_obat")->default(false);
 
             $table->text("perubahan_resep_tertulis_1")->nullable();
             $table->text("perubahan_resep_menjadi_1")->nullable();

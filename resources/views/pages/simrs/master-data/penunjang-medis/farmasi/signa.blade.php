@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Suku')
+@section('title', 'Kata Kunci Signa Farmasi')
 @section('extended-css')
     <style>
         hr {
@@ -59,7 +59,7 @@
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
-                            Suku
+                            Kata Kunci Signa
                         </h2>
                     </div>
                     <div class="panel-container show">
@@ -73,23 +73,18 @@
                                         class="table table-bordered table-hover table-striped w-100">
                                         <thead class="bg-primary-600">
                                             <tr>
-                                                <th>Nama Suku</th>
+                                                <th>Kata Kunci</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($ethnics as $ethnic)
+                                            @foreach ($signas as $signa)
                                                 <tr>
-                                                    <td>{{ $ethnic->name }}</td>
+                                                    <td>{{ $signa->kata }}</td>
                                                     <td>
-                                                        <button title="Edit suku"
-                                                            class="btn btn-sm btn-success px-2 py-1 btn-edit"
-                                                            data-id="{{ $ethnic->id }}">
-                                                            <i class="fas fa-pencil"></i>
-                                                        </button>
-                                                        <button title="Hapus suku" data-name="{{ $ethnic->name }}"
+                                                        <button title="Hapus signa" data-name="{{ $signa->kata }}"
                                                             class="btn btn-sm btn-danger px-2 py-1 btn-delete"
-                                                            data-id="{{ $ethnic->id }}">
+                                                            data-id="{{ $signa->id }}">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -101,9 +96,9 @@
                                                 <th colspan="4" class="text-center">
                                                     <button type="button"
                                                         class="btn btn-outline-primary waves-effect waves-themed"
-                                                        id="btn-tambah-suku">
+                                                        id="btn-tambah-signa">
                                                         <span class="fal fa-plus-circle"></span>
-                                                        Tambah Suku
+                                                        Tambah Kata Kunci
                                                     </button>
                                                 </th>
                                             </tr>
@@ -118,7 +113,7 @@
             </div>
         </div>
     </main>
-    @include('pages.simrs.master-data.setup.ethnics.partials.modal-add')
+    @include('pages.simrs.master-data.penunjang-medis.farmasi.partials.modal-add')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -126,10 +121,10 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            // on btn-tambah-suku click
+            // on btn-tambah-signa click
             // show modal
-            $('#btn-tambah-suku').on('click', function() {
-                $('#modal-tambah-ethnic').modal('show');
+            $('#btn-tambah-signa').on('click', function() {
+                $('#modal-tambah-signa').modal('show');
             });
 
             // listen to btn-delete click event
@@ -139,12 +134,12 @@
 
                 var id = $(this).data('id');
                 var name = $(this).data('name');
-                var url = '/api/simrs/master-data/setup/ethnics/delete/' + id;
-                var message = 'Hapus suku ' + name + '?';
+                var url = '/api/simrs/master-data/penunjang-medis/farmasi/signa/delete/' + id;
+                var message = 'Hapus kata kunci signa "' + name + '"?';
 
                 // fire alert with sweetalert2
                 Swal.fire({
-                    title: 'Hapus Suku',
+                    title: 'Hapus Signa',
                     text: message,
                     icon: 'warning',
                     showCancelButton: true,
@@ -164,7 +159,7 @@
                                 // show success message with sweetalert2
                                 Swal.fire({
                                     title: 'Berhasil',
-                                    text: 'Suku berhasil dihapus',
+                                    text: 'Signa berhasil dihapus',
                                     icon: 'success',
                                     timer: 2000,
                                     showConfirmButton: false
@@ -176,7 +171,7 @@
                             error: function(xhr, status, error) {
                                 Swal.fire({
                                     title: 'Gagal',
-                                    text: 'Suku gagal dihapus',
+                                    text: 'Signa gagal dihapus',
                                     icon: 'error',
                                     timer: 2000,
                                     showConfirmButton: false
@@ -199,22 +194,25 @@
                 console.log(form.find('input[name="name"]').val());
 
                 $.ajax({
-                    url: '/api/simrs/master-data/setup/ethnics/create',
+                    url: '{{ route('master-data.penunjang-medis.farmasi.signa.store') }}',
                     type: 'POST',
                     data: formData,
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json'
                     },
                     beforeSend: function() {
-                        $('#modal-tambah-ethnic').find('#btn-tambah').prop(
+                        $('#modal-tambah-signa').find('#btn-tambah').prop(
                             'disabled', true);
-                        $('#modal-tambah-ethnic').find('.ikon-tambah').hide();
-                        $('#modal-tambah-ethnic').find('.spinner-text')
+                        $('#modal-tambah-signa').find('.ikon-tambah').hide();
+                        $('#modal-tambah-signa').find('.spinner-text')
                             .removeClass(
                                 'd-none');
                     },
                     success: function(response) {
-                        $('#modal-tambah-ethnic').modal('hide');
+                        console.log(response);
+                        
+                        $('#modal-tambah-signa').modal('hide');
                         showSuccessAlert(response.message);
 
                         setTimeout(() => {
@@ -232,11 +230,11 @@
                                     '\n';
                             });
 
-                            $('#modal-tambah-ethnic').modal('hide');
+                            $('#modal-tambah-signa').modal('hide');
                             showErrorAlert('Terjadi kesalahan:\n' +
                                 errorMessages);
                         } else {
-                            $('#modal-tambah-ethnic').modal('hide');
+                            $('#modal-tambah-signa').modal('hide');
                             showErrorAlert('Terjadi kesalahan: ' + error);
                             console.log(error);
                         }

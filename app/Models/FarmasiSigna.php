@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class FarmasiResep extends Model
+class FarmasiSigna extends Model
 {
-    protected $guarded =["id"];
+    protected $guarded = ["id"];
 }

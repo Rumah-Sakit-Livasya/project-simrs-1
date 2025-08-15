@@ -37,6 +37,7 @@ interface Penjamin {
     jenis_kerjasama: string;
     jenis_kontrak: string;
     pasien_otc: number;
+    is_bpjs: boolean;
     keterangan: string | null;
     deleted_at: string | null;
     created_at: string | null;
@@ -478,10 +479,32 @@ interface BarangFarmasi {
     principal: string | null;
     harga_principal: number | null;
     diskon_principal: number | null;
+    restriksi: string | null;
 
     satuan?: Satuan;
     golongan?: GolonganBarang;
     kategori?: KategoriBarang;
+    zat_aktif?: ZatAktifFarmasi[];
+}
+
+interface ZatAktif {
+    id: number;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+    kode: string;
+    nama: string;
+    aktif: number;
+}
+
+interface ZatAktifFarmasi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    zat_id: number;
+    barang_id: number;
+    zat?: ZatAktif;
 }
 
 interface BarangNonFarmasi {
@@ -623,6 +646,89 @@ interface StoredItem {
     qty: number;
 
     pbi?: PenerimaanBarangItem;
+}
+
+
+interface FarmasiResep {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    order_date: string;
+    registration_id: number;
+    otc_id: number;
+    re_id: number;
+    dokter_id: number;
+    user_id: number;
+    gudang_id: number;
+    kode_resep: string;
+    alamat: string;
+    resep_manual: string;
+    embalase: 'tidak' | 'item' | 'racikan';
+    no_telp: string;
+    total: number;
+    bmhp: boolean;
+    kronis: boolean;
+    billed: boolean;
+    handed: boolean;
+    dispensing: boolean;
+
+    items: FarmasiResepItems[];
+}
+
+interface FarmasiResepItems {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    resep_id: number;
+    si_id: number;
+    racikan_id: number;
+    tipe: 'obat' | 'racikan';
+    signa: string;
+    instruksi: string;
+    jam_pemberian: string;
+    qty: number;
+    harga: number;
+    embalase: number;
+    subtotal: number;
+
+    stored?: StoredItem;
+    resep?: FarmasiResep;
+}
+
+interface TelaahResep {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    resep_id: number;
+    kejelasan_tulisan: boolean;
+    benar_pasien: boolean;
+    benar_nama_obat: boolean;
+    benar_dosis: boolean;
+    benar_waktu_dan_frekeunsi_pemberian: boolean;
+    benar_rute_dan_cara_pemberian: boolean;
+    ada_alergi_dengan_obat_yang_diresepkan: boolean;
+    ada_duplikat_obat: boolean;
+    interaksi_obat_yang_mungkin_terjadi: boolean;
+    hal_lain_yang_mungkin_terjadi: boolean;
+    hal_lain_yang_merupakan_masalah_dengan_obat: boolean;
+    perubahan_resep_tertulis_1?: string | null;
+    perubahan_resep_menjadi_1?: string | null;
+    perubahan_resep_petugas_1?: string | null;
+    perubahan_resep_disetujui_1?: string | null;
+    perubahan_resep_tertulis_2?: string | null;
+    perubahan_resep_menjadi_2?: string | null;
+    perubahan_resep_petugas_2?: string | null;
+    perubahan_resep_disetujui_2?: string | null;
+    perubahan_resep_tertulis_3?: string | null;
+    perubahan_resep_menjadi_3?: string | null;
+    perubahan_resep_petugas_3?: string | null;
+    perubahan_resep_disetujui_3?: string | null;
+    alamat_no_telp_pasien?: string | null;
+
+    resep?: FarmasiResep;
 }
 
 interface PenerimaanBarangItem {
@@ -873,6 +979,63 @@ type StoredItemOpname = StoredItem & {
     type: "f" | "nf";
     opname?: StockOpnameItem;
 }
+
+interface ResepElektronik {
+    id: number;
+    created_at: string; // Assuming this is a timestamp in ISO format
+    updated_at: string; // Assuming this is a timestamp in ISO format
+    deleted_at: string | null; // Assuming this is a timestamp in ISO format for soft deletes
+    cppt_id: number;
+    user_id: number;
+    registration_id: number;
+    gudang_id: number | null;
+    kode_re: string;
+    resep_manual: string;
+    total: number;
+    processed: number;
+
+    registration?: Registration;
+    cppt?: CPPT;
+    items?: ResepElektronikItem[];
+}
+
+interface CPPT {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    user_id: number;
+    registration_id: number;
+    tipe_cppt: string;
+    tipe_rawat: string;
+    doctor_id: number | null;
+    konsulkan_ke: number | null;
+    subjective: string;
+    objective: string;
+    assesment: string;
+    planning: string;
+    instruksi: string | null;
+    evaluasi: string | null;
+    implementasi: string | null;
+}
+
+interface ResepElektronikItem {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    re_id: number | null;
+    barang_id: number;
+    satuan_id: number;
+    qty: number;
+    harga: number;
+    subtotal: number;
+    signa: string;
+    instruksi: string;
+    billed: number;
+
+    barang?: BarangFarmasi;
+}
+
 
 type StockTransactionsSources = PenerimaanBarang | DistribusiBarang | ReturBarang | StockOpnameItem;
 type PatientType = "rajal" | "ranap" | "otc";
