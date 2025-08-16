@@ -18,17 +18,15 @@ DOC: if you remove pace.js from core please note on Internet Explorer some CSS a
     $('#js-page-content').smartPanel();
     // Fungsi untuk menampilkan notifikasi sukses SweetAlert
     function showSuccessAlert(message) {
-        // alert("Sukses")
         Swal.fire({
             icon: 'success',
             title: 'Sukses!',
             text: message,
             showConfirmButton: false,
-            timer: 2000 // Durasi notifikasi dalam milidetik (ms)
+            timer: 2000
         });
     }
 
-    // Fungsi untuk menampilkan notifikasi kesalahan SweetAlert 
     function showErrorAlert(message) {
         Swal.fire({
             icon: 'error',
@@ -36,29 +34,48 @@ DOC: if you remove pace.js from core please note on Internet Explorer some CSS a
             text: message,
             confirmButtonColor: '#3085d6',
             confirmButtonText: 'OK',
-            allowOutsideClick: false, // Mencegah penutupan saat klik di luar
-            allowEscapeKey: false, // Mencegah penutupan saat tekan tombol ESC
-            allowEnterKey: false // Mencegah penutupan saat tekan tombol Enter
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: false
         }).then((result) => {
-            // Memuat ulang halaman jika pengguna mengklik tombol OK
             if (result.isConfirmed) {
                 location.reload();
             }
         });
     }
 
-
     function showErrorAlertNoRefresh(message) {
-        // alert('Terjadi Kesalahan');
         Swal.fire({
             icon: 'error',
             title: 'Terjadi Kesalahan!',
             text: message,
             confirmButtonColor: '#3085d6',
             confirmButtonText: 'OK',
-            allowOutsideClick: false, // Mencegah penutupan saat klik di luar
-            allowEscapeKey: false, // Mencegah penutupan saat tekan tombol ESC
-            allowEnterKey: false // Mencegah penutupan saat tekan tombol Enter
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: false
+        });
+    }
+
+    /**
+     * Menampilkan dialog konfirmasi SweetAlert untuk penghapusan.
+     * @param {function} onConfirmCallback - Fungsi yang akan dijalankan jika pengguna menekan "Ya, Hapus!".
+     */
+    function showDeleteConfirmation(onConfirmCallback) {
+        Swal.fire({
+            title: 'Apakah Anda Yakin?',
+            text: "Data yang akan dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            // Jika pengguna mengklik tombol konfirmasi
+            if (result.isConfirmed) {
+                onConfirmCallback();
+            }
         });
     }
 

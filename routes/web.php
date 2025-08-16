@@ -10,6 +10,7 @@ use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
+use App\Http\Controllers\DailyWasteInputController;
 use App\Http\Controllers\LaporanInternalController;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\Pages\DashboardController;
@@ -409,6 +410,12 @@ Route::middleware([LastSeenUser::class])->group(function () {
 });
 
 // routes/web.php
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/daily-waste', [DailyWasteInputController::class, 'index']);
+    Route::get('/daily-waste/daily', [DailyWasteInputController::class, 'daily'])->name('daily-waste.daily');
+    Route::get('/daily-waste/transport', [DailyWasteInputController::class, 'transport'])->name('daily-waste.transport');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/impersonate', [SwitchUserController::class, 'impersonate'])
