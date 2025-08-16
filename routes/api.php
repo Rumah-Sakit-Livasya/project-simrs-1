@@ -11,6 +11,7 @@ use App\Http\Controllers\API\JobPositionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\ShiftController;
 use App\Http\Controllers\API\BankEmployeeController;
+use App\Http\Controllers\Api\DailyWasteInputController;
 use App\Http\Controllers\API\DayOffRequestController;
 use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\KPIController;
@@ -45,6 +46,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\EmployeeLeaveController;
 use App\Http\Controllers\API\PesanController;
+use App\Http\Controllers\Api\WasteTransportController;
 use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\WhatsappController;
 
@@ -379,5 +381,11 @@ Route::prefix('api')->group(function () {
 
     Route::get('/coa/parents', [ChartOfAccountController::class, 'getParents'])->name('coa.parents');
 });
+// Endpoint untuk chart
+Route::get('/chart-data', [DailyWasteInputController::class, 'getChartData']);
+
+// Resource routes untuk CRUD
+Route::apiResource('daily-inputs', DailyWasteInputController::class);
+Route::apiResource('waste-transports', WasteTransportController::class);
 
 require __DIR__ . '/api-simrs.php';
