@@ -867,6 +867,14 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get("popup/pilih-dokter", [FarmasiResepController::class, 'popupPilihDokter'])->name('farmasi.transaksi-resep.popup.pilih-dokter');
                 Route::get("popup/resep-elektronik", [FarmasiResepController::class, 'popupResepElektronik'])->name('farmasi.transaksi-resep.popup.resep-elektronik');
                 Route::get("popup/telaah-resep-raw/{json}", [FarmasiResepController::class, 'telaahResepRaw'])->name('farmasi.transaksi-resep.popup.telaah-resep-raw');
+
+                Route::prefix("print")->group(function(){
+                    Route::get("/e-tiket/{id}", [FarmasiResepController::class, 'print_e_tiket'])->name('farmasi.transaksi-resep.print.e-tiket');
+                    Route::get("/e-tiket-ranap/{id}", [FarmasiResepController::class, 'print_e_tiket_ranap'])->name('farmasi.transaksi-resep.print.e-tiket-ranap');
+                    Route::get("/penjualan/{id}", [FarmasiResepController::class, 'print_penjualan'])->name('farmasi.transaksi-resep.print.penjualan');
+                    Route::get("/resep/{id}", [FarmasiResepController::class, 'print_resep'])->name('farmasi.transaksi-resep.print.resep');
+                });
+
             });
 
 

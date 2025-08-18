@@ -34,10 +34,71 @@ class FarmasiResepController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $query = FarmasiResep::query()->with([
+            "registration",
+            "otc",
+            "doctor",
+            "items",
+            "registration.departement",
+            "doctor.employee",
+            "registration.patient",
+            "items.stored",
+            "items.stored.pbi"
+        ]);
+        $filterApplied = false;
+
+        // Filter by date range
+        if ($request->filled('tanggal')) {
+            $dateRange = explode(' - ', $request->tanggal);
+            if (count($dateRange) === 2) {
+                $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
+                $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
+                $query->whereBetween('order_date', [$startDate, $endDate]);
+            }
+            $filterApplied = true;
+        }
+
+        if ($request->filled('nama_pasien')) {
+            // if FarmasiResep has column 'registration_id' filled,
+            // filter from registration.patient on column 'name'
+            // else if FarmasiResep has column 'otc_id' filled
+            // filter from otc on column 'nama_pasien'
+
+            // Check if the resep records have registration_id or otc_id filled
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('registration', function ($qr) use ($request) {
+                    $qr->where('patient.name', 'like', '%' . $request->nama_pasien . '%');
+                })
+                    ->orWhereHas('otc', function ($qr) use ($request) {
+                        $qr->where('nama_pasien', 'like', '%' . $request->nama_pasien . '%');
+                    });
+            });
+            $filterApplied = true;
+        }
+
+        if ($request->filled("nama_dokter")) {
+            $query->whereHas("dokter.employee", function ($q) use ($request) {
+                $q->where('fullname', 'like', '%' . $request->nama_dokter . '%');
+            });
+        }
+
+        if ($request->filled("nama_poli")) {
+            $query->whereHas("registration.departement", function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->nama_poli . '%');
+            });
+        }
+
+        if ($filterApplied) {
+            $reseps = $query->get();
+        } else {
+            $reseps = FarmasiResep::whereDate('created_at', Carbon::today())->get();
+        }
+
         return view("pages.simrs.farmasi.transaksi-resep.index", [
-            'gudangs' => WarehouseMasterGudang::where("apotek", 1)->where("warehouse", 0)->get()
+            'gudangs' => WarehouseMasterGudang::where("apotek", 1)->where("warehouse", 0)->get(),
+            'reseps' => $reseps
         ]);
     }
 
@@ -335,6 +396,7 @@ class FarmasiResepController extends Controller
             "signa.*" => "nullable|string",
             "jam_pemberian.*" => "nullable|string",
             "instruksi.*" => "nullable|string",
+            "nama_racikan.*" => "nullable|string",
             "detail_racikan.*" => "integer",
             "subtotal.*" => "integer",
             "harga_embalase.*" => "integer",
@@ -424,6 +486,7 @@ class FarmasiResepController extends Controller
                     "resep_id"      => $resep->id,
                     "tipe"          => $type,
                     "si_id"         => isset($data2["si_id"][$key])            ? $data2["si_id"][$key]            : null,
+                    "nama_racikan"  => isset($data2["nama_racikan"][$key])     ? $data2["nama_racikan"][$key]     : null,
                     "racikan_id"    => $detail_racikan_id,
                     "signa"         => isset($data2["signa"][$key])            ? $data2["signa"][$key]            : null,
                     "instruksi"     => isset($data2["instruksi"][$key])        ? $data2["instruksi"][$key]        : null,
@@ -450,6 +513,70 @@ class FarmasiResepController extends Controller
         $items = json_decode(base64_decode($json), true);
 
         return view('pages.simrs.farmasi.transaksi-resep.partials.popup-telaah-resep', compact('items'));
+    }
+
+    public function print_e_tiket(int $id)
+    {
+        $resep = FarmasiResep::with([
+            "otc",
+            "registration",
+            "registration.patient",
+            "items",
+            "doctor",
+            "items.stored",
+            "items.stored.pbi"
+        ])->where('id', $id)->first();
+        return view('pages.simrs.farmasi.transaksi-resep.partials.print-e-tiket', compact("resep"));
+    }
+
+    public function print_e_tiket_ranap(int $id)
+    {
+        $resep = FarmasiResep::with([
+            "otc",
+            "registration",
+            "registration.patient",
+            "registration.patient.bed",
+            "registration.patient.bed.room",
+            "items",
+            "doctor",
+            "items.stored",
+            "items.stored.pbi"
+        ])->where('id', $id)->first();
+        return view('pages.simrs.farmasi.transaksi-resep.partials.print-e-tiket-ranap', compact("resep"));
+    }
+
+    public function print_penjualan(int $id)
+    {
+        $resep = FarmasiResep::with([
+            "otc",
+            "registration",
+            "registration.patient",
+            "registration.patient.bed",
+            "registration.patient.bed.room",
+            "items",
+            "doctor",
+            "user",
+            "items.stored",
+            "items.stored.pbi"
+        ])->where('id', $id)->first();
+        return view('pages.simrs.farmasi.transaksi-resep.partials.print-penjualan', compact("resep"));
+    }
+
+    public function print_resep(int $id)
+    {
+        $resep = FarmasiResep::with([
+            "otc",
+            "registration",
+            "registration.patient",
+            "registration.patient.bed",
+            "registration.patient.bed.room",
+            "items",
+            "doctor",
+            "user",
+            "items.stored",
+            "items.stored.pbi"
+        ])->where('id', $id)->first();
+        return view('pages.simrs.farmasi.transaksi-resep.partials.print-resep', compact("resep"));
     }
 
     /**

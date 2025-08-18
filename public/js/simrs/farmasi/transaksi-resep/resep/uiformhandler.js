@@ -179,7 +179,7 @@ class UIFormUpdater {
             showErrorAlertNoRefresh("Doctor object is not complete");
             throw new Error("Doctor object is not complete");
         }
-        $("#doctor-id").val(doctor.id);
+        $("#dokter-id").val(doctor.id);
         $("#nama_dokter").val(doctor.employee.fullname);
     }
 
@@ -267,6 +267,7 @@ class UIFormUpdater {
         $("main input:not([type='hidden']):not(.unclearable)").val("");
         $("#doctor-id").val("");
         $("#registration-id").val("");
+        $("#dokter-id").val("");
         $("#re-id").val("");
         $("#embalase_tidak").prop("checked", true);
         $("#bmhp").prop("checked", false);

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->foreignId('barang_id')->nullable()->constrained('warehouse_barang_farmasi')->onDelete('cascade')->cascadeOnUpdate();
             $table->foreignId('satuan_id')->nullable()->constrained('warehouse_satuan_barang')->onDelete('cascade');
             $table->foreignId('racikan_id')->nullable()->constrained('farmasi_resep_items')->onDelete('cascade');
+            $table->string('nama_racikan')->nullable();
             $table->enum('tipe', ['obat', 'racikan'])->default('racikan');
             $table->string('signa')->nullable();
             $table->string('instruksi')->nullable();

@@ -106,8 +106,8 @@
                                 @method('post')
                                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
-                                <input type="hidden" name="doctor_id" id="doctor-id" value="">
                                 <input type="hidden" name="registration_id" id="registration-id" value="">
+                                <input type="hidden" name="dokter_id" id="dokter-id" value="">
                                 <input type="hidden" name="re_id" id="re-id" value="">
                                 <input type="hidden" name="telaah_resep" id="telaah-resep" value="">
 

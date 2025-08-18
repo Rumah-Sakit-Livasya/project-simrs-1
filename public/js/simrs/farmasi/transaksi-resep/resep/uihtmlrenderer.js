@@ -67,8 +67,9 @@ class UIHTMLRenderer {
                 <input type="hidden" name="hna[${key}]" value="0">
                 <input type="hidden" name="harga_embalase[${key}]" value="${embalaseValue}">
                 <input type="hidden" name="subtotal[${key}]" value="${embalaseValue}">
-                <input type="hidden" name="type[${key}]" value="racikan">
                 <input type="hidden" name="qty[${key}]" value="1">
+                <input type="hidden" name="type[${key}]" value="racikan">
+                <input type="hidden" name="nama_racikan[${key}]" value="${name}">
 
                 <td class="kode_barang">RACIKAN</td>
                 <td class="nama_barang"><u>${name}</u></td>
