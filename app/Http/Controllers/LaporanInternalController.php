@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Exports\LaporanHarianExport;
 use App\Imports\LaporanInternalImport;
 use App\Models\Employee;
+use App\Models\Inventaris\Barang;
+use App\Models\Inventaris\MaintenanceBarang;
+use App\Models\Inventaris\RoomMaintenance;
 use App\Models\LaporanInternal;
 use App\Models\Organization;
 use Carbon\Carbon;
@@ -13,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
@@ -65,7 +69,12 @@ class LaporanInternalController extends Controller
             ->where('is_active', 1)
             ->get();
 
-        return view('pages.laporan-internal.index', compact('umum', 'employeeUnit'));
+        // Ambil daftar ruangan berdasarkan organisasi user yang sedang login
+        $userOrganizationId = auth()->user()->employee->organization_id;
+        $rooms = RoomMaintenance::all();
+
+
+        return view('pages.laporan-internal.index', compact('umum', 'employeeUnit', 'rooms')); // Tambahkan 'rooms'
     }
 
     public function getLaporan($id)
@@ -97,38 +106,72 @@ class LaporanInternalController extends Controller
         }
     }
 
-
     public function store(Request $request)
     {
+        // [FIXED] Pengecekan 'isMaintenance' dibuat lebih aman.
+        // Cek apakah laporan ini adalah maintenance atau perbaikan, baik untuk kegiatan maupun kendala
+        $isMaintenance = (
+            $request->has('jenis_kendala_checkbox') &&
+            is_array($request->jenis_kendala_checkbox) &&
+            (
+                in_array('Maintenance', $request->jenis_kendala_checkbox) ||
+                in_array('Perbaikan', $request->jenis_kendala_checkbox)
+            )
+        );
+
+        // [MODIFIED] Validasi disederhanakan, 'maintenance_rtl' tidak lagi divalidasi
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'organization_id' => 'required|exists:organizations,id',
-            'unit_terkait' => 'required|exists:organizations,id',
+            'unit_terkait' => 'required_with:jenis|exists:organizations,id',
             'tanggal' => 'required|date',
             'jenis' => 'required|in:kendala,kegiatan',
             'kegiatan' => 'required|string',
             'status' => 'required|in:diproses,selesai,ditunda,ditolak',
-            'keterangan' => 'required_if:status,ditunda,ditolak|nullable|string',
-            'jam_masuk' => 'nullable',
-            'jam_diterima' => 'nullable',
-            'jam_diproses' => 'nullable',
-            'jam_selesai' => 'nullable',
-            'dokumentasi' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // 2MB max
+            'keterangan' => 'nullable|string',
+            'dokumentasi' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'barang_id' => 'nullable|exists:barang,id',
+            'jenis_kendala_checkbox' => 'nullable|array',
+
+            // 'maintenance_rtl' dihapus dari validasi karena diisi otomatis
+            'maintenance_kondisi' => ($isMaintenance ? 'required|string' : 'nullable|string'),
+            'maintenance_hasil' => ($isMaintenance ? 'required|string' : 'nullable|string'),
+            'maintenance_estimasi' => 'nullable|date',
         ]);
 
-        // Handle file upload if exists
+        $dokumentasiPath = null;
         if ($request->hasFile('dokumentasi')) {
             $file = $request->file('dokumentasi');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('dokumentasi', $fileName);
-            $validated['dokumentasi'] = Storage::url($path);
+            $path = $file->storeAs('public/dokumentasi', $fileName);
+            $dokumentasiPath = Storage::url($path);
+            $validated['dokumentasi'] = $dokumentasiPath;
         }
-        // return dd($validated['dokumentasi'] = Storage::url($path));
+
+        if ($request->has('jenis_kendala_checkbox')) {
+            $validated['jenis_kendala'] = implode(', ', $request->jenis_kendala_checkbox);
+        }
 
         $laporan = LaporanInternal::create($validated);
 
+        if ($isMaintenance && $request->filled('barang_id')) {
+            MaintenanceBarang::create([
+                'laporan_internal_id' => $laporan->id,
+                'barang_id' => $request->barang_id,
+                'user_id' => auth()->id(),
+                'tanggal' => $laporan->tanggal,
+                'kondisi' => $request->maintenance_kondisi,
+                'hasil' => $request->maintenance_hasil,
+                'estimasi' => $request->maintenance_estimasi,
+                'keterangan' => $laporan->keterangan,
+                'status' => $laporan->status,
+                'foto' => $dokumentasiPath,
+                'rtl' => $laporan->kegiatan,
+            ]);
+        }
+
         return response()->json([
-            'message' => 'Laporan berhasil ditambahkan.',
+            'message' => 'Laporan dan data maintenance berhasil ditambahkan.',
             'data' => $laporan
         ]);
     }
@@ -555,5 +598,25 @@ class LaporanInternalController extends Controller
 
         // Ganti simbol-simbol di dalam teks dengan kata yang sesuai
         return strtr($text, $symbolReplacements);
+    }
+
+    public function getBarangByRoom($roomId)
+    {
+        $barangs = \App\Models\Inventaris\Barang::where('room_id', $roomId)
+            ->whereNull('deleted_at')
+            ->with('template_barang:id,name') // Eager load template untuk fallback
+            ->get(['id', 'custom_name', 'item_code', 'template_barang_id']); // [FIX] Pastikan 'item_code' ikut diambil
+
+        $result = $barangs->map(function ($barang) {
+            return [
+                'id' => $barang->id,
+                // Logika untuk memastikan nama barang selalu ada
+                'custom_name' => $barang->custom_name ?? optional($barang->template_barang)->name ?? 'Nama Tidak Tersedia',
+                // [FIX] Sertakan 'item_code' dalam response JSON
+                'item_code' => $barang->item_code,
+            ];
+        });
+
+        return response()->json($result);
     }
 }

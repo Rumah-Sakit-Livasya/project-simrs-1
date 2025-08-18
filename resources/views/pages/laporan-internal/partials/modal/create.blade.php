@@ -44,6 +44,7 @@
                             </div>
                         </div>
 
+
                         <!-- Pilih Unit (Organisasi) -->
                         <div class="col-md-4" id="create-organization-field" style="display: none">
                             <div class="form-group">
@@ -55,6 +56,107 @@
                                     @endforeach
                                 </select>
                                 <small class="text-muted">Hanya untuk laporan kegiatan</small>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="create-maintenance-field" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label font-weight-bold">Tipe Kegiatan</label>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="create-check-maintenance"
+                                        name="jenis_kendala_checkbox[]" value="Maintenance">
+                                    <label class="custom-control-label" for="create-check-maintenance">Terkait
+                                        Maintenance Inventaris</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- [BARU] Field dinamis untuk Perbaikan (muncul saat 'Kendala' dipilih) -->
+                        <div class="col-12" id="create-perbaikan-field" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label font-weight-bold">Tipe Kendala</label>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="create-check-perbaikan"
+                                        name="jenis_kendala_checkbox[]" value="Perbaikan">
+                                    <label class="custom-control-label" for="create-check-perbaikan">Terkait Perbaikan
+                                        Inventaris</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- [BARU] Field dinamis untuk Ruangan & Barang (muncul saat checkbox di centang) -->
+                        <div class="col-12" id="create-room-item-fields" style="display: none;">
+                            <div class="card border p-3">
+                                <div class="row">
+                                    <!-- Pilih Ruangan -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="create-room" class="font-weight-bold">Pilih Ruangan</label>
+                                            <select class="form-control select2" id="create-room"
+                                                name="room_maintenance_id">
+                                                <option value="" selected disabled>Pilih Ruangan</option>
+                                                @if (isset($rooms))
+                                                    @foreach ($rooms as $room)
+                                                        <option value="{{ $room->id }}">
+                                                            {{ strtoupper($room->name) }}
+                                                        </option> <!-- Pastikan 'name' benar -->
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pilih Barang -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="create-barang" class="font-weight-bold">Pilih Barang</label>
+                                            <select class="form-control select2" id="create-barang" name="barang_id"
+                                                disabled>
+                                                <option value="" selected disabled>Pilih Ruangan Dulu</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div id="create-maintenance-details" style="display: none;">
+                                <hr>
+                                <h5 class="mb-3">Detail Maintenance</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="maintenance-kondisi" class="font-weight-bold">Kondisi Awal
+                                                Barang <i class="text-danger">*</i></label>
+                                            <textarea class="form-control" name="maintenance_kondisi" id="maintenance-kondisi" rows="3"
+                                                placeholder="Contoh: Mati total, layar bergaris, ..."></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="maintenance-hasil" class="font-weight-bold">Hasil Maintenance
+                                                <i class="text-danger">*</i></label>
+                                            <textarea class="form-control" name="maintenance_hasil" id="maintenance-hasil" rows="3"
+                                                placeholder="Contoh: Berhasil diperbaiki, penggantian komponen X, ..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- [GANTI DENGAN BLOK INI] -->
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="maintenance-estimasi" class="font-weight-bold">Estimasi
+                                                Selesai (Opsional)</label>
+                                            <input type="date" class="form-control" name="maintenance_estimasi"
+                                                id="maintenance-estimasi">
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">
+                                    Status dan Foto hasil maintenance akan diambil secara otomatis dari Status dan
+                                    Dokumentasi Laporan Internal.
+                                </small>
                             </div>
                         </div>
                     </div>
