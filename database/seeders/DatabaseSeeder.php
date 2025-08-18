@@ -53,12 +53,18 @@ class DatabaseSeeder extends Seeder
         //     WasteCategorySeeder::class,
         //     VehicleSeeder::class,
         // ]);
+        $this->call([
+            LinenCategorySeeder::class,
+            LinenTypeSeeder::class,
+        ]);
 
 
         // Membuat 200 data input limbah harian
         // \App\Models\DailyWasteInput::factory(200)->create();
 
         // Membuat 100 data pengangkutan limbah
-        \App\Models\WasteTransport::factory(100)->create();
+        // \App\Models\WasteTransport::factory(100)->create();
+
+
     }
 }
