@@ -48,6 +48,7 @@ use App\Http\Controllers\API\EmployeeLeaveController;
 use App\Http\Controllers\API\PesanController;
 use App\Http\Controllers\Api\WasteTransportController;
 use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\LaporanInternalController;
 use App\Http\Controllers\WhatsappController;
 
 /*
@@ -63,6 +64,10 @@ use App\Http\Controllers\WhatsappController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/get-barang-by-room/{roomId}', [LaporanInternalController::class, 'getBarangByRoom'])->name('api.getBarangByRoom');
 });
 
 Route::middleware(['web', 'auth'])->prefix('inventaris')->group(function () {

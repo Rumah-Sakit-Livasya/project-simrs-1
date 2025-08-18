@@ -161,6 +161,106 @@
             $('#edit-form-laporan .select2').select2({
                 dropdownParent: $('#ubah-data')
             });
+            // [NEW] Fungsi komprehensif untuk mereset semua field dinamis
+            function resetDynamicFields() {
+                // Sembunyikan semua kontainer dinamis
+                $('#create-maintenance-field').hide();
+                $('#create-perbaikan-field').hide();
+                $('#create-room-item-fields').hide();
+                $('#create-organization-field').hide();
+
+                // Hapus centang pada checkbox
+                $('#create-check-maintenance, #create-check-perbaikan').prop('checked', false);
+
+                // Reset dan nonaktifkan dropdown ruangan dan barang
+                $('#create-room').val(null).trigger('change');
+                $('#create-barang').html('<option value="" selected disabled>Pilih Ruangan Dulu</option>').prop(
+                    'disabled', true);
+
+                $('#create-maintenance-details').hide(); // Tambahkan ini
+                $('#create-form-laporan').find('[name^="maintenance_"]').val(
+                    ''); // Tambahkan ini untuk mengosongkan inputnya
+            }
+
+            // 1. [REWRITTEN] Event listener utama untuk dropdown JENIS LAPORAN
+            $('#create-jenis').change(function() {
+                const selectedJenis = $(this).val();
+
+                // Selalu reset ke kondisi awal setiap kali dropdown diubah
+                resetDynamicFields();
+
+                if (selectedJenis === 'kegiatan') {
+                    // JIKA 'KEGIATAN' DIPILIH:
+                    $('#create-maintenance-field').slideDown();
+                    // Pastikan input hidden 'unit_terkait' ada
+                    if (!$('input[name="unit_terkait"][type="hidden"]').length) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'unit_terkait',
+                            value: '{{ auth()->user()->employee->organization_id }}'
+                        }).appendTo('#create-form-laporan');
+                    }
+                } else if (selectedJenis === 'kendala') {
+                    // JIKA 'KENDALA' DIPILIH:
+                    $('#create-perbaikan-field').slideDown();
+                    $('#create-organization-field').show();
+                    // Hapus input hidden 'unit_terkait' agar dropdown yang digunakan
+                    $('input[name="unit_terkait"][type="hidden"]').remove();
+                }
+            });
+
+            // 2. [UNCHANGED] Event listener untuk CHECKBOX (Maintenance/Perbaikan)
+            // Logika ini tetap valid karena menangani kedua checkbox
+            $('#create-check-maintenance, #create-check-perbaikan').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#create-room-item-fields').slideDown();
+                } else {
+                    // Hanya sembunyikan jika KEDUA checkbox tidak tercentang
+                    if (!$('#create-check-maintenance').is(':checked') && !$('#create-check-perbaikan').is(
+                            ':checked')) {
+                        $('#create-room-item-fields').slideUp();
+                        $('#create-room').val(null).trigger('change'); // Reset
+                    }
+                }
+            });
+
+            // 3. [UNCHANGED] Event listener untuk dropdown RUANGAN (AJAX call)
+            $('#create-room').change(function() {
+                const roomId = $(this).val();
+                const barangSelect = $('#create-barang');
+                barangSelect.html('<option value="" selected disabled>Memuat data barang...</option>').prop(
+                    'disabled', true);
+
+                if (roomId) {
+                    $.ajax({
+                        url: `/api/get-barang-by-room/${roomId}`,
+                        type: 'GET',
+                        success: function(data) {
+                            barangSelect.html(
+                                '<option value="" selected disabled>Pilih Barang</option>');
+                            if (data && data.length > 0) {
+                                $.each(data, (key, value) => barangSelect.append(
+                                    `<option value="${value.id}">${value.custom_name.toUpperCase() +" "+ (value.item_code ? value.item_code + '. ' : '')}</option>`
+                                ));
+                                barangSelect.prop('disabled', false);
+                            } else {
+                                barangSelect.html(
+                                    '<option value="" selected disabled>Tidak ada barang</option>'
+                                );
+                            }
+                        },
+                        error: () => {
+                            barangSelect.html(
+                                '<option value="" selected disabled>Gagal memuat data</option>'
+                            );
+                            showToast('Gagal memuat data barang.', 'error');
+                        }
+                    });
+                } else {
+                    barangSelect.html('<option value="" selected disabled>Pilih Ruangan Dulu</option>')
+                        .prop('disabled', true);
+                }
+            });
 
             $(function() {
                 $('.select3').select2();
@@ -185,6 +285,17 @@
                             value: '{{ auth()->user()->employee->organization_id }}'
                         }).appendTo('form');
                     }
+                }
+            });
+
+            $('#create-barang').change(function() {
+                const barangId = $(this).val();
+                // Jika ada barang yang dipilih, tampilkan detail maintenance
+                if (barangId) {
+                    $('#create-maintenance-details').slideDown();
+                } else {
+                    // Jika tidak, sembunyikan
+                    $('#create-maintenance-details').slideUp();
                 }
             });
 
@@ -419,245 +530,6 @@
                 // },
             });
 
-            // var table = $('#laporanTable').DataTable({
-            //     processing: true,
-            //     serverSide: true,
-            //     ajax: {
-            //         url: '/laporan-internal-list',
-            //         type: 'GET',
-            //         data: function(d) {
-            //             console.log(d);
-
-            //             // Tambahkan data filter ke request
-            //             d.user_id = $('#filter-user').val();
-            //             d.jenis = $('#filter-jenis').val();
-            //             d.status = $('#filter-status').val();
-            //             d.tanggal = $('#filter-tanggal').val();
-            //             d.organization = {{ auth()->user()->employee->organization->id }};
-            //         },
-            //         error: function(xhr) {
-            //             console.error('DataTables error:', xhr.responseText);
-            //             showToast('Gagal memuat data laporan', 'error');
-            //         }
-            //     },
-            //     columns: [{
-            //             data: null,
-            //             name: 'no',
-            //             orderable: false,
-            //             render: function(data, type, row, meta) {
-            //                 return meta.row + meta.settings._iDisplayStart + 1;
-            //             }
-            //         },
-            //         {
-            //             data: 'tanggal',
-            //             name: 'tanggal',
-            //             render: function(data) {
-            //                 return new Date(data).toLocaleDateString('id-ID', {
-            //                     weekday: 'long',
-            //                     year: 'numeric',
-            //                     month: 'long',
-            //                     day: 'numeric'
-            //                 });
-            //             }
-            //         },
-            //         {
-            //             data: 'jenis',
-            //             name: 'jenis',
-            //             render: function(data) {
-            //                 const badgeClass = data === 'kegiatan' ? 'bg-success' : 'bg-warning';
-            //                 const displayText = data === 'kegiatan' ? 'Kegiatan' : 'Kendala';
-            //                 return `<span class="badge ${badgeClass}">${displayText}</span>`;
-            //             }
-            //         },
-            //         {
-            //             data: 'kegiatan',
-            //             name: 'kegiatan'
-            //         },
-            //         {
-            //             data: 'status',
-            //             name: 'status',
-            //             render: function(data) {
-            //                 let badgeClass = 'bg-secondary';
-            //                 if (data == 'selesai') badgeClass = 'bg-success';
-            //                 if (data == 'diproses') badgeClass = 'bg-primary';
-            //                 if (data == 'baru') badgeClass = 'bg-info';
-            //                 if (data == 'ditolak') badgeClass = 'bg-danger';
-            //                 return `<span class="badge ${badgeClass}">${data}</span>`;
-            //             }
-            //         },
-            //         {
-            //             data: 'keterangan',
-            //             name: 'keterangan',
-            //             render: function(data) {
-            //                 return data ?? '-';
-            //             }
-            //         },
-            //         @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)')
-            //             {
-            //                 data: 'jam_masuk',
-            //                 name: 'jam_masuk',
-            //                 render: function(data) {
-            //                     if (!data) return '-';
-            //                     try {
-            //                         // Jika format waktu sudah HH:MM:SS
-            //                         if (typeof data === 'string' && data.match(
-            //                                 /^\d{2}:\d{2}:\d{2}$/)) {
-            //                             return data;
-            //                         }
-            //                         // Jika format timestamp
-            //                         return new Date(data).toLocaleTimeString('id-ID', {
-            //                             hour: '2-digit',
-            //                             minute: '2-digit',
-            //                             second: '2-digit',
-            //                             hour12: false
-            //                         });
-            //                     } catch (e) {
-            //                         return '<span class="text-warning">Invalid</span>';
-            //                     }
-            //                 }
-            //             }, {
-            //                 data: 'jam_diproses',
-            //                 name: 'jam_diproses',
-            //                 render: function(data) {
-            //                     if (!data) return '-';
-            //                     try {
-            //                         if (typeof data === 'string' && data.match(
-            //                                 /^\d{2}:\d{2}:\d{2}$/)) {
-            //                             return data;
-            //                         }
-            //                         return new Date(data).toLocaleTimeString('id-ID', {
-            //                             hour: '2-digit',
-            //                             minute: '2-digit',
-            //                             second: '2-digit',
-            //                             hour12: false
-            //                         });
-            //                     } catch (e) {
-            //                         return '<span class="text-warning">Invalid</span>';
-            //                     }
-            //                 }
-            //             }, {
-            //                 data: null,
-            //                 name: 'respon_time',
-            //                 render: function(data, type, row) {
-            //                     // Hitung waktu respon dari jam_masuk ke jam_diproses
-            //                     if (row.jam_masuk && row.jam_diproses) {
-            //                         try {
-            //                             const start = this.parseTime(row.jam_masuk);
-            //                             const respon = this.parseTime(row.jam_diproses);
-
-            //                             if (respon < start) {
-            //                                 return '<span class="text-danger">Invalid</span>';
-            //                             }
-
-            //                             const diff = Math.abs(respon - start);
-            //                             return this.formatDuration(diff);
-            //                         } catch (e) {
-            //                             console.error('Error calculating response time:', e);
-            //                             return '<span class="text-warning">Error</span>';
-            //                         }
-            //                     }
-            //                     return '-';
-            //                 }
-            //             },
-            //         @endif {
-            //             data: 'fullname',
-            //             name: 'fullname',
-            //             render: function(data) {
-            //                 return data ?? '-';
-            //             }
-            //         },
-            //         {
-            //             data: 'id',
-            //             name: 'action',
-            //             orderable: false,
-            //             searchable: false,
-            //             render: function(data, type, row) {
-            //                 // Tombol default (edit dan delete)
-            //                 let buttons = `
-        //                             <div class="btn-group">
-        //                                 <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(${data})">
-        //                                     <i class="fas fa-edit"></i>
-        //                                 </button>
-        //                                 @can('delete laporan internal')
-        //                                     <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(${data})">
-        //                                         <i class="fas fa-trash"></i>
-        //                                     </button>
-        //                                 @endcan
-        //                             `;
-
-            //                 // Tambahkan tombol dokumentasi jika ada
-            //                 if (row.dokumentasi && !isNumeric(row.dokumentasi)) {
-            //                     buttons += `
-        //                                 <button class="btn btn-sm btn-icon btn-info btn-show-dokumentasi"
-        //                                         data-file="${row.dokumentasi.startsWith('http') ? row.dokumentasi : assetUrl(row.dokumentasi)}">
-        //                                     <i class="fas fa-eye"></i>
-        //                                 </button>
-        //                             `;
-            //                 }
-
-            //                 // Tambahkan tombol checklist jika status Diproses atau Ditolak
-            //                 if (row.status === 'diproses') {
-            //                     buttons += `
-        //                                     <button class="btn btn-sm btn-icon btn-success" onclick="completeLaporan(${data})" title="Tandai Selesai">
-        //                                         <i class="fas fa-check"></i>
-        //                                     </button>
-        //                                 `;
-            //                 }
-
-            //                 buttons += `</div>`;
-            //                 return buttons;
-            //             }
-            //         }
-            //     ],
-            //     // Tambahkan fungsi helper di luar columns
-            //     createdRow: function(row, data, dataIndex) {
-            //         // Helper functions untuk digunakan dalam render
-            //         $.fn.dataTable.render.formatDuration = function(diff) {
-            //             const hours = Math.floor(diff / (1000 * 60 * 60));
-            //             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            //             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-            //             let durationText = '';
-            //             if (hours > 0) durationText += `${hours} jam `;
-            //             if (minutes > 0) durationText += `${minutes} menit `;
-            //             if (seconds > 0 || (hours === 0 && minutes === 0)) durationText +=
-            //                 `${seconds} detik`;
-
-            //             return durationText.trim();
-            //         };
-
-            //         $.fn.dataTable.render.parseTime = function(timeStr) {
-            //             // Handle both timestamp and HH:MM:SS format
-            //             if (typeof timeStr === 'string' && timeStr.match(/^\d{2}:\d{2}:\d{2}$/)) {
-            //                 const [hours, minutes, seconds] = timeStr.split(':');
-            //                 const date = new Date();
-            //                 date.setHours(hours, minutes, seconds);
-            //                 return date;
-            //             }
-            //             return new Date(timeStr);
-            //         };
-            //     },
-            //     language: {
-            //         "decimal": "",
-            //         "emptyTable": "Tidak ada data yang tersedia",
-            //         "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            //         "infoEmpty": "Menampilkan 0 sampai 0 dari 0 data",
-            //         "infoFiltered": "(disaring dari _MAX_ total data)",
-            //         "infoPostFix": "",
-            //         "thousands": ",",
-            //         "lengthMenu": "Tampilkan _MENU_ data",
-            //         "loadingRecords": "Memuat...",
-            //         "processing": "Memproses...",
-            //         "search": "Cari:",
-            //         "zeroRecords": "Tidak ditemukan data yang sesuai",
-            //         "paginate": {
-            //             "first": "Pertama",
-            //             "last": "Terakhir",
-            //             "next": "Selanjutnya",
-            //             "previous": "Sebelumnya"
-            //         }
-            //     },
-            //     responsive: true
-            // });
 
             // Helper function to check if value is numeric
             function isNumeric(n) {
@@ -833,13 +705,16 @@
                 });
             });
 
-            // Reset form when modal is closed
+            // [FIXED] Panggil fungsi reset saat modal ditutup
             $('#tambah-data').on('hidden.bs.modal', function() {
                 $('#create-form-laporan')[0].reset();
-                $('.select2').val(null).trigger('change');
+                $('#create-form-laporan .select2').val(null).trigger('change');
                 $('.datepicker').datepicker('setDate', new Date());
-                $('#create-organization-field').hide();
+                resetDynamicFields(); // Memanggil fungsi reset
+                $('#image-preview').hide();
+
             });
+
         });
 
         // Show Dokumentasi

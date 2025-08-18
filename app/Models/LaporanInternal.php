@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Inventaris\MaintenanceBarang;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -39,5 +40,10 @@ class LaporanInternal extends Model
     {
         // Mengembalikan nama organisasi yang terkait dengan unit_terkait_name
         return $this->unit_terkait_name ? $this->unit_terkait_name->name : '-';
+    }
+
+    public function maintenance_barang()
+    {
+        return $this->hasOne(MaintenanceBarang::class);
     }
 }
