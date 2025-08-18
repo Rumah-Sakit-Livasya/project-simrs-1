@@ -474,12 +474,36 @@
                         orderable: false,
                         searchable: false,
                         render: (data, type, row) => {
-                            // Logika untuk membuat tombol aksi
-                            // Ganti dengan fungsi render tombol Anda yang sudah ada
-                            return `<div class="btn-group">
-                                    <button class="btn btn-sm btn-primary" onclick="editLaporan(${data})"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteLaporan(${data})"><i class="fas fa-trash"></i></button>
-                                </div>`;
+                            // Buat array tombol
+                            let buttons = [];
+
+                            // Tombol edit
+                            buttons.push(
+                                `<button class="btn btn-sm btn-primary" onclick="editLaporan(${data})"><i class="fas fa-edit"></i></button>`
+                                );
+
+                            // Tombol dokumentasi (jika ada), akan diletakkan di tengah
+                            let dokumentasiBtn = '';
+                            if (row.dokumentasi && typeof row.dokumentasi === 'string' && row
+                                .dokumentasi.trim() !== '') {
+                                let fileUrl = row.dokumentasi.startsWith('http') ? row.dokumentasi :
+                                    assetUrl(row.dokumentasi);
+                                dokumentasiBtn =
+                                    `<button class="btn btn-sm btn-info btn-show-dokumentasi" data-file="${fileUrl}"><i class="fas fa-eye"></i></button>`;
+                            }
+
+                            // Tombol hapus
+                            buttons.push(
+                                `<button class="btn btn-sm btn-danger" onclick="deleteLaporan(${data})"><i class="fas fa-trash"></i></button>`
+                                );
+
+                            // Jika ada tombol dokumentasi, letakkan di tengah
+                            if (dokumentasiBtn) {
+                                // Sisipkan di antara edit dan delete
+                                buttons.splice(1, 0, dokumentasiBtn);
+                            }
+
+                            return `<div class="btn-group">${buttons.join('')}</div>`;
                         }
                     }
                 ],
