@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Pages\CompanyController;
 use App\Http\Controllers\API\CompanyController as ApiCompanyController;
 use App\Http\Controllers\API\TimeScheduleController;
+use App\Http\Controllers\API\WasteTransportController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\SwitchUserController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TestingDataController;
 use App\Http\Controllers\UrlShortenerController;
+use App\Http\Controllers\WasteReportController;
 use App\Http\Controllers\WhatsappController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -412,9 +414,17 @@ Route::middleware([LastSeenUser::class])->group(function () {
 // routes/web.php
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/daily-waste', [DailyWasteInputController::class, 'index']);
-    Route::get('/daily-waste/daily', [DailyWasteInputController::class, 'daily'])->name('daily-waste.daily');
-    Route::get('/daily-waste/transport', [DailyWasteInputController::class, 'transport'])->name('daily-waste.transport');
+    Route::get('/daily-waste', [DailyWasteInputController::class, 'index'])->name('daily-waste.index');
+    Route::get('/waste-transports', [DailyWasteInputController::class, 'transport'])->name('daily-waste.transport');
+    Route::post('/waste-transports/store-or-update-batch', [WasteTransportController::class, 'storeOrUpdateBatch'])->name('waste-transports.storeOrUpdateBatch');
+    // Route untuk menampilkan halaman laporan
+    Route::get('/waste-transports/reports', [WasteReportController::class, 'index'])->name('reports.waste.index');
+    // Route untuk mengambil data laporan via AJAX
+    Route::get('/waste-transports/getWasteData', [WasteReportController::class, 'getWasteData'])->name('reports.waste.data');
+
+    Route::get('/daily-waste/reports', [WasteReportController::class, 'dailyIndex'])->name('reports.daily.index');
+    // Route untuk mengambil data laporan via AJAX
+    Route::get('/daily-waste/getDailyWasteData', [WasteReportController::class, 'getDailyWasteData'])->name('reports.daily.data');
 });
 
 Route::middleware(['auth'])->group(function () {

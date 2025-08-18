@@ -386,5 +386,7 @@ Route::get('/chart-data', [DailyWasteInputController::class, 'getChartData']);
 // Resource routes untuk CRUD
 Route::apiResource('daily-inputs', DailyWasteInputController::class);
 Route::apiResource('waste-transports', WasteTransportController::class);
+Route::get('waste-transports/{id}/edit', [WasteTransportController::class, 'edit']);
+Route::delete('waste-transports/{id}', [WasteTransportController::class, 'destroy']);
 
 require __DIR__ . '/api-simrs.php';
