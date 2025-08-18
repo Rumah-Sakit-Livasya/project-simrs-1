@@ -143,13 +143,10 @@ class LaporanInternalController extends Controller
         if ($request->hasFile('dokumentasi')) {
             $file = $request->file('dokumentasi');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('public/dokumentasi', $fileName);
-            $dokumentasiPath = Storage::url($path);
-            $validated['dokumentasi'] = $dokumentasiPath;
-        }
 
-        if ($request->has('jenis_kendala_checkbox')) {
-            $validated['jenis_kendala'] = implode(', ', $request->jenis_kendala_checkbox);
+            $path = $file->storeAs('dokumentasi', $fileName); // default disk = local, bukan public
+            // Simpan path relatif (misal: dokumentasi/namafile.jpg)
+            $validated['dokumentasi'] = $path;
         }
 
         $laporan = LaporanInternal::create($validated);
