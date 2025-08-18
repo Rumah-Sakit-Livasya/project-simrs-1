@@ -239,18 +239,6 @@ class LaporanInternalController extends Controller
             ->addColumn('fullname', function ($item) {
                 return optional($item->user->employee)->fullname ?? '-';
             })
-            ->addColumn('action', function ($item) {
-                return '
-                <div class="btn-group">
-                    <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(' . $item->id . ')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(' . $item->id . ')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            ';
-            })
             ->rawColumns(['action'])
             ->make(true);
     }
