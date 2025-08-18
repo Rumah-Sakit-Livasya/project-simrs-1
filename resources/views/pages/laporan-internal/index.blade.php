@@ -98,9 +98,9 @@
                                                 <th>Status</th>
                                                 <th>Keterangan</th>
                                                 {{-- <th>Dokumentasi</th> --}}
-                                                @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)')
                                                     <th>Jam Masuk</th>
                                                     <th>Jam Diproses</th>
+                                                @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)')
                                                     <th>Respon Time</th>
                                                 @endif
                                                 <th>User</th>
