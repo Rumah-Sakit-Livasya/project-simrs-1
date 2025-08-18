@@ -13,6 +13,8 @@ use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
 use App\Http\Controllers\DailyWasteInputController;
 use App\Http\Controllers\LaporanInternalController;
+use App\Http\Controllers\Laundry\DailyLinenInputController;
+use App\Http\Controllers\Laundry\LinenTypeController;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\Pages\DashboardController;
 use App\Http\Controllers\Pages\UpdateProfileController;
@@ -425,6 +427,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/daily-waste/reports', [WasteReportController::class, 'dailyIndex'])->name('reports.daily.index');
     // Route untuk mengambil data laporan via AJAX
     Route::get('/daily-waste/getDailyWasteData', [WasteReportController::class, 'getDailyWasteData'])->name('reports.daily.data');
+
+    // Laundry
+    Route::get('daily-linens', [DailyLinenInputController::class, 'index'])->name('daily-linens.index');
+    Route::get('daily-linens/create', [DailyLinenInputController::class, 'create'])->name('daily-linens.create');
+    Route::post('daily-linens', [DailyLinenInputController::class, 'store'])->name('daily-linens.store');
+    Route::get('daily-linens/{daily_linen}/edit', [DailyLinenInputController::class, 'edit'])->name('daily-linens.edit');
+    Route::put('daily-linens/{daily_linen}', [DailyLinenInputController::class, 'update'])->name('daily-linens.update');
+    Route::delete('daily-linens/{daily_linen}', [DailyLinenInputController::class, 'destroy'])->name('daily-linens.destroy');
+
+    Route::post('daily-linens-batch', [DailyLinenInputController::class, 'storeOrUpdateBatch'])->name('daily-linens.storeOrUpdateBatch');
+
+    Route::get('/daily-linens/reports', [WasteReportController::class, 'laundryIndex'])->name('laundry.index');
+    Route::get('/daily-linens/getLaundryData', [WasteReportController::class, 'getLaundryData'])->name('laundry.data');
+
+    Route::resource('master/linen-types', LinenTypeController::class);
 });
 
 Route::middleware(['auth'])->group(function () {
