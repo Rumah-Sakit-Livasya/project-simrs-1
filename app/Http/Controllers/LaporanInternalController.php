@@ -120,8 +120,10 @@ class LaporanInternalController extends Controller
         if ($request->hasFile('dokumentasi')) {
             $file = $request->file('dokumentasi');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('dokumentasi', $fileName);
-            $validated['dokumentasi'] = Storage::url($path);
+            // Simpan ke storage/app/dokumentasi (bukan public)
+            $path = $file->storeAs('dokumentasi', $fileName); // default disk = local, bukan public
+            // Simpan path relatif (misal: dokumentasi/namafile.jpg)
+            $validated['dokumentasi'] = $path;
         }
         // return dd($validated['dokumentasi'] = Storage::url($path));
 
