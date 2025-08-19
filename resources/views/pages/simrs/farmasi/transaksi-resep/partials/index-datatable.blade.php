@@ -131,16 +131,19 @@
                                         Coming Soon!
                                     </td>
                                     <td>
-                                        <a class="fas fa-pencil pointer fa-lg text-secondary edit-btn"
-                                            title="Edit resep" data-id="{{ $resep->id }}"></a>
-                                        <a class="fal fa-times pointer fa-lg text-danger delete-btn"
-                                            title="Hapus resep" data-id="{{ $resep->id }}"></a>
+                                        @if (!$resep->billed)
+                                            <a class="fas fa-pencil pointer fa-lg text-secondary edit-btn"
+                                                title="Edit resep" data-id="{{ $resep->id }}"></a>
+                                            <a class="fal fa-times pointer fa-lg text-danger delete-btn"
+                                                title="Hapus resep" data-id="{{ $resep->id }}"></a>
+                                        @endif
+                                        
                                         <a class="fas fa-clipboard-list pointer fa-lg text-info telaah-btn"
                                             title="Telaah resep" data-id="{{ $resep->id }}"></a>
 
                                         <a class="fas fa-print pointer fa-lg text-success print-e-tiket-btn"
                                             title="Print E-Tiket" data-id="{{ $resep->id }}"></a>
-                                        <a class="fas fa-print pointer fa-lg text-info print-e-tiket-ranap-btn"
+                                        <a class="fas fa-print pointer fa-lg text-secondary print-e-tiket-ranap-btn"
                                             title="Print E-Tiket Ranap" data-id="{{ $resep->id }}"></a>
                                         <a class="fas fa-print pointer fa-lg text-primary print-penjualan-btn"
                                             title="Print Penjualan" data-id="{{ $resep->id }}"></a>
@@ -173,22 +176,3 @@
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-</script>
-
-<script>
-    const list = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-    list.map((el) => {
-        let opts = {
-            animation: true,
-        }
-        if (el.hasAttribute('data-bs-content-id')) {
-            opts.content = document.getElementById(el.getAttribute('data-bs-content-id')).innerHTML;
-            opts.html = true;
-            opts.sanitize = false;
-        }
-        new bootstrap.Popover(el, opts);
-    })
-</script>

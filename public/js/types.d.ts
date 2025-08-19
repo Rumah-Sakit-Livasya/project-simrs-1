@@ -953,7 +953,8 @@ interface StockTransactions {
     before_gudang_id: number | null;
     after_gudang_id: number;
     performed_by: number;
-
+    keterangan?: string;
+    
     stock?: StoredItem;
     source?: StockTransactionsSources;
     user?: User;

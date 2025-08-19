@@ -93,9 +93,9 @@ class UIHTMLRenderer {
                     <a class="mdi mdi-clock-time-eight pointer mdi-24px text-secondary jam-pemberian-btn"
                     title="Ubah jam pemberian" onclick="ResepClass.jamPemberian(${key}, '${name}')"></a>
                     <a class="mdi mdi-medication pointer mdi-24px text-success signa-btn"
-                    title="Ubah signa" onclick="ResepClass.signa(${key}, 'Racikan ${name}')"></a>
+                    title="Ubah signa" onclick="ResepClass.signa(${key}, '${name}')"></a>
                     <a class="mdi mdi-plus pointer mdi-24px text-primary add-to-racikan-btn"
-                    title="Tambah Obat" onclick="ResepClass.tambahObatRacikan(${key}, 'Racikan ${name}')"></a>
+                    title="Tambah Obat" onclick="ResepClass.tambahObatRacikan(${key}, '${name}')"></a>
                 </td>
             </tr>
         `;

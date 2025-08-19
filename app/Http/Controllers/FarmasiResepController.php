@@ -473,7 +473,8 @@ class FarmasiResepController extends Controller
                     }
 
                     // decrease current stock
-                    $args = new IncreaseDecreaseStockArguments($user, $resep, $stored, $data2["qty"][$key]);
+                    $keterangan = "PENJUALAN OBAT PS: " . ($data["tipe_pasien"] != 'otc' ? $registration->nama_pasien : $registration->patient->name);
+                    $args = new IncreaseDecreaseStockArguments($user, $resep, $stored, $data2["qty"][$key], $keterangan);
                     $this->goodsStockService->decreaseStock($args);
                 }
 
@@ -506,6 +507,148 @@ class FarmasiResepController extends Controller
             DB::rollBack();
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, int $id)
+    {
+        // dd($request->all());
+
+        $data = $request->validate([
+            'gudang_id' => 'required|exists:warehouse_master_gudang,id',
+            'embalase' => 'required|in:tidak,item,racikan',
+            'total' => 'nullable|integer',
+            'bmhp' => 'boolean',
+            'kronis' => 'boolean',
+            'dispensing' => 'boolean',
+        ]);
+
+        $data2 = $request->validate([
+            "si_id.*" => "exists:stored_barang_farmasi,id",
+            "obat_id.*" => "exists:warehouse_barang_farmasi,id",
+            "item_id.*" => "exists:farmasi_resep_items,id",
+            "type.*" => "in:obat,racikan",
+            "signa.*" => "nullable|string",
+            "jam_pemberian.*" => "nullable|string",
+            "instruksi.*" => "nullable|string",
+            "nama_racikan.*" => "nullable|string",
+            "detail_racikan.*" => "integer",
+            "subtotal.*" => "integer",
+            "harga_embalase.*" => "integer",
+            "hna.*" => "integer",
+            "qty.*" => "integer",
+        ]);
+
+        // sort $data2["type"] so that the top ones are "racikan" first
+        uasort($data2["type"], function ($a, $b) {
+            return ($a === "racikan" ? 0 : 1) <=> ($b === "racikan" ? 0 : 1);
+        });
+
+        // populate resep_dict
+        $resep_dict = [];
+        foreach ($data2['item_id'] as $key => $item_id) {
+            $resep_dict[$key] = $item_id;
+        }
+
+
+        DB::beginTransaction();
+        try {
+            $resep = FarmasiResep::findOrFail($id);
+
+            if ($resep->billed) {
+                throw new \Exception("Resep sudah dibill, tidak bisa diubah");
+            }
+
+            $user = User::findOrFail(auth()->user()->id);
+            $resep->update($data);
+            $isOTC = $resep->otc_id != null;
+            $registration = $isOTC ? $resep->otc : $resep->registration;
+
+            // dd($request->all());
+            foreach ($data2['type'] as $key => $type) {
+                $detail_racikan_id = null;
+                if (isset($data2["detail_racikan"][$key])) {
+                    $detail_racikan_id = $resep_dict[$data2["detail_racikan"][$key]];
+                }
+
+                if (!isset($data2['item_id'][$key])) // new item
+                {
+
+                    if (isset($data2["si_id"][$key])) {
+                        $stored = StoredBarangFarmasi::find($data2["si_id"][$key]);
+                        if ($stored->qty < $data2["qty"][$key]) {
+                            throw new \Exception("Stok tidak cukup untuk item dengan ID " . $data2["si_id"][$key]);
+                        }
+
+                        // decrease current stock
+                        $keterangan = "PENJUALAN OBAT PS: " . ($isOTC ? $registration->nama_pasien : $registration->patient->name);
+                        $args = new IncreaseDecreaseStockArguments($user, $resep, $stored, $data2["qty"][$key], $keterangan);
+                        $this->goodsStockService->decreaseStock($args);
+                    }
+
+                    $item = FarmasiResepItems::create([
+                        "resep_id"      => $resep->id,
+                        "tipe"          => $type,
+                        "si_id"         => isset($data2["si_id"][$key])            ? $data2["si_id"][$key]            : null,
+                        "nama_racikan"  => isset($data2["nama_racikan"][$key])     ? $data2["nama_racikan"][$key]     : null,
+                        "racikan_id"    => $detail_racikan_id,
+                        "signa"         => isset($data2["signa"][$key])            ? $data2["signa"][$key]            : null,
+                        "instruksi"     => isset($data2["instruksi"][$key])        ? $data2["instruksi"][$key]        : null,
+                        "jam_pemberian" => isset($data2["jam_pemberian"][$key])    ? $data2["jam_pemberian"][$key]    : null,
+                        "qty"           => isset($data2["qty"][$key])              ? $data2["qty"][$key]              : null,
+                        "harga"         => isset($data2["hna"][$key])              ? $data2["hna"][$key]              : null,
+                        "embalase"      => isset($data2["harga_embalase"][$key])   ? $data2["harga_embalase"][$key]   : null,
+                        "subtotal"      => isset($data2["subtotal"][$key])         ? $data2["subtotal"][$key]         : null,
+                    ]);
+                    $resep_dict[$key] = $item->id;
+                    continue;
+                }
+
+                // old item
+                $item = FarmasiResepItems::findOrFail($data2['item_id'][$key]);
+
+                // qty update
+                if ($item->qty != $data2['qty'][$key]) {
+                    $delta = $data2['qty'][$key] - $item->qty;
+                    $keterangan = "UPDATE PENJUALAN OBAT PS: " . ($isOTC ? $registration->nama_pasien : $registration->patient->name);
+                    $args = new IncreaseDecreaseStockArguments($user, $resep, $item->stored, $delta, $keterangan);
+                    if ($delta < 0)
+                        $this->goodsStockService->decreaseStock($args);
+                    else
+                        $this->goodsStockService->increaseStock($args);
+                }
+
+                $item->update([
+                    "resep_id"      => $resep->id,
+                    "tipe"          => $type,
+                    "si_id"         => isset($data2["si_id"][$key])            ? $data2["si_id"][$key]            : null,
+                    "nama_racikan"  => isset($data2["nama_racikan"][$key])     ? $data2["nama_racikan"][$key]     : null,
+                    "racikan_id"    => $detail_racikan_id,
+                    "signa"         => isset($data2["signa"][$key])            ? $data2["signa"][$key]            : null,
+                    "instruksi"     => isset($data2["instruksi"][$key])        ? $data2["instruksi"][$key]        : null,
+                    "jam_pemberian" => isset($data2["jam_pemberian"][$key])    ? $data2["jam_pemberian"][$key]    : null,
+                    "qty"           => isset($data2["qty"][$key])              ? $data2["qty"][$key]              : null,
+                    "harga"         => isset($data2["hna"][$key])              ? $data2["hna"][$key]              : null,
+                    "embalase"      => isset($data2["harga_embalase"][$key])   ? $data2["harga_embalase"][$key]   : null,
+                    "subtotal"      => isset($data2["subtotal"][$key])         ? $data2["subtotal"][$key]         : null,
+                ]);
+            }
+
+            DB::commit();
+            return back()->with('success', "Resep berhasil di update!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function telaahResep(int $id)
+    {
+        $telaah = FarmasiTelaahResep::where('resep_id', $id)->get()->first();
+
+        return view('pages.simrs.farmasi.transaksi-resep.partials.popup-telaah-resep', compact('telaah'));
     }
 
     public function telaahResepRaw(string $json)
@@ -579,6 +722,50 @@ class FarmasiResepController extends Controller
         return view('pages.simrs.farmasi.transaksi-resep.partials.print-resep', compact("resep"));
     }
 
+    public function update_telaah(int $id, Request $request)
+    {
+        $data = $request->validate([
+            'kejelasan_tulisan' => 'boolean',
+            'benar_pasien' => 'boolean',
+            'benar_nama_obat' => 'boolean',
+            'benar_dosis' => 'boolean',
+            'benar_waktu_dan_frekeunsi_pemberian' => 'boolean',
+            'benar_rute_dan_cara_pemberian' => 'boolean',
+            'ada_alergi_dengan_obat_yang_diresepkan' => 'boolean',
+            'ada_duplikat_obat' => 'boolean',
+            'interaksi_obat_yang_mungkin_terjadi' => 'boolean',
+            'hal_lain_yang_mungkin_terjadi' => 'boolean',
+            'hal_lain_yang_merupakan_masalah_dengan_obat' => 'boolean',
+
+            'perubahan_resep_tertulis_1' => 'nullable|string|max:255',
+            'perubahan_resep_menjadi_1' => 'nullable|string|max:255',
+            'perubahan_resep_petugas_1' => 'nullable|string|max:255',
+            'perubahan_resep_disetujui_1' => 'nullable|string|max:255',
+
+            'perubahan_resep_tertulis_2' => 'nullable|string|max:255',
+            'perubahan_resep_menjadi_2' => 'nullable|string|max:255',
+            'perubahan_resep_petugas_2' => 'nullable|string|max:255',
+            'perubahan_resep_disetujui_2' => 'nullable|string|max:255',
+
+            'perubahan_resep_tertulis_3' => 'nullable|string|max:255',
+            'perubahan_resep_menjadi_3' => 'nullable|string|max:255',
+            'perubahan_resep_petugas_3' => 'nullable|string|max:255',
+            'perubahan_resep_disetujui_3' => 'nullable|string|max:255',
+
+            'alamat_no_telp_pasien' => 'nullable|string|max:500',
+        ]);
+
+        // Find the data in the database
+        $telaah = FarmasiTelaahResep::find($id);
+        if (!$telaah) {
+            return back()->with('error', 'Telaah Resep tidak ditemukan.');
+        }
+
+        // Update the data
+        $telaah->update($data);
+        return back()->with('success', 'Telaah Resep berhasil di edit!');
+    }
+
     /**
      * Display the specified resource.
      */
@@ -590,24 +777,85 @@ class FarmasiResepController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(FarmasiResep $farmasiResep)
+    public function edit(FarmasiResep $farmasiResep, int $id)
     {
-        //
-    }
+        // Retrieve the Resep by ID
+        $resep = FarmasiResep::with([
+            "otc",
+            "registration",
+            "registration.patient",
+            "registration.patient.bed",
+            "registration.patient.bed.room",
+            "items",
+            "doctor",
+            "user",
+            "items.stored",
+            "items.stored.pbi"
+        ])->find($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, FarmasiResep $farmasiResep)
-    {
-        //
+        if (!$resep) {
+            return back()->with('error', 'Resep tidak ditemukan!');
+        }
+
+        $default_apotek = WarehouseMasterGudang::select('id')->where('id', $resep->gudang_id)->first();
+        $obats = null;
+        if (isset($default_apotek)) {
+            $query = WarehouseBarangFarmasi::query()->with(["stored_items", "satuan", "zat_aktif", "zat_aktif.zat"]);
+            $query->whereHas("stored_items", function ($q) use ($default_apotek) {
+                $q->where("gudang_id", $default_apotek->id);
+            });
+
+            $obats = $query->get();
+        }
+
+        $signas = FarmasiSigna::all()->sortByDesc(function ($signa) {
+            return strlen($signa->kata);
+        });
+
+        return view("pages.simrs.farmasi.transaksi-resep.edit-resep", [
+            'gudangs' => WarehouseMasterGudang::where("apotek", 1)->where("warehouse", 0)->get(),
+            'default_apotek' => $default_apotek,
+            'obats' => $obats,
+            "signas" => $signas,
+            "resep" => $resep
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(FarmasiResep $farmasiResep)
+    public function destroy(FarmasiResep $farmasiResep, int $id)
     {
-        //
+        $user = auth()->user();
+        // Cari resep berdasarkan ID
+        $resep = FarmasiResep::find($id);
+        if (!$resep) {
+            return response()->json(['message' => 'Resep tidak ditemukan'], 404);
+        }
+
+        if ($resep->billed) {
+            return back()->with("error", "Resep sudah billed!");
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($resep->items as $item) {
+                if ($item->tipe == 'racikan') continue;
+                // decrease current stock
+                $keterangan = "BATAL PENJUALAN OBAT";
+                $args = new IncreaseDecreaseStockArguments($user, $resep, $item->stored, $item->qty, $keterangan);
+                $this->goodsStockService->decreaseStock($args);
+                $item->delete();
+            }
+
+            // Hapus resep
+            $resep->delete();
+
+            DB::commit();
+            return back()->with("success", "Resep berhasil dihapus");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with("error", $e->getMessage());
+        }
     }
 }

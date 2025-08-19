@@ -25,6 +25,7 @@ class CreateStockArguments
         public GoodsType $type,
         public WarehouseMasterGudang $warehouse,
         public WarehousePenerimaanBarangFarmasiItems|WarehousePenerimaanBarangNonFarmasiItems $pbi,
+        public string $keterangan = '',
         public int $qty,
     ) {}
 }
@@ -36,6 +37,7 @@ class IncreaseDecreaseStockArguments
         public Model $source,
         public StoredBarangFarmasi|StoredBarangNonFarmasi $item,
         public int $qty,
+        public string $keterangan = '',
     ) {}
 }
 
@@ -49,6 +51,7 @@ class MoveStockArguments
         public Model $source,
         public StoredBarangFarmasi|StoredBarangNonFarmasi $item,
         public WarehouseMasterGudang $warehouse_destination,
+        public string $keterangan = '',
     ) {
         $this->warehouse_source = WarehouseMasterGudang::findOrFail($item->gudang_id);
         $this->qty = $item->qty;
@@ -63,6 +66,7 @@ class TransferStockArguments
         public StoredBarangFarmasi|StoredBarangNonFarmasi $itemA,
         public StoredBarangFarmasi|StoredBarangNonFarmasi $itemB,
         public int $qty,
+        public string $keterangan = '',
     ) {}
 }
 
@@ -100,6 +104,7 @@ class GoodsStockService
             'after_qty'         => $args->qty,
             'after_gudang_id'   => $args->warehouse->id,
             'performed_by'      => $args->user->id,
+            'keterangan'        => $args->keterangan
         ]);
 
         return $item;
@@ -153,6 +158,7 @@ class GoodsStockService
             'after_gudang_id'   => $afterGudang,
             'after_qty'         => $args->qty,
             'performed_by'      => $args->user->id,
+            'keterangan'        => $args->keterangan
         ]);
     }
 
@@ -194,6 +200,7 @@ class GoodsStockService
             'after_qty'         => $item->qty,
             'after_gudang_id'   => $item->gudang_id,
             'performed_by'      => $args->user->id,
+            'keterangan'        => $args->keterangan
         ]);
     }
 

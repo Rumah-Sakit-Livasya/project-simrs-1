@@ -198,6 +198,9 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::get("/gudang-default-rajal", [FarmasiResepController::class, "gudang_default_rajal"])->name("farmasi.transaksi-resep.gudang-default-rajal");
             Route::get('/obat/{gudang_id}', [FarmasiResepController::class, 'get_obat'])->name('farmasi.get-obat');
             Route::get('/batch/{gudang_id}/{barang_id}', [FarmasiResepController::class, 'get_batch'])->name('farmasi.get-batch');
+            Route::put("/update/telaah/{id}", [FarmasiResepController::class, "update_telaah"])->name("farmasi.update.telaah");
+            Route::put('/update/resep/{id}', [FarmasiResepController::class, 'update'])->name('farmasi.transaksi-resep.update');
+            Route::delete("/destroy/{id}", [FarmasiResepController::class, "destroy"])->name("farmasi.transaksi-resep.delete");
         });
     });
 

@@ -5,9 +5,13 @@ namespace App\Models;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FarmasiResep extends Model
 {
+
+    use SoftDeletes;
+
     protected $guarded = ["id"];
 
     public function registration()
