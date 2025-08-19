@@ -76,22 +76,28 @@ class KunjunganController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        DB::beginTransaction();
+        DB::beginTransaction(); // Memulai transaksi
         try {
+            // 1. Membuat record Kunjungan
             $kunjungan = Kunjungan::create($request->except('dokumentasi'));
 
+            // 2. Jika ada file, simpan dan buat record Dokumentasi
             if ($request->hasFile('dokumentasi')) {
                 foreach ($request->file('dokumentasi') as $file) {
-                    // Simpan file ke 'storage/app/public/dokumentasi'
+                    // Proses ini berhasil
                     $path = $file->store('dokumentasi', 'public');
+
+                    // Kemungkinan besar GAGAL DI SINI
                     $kunjungan->dokumentasi()->create(['file_path' => $path]);
                 }
             }
 
+            // 3. Commit transaksi jika semua berhasil
             DB::commit();
             return response()->json(['message' => 'Data kunjungan berhasil ditambahkan.'], 201);
         } catch (\Exception $e) {
-            DB::rollBack();
+            // 4. Jika ada GAGAL di mana pun dalam blok 'try', kode ini akan berjalan
+            DB::rollBack(); // Semua perubahan database dibatalkan
             return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
