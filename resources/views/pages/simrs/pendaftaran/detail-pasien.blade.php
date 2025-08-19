@@ -120,8 +120,11 @@
                         <div class="panel-content">
                             <div class="row">
                                 <div class="col-md-2 biodata-pasien">
-                                    <img src="{{ $patient->gender === 'Laki-laki' ? '/img/user/man-icon.png' : '/img/user/woman-icon.png' }}"
-                                        style="width: 120px; height: 120px;">
+                                    @if ($patient->gender == 'Laki-laki')
+                                        <img src="/img/user/man-icon.png" style="width: 120px; height: 120px;">
+                                    @else
+                                        <img src="/img/user/woman-icon.png" style="width: 120px; height: 120px;">
+                                    @endif
                                     <div class="btn-biodata">
                                         <button class="btn-flatcx pointer" data-toggle="modal"
                                             data-target="#riwayat-kunjungan" title="Riwayat Kunjungan">
