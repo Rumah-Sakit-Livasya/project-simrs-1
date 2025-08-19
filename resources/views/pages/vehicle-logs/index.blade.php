@@ -312,7 +312,7 @@
                     data
                 } = await response.json();
                 $('#logId').val(data.id);
-                $('#info_vehicle_name').text(`${data.vehicle.name} (${data.vehicle.license_plate})`);
+                $('#info_vehicle_name').text(`${data.internal_vehicle.name} (${data.internal_vehicle.license_plate})`);
                 $('#info_start_odometer').text(data.start_odometer);
                 $('#end_odometer').attr('min', data.start_odometer); // Set validasi min
                 $('#pengembalianModal').modal('show');
