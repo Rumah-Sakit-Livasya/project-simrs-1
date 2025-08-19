@@ -52,9 +52,18 @@ class DatabaseSeeder extends Seeder
         //     WasteCategorySeeder::class,
         //     VehicleSeeder::class,
         // ]);
+        // $this->call([
+        //     LinenCategorySeeder::class,
+        //     LinenTypeSeeder::class,
+        // ]);
+
         $this->call([
-            LinenCategorySeeder::class,
-            LinenTypeSeeder::class,
+            InspectionItemSeeder::class,
+            InternalVehicleSeeder::class,
+            WorkshopVendorSeeder::class,
+            DriverSeeder::class,
+            VehicleLogSeeder::class,
+            // Daftarkan seeder lain di sini jika ada
         ]);
 
 

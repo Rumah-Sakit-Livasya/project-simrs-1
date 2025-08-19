@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Console\Commands\NotifyContractExpiry;
+use App\Models\Inspection;
 use App\Models\WarehousePenerimaanBarangFarmasi;
 use App\Models\WarehousePenerimaanBarangNonFarmasi;
+use App\Observers\InspectionObserver;
 use Carbon\Carbon;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -60,5 +62,7 @@ class AppServiceProvider extends ServiceProvider
             'penerimaan_farmasi' => WarehousePenerimaanBarangFarmasi::class,
             'penerimaan_non_farmasi' => WarehousePenerimaanBarangNonFarmasi::class,
         ]);
+
+        // Inspection::observe(InspectionObserver::class);
     }
 }
