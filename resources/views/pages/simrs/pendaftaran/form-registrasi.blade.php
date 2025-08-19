@@ -81,20 +81,20 @@
         }
 
         /* .box-menu li {
-                padding: 20px 30px;
-                margin: 20px;
-                width: 200px;
-                background: #f2f0f5;
-                text-align: center;
-                cursor: pointer;
-                border: 1px solid #e5e5e5;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
-            } */
+                            padding: 20px 30px;
+                            margin: 20px;
+                            width: 200px;
+                            background: #f2f0f5;
+                            text-align: center;
+                            cursor: pointer;
+                            border: 1px solid #e5e5e5;
+                            border-radius: 8px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-direction: column;
+                            box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
+                        } */
 
         .box-menu .circle-menu {
             height: 50px;
@@ -118,21 +118,17 @@
                         <div class="panel-content">
                             <div class="row">
                                 <div class="col-md-2 biodata-pasien">
-                                    <<<<<<< HEAD @if ($patient->gender == 'Laki-laki')
+                                    @if ($patient->gender == 'Laki-laki')
                                         <img src="/img/user/man-icon.png" style="width: 120px; height: 120px;">
                                     @else
                                         <img src="/img/user/woman-icon.png" style="width: 120px; height: 120px;">
-                                        @endif
-                                        =======
-                                        <img src="{{ $patient->gender === 'Laki-laki' ? '/img/user/man-icon.png' : '/img/user/woman-icon.png' }}"
-                                            style="width: 120px; height: 120px;">
-                                        >>>>>>> 20594538fd60899f4f37b09fb0b97bc5800c7859
-                                        <div class="btn-biodata">
-                                            <button class="btn-flatcx pointer" id="kunjungan" alt="Riwayat Kunjungan"
-                                                title="Riwayat Kunjungan"><i class="mdi mdi-clipboard-pulse"></i></button>
-                                            <button class="btn-flatcx" id="button" alt="Detail Biodata Pasien"
-                                                title="Detail Biodata Pasien"><i class="mdi mdi-account-edit"></i></button>
-                                        </div>
+                                    @endif
+                                    <div class="btn-biodata">
+                                        <button class="btn-flatcx pointer" id="kunjungan" alt="Riwayat Kunjungan"
+                                            title="Riwayat Kunjungan"><i class="mdi mdi-clipboard-pulse"></i></button>
+                                        <button class="btn-flatcx" id="button" alt="Detail Biodata Pasien"
+                                            title="Detail Biodata Pasien"><i class="mdi mdi-account-edit"></i></button>
+                                    </div>
                                 </div>
                                 <div class="col-md-10 col-bg-10">
                                     <div class="row align-items-center">
