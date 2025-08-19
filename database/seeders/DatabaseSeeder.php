@@ -58,7 +58,8 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            InspectionItemSeeder::class,
+            JenisKegiatanSeeder::class,
+            // InspectionItemSeeder::class,
             // InternalVehicleSeeder::class,
             // WorkshopVendorSeeder::class,
             // DriverSeeder::class,

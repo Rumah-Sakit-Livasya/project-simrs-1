@@ -50,6 +50,7 @@ use App\Http\Controllers\API\InspectionController;
 use App\Http\Controllers\API\InspectionItemController;
 use App\Http\Controllers\API\InternalVehicleController;
 use App\Http\Controllers\API\InternalVehicleVendorController;
+use App\Http\Controllers\API\KunjunganController;
 use App\Http\Controllers\API\PesanController;
 use App\Http\Controllers\API\VehicleLogController;
 use App\Http\Controllers\API\VehicleServiceController;
@@ -426,6 +427,9 @@ Route::prefix('internal')->group(function () {
 
     Route::apiResource('vehicle-services', VehicleServiceController::class);
 });
+
+Route::apiResource('kunjungan', KunjunganController::class);
+
 
 
 require __DIR__ . '/api-simrs.php';
