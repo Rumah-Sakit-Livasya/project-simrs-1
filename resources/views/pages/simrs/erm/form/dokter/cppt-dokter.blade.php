@@ -315,8 +315,6 @@ Skrining Nyeri:
                                     'signature_model' => $pengkajian?->signature, // Kirim model data tanda tangan yang relevan
                                 ])
 
-
-
                                 <!-- Action Buttons -->
                                 <div class="d-flex justify-content-between mt-4">
                                     <button type="button" class="btn btn-outline-secondary" id="tutup">
