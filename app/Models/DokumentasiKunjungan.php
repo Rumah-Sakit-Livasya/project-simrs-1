@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class DokumentasiKunjungan extends Model
 {
     use HasFactory;
-    protected $fillable = ['kunjungan_id', 'file_path'];
+    protected $guarded = ['id'];
 
     public function kunjungan()
     {
