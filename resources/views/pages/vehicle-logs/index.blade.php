@@ -95,7 +95,7 @@
                             <div class="form-group col-md-6">
                                 <label for="start_odometer">Kilometer Awal</label>
                                 <input type="number" class="form-control" id="start_odometer" name="start_odometer"
-                                    readonly required>
+                                    required>
                             </div>
                         </div>
                         <div class="form-group">
