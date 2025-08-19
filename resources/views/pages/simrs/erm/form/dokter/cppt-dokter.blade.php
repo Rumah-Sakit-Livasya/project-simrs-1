@@ -306,25 +306,6 @@ Skrining Nyeri:
                                         </table>
                                     </div>
                                 </div>
-
-                                @include('pages.simrs.erm.partials.signature-field', [
-                                    'judul' => 'Dokter,',
-                                    'pic' => auth()->user()->employee->fullname,
-                                    'role' => 'dokter',
-                                    'prefix' => 'cppt_dokter', // Berikan prefix unik
-                                    'signature_model' => $pengkajian?->signature, // Kirim model data tanda tangan yang relevan
-                                ])
-
-                                <!-- Action Buttons -->
-                                <div class="d-flex justify-content-between mt-4">
-                                    <button type="button" class="btn btn-outline-secondary" id="tutup">
-                                        <span class="mdi mdi-arrow-up-bold-circle-outline"></span> Tutup
-                                    </button>
-                                    <button type="submit" class="btn btn-primary btn-saves-soap" id="bsSOAP"
-                                        name="save">
-                                        <span class="mdi mdi-content-save"></span> Simpan
-                                    </button>
-                                </div>
                     </form>
                 </div>
                 <!-- Filter Section -->
