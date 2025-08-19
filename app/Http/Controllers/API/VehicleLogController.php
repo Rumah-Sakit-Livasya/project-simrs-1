@@ -71,7 +71,7 @@ class VehicleLogController extends Controller
 
     public function show(VehicleLog $vehicleLog)
     {
-        return response()->json(['data' => $vehicleLog->load(['vehicle', 'driver.employee'])]);
+        return response()->json(['data' => $vehicleLog->load(['internal_vehicle', 'driver.employee'])]);
     }
 
     public function update(Request $request, VehicleLog $vehicleLog) // Proses Pengembalian

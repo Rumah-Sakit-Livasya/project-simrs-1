@@ -89,11 +89,21 @@
                                 <div class="invalid-feedback" id="model_year-error"></div>
                             </div>
                         </div>
+                        {{-- Tambah input current_km --}}
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="current_km">Odometer Saat Ini (KM)</label>
+                                <input type="number" class="form-control" id="current_km" name="current_km"
+                                    placeholder="Contoh: 50000">
+                                <div class="invalid-feedback" id="current_km-error"></div>
+                            </div>
+                        </div>
                         <hr>
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label for="tax_due_date">Tgl Pajak Tahunan</label>
-                                <input type="date" class="form-control" id="tax_due_date" name="tax_due_date" required>
+                                <input type="date" class="form-control" id="tax_due_date" name="tax_due_date"
+                                    required>
                                 <div class="invalid-feedback" id="tax_due_date-error"></div>
                             </div>
                             <div class="form-group col-md-6">
@@ -214,6 +224,7 @@
                 $('#type').val(data.type);
                 $('#brand_model').val(data.brand_model);
                 $('#model_year').val(data.model_year);
+                $('#current_km').val(data.current_km); // Set value current_km
                 $('#tax_due_date').val(data.tax_due_date);
                 $('#stnk_due_date').val(data.stnk_due_date);
                 $('#service_schedule_km').val(data.service_schedule_km);
