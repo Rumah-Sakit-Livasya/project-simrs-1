@@ -141,4 +141,14 @@ class Employee extends Model
     {
         return $this->hasMany(Registration::class);
     }
+
+    public function vehicleLogs()
+    {
+        return $this->hasMany(VehicleLog::class);
+    }
+
+    public function driver()
+    {
+        return $this->hasOne(Driver::class);
+    }
 }

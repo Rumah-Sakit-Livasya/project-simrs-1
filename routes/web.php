@@ -12,6 +12,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
 use App\Http\Controllers\DailyWasteInputController;
+use App\Http\Controllers\InternalVehiclePageController;
 use App\Http\Controllers\LaporanInternalController;
 use App\Http\Controllers\Laundry\DailyLinenInputController;
 use App\Http\Controllers\Laundry\LinenTypeController;
@@ -442,6 +443,29 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/daily-linens/getLaundryData', [WasteReportController::class, 'getLaundryData'])->name('laundry.data');
 
     Route::resource('master/linen-types', LinenTypeController::class);
+
+    // Manajemen Kendaraan
+    Route::prefix('manajemen-kendaraan')->name('vehicles.')->group(function () {
+        // Halaman daftar kendaraan
+        Route::get('/', [InternalVehiclePageController::class, 'index'])->name('index');
+        // Halaman drivers
+        Route::get('/drivers', [InternalVehiclePageController::class, 'drivers'])->name('drivers');
+        // Halaman dashboard manajemen kendaraan
+        Route::get('/dashboard', [InternalVehiclePageController::class, 'dashboard'])->name('dashboard');
+        // Halaman daftar inspection item kendaraan internal
+        Route::get('/inspection-items', [InternalVehiclePageController::class, 'inspection_item'])->name('inspection_items');
+        // Halaman daftar vendor kendaraan internal
+        Route::get('/workshop-vendors', [InternalVehiclePageController::class, 'vendors'])->name('vendors');
+        // Halaman riwayat penggunaan kendaraan
+        Route::get('/vehicle-logs', [InternalVehiclePageController::class, 'vehicle_logs'])->name('vehicle_logs');
+
+        // Halaman daftar inspeksi kendaraan internal
+        Route::get('/inspections', [InternalVehiclePageController::class, 'inspections'])->name('inspections');
+        // Halaman form input inspeksi kendaraan internal
+        Route::get('/inspections/create', [InternalVehiclePageController::class, 'create_inspection'])->name('inspections.create');
+
+        Route::get('/service-tickets', [InternalVehiclePageController::class, 'service_tickets'])->name('service_tickets');
+    });
 });
 
 Route::middleware(['auth'])->group(function () {
