@@ -294,8 +294,8 @@ Skrining Nyeri:
                                                     <td colspan="8" align="right">Grand Total</td>
                                                     <td align="right"><span id="grand_total" style="text-align: right;"
                                                             class="numeric">0</span>
-                                                        <input type="hidden" name="total_harga_obat" id="total_harga_obat"
-                                                            value="0" readonly="">
+                                                        <input type="hidden" name="total_harga_obat"
+                                                            id="total_harga_obat" value="0" readonly="">
                                                         <input type="hidden" name="total_bpjs" id="total_bpjs"
                                                             value="0" readonly="">
                                                         <input type="hidden" name="is_bpjs" id="is_bpjs"
@@ -311,7 +311,10 @@ Skrining Nyeri:
                                     'judul' => 'Dokter,',
                                     'pic' => auth()->user()->employee->fullname,
                                     'role' => 'dokter',
+                                    'prefix' => 'cppt_dokter', // Berikan prefix unik
+                                    'signature_model' => $pengkajian?->signature, // Kirim model data tanda tangan yang relevan
                                 ])
+
 
 
                                 <!-- Action Buttons -->

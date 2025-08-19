@@ -236,7 +236,6 @@ class ERMController extends Controller
     public static function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path)
     {
         Carbon::setLocale('id');
-
         switch ($menu) {
             case 'triage':
                 $pengkajian = Triage::where('registration_id', $registration->id)->first();
@@ -282,7 +281,7 @@ class ERMController extends Controller
                 $default_column = "rajal_default";
                 if ($registration->registration_type == "rawat-inap") $default_column = "ranap_default";
                 $default_apotek = WarehouseMasterGudang::select('id')->where($default_column, 1)->first();
-                
+
                 return view('pages.simrs.erm.form.dokter.cppt-dokter', compact('gudangs', 'barangs', 'default_apotek', 'registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
 
             case 'resume_medis':
@@ -342,6 +341,10 @@ class ERMController extends Controller
                 return view('pages.simrs.erm.form.perawat.assesment-gadar', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'rujuk_antar_rs':
+                $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
+                return view('pages.simrs.erm.form.perawat.rujuk-antar-rs', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+
+            case 'resep_harian':
                 $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
                 return view('pages.simrs.erm.form.perawat.rujuk-antar-rs', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
