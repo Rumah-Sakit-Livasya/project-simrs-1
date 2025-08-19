@@ -59,10 +59,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             InspectionItemSeeder::class,
-            InternalVehicleSeeder::class,
-            WorkshopVendorSeeder::class,
-            DriverSeeder::class,
-            VehicleLogSeeder::class,
+            // InternalVehicleSeeder::class,
+            // WorkshopVendorSeeder::class,
+            // DriverSeeder::class,
+            // VehicleLogSeeder::class,
             // Daftarkan seeder lain di sini jika ada
         ]);
 
