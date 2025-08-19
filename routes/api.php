@@ -11,7 +11,9 @@ use App\Http\Controllers\API\JobPositionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\ShiftController;
 use App\Http\Controllers\API\BankEmployeeController;
+use App\Http\Controllers\API\DailyWasteInputController;
 use App\Http\Controllers\API\DayOffRequestController;
+use App\Http\Controllers\API\DriverController;
 use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\KPIController;
 use App\Http\Controllers\API\StructureController;
@@ -37,12 +39,24 @@ use App\Http\Controllers\API\TimeScheduleController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
 use App\Http\Controllers\Keuangan\CategoryController;
+use App\Http\Controllers\Keuangan\ChartOfAccountController;
 use App\Http\Controllers\SIMRS\TextToSpeech\TextToSpeechController;
 use App\Http\Middleware\CheckAuthorizationBot;
 use App\Models\AttendanceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\EmployeeLeaveController;
+use App\Http\Controllers\API\InspectionController;
+use App\Http\Controllers\API\InspectionItemController;
+use App\Http\Controllers\API\InternalVehicleController;
+use App\Http\Controllers\API\InternalVehicleVendorController;
+use App\Http\Controllers\API\PesanController;
+use App\Http\Controllers\API\VehicleLogController;
+use App\Http\Controllers\API\VehicleServiceController;
+use App\Http\Controllers\API\WasteTransportController;
+use App\Http\Controllers\API\WebhookController;
+use App\Http\Controllers\API\WorkshopVendorController;
+use App\Http\Controllers\WhatsappController;
 
 /*
 |--------------------------------------------------------------------------
@@ -347,10 +361,14 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
     Route::get('user/getByName', [UserController::class, 'getByName'])->name('user.getByName');
 });
 
-
 Route::get('/tts', [TextToSpeechController::class, 'tts'])->name('tts');
 Route::post('livasya-message', [BotMessageController::class, 'livasyaMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.verified');
+
 Route::post('process-message', [BotMessageController::class, 'processMessage'])->middleware(CheckAuthorizationBot::class)->name('bot.kirim-pesan');
+
+Route::post('/whatsapp/process-message', [WhatsappController::class, 'processMessage']);
+Route::post('/whatsapp/confirm-sent', [WhatsappController::class, 'confirmSent'])->name('whatsapp.confirmSent');
+
 Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])->middleware(CheckAuthorizationBot::class);
 // Route::get('notify-contract', [BotMessageController::class, 'notifyExpiryContract']);
 
@@ -361,5 +379,53 @@ Route::apiResource('events', EventController::class);
 Route::get('/employee-birthdays', [EventController::class, 'getEmployeeBirthdays']);
 
 Route::get('/employee-leaves/{id}', [AttendanceController::class, 'getDayOffs']);
+Route::post('/webhook/whatsapp', [WebhookController::class, 'handleWhatsapp']);
+
+
+Route::prefix('api')->group(function () {
+    Route::get('/coa/group/{group_id}', [ChartOfAccountController::class, 'getByGroup'])->name('coa.byGroup');
+    Route::get('/coa/{coa:id}', [ChartOfAccountController::class, 'show'])->name('coa.show');
+
+    Route::get('/coa/parents', [ChartOfAccountController::class, 'getParents'])->name('coa.parents');
+});
+// Endpoint untuk chart
+Route::get('/chart-data', [DailyWasteInputController::class, 'getChartData']);
+
+// Resource routes untuk CRUD
+Route::apiResource('daily-inputs', DailyWasteInputController::class);
+Route::apiResource('waste-transports', WasteTransportController::class);
+Route::get('waste-transports/{id}/edit', [WasteTransportController::class, 'edit']);
+Route::delete('waste-transports/{id}', [WasteTransportController::class, 'destroy']);
+
+Route::prefix('internal')->group(function () {
+    // Resource untuk kendaraan internal (CRUD internal_vehicles)
+    Route::apiResource('internal-vehicles', InternalVehicleController::class);
+
+    // Resource untuk driver (CRUD drivers)
+    Route::apiResource('drivers', DriverController::class);
+
+    // Resource untuk item inspeksi kendaraan (CRUD inspection_items)
+    Route::apiResource('inspection-items', InspectionItemController::class);
+
+    // Resource untuk vendor kendaraan internal (CRUD internal_vehicle_vendors)
+    Route::apiResource('internal-vehicle-vendors', InternalVehicleVendorController::class);
+
+    // Resource untuk vendor bengkel (CRUD workshop_vendors)
+    Route::apiResource('workshop-vendors', WorkshopVendorController::class);
+
+    // Endpoint untuk mendapatkan odometer terakhir kendaraan tertentu
+    Route::get('internal-vehicles/{vehicle}/last-odometer', [VehicleLogController::class, 'getLastOdometer']);
+
+    // Resource untuk log kendaraan (CRUD vehicle_logs)
+    Route::apiResource('vehicle-logs', VehicleLogController::class);
+
+    // Route resource untuk inspeksi kendaraan internal, hanya mengaktifkan index (list) dan store (buat baru)
+    Route::apiResource('inspections', InspectionController::class)->except(['update']); // Kita tidak perlu update, hanya show & destroy
+
+    Route::get('workshop-vendors-list', [VehicleServiceController::class, 'getWorkshopVendors']);
+
+    Route::apiResource('vehicle-services', VehicleServiceController::class);
+});
+
 
 require __DIR__ . '/api-simrs.php';

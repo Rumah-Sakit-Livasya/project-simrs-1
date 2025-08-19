@@ -125,6 +125,63 @@ class KepustakaanController extends Controller
         return Storage::disk('private')->download($path);
     }
 
+    // public function store(Request $request)
+    // {
+    //     // Atur aturan validasi dasar
+    //     $rules = [
+    //         'type' => 'required',
+    //         'kategori' => 'nullable',
+    //         'parent_id' => 'nullable',
+    //         'organization_id' => 'nullable',
+    //         'name' => 'required',
+    //         'size' => 'nullable',
+    //         'file' => 'required', // default: file wajib
+    //     ];
+
+    //     // Jika tipenya folder, maka file boleh kosong
+    //     if ($request->input('type') === 'folder') {
+    //         $rules['file'] = 'nullable';
+    //     }
+
+    //     // Pesan kustom untuk masing-masing input
+    //     $messages = [
+    //         'type.required' => 'Tipe harus dipilih.',
+    //         'name.required' => 'Nama folder atau file harus diisi.',
+    //         'file.required' => 'File harus diunggah jika bukan folder.',
+    //     ];
+
+    //     $validatedData = $request->validate($rules, $messages);
+
+    //     // Ambil data organisasi jika ada
+    //     $organization = Organization::find($request->organization_id);
+
+    //     if ($request->hasFile('file')) {
+    //         $file = $request->file('file');
+    //         $fileName = Carbon::now()->timestamp . '_' . \Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
+    //         $kategori = \Str::slug($request->kategori ?? 'lainnya');
+    //         $orgName = $organization ? \Str::slug($organization->name) : 'umum';
+    //         $path = 'kepustakaan/' . $kategori . '/' . $orgName;
+
+    //         // Simpan file secara manual ke storage private
+    //         $storagePath = storage_path('app/private/' . $path);
+    //         if (!file_exists($storagePath)) {
+    //             mkdir($storagePath, 0755, true);
+    //         }
+
+    //         $file->move($storagePath, $fileName);
+
+    //         // Simpan path relatif ke database
+    //         $validatedData['file'] = $path . '/' . $fileName;
+    //     }
+
+    //     try {
+    //         Kepustakaan::create($validatedData);
+    //         return response()->json(['message' => 'Folder/File berhasil ditambahkan!'], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
+
     public function store(Request $request)
     {
         // Atur aturan validasi dasar
@@ -136,6 +193,8 @@ class KepustakaanController extends Controller
             'name' => 'required',
             'size' => 'nullable',
             'file' => 'required', // default: file wajib
+            'month' => 'nullable|integer', // <-- Tambahkan ini
+            'year' => 'nullable|integer',  // <-- Tambahkan ini
         ];
 
         // Jika tipenya folder, maka file boleh kosong
@@ -143,18 +202,24 @@ class KepustakaanController extends Controller
             $rules['file'] = 'nullable';
         }
 
+        // UPDATE: Jika kategori adalah 'Laporan', bulan dan tahun wajib diisi
+        if ($request->input('kategori') === 'Laporan') {
+            $rules['month'] = 'required|integer';
+            $rules['year'] = 'required|integer';
+        }
+
         // Pesan kustom untuk masing-masing input
         $messages = [
             'type.required' => 'Tipe harus dipilih.',
             'name.required' => 'Nama folder atau file harus diisi.',
             'file.required' => 'File harus diunggah jika bukan folder.',
+            'month.required' => 'Bulan laporan harus dipilih.', // <-- Tambahkan ini
+            'year.required' => 'Tahun laporan harus dipilih.',  // <-- Tambahkan ini
         ];
 
         $validatedData = $request->validate($rules, $messages);
 
-        // Ambil data organisasi jika ada
         $organization = Organization::find($request->organization_id);
-
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $fileName = Carbon::now()->timestamp . '_' . \Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
@@ -175,6 +240,7 @@ class KepustakaanController extends Controller
         }
 
         try {
+            // Data yang divalidasi sekarang sudah termasuk 'month' dan 'year'
             Kepustakaan::create($validatedData);
             return response()->json(['message' => 'Folder/File berhasil ditambahkan!'], 200);
         } catch (\Exception $e) {
@@ -338,5 +404,189 @@ class KepustakaanController extends Controller
 
         // Hapus folder dari database
         $folder->delete();
+    }
+
+    /**
+     * Menampilkan dasbor checklist laporan bulanan per unit.
+     */
+    // public function laporanDashboard(Request $request)
+    // {
+    //     // 1. Tentukan periode (bulan dan tahun) yang akan dicek.
+    //     // Ambil dari request, atau gunakan bulan dan tahun saat ini sebagai default.
+    //     // FIX: Lakukan type casting ke integer untuk menghindari error di Carbon.
+    //     $selectedYear = (int) $request->input('year', Carbon::now()->year);
+    //     $selectedMonth = (int) $request->input('month', Carbon::now()->month);
+
+    //     // 2. Ambil semua organisasi/unit yang relevan.
+    //     // $organizations = Organization::where('is_active', 1)->orderBy('name', 'asc')->get();
+    //     $organizations = Organization::orderBy('name', 'asc')->get();
+
+    //     // 3. Ambil ID semua organisasi yang SUDAH mengunggah laporan pada periode yang dipilih.
+    //     $submittedOrganizationIds = Kepustakaan::where('kategori', 'Laporan')
+    //         ->where('type', 'file')
+    //         ->whereYear('created_at', $selectedYear)
+    //         ->whereMonth('created_at', $selectedMonth)
+    //         ->whereNotNull('organization_id')
+    //         ->pluck('organization_id')
+    //         ->unique()
+    //         ->toArray();
+
+    //     // 4. Siapkan data untuk view.
+    //     $reportStatus = [];
+    //     foreach ($organizations as $org) {
+    //         $status = in_array($org->id, $submittedOrganizationIds);
+    //         $submissionData = null;
+
+    //         if ($status) {
+    //             // Jika sudah mengirim, ambil detail file terakhir yang diunggah
+    //             $submissionData = Kepustakaan::where('organization_id', $org->id)
+    //                 ->where('kategori', 'Laporan')
+    //                 ->where('type', 'file')
+    //                 ->whereYear('created_at', $selectedYear)
+    //                 ->whereMonth('created_at', $selectedMonth)
+    //                 ->latest('created_at') // Ambil yang paling baru
+    //                 ->first();
+    //         }
+
+    //         $reportStatus[] = [
+    //             'organization_name' => $org->name,
+    //             'status' => $status,
+    //             'submission' => $submissionData,
+    //         ];
+    //     }
+
+    //     // 5. Kirim data ke view.
+    //     return view('pages.simrs.kepustakaan.laporan_dashboard', compact(
+    //         'reportStatus',
+    //         'selectedYear',
+    //         'selectedMonth'
+    //     ));
+    // }
+
+    // app/Http-v2025/Controllers/SIMRS/KepustakaanController.php
+    // app/Http/Controllers/SIMRS/KepustakaanController.php
+
+    public function laporanDashboard(Request $request)
+    {
+        $selectedYear = (int) $request->input('year', Carbon::now()->year);
+        $selectedMonth = (int) $request->input('month', Carbon::now()->month);
+
+        // ===================================================================
+        // LANGKAH 1: Ambil dan Siapkan Data Unit
+        // ===================================================================
+
+        // 1a. Ambil hierarki organisasi utama
+        $orderedOrganizations = Organization::getAllOrderedByHierarchy();
+
+        // 1b. Dapatkan ID organisasi 'Sub Bagian Umum' untuk referensi
+        $subBagianUmumOrg = Organization::where('name', 'Sub Bagian Umum')->first();
+
+        // 1c. Ambil unit virtual dari Kepustakaan
+        $virtualUnits = collect();
+        if ($subBagianUmumOrg) {
+            // Cari folder "Unit Laundry" dan "Unit Kebersihan" yang dimiliki oleh ANAK dari "Sub Bagian Umum"
+            $childOrgIds = $subBagianUmumOrg->child_structures()->pluck('child_organization')->toArray();
+            $virtualUnits = Kepustakaan::whereIn('organization_id', $childOrgIds)
+                ->whereIn('name', ['Unit Laundry', 'Unit Kebersihan'])
+                ->where('type', 'folder')
+                ->get();
+        }
+
+        // ===================================================================
+        // LANGKAH 2: Bangun Daftar Unit Gabungan (Master List)
+        // ===================================================================
+
+        $masterUnitList = collect();
+        foreach ($orderedOrganizations as $org) {
+            $masterUnitList->push([
+                'id' => $org['id'],
+                'is_virtual' => false,
+                'organization_name' => $org['prefixed_name'],
+                'original_name' => $org['name'],
+            ]);
+
+            // Sisipkan unit virtual di bawah 'Sub Bagian Umum'
+            if ($subBagianUmumOrg && $org['id'] === $subBagianUmumOrg->id) {
+                foreach ($virtualUnits as $virtualUnit) {
+                    $masterUnitList->push([
+                        'id' => 'virtual_' . $virtualUnit->id, // ID unik, misal: 'virtual_53'
+                        'is_virtual' => true,
+                        'organization_name' => str_repeat('— ', $org['depth'] + 1) . $virtualUnit->name,
+                        'original_name' => $virtualUnit->name,
+                    ]);
+                }
+            }
+        }
+
+        // ===================================================================
+        // LANGKAH 3: Cek Status Laporan dengan Efisien
+        // ===================================================================
+
+        // 3a. Ambil ID dari semua unit nyata dan ID folder dari semua unit virtual
+        $realOrgIds = $masterUnitList->where('is_virtual', false)->pluck('id')->toArray();
+        $virtualFolderIds = $virtualUnits->pluck('id')->toArray();
+
+        // 3b. Ambil SEMUA file laporan yang relevan dalam SATU QUERY
+        $allSubmissions = Kepustakaan::where('kategori', 'Laporan')
+            ->where('type', 'file')
+            ->where('year', $selectedYear)
+            ->where('month', $selectedMonth)
+            ->get();
+
+        // 3c. Buat Peta Status Pengiriman yang Cerdas
+        $submissionMap = [];
+        foreach ($allSubmissions as $submission) {
+            // Tandai unit PENGUNGGAH sebagai 'sudah mengirim'
+            if ($submission->organization_id) {
+                $submissionMap[$submission->organization_id] = $submission;
+            }
+            // Tandai unit FOLDER TUJUAN (jika folder itu adalah unit virtual) sebagai 'sudah mengirim'
+            if ($submission->parent_id && in_array($submission->parent_id, $virtualFolderIds)) {
+                $virtualId = 'virtual_' . $submission->parent_id;
+                $submissionMap[$virtualId] = $submission;
+            }
+        }
+
+        // ===================================================================
+        // LANGKAH 4: Bangun dan Filter Hasil Akhir
+        // ===================================================================
+
+        $reportStatus = [];
+        foreach ($masterUnitList as $unit) {
+            $submissionData = $submissionMap[$unit['id']] ?? null;
+            $status = !is_null($submissionData);
+
+            $reportStatus[] = [
+                'organization_name' => $unit['organization_name'],
+                'original_name' => $unit['original_name'],
+                'status' => $status,
+                'submission' => $submissionData,
+            ];
+        }
+
+        $excludedNames = [
+            'fitboss',
+            'pt',
+            'driver',
+            'dokter',
+            'gudang farmasi',
+            'farmasi ranap',
+            'farmasi rajal',
+            'rawat inap 2',
+            'rawat inap',
+            'umum rumah tangga',
+            'gardener',
+            'sod',
+        ];
+
+        $finalReportStatus = array_filter($reportStatus, function ($report) use ($excludedNames) {
+            return !in_array(strtolower($report['original_name']), $excludedNames);
+        });
+
+        return view('pages.simrs.kepustakaan.laporan_dashboard', [
+            'reportStatus' => $finalReportStatus,
+            'selectedYear' => $selectedYear,
+            'selectedMonth' => $selectedMonth,
+        ]);
     }
 }

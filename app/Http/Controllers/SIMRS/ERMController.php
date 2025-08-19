@@ -27,6 +27,9 @@ use App\Models\SIMRS\Peralatan\Peralatan;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\ResumeMedisRajal\ResumeMedisRajal;
 use App\Models\SIMRS\TindakanMedis;
+use App\Models\StoredBarangFarmasi;
+use App\Models\WarehouseBarangFarmasi;
+use App\Models\WarehouseMasterGudang;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -273,7 +276,10 @@ class ERMController extends Controller
             case 'cppt_dokter':
                 $dokter = Employee::where('is_doctor', 1)->get();
                 $pengkajian = CPPT::where('registration_id', $registration->id)->first();
-                return view('pages.simrs.erm.form.dokter.cppt-dokter', compact('registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
+                $gudangs = WarehouseMasterGudang::where('apotek', 1)->where('warehouse', 0)->get();
+                $default_apotek = WarehouseMasterGudang::select('id')->where('apotek_default', 1)->first();
+                $barangs = WarehouseBarangFarmasi::with(["stored_items", "satuan"])->get();
+                return view('pages.simrs.erm.form.dokter.cppt-dokter', compact('gudangs', 'barangs', 'default_apotek', 'registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
 
             case 'resume_medis':
                 $dokter = Employee::where('is_doctor', 1)->get();
@@ -338,6 +344,24 @@ class ERMController extends Controller
             default:
                 return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'path'));
         }
+    }
+
+    public function get_obat(int $gudang_id){
+        $query = WarehouseBarangFarmasi::with(['stored_items']);
+        $query->whereHas('stored_items', function ($q) use ($gudang_id) {
+            $q->where('gudang_id', $gudang_id);
+            $q->where('warehouse_penerimaan_barang_farmasi_item.qty', '>', 0);
+        });
+        
+        $items = $query->get();
+        foreach ($items as $item) {
+            $stored = $item->stored_items->where('gudang_id', $gudang_id);
+            $item->qty = $stored->sum('qty');
+        }
+
+        return response()->json([
+            'items' => $items
+        ]);
     }
 
     public function saveSignature(Request $request, $id)

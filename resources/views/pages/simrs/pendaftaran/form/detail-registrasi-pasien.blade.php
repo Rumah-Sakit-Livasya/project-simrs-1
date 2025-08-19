@@ -486,7 +486,7 @@
                                         </li>
                                         <li>
                                             <div class="circle-menu waves-effect light-green accent-3 menu-layanan"
-                                                data-layanan="operasi/data_treatment">
+                                                data-layanan="operasi/list_order">
                                                 <i class="mdi mdi-heart-pulse"></i>
                                             </div>
                                             <span>Operasi (OK)</span>

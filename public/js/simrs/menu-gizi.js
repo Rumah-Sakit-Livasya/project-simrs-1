@@ -30,14 +30,15 @@ class ModalMenuGiziHandler {
             location.reload();
         });
 
-        this.#FormElement.find('select').on('change', (e) => {
-            const id = parseInt(e.target.value);
+        this.#FormElement.find('select#search-food').on('change', (e) => {
+            const select = /** @type {HTMLSelectElement} */ (e.target);
+            const id = parseInt(select.value);
             if (!isNaN(id)) {
-            this.#onFoodSelect(id);
+                this.#onFoodSelect(id);
 
-            this.#FormElement.find('select')
-                .val('')
-                .trigger('change');
+                this.#FormElement.find('select#search-food')
+                    .val('')
+                    .trigger('change');
             }
         });
     }

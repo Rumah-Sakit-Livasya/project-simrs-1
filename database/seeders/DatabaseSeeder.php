@@ -13,8 +13,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Aktifkan sesuai kebutuhan:
         // $this->call(GroupCOASeeders::class);
-        $this->call(DokterSeeder::class);
+        // $this->call(ChartOfAccountSeeders::class);
         // $this->call(EthnicSeeder::class);
         // Target::factory()->count(100)->create();
         // $this->call(RolePermissionSeeder::class);
@@ -42,5 +43,36 @@ class DatabaseSeeder extends Seeder
         //     ['id' => 1, 'nama' => 'Pemasukan', 'created_at' => now(), 'updated_at' => now()],
         //     ['id' => 2, 'nama' => 'Pengeluaran', 'created_at' => now(), 'updated_at' => now()],
         // ]);
+
+        // $this->call(AccountReceivableSeeder::class);
+        // $this->call([
+        //         RncCenterSeeder::class,
+        // ]);
+        // $this->call([
+        //     WasteCategorySeeder::class,
+        //     VehicleSeeder::class,
+        // ]);
+        // $this->call([
+        //     LinenCategorySeeder::class,
+        //     LinenTypeSeeder::class,
+        // ]);
+
+        $this->call([
+            InspectionItemSeeder::class,
+            // InternalVehicleSeeder::class,
+            // WorkshopVendorSeeder::class,
+            // DriverSeeder::class,
+            // VehicleLogSeeder::class,
+            // Daftarkan seeder lain di sini jika ada
+        ]);
+
+
+        // Membuat 200 data input limbah harian
+        // \App\Models\DailyWasteInput::factory(200)->create();
+
+        // Membuat 100 data pengangkutan limbah
+        // \App\Models\WasteTransport::factory(100)->create();
+
+
     }
 }

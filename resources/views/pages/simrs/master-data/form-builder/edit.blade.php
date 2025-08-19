@@ -22,6 +22,15 @@
     <main id="js-page-content" role="main" class="page-content">
         <div class="row justify-content-center">
             <div class="col-xl-12">
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <a href="{{ route('master-data.setup.form-builder') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left mr-1"></i> Kembali
+                        </a>
+                    </div>
+                </div>
+
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
                         <h2>
@@ -35,14 +44,30 @@
                                 @csrf
                                 {{-- Kita tidak perlu @method('PUT') karena menggunakan AJAX dengan POST --}}
                                 <div class="row">
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="nama_form" class="form-label">Nama Formulir</label>
                                             <input type="text" name="nama_form" id="nama_form" class="form-control"
                                                 value="{{ old('nama_form', $formTemplate->nama_form) }}">
                                         </div>
                                     </div>
-                                    <div class="col-md-4 mb-3">
+
+                                    <div class="col-md-3 mb-3">
+                                        <label for="tipe_form" class="form-label">Tipe Formulir</label>
+                                        <select class="form-control select2" name="tipe_form" id="tipe_form">
+                                            <option value="rawat-jalan"
+                                                {{ old('tipe_form', $formTemplate->tipe_form) == 'rawat-jalan' ? 'selected' : '' }}>
+                                                Rawat Jalan</option>
+                                            <option value="rawat-inap"
+                                                {{ old('tipe_form', $formTemplate->tipe_form) == 'rawat-inap' ? 'selected' : '' }}>
+                                                Rawat Inap</option>
+                                            <option value="all"
+                                                {{ old('tipe_form', $formTemplate->tipe_form) == 'all' ? 'selected' : '' }}>
+                                                Semua</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="form_kategori_id" class="form-label">Kategori Formulir</label>
                                             <select class="form-control select2" name="form_kategori_id"
@@ -56,7 +81,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <div class="form-group">
                                             <label for="is_active" class="form-label">Status</label>
                                             <select class="form-control select2" name="is_active" id="is_active">
@@ -71,7 +96,7 @@
                                     </div>
                                     <div class="col-md-12 mb-3">
                                         <label for="summernote" class="form-label mb-2">Isi Formulir</label>
-                                        <textarea name="form_source" id="summernote" class="form-control" rows="10">{{ old('form_source', $formTemplate->form_source) }}</textarea>
+                                        <textarea name="form_source" id="summernote" class="form-control" rows="20">{{ old('form_source', $formTemplate->form_source) }}</textarea>
                                     </div>
                                     <div class="col-md-12">
                                         <button type="submit" class="btn btn-block mt-2 btn-primary">
@@ -98,7 +123,7 @@
         $(document).ready(function() {
             $('.select2').select2();
             $('#summernote').summernote({
-                height: 300 // Atur tinggi editor
+                height: 500 // Atur tinggi editor
             });
 
             $('#update-form').on('submit', function(e) {

@@ -3,14 +3,21 @@
 namespace App\Providers;
 
 use App\Console\Commands\NotifyContractExpiry;
+use App\Models\Inspection;
+use App\Models\WarehousePenerimaanBarangFarmasi;
+use App\Models\WarehousePenerimaanBarangNonFarmasi;
+use App\Observers\InspectionObserver;
 use Carbon\Carbon;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
+use Illuminate\Filesystem\Filesystem;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,7 +26,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton('files', function ($app) {
+            return new Filesystem;
+        });
     }
 
     /**
@@ -48,5 +57,12 @@ class AppServiceProvider extends ServiceProvider
 
         // // Share session to all views
         // View::share('appType', session('app_type', 'hr'));
+
+        Relation::morphMap([
+            'penerimaan_farmasi' => WarehousePenerimaanBarangFarmasi::class,
+            'penerimaan_non_farmasi' => WarehousePenerimaanBarangNonFarmasi::class,
+        ]);
+
+        // Inspection::observe(InspectionObserver::class);
     }
 }

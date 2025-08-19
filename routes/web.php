@@ -7,10 +7,15 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Pages\CompanyController;
 use App\Http\Controllers\API\CompanyController as ApiCompanyController;
 use App\Http\Controllers\API\TimeScheduleController;
+use App\Http\Controllers\API\WasteTransportController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
+use App\Http\Controllers\DailyWasteInputController;
+use App\Http\Controllers\InternalVehiclePageController;
 use App\Http\Controllers\LaporanInternalController;
+use App\Http\Controllers\Laundry\DailyLinenInputController;
+use App\Http\Controllers\Laundry\LinenTypeController;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\Pages\DashboardController;
 use App\Http\Controllers\Pages\UpdateProfileController;
@@ -20,7 +25,9 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SurveiKebersihanKamarController;
 use App\Http\Controllers\SwitchUserController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TestingDataController;
 use App\Http\Controllers\UrlShortenerController;
+use App\Http\Controllers\WasteReportController;
 use App\Http\Controllers\WhatsappController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +36,7 @@ use App\Http\Middleware\LastSeenUser;
 use App\Models\ChecklistHarianCategory;
 use App\Models\LaporanInternal;
 use Illuminate\Support\Facades\File;
+use Pusher\Pusher; // Jangan lupa tambahkan ini jika belum ada
 
 // Route::get('/test', [TimeScheduleController::class, 'getEmployeesByOrganizationAndJobPosition']);
 
@@ -206,17 +214,42 @@ Route::middleware([LastSeenUser::class])->group(function () {
     |  WHATSAPP
     |--------------------------------------------------------------------------
     */
-        Route::prefix('whatsapp')->group(function () {
-            Route::get('/', function () {
-                return view('pages.whatsapp.index');
-            })->name('whatsapp');
+        // routes/web.php
+
+        // routes/web.php
+
+        Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+
+            // --- Rute untuk Halaman Chat dan Balasan Pesan ---
+
+            // 1. Rute utama untuk menampilkan halaman chat.
+            //    MENUNJUK KE METODE BARU: showChatPage
+            //    Parameter {phoneNumber?} membuatnya bisa menangani:
+            //    - /whatsapp (halaman utama)
+            //    - /whatsapp/62812345 (halaman chat spesifik)
+            Route::get('/{phoneNumber?}', [WhatsappController::class, 'showChatPage'])->name('chat');
+
+            // 2. Rute untuk mengirim balasan dari form di halaman chat
+            Route::post('/reply', [WhatsappController::class, 'reply'])->name('reply');
+
+            // --- Rute Lain yang Sudah Ada (Tidak Perlu Diubah) ---
+
+            // 3. Menampilkan halaman untuk kirim broadcast
             Route::get('/broadcast', function () {
-                return view('pages.whatsapp.index');
+                return view('pages.whatsapp.broadcast');
             })->name('broadcast');
+
+            // 4. Mengirim pesan (dari form broadcast, dll.)
+            //    Rute ini sudah benar, kita hanya perlu menambahkan metodenya di controller.
+            Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('send');
+
+            // 5. Menampilkan halaman untuk manajemen grup kontak
             Route::get('/group_kontak', function () {
-                return view('pages.whatsapp.index');
+                return view('pages.whatsapp.group_kontak');
             })->name('group_kontak');
-            Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('whatsapp.send');
+
+            Route::get('/message-status/{message}', [App\Http\Controllers\WhatsappController::class, 'checkStatus'])
+                ->name('whatsapp.status');
         });
         /* END PAYROLL --------------------------------------------------------*/
 
@@ -384,11 +417,83 @@ Route::middleware([LastSeenUser::class])->group(function () {
 // routes/web.php
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/daily-waste', [DailyWasteInputController::class, 'index'])->name('daily-waste.index');
+    Route::get('/waste-transports', [DailyWasteInputController::class, 'transport'])->name('daily-waste.transport');
+    Route::post('/waste-transports/store-or-update-batch', [WasteTransportController::class, 'storeOrUpdateBatch'])->name('waste-transports.storeOrUpdateBatch');
+    // Route untuk menampilkan halaman laporan
+    Route::get('/waste-transports/reports', [WasteReportController::class, 'index'])->name('reports.waste.index');
+    // Route untuk mengambil data laporan via AJAX
+    Route::get('/waste-transports/getWasteData', [WasteReportController::class, 'getWasteData'])->name('reports.waste.data');
+
+    Route::get('/daily-waste/reports', [WasteReportController::class, 'dailyIndex'])->name('reports.daily.index');
+    // Route untuk mengambil data laporan via AJAX
+    Route::get('/daily-waste/getDailyWasteData', [WasteReportController::class, 'getDailyWasteData'])->name('reports.daily.data');
+
+    // Laundry
+    Route::get('daily-linens', [DailyLinenInputController::class, 'index'])->name('daily-linens.index');
+    Route::get('daily-linens/create', [DailyLinenInputController::class, 'create'])->name('daily-linens.create');
+    Route::post('daily-linens', [DailyLinenInputController::class, 'store'])->name('daily-linens.store');
+    Route::get('daily-linens/{daily_linen}/edit', [DailyLinenInputController::class, 'edit'])->name('daily-linens.edit');
+    Route::put('daily-linens/{daily_linen}', [DailyLinenInputController::class, 'update'])->name('daily-linens.update');
+    Route::delete('daily-linens/{daily_linen}', [DailyLinenInputController::class, 'destroy'])->name('daily-linens.destroy');
+
+    Route::post('daily-linens-batch', [DailyLinenInputController::class, 'storeOrUpdateBatch'])->name('daily-linens.storeOrUpdateBatch');
+
+    Route::get('/daily-linens/reports', [WasteReportController::class, 'laundryIndex'])->name('laundry.index');
+    Route::get('/daily-linens/getLaundryData', [WasteReportController::class, 'getLaundryData'])->name('laundry.data');
+
+    Route::resource('master/linen-types', LinenTypeController::class);
+
+    // Manajemen Kendaraan
+    Route::prefix('manajemen-kendaraan')->name('vehicles.')->group(function () {
+        // Halaman daftar kendaraan
+        Route::get('/', [InternalVehiclePageController::class, 'index'])->name('index');
+        // Halaman drivers
+        Route::get('/drivers', [InternalVehiclePageController::class, 'drivers'])->name('drivers');
+        // Halaman dashboard manajemen kendaraan
+        Route::get('/dashboard', [InternalVehiclePageController::class, 'dashboard'])->name('dashboard');
+        // Halaman daftar inspection item kendaraan internal
+        Route::get('/inspection-items', [InternalVehiclePageController::class, 'inspection_item'])->name('inspection_items');
+        // Halaman daftar vendor kendaraan internal
+        Route::get('/workshop-vendors', [InternalVehiclePageController::class, 'vendors'])->name('vendors');
+        // Halaman riwayat penggunaan kendaraan
+        Route::get('/vehicle-logs', [InternalVehiclePageController::class, 'vehicle_logs'])->name('vehicle_logs');
+
+        // Halaman daftar inspeksi kendaraan internal
+        Route::get('/inspections', [InternalVehiclePageController::class, 'inspections'])->name('inspections');
+        // Halaman form input inspeksi kendaraan internal
+        Route::get('/inspections/create', [InternalVehiclePageController::class, 'create_inspection'])->name('inspections.create');
+
+        Route::get('/service-tickets', [InternalVehiclePageController::class, 'service_tickets'])->name('service_tickets');
+    });
+});
+
+Route::middleware(['auth'])->group(function () {
     Route::post('/impersonate', [SwitchUserController::class, 'impersonate'])
         ->middleware(ImpersonateUser::class)
         ->name('impersonate');
     Route::post('/switchback', [SwitchUserController::class, 'switchBack'])->name('switchback');
 });
+
+
+// Testing Data
+Route::prefix('testing-data')->middleware(['auth'])->group(function () {
+    // Menampilkan view testing
+    Route::get('/', [TestingDataController::class, 'index'])->name('testing.index');
+
+    // Mengambil data testing untuk update
+    Route::get('/{id}/get', [TestingDataController::class, 'getData'])->name('testing.getData');
+
+    // Menyimpan data testing
+    Route::post('/', [TestingDataController::class, 'store'])->name('testing.store');
+
+    // Mengupdate data testing
+    Route::put('/{id}', [TestingDataController::class, 'update'])->name('testing.update');
+
+    // Menghapus data testing
+    Route::delete('/{id}', [TestingDataController::class, 'destroy'])->name('testing.destroy');
+});
+
 
 Route::get('/test', function () {
     $laporanKendala = LaporanInternal::with(['organization', 'user'])
@@ -410,6 +515,35 @@ Route::get('/test', function () {
     ]);
 });
 
+
+
+Route::get('/test-pusher', function () {
+    $options = [
+        'cluster' => env('PUSHER_APP_CLUSTER'),
+        'useTLS' => true,
+        // --- TAMBAHKAN BARIS INI ---
+        'curl_options' => [
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_SSL_VERIFYPEER => 0,
+        ]
+    ];
+    $pusher = new Pusher(
+        env('PUSHER_APP_KEY'),
+        env('PUSHER_APP_SECRET'),
+        env('PUSHER_APP_ID'),
+        $options
+    );
+
+    $data['message'] = 'Halo ini pesan dari Laravel!';
+    $pusher->trigger('my-channel', 'my-event', $data);
+
+    return 'Event telah dikirim (tanpa verifikasi SSL)!';
+});
+
+// routes/web.php
+Route::get('/test-layout', function () {
+    return view('test-layout');
+});
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/simrs.php';

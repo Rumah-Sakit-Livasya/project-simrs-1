@@ -1,5 +1,5 @@
 <div class="modal fade" id="modal-tambah-kepustakaan" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-xl" role="document"> <!-- Menggunakan kelas modal-xl untuk ukuran ekstra besar -->
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <form autocomplete="off" novalidate action="javascript:void(0)" method="post" id="store-form-kepustakaan"
                 enctype="multipart/form-data">
@@ -74,21 +74,59 @@
                                                 </select>
                                             </div>
                                         </div>
+                                    @else
+                                        <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
                                     @endif
+                                @else
+                                    <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
                                 @endif
                                 <div class="col-md-12 mt-3">
                                     <label for="name">Nama (File/Folder) <span
                                             class="text-danger fw-bold">*</span></label>
-                                    <input type="hidden" name="kategori" value="{{ $folder->kategori ?? '' }}">
                                     <input type="text" class="form-control" id="name" name="name" required
                                         placeholder="Masukan nama file/folder...">
                                 </div>
+
+                                <div class="col-md-12 mt-3" id="laporan-periode-section">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label" for="month">Bulan Laporan <span
+                                                        class="text-danger">*</span></label>
+                                                <select name="month" id="month-select"
+                                                    class="form-control select2-laporan">
+                                                    <option value="" disabled selected>Pilih Bulan</option>
+                                                    @for ($m = 1; $m <= 12; $m++)
+                                                        <option value="{{ $m }}">
+                                                            {{ \Carbon\Carbon::create()->month($m)->format('F') }}
+                                                        </option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label" for="year">Tahun Laporan <span
+                                                        class="text-danger">*</span></label>
+                                                <select name="year" id="year-select"
+                                                    class="form-control select2-laporan">
+                                                    <option value="" disabled selected>Pilih Tahun</option>
+                                                    @for ($y = date('Y'); $y >= date('Y') - 5; $y--)
+                                                        <option value="{{ $y }}">{{ $y }}
+                                                        </option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="col-md-12 mt-3" id="file_upload_section">
                                     <label for="customFile">Upload (File) <span
                                             class="text-danger fw-bold">*</span></label>
                                     <div class="custom-file">
-                                        <input type="file" class="custom-file-input" name="file" id="customFile"
-                                            required>
+                                        <input type="file" class="custom-file-input" name="file"
+                                            id="customFile">
                                         <label class="custom-file-label" for="customFile">Choose file</label>
                                     </div>
                                 </div>
@@ -99,7 +137,7 @@
                 <div class="modal-footer pt-0">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="submit" data-backdrop="static" data-keyboard="false" id="btn-tambah"
-                        class="btn mx-1 btn-tambah btn-primary text-white" title="Hapus">
+                        class="btn mx-1 btn-tambah btn-primary text-white" title="Tambah">
                         <div class="ikon-tambah">
                             <span class="fal fa-plus-circle mr-1"></span>Tambah
                         </div>
@@ -113,3 +151,61 @@
         </div>
     </div>
 </div>
+
+{{-- ==================================================================== --}}
+{{-- =                      BAGIAN SCRIPT YANG DIPERBARUI                 = --}}
+{{-- ==================================================================== --}}
+<script>
+    $(document).ready(function() {
+        // Fungsi untuk menampilkan/menyembunyikan input periode laporan
+        function toggleLaporanPeriode() {
+            const isFileType = $('#modal-tambah-kepustakaan #type_file').is(':checked');
+            const kategoriDropdown = $('#modal-tambah-kepustakaan #kategori');
+            const kategoriValue = kategoriDropdown.length > 0 ?
+                kategoriDropdown.val() :
+                $('#modal-tambah-kepustakaan input[name="kategori"]').val();
+
+            if (isFileType && kategoriValue === 'Laporan') {
+                $('#laporan-periode-section').slideDown();
+            } else {
+                $('#laporan-periode-section').slideUp();
+            }
+        }
+
+        // --- UPDATE UTAMA ADA DISINI ---
+        // Inisialisasi SEMUA elemen select2 di dalam modal
+        // Ini akan mengaktifkan Select2 untuk dropdown Unit, Kategori, Bulan, dan Tahun
+        $('#modal-tambah-kepustakaan .select2, #modal-tambah-kepustakaan .select2-laporan').select2({
+            dropdownParent: $('#modal-tambah-kepustakaan'),
+            placeholder: "Pilih salah satu" // Opsi tambahan agar lebih user-friendly
+        });
+
+        // Membersihkan placeholder untuk dropdown Kategori agar tidak duplikat
+        $('#modal-tambah-kepustakaan #kategori').select2({
+            dropdownParent: $('#modal-tambah-kepustakaan')
+            // Tanpa placeholder di sini karena sudah ada opsi default
+        });
+        // --- AKHIR UPDATE ---
+
+
+        // Event listener ketika pilihan Tipe (File/Folder) berubah
+        $('#modal-tambah-kepustakaan').on('change', 'input[name="type"]', function() {
+            toggleLaporanPeriode();
+        });
+
+        // Event listener ketika pilihan Kategori berubah (hanya untuk yang di root)
+        $('#modal-tambah-kepustakaan').on('change', '#kategori', function() {
+            toggleLaporanPeriode();
+        });
+
+        // Jalankan pengecekan pertama kali saat modal ditampilkan
+        $('#modal-tambah-kepustakaan').on('shown.bs.modal', function() {
+            // Reset form dan select2 saat modal dibuka
+            $('#store-form-kepustakaan').trigger('reset');
+            $('#modal-tambah-kepustakaan .select2, #modal-tambah-kepustakaan .select2-laporan').val(
+                null).trigger('change');
+
+            toggleLaporanPeriode();
+        });
+    });
+</script>

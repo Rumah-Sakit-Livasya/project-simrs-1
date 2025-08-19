@@ -30,10 +30,10 @@
                                 <th>Ruang</th>
                                 <th>T. Tidur</th>
                                 <th>No. Registrasi</th>
-                                <th>Tgl. Reg</th>
                                 <th>[MRN] Nama Lengkap</th>
                                 <th>Dokter</th>
                                 <th>Diagnosa Awal</th>
+                                <th>Kategori Diet</th>
                                 <th>Asuransi</th>
                                 <th>Aksi</th>
                             </tr>
@@ -55,9 +55,6 @@
                                         {{ $registration->registration_number }}
                                     </td>
                                     <td>
-                                        {{ $registration->date }}
-                                    </td>
-                                    <td>
                                         [{{ $registration->patient->medical_record_number }}]
                                         {{ $registration->patient->name }}
                                     </td>
@@ -68,9 +65,15 @@
                                         {{ $registration->diagnosa_awal }}
                                     </td>
                                     <td>
+                                        {{ $registration->diet_gizi ? $registration->diet_gizi->category->nama : 'Belum Terpilih' }}
+                                    </td>
+                                    <td>
                                         {{ $registration->penjamin->penjamin ?? '-' }}
                                     </td>
                                     <td>
+                                        <a class="mdi mdi-backburger pointer mdi-24px text-secondary"
+                                            onclick="pilihMenuJamMakan({{ $registration->id }})" title="Pilih kategori diet"
+                                            data-id="{{ $registration->id }}"></a>
                                         <a class="mdi mdi-silverware pointer mdi-24px text-success"
                                             onclick="orderPasien({{ $registration->id }})" title="Order makanan pasien"
                                             data-id="{{ $registration->id }}"></a>
@@ -89,10 +92,10 @@
                                 <th>Ruang</th>
                                 <th>T. Tidur</th>
                                 <th>No. Registrasi</th>
-                                <th>Tgl. Reg</th>
                                 <th>[MRN] Nama Lengkap</th>
                                 <th>Dokter</th>
                                 <th>Diagnosa Awal</th>
+                                <th>Kategori Diet</th>
                                 <th>Asuransi</th>
                                 <th>Aksi</th>
                             </tr>
@@ -148,6 +151,18 @@
             "popupWindow_orderGiziKeluarga_" + id,
             "width=" + width + ",height=" + height +
             ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+        );
+    }
+
+    function pilihMenuJamMakan(id) {
+        let url = "/simrs/gizi/popup/pilih-diet/" + id;
+        let width = screen.width;
+        let height = screen.height
+        window.open(
+            url,
+            "popupWindow_pilihMenuJamMakan_" + id,
+            "width=" + width + ",height=" + height +
+            ",scrollbars=yes,resizable=yes"
         );
     }
 </script>

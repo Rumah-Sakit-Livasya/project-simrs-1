@@ -81,20 +81,20 @@
         }
 
         /* .box-menu li {
-                    padding: 20px 30px;
-                    margin: 20px;
-                    width: 200px;
-                    background: #f2f0f5;
-                    text-align: center;
-                    cursor: pointer;
-                    border: 1px solid #e5e5e5;
-                    border-radius: 8px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
-                } */
+                                    padding: 20px 30px;
+                                    margin: 20px;
+                                    width: 200px;
+                                    background: #f2f0f5;
+                                    text-align: center;
+                                    cursor: pointer;
+                                    border: 1px solid #e5e5e5;
+                                    border-radius: 8px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    flex-direction: column;
+                                    box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
+                                } */
 
         .box-menu .circle-menu {
             height: 50px;
@@ -118,17 +118,21 @@
                         <div class="panel-content">
                             <div class="row">
                                 <div class="col-md-2 biodata-pasien">
-                                    @if ($patient->gender == 'Laki-laki')
+                                    <<<<<<< HEAD @if ($patient->gender == 'Laki-laki')
                                         <img src="/img/user/man-icon.png" style="width: 120px; height: 120px;">
                                     @else
                                         <img src="/img/user/woman-icon.png" style="width: 120px; height: 120px;">
-                                    @endif
-                                    <div class="btn-biodata">
-                                        <button class="btn-flatcx pointer" id="kunjungan" alt="Riwayat Kunjungan"
-                                            title="Riwayat Kunjungan"><i class="mdi mdi-clipboard-pulse"></i></button>
-                                        <button class="btn-flatcx" id="button" alt="Detail Biodata Pasien"
-                                            title="Detail Biodata Pasien"><i class="mdi mdi-account-edit"></i></button>
-                                    </div>
+                                        @endif
+                                        =======
+                                        <img src="{{ $patient->gender === 'Laki-laki' ? '/img/user/man-icon.png' : '/img/user/woman-icon.png' }}"
+                                            style="width: 120px; height: 120px;">
+                                        >>>>>>> 20594538fd60899f4f37b09fb0b97bc5800c7859
+                                        <div class="btn-biodata">
+                                            <button class="btn-flatcx pointer" id="kunjungan" alt="Riwayat Kunjungan"
+                                                title="Riwayat Kunjungan"><i class="mdi mdi-clipboard-pulse"></i></button>
+                                            <button class="btn-flatcx" id="button" alt="Detail Biodata Pasien"
+                                                title="Detail Biodata Pasien"><i class="mdi mdi-account-edit"></i></button>
+                                        </div>
                                 </div>
                                 <div class="col-md-10 col-bg-10">
                                     <div class="row align-items-center">
@@ -620,6 +624,69 @@
                 $('#tindakan').select2();
                 $('#kelas_rawat_id').select2({
                     dropdownParent: $('#kelas-rawat-form')
+                });
+            });
+
+            // Listener ini akan bekerja untuk SEMUA form yang memiliki id="form-registrasi"
+            $('#form-registrasi').on('submit', function(e) {
+                e.preventDefault();
+
+                const form = $(this);
+                const submitButton = form.find('#simpan-btn');
+                const originalButtonHtml = submitButton.html();
+
+                // Bersihkan error sebelumnya
+                $('.invalid-feedback').html('');
+                $('#form-notification').addClass('d-none');
+
+                submitButton.prop('disabled', true).html(
+                    '<span class="fal fa-spinner fa-spin mr-1"></span> Menyimpan...');
+
+                $.ajax({
+                    // PERUBAHAN UTAMA ADA DI BARIS INI
+                    url: form.data('action-url'), // Mengambil URL dari data attribute
+                    type: 'POST',
+                    data: new FormData(this),
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: response.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.href = response.redirect_url;
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            $.each(errors, function(key, value) {
+                                $('#error-' + key).html(value[0]);
+                            });
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Harap periksa kembali isian Anda. Ada beberapa data yang tidak valid.',
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Terjadi Kesalahan',
+                                text: 'Tidak dapat memproses permintaan. Silakan hubungi administrator.',
+                            });
+                        }
+                    },
+                    complete: function() {
+                        submitButton.prop('disabled', false).html(originalButtonHtml);
+                    }
                 });
             });
         });

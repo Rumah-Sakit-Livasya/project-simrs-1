@@ -9,6 +9,7 @@ use App\Models\LaporanInternal;
 use App\Models\Organization;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -119,8 +120,10 @@ class LaporanInternalController extends Controller
         if ($request->hasFile('dokumentasi')) {
             $file = $request->file('dokumentasi');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('dokumentasi', $fileName);
-            $validated['dokumentasi'] = Storage::url($path);
+            // Simpan ke storage/app/dokumentasi (bukan public)
+            $path = $file->storeAs('dokumentasi', $fileName); // default disk = local, bukan public
+            // Simpan path relatif (misal: dokumentasi/namafile.jpg)
+            $validated['dokumentasi'] = $path;
         }
         // return dd($validated['dokumentasi'] = Storage::url($path));
 
@@ -184,42 +187,59 @@ class LaporanInternalController extends Controller
 
     public function list(Request $request)
     {
-        $query = LaporanInternal::with('user.employee')->where('organization_id', $request->organization);
-        // return dd($query->whereIn('user_id', [0 => 2])->count());
-        // return dd($request->user_id);
-        // Apply filters based on request
-        if ($request->filled('jenis')) {
-            $query->where('jenis', $request->jenis);
+        // Ambil user dan organisasi user saat ini
+        $user = Auth::user();
+        $userOrg = $user->employee->organization ?? null;
+
+        // Dapatkan semua ID organisasi dalam hierarki (termasuk parent dan semua child)
+        $organizationIds = [];
+        if ($userOrg) {
+            $organizationIds[] = $userOrg->id;
+            if (method_exists($userOrg, 'getAllChildIds')) {
+                $organizationIds = array_merge($organizationIds, $userOrg->getAllChildIds());
+            } else {
+                $organizationIds = [$userOrg->id];
+            }
         }
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        // Build base query with eager loading
+        $query = LaporanInternal::with('user.employee')
+            ->when(!$user->hasRole('super admin'), function ($query) use ($user, $organizationIds) {
+                $query->whereIn('organization_id', $organizationIds);
+            });
+
+        // Jika user adalah staff, tampilkan hanya laporan internal miliknya sendiri
+        // kecuali jika dia penanggung jawab atau manager
+        if ($user->hasRole('employee')) {
+            // Cek apakah user juga punya role penanggung jawab atau manager
+            if (!($user->hasRole('pj') || $user->hasRole('manager'))) {
+                $query->where('user_id', $user->id);
+            }
         }
 
-        if ($request->filled('tanggal')) {
-            $query->whereDate('tanggal', $request->tanggal);
+        $query->latest();
+
+        // Apply filters if provided
+        $filters = ['jenis', 'status', 'tanggal'];
+        foreach ($filters as $filter) {
+            if ($request->filled($filter)) {
+                if ($filter === 'tanggal') {
+                    $query->whereDate($filter, $request->$filter);
+                } else {
+                    $query->where($filter, $request->$filter);
+                }
+            }
         }
 
         // Filter by user if provided
         if ($request->filled('user_id')) {
-            $query->whereIn('user_id', $request->user_id);
+            $query->whereIn('user_id', (array) $request->user_id);
         }
 
+        // Return DataTable with custom columns
         return DataTables::of($query)
             ->addColumn('fullname', function ($item) {
                 return optional($item->user->employee)->fullname ?? '-';
-            })
-            ->addColumn('action', function ($item) {
-                return '
-            <div class="btn-group">
-                <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(' . $item->id . ')">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(' . $item->id . ')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        ';
             })
             ->rawColumns(['action'])
             ->make(true);

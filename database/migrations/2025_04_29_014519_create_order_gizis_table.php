@@ -16,13 +16,14 @@ return new class extends Migration {
     {
         Schema::create('order_gizi', function (Blueprint $table) {
             $table->id();
+            $table->softDeletes();
             $table->timestamps();
             $table->foreignId('registration_id')->constrained("registrations")->onDelete("cascade");
             $table->foreignId('kategori_id')->constrained(table: 'kategori_gizi')->onDelete('cascade');
             $table->string('nama_pemesan');
             $table->enum('untuk', ['pasien','keluarga'])->default('pasien');
             $table->dateTime('tanggal_order');
-            $table->enum('waktu_makan', ['pagi','siang','sore'])->nullable();
+            $table->string('waktu_makan')->nullable();
             $table->boolean('ditagihkan')->default(true);
             $table->boolean('digabung')->default(true);
             $table->integer('total_harga');

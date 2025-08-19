@@ -17,6 +17,7 @@ return new class extends Migration
     {
         Schema::create('order_makanan_gizi', function (Blueprint $table) {
             $table->id();
+            $table->softDeletes();
             $table->timestamps();
             $table->foreignId('order_id')->constrained('order_gizi')->onDelete('cascade');
             $table->foreignId('makanan_id')->constrained('makanan_gizi')->onDelete('cascade');

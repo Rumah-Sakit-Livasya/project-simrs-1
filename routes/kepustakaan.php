@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SIMRS\KepustakaanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,9 +14,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['middleware' => ['auth']], function () {
-    Route::prefix('kepustakaan')->group(function () {
+    Route::prefix('kepustakaan')->name('kepustakaan.')->group(function () {
         Route::get('/dashboard', function () {
             return view('app-type.kepustakaan.dashboard');
-        })->name('kepustakaan');
+        })->name('');
+
+        Route::get('/laporan-dashboard', [KepustakaanController::class, 'laporanDashboard'])
+            ->name('laporan.dashboard');
     });
 });

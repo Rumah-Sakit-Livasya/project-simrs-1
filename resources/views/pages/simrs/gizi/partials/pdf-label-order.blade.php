@@ -38,11 +38,13 @@
 
 <body class="relative">
     <div class="container absolute">
-        <h4>{{ strtoupper($order->nama_pemesan) }}</h4>
         @if ($order->untuk == 'pasien')
+            <h4>{{ strtoupper($order->registration->patient->name) }}</h4>
             <h4>{{ $order->registration->patient->date_of_birth }} /
                 {{ $order->registration->patient->medical_record_number }}
                 ({{ strtoupper(substr($order->registration->patient->gender, 0, 1)) }})</h4>
+        @else
+            <h4>{{ strtoupper($order->nama_pemesan) }}</h4>
         @endif
         <p>{{ $order->registration->kelas_rawat->kelas }} / {{ $order->registration->patient->bed->room->ruangan }}</p>
         <p>{{ \Carbon\Carbon::parse($order->tanggal_order)->format('d-m-Y') }}</p>

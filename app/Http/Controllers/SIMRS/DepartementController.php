@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Imports\DepartementsImport;
 use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DepartementController extends Controller
 {
@@ -100,5 +102,33 @@ class DepartementController extends Controller
     public function destroy(Departement $departement)
     {
         //
+    }
+
+    /**
+     * Menangani proses import data dari file yang di-upload.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function import(Request $request)
+    {
+        // 1. Validasi request file itu sendiri
+        $request->validate(
+            ['file' => 'required|mimes:xlsx,xls,csv|max:2048'],
+            ['file.required' => 'Anda harus memilih file untuk diimpor.']
+        );
+
+        // 2. Lakukan proses import
+        try {
+            $import = new DepartementsImport();
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            // Tangani error umum yang mungkin terjadi selama proses
+            return back()->with('error', 'Terjadi kesalahan tak terduga saat mengimpor file: ' . $e->getMessage());
+        }
+
+        // 3. Redirect kembali dengan pesan sukses
+        return redirect()->route('master-data.setup.departemen.index')
+            ->with('success', 'Data departemen berhasil diimpor!');
     }
 }
