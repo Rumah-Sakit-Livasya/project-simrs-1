@@ -146,6 +146,8 @@
         // =====================================================================
         (function() {
             const canvasManyElement = document.getElementById('canvas-many');
+            console.log(canvasManyElement);
+            
             if (!canvasManyElement || window.signaturePadManyInitialized) return;
 
             const ctxMany = canvasManyElement.getContext('2d', {

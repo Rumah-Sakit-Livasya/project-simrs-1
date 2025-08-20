@@ -7,6 +7,7 @@ use App\Models\WarehouseGolonganBarang;
 use App\Models\WarehouseKategoriBarang;
 use App\Models\WarehouseKelompokBarang;
 use App\Models\WarehouseMasterBarangEditLog;
+use App\Models\WarehousePabrik;
 use App\Models\WarehouseSatuanBarang;
 use App\Models\WarehouseSatuanTambahanBarangFarmasi;
 use App\Models\WarehouseZatAktif;
@@ -62,7 +63,8 @@ class WarehouseBarangFarmasiController extends Controller
             "kelompoks" => WarehouseKelompokBarang::all(),
             "golongans" => WarehouseGolonganBarang::all(),
             "satuans" => WarehouseSatuanBarang::all(),
-            "zats" => WarehouseZatAktif::all()
+            "zats" => WarehouseZatAktif::all(),
+            "pabriks" => WarehousePabrik::all()
         ]);
     }
 
@@ -75,6 +77,7 @@ class WarehouseBarangFarmasiController extends Controller
             'nama' => 'required|string|max:255',
             'kode' => 'required|string|max:255',
             'keterangan' => 'nullable|string',
+            'restriksi' => 'nullable|string',
             'hna' => 'required|integer',
             'ppn' => 'required|integer',
             'ppn_rajal' => 'required|integer',
@@ -88,7 +91,7 @@ class WarehouseBarangFarmasiController extends Controller
             'golongan_id' => 'nullable|exists:warehouse_golongan_barang,id',
             'kelompok_id' => 'nullable|exists:warehouse_kelompok_barang,id',
             'satuan_id' => 'required|exists:warehouse_satuan_barang,id',
-            'principal' => 'nullable|string',
+            'principal' => 'nullable|exists:warehouse_pabrik,id',
             'harga_principal' => 'nullable|integer',
             'diskon_principal' => 'nullable|integer',
             "satuans_id" => "nullable|array",
@@ -145,7 +148,8 @@ class WarehouseBarangFarmasiController extends Controller
             "kelompoks" => WarehouseKelompokBarang::all(),
             "golongans" => WarehouseGolonganBarang::all(),
             "satuans" => WarehouseSatuanBarang::all(),
-            "zats" => WarehouseZatAktif::all()
+            "zats" => WarehouseZatAktif::all(),
+            "pabriks" => WarehousePabrik::all()
         ]);
     }
 
@@ -159,6 +163,7 @@ class WarehouseBarangFarmasiController extends Controller
             'nama' => 'required|string|max:255',
             'kode' => 'required|string|max:255',
             'keterangan' => 'nullable|string',
+            'restriksi' => 'nullable|string',
             'hna' => 'required|integer',
             'ppn' => 'required|integer',
             'ppn_rajal' => 'required|integer',
@@ -172,7 +177,7 @@ class WarehouseBarangFarmasiController extends Controller
             'golongan_id' => 'nullable|exists:warehouse_golongan_barang,id',
             'kelompok_id' => 'nullable|exists:warehouse_kelompok_barang,id',
             'satuan_id' => 'required|exists:warehouse_satuan_barang,id',
-            'principal' => 'nullable|string',
+            'principal' => 'nullable|exists:warehouse_pabrik,id',
             'harga_principal' => 'nullable|integer',
             'diskon_principal' => 'nullable|integer'
         ]);

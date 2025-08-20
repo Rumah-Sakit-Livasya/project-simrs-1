@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SIMRS\CPPT;
 use App\Http\Controllers\Controller;
 use App\Models\FarmasiResepElektronik;
 use App\Models\FarmasiResepElektronikItems;
+use App\Models\FarmasiResepResponse;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\Registration;
@@ -189,7 +190,7 @@ class CPPTController extends Controller
 
                 // Hapus tanda tangan lama jika ada
                 if ($cppt->signature && \Storage::disk('public')->exists($cppt->signature->signature)) {
-                \Storage::disk('public')->delete($cppt->signature->signature);
+                    \Storage::disk('public')->delete($cppt->signature->signature);
                 }
 
                 // Simpan file baru
@@ -212,7 +213,7 @@ class CPPTController extends Controller
             // farmasi rajal
             if ($request->has('resep_manual') || $request->has('gudang_id')) {
                 if (!$request->has("gudang_id")) { // manual recipe only
-                    FarmasiResepElektronik::create([
+                    $re = FarmasiResepElektronik::create([
                         'cppt_id' => $cppt->id,
                         'user_id' => auth()->user()->id,
                         'kode_re' => $this->generate_pharmacy_re_code(),
@@ -222,7 +223,7 @@ class CPPTController extends Controller
                     ]);
                 } else {
                     $total = $request->get('total_harga_obat');
-                    if($total == null) {
+                    if ($total == null) {
                         throw new \Exception("Total harga obat tidak boleh kosong");
                     }
 
@@ -230,6 +231,7 @@ class CPPTController extends Controller
                         'cppt_id' => $cppt->id,
                         'user_id' => auth()->user()->id,
                         'kode_re' => $this->generate_pharmacy_re_code(),
+                        'gudang_id' => $request->get("gudang_id"),
                         'total' => $total,
                         'resep_manual' => $request->has('resep_manual') ? $request->get('resep_manual') : null,
                         'registration_id' => $validatedData['registration_id']
@@ -259,6 +261,11 @@ class CPPTController extends Controller
                         ]);
                     }
                 }
+
+                // create response
+                FarmasiResepResponse::create([
+                    "re_id" => $re->id
+                ]);
             }
 
             DB::commit();

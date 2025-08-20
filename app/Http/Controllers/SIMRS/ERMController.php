@@ -236,7 +236,6 @@ class ERMController extends Controller
     public static function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path)
     {
         Carbon::setLocale('id');
-
         switch ($menu) {
             case 'triage':
                 $pengkajian = Triage::where('registration_id', $registration->id)->first();
@@ -277,8 +276,12 @@ class ERMController extends Controller
                 $dokter = Employee::where('is_doctor', 1)->get();
                 $pengkajian = CPPT::where('registration_id', $registration->id)->first();
                 $gudangs = WarehouseMasterGudang::where('apotek', 1)->where('warehouse', 0)->get();
-                $default_apotek = WarehouseMasterGudang::select('id')->where('apotek_default', 1)->first();
                 $barangs = WarehouseBarangFarmasi::with(["stored_items", "satuan"])->get();
+
+                $default_column = "rajal_default";
+                if ($registration->registration_type == "rawat-inap") $default_column = "ranap_default";
+                $default_apotek = WarehouseMasterGudang::select('id')->where($default_column, 1)->first();
+
                 return view('pages.simrs.erm.form.dokter.cppt-dokter', compact('gudangs', 'barangs', 'default_apotek', 'registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
 
             case 'resume_medis':
@@ -341,18 +344,23 @@ class ERMController extends Controller
                 $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
                 return view('pages.simrs.erm.form.perawat.rujuk-antar-rs', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
+            case 'resep_harian':
+                $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
+                return view('pages.simrs.erm.form.perawat.resep-harian', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+
             default:
                 return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'path'));
         }
     }
 
-    public function get_obat(int $gudang_id){
+    public function get_obat(int $gudang_id)
+    {
         $query = WarehouseBarangFarmasi::with(['stored_items']);
         $query->whereHas('stored_items', function ($q) use ($gudang_id) {
             $q->where('gudang_id', $gudang_id);
             $q->where('warehouse_penerimaan_barang_farmasi_item.qty', '>', 0);
         });
-        
+
         $items = $query->get();
         foreach ($items as $item) {
             $stored = $item->stored_items->where('gudang_id', $gudang_id);

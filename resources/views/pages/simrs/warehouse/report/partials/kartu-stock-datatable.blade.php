@@ -78,7 +78,7 @@
                                             <td>{{ $code }}</td>
                                             <td>{{ $move_out ? $log->before_gudang->nama : $log->after_gudang->nama }}
                                             </td>
-                                            <td>{{ $log->source->keterangan ?? '' }}</td>
+                                            <td>{{ $log->source->keterangan ?? $log->keterangan }}</td>
                                             <td>{{ $before }}</td>
                                             <td>{{ !$move_out ? $sign : '' }}{{ $move_out ? -$log->before_qty : $adjustment }}
                                             </td>

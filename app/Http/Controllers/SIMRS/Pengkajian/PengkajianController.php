@@ -171,6 +171,7 @@ class PengkajianController extends Controller
 
             $transfer->fill($request->except(['_token', '_method', 'data_ttd1', 'data_ttd2', 'data_ttd3', 'data_ttd4']));
             $transfer->modified_by = $userId;
+            $transfer->user_id = $userId;
             if (!$transfer->exists) {
                 $transfer->created_by = $userId;
             }

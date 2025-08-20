@@ -258,6 +258,11 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link"
+                    href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'resep_harian']) }}">Resep
+                    Harian</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"
                     href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_lanjutan']) }}">Pengkajian
                     Lanjutan</a>
             </li>

@@ -30,6 +30,18 @@ class Utils {
         };
     }
 
+
+    /**
+     * Convert SQL date string to local date string
+     * @param {string} dateString 
+     * @returns {string}
+     */
+    static sqlDateToLocal(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('id-ID', {day: "2-digit", month: "long", year: "numeric"});
+    }
+
     /**
      * Format angka menjadi mata uang rupiah
      * @param {number} amount 
@@ -39,7 +51,7 @@ class Utils {
         const formattedAmount = 'Rp ' + amount.toLocaleString('id-ID');
         return formattedAmount;
     }
-    
+
     /**
      * Enforce number input min max limit on manual input
      * @param {Event} event 

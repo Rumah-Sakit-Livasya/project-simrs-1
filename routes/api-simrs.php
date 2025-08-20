@@ -4,6 +4,8 @@ use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\DietGiziController;
 use App\Http\Controllers\FarmasiResepController;
+use App\Http\Controllers\FarmasiReturResepController;
+use App\Http\Controllers\FarmasiSignaController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
@@ -108,6 +110,7 @@ use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\TarifOperasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Models\Employee;
+use App\Models\FarmasiReturResep;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Support\Facades\Storage;
@@ -193,7 +196,18 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::prefix("farmasi")->group(function () {
         Route::prefix("transaksi-resep")->group(function () {
             Route::post("/store", [FarmasiResepController::class, 'store'])->name("farmasi.transaksi-resep.store");
-            Route::get('/obat/{gudang_id}', [ERMController::class, 'get_obat'])->name('farmasi.get-obat');
+            Route::get("/gudang-default-ranap", [FarmasiResepController::class, "gudang_default_ranap"])->name("farmasi.transaksi-resep.gudang-default-ranap");
+            Route::get("/gudang-default-rajal", [FarmasiResepController::class, "gudang_default_rajal"])->name("farmasi.transaksi-resep.gudang-default-rajal");
+            Route::get('/obat/{gudang_id}', [FarmasiResepController::class, 'get_obat'])->name('farmasi.get-obat');
+            Route::get('/batch/{gudang_id}/{barang_id}', [FarmasiResepController::class, 'get_batch'])->name('farmasi.get-batch');
+            Route::put("/update/telaah/{id}", [FarmasiResepController::class, "update_telaah"])->name("farmasi.update.telaah");
+            Route::put('/update/resep/{id}', [FarmasiResepController::class, 'update'])->name('farmasi.transaksi-resep.update');
+            Route::delete("/destroy/{id}", [FarmasiResepController::class, "destroy"])->name("farmasi.transaksi-resep.delete");
+        });
+
+        Route::prefix('retur-resep')->group(function(){
+            Route::post('/store', [FarmasiReturResepController::class, 'store'])->name('farmasi.retur-barang.store');
+            Route::get("/get/item-patient/{id}", [FarmasiReturResepController::class, 'getItemPatient'])->name('farmasi.retur-barang.get.item-patient');
         });
     });
 
@@ -711,6 +725,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::get('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'getNilaiNormal'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.get');
                 Route::patch('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.update');
                 Route::delete('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.delete');
+            });
+
+            Route::prefix("farmasi")->group(function () {
+                Route::prefix("signa")->group(function () {
+                    Route::post("/create", [FarmasiSignaController::class, "store"])->name("master-data.penunjang-medis.farmasi.signa.store");
+                    Route::delete("/delete/{id}", [FarmasiSignaController::class, "destroy"])->name("master-data.penunjang-medis.farmasi.signa.delete");
+                });
             });
         });
 
