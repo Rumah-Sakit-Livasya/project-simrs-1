@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\API\DiagnosisCategoryController;
 use App\Http\Controllers\API\EmployeeController;
+use App\Http\Controllers\API\NursingDiagnosisController;
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\DietGiziController;
 use App\Http\Controllers\FarmasiResepController;
@@ -559,6 +561,26 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
 
     Route::prefix('master-data')->group(function () {
+        Route::prefix('diagnosa-keperawatan')->group(function () {
+            Route::get('diagnosis-categories/select-all', [DiagnosisCategoryController::class, 'selectAll']);
+            Route::get('diagnosis-categories', [DiagnosisCategoryController::class, 'index']);
+            Route::post('diagnosis-categories', [DiagnosisCategoryController::class, 'store']);
+            Route::get('diagnosis-categories/{diagnosis_category}', [DiagnosisCategoryController::class, 'show']);
+            Route::get('diagnosis-categories/{diagnosis_category}/edit', [DiagnosisCategoryController::class, 'edit']);
+            Route::put('diagnosis-categories/{diagnosis_category}', [DiagnosisCategoryController::class, 'update']);
+            Route::patch('diagnosis-categories/{diagnosis_category}', [DiagnosisCategoryController::class, 'update']);
+            Route::delete('diagnosis-categories/{diagnosis_category}', [DiagnosisCategoryController::class, 'destroy']);
+
+            // Routes untuk Diagnosa Keperawatan
+            Route::get('nursing-diagnoses', [NursingDiagnosisController::class, 'index']);
+            Route::post('nursing-diagnoses', [NursingDiagnosisController::class, 'store']);
+            Route::get('nursing-diagnoses/{nursing_diagnosis}', [NursingDiagnosisController::class, 'show']);
+            Route::get('nursing-diagnoses/{nursing_diagnosis}/edit', [NursingDiagnosisController::class, 'edit']);
+            Route::put('nursing-diagnoses/{nursing_diagnosis}', [NursingDiagnosisController::class, 'update']);
+            Route::patch('nursing-diagnoses/{nursing_diagnosis}', [NursingDiagnosisController::class, 'update']);
+            Route::delete('nursing-diagnoses/{nursing_diagnosis}', [NursingDiagnosisController::class, 'destroy']);
+        });
+
         Route::prefix('employee')->group(function () {
             Route::get('/doctors', [EmployeeController::class, 'getDoctors']);
         });

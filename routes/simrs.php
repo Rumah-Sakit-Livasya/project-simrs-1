@@ -11,6 +11,7 @@ use App\Http\Controllers\FarmasiSignaController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
+use App\Http\Controllers\NursingDiannosisPageController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\ProcurementPOApprovalCEO;
 use App\Http\Controllers\ProcurementPOApprovalNonPharmacy;
@@ -299,6 +300,10 @@ Route::group(['middleware' => ['auth']], function () {
         |
         */
         Route::prefix('/master-data')->group(function () {
+            Route::prefix('diagnosa-keperawatan')->group(function () {
+                Route::get('/categories', [NursingDiannosisPageController::class, 'viewCategories'])->name('master.categories');
+                Route::get('/diagnoses', [NursingDiannosisPageController::class, 'viewDiagnoses'])->name('master.diagnoses');
+            });
             // Setup and configuration routes
             Route::prefix('setup')->group(function () {
                 // Inpatient administration fees

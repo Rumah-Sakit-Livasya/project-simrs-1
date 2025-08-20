@@ -58,14 +58,19 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            JenisKegiatanSeeder::class,
-            // InspectionItemSeeder::class,
-            // InternalVehicleSeeder::class,
-            // WorkshopVendorSeeder::class,
-            // DriverSeeder::class,
-            // VehicleLogSeeder::class,
-            // Daftarkan seeder lain di sini jika ada
+            NursingDiagnosisSeeder::class,
+            // Anda bisa menambahkan seeder lain di sini
         ]);
+
+        // $this->call([
+        // JenisKegiatanSeeder::class,
+        // InspectionItemSeeder::class,
+        // InternalVehicleSeeder::class,
+        // WorkshopVendorSeeder::class,
+        // DriverSeeder::class,
+        // VehicleLogSeeder::class,
+        // Daftarkan seeder lain di sini jika ada
+        // ]);
 
 
         // Membuat 200 data input limbah harian
