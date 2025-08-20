@@ -130,14 +130,34 @@ class LaporanInternalController extends Controller
             'status' => 'required|in:diproses,selesai,ditunda,ditolak',
             'keterangan' => 'nullable|string',
             'dokumentasi' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'barang_id' => 'nullable|exists:barang,id',
             'jenis_kendala_checkbox' => 'nullable|array',
+            'jam_masuk' => 'nullable',
+            'jam_diterima' => 'nullable',
+            'jam_diproses' => 'nullable',
+            'jam_selesai' => 'nullable',
+            'barang_id' => 'nullable|exists:barang,id',
 
             // 'maintenance_rtl' dihapus dari validasi karena diisi otomatis
             'maintenance_kondisi' => ($isMaintenance ? 'required|string' : 'nullable|string'),
             'maintenance_hasil' => ($isMaintenance ? 'required|string' : 'nullable|string'),
             'maintenance_estimasi' => 'nullable|date',
         ]);
+
+        // $validated = $request->validate([
+        //     'user_id' => 'required|exists:users,id',
+        //     'organization_id' => 'required|exists:organizations,id',
+        //     'unit_terkait' => 'required|exists:organizations,id',
+        //     'tanggal' => 'required|date',
+        //     'jenis' => 'required|in:kendala,kegiatan',
+        //     'kegiatan' => 'required|string',
+        //     'status' => 'required|in:diproses,selesai,ditunda,ditolak',
+        //     'keterangan' => 'required_if:status,ditunda,ditolak|nullable|string',
+        //     'jam_masuk' => 'nullable',
+        //     'jam_diterima' => 'nullable',
+        //     'jam_diproses' => 'nullable',
+        //     'jam_selesai' => 'nullable',
+        //     'dokumentasi' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // 2MB max
+        // ]);
 
         $dokumentasiPath = null;
         if ($request->hasFile('dokumentasi')) {
