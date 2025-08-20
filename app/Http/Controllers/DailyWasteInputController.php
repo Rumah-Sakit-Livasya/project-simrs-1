@@ -11,18 +11,9 @@ class DailyWasteInputController extends Controller
     public function index()
     {
         $wasteCategories = WasteCategory::all();
-        $transportCategories = WasteCategory::whereIn('name', ['Infeksius', 'Domestik'])->get();
-        $vehicles = Vehicle::all();
-
-        return view('pages.daily-waste.index', compact('wasteCategories', 'transportCategories', 'vehicles'));
-    }
-
-    public function daily()
-    {
-        $wasteCategories = WasteCategory::all();
         $sanitationOrgId = Organization::where('name', 'Sanitasi')->value('id');
 
-        return view('pages.daily-waste.daily', compact('wasteCategories', 'sanitationOrgId'));
+        return view('pages.daily-waste.index', compact('wasteCategories', 'sanitationOrgId'));
     }
 
     public function transport()

@@ -11,7 +11,7 @@ use App\Http\Controllers\API\JobPositionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\ShiftController;
 use App\Http\Controllers\API\BankEmployeeController;
-use App\Http\Controllers\Api\DailyWasteInputController;
+use App\Http\Controllers\API\DailyWasteInputController;
 use App\Http\Controllers\API\DayOffRequestController;
 use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\KPIController;
@@ -392,5 +392,7 @@ Route::get('/chart-data', [DailyWasteInputController::class, 'getChartData']);
 // Resource routes untuk CRUD
 Route::apiResource('daily-inputs', DailyWasteInputController::class);
 Route::apiResource('waste-transports', WasteTransportController::class);
+Route::get('waste-transports/{id}/edit', [WasteTransportController::class, 'edit']);
+Route::delete('waste-transports/{id}', [WasteTransportController::class, 'destroy']);
 
 require __DIR__ . '/api-simrs.php';

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\DailyWasteInput;
@@ -26,37 +26,46 @@ class DailyWasteInputController extends Controller
 
     public function index(Request $request)
     {
-        if ($request->ajax()) {
-            $query = DailyWasteInput::with(['wasteCategory', 'employee'])->latest();
+        try {
+            if ($request->ajax()) {
+                $query = DailyWasteInput::with(['wasteCategory', 'employee'])->latest();
 
-            if ($request->filled('start_date') && $request->filled('end_date')) {
-                $query->whereBetween('date', [$request->start_date, $request->end_date]);
+                if ($request->filled('start_date') && $request->filled('end_date')) {
+                    $query->whereBetween('date', [$request->start_date, $request->end_date]);
+                }
+
+                return DataTables::of($query)
+                    ->addIndexColumn()
+                    ->addColumn('pic', fn($row) => $row->employee ? $row->employee->fullname : 'N/A')
+                    ->addColumn('action', function ($row) {
+                        $picName = $row->employee ? e($row->employee->fullname) : '';
+
+                        return '<a href="javascript:void(0)"
+                                   data-id="' . $row->id . '"
+                                   data-date="' . $row->date . '"
+                                   data-volume="' . $row->volume . '"
+                                   data-category-id="' . $row->waste_category_id . '"
+                                   data-pic-id="' . $row->pic . '"
+                                   data-pic-name="' . $picName . '"
+                                   class="btn btn-primary btn-sm editDaily" title="Edit">
+                                       <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-danger btn-sm deleteDaily" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>';
+                    })
+                    ->rawColumns(['action'])
+                    ->make(true);
+            } else {
+                // Jika bukan AJAX, kembalikan response error
+                return response()->json(['error' => 'Invalid request.'], 400);
             }
-
-            return DataTables::of($query)
-                ->addIndexColumn()
-                ->addColumn('pic_name', fn($row) => $row->employee ? $row->employee->fullname : 'N/A')
-                ->addColumn('action', function ($row) {
-                    $picName = $row->employee ? e($row->employee->fullname) : '';
-
-                    // --- PERBAIKAN UTAMA DI SINI ---
-                    // Mengubah snake_case (data-category_id) menjadi kebab-case (data-category-id)
-                    return '<a href="javascript:void(0)"
-                               data-id="' . $row->id . '"
-                               data-date="' . $row->date . '"
-                               data-volume="' . $row->volume . '"
-                               data-category-id="' . $row->waste_category_id . '"
-                               data-pic-id="' . $row->pic . '"
-                               data-pic-name="' . $picName . '"
-                               class="btn btn-primary btn-sm editDaily" title="Edit">
-                                   <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-danger btn-sm deleteDaily" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </a>';
-                })
-                ->rawColumns(['action'])
-                ->make(true);
+        } catch (\Exception $e) {
+            // Tangani error dan kembalikan response JSON agar DataTables bisa menampilkan error dengan benar
+            return response()->json([
+                'error' => 'Terjadi kesalahan pada server.',
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 

@@ -48,9 +48,22 @@ class DatabaseSeeder extends Seeder
         // $this->call([
         //         RncCenterSeeder::class,
         // ]);
+        // $this->call([
+        //     WasteCategorySeeder::class,
+        //     VehicleSeeder::class,
+        // ]);
         $this->call([
-            WasteCategorySeeder::class,
-            VehicleSeeder::class,
+            LinenCategorySeeder::class,
+            LinenTypeSeeder::class,
         ]);
+
+
+        // Membuat 200 data input limbah harian
+        // \App\Models\DailyWasteInput::factory(200)->create();
+
+        // Membuat 100 data pengangkutan limbah
+        // \App\Models\WasteTransport::factory(100)->create();
+
+
     }
 }

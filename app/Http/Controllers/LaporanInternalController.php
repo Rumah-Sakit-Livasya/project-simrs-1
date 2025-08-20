@@ -163,13 +163,10 @@ class LaporanInternalController extends Controller
         if ($request->hasFile('dokumentasi')) {
             $file = $request->file('dokumentasi');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('public/dokumentasi', $fileName);
-            $dokumentasiPath = Storage::url($path);
-            $validated['dokumentasi'] = $dokumentasiPath;
-        }
 
-        if ($request->has('jenis_kendala_checkbox')) {
-            $validated['jenis_kendala'] = implode(', ', $request->jenis_kendala_checkbox);
+            $path = $file->storeAs('dokumentasi', $fileName); // default disk = local, bukan public
+            // Simpan path relatif (misal: dokumentasi/namafile.jpg)
+            $validated['dokumentasi'] = $path;
         }
 
         $laporan = LaporanInternal::create($validated);
@@ -301,18 +298,6 @@ class LaporanInternalController extends Controller
         return DataTables::of($query)
             ->addColumn('fullname', function ($item) {
                 return optional($item->user->employee)->fullname ?? '-';
-            })
-            ->addColumn('action', function ($item) {
-                return '
-                <div class="btn-group">
-                    <button class="btn btn-sm btn-icon btn-primary" onclick="editLaporan(' . $item->id . ')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-icon btn-danger" onclick="deleteLaporan(' . $item->id . ')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            ';
             })
             ->rawColumns(['action'])
             ->make(true);
