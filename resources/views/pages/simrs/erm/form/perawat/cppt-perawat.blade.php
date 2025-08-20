@@ -287,6 +287,7 @@ Terapi / Tindakan :
     @endif
 
     @include('pages.simrs.erm.partials.modal-diagnosa')
+    @include('pages.simrs.erm.partials.modal-intervensi')
 @endsection
 @section('plugin-erm')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -445,6 +446,71 @@ Terapi / Tindakan :
                 // Set nilai baru ke textarea dan tutup modal
                 $('#assesment').val(newContent);
                 $('#modal-diagnosa-keperawatan').modal('hide');
+            });
+
+            // ===================================================================
+            // LOGIKA UNTUK MODAL INTERVENSI KEPERAWATAN
+            // ===================================================================
+
+            let intervensiTable; // Variabel untuk instance Datatable
+
+            // 1. Event listener untuk membuka modal
+            $('#intervensi_perawat').on('click', function() {
+                if (!$.fn.DataTable.isDataTable('#intervensi-table')) {
+                    intervensiTable = $('#intervensi-table').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        ajax: {
+                            url: "{{ url('api/simrs/master-data/interventions') }}",
+                            data: function(d) {
+                                // Mengambil tipe rawat dari form utama dan mengirimkannya sebagai parameter
+                                // d.tipe_rawat = $('#cppt-perawat-rajal-form').data('tipe-rawat');
+                                d.search_query = $('#intervensi_search_input').val();
+                            }
+                        },
+                        columns: [{
+                                data: 'name',
+                                name: 'name'
+                            },
+                            {
+                                data: null,
+                                paginate: false,
+                                orderable: false,
+                                searchable: false,
+                                render: function(data, type, row) {
+                                    return '<button class="btn btn-success btn-sm select-intervensi-btn" data-name="' +
+                                        row.name + '">Pilih</button>';
+                                }
+                            }
+                        ]
+                    });
+                }
+
+                $('#modal-intervensi-keperawatan').modal('show');
+            });
+
+            // 2. Event listener untuk form pencarian
+            $('#intervensi-search-form').on('submit', function(e) {
+                e.preventDefault();
+                intervensiTable.draw();
+            });
+
+            // 3. Event listener untuk tombol "Pilih"
+            $('#intervensi-table tbody').on('click', '.select-intervensi-btn', function() {
+                const name = $(this).data('name');
+
+                // Target textarea adalah #planning
+                const currentPlanning = $('#planning').val();
+
+                let newContent;
+                if (currentPlanning.trim() === '' || currentPlanning.endsWith('\n')) {
+                    newContent = currentPlanning + '- ' + name; // Menambahkan tanda '-' untuk list
+                } else {
+                    newContent = currentPlanning + '\n- ' + name;
+                }
+
+                $('#planning').val(newContent);
+                $('#modal-intervensi-keperawatan').modal('hide');
             });
         });
     </script>

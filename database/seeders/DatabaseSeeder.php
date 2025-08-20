@@ -58,7 +58,8 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            NursingDiagnosisSeeder::class,
+            // NursingDiagnosisSeeder::class,
+            InterventionSeeder::class, // <-- TAMBAHKAN INI
             // Anda bisa menambahkan seeder lain di sini
         ]);
 

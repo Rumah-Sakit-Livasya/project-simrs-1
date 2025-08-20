@@ -8,6 +8,7 @@ use App\Http\Controllers\FarmasiReportStockStatus;
 use App\Http\Controllers\FarmasiResepController;
 use App\Http\Controllers\FarmasiReturResepController;
 use App\Http\Controllers\FarmasiSignaController;
+use App\Http\Controllers\InterventionPageController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
@@ -300,6 +301,9 @@ Route::group(['middleware' => ['auth']], function () {
         |
         */
         Route::prefix('/master-data')->group(function () {
+            Route::prefix('interventions')->group(function () {
+                Route::get('/', [InterventionPageController::class, 'index'])->name('master.interventions');
+            });
             Route::prefix('diagnosa-keperawatan')->group(function () {
                 Route::get('/categories', [NursingDiannosisPageController::class, 'viewCategories'])->name('master.categories');
                 Route::get('/diagnoses', [NursingDiannosisPageController::class, 'viewDiagnoses'])->name('master.diagnoses');

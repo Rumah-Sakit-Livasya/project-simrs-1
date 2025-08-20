@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\DiagnosisCategoryController;
 use App\Http\Controllers\API\EmployeeController;
+use App\Http\Controllers\API\InterventionController;
 use App\Http\Controllers\API\NursingDiagnosisController;
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\DietGiziController;
@@ -561,6 +562,17 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
 
     Route::prefix('master-data')->group(function () {
+
+        Route::prefix('interventions')->group(function () {
+            // Routes untuk Master Intervensi (bukan apiResource)
+            Route::get('/', [InterventionController::class, 'index']);
+            Route::post('/', [InterventionController::class, 'store']);
+            Route::get('/{id}/edit', [InterventionController::class, 'edit']);
+            Route::put('/{id}', [InterventionController::class, 'update']);
+            Route::patch('/{id}', [InterventionController::class, 'update']);
+            Route::delete('/{id}', [InterventionController::class, 'destroy']);
+        });
+
         Route::prefix('diagnosa-keperawatan')->group(function () {
             Route::get('diagnosis-categories/select-all', [DiagnosisCategoryController::class, 'selectAll']);
             Route::get('diagnosis-categories', [DiagnosisCategoryController::class, 'index']);
