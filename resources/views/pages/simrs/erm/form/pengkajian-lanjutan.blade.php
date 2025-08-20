@@ -156,7 +156,7 @@
                     // Enkripsi ID form dengan Base64 di sisi client
                     let encryptedId = btoa(idForm);
                     let url =
-                        "{{ route('poliklinik.pengkajian-lanjutan.show', [':registrationId', ':encryptedId']) }}"
+                        "{{ route('poliklinik.pengkajian-lanjutan.create', [':registrationId', ':encryptedId']) }}"
                         .replace(':registrationId', registrationId)
                         .replace(':encryptedId', encryptedId);
 

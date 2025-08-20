@@ -461,9 +461,40 @@ Route::group(['middleware' => ['auth']], function () {
             });
         });
 
-        Route::prefix('poliklinik')->group(function () {
-            Route::get('/daftar-pasien', [ERMController::class, 'catatanMedis'])->name('poliklinik.daftar-pasien');
-            Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
+
+        Route::prefix('poliklinik')->name('poliklinik.')->group(function () {
+            // Rute utama untuk daftar pasien poliklinik
+            Route::get('/daftar-pasien', [ERMController::class, 'catatanMedis'])
+                ->name('daftar-pasien');
+
+            // === Grup Rute untuk Pengkajian Lanjutan ===
+            // Mengelompokkan semua rute terkait pengkajian lanjutan agar lebih rapi.
+            // Refactored: Gunakan Route::controller dan urutkan rute statis sebelum dinamis
+            Route::prefix('pengkajian-lanjutan')->name('pengkajian-lanjutan.')->group(function () {
+                // Form baru (CREATE)
+                Route::get('/create/{registration_id}/{template_id}', [PoliklinikController::class, 'showForm'])
+                    ->name('create');
+
+                // Simpan form baru (STORE)
+                Route::post('/', [PengkajianController::class, 'storeOrUpdatePengkajianLanjutan'])
+                    ->name('store');
+
+                // Edit form yang sudah diisi (EDIT)
+                Route::get('/{pengkajianLanjutan}/edit', [PoliklinikController::class, 'editFilledForm'])
+                    ->name('edit');
+
+                // Update form yang sudah diisi (UPDATE)
+                Route::put('/{pengkajianLanjutan}', [PengkajianController::class, 'storeOrUpdatePengkajianLanjutan'])
+                    ->name('update');
+
+                // Hapus data pengkajian (DESTROY)
+                Route::delete('/{pengkajianLanjutan}', [PengkajianController::class, 'destroyPengkajianLanjutan'])
+                    ->name('destroy');
+
+                // Tampilkan form yang sudah diisi (SHOW) - letakkan paling bawah agar tidak bentrok dengan rute statis
+                Route::get('/{pengkajianLanjutan}', [PoliklinikController::class, 'showFilledForm'])
+                    ->name('show');
+            });
         });
 
         Route::prefix('farmasi')->group(function () {
@@ -881,7 +912,7 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get("popup/telaah-resep-raw/{json}", [FarmasiResepController::class, 'telaahResepRaw'])->name('farmasi.transaksi-resep.popup.telaah-resep-raw');
                 Route::get("popup/telaah-resep/{id}", [FarmasiResepController::class, 'telaahResep'])->name('farmasi.transaksi-resep.popup.telaah-resep');
 
-                Route::prefix("print")->group(function(){
+                Route::prefix("print")->group(function () {
                     Route::get("/e-tiket/{id}", [FarmasiResepController::class, 'print_e_tiket'])->name('farmasi.transaksi-resep.print.e-tiket');
                     Route::get("/e-tiket-ranap/{id}", [FarmasiResepController::class, 'print_e_tiket_ranap'])->name('farmasi.transaksi-resep.print.e-tiket-ranap');
                     Route::get("/penjualan/{id}", [FarmasiResepController::class, 'print_penjualan'])->name('farmasi.transaksi-resep.print.penjualan');
@@ -889,7 +920,7 @@ Route::group(['middleware' => ['auth']], function () {
                 });
             });
 
-            Route::prefix("retur-resep")->group(function(){
+            Route::prefix("retur-resep")->group(function () {
                 Route::get("/", [FarmasiReturResepController::class, 'index'])->name('farmasi.retur-resep');
                 Route::get("/create", [FarmasiReturResepController::class, 'create'])->name('farmasi.retur-resep.create');
             });

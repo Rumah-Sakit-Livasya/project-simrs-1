@@ -205,7 +205,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::delete("/destroy/{id}", [FarmasiResepController::class, "destroy"])->name("farmasi.transaksi-resep.delete");
         });
 
-        Route::prefix('retur-resep')->group(function(){
+        Route::prefix('retur-resep')->group(function () {
             Route::post('/store', [FarmasiReturResepController::class, 'store'])->name('farmasi.retur-barang.store');
             Route::get("/get/item-patient/{id}", [FarmasiReturResepController::class, 'getItemPatient'])->name('farmasi.retur-barang.get.item-patient');
         });
@@ -652,6 +652,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::delete('{id}/delete', [FormBuilderController::class, 'destroy'])->name('api.form-builder.destroy');
             });
 
+
+            Route::prefix('ethnics')->group(function () {
+                Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');
+            });
 
             Route::prefix('ethnics')->group(function () {
                 Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');

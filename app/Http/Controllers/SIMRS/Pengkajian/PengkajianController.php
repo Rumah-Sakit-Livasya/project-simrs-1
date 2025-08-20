@@ -142,7 +142,6 @@ class PengkajianController extends Controller
     {
         $validatedData = $request->validate([
             'registration_id' => 'required|exists:registrations,id',
-            // ... validasi lain untuk transfer pasien
             'data_ttd1' => 'nullable|array',
             'data_ttd1.pic' => 'nullable|string',
             'data_ttd1.signature_image' => 'nullable|string',
