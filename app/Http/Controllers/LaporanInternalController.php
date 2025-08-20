@@ -127,7 +127,6 @@ class LaporanInternalController extends Controller
         }
         // return dd($validated['dokumentasi'] = Storage::url($path));
 
-        dd($validated);
         $laporan = LaporanInternal::create($validated);
 
         return response()->json([
