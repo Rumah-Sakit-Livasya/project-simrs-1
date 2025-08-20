@@ -345,8 +345,14 @@ class ERMController extends Controller
                 return view('pages.simrs.erm.form.perawat.rujuk-antar-rs', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'resep_harian':
+                $gudangs = WarehouseMasterGudang::where('apotek', 1)->where('warehouse', 0)->get();
+                $barangs = WarehouseBarangFarmasi::with(["stored_items", "satuan"])->get();
+
+                $default_column = "rajal_default";
+                if ($registration->registration_type == "rawat-inap") $default_column = "ranap_default";
+                $default_apotek = WarehouseMasterGudang::select('id')->where($default_column, 1)->first();
                 $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
-                return view('pages.simrs.erm.form.perawat.resep-harian', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                return view('pages.simrs.erm.form.perawat.resep-harian', compact('gudangs', 'barangs', 'default_apotek', 'pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             default:
                 return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'path'));
@@ -355,7 +361,7 @@ class ERMController extends Controller
 
     public function get_obat(int $gudang_id)
     {
-        $query = WarehouseBarangFarmasi::with(['stored_items']);
+        $query = WarehouseBarangFarmasi::with(['stored_items', 'satuan']);
         $query->whereHas('stored_items', function ($q) use ($gudang_id) {
             $q->where('gudang_id', $gudang_id);
             $q->where('warehouse_penerimaan_barang_farmasi_item.qty', '>', 0);

@@ -6,20 +6,30 @@
 // @ts-ignore
 const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
-class CPPTDokterClass {
+class ResepHarianClass {
     #$Table = $("#table_re");
     #$GudangSelect = $("#cppt_gudang_id");
     #$BarangSelect = $("#cppt_barang_id");
     #$Loadings = $(".loading");
     #$LoadingsMessage = $(".loading-message");
-    #$GrandTotalDisplay = $("#grand_total");
-    #$GrandTotal = $("#total_harga_obat");
     #API_URL = "/api/simrs/poliklinik";
 
     constructor() {
         this.#showLoading(false);
+        $("#simpan-btn").on("click", this.#handleFormSubmit.bind(this));
+        $(document).on("change input keyup", "input[type='number']", ResepHarianClass.enforceNumberLimit);
+        $(document).on("change input keyup", "input[type='number']", this.refreshTotal.bind(this));
         this.#$GudangSelect.on('select2:select', (e) => this.#handleGudangSelect.bind(this, e)());
         this.#$BarangSelect.on('select2:select', (e) => this.#handleBarangSelect.bind(this, e)());
+    }
+
+    #handleFormSubmit(event) {
+        // check if textarea #resep_manual is empty
+        // and if there's no tr.item-obat element
+        if ($("textarea#resep_manual").val() === "" && $("tr.item-obat").length === 0) {
+            event.preventDefault();
+            showErrorAlertNoRefresh("Mohon isi resep manual atau tambahkan obat resep elektronik!");
+        }
     }
 
     /**
@@ -53,34 +63,28 @@ class CPPTDokterClass {
 
         const key = Math.round(Math.random() * 100000);
 
-        // <th style="width: 1%;">Aksi</th>
-        // <th style="width: 25%;">Nama Obat</th>
         // <th style="width: 10%;">UOM</th>
         // <th style="width: 5%;">Stok</th>
-        // <th style="width: 10%;">Qty</th>
-        // <th style="width: 5%;">Harga</th>
+        // <th style="width: 10%;">Qty Perhari</th>
+        // <th style="width: 10%;">Jumlah Hari</th>
+        // <th style="width: 10%;">Total Qty</th>
         // <th style="width: 15%">Signa</th>
-        // <th style="width: 15%">Instruksi</th>
-        // <th style="width: 10%;">Subtotal Harga</th>
+        // <th style="width: 1%;">Aksi</th>
         // 
         // insert to this.#$Table
         this.#$Table.append(/*html*/`
                 <tr id="item${key}" class="item-obat obat-${item.id}">
-                    <input type="hidden" name="hna[${key}]" value="${item.hna}">
                     <input type="hidden" name="barang_id[${key}]" value="${item.id}">
-                    <input type="hidden" name="subtotal[${key}]" value="${item.hna}">
 
-                    <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                        title="Hapus" onclick="CPPTDokter.deleteItem(${key})"></a></td>
                     <td>${item.nama}</td>
                     <td>${item.satuan?.kode}</td>
                     <td>${item.qty}</td>
-                    <td><input type="number" name="qty[${key}]" min="1" step="1" class="form-control" value="1" max="${item.qty}"
-                    onkeyup="CPPTDokter.refreshTotal()" onchange="CPPTDokter.refreshTotal()"></td>
-                    <td>${this.#rp(item.hna)}</td>
+                    <td><input type="number" name="qty_perhari[${key}]" min="1" step="1" class="form-control" value="1" max="${item.qty}"></td>
+                    <td><input type="number" name="qty_hari[${key}]" min="1" step="1" class="form-control" value="1"></td>
+                    <td class="total-qty">1</td>
                     <td><input type="text" name="signa[${key}]" class="form-control"></td>
-                    <td><input type="text" name="instruksi_obat[${key}]" class="form-control"></td>
-                    <td class="subtotal">${this.#rp(item.hna)}</td>
+                    <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
+                        title="Hapus" onclick="ResepHarian.deleteItem(${key})"></a></td>
                 </tr>
             `);
 
@@ -90,23 +94,17 @@ class CPPTDokterClass {
     refreshTotal() {
         let total = 0;
         this.#$Table.find("tr.item-obat").each((i, tr) => {
-            const qtyEl = $(tr).find("input[name^=qty]");
-            const hnaEl = $(tr).find("input[name^=hna]");
-            if (!qtyEl || !hnaEl) return;
+            const qtyEl = $(tr).find("input[name^=qty_perhari]");
+            const hariEl = $(tr).find("input[name^=qty_hari]");
+            if (!qtyEl || !hariEl) return;
 
             const qty = parseInt(String(qtyEl.val()));
-            const hna = parseInt(String(hnaEl.val()));
-            if (isNaN(qty) || isNaN(hna)) return;
+            const hari = parseInt(String(hariEl.val()));
+            if (isNaN(qty) || isNaN(hari)) return;
 
-            const subtotal = qty * hna;
-
-            total += subtotal;
-            $(tr).find("td.subtotal").text(this.#rp(subtotal));
-            $(tr).find("input[name^=subtotal]").val(subtotal);
+            const qty_total = qty * hari;
+            $(tr).find("td.total-qty").text(qty_total);
         });
-
-        this.#$GrandTotalDisplay.text(this.#rp(total));
-        this.#$GrandTotal.val(total);
     }
 
     deleteItem(key) {
@@ -172,6 +170,28 @@ class CPPTDokterClass {
     }
 
     /**
+     * Enforce number input min max limit on manual input
+     * @param {Event} event 
+     */
+    static enforceNumberLimit(event) {
+        const inputField = /** @type {HTMLInputElement} */ (event.target);
+        let value = parseFloat(inputField.value);
+        let min = parseInt(String(inputField.min || 0));
+        let max = parseInt(String(inputField.max || Number.MAX_SAFE_INTEGER));
+
+        if (isNaN(value)) {
+            inputField.value = '';
+            return;
+        }
+
+        if (value < min) {
+            inputField.value = String(min);
+        } else if (value > max) {
+            inputField.value = String(max);
+        }
+    }
+
+    /**
      * Make a fetch call with API URL as base URL
      * @param {string} url 
      * @param {any | null} body 
@@ -206,4 +226,4 @@ class CPPTDokterClass {
     }
 }
 
-const CPPTDokter = new CPPTDokterClass();
+const ResepHarian = new ResepHarianClass();

@@ -183,6 +183,12 @@ Skrining Nyeri:
                                                 border-radius: 0 0 4px 4px;
                                                 z-index: 1000;
                                             }
+
+                                            input[type='checkbox'] {
+                                                width: 1.5rem;
+                                                height: 1.5rem;
+                                                margin: 0.5rem;
+                                            }
                                         </style>
                                         <div class="row">
                                             <div class="col-md-12">
@@ -236,6 +242,7 @@ Skrining Nyeri:
                                                                             <option value="{{ $barang->id }}"
                                                                                 class="obat"
                                                                                 data-qty="{{ $qty }}"
+                                                                                data-zat="@foreach ($barang->zat_aktif as $zat_aktif) {{ $zat_aktif->zat->nama }}, @endforeach"
                                                                                 data-item="{{ json_encode($barang) }}">
                                                                                 {{ $barang->nama }} (Stock:
                                                                                 {{ $qty }})</option>
@@ -243,6 +250,13 @@ Skrining Nyeri:
                                                                     @endforeach
                                                                 @endif
                                                             </select>
+                                                            <div class="row">
+                                                                <div class="col-xl">
+                                                                    <input type="checkbox" name="zat_aktif"
+                                                                        id="zat_aktif">
+                                                                    <label for="zat_aktif"> Zat Aktif </label>
+                                                                </div>
+                                                            </div>
                                                             <div class="form-control-line"></div>
                                                         </div>
                                                     </div>
@@ -446,6 +460,39 @@ Skrining Nyeri:
     <script src="{{ asset('js/simrs/erm/form/dokter/cppt.js') }}?time={{ now() }}"></script>
 
     <script>
+        /**
+         * Custom matcher for the Select2 drug dropdown to allow searching
+         * by drug name or active substance (zat aktif).
+         * @param {import("select2").SearchOptions} params
+         * @param {import("select2").OptGroupData | import("select2").OptionData} data
+         * @returns {import("select2").OptGroupData | import("select2").OptionData | null}
+         */
+        function obatMatcher(params, data) {
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+
+            const zatCheck = $("#zat_aktif");
+            console.log(zatCheck.is(':checked'));
+
+            const term = params.term.toLowerCase();
+            const text = data.text.toLowerCase();
+            const $el = $(data.element);
+            const zat = $el.data('zat')?.toString().toLowerCase();
+
+            if (zatCheck.is(':checked')) {
+                if (zat && zat.includes(term)) {
+                    return data;
+                }
+            } else {
+                if (text.includes(term)) {
+                    return data;
+                }
+            }
+
+            return null;
+        }
+
         $(document).ready(function() {
             function submitFormCPPT(actionType) {
                 const form = $('#cppt-dokter-rajal-form');
@@ -505,9 +552,10 @@ Skrining Nyeri:
             //     placeholder: 'Pilih Dokter',
             // });
 
-            $('#cppt_barang_id').select2({
-                placeholder: 'Pilih Obat',
-            });
+            $("#cppt_barang_id").select2({
+                matcher: obatMatcher,
+                placeholder: 'Pilih Obat'
+            })
 
             $('#cppt_gudang_id').select2({
                 placeholder: 'Pilih Gudang',

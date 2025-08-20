@@ -4,6 +4,7 @@ use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\DietGiziController;
 use App\Http\Controllers\FarmasiResepController;
+use App\Http\Controllers\FarmasiResepHarianController;
 use App\Http\Controllers\FarmasiReturResepController;
 use App\Http\Controllers\FarmasiSignaController;
 use App\Http\Controllers\KategoriGiziController;
@@ -203,6 +204,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::put("/update/telaah/{id}", [FarmasiResepController::class, "update_telaah"])->name("farmasi.update.telaah");
             Route::put('/update/resep/{id}', [FarmasiResepController::class, 'update'])->name('farmasi.transaksi-resep.update');
             Route::delete("/destroy/{id}", [FarmasiResepController::class, "destroy"])->name("farmasi.transaksi-resep.delete");
+        });
+
+        Route::prefix('resep-harian')->group(function(){
+            Route::post('/store', [FarmasiResepHarianController::class, 'store'])->name('farmasi.resep-harian.store');
         });
 
         Route::prefix('retur-resep')->group(function(){
