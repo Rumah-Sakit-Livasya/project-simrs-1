@@ -10,21 +10,25 @@ use Yajra\DataTables\Facades\DataTables;
 
 class NursingDiagnosisController extends Controller
 {
-    public function index()
+    // app/Http/Controllers/Api/NursingDiagnosisController.php
+
+    public function index(Request $request) // Tambahkan Request $request
     {
         // Gunakan 'with' untuk eager loading relasi
         $data = NursingDiagnosis::with('category');
+
+        // Tambahkan logika pencarian kustom
+        if ($request->filled('search_query')) {
+            $data->where('diagnosa', 'like', '%' . $request->search_query . '%');
+        }
+
         return DataTables::of($data)
             ->addIndexColumn()
             ->addColumn('category_name', function ($row) {
                 return $row->category ? $row->category->name : 'N/A';
             })
-            ->addColumn('action', function ($row) {
-                $btn = '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-primary btn-sm edit-btn">Edit</a> ';
-                $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-danger btn-sm delete-btn">Hapus</a>';
-                return $btn;
-            })
-            ->rawColumns(['action'])
+            // Kita tidak lagi butuh kolom 'action' dari backend, karena dibuat di frontend
+            // ->addColumn('action', function ($row) { ... })
             ->make(true);
     }
 

@@ -285,6 +285,8 @@ Terapi / Tindakan :
             </div>
         </div>
     @endif
+
+    @include('pages.simrs.erm.partials.modal-diagnosa')
 @endsection
 @section('plugin-erm')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
@@ -362,6 +364,87 @@ Terapi / Tindakan :
             $('.slide-backdrop').on('click', function() {
                 $('#js-slide-left').removeClass('slide-on-mobile-left-show');
                 $(this).removeClass('show');
+            });
+
+            let diagnosaTable; // Variabel untuk menyimpan instance Datatable
+
+            // 1. Event listener untuk membuka modal
+            $('#diag_perawat').on('click', function() {
+                // Hanya inisialisasi Datatable jika belum ada
+                if (!$.fn.DataTable.isDataTable('#diagnosa-table')) {
+                    diagnosaTable = $('#diagnosa-table').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        // Mengambil data dari API yang sudah kita buat
+                        ajax: {
+                            url: "{{ url('api/simrs/master-data/diagnosa-keperawatan/nursing-diagnoses') }}",
+                            // Menambahkan parameter pencarian kustom
+                            data: function(d) {
+                                d.search_query = $('#diagnosa_search_input').val();
+                            }
+                        },
+                        columns: [{
+                                data: 'category_name',
+                                name: 'category.name'
+                            },
+                            {
+                                data: 'code',
+                                name: 'code'
+                            },
+                            {
+                                data: 'diagnosa',
+                                name: 'diagnosa'
+                            },
+                            // Kolom 'action' kita buat secara kustom di sini
+                            {
+                                data: null, // tidak terikat ke kolom database
+                                orderable: false,
+                                searchable: false,
+                                render: function(data, type, row) {
+                                    // Membuat tombol "Pilih" dengan data-attributes
+                                    return '<button class="btn btn-success btn-sm select-diagnosa-btn" data-code="' +
+                                        row.code + '" data-diagnosa="' + row.diagnosa +
+                                        '">Pilih</button>';
+                                }
+                            }
+                        ]
+                    });
+                }
+
+                // Tampilkan modal
+                $('#modal-diagnosa-keperawatan').modal('show');
+            });
+
+            // 2. Event listener untuk form pencarian di dalam modal
+            $('#diagnosa-search-form').on('submit', function(e) {
+                e.preventDefault(); // Mencegah form submit standar
+                diagnosaTable.draw(); // Memuat ulang data Datatable dengan parameter pencarian baru
+            });
+
+            // 3. Event listener untuk tombol "Pilih" (menggunakan event delegation)
+            $('#diagnosa-table tbody').on('click', '.select-diagnosa-btn', function() {
+                // Ambil data dari data-attributes tombol
+                const code = $(this).data('code');
+                const diagnosaText = $(this).data('diagnosa');
+
+                // Format teks yang akan disisipkan
+                const newEntry = code + ' ' + diagnosaText;
+
+                // Ambil isi textarea assesment saat ini
+                const currentAssesment = $('#assesment').val();
+
+                let newContent;
+
+                // Cek apakah textarea sudah berisi, jika ya tambahkan baris baru
+                if (currentAssesment.trim() === '' || currentAssesment.endsWith('\n')) {
+                    newContent = currentAssesment + newEntry;
+                } else {
+                    newContent = currentAssesment + '\n' + newEntry;
+                }
+
+                // Set nilai baru ke textarea dan tutup modal
+                $('#assesment').val(newContent);
+                $('#modal-diagnosa-keperawatan').modal('hide');
             });
         });
     </script>
