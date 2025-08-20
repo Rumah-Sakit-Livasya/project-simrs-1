@@ -13,6 +13,7 @@ use App\Models\WarehouseBarangFarmasi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CPPTController extends Controller
 {
@@ -56,42 +57,85 @@ class CPPTController extends Controller
     public function getCPPT(Request $request)
     {
         try {
-            $id = $request->registration_id;
+            // 1. Validasi input dari filter untuk keamanan
+            $request->validate([
+                'registration_id' => 'required|exists:registrations,id',
+                'start_date'      => 'nullable|date_format:Y-m-d',
+                'end_date'        => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
+                'care_status'     => 'nullable|string|in:ri,rj,igd',
+                'cppt_type'       => 'nullable|string|in:dokter,perawat',
+            ]);
 
-            $cppt = CPPT::where('registration_id', $id)
-                ->where('tipe_cppt', '!=', 'dokter')
-                ->with(['user.employee', 'signature']) // tambahkan relasi signature
-                ->orderBy('created_at', 'desc')
-                ->get();
+            // 2. Mulai membangun query, jangan panggil ->get() dulu
+            $query = CPPT::with(['user.employee', 'signature'])
+                ->where('registration_id', $request->registration_id);
 
-            if ($cppt->isNotEmpty()) {
-                $cppt = $cppt->map(function ($item) {
-                    $item->nama = optional($item->user->employee)->fullname;
+            // ===================================================================
+            // APLIKASIKAN FILTER SECARA KONDISIONAL
+            // ===================================================================
 
-                    // Format tipe_rawat
-                    if (!empty($item->tipe_rawat)) {
-                        $item->tipe_rawat = $item->tipe_rawat === 'igd'
-                            ? 'UGD'
-                            : ucwords(str_replace('-', ' ', $item->tipe_rawat));
-                    }
-
-                    // Tambahkan full path ke signature jika ada
-                    $item->signature_url = $item->signature
-                        ? asset('storage/' . $item->signature->signature)
-                        : null;
-
-                    return $item;
-                });
-
-                return response()->json($cppt, 200);
+            // Filter berdasarkan Tipe CPPT (role)
+            if ($request->filled('cppt_type')) {
+                // Jika filter diisi (misal: 'perawat'), gunakan nilai dari filter
+                $query->where('tipe_cppt', $request->cppt_type);
             } else {
-                return response()->json(['error' => 'Data tidak ditemukan!'], 404);
+                // Jika filter kosong, terapkan logika default method ini (tampilkan semua selain dokter)
+                $query->where('tipe_cppt', '!=', 'dokter');
             }
+
+            // Filter berdasarkan Status Rawat (dept)
+            if ($request->filled('care_status')) {
+                // Frontend mengirim 'ri', 'rj', 'igd'. Database menyimpan 'rawat-inap', 'rawat-jalan', 'igd'
+                // Kita perlu menyesuaikannya jika format di database berbeda.
+                // Asumsi: format di DB sama dengan yang dikirim frontend (ri, rj, igd)
+                // Jika tidak, Anda perlu mapping. Contoh:
+                // $careStatusMap = ['ri' => 'rawat-inap', 'rj' => 'rawat-jalan', 'igd' => 'igd'];
+                // $dbCareStatus = $careStatusMap[$request->care_status] ?? null;
+                // if($dbCareStatus) $query->where('tipe_rawat', $dbCareStatus);
+
+                $query->where('tipe_rawat', $request->care_status);
+            }
+
+            // Filter berdasarkan Rentang Tanggal (sdate & edate)
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                // Gunakan whereBetween untuk query yang efisien
+                // Tambahkan waktu untuk memastikan seluruh hari terakhir ter-cover
+                $query->whereBetween('created_at', [
+                    $request->start_date . ' 00:00:00',
+                    $request->end_date . ' 23:59:59'
+                ]);
+            }
+
+            // 3. Eksekusi query setelah semua filter diterapkan
+            $cppt = $query->orderBy('created_at', 'desc')->get();
+
+            // 4. Lakukan formatting data seperti sebelumnya
+            // Tidak perlu lagi mengecek isNotEmpty(), karena map tidak akan error pada collection kosong
+            $formattedCppt = $cppt->map(function ($item) {
+                $item->nama = optional($item->user->employee)->fullname;
+
+                if (!empty($item->tipe_rawat)) {
+                    $item->tipe_rawat = $item->tipe_rawat === 'igd'
+                        ? 'UGD'
+                        : ucwords(str_replace('-', ' ', $item->tipe_rawat));
+                }
+
+                $item->signature_url = $item->signature
+                    ? Storage::url($item->signature->signature) // Gunakan Storage::url() untuk path yang benar
+                    : null;
+
+                return $item;
+            });
+
+            // Langsung kembalikan hasil yang sudah diformat
+            return response()->json($formattedCppt, 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Tangani error validasi secara spesifik
+            return response()->json(['error' => 'Input tidak valid.', 'details' => $e->errors()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Terjadi kesalahan pada server: ' . $e->getMessage()], 500);
         }
     }
-
 
     public function getCPPTDokter(Request $request)
     {
