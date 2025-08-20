@@ -4,6 +4,7 @@ use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\DietGiziController;
 use App\Http\Controllers\FarmasiResepController;
+use App\Http\Controllers\FarmasiReturResepController;
 use App\Http\Controllers\FarmasiSignaController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
@@ -109,6 +110,7 @@ use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\TarifOperasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Models\Employee;
+use App\Models\FarmasiReturResep;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Support\Facades\Storage;
@@ -201,6 +203,11 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::put("/update/telaah/{id}", [FarmasiResepController::class, "update_telaah"])->name("farmasi.update.telaah");
             Route::put('/update/resep/{id}', [FarmasiResepController::class, 'update'])->name('farmasi.transaksi-resep.update');
             Route::delete("/destroy/{id}", [FarmasiResepController::class, "destroy"])->name("farmasi.transaksi-resep.delete");
+        });
+
+        Route::prefix('retur-resep')->group(function(){
+            Route::post('/store', [FarmasiReturResepController::class, 'store'])->name('farmasi.retur-barang.store');
+            Route::get("/get/item-patient/{id}", [FarmasiReturResepController::class, 'getItemPatient'])->name('farmasi.retur-barang.get.item-patient');
         });
     });
 

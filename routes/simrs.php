@@ -6,6 +6,7 @@ use App\Http\Controllers\FarmasiReportKartuStock;
 use App\Http\Controllers\FarmasiReportStockDetail;
 use App\Http\Controllers\FarmasiReportStockStatus;
 use App\Http\Controllers\FarmasiResepController;
+use App\Http\Controllers\FarmasiReturResepController;
 use App\Http\Controllers\FarmasiSignaController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
@@ -876,13 +877,14 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/penjualan/{id}", [FarmasiResepController::class, 'print_penjualan'])->name('farmasi.transaksi-resep.print.penjualan');
                     Route::get("/resep/{id}", [FarmasiResepController::class, 'print_resep'])->name('farmasi.transaksi-resep.print.resep');
                 });
+            });
 
+            Route::prefix("retur-resep")->group(function(){
+                Route::get("/", [FarmasiReturResepController::class, 'index'])->name('farmasi.retur-resep');
+                Route::get("/create", [FarmasiReturResepController::class, 'create'])->name('farmasi.retur-resep.create');
             });
 
 
-
-            Route::get('retur-resep', [FarmasiController::class, 'returResep'])
-                ->name('farmasi.retur-resep');
 
             Route::get('reponse-time', [FarmasiController::class, 'responseTime'])
                 ->name('farmasi.reponse-time');

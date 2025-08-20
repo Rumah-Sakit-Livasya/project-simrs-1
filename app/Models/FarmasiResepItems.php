@@ -25,4 +25,8 @@ class FarmasiResepItems extends Model
     {
         return $this->hasMany(FarmasiResepItems::class, "racikan_id");
     }
+
+    public function resep(){
+        return $this->belongsTo(FarmasiResep::class, 'resep_id');
+    }
 }
