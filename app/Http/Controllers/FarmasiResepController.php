@@ -848,6 +848,21 @@ class FarmasiResepController extends Controller
                 $item->delete();
             }
 
+            // unset response time if exists
+            // also unset electronic recipe
+            if($resep->re_id != null){
+                $response = FarmasiResepResponse::findOrFail($resep->re_id);
+                $response->update([
+                    "input_resep_user_id" => null,
+                    "input_resep_time" => null
+                ]);
+
+                $re = FarmasiResepElektronik::findOrFail($resep->re_id);
+                $re->update([
+                    "processed" => 0
+                ]);
+            }
+
             // Hapus resep
             $resep->delete();
 
