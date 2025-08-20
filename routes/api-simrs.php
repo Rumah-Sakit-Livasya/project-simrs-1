@@ -548,17 +548,51 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
 
     Route::prefix('erm')->group(function () {
+        // ==========================================================
+        // DATA UMUM & PENDUKUNG
+        // ==========================================================
         Route::get('/get-jadwal-dokter/{departement_id}', [CPPTController::class, 'getJadwalDokter']);
+
+        // ==========================================================
+        // PENGKAJIAN
+        // ==========================================================
         Route::get('/dokter-pengkajian/{type}/{registration_number}/get', [PengkajianDokterRajalController::class, 'getPengkajian'])->name('pengkajian.dokter-rajal.get');
         Route::get('/perawat-pengkajian/{type}/{registration_number}/get', [PengkajianController::class, 'getPengkajianRajal'])->name('pengkajian.perawat-rajal.get');
-        Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
-        Route::get('/dokter-cppt/get', [CPPTController::class, 'getCPPTDokter'])->name('cppt-dokter.get');
-        Route::get('/perawat-cppt/get', [CPPTController::class, 'getCPPT'])->name('cppt.get');
-        Route::post('/dokter-cppt/{type}/{registration_number}/store', [CPPTController::class, 'store'])->name('cppt.dokter-rajal.store');
-        Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
+
+        // ==========================================================
+        // CPPT (CATATAN PERKEMBANGAN PASIEN TERINTEGRASI)
+        // ==========================================================
+
+        // --- CREATE ---
+        // Endpoint ini menangani penyimpanan CPPT baru (bisa untuk dokter/perawat tergantung logika di controller)
+        Route::post('/cppt/{type}/{registration_number}/store', [CPPTController::class, 'store'])->name('cppt.store');
+
+        // --- READ (GET DATA) ---
+        // Endpoint spesifik untuk mengambil data CPPT Dokter
+        Route::get('/cppt/dokter/get', [CPPTController::class, 'getCPPTDokter'])->name('cppt.dokter.get');
+        // Endpoint spesifik untuk mengambil data CPPT Perawat/Lainnya
+        Route::get('/cppt/perawat/get', [CPPTController::class, 'getCPPT'])->name('cppt.perawat.get');
+
+        // --- UPDATE ---
+        // Endpoint untuk mengambil data satu CPPT spesifik yang akan diedit
+        Route::get('/cppt/{cppt}/edit', [CPPTController::class, 'edit'])->name('cppt.edit');
+        // Endpoint untuk menyimpan perubahan setelah diedit
+        Route::put('/cppt/{cppt}/update', [CPPTController::class, 'update'])->name('cppt.update');
+
+        // --- DELETE ---
+        Route::delete('/cppt/{cppt}/destroy', [CPPTController::class, 'destroy'])->name('cppt.destroy');
+
+        // --- AKSI LAINNYA ---
+        // Endpoint untuk menyimpan data dari form SBAR
+        Route::post('/cppt/{cppt}/sbar/store', [CPPTController::class, 'storeSbar'])->name('cppt.sbar.store');
+        // Endpoint untuk verifikasi CPPT
+        Route::post('/cppt/{cppt}/verify', [CPPTController::class, 'verify'])->name('cppt.verify');
+
+        // ==========================================================
+        // RESUME MEDIS
+        // ==========================================================
         Route::post('/dokter-resume-medis/store', [ResumeMedisRajalController::class, 'store'])->name('resume-medis.dokter-rajal.store');
         Route::get('/dokter-resume-medis-rajal/{type}/{registration_number}/get', [ResumeMedisRajalController::class, 'getResumeMedis'])->name('resume-medis.dokter-rajal.get');
-        // Route::post('/transfer/store', [CPPTController::class, 'getCPPT'])->name('pengkajian.transfer-pasien-antar-ruangan.store');
     });
 
     Route::prefix('master-data')->group(function () {

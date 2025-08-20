@@ -219,6 +219,34 @@
             white-space: pre-wrap;
             line-height: 1.6;
         }
+
+        /* Pastikan ada styling untuk footer kartu */
+        .cppt-card-footer {
+            text-align: right;
+            /* Membuat konten rata kanan */
+            margin-top: 25px;
+            /* Jarak dari konten terakhir di atasnya */
+            padding-top: 15px;
+            border-top: 1px solid #e1bee7;
+            /* Garis pemisah tipis */
+        }
+
+        .cppt-card-footer img {
+            display: block;
+            margin-left: auto;
+            /* Gambar rata kanan */
+            margin-right: 0;
+            margin-bottom: 5px;
+            max-width: 150px;
+            /* Lebar maksimum gambar TTD */
+            height: auto;
+        }
+
+        .cppt-card-footer .author-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9em;
+        }
     </style>
 
 @endsection

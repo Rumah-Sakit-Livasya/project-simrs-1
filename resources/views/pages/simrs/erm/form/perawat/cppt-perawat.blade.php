@@ -276,6 +276,8 @@ Terapi / Tindakan :
 
     @include('pages.simrs.erm.partials.modal-diagnosa')
     @include('pages.simrs.erm.partials.modal-intervensi')
+    @include('pages.simrs.erm.partials.modal-sbar')
+
 @endsection
 @section('plugin-erm')
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
@@ -290,7 +292,7 @@ Terapi / Tindakan :
                 const registrationNumber = "{{ $registration->registration_number }}";
 
                 const url =
-                    "{{ route('cppt.dokter-rajal.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
+                    "{{ route('cppt.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
                     .replace('__registration_number__', registrationNumber);
 
                 // Now you can use `url` in your form submission or AJAX request

@@ -12,7 +12,9 @@ use App\Models\SIMRS\Registration;
 use App\Models\WarehouseBarangFarmasi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class CPPTController extends Controller
@@ -226,9 +228,12 @@ class CPPTController extends Controller
             'instruksi' => 'nullable',
             'evaluasi' => 'nullable',
             'implementasi' => 'nullable',
-            'medical_record_number' => 'required'
+            'medical_record_number' => 'required',
+            // ttd
+            'signature_data' => 'nullable|array',
+            'signature_data.pic' => 'nullable|string',
+            'signature_data.signature_image' => 'nullable|string',
         ]);
-
 
         DB::beginTransaction();
         try {
@@ -246,36 +251,32 @@ class CPPTController extends Controller
                 $validatedData['tipe_cppt'] = auth()->user()->employee->organization->name;
             }
 
-
             $cppt = CPPT::create($validatedData);
 
-            // Handle signature jika ada
-            if ($request->filled('signature_image')) {
-                $imageData = $request->input('signature_image');
-                $image = base64_decode(str_replace('data:image/png;base64,', '', str_replace(' ', '+', $imageData)));
-                $imageName = 'ttd_' . time() . '.png';
-                $path = 'signatures/' . $imageName;
+            // Logika penyimpanan tanda tangan (signature) - samakan dengan PengkajianController
+            $signatureData = $validatedData['signature_data'] ?? null;
+            if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                $oldPath = optional($cppt->signature)->signature;
+                $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', str_replace(' ', '+', $signatureData['signature_image'])));
+                $imageName = 'ttd_cppt_' . $cppt->id . '_' . time() . '.png';
+                $newPath = 'signatures/' . $imageName;
+                \Storage::disk('public')->put($newPath, $image);
 
-                // Hapus tanda tangan lama jika ada
-                if ($cppt->signature && \Storage::disk('public')->exists($cppt->signature->signature)) {
-                    \Storage::disk('public')->delete($cppt->signature->signature);
-                }
-
-                // Simpan file baru
-                \Storage::disk('public')->put($path, $image);
-
-                // Simpan/Update relasi signature
                 $cppt->signature()->updateOrCreate(
                     [
                         'signable_id' => $cppt->id,
                         'signable_type' => get_class($cppt),
                     ],
                     [
-                        'signature' => $path,
-                        'pic' => $request->input('pic'),
-                        'role' => $request->input('role') ?? 'perawat',
+                        'signature' => $newPath,
+                        'pic' => $signatureData['pic'] ?? null,
+                        'role' => $signatureData['role'] ?? 'perawat',
                     ]
                 );
+
+                if ($oldPath && \Storage::disk('public')->exists($oldPath)) {
+                    \Storage::disk('public')->delete($oldPath);
+                }
             }
 
             // farmasi rajal
@@ -342,5 +343,167 @@ class CPPTController extends Controller
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Mengambil data satu CPPT untuk form edit.
+     */
+    public function edit(CPPT $cppt)
+    {
+        // Gunakan Gate untuk memeriksa otorisasi
+        // Pastikan Anda sudah mendaftarkan 'modify-cppt' di AuthServiceProvider atau bootstrap/app.php
+        if (! Gate::allows('modify-cppt', $cppt)) {
+            return response()->json(['error' => 'Anda tidak memiliki izin untuk mengedit data ini.'], 403);
+        }
+
+        // Eager load relasi yang mungkin dibutuhkan di form edit
+        $cppt->load('signature');
+
+        return response()->json($cppt);
+    }
+
+    /**
+     * Memperbarui data CPPT yang sudah ada.
+     */
+    public function update(Request $request, CPPT $cppt)
+    {
+        // 1. Otorisasi
+        if (! Gate::allows('modify-cppt', $cppt)) {
+            return response()->json(['error' => 'Anda tidak memiliki izin untuk memperbarui data ini.'], 403);
+        }
+
+        // 2. Validasi (mirip dengan method store, tapi sesuaikan jika perlu)
+        $validatedData = $request->validate([
+            'subjective' => 'required|string',
+            'objective'  => 'required|string',
+            'assesment'  => 'required|string',
+            'planning'   => 'required|string',
+            'instruksi'  => 'nullable|string',
+            'evaluasi'   => 'nullable|string',
+            // Tambahkan validasi lain jika ada input baru saat edit
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // 3. Update data utama
+            $cppt->update($validatedData);
+
+            // 4. Handle update tanda tangan jika ada gambar baru yang dikirim
+            if ($request->filled('signature_image')) {
+                $imageData = $request->input('signature_image');
+                $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $imageData));
+                $imageName = 'ttd_cppt_' . $cppt->id . '_' . time() . '.png';
+                $path = 'signatures/' . $imageName;
+
+                // Hapus tanda tangan lama jika ada
+                if ($cppt->signature && Storage::disk('public')->exists($cppt->signature->signature)) {
+                    Storage::disk('public')->delete($cppt->signature->signature);
+                }
+
+                // Simpan file baru
+                Storage::disk('public')->put($path, $image);
+
+                // Perbarui relasi signature
+                $cppt->signature()->update([
+                    'signature' => $path,
+                    'pic'       => $request->input('pic') ?? Auth::user()->name,
+                    'role'      => $request->input('role')
+                ]);
+            }
+
+            DB::commit();
+            return response()->json(['success' => 'CPPT berhasil diperbarui!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Gagal memperbarui CPPT: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Menghapus data CPPT.
+     */
+    public function destroy(CPPT $cppt)
+    {
+        // Otorisasi
+        if (! Gate::allows('modify-cppt', $cppt)) {
+            return response()->json(['error' => 'Anda tidak memiliki izin untuk menghapus data ini.'], 403);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Hapus tanda tangan terkait jika ada
+            if ($cppt->signature && Storage::disk('public')->exists($cppt->signature->signature)) {
+                Storage::disk('public')->delete($cppt->signature->signature);
+                $cppt->signature()->delete();
+            }
+
+            // Hapus resep elektronik terkait jika ada (opsional, tergantung kebutuhan bisnis)
+            // FarmasiResepElektronik::where('cppt_id', $cppt->id)->delete();
+
+            $cppt->delete();
+
+            DB::commit();
+            return response()->json(['success' => 'CPPT berhasil dihapus.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Gagal menghapus CPPT: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Memverifikasi sebuah entri CPPT.
+     */
+    public function verify(CPPT $cppt)
+    {
+        // Otorisasi
+        if (!Gate::allows('verify-cppt', $cppt)) {
+            return response()->json(['error' => 'Anda tidak memiliki izin untuk melakukan verifikasi.'], 403);
+        }
+
+        // Pastikan ada kolom untuk menampung status verifikasi di tabel 'cppts'
+        // Contoh: $table->boolean('is_verified')->default(false);
+        // Contoh: $table->foreignId('verified_by')->nullable()->constrained('users');
+        // Contoh: $table->timestamp('verified_at')->nullable();
+
+        $cppt->update([
+            'is_verified' => true,
+            'verified_by' => Auth::id(),
+            'verified_at' => now(),
+        ]);
+
+        return response()->json(['success' => 'CPPT berhasil diverifikasi.']);
+    }
+
+    /**
+     * Menyimpan data SBAR yang terkait dengan sebuah CPPT.
+     */
+    public function storeSbar(Request $request, CPPT $cppt)
+    {
+        // Pastikan Anda sudah membuat Model dan Migrasi untuk SBAR
+        // Contoh: php artisan make:model Sbar -m
+
+        $validated = $request->validate([
+            'situation'      => 'required|string',
+            'background'     => 'required|string',
+            'assessment'     => 'required|string',
+            'recommendation' => 'required|string',
+            // Tambahkan validasi untuk tanda tangan SBAR jika diperlukan
+        ]);
+
+        // Simpan data SBAR
+        // Contoh jika Anda punya model Sbar:
+        /*
+        Sbar::create([
+            'cppt_id' => $cppt->id,
+            'user_id' => Auth::id(),
+            'situation' => $validated['situation'],
+            'background' => $validated['background'],
+            'assessment' => $validated['assessment'],
+            'recommendation' => $validated['recommendation'],
+        ]);
+        */
+
+        // Untuk saat ini, kita hanya akan mengembalikan respons sukses
+        return response()->json(['success' => 'SBAR berhasil disimpan.']);
     }
 }
