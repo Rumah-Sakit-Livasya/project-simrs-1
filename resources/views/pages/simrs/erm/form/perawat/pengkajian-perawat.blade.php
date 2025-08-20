@@ -380,7 +380,7 @@
                             </div>
                             <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
                                 <input name="skor_nyeri" id="skor_nyeri" class="form-control text-center mt-3"
-                                    style="font-size: 3rem; height: 60px;" type="text"
+                                    style="font-size: 3rem; height: 60px;" type="number"
                                     value="{{ $pengkajian?->skor_nyeri }}">
                                 <label for="skor_nyeri" class="control-label text-primary">Skor</label>
                             </div>
@@ -842,33 +842,36 @@
                     </header>
                     <div class="row mt-3">
                         @php
-                            // 1. Logika pengambilan data yang lebih baik
-                            $sensorik_data = [];
-                            if (!empty($pengkajian?->sensorik)) {
-                                $sensorik_data = is_array($pengkajian->sensorik)
-                                    ? $pengkajian->sensorik // Jika sudah array (karena casting), langsung gunakan
-                                    : json_decode($pengkajian->sensorik, true) ?? []; // Jika masih string, decode
-                            }
+                            // Ambil data sensorik dari database, jika ada
+                            $sensorik_penglihatan = $pengkajian->sensorik_penglihatan ?? '';
+                            $sensorik_penciuman = $pengkajian->sensorik_penciuman ?? '';
+                            $sensorik_pendengaran = $pengkajian->sensorik_pendengaran ?? '';
 
                             $opsi_sensorik = [
                                 'sensorik_penglihatan' => ['Normal', 'Kabur', 'Kaca Mata', 'Lensa Kontak'],
                                 'sensorik_penciuman' => ['Normal', 'Tidak'],
                                 'sensorik_pendengaran' => ['Normal', 'Tuli Ka / Ki', 'Ada alat bantu dengar ka/ki'],
                             ];
+
+                            // Mapping nama kolom ke value yang diambil dari database
+                            $sensorik_db_value = [
+                                'sensorik_penglihatan' => $sensorik_penglihatan,
+                                'sensorik_penciuman' => $sensorik_penciuman,
+                                'sensorik_pendengaran' => $sensorik_pendengaran,
+                            ];
                         @endphp
                         <table class="table">
                             <tbody>
                                 @foreach ($opsi_sensorik as $kategori => $listOpsional)
                                     <tr>
-                                        <td>{{ Str::of($kategori)->after('sensorik_')->ucfirst() }}
-                                        </td>
+                                        <td>{{ Str::of($kategori)->after('sensorik_')->ucfirst() }}</td>
                                         @foreach ($listOpsional as $i => $opsiValue)
                                             <td {{ $loop->remaining < 3 - count($listOpsional) ? 'colspan=2' : '' }}>
                                                 <div class="custom-control custom-radio custom-control-inline">
                                                     <input name="{{ $kategori }}" id="{{ $kategori . $i }}"
                                                         value="{{ $opsiValue }}" data-skor="{{ $i }}"
-                                                        class="custom-control-input" type="radio" {{-- 2. Gunakan variabel baru dan cek dengan @checked --}}
-                                                        @checked(($sensorik_data[$kategori] ?? null) == $opsiValue)>
+                                                        class="custom-control-input" type="radio"
+                                                        @checked(($sensorik_db_value[$kategori] ?? null) == $opsiValue)>
                                                     <label class="custom-control-label" for="{{ $kategori . $i }}">
                                                         {{ $opsiValue }}
                                                     </label>
@@ -935,14 +938,7 @@
                     </header>
                     <div class="row mt-3">
                         @php
-                            // 1. Logika pengambilan data yang lebih baik untuk motorik
-                            $motorik_data = [];
-                            if (!empty($pengkajian?->motorik)) {
-                                $motorik_data = is_array($pengkajian->motorik)
-                                    ? $pengkajian->motorik // Jika sudah array, langsung gunakan
-                                    : json_decode($pengkajian->motorik, true) ?? []; // Jika masih string, decode
-                            }
-
+                            // Daftar kategori motorik dan opsi, nama key = nama kolom di database
                             $opsiMotorik = [
                                 'motorik_aktifitas' => ['Mandiri', 'Bantuan Minimal', 'Bantuan Ketergantungan Total'],
                                 'motorik_berjalan' => [
@@ -957,15 +953,14 @@
                             <tbody>
                                 @foreach ($opsiMotorik as $kategori => $opsiList)
                                     <tr>
-                                        <td>{{ Str::of($kategori)->after('motorik_')->replace('_', ' ')->ucfirst() }}
-                                        </td>
+                                        <td>{{ Str::of($kategori)->after('motorik_')->replace('_', ' ')->ucfirst() }}</td>
                                         @foreach ($opsiList as $i => $opsiValue)
                                             <td @if ($loop->last && $loop->count < 4) colspan="{{ 5 - $loop->count }}" @endif>
                                                 <div class="custom-control custom-radio">
                                                     <input name="{{ $kategori }}" id="{{ $kategori . $i }}"
                                                         value="{{ $opsiValue }}" data-skor="{{ $i }}"
-                                                        class="custom-control-input" type="radio" {{-- 2. Gunakan variabel baru dan cek dengan @checked --}}
-                                                        @checked(($motorik_data[$kategori] ?? null) == $opsiValue)>
+                                                        class="custom-control-input" type="radio"
+                                                        @checked(($pengkajian?->{$kategori} ?? null) == $opsiValue)>
                                                     <label class="custom-control-label text-primary"
                                                         for="{{ $kategori . $i }}">
                                                         {{ $opsiValue }}
