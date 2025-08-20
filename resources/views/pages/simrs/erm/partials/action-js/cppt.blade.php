@@ -28,120 +28,152 @@
         });
 
         // ===================================================================
-        // FUNGSI UTAMA UNTUK MEMUAT DAN MERENDER DATA CPPT
+        // FUNGSI UTAMA UNTUK MEMUAT DAN MERENDER DATA CPPT (VERSI 2 KOLOM)
         // ===================================================================
-        function loadAndRenderCPPT(targetElementId, apiUrl, filterData) {
-            $.ajax({
-                url: apiUrl,
+        function loadSideBySideTimeline(filterData) {
+            const targetElement = $('#cppt-container');
+            targetElement.html('<div class="text-center p-5">Memuat data CPPT...</div>');
+
+            const getDokterData = $.ajax({
+                url: '{{ route('cppt-dokter.get') }}',
                 type: 'GET',
                 dataType: 'json',
-                data: filterData, // Menggunakan data filter yang dikirim
-                success: function(response) {
-                    const targetElement = $(`#${targetElementId}`);
-                    targetElement.empty(); // Kosongkan container
+                data: filterData
+            });
 
-                    if (response.length === 0) {
+            const getPerawatData = $.ajax({
+                url: '{{ route('cppt.get') }}',
+                type: 'GET',
+                dataType: 'json',
+                data: filterData
+            });
+
+            Promise.all([getDokterData, getPerawatData])
+                .then(([dokterResponse, perawatResponse]) => {
+                    targetElement.empty();
+
+                    const dokterData = dokterResponse || [];
+                    const perawatData = perawatResponse || [];
+
+                    if (dokterData.length === 0 && perawatData.length === 0) {
                         targetElement.html(
-                            '<tr><td colspan="3" class="text-center">Tidak ada data CPPT yang ditemukan.</td></tr>'
-                        );
+                            '<div class="text-center p-4">Tidak ada data CPPT yang ditemukan.</div>');
                         return;
                     }
 
-                    // Kelompokkan data berdasarkan tanggal
-                    const groupedData = response.reduce((acc, data) => {
-                        const date = new Date(data.created_at).toLocaleDateString('id-ID', {
+                    // 1. Kumpulkan semua tanggal unik dari kedua dataset
+                    const allDates = new Set();
+                    [...dokterData, ...perawatData].forEach(item => {
+                        const date = new Date(item.created_at).toLocaleDateString('id-ID', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        allDates.add(date);
+                    });
+
+                    // 2. Urutkan tanggal unik dari yang terbaru
+                    const sortedUniqueDates = Array.from(allDates).sort((a, b) => new Date(b) - new Date(
+                        a));
+
+                    // 3. Kelompokkan setiap dataset berdasarkan tanggal
+                    const groupDataByDate = (data) => data.reduce((acc, item) => {
+                        const date = new Date(item.created_at).toLocaleDateString('id-ID', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric'
                         });
                         if (!acc[date]) acc[date] = [];
-                        acc[date].push(data);
+                        acc[date].push(item);
                         return acc;
                     }, {});
 
-                    // Urutkan tanggal dari yang terbaru ke terlama
-                    const sortedDates = Object.keys(groupedData).sort((a, b) => new Date(b) -
-                        new Date(a));
+                    const groupedDokterData = groupDataByDate(dokterData);
+                    const groupedPerawatData = groupDataByDate(perawatData);
 
-                    sortedDates.forEach(date => {
-                        const entries = groupedData[date];
+                    // 4. Render HTML untuk setiap tanggal
+                    sortedUniqueDates.forEach(date => {
+                        // Tambahkan Header Tanggal yang mencakup kedua kolom
+                        targetElement.append(`<div class="daily-cppt-header">${date}</div>`);
 
-                        // Tambahkan baris pemisah tanggal
-                        targetElement.append(`
-                            <tr>
-                                <td colspan="3" class="text-center font-weight-bold text-white" style="background-color: #886ab5;">${date}</td>
-                            </tr>
-                        `);
+                        // Buat baris Bootstrap untuk menampung kedua kolom
+                        const dailyRow = $('<div class="row"></div>');
+                        targetElement.append(dailyRow);
 
-                        // Urutkan entri berdasarkan jam dari yang terbaru ke terlama
-                        entries.sort((a, b) => new Date(b.created_at) - new Date(a
-                            .created_at));
+                        // Buat Kolom Kiri (Dokter)
+                        const dokterCol = $('<div class="col-md-6 cppt-column"></div>');
+                        if (groupedDokterData[date]) {
+                            // Urutkan entri berdasarkan waktu
+                            groupedDokterData[date].sort((a, b) => new Date(b.created_at) -
+                                new Date(a.created_at));
+                            groupedDokterData[date].forEach(data => {
+                                dokterCol.append(generateCardHtml(data));
+                            });
+                        }
+                        dailyRow.append(dokterCol);
 
-                        entries.forEach(data => {
-                            const formattedDate = new Intl.DateTimeFormat('id-ID', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                hour12: false,
-                                timeZone: 'Asia/Jakarta'
-                            }).format(new Date(data.created_at));
-
-                            // Template HTML yang sama untuk dokter dan perawat
-                            const rowHtml = `
-                                <tr>
-                                    <td class="text-center" style="width: 25%;">
-                                        <div class="text-primary mt-3 font-weight-bold">${formattedDate}</div>
-                                        <div class="text-success mt-2">${data.tipe_rawat.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
-                                        <div class="mt-2 text-info">${data.user.name}</div>
-                                        <a href="javascript:void(0)" class="d-block text-uppercase badge badge-primary mt-2"><i class="mdi mdi-plus-circle"></i> Verifikasi</a>
-                                        <div class="mt-2">
-                                            ${data.signature_url ? `<img src="${data.signature_url}" style="width: 150px; height: auto;">` : ''}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <table class="table-soap nurse w-100">
-                                            <tbody>
-                                                <tr><td colspan="2" class="soap-text title">CPPT</td></tr>
-                                                <tr><td class="soap-text text-center font-weight-bold" width="8%">S</td><td>${(data.subjective || '').replace(/\n/g, "<br>")}</td></tr>
-                                                <tr><td class="soap-text text-center font-weight-bold">O</td><td>${(data.objective || '').replace(/\n/g, "<br>")}</td></tr>
-                                                <tr><td class="soap-text text-center font-weight-bold">A</td><td>${(data.assesment || '').replace(/\n/g, "<br>")}</td></tr>
-                                                <tr><td class="soap-text text-center font-weight-bold">P</td><td>${(data.planning || '').replace(/\n/g, "<br>")}</td></tr>
-                                                ${data.evaluasi ? `<tr><td class="soap-text text-center font-weight-bold">E</td><td>${(data.evaluasi || '').replace(/\n/g, "<br>")}</td></tr>` : ''}
-                                                ${data.instruksi ? `<tr><td class="soap-text text-center font-weight-bold">I</td><td>${(data.instruksi || '').replace(/\n/g, "<br>")}</td></tr>` : ''}
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                    <td class="text-center" style="width: 5%;">
-                                        <div class="d-flex flex-column">
-                                            <i class="mdi mdi-content-copy blue-text pointer mdi-18px copy-soap mb-2" data-id="${data.id}" title="Copy"></i>
-                                            <i class="mdi mdi-delete-forever red-text pointer mdi-18px hapus-soap mb-2" data-id="${data.id}" title="Hapus"></i>
-                                            <i class="mdi mdi-pencil blue-text pointer mdi-18px edit-soap mb-2" data-id="${data.id}" title="Edit"></i>
-                                            <i class="mdi mdi-printer green-text pointer mdi-18px print-antrian" data-id="${data.id}" title="Print"></i>
-                                        </div>
-                                    </td>
-                                </tr>
-                            `;
-                            targetElement.append(rowHtml);
-                        });
+                        // Buat Kolom Kanan (Perawat)
+                        const perawatCol = $('<div class="col-md-6 cppt-column"></div>');
+                        if (groupedPerawatData[date]) {
+                            // Urutkan entri berdasarkan waktu
+                            groupedPerawatData[date].sort((a, b) => new Date(b.created_at) -
+                                new Date(a.created_at));
+                            groupedPerawatData[date].forEach(data => {
+                                perawatCol.append(generateCardHtml(data));
+                            });
+                        }
+                        dailyRow.append(perawatCol);
                     });
-                },
-                error: function(xhr) {
-                    console.error("Error loading CPPT data:", xhr.responseText);
-                    $(`#${targetElementId}`).html(
-                        '<tr><td colspan="3" class="text-center text-danger">Gagal memuat data.</td></tr>'
+                })
+                .catch(error => {
+                    console.error("Gagal memuat data CPPT:", error);
+                    targetElement.html(
+                        '<div class="alert alert-danger">Gagal memuat data CPPT. Silakan coba lagi.</div>'
                     );
-                }
+                });
+        }
+
+        // Fungsi terpisah untuk membuat HTML kartu agar kode lebih bersih
+        function generateCardHtml(data) {
+            const entryTime = new Date(data.created_at).toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
             });
+
+            let cpptTitle = 'Catatan ' + data.tipe_cppt.charAt(0).toUpperCase() + data.tipe_cppt.slice(1);
+            // Anda bisa menambahkan logika kustom di sini jika perlu
+            // if (data.tipe_cppt === 'bidan') cpptTitle = 'Catatan Bidan';
+
+            return `
+            <div class="cppt-entry-card">
+                <div class="cppt-card-header">
+                    <div class="info">
+                        <div class="status">${data.tipe_rawat.toUpperCase()}</div>
+                        <div class="title">${cpptTitle} : ${entryTime}</div>
+                        <div class="author">${data.user.name}</div>
+                    </div>
+                    <div class="cppt-card-actions">
+                        <i class="mdi mdi-content-copy pointer copy-soap" data-id="${data.id}" title="Copy"></i>
+                        <i class="mdi mdi-pencil pointer edit-soap" data-id="${data.id}" title="Edit"></i>
+                        <i class="mdi mdi-delete-forever pointer hapus-soap" data-id="${data.id}" title="Hapus"></i>
+                    </div>
+                </div>
+                <div class="cppt-card-body">
+                    ${data.subjective ? `<div class="soap-section"><span class="soap-label">Subjective :</span><div class="soap-content">${data.subjective}</div></div>` : ''}
+                    ${data.objective ? `<div class="soap-section"><span class="soap-label">Objective :</span><div class="soap-content">${data.objective}</div></div>` : ''}
+                    ${data.assesment ? `<div class="soap-section"><span class="soap-label">Assessment :</span><div class="soap-content">${data.assesment}</div></div>` : ''}
+                    ${data.planning ? `<div class="soap-section"><span class="soap-label">Plan :</span><div class="soap-content">${data.planning}</div></div>` : ''}
+                    ${data.evaluasi ? `<div class="soap-section"><span class="soap-label">Evaluasi :</span><div class="soap-content">${data.evaluasi}</div></div>` : ''}
+                    ${data.instruksi ? `<div class="soap-section"><span class="soap-label">Instruksi :</span><div class="soap-content">${data.instruksi}</div></div>` : ''}
+                </div>
+            </div>`;
         }
 
         // ===================================================================
-        // FUNGSI UNTUK MENJALANKAN FILTER
+        // FUNGSI FILTER (KINI MEMANGGIL FUNGSI LAYOUT BARU)
         // ===================================================================
         function applyFilters() {
-            // Kumpulkan semua data filter ke dalam satu objek
             const filters = {
                 registration_id: "{{ $registration->id }}",
                 start_date: $('#sdate').val(),
@@ -150,21 +182,10 @@
                 cppt_type: $('#role').val()
             };
 
-            // Panggil fungsi render untuk dokter dan perawat dengan filter yang sama
-            loadAndRenderCPPT('list_soap_dokter', '{{ route('cppt-dokter.get') }}', filters);
-            loadAndRenderCPPT('list_soap_perawat', '{{ route('cppt.get') }}', filters);
+            loadSideBySideTimeline(filters);
         }
 
-        // ===================================================================
-        // EVENT LISTENERS DAN PEMANGGILAN AWAL
-        // ===================================================================
-
-        // 1. Terapkan filter saat tombol diklik
-        $('#btn-apply-filter').on('click', function() {
-            applyFilters();
-        });
-
-        // 2. Muat data awal saat halaman pertama kali dibuka
+        $('#btn-apply-filter').on('click', applyFilters);
         applyFilters();
 
     });

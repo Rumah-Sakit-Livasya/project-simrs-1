@@ -140,40 +140,64 @@ class CPPTController extends Controller
     public function getCPPTDokter(Request $request)
     {
         try {
-            $id = $request->registration_id;
-
-            $cppt = CPPT::where('registration_id', $id)
-                ->where('tipe_cppt', '=', 'dokter')
-                ->with('user.employee')->orderBy('created_at', 'desc')
-                ->get();
-
-            if ($cppt->isNotEmpty()) {
-                $cppt = $cppt->map(function ($item) {
-                    $item->nama = optional($item->user->employee)->fullname;
-
-                    // Modifikasi tipe_rawat menjadi format huruf kapital pada setiap kata
-                    if (!empty($item->tipe_rawat)) {
-                        $item->tipe_rawat = $item->tipe_rawat === 'igd'
-                            ? 'UGD'
-                            : ucwords(str_replace('-', ' ', $item->tipe_rawat));
-                    }
-
-                    // Tambahkan full path ke signature jika ada
-                    $item->signature_url = $item->signature
-                        ? asset('storage/' . $item->signature->signature)
-                        : null;
-
-                    return $item;
-                });
-
-                return response()->json($cppt, 200);
-            } else {
-                return response()->json(['error' => 'Data tidak ditemukan!'], 404);
+            // Jika filter Tipe CPPT diisi dan BUKAN 'dokter', langsung kembalikan array kosong.
+            // Ini adalah cara paling efisien untuk menangani kasus ini.
+            if ($request->filled('cppt_type') && $request->cppt_type !== 'dokter') {
+                return response()->json([], 200);
             }
+
+            // Mulai membangun query, JANGAN panggil ->get() dulu
+            $query = CPPT::where('registration_id', $request->registration_id)
+                ->where('tipe_cppt', '=', 'dokter') // Filter utama method ini
+                ->with('user.employee', 'signature'); // Pastikan 'signature' juga di-load
+
+            // ===================================================================
+            // APLIKASIKAN FILTER DARI REQUEST SECARA KONDISIONAL
+            // ===================================================================
+
+            // Filter berdasarkan Status Rawat (misal: 'ri', 'rj', 'igd')
+            if ($request->filled('care_status')) {
+                $query->where('tipe_rawat', $request->care_status);
+            }
+
+            // Filter berdasarkan Rentang Tanggal
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $query->whereBetween('created_at', [
+                    $request->start_date . ' 00:00:00',
+                    $request->end_date . ' 23:59:59'
+                ]);
+            }
+
+            // ===================================================================
+
+            // Sekarang, eksekusi query setelah semua filter ditambahkan
+            $cppt = $query->orderBy('created_at', 'desc')->get();
+
+            // Logika `map` Anda sudah bagus, kita pertahankan.
+            // Tidak perlu lagi `isNotEmpty()` karena `map` aman untuk collection kosong.
+            $formattedCppt = $cppt->map(function ($item) {
+                $item->nama = optional($item->user->employee)->fullname;
+
+                if (!empty($item->tipe_rawat)) {
+                    $item->tipe_rawat = $item->tipe_rawat === 'igd'
+                        ? 'UGD'
+                        : ucwords(str_replace('-', ' ', $item->tipe_rawat));
+                }
+
+                $item->signature_url = $item->signature
+                    ? Storage::url($item->signature->signature) // Gunakan Storage::url()
+                    : null;
+
+                return $item;
+            });
+
+            return response()->json($formattedCppt, 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            // Lebih baik menangkap error spesifik jika memungkinkan, tapi ini sudah cukup
+            return response()->json(['error' => 'Terjadi kesalahan pada server: ' . $e->getMessage()], 500);
         }
     }
+
 
     private function generate_pharmacy_re_code()
     {

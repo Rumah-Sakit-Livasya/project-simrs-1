@@ -261,62 +261,11 @@ Terapi / Tindakan :
                         </div>
                     </form>
 
-                    <div class="col-md-6">
-                        <hr style="border-color: #868686; margin-bottom: 50px;">
-                        <div class="card-body">
-                            <div class="table-responsive no-margin">
-                                <table id="cppt-dokter" class="table table-striped table-bordered" style="width:100%">
-                                    <tbody id="list_soap_dokter">
-                                        <tr>
-                                            <td class="text-center">
-                                            </td>
-                                            <td>
-                                                <table width="100%" class="table-soap nurse">
-                                                </table>
-                                            </td>
-                                            <td>
-                                            </td>
-                                        </tr>
-                                        <!-- Additional rows here -->
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="3" class="text-center">
-                                                <!-- Pagination will be handled by DataTables -->
-                                            </td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div><!--end .table-responsive -->
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <hr style="border-color: #868686; margin-bottom: 50px;">
-                        <div class="card-body">
-                            <div class="table-responsive no-margin">
-                                <table id="cppt-perawat" class="table table-striped table-bordered" style="width:100%">
-                                    <tbody id="list_soap_perawat">
-                                        <tr>
-                                            <td class="text-center">
-                                            </td>
-                                            <td>
-                                                <table width="100%" class="table-soap nurse">
-                                                </table>
-                                            </td>
-                                            <td>
-                                            </td>
-                                        </tr>
-                                        <!-- Additional rows here -->
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="3" class="text-center">
-                                                <!-- Pagination will be handled by DataTables -->
-                                            </td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div><!--end .table-responsive -->
+                    <div class="col-md-12">
+                        <hr style="border-color: #868686; margin-bottom: 30px;">
+                        {{-- Container utama untuk semua data CPPT --}}
+                        <div id="cppt-container" class="cppt-container">
+                            <!-- Konten (Header tanggal dan kolom) akan di-generate oleh JavaScript -->
                         </div>
                     </div>
 

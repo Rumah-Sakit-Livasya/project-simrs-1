@@ -130,6 +130,95 @@
         #js-slide-left .position-fixed {
             width: 18.7%;
         }
+
+        /* Kontainer Utama untuk CPPT */
+        .cppt-container {
+            font-family: Arial, sans-serif;
+        }
+
+        /* Header Tanggal (misal: 20 August 2025) */
+        .daily-cppt-header {
+            background-color: #6a1b9a;
+            /* Warna ungu gelap */
+            color: white;
+            text-align: center;
+            padding: 8px 15px;
+            font-weight: bold;
+            border-radius: 5px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        /* Styling untuk setiap kolom (Dokter/Perawat) */
+        .cppt-column {
+            padding: 0 10px;
+        }
+
+        /* Kartu untuk setiap entri CPPT */
+        .cppt-entry-card {
+            background-color: #f3e5f5;
+            /* Warna latar belakang kartu */
+            border: 1px solid #e1bee7;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
+            margin-bottom: 15px;
+            /* Jarak antar kartu di kolom yang sama */
+        }
+
+        /* Header di dalam kartu */
+        .cppt-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #ce93d8;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .cppt-card-header .info .status {
+            font-weight: bold;
+            color: #4a148c;
+            font-size: 0.9em;
+        }
+
+        .cppt-card-header .info .title {
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .cppt-card-header .info .author {
+            color: #d81b60;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .cppt-card-actions i {
+            margin-left: 10px;
+            font-size: 18px;
+            color: #7b1fa2;
+            cursor: pointer;
+        }
+
+        /* Bagian S-O-A-P-E-I di dalam kartu (tidak berubah) */
+        .cppt-card-body .soap-section {
+            margin-bottom: 15px;
+        }
+
+        .cppt-card-body .soap-label {
+            font-weight: bold;
+            color: #6a1b9a;
+            text-decoration: underline;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .cppt-card-body .soap-content {
+            color: #444;
+            font-size: 0.95em;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
     </style>
 
 @endsection
