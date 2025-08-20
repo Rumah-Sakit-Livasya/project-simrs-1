@@ -4,14 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\FarmasiResepItems;
 use App\Models\FarmasiReturResep;
+use App\Models\FarmasiReturResepItems;
 use App\Models\SIMRS\Patient;
+use App\Models\StoredBarangFarmasi;
+use App\Models\User;
 use App\Models\WarehouseMasterGudang;
+use App\Services\CreateStockArguments;
+use App\Services\GoodsStockService;
+use App\Services\GoodsType;
+use App\Services\IncreaseDecreaseStockArguments;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class FarmasiReturResepController extends Controller
 {
+    protected GoodsStockService $goodsStockService;
+
+    public function __construct(GoodsStockService $goodsStockService)
+    {
+        $this->goodsStockService = $goodsStockService;
+        $this->goodsStockService->controller = $this::class;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -56,12 +71,14 @@ class FarmasiReturResepController extends Controller
     {
         $date = Carbon::now();
         $year = $date->format('y');
+        $month = $date->format('m');
 
         $count = FarmasiReturResep::whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return "RF" . $year . "-" . $count;
+        return "RF" . $year . $month . $count;
     }
 
     /**
@@ -69,7 +86,7 @@ class FarmasiReturResepController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
 
         $data = $request->validate([
             "user_id" => "required|exists:users,id",
@@ -87,12 +104,56 @@ class FarmasiReturResepController extends Controller
         DB::beginTransaction();
 
         try {
-            FarmasiReturResep::create([
+            $user = User::findOrFail($data["user_id"]);
+            $patient = Patient::findOrFail($data["patient_id"]);
+            $warehouse = WarehouseMasterGudang::findOrFail($data["gudang_id"]);
+
+            $rr = FarmasiReturResep::create([
                 "tanggal_retur" => $data["tanggal_retur"],
                 "patient_id" => $data["patient_id"],
                 "gudang_id" => $data["gudang_id"],
-
+                "kode_retur" => $this->generate_rf_code(),
+                "keterangan" => $data["keterangan"],
+                "total" => $data["nominal"]
             ]);
+
+            foreach ($data["item_id"] as $key => $id) {
+                $item = FarmasiResepItems::findOrFail($id);
+                $item->update([
+                    "returned_qty" => $item->returned_qty + $data["qty"][$key],
+                ]);
+
+                if ($data["gudang_id"] != $item->stored->gudang_id) {
+                    // different warehouse than where the item was taken
+                    // check if there's any StoredBarangFarmasi with pbi_id == $item->stored->pbi_id
+                    // and gudang_id == $data["gudang_id"]
+                    $stored = StoredBarangFarmasi::where([
+                        "pbi_id" => $item->stored->pbi_id,
+                        "gudang_id" => $data["gudang_id"],
+                    ])->first();
+
+                    if ($stored) {
+                        // update stored
+                        $args = new  IncreaseDecreaseStockArguments($user, $rr, $stored, $data["qty"][$key], "RETUR RESEP PS: " . $patient->name);
+                        $this->goodsStockService->increaseStock($args);
+                    } else {
+                        // create new stored
+                        $args = new CreateStockArguments($user, $rr, GoodsType::Pharmacy, $warehouse, $item->stored->pbi, "RETUR RESEP PS: " . $patient->name, $data["qty"][$key]);
+                        $this->goodsStockService->createStock($args);
+                    }
+                } else {
+                    // same warehouse
+                    $args = new  IncreaseDecreaseStockArguments($user, $rr, $item->stored, $data["qty"][$key], "RETUR RESEP PS: " . $patient->name);
+                    $this->goodsStockService->increaseStock($args);
+                }
+
+                FarmasiReturResepItems::create([
+                    "retur_id" => $rr->id,
+                    "ri_id" => $id,
+                    "qty" => $data["qty"][$key],
+                    "subtotal" => $data["subtotal"][$key]
+                ]);
+            }
 
             DB::commit();
             return back()->with('success', "Data berhasil disimpan!");
