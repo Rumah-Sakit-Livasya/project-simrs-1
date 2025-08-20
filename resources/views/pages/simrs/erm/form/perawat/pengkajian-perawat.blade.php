@@ -61,7 +61,7 @@
                                 <label class="text-primary" for="pr">Nadi (PR)</label>
                                 <div class="input-group">
                                     <div class="input-group">
-                                        <input id="pr" type="text" name="pr" class="form-control"
+                                        <input id="pr" type="number" name="pr" class="form-control"
                                             value="{{ $pengkajian?->pr }}">
                                         <div class="input-group-append">
                                             <span class="input-group-text">x/menit</span>
@@ -74,7 +74,7 @@
                             <div class="form-group">
                                 <label for="rr" class="text-primary">Respirasi (RR)</label>
                                 <div class="input-group">
-                                    <input class="form-control numeric" id="rr" name="rr" type="text"
+                                    <input class="form-control numeric" id="rr" name="rr" type="number"
                                         value="{{ $pengkajian?->rr }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">x/menit</span>
@@ -86,7 +86,7 @@
                             <div class="form-group">
                                 <label for="bp" class="text-primary">Tensi (BP)</label>
                                 <div class="input-group">
-                                    <input class="form-control numeric" id="bp" name="bp" type="text"
+                                    <input class="form-control numeric" id="bp" name="bp" type="number"
                                         value="{{ $pengkajian?->bp }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">mmHg</span>
@@ -98,7 +98,7 @@
                             <div class="form-group">
                                 <label for="temperatur" class="text-primary">Suhu (T)</label>
                                 <div class="input-group">
-                                    <input class="form-control numeric" id="temperatur" name="temperatur" type="text"
+                                    <input class="form-control numeric" id="temperatur" name="temperatur" type="number"
                                         value="{{ $pengkajian?->temperatur }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">C°</span>
@@ -111,7 +111,7 @@
                                 <label for="height" class="text-primary">Tinggi Badan</label>
                                 <div class="input-group">
                                     <input class="form-control numeric calc-bmi" id="body_height" name="body_height"
-                                        type="text" value="{{ $pengkajian?->body_height }}">
+                                        type="number" value="{{ $pengkajian?->body_height }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">Cm</span>
                                     </div>
@@ -123,7 +123,7 @@
                                 <label for="weight" class="text-primary">Berat Badan</label>
                                 <div class="input-group">
                                     <input class="form-control numeric calc-bmi" id="body_weight" name="body_weight"
-                                        type="text" value="{{ $pengkajian?->body_weight }}">
+                                        type="number" value="{{ $pengkajian?->body_weight }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">Kg</span>
                                     </div>
@@ -135,7 +135,7 @@
                                 <label for="bmi" class="text-primary">Index Massa Tubuh</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="bmi" name="bmi"
-                                        readonly="readonly" type="text" value="{{ $pengkajian?->bmi }}">
+                                        readonly="readonly" type="number" value="{{ $pengkajian?->bmi }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">Kg/m²</span>
                                     </div>
@@ -158,7 +158,7 @@
                             <div class="form-group">
                                 <label for="sp02" class="text-primary">SP 02</label>
                                 <div class="input-group">
-                                    <input class="form-control" id="sp02" name="sp02" type="text"
+                                    <input class="form-control" id="sp02" name="sp02" type="number"
                                         value="{{ $pengkajian?->sp02 }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">%</span>
@@ -171,7 +171,7 @@
                                 <label for="lingkar_kepala" class="text-primary">Lingkar
                                     Kepala</label>
                                 <div class="input-group">
-                                    <input class="form-control" id="lingkar_kepala" name="lingkar_kepala" type="text"
+                                    <input class="form-control" id="lingkar_kepala" name="lingkar_kepala" type="number"
                                         value="{{ $pengkajian?->lingkar_kepala }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">Cm</span>
@@ -979,7 +979,6 @@
                         </table>
                     </div>
 
-                    {{-- Contoh pemanggilan yang sudah diperbaiki --}}
                     @include('pages.simrs.erm.partials.signature-field', [
                         'judul' => 'Perawat,',
                         'pic' => auth()->user()->employee->fullname,
@@ -1033,9 +1032,6 @@
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
             });
-            // $('#doctor_id').select2({
-            //     placeholder: 'Pilih Dokter',
-            // });
 
             if (pengkajian) {
                 $('#diagnosa-keperawatan').val(pengkajian.diagnosa_keperawatan).select2();

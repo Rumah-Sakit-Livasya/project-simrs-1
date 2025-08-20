@@ -1,6 +1,6 @@
 @props([
     'judul',
-    'prefix', // <-- TETAP: Untuk ID unik, mis: "perawat_pemeriksa"
+    'prefix', // <-- ID unik untuk elemen HTML
     'pic' => '',
     'role' => '',
     'signature_model' => null,
@@ -26,21 +26,20 @@
                 style="border-radius: 11px; border: 1px solid #ccc; max-height: 200px; max-width: 60%; {{ $previewStyle }}">
         </div>
 
-        {{-- Input ini akan disinkronkan oleh JavaScript sebelum submit --}}
-        {{-- DIUBAH: Menggunakan name_prefix untuk membuat array --}}
-        <input type="hidden" name="signature_image" id="signature_image_{{ $prefix }}">
+        {{-- PERUBAHAN DI SINI: Atribut 'name' diubah menjadi format array --}}
+        <input type="hidden" name="signature_data[signature_image]" id="signature_image_{{ $prefix }}">
 
         <div class="mt-5 d-flex flex-column align-items-center">
-            {{-- DIUBAH: Menggunakan name_prefix untuk membuat array --}}
-            <input type="text" name="pic" id="pic_{{ $prefix }}" value="{{ $picName }}"
+            {{-- PERUBAHAN DI SINI: Atribut 'name' diubah menjadi format array --}}
+            <input type="text" name="signature_data[pic]" id="pic_{{ $prefix }}" value="{{ $picName }}"
                 style="border-top: none; border-left: none; border-right: none; border-bottom: 1px solid #ccc; width: 200px; text-align: center;"
                 placeholder="Nama Jelas">
 
-            {{-- DIUBAH: Menggunakan name_prefix untuk membuat array --}}
-            <input type="hidden" name="role" id="role_{{ $prefix }}" value="{{ $roleName }}">
+            {{-- PERUBAHAN DI SINI: Atribut 'name' diubah menjadi format array --}}
+            <input type="hidden" name="signature_data[role]" id="role_{{ $prefix }}" value="{{ $roleName }}">
 
             <div id="tombol_{{ $prefix }}" class="mt-2">
-                {{-- DIUBAH: Memanggil fungsi yang sama dengan 'signature-many' --}}
+                {{-- Bagian ini sudah benar, memanggil fungsi JavaScript yang terpadu --}}
                 <a class="badge badge-primary text-white ttd" onclick="openSignaturePadMany('{{ $prefix }}')"
                     id="ttd_pegawai_{{ $prefix }}">Tanda tangan</a>
             </div>

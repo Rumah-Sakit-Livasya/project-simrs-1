@@ -227,96 +227,10 @@
         </div>
     </main>
     @include('pages.simrs.erm.partials.ttd-many')
-    @include('pages.simrs.erm.partials.ttd')
 @endsection
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
-        // Tambahkan fungsi clearCanvas
-
-        function clearCanvas() {
-            // Untuk canvas utama (id="canvas")
-            var canvas = document.getElementById('canvas');
-            if (canvas && canvas.getContext) {
-                var ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
-            // Untuk canvas many (id="canvas-many")
-            var canvasMany = document.getElementById('canvas-many');
-            if (canvasMany && canvasMany.getContext) {
-                var ctxMany = canvasMany.getContext('2d');
-                ctxMany.clearRect(0, 0, canvasMany.width, canvasMany.height);
-            }
-            // Reset status hasDrawn jika ada
-            if (typeof hasDrawn !== 'undefined') {
-                hasDrawn = false;
-            }
-        }
-
-        function openSignaturePad(index, target) {
-            $('#btn_save_ttd').attr('data-target', target);
-            clearCanvas();
-            $('#signatureModal').modal('show');
-        }
-
-        function saveSignature() {
-            if (!hasDrawn) {
-                alert("Silakan buat tanda tangan terlebih dahulu.");
-                return;
-            }
-
-            const dataURL = canvas.toDataURL('image/png');
-            const target = $('#btn_save_ttd').attr('data-target');
-
-            // Simpan base64 ke input hidden
-            $('#signature_image').val(dataURL);
-
-            // Tampilkan preview image
-            $('#signature_preview').attr('src', dataURL).show();
-
-            // Tutup modal dan bersihkan canvas
-            $('#signatureModal').modal('hide');
-            clearCanvas();
-        }
-
-        let currentSignatureIndex = null;
-
-        function openSignaturePadMany(index) {
-            currentSignatureIndex = index;
-
-            // Tampilkan modal
-            $('#signatureModalMany').data('target-index', index).modal('show');
-
-            // Atur data-index di canvas
-            const canvasMany = document.getElementById('canvas-many');
-            if (canvasMany) {
-                canvasMany.setAttribute('data-index', index);
-                clearCanvas(); // bersihkan canvas sebelum mulai tanda tangan baru
-            }
-        }
-
-        function saveSignatureMany() {
-            if (!hasDrawn) {
-                alert("Silakan buat tanda tangan terlebih dahulu.");
-                return;
-            }
-
-            const dataURL = canvas.toDataURL('image/png');
-
-            // Masukkan ke input sesuai index
-            document.querySelectorAll('input[name="signature_image[]"]')[currentSignatureIndex].value = dataURL;
-
-            // Tampilkan preview (jika kamu pakai ID dinamis, sesuaikan)
-            const previews = document.querySelectorAll('#signature_preview');
-            if (previews[currentSignatureIndex]) {
-                previews[currentSignatureIndex].src = dataURL;
-                previews[currentSignatureIndex].style.display = 'block';
-            }
-
-            $('#signatureModalMany').modal('hide');
-            clearCanvas();
-        }
-
         $(document).ready(function() {
             const pengkajian = @json($pengkajian ?? []);
 
@@ -419,42 +333,10 @@
                     }
                 });
             });
-
-
-            // if ($('#filter_pasien #departement_id').val() != null || $('#filter_pasien #doctor_id').val() !=
-            //     null) {
-            //     $.ajax({
-            //         type: "POST",
-            //         data: {
-            //             _token: "{{ csrf_token() }}", // Tambahkan token CSRF
-            //             route: window.location.href,
-            //             departement_id: $('#filter_pasien #departement_id').val(),
-            //             doctor_id: $('#filter_pasien #doctor_id').val()
-            //         },
-            //         dataType: "json",
-            //         beforeSend: function() {
-            //             $('#daftar-pasien .col-12').html(
-            //                 '<p class="text-center mt-3">Sedang memuat...</p>'); // Tambahkan loading
-            //         },
-            //         success: function(response) {
-
-
-            //             if (response.success) {
-            //                 $('#daftar-pasien .col-12').html(response.html);
-            //             } else {
-            //                 $('#daftar-pasien .col-12').html(
-            //                     '<p>Tidak ada data pasien.</p>');
-            //             }
-            //         },
-            //         error: function(xhr, status, error) {
-            //             console.log(xhr.responseText);
-            //             alert("Terjadi kesalahan, silakan coba lagi.");
-            //         }
-            //     });
-            // }
         });
     </script>
     @yield('signature')
     @yield('plugin-erm')
     @include('pages.simrs.poliklinik.partials.action-js.pengkajian-perawat')
+    @include('pages.simrs.erm.form.ttd.signature')
 @endsection
