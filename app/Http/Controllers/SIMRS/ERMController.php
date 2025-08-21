@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\HospitalInfectionSurveillance;
 use App\Models\SIMRS\AssesmentKeperawatanGadar;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Departement;
@@ -33,6 +34,8 @@ use App\Models\WarehouseMasterGudang;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
@@ -232,6 +235,60 @@ class ERMController extends Controller
         return view('pages.simrs.erm.index', compact('departements', 'pengkajian', 'menu', 'jadwal_dokter', 'registration', 'registrations', 'path'));
     }
 
+    // app/Http/Controllers/SIMRS/ERMController.php
+    public function storeSurveilansInfeksi(Request $request)
+    {
+        // Validasi dasar (bisa dibuat lebih detail)
+        $validatedData = $request->validate([
+            'registration_id' => 'required|exists:registrations,id',
+            // ... tambahkan validasi lain jika perlu
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $dataToStore = $request->except(['_token', 'signatures']);
+            $dataToStore['user_id'] = Auth::id();
+
+            // Gunakan updateOrCreate untuk menyimpan data utama
+            $surveilans = HospitalInfectionSurveillance::updateOrCreate(
+                ['registration_id' => $request->registration_id],
+                $dataToStore
+            );
+
+            // Logika untuk menyimpan tanda tangan (menggunakan pola yang sudah ada)
+            if ($request->has('signatures')) {
+                foreach ($request->signatures as $role => $signatureData) {
+                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                        $oldPath = optional($surveilans->signatures()->where('role', $role)->first())->signature;
+                        // Simpan file signature base64 ke storage/app/public/signatures
+                        $image = $signatureData['signature_image'];
+                        $image = preg_replace('/^data:image\/\w+;base64,/', '', $image);
+                        $image = str_replace(' ', '+', $image);
+                        $imageName = "signatures/surveilans_{$surveilans->id}_{$role}_" . uniqid() . '.png';
+                        Storage::disk('public')->put($imageName, base64_decode($image));
+                        $newPath = $imageName;
+
+                        $surveilans->signatures()->updateOrCreate(
+                            ['role' => $role],
+                            ['pic' => $signatureData['pic'], 'signature' => $newPath]
+                        );
+
+                        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                            Storage::disk('public')->delete($oldPath);
+                        }
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json(['success' => 'Data Surveilans Infeksi berhasil disimpan!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan Surveilans Infeksi: ' . $e->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
+        }
+    }
+
 
     public static function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path)
     {
@@ -353,6 +410,12 @@ class ERMController extends Controller
                 // datanya akan dimuat oleh Datatables. Kita hanya perlu mengirim
                 // variabel $registration yang penting untuk view.
                 return view('pages.simrs.erm.form.perawat.infusion-monitor', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+
+            case 'surveilans_infeksi':
+                // Gunakan firstOrNew untuk menangani form baru dan edit
+                $pengkajian = HospitalInfectionSurveillance::firstOrNew(['registration_id' => $registration->id]);
+                return view('pages.simrs.erm.form.perawat.surveilans-infeksi', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
 
             default:
                 return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'path'));

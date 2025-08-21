@@ -227,6 +227,9 @@
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'infusion_monitor']) }}">Pencatatan
                         Infus</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'surveilans_infeksi']) }}">Surveilans
+                        Insfeksi Rumah Sakik</a>
 
                 </div>
             </li>
