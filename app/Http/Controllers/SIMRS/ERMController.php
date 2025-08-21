@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Models\DischargePlanning;
 use App\Models\Employee;
 use App\Models\HospitalInfectionSurveillance;
 use App\Models\SIMRS\AssesmentKeperawatanGadar;
@@ -289,6 +290,40 @@ class ERMController extends Controller
         }
     }
 
+    // app/Http/Controllers/SIMRS/ERMController.php
+    public function storeDischargePlanning(Request $request)
+    {
+        $validatedData = $request->validate([
+            'registration_id' => 'required|exists:registrations,id',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Gabungkan tanggal dan jam penjelasan menjadi satu timestamp
+            $waktuPenjelasan = null;
+            if ($request->filled('tgl_penjelasan') && $request->filled('jam_penjelasan')) {
+                $waktuPenjelasan = $request->tgl_penjelasan . ' ' . $request->jam_penjelasan;
+            }
+
+            // Siapkan data untuk disimpan
+            $dataToStore = $request->except(['_token', 'tgl_penjelasan', 'jam_penjelasan']);
+            $dataToStore['user_id'] = Auth::id();
+            $dataToStore['waktu_penjelasan'] = $waktuPenjelasan;
+
+            $planning = DischargePlanning::updateOrCreate(
+                ['registration_id' => $request->registration_id],
+                $dataToStore
+            );
+
+            DB::commit();
+            return response()->json(['success' => 'Data Rencana Pulang berhasil disimpan!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan Rencana Pulang: ' . $e->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
+        }
+    }
+
 
     public static function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path)
     {
@@ -415,6 +450,11 @@ class ERMController extends Controller
                 // Gunakan firstOrNew untuk menangani form baru dan edit
                 $pengkajian = HospitalInfectionSurveillance::firstOrNew(['registration_id' => $registration->id]);
                 return view('pages.simrs.erm.form.perawat.surveilans-infeksi', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
+            case 'discharge_planning':
+                $pengkajian = DischargePlanning::firstOrNew(['registration_id' => $registration->id]);
+                return view('pages.simrs.erm.form.perawat.discharge-planning', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
 
 
             default:

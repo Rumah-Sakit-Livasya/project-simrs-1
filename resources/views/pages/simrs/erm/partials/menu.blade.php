@@ -231,6 +231,10 @@
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'surveilans_infeksi']) }}">Surveilans
                         Insfeksi Rumah Sakik</a>
 
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'discharge_planning']) }}">Discharge
+                        Planning</a>
+
                 </div>
             </li>
             <li class="nav-item dropdown">
