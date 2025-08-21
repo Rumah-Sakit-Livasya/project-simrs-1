@@ -882,6 +882,7 @@ Route::group(['middleware' => ['auth']], function () {
             Route::prefix("retur-resep")->group(function(){
                 Route::get("/", [FarmasiReturResepController::class, 'index'])->name('farmasi.retur-resep');
                 Route::get("/create", [FarmasiReturResepController::class, 'create'])->name('farmasi.retur-resep.create');
+                Route::get("/print/{id}", [FarmasiReturResepController::class, 'print'])->name('farmasi.retur-resep.print');
             });
 
 

@@ -70,8 +70,9 @@ class FarmasiReturResepController extends Controller
             'returs' => $returs
         ]);
     }
-    
-    public function getRegistrations(int $patient_id){
+
+    public function getRegistrations(int $patient_id)
+    {
         $registrations = Registration::with(['patient', 'patient.bed', 'patient.bed.room', 'kelas_rawat'])->where("patient_id", $patient_id)->get()->all();
         return response()->json($registrations);
     }
@@ -203,6 +204,13 @@ class FarmasiReturResepController extends Controller
             DB::rollBack();
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function print(int $id)
+    {
+        $retur = FarmasiReturResep::findOrFail($id);
+
+        return view("pages.simrs.farmasi.retur-resep.partials.print-rr", compact('retur'));
     }
 
     /**
