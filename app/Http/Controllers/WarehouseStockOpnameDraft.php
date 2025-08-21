@@ -220,7 +220,8 @@ class WarehouseStockOpnameDraft extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = WarehouseStockOpnameItems::whereMonth('created_at', now()->month)
+        $count = WarehouseStockOpnameItems::withTrashed()
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);

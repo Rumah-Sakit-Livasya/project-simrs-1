@@ -88,7 +88,7 @@ class OrderLaboratoriumController extends Controller
         $month = $date->format('m');
         $day = $date->format('d');
 
-        $count = OrderLaboratorium::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = OrderLaboratorium::withTrashed()->whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
         return 'LAB' . $year . $month . $day . $count;
@@ -101,7 +101,7 @@ class OrderLaboratoriumController extends Controller
         $month = $date->format('m');
         $day = $date->format('d');
 
-        $count = RegistrationOTC::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = RegistrationOTC::withTrashed()->whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
         return "OTC" . $year . $month . $day . $count;

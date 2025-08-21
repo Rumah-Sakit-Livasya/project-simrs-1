@@ -152,8 +152,8 @@ class WarehousePurchaseRequestNonPharmacy extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = ProcurementPurchaseRequestNonPharmacy::
-            whereMonth('created_at', now()->month)
+        $count = ProcurementPurchaseRequestNonPharmacy::withTrashed()
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);

@@ -290,7 +290,8 @@ class WarehouseStockAdjustmentController extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = WarehouseStockAdjustment::whereMonth('created_at', now()->month)
+        $count = WarehouseStockAdjustment::withTrashed()
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
@@ -345,7 +346,7 @@ class WarehouseStockAdjustmentController extends Controller
 
                 $delta = $qty - $stored_barang->qty;
 
-                if($delta == 0) continue;
+                if ($delta == 0) continue;
 
                 WarehouseStockAdjustmentItems::create([
                     "sa_id" => $sa->id,

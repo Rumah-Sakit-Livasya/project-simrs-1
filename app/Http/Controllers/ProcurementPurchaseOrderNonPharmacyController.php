@@ -106,8 +106,8 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = ProcurementPurchaseOrderNonPharmacy::
-            whereMonth('created_at', now()->month)
+        $count = ProcurementPurchaseOrderNonPharmacy::withTrashed()
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
@@ -189,7 +189,6 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
             DB::rollBack();
             return back()->with('error', $e->getMessage());
         }
-
     }
 
     public function print($id)
@@ -335,7 +334,7 @@ class ProcurementPurchaseOrderNonPharmacyController extends Controller
 
                 $poi->save();
             }
-            
+
             $po->save();
             DB::commit();
             return back()->with('success', 'Data berhasil disimpan');

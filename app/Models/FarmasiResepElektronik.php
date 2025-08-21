@@ -5,9 +5,12 @@ namespace App\Models;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FarmasiResepElektronik extends Model
 {
+
+    use SoftDeletes;
 
     protected $guarded = ['id'];
 

@@ -152,8 +152,8 @@ class ProcurementPurchaseRequestPharmacyController extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = ProcurementPurchaseRequestPharmacy::
-            whereMonth('created_at', now()->month)
+        $count = ProcurementPurchaseRequestPharmacy::withTrashed()
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);

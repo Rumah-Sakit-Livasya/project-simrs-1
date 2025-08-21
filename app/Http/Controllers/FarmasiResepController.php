@@ -335,7 +335,7 @@ class FarmasiResepController extends Controller
         $month = $date->format('m');
         $day = $date->format('d');
 
-        $count = RegistrationOTC::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = RegistrationOTC::withTrashed()->whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
         return "OTC" . $year . $month . $day . $count;
@@ -348,7 +348,7 @@ class FarmasiResepController extends Controller
         $month = $date->format('m');
         $day = $date->format('d');
 
-        $count = FarmasiResep::whereDate('created_at', $date->toDateString())->where("tipe_pasien", $tipe_pasien)->count() + 1;
+        $count = FarmasiResep::withTrashed()->whereDate('created_at', $date->toDateString())->where("tipe_pasien", $tipe_pasien)->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
         $kode = "FRJ";

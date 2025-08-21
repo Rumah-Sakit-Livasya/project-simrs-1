@@ -113,7 +113,8 @@ class FarmasiReturResepController extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = FarmasiReturResep::whereYear('created_at', now()->year)
+        $count = FarmasiReturResep::withTrashed()
+            ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
@@ -240,8 +241,40 @@ class FarmasiReturResepController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(FarmasiReturResep $farmasiReturResep)
+    public function destroy(FarmasiReturResep $farmasiReturResep, int $id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $rr = $farmasiReturResep::findOrFail($id);
+            $user = User::findorFail(auth()->user()->id);
+            $rr->delete();
+
+            foreach ($rr->items as $item) {
+                $item->ri->update([
+                    "returned_qty" => $item->ri->returned_qty - $item->qty
+                ]);
+
+                $args = new IncreaseDecreaseStockArguments($user, $rr, $item->ri->stored, $item->qty, "BATAL RETUR RESEP PS: " . $rr->patient->name);
+                $this->goodsStockService->decreaseStock($args);
+
+                $item->delete();
+            }
+
+            DB::commit();
+            // return JSON 200 ok
+            return response()->json([
+                'message' => 'Data berhasil dihapus',
+                'success' => true,
+                'data' => $rr,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // return error in JSON
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menghapus data',
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

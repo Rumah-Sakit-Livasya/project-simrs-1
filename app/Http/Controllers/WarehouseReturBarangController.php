@@ -114,7 +114,8 @@ class WarehouseReturBarangController extends Controller
         $date = Carbon::now();
         $year = $date->format('y');
 
-        $count = WarehouseReturBarang::whereYear('created_at', now()->year)
+        $count = WarehouseReturBarang::withTrashed()
+            ->whereYear('created_at', now()->year)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
@@ -179,10 +180,10 @@ class WarehouseReturBarangController extends Controller
                     "harga" => $validatedData2["item_harga"][$key],
                     "subtotal" => $validatedData2["item_subtotal"][$key],
                     $validatedData2["item_type"][$key] => $id
-                ]);                
+                ]);
 
                 // $si_item->update([
-                    // "qty" => $si_item->qty - $validatedData2["item_qty"][$key]
+                // "qty" => $si_item->qty - $validatedData2["item_qty"][$key]
                 // ]);
                 // $si_item->save();
 
@@ -228,7 +229,7 @@ class WarehouseReturBarangController extends Controller
                 $user = request()->user();
                 $args = new IncreaseDecreaseStockArguments($user, $rb, $rbi->stored, $rbi->qty);
                 $this->goodsStockService->increaseStock($args);
-                
+
                 $rbi->delete();
             }
             $rb->delete();

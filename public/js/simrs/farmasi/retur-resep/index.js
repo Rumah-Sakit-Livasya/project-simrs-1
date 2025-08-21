@@ -87,7 +87,7 @@ class IndexHandler {
         if (!id) return;
 
         Swal.fire({
-            title: 'Hapus Order Resep?',
+            title: 'Hapus Retur Resep?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
