@@ -456,4 +456,5 @@
     @yield('plugin-erm')
     @include('pages.simrs.poliklinik.partials.action-js.pengkajian-perawat')
     @include('pages.simrs.erm.form.ttd.signature')
+    @stack('scripts')
 @endsection

@@ -801,8 +801,6 @@ Route::group(['middleware' => ['auth']], function () {
             // Tambahkan route ini di dalam group route operasi
             Route::delete('/prosedur/{prosedurId}', [OperasiController::class, 'deleteProsedur'])->name('ok.prosedur.delete');
 
-
-
             Route::prefix('reports')->group(function () {
                 Route::get('order-pasien', [IGDController::class, 'orderPasien'])
                     ->name('ok.reports.order-pasien');

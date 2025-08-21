@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\DiagnosisCategoryController;
 use App\Http\Controllers\API\EmployeeController;
+use App\Http\Controllers\API\InfusionMonitorController;
 use App\Http\Controllers\API\InterventionController;
 use App\Http\Controllers\API\NursingDiagnosisController;
 use App\Http\Controllers\API\SbarController;
@@ -541,6 +542,14 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::prefix('rujuk-antar-rs')->group(function () {
             Route::post('/', [RujukAntarRSController::class, 'store'])->name('erm.rujuk-antar-rs.store');
             Route::get('/{id}', [RujukAntarRSController::class, 'getData'])->name('erm.rujuk-antar-rs.store');
+        });
+
+        Route::prefix('infusion-monitors')->name('api.infusion.')->group(function () {
+            Route::get('/{registration}', [InfusionMonitorController::class, 'index'])->name('index');
+            Route::post('/', [InfusionMonitorController::class, 'store'])->name('store');
+            Route::get('/{monitor}/edit', [InfusionMonitorController::class, 'edit'])->name('edit');
+            Route::put('/{monitor}/update', [InfusionMonitorController::class, 'update'])->name('update');
+            Route::delete('/{monitor}', [InfusionMonitorController::class, 'destroy'])->name('destroy');
         });
     });
     Route::prefix('poliklinik')->group(function () {

@@ -206,6 +206,16 @@
                     aria-haspopup="true" aria-expanded="false">Perawat</a>
                 <div class="dropdown-menu">
                     <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'ews_anak']) }}"
+                        role="tab">Early Warning Scoring System (Anak)</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'ews_dewasa']) }}"
+                        role="tab">Early Warning Scoring System (Dewasa)</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'ews_obstetri']) }}"
+                        role="tab">Early Warning Scoring System (Obstetri)</a>
+
+                    <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_perawat']) }}"
                         role="tab">Pengkajian</a>
                     <a class="dropdown-item"
@@ -213,6 +223,11 @@
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'transfer_pasien_perawat']) }}">Transfer
                         Pasien Antar Ruangan</a>
+
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'infusion_monitor']) }}">Pencatatan
+                        Infus</a>
+
                 </div>
             </li>
             <li class="nav-item dropdown">

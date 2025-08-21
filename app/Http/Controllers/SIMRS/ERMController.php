@@ -348,6 +348,12 @@ class ERMController extends Controller
                 $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
                 return view('pages.simrs.erm.form.perawat.resep-harian', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
+            case 'infusion_monitor':
+                // Di sini kita tidak perlu mengambil data awal ($pengkajian) karena
+                // datanya akan dimuat oleh Datatables. Kita hanya perlu mengirim
+                // variabel $registration yang penting untuk view.
+                return view('pages.simrs.erm.form.perawat.infusion-monitor', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+
             default:
                 return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'path'));
         }
