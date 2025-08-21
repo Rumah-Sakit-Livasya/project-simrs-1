@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\FarmasiResepHarian;
 use App\Models\SIMRS\AssesmentKeperawatanGadar;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Departement;
@@ -352,7 +353,8 @@ class ERMController extends Controller
                 if ($registration->registration_type == "rawat-inap") $default_column = "ranap_default";
                 $default_apotek = WarehouseMasterGudang::select('id')->where($default_column, 1)->first();
                 $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
-                return view('pages.simrs.erm.form.perawat.resep-harian', compact('gudangs', 'barangs', 'default_apotek', 'pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                $reseps = FarmasiResepHarian::with(["items", "items.barang","doctor", "doctor.employee", "gudang"])->where("registration_id", $registration->id)->get();
+                return view('pages.simrs.erm.form.perawat.resep-harian', compact('reseps', 'gudangs', 'barangs', 'default_apotek', 'pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             default:
                 return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'path'));

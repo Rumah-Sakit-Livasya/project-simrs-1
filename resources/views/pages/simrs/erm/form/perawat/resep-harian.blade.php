@@ -16,6 +16,15 @@
                 height: 1.5rem;
                 margin: 0.5rem;
             }
+
+            .display-none {
+                display: none;
+            }
+
+            .popover {
+                max-width: 100%;
+                max-height:
+            }
         </style>
 
         <div class="tab-content p-3">
@@ -46,11 +55,32 @@
                                             <th>Nama Dokter</th>
                                             <th>Apotek</th>
                                             <th>User Input</th>
-                                            <th>Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {{-- TODO --}}
+                                        @foreach ($reseps as $resep)
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td> <button type="button" class="btn btn-sm btn-primary"
+                                                        data-bs-placement="top" data-bs-toggle="popover"
+                                                        data-bs-title="Detail Resep Harian" data-bs-html="true"
+                                                        data-bs-content-id="popover-content-{{ $resep->id }}">
+                                                        <i class="fas fa-list text-light" style="transform: scale(1.8)"></i>
+                                                    </button>
+                                                    <div class="display-none" id="popover-content-{{ $resep->id }}">
+                                                        @include(
+                                                            'pages.simrs.farmasi.resep-harian.partials.rh-detail',
+                                                            ['resep' => $resep]
+                                                        )
+                                                    </div>
+                                                </td>
+                                                <td>{{ tgl_waktu($resep->created_at) }}</td>
+                                                <td>{{ $resep->kode_resep }}</td>
+                                                <td>{{ $resep->doctor->employee->fullname }}</td>
+                                                <td>{{ $resep->gudang->nama }}</td>
+                                                <td>{{ $resep->user->name }}</td>
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                     <tfoot>
                                         <tr>
@@ -61,7 +91,6 @@
                                             <th>Nama Dokter</th>
                                             <th>Apotek</th>
                                             <th>User Input</th>
-                                            <th>Aksi</th>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -196,8 +225,8 @@
 
                                             <div class="row justify-content-end mt-3">
                                                 <div class="col-xl-3">
-                                                    <button type="submit" class="btn btn-primary waves-effect waves-themed"
-                                                        id="simpan-btn">
+                                                    <button type="submit"
+                                                        class="btn btn-primary waves-effect waves-themed" id="simpan-btn">
                                                         <span class="fal fa-save mr-1"></span>
                                                         Simpan Resep Harian
                                                     </button>
@@ -223,6 +252,21 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
     <script src="{{ asset('js/simrs/erm/form/ranap/resep-harian.js') }}?time={{ now() }}"></script>
+
+    <script>
+        const list = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        list.map((el) => {
+            let opts = {
+                animation: true,
+            }
+            if (el.hasAttribute('data-bs-content-id')) {
+                opts.content = document.getElementById(el.getAttribute('data-bs-content-id')).innerHTML;
+                opts.html = true;
+                opts.sanitize = false;
+            }
+            new bootstrap.Popover(el, opts);
+        })
+    </script>
 
     <script>
         /**

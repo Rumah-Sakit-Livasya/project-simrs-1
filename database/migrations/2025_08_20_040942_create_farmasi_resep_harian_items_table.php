@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('signa')->nullable();
             $table->integer('qty_perhari');
             $table->integer('qty_hari');
-            $table->integer('qty_diberi');
+            $table->integer('qty_diberi')->default(0);
         });
     }
 
