@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\SIMRS\Doctor;
+use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -11,6 +12,10 @@ class FarmasiResepHarian extends Model
     use SoftDeletes;
 
     protected $guarded = ['id'];
+    
+    public function registration(){
+        return $this->belongsTo(Registration::class, "registration_id");
+    }
 
     public function items(){
         return $this->hasMany(FarmasiResepHarianItems::class, "rh_id");

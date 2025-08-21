@@ -109,6 +109,7 @@
                                 <input type="hidden" name="registration_id" id="registration-id" value="">
                                 <input type="hidden" name="dokter_id" id="dokter-id" value="">
                                 <input type="hidden" name="re_id" id="re-id" value="">
+                                <input type="hidden" name="rh_id" id="rh-id" value="">
                                 <input type="hidden" name="telaah_resep" id="telaah-resep" value="">
 
                                 <div class="row justify-content-center">
@@ -527,6 +528,7 @@
                                             <tr>
                                                 <td class="text-right" colspan="11">
                                                     <button type="button" id="update-task-id-6-btn" disabled
+                                                        title="Coming Soon!"
                                                         class="btn btn-primary waves-effect waves-themed">
                                                         <span class="fal fa-check mr-1"></span>
                                                         Update Task Id 6
@@ -538,7 +540,7 @@
                                                         Resep Elektronik
                                                     </button>
 
-                                                    <button type="button" id="resep-harian-btn" disabled
+                                                    <button type="button" id="resep-harian-btn"
                                                         class="btn btn-primary waves-effect waves-themed">
                                                         <span class="fal fa-notes-medical mr-1"></span>
                                                         Resep Harian

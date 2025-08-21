@@ -163,12 +163,18 @@ class UITableUpdater {
         this.refreshTotal();
     }
 
-    /** @param {BarangFarmasi} item */
-    insertIncompleteObat(item, qty, signa, instruksi) {
+    /** 
+     * @param {BarangFarmasi} item
+     * @param {number} qty
+     * @param {string} signa
+     * @param {string} instruksi 
+     * @param {number | null} rhi_id Resep Harian Item id
+     */
+    insertIncompleteObat(item, qty, signa, instruksi = "", rhi_id = null) {
         const key = Math.round(Math.random() * 100000);
         const embalaseCheck = $('#embalase_item');
         const embalaseValue = embalaseCheck.is(':checked') ? 2000 : 0;
-        const html = this.htmlRenderer.getIncompleteObat(item, key, embalaseValue, qty, signa, instruksi);
+        const html = this.htmlRenderer.getIncompleteObat(item, key, embalaseValue, qty, signa, instruksi, rhi_id);
 
         this.$Table.append(html);
         $(`#instruksi${key}`).select2({ tags: true });
@@ -177,10 +183,29 @@ class UITableUpdater {
     }
 
     /**
-     * Updates the recipe table based on existing recipe data.
+     * Updates the recipe table based on existing daily recipe data.
+     * @param {ResepHarian} rh
+     */
+    updateDailyRecipeInfo(rh) {
+        $("#rh-id").val(rh.id);
+        $("#resep-manual").val(rh.resep_manual);
+        if (rh.items) {
+            for (const item of rh.items) {
+                const obat = /** @type {BarangFarmasi} */ (item.barang);
+                if (!obat) {
+                    showErrorAlertNoRefresh("ResepHarianItem object is not complete");
+                    throw new Error("ResepHarianItem object is not complete");
+                }
+                this.insertIncompleteObat(obat, item.qty_perhari, item.signa, "", item.id);
+            }
+        }
+    }
+
+    /**
+     * Updates the recipe table based on existing electronic recipe data.
      * @param {ResepElektronik} re
      */
-    updateRecipeInfo(re) {
+    updateElectronicRecipeInfo(re) {
         $("#re-id").val(re.id);
         $("#resep-manual").val(re.resep_manual);
         if (re.items) {

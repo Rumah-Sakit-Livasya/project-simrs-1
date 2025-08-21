@@ -244,7 +244,7 @@ interface Patient {
     deleted_at: string | null;
     created_at: string;
     updated_at: string;
-    
+
     bed?: Bed
 }
 
@@ -1070,6 +1070,40 @@ interface ResepElektronikItem {
     signa: string;
     instruksi: string;
     billed: number;
+
+    barang?: BarangFarmasi;
+}
+
+interface ResepHarian {
+    id: number;
+    created_at: string; // Timestamp in ISO format
+    updated_at: string; // Timestamp in ISO format
+    deleted_at: string | null; // Assuming this is a timestamp in ISO format for soft deletes
+    user_id: number;
+    registration_id: number;
+    doctor_id: number;
+    gudang_id: number;
+    kode_resep: string;
+    resep_manual: string;
+    selesai: boolean;
+
+    items?: ResepHarianItems[];
+    registration?: Registration;
+    doctor?: Doctor;
+    gudang?: MasterGudang;
+}
+
+interface ResepHarianItems {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    rh_id: number;
+    barang_id: number;
+    signa: string;
+    qty_perhari: number;
+    qty_hari: number;
+    qty_diberi: number;
 
     barang?: BarangFarmasi;
 }

@@ -110,13 +110,18 @@ class UIHTMLRenderer {
      * @param {number} qty Quantity.
      * @param {string} signa
      * @param {string} instruksi
+     * @param {number | null} rhi_id Resep Harian Item id
      */
-    getIncompleteObat(item, key, embalaseValue, qty = 0, signa = "", instruksi = "") {
+    getIncompleteObat(item, key, embalaseValue, qty = 0, signa = "", instruksi = "", rhi_id = null) {
         const UniqueInstruksiOption = /*html*/`
                 <option value="${instruksi}" selected>${instruksi}</option>
         `;
 
         const HasDefault = ["sesudah makan", "sebelum makan", "saat makan"].includes(instruksi.toLowerCase());
+
+        const Rhi_IdInput = /*html*/`
+            <input type="hidden" name="rhi_id[${key}]" value="${rhi_id}">
+        `;
 
         const Instruksi = /*html*/`
             <select name="instruksi[${key}]" id="instruksi${key}">
@@ -139,6 +144,11 @@ class UIHTMLRenderer {
                 title="Obat Tidak Lengkap! Pilih Batch Obat!" onclick="ResepClass.pilihBatch(${key}, ${item.id}, '${item.nama}')"></a>
         `;
 
+        const TombolHapus = /*html*/`
+            <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
+                title="Hapus" onclick="ResepClass.deleteItem(${key})"></a>
+        `;
+
         const restriksiHTML = this._getRestriksiHTML(item);
         const subtotal = item.hna + embalaseValue;
 
@@ -152,6 +162,7 @@ class UIHTMLRenderer {
                 <input type="hidden" name="subtotal[${key}]" value="${subtotal}">
                 <input type="hidden" name="type[${key}]" value="obat">
                 <input type="hidden" name="si_id[${key}]" value="">
+                ${rhi_id != null ? Rhi_IdInput : ''}
 
                 <td class="kode_barang">${item.kode}</td>
                 <td class="nama_barang">${TombolAlertIncomplete}${item.nama}</td>
@@ -166,8 +177,8 @@ class UIHTMLRenderer {
                 <td>${Utils.rp(item.hna)}</td>
                 <td class="embalase">${Utils.rp(embalaseValue)}</td>
                 <td class="subtotal">${Utils.rp(subtotal)}</td>
-                <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                    title="Hapus" onclick="ResepClass.deleteItem(${key})"></a>
+                <td>
+                    ${rhi_id == null ? TombolHapus : ''}
                     ${TombolJamPemberian}
                     ${TombolSigna}
                     ${TombolAlertIncomplete}
