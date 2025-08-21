@@ -230,10 +230,12 @@
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'surveilans_infeksi']) }}">Surveilans
                         Insfeksi Rumah Sakik</a>
-
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'discharge_planning']) }}">Discharge
                         Planning</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'checklist_keperawatan']) }}">Ceklist
+                        Pelaksanaan / Kegiatan Keperawatan</a>
 
                 </div>
             </li>

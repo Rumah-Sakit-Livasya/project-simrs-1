@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DischargePlanning;
 use App\Models\Employee;
 use App\Models\HospitalInfectionSurveillance;
+use App\Models\NursingActivityChecklist;
 use App\Models\SIMRS\AssesmentKeperawatanGadar;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Departement;
@@ -324,6 +325,33 @@ class ERMController extends Controller
         }
     }
 
+    // app/Http/Controllers/SIMRS/ERMController.php
+    public function storeChecklistKeperawatan(Request $request)
+    {
+        $request->validate(['registration_id' => 'required|exists:registrations,id']);
+
+        DB::beginTransaction();
+        try {
+            // Kita hanya perlu menyimpan satu field JSON besar
+            $checklistData = $request->except(['_token', 'registration_id']);
+
+            $checklist = NursingActivityChecklist::updateOrCreate(
+                ['registration_id' => $request->registration_id],
+                [
+                    'user_id' => Auth::id(),
+                    'checklist_data' => $checklistData
+                ]
+            );
+
+            DB::commit();
+            return response()->json(['success' => 'Checklist Kegiatan Keperawatan berhasil disimpan!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan Checklist Keperawatan: ' . $e->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
+        }
+    }
+
 
     public static function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path)
     {
@@ -455,6 +483,9 @@ class ERMController extends Controller
                 $pengkajian = DischargePlanning::firstOrNew(['registration_id' => $registration->id]);
                 return view('pages.simrs.erm.form.perawat.discharge-planning', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
+            case 'checklist_keperawatan':
+                $pengkajian = NursingActivityChecklist::firstOrNew(['registration_id' => $registration->id]);
+                return view('pages.simrs.erm.form.perawat.checklist-keperawatan', compact('registration', 'pengkajian', 'path',  'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
 
             default:

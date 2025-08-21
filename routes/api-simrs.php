@@ -560,6 +560,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::prefix('erm')->group(function () {
         Route::post('/surveilans-infeksi/store', [ERMController::class, 'storeSurveilansInfeksi'])->name('erm.surveilans-infeksi.store');
         Route::post('/erm/discharge-planning/store', [ERMController::class, 'storeDischargePlanning'])->name('erm.discharge-planning.store');
+        Route::post('/erm/checklist-keperawatan/store', [ERMController::class, 'storeChecklistKeperawatan'])->name('erm.checklist-keperawatan.store');
+
         // ==========================================================
         // DATA UMUM & PENDUKUNG
         // ==========================================================
