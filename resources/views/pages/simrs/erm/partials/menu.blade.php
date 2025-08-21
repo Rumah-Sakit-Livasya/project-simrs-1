@@ -242,6 +242,9 @@
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'asesmen_awal_ranap_anak']) }}">
                         Pengkajian Awal Keperawatan Rawat Inap Anak (New)</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'asesmen_awal_ranap_lansia']) }}">
+                        Pengkajian Awal Keperawatan Rawat Inap Lansia (New)</a>
 
                 </div>
             </li>
