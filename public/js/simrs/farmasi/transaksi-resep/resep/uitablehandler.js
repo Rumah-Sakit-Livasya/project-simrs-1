@@ -75,6 +75,19 @@ class UITableUpdater {
         // update the max of the input with type number and name^=qty
         Item.find("input[type='number'][name^='qty']").attr("max", item.qty);
 
+        const RequiredQty = parseInt(String(Item.find("input[type='number'][name^='qty']").val()));
+        if (item.qty < RequiredQty) {
+            // not enough stock, display alert
+            showErrorAlertNoRefresh(`Stock tidak cukup untuk barang ${item.pbi.item.nama}! 
+                Jumlah obat akan disesuaikan dengan stock batch yang dipilih! 
+                (Dibutuhkan: ${RequiredQty} | Stock Batch Dipilih: ${item.qty}).`.trim());
+
+            // update the input with name^=si_qty and add class "incomplete-btn"
+            Item.find("input[type='number'][name^='qty']").val(item.qty);
+        }
+
+
+
         // update the text of td with class .batch
         Item.find("td.batch").text(item.pbi?.batch_no);
 
@@ -151,11 +164,11 @@ class UITableUpdater {
     }
 
     /** @param {BarangFarmasi} item */
-    insertIncompleteObat(item) {
+    insertIncompleteObat(item, qty, signa, instruksi) {
         const key = Math.round(Math.random() * 100000);
         const embalaseCheck = $('#embalase_item');
         const embalaseValue = embalaseCheck.is(':checked') ? 2000 : 0;
-        const html = this.htmlRenderer.getIncompleteObat(item, key, embalaseValue);
+        const html = this.htmlRenderer.getIncompleteObat(item, key, embalaseValue, qty, signa, instruksi);
 
         this.$Table.append(html);
         $(`#instruksi${key}`).select2({ tags: true });
@@ -177,7 +190,7 @@ class UITableUpdater {
                     showErrorAlertNoRefresh("ResepElektronikItem object is not complete");
                     throw new Error("ResepElektronikItem object is not complete");
                 }
-                this.insertIncompleteObat(obat);
+                this.insertIncompleteObat(obat, item.qty, item.signa, item.instruksi);
             }
         }
     }

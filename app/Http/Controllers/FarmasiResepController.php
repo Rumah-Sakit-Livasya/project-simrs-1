@@ -303,7 +303,7 @@ class FarmasiResepController extends Controller
             $res = $query->orderBy('created_at', 'asc')->get();
         } else {
             // Return today's data if no filter is applied
-            $res = FarmasiResepElektronik::with([$relations])->whereDate('created_at', Carbon::today())->orderBy('created_at', 'asc')->get();
+            $res = FarmasiResepElektronik::with($relations)->whereDate('created_at', Carbon::today())->orderBy('created_at', 'asc')->get();
         }
 
 

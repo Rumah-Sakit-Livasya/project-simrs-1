@@ -107,13 +107,23 @@ class UIHTMLRenderer {
      * @param {BarangFarmasi} item The drug item.
      * @param {number} key The unique key for the item.
      * @param {number} embalaseValue The value for the embalase fee.
+     * @param {number} qty Quantity.
+     * @param {string} signa
+     * @param {string} instruksi
      */
-    getIncompleteObat(item, key, embalaseValue) {
+    getIncompleteObat(item, key, embalaseValue, qty = 0, signa = "", instruksi = "") {
+        const UniqueInstruksiOption = /*html*/`
+                <option value="${instruksi}" selected>${instruksi}</option>
+        `;
+
+        const HasDefault = ["sesudah makan", "sebelum makan", "saat makan"].includes(instruksi.toLowerCase());
+
         const Instruksi = /*html*/`
             <select name="instruksi[${key}]" id="instruksi${key}">
-                <option value="Sesudah Makan">Sesudah Makan</option>
-                <option value="Sebelum Makan">Sebelum Makan</option>
-                <option value="Saat Makan">Saat Makan</option>
+                <option value="Sesudah Makan" ${instruksi.toLowerCase() == 'sesudah makan' ? 'selected' : ''}>Sesudah Makan</option>
+                <option value="Sebelum Makan" ${instruksi.toLowerCase() == 'sebelum makan' ? 'selected' : ''}>Sebelum Makan</option>
+                <option value="Saat Makan" ${instruksi.toLowerCase() == 'saat makan' ? 'selected' : ''}>Saat Makan</option>
+                ${HasDefault ? UniqueInstruksiOption : ''}
             </select>
         `;
         const TombolJamPemberian = /*html*/`
@@ -149,8 +159,8 @@ class UIHTMLRenderer {
                 <td>${restriksiHTML}</td>
                 <td class="batch">SELECT A BATCH</td>
                 <td class="ed">SELECT A BATCH</td>
-                <td><input type="number" name="qty[${key}]" min="1" step="1" class="form-control" value="1" max="1"></td>
-                <td class="signa">-</td>
+                <td><input type="number" name="qty[${key}]" min="1" step="1" class="form-control" value="${qty ?? 1}" max="${qty ?? 1}"></td>
+                <td class="signa">${signa ?? '-'}</td>
                 <td>${Instruksi}</td>
                 <td class="jam-pemberian">-</td>
                 <td>${Utils.rp(item.hna)}</td>
