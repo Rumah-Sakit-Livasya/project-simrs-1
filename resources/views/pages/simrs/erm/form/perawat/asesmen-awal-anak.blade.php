@@ -1,5 +1,11 @@
 @extends('pages.simrs.erm.index')
 @section('erm')
+    {{-- Header Pasien --}}
+    <div class="p-3 tab-content">
+        @include('pages.simrs.erm.partials.detail-pasien')
+    </div>
+    <hr>
+
     <div class="card">
         <form id="form-asesmen-awal-ranap-anak" action="javascript:void(0)">
             @csrf
