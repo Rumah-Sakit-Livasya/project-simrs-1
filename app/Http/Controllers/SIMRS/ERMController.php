@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SIMRS;
 
 use App\Http\Controllers\Controller;
+use App\Models\ChildInitialAssessment;
 use App\Models\DischargePlanning;
 use App\Models\Employee;
 use App\Models\HospitalInfectionSurveillance;
@@ -430,6 +431,33 @@ class ERMController extends Controller
         }
     }
 
+    // app/Http/Controllers/SIMRS/ERMController.php
+    public function storeAsesmenAwalRanapAnak(Request $request)
+    {
+        $request->validate(['registration_id' => 'required|exists:registrations,id']);
+        DB::beginTransaction();
+        try {
+            $dataToStore = $request->except(['_token', 'signatures']);
+            $dataToStore['user_id'] = Auth::id();
+
+            $asesmen = ChildInitialAssessment::updateOrCreate(
+                ['registration_id' => $request->registration_id],
+                $dataToStore
+            );
+
+            // Logika simpan signature jika ada
+            if ($request->has('signatures')) { /* ... logika simpan signature ... */
+            }
+
+            DB::commit();
+            return response()->json(['success' => 'Asesmen Awal Anak berhasil disimpan!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan Asesmen Awal Anak: ' . $e->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
+        }
+    }
+
     public static function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path)
     {
         Carbon::setLocale('id');
@@ -567,6 +595,11 @@ class ERMController extends Controller
             case 'asesmen_awal_ranap':
                 $pengkajian = InpatientInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
                 return view('pages.simrs.erm.form.perawat.asesmen-awal-ranap-dewasa', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
+            case 'asesmen_awal_ranap_anak':
+                $pengkajian = ChildInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
+                return view('pages.simrs.erm.form.perawat.asesmen-awal-anak', compact('registration', 'pengkajian', 'path',  'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
 
 
             default:
