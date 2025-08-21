@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FarmasiResepElektronik;
 use App\Models\FarmasiResepElektronikItems;
 use App\Models\FarmasiResepResponse;
+use App\Models\Sbar;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\Registration;
@@ -121,10 +122,10 @@ class CPPTController extends Controller
                         ? 'UGD'
                         : ucwords(str_replace('-', ' ', $item->tipe_rawat));
                 }
-
-                $item->signature_url = $item->signature
-                    ? Storage::url($item->signature->signature) // Gunakan Storage::url() untuk path yang benar
-                    : null;
+                // INI BAGIAN PALING PENTING
+                // Pastikan 'signature' di-load, lalu buat 'signature_url' dan 'signature_pic'
+                $item->signature_url = $item->signature ? Storage::url($item->signature->signature) : null;
+                $item->signature_pic = $item->signature ? $item->signature->pic : null;
 
                 return $item;
             });
@@ -186,9 +187,10 @@ class CPPTController extends Controller
                         : ucwords(str_replace('-', ' ', $item->tipe_rawat));
                 }
 
-                $item->signature_url = $item->signature
-                    ? Storage::url($item->signature->signature) // Gunakan Storage::url()
-                    : null;
+                // INI BAGIAN PALING PENTING
+                // Pastikan 'signature' di-load, lalu buat 'signature_url' dan 'signature_pic'
+                $item->signature_url = $item->signature ? Storage::url($item->signature->signature) : null;
+                $item->signature_pic = $item->signature ? $item->signature->pic : null;
 
                 return $item;
             });
@@ -475,35 +477,34 @@ class CPPTController extends Controller
     }
 
     /**
-     * Menyimpan data SBAR yang terkait dengan sebuah CPPT.
+     * Mengambil data SBAR berdasarkan cppt_id.
+     *
+     * @param  int  $cpptId
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function storeSbar(Request $request, CPPT $cppt)
+    public function getSbar($cpptId)
     {
-        // Pastikan Anda sudah membuat Model dan Migrasi untuk SBAR
-        // Contoh: php artisan make:model Sbar -m
+        // Cari SBAR berdasarkan cppt_id
+        $sbar = \App\Models\Sbar::where('cppt_id', $cpptId)->latest()->first();
 
-        $validated = $request->validate([
-            'situation'      => 'required|string',
-            'background'     => 'required|string',
-            'assessment'     => 'required|string',
-            'recommendation' => 'required|string',
-            // Tambahkan validasi untuk tanda tangan SBAR jika diperlukan
+        if (!$sbar) {
+            return response()->json(['error' => 'Data SBAR tidak ditemukan untuk CPPT ini.'], 404);
+        }
+
+        return response()->json([
+            'id'            => $sbar->id,
+            'cppt_id'       => $sbar->cppt_id,
+            'user_id'       => $sbar->user_id,
+            'situation'     => $sbar->situation,
+            'background'    => $sbar->background,
+            'assessment'    => $sbar->assessment,
+            'recommendation' => $sbar->recommendation,
+            'created_at'    => $sbar->created_at,
+            'updated_at'    => $sbar->updated_at,
+
+            // TAMBAHKAN DUA BARIS INI SECARA EKSPLISIT
+            'signature_penerima' => $sbar->signature_penerima,
+            'signature_pemberi'  => $sbar->signature_pemberi,
         ]);
-
-        // Simpan data SBAR
-        // Contoh jika Anda punya model Sbar:
-        /*
-        Sbar::create([
-            'cppt_id' => $cppt->id,
-            'user_id' => Auth::id(),
-            'situation' => $validated['situation'],
-            'background' => $validated['background'],
-            'assessment' => $validated['assessment'],
-            'recommendation' => $validated['recommendation'],
-        ]);
-        */
-
-        // Untuk saat ini, kita hanya akan mengembalikan respons sukses
-        return response()->json(['success' => 'SBAR berhasil disimpan.']);
     }
 }

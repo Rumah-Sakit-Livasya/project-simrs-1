@@ -4,6 +4,7 @@ use App\Http\Controllers\API\DiagnosisCategoryController;
 use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\API\InterventionController;
 use App\Http\Controllers\API\NursingDiagnosisController;
+use App\Http\Controllers\API\SbarController;
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\DietGiziController;
 use App\Http\Controllers\FarmasiResepController;
@@ -583,8 +584,9 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::delete('/cppt/{cppt}/destroy', [CPPTController::class, 'destroy'])->name('cppt.destroy');
 
         // --- AKSI LAINNYA ---
+        Route::get('/cppt/{cpptId}/sbar/get', [CPPTController::class, 'getSbar'])->name('cppt.sbar.get');
         // Endpoint untuk menyimpan data dari form SBAR
-        Route::post('/cppt/{cppt}/sbar/store', [CPPTController::class, 'storeSbar'])->name('cppt.sbar.store');
+        Route::post('/cppt/{cpptId}/sbar', [SbarController::class, 'storeSbar'])->name('cppt.sbar.store');
         // Endpoint untuk verifikasi CPPT
         Route::post('/cppt/{cppt}/verify', [CPPTController::class, 'verify'])->name('cppt.verify');
 

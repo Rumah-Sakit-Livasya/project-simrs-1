@@ -1,5 +1,43 @@
 <script>
     $(document).ready(function() {
+        // ==========================================================
+        // LOGIKA BARU UNTUK POPUP TANDA TANGAN
+        // ==========================================================
+
+        // Fungsi ini dipanggil dari window popup untuk mengupdate halaman utama
+        window.updateSignature = function(targetInputId, targetPreviewId, dataURL) {
+            // Cari elemen di halaman utama dan isi nilainya
+            const inputField = document.getElementById(targetInputId);
+            const previewImage = document.getElementById(targetPreviewId);
+
+            if (inputField) {
+                inputField.value = dataURL;
+            }
+            if (previewImage) {
+                previewImage.src = dataURL;
+                previewImage.style.display = 'block';
+            }
+        };
+
+        // Fungsi ini dipanggil oleh tombol "Tanda Tangan" untuk membuka popup
+        window.openSignaturePopup = function(targetInputId, targetPreviewId) {
+            const windowWidth = screen.availWidth;
+            const windowHeight = screen.availHeight;
+            const left = 0;
+            const top = 0;
+
+            // Bangun URL dengan query string untuk memberitahu popup elemen mana yang harus diupdate
+            const url =
+                `{{ route('signature.pad') }}?targetInput=${targetInputId}&targetPreview=${targetPreviewId}`;
+
+            // Buka popup window
+            window.open(
+                url,
+                'SignatureWindow',
+                `width=${windowWidth},height=${windowHeight},top=${top},left=${left},resizable=yes,scrollbars=yes`
+            );
+        };
+
         // ===================================================================
         // INISIALISASI AWAL
         // ===================================================================
@@ -213,30 +251,206 @@
                     alert(jqXHR.responseJSON.error || 'Gagal mengambil data untuk disalin.');
                 });
         });
-        // -- TOMBOL SBAR --
-        $('body').on('click', '.sbar-btn', function() {
+
+        // -- TOMBOL SBAR (VERSI PERBAIKAN) --
+        $('body').off('click', '.sbar-btn').on('click', '.sbar-btn', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
             const cpptId = $(this).data('id');
-            $('#sbar_cppt_id').val(cpptId);
-            $('#sbar-form').trigger("reset");
-            $('#modal-sbar').modal('show');
+            const sbarForm = $('#sbar-form');
+            const modal = $('#modal-sbar');
+
+            if (!cpptId) {
+                alert("CRITICAL ERROR: 'data-id' tidak ditemukan pada tombol SBAR.");
+                return;
+            }
+
+            Swal.fire({
+                title: 'Memeriksa data SBAR...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            const getUrl = `{{ url('api/simrs/erm/cppt') }}/${cpptId}/sbar/get`;
+
+            $.get(getUrl)
+                .done(function(sbarData) {
+                    Swal.close();
+
+                    // 1. Selalu reset form ke kondisi awal
+                    sbarForm.trigger("reset");
+                    sbarForm.find('textarea').val('');
+                    // Reset semua preview: kosongkan src, dan pastikan disembunyikan
+                    sbarForm.find('img[id^="signature_preview_"]').attr('src', '').css('display',
+                        'none');
+
+                    sbarForm.find('#sbar_cppt_id').val(cpptId);
+
+                    // 2. Isi data utama jika ada
+                    if (sbarData && sbarData.id) {
+                        sbarForm.find('[name="situation"]').val(sbarData.situation);
+                        sbarForm.find('[name="background"]').val(sbarData.background);
+                        sbarForm.find('[name="assessment"]').val(sbarData.assessment);
+                        sbarForm.find('[name="recommendation"]').val(sbarData.recommendation);
+
+                        // ==========================================================
+                        // LOGIKA BARU YANG LEBIH EKSPLISIT UNTUK PREVIEW TTD
+                        // ==========================================================
+                        const penerimaPreview = $('#signature_preview_1');
+                        const pemberiPreview = $('#signature_preview_2');
+
+                        // Logika untuk TTD Penerima (index 1)
+                        if (sbarData.signature_penerima && sbarData.signature_penerima
+                            .signature_url) {
+                            const sig = sbarData.signature_penerima;
+                            $('input[name="signatures[penerima][pic]"]').val(sig.pic || '');
+                            penerimaPreview.attr('src', sig.signature_url);
+                            penerimaPreview.css('display', 'block'); // <-- Ganti .show() dengan ini
+                        } else {
+                            penerimaPreview.css('display',
+                            'none'); // <-- Pastikan tersembunyi jika tidak ada data
+                        }
+
+                        // Logika untuk TTD Pemberi (index 2)
+                        if (sbarData.signature_pemberi && sbarData.signature_pemberi
+                            .signature_url) {
+                            const sig = sbarData.signature_pemberi;
+                            $('input[name="signatures[pemberi][pic]"]').val(sig.pic || '');
+                            pemberiPreview.attr('src', sig.signature_url);
+                            pemberiPreview.css('display', 'block'); // <-- Ganti .show() dengan ini
+                        } else {
+                            pemberiPreview.css('display',
+                            'none'); // <-- Pastikan tersembunyi jika tidak ada data
+                        }
+                    }
+                    modal.modal('show');
+                })
+                .fail(function(jqXHR) {
+                    Swal.close();
+                    sbarForm.trigger("reset");
+                    sbarForm.find('textarea').val('');
+                    sbarForm.find('img[id^="signature_preview_"]').attr('src', '').css('display',
+                        'none');
+                    sbarForm.find('#sbar_cppt_id').val(cpptId);
+                    console.log("SBAR tidak ditemukan (atau error lain), menampilkan form kosong.");
+                    modal.modal('show');
+                });
         });
 
-        $('#save-sbar-btn').click(function() {
-            const cpptId = $('#sbar_cppt_id').val();
+        // Listener untuk tombol simpan tidak perlu diubah, karena ia akan mengirim
+        // data yang ada di form, baik itu data baru maupun data lama.
+        // Jika Anda butuh logika UPDATE, Anda perlu menambahkan input tersembunyi untuk sbar_id.
+        // GANTI BLOK LAMA DENGAN INI
+
+        // Gunakan event delegation pada elemen statis seperti document atau modal itu sendiri
+        $('#modal-sbar').on('click', '#save-sbar-btn', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            const saveButton = $(this);
+            const sbarForm = $('#sbar-form'); // Targetkan form secara eksplisit
+            const cpptId = sbarForm.find('#sbar_cppt_id').val(); // Cari input di dalam form itu
+
+            if (!cpptId) {
+                Swal.fire('Error', 'ID CPPT tidak ditemukan. Gagal menyimpan SBAR.', 'error');
+                return;
+            }
+
+            const url = `{{ url('api/simrs/erm/cppt') }}/${cpptId}/sbar`;
+
+            saveButton.prop('disabled', true).html(
+                '<span class="spinner-border spinner-border-sm"></span> Menyimpan...');
+
+            // =========================
+            // SCRIPT UNTUK TTD (SIGNATURE)
+            // =========================
+            // Kirim data signature secara eksplisit dalam bentuk JSON agar sesuai dengan backend
+            // Ambil data form SBAR
+            const formElement = sbarForm[0];
+            const formDataObj = {};
+            // Ambil semua input dan textarea (kecuali signature)
+            $(formElement).find('input, textarea').each(function() {
+                const name = $(this).attr('name');
+                if (!name) return;
+                // Untuk input radio/checkbox, hanya ambil yang checked
+                if ($(this).is(':radio') || $(this).is(':checkbox')) {
+                    if ($(this).is(':checked')) {
+                        formDataObj[name] = $(this).val();
+                    }
+                } else {
+                    formDataObj[name] = $(this).val();
+                }
+            });
+
+            // Ambil data signature dari komponen signature-many
+            // Asumsi: ada 2 role: penerima dan pemberi, dan masing-masing ada input hidden untuk pic dan signature_image
+            // (lihat name_prefix di partial signature-many)
+            // ===> BAGIAN INI ADALAH SCRIPT UNTUK TTD <===
+            function getSignatureData(role) {
+                return {
+                    pic: sbarForm.find(`[name="signatures[${role}][pic]"]`).val() || '',
+                    signature_image: sbarForm.find(`[name="signatures[${role}][signature_image]"]`)
+                        .val() || ''
+                };
+            }
+            formDataObj['signatures'] = {
+                penerima: getSignatureData('penerima'),
+                pemberi: getSignatureData('pemberi')
+            };
+            // =========================
+            // AKHIR SCRIPT UNTUK TTD
+            // =========================
+
+            // Kirim sebagai JSON
             $.ajax({
-                url: `{{ url('cppt') }}/${cpptId}/sbar`,
+                url: url,
                 type: 'POST',
-                data: $('#sbar-form').serialize(),
+                data: JSON.stringify(formDataObj),
+                processData: false,
+                contentType: 'application/json',
                 success: function(response) {
                     $('#modal-sbar').modal('hide');
-                    Swal.fire('Sukses', response.success, 'success');
+                    // Hapus input tersembunyi untuk mode edit
+                    mainForm.find('input[name="_method"], input[name="cppt_id"]').remove();
+
+                    // Kosongkan setiap input teks dan textarea
+                    mainForm.find('input[type="text"], textarea').val('');
+
+                    // Reset setiap Select2
+                    mainForm.find('.select2').val(null).trigger('change');
+
+                    // Jika ada checkbox atau radio, uncheck mereka
+                    mainForm.find('input[type="radio"], input[type="checkbox"]').prop(
+                        'checked', false);
+                    Swal.fire('Sukses!!', response.message || response.success, 'success');
                 },
                 error: function(jqXHR) {
-                    alert(jqXHR.responseJSON.error || 'Gagal menyimpan SBAR.');
+                    let errorMsg = 'Gagal menyimpan SBAR. Silakan coba lagi.';
+                    if (jqXHR.status === 422 && jqXHR.responseJSON && jqXHR.responseJSON
+                        .errors) {
+                        // Format pesan error validasi dengan lebih baik
+                        const errors = Object.values(jqXHR.responseJSON.errors).map(e =>
+                            `- ${e[0]}`).join('<br>');
+                        errorMsg = `<strong>Error Validasi:</strong><br>${errors}`;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            html: errorMsg // Gunakan 'html' agar <br> dirender
+                        });
+                    } else {
+                        Swal.fire('Error', (jqXHR.responseJSON && jqXHR.responseJSON
+                            .error) || errorMsg, 'error');
+                    }
+                },
+                complete: function() {
+                    saveButton.prop('disabled', false).html('Simpan');
                 }
             });
         });
 
+        // PENTING: Hapus semua listener lain yang mungkin menargetkan '#save-sbar-btn'
+        // Pastikan tidak ada $('#save-sbar-btn').click(...) lain di file Anda.
         // -- TOMBOL HAPUS --
         $('body').on('click', '.delete-cppt-btn', function() {
             const cpptId = $(this).data('id');
@@ -367,6 +581,7 @@
         const loggedInUserId = {{ Auth::id() }};
 
         // Fungsi terpisah untuk membuat HTML kartu agar kode lebih bersih
+        // Fungsi terpisah untuk membuat HTML kartu agar kode lebih bersih
         function generateCardHtml(data) {
             const entryTime = new Date(data.created_at).toLocaleTimeString('id-ID', {
                 hour: '2-digit',
@@ -377,43 +592,57 @@
             let cpptTitle = 'Catatan ' + data.tipe_cppt.charAt(0).toUpperCase() + data.tipe_cppt.slice(1);
             const canModify = (loggedInUserId === data.user_id);
 
-            // VARIABEL BARU UNTUK BLOK TANDA TANGAN
-            const signatureBlock = data.signature_url ? `
-                <div class="cppt-card-footer">
-                    <img src="${data.signature_url}" alt="Tanda Tangan">
-                    <span class="author-name">${data.user.name}</span>
-                </div>
-            ` : ''; // Jika tidak ada TTD, render string kosong
+            // ==========================================================
+            // LOGIKA KONDISIONAL UNTUK TANDA TANGAN
+            // ==========================================================
 
-            // KEMBALIKAN TEMPLATE DENGAN BLOK TANDA TANGAN
+            // 1. Inisialisasi blok tanda tangan sebagai string kosong
+            let signatureBlock = '';
+
+            // 2. HANYA buat blok HTML jika 'data.signature_url' ada dan tidak kosong
+            if (data.signature_url) {
+                // Tentukan nama yang akan ditampilkan: PIC dari signature, atau fallback ke user pembuat CPPT
+                const signatureAuthorName = data.signature_pic || data.user.name;
+
+                // 3. Isi variabel signatureBlock dengan HTML lengkap
+                signatureBlock = `
+            <div class="cppt-card-footer">
+                <img src="${data.signature_url}" alt="Tanda Tangan">
+                <span class="author-name">${signatureAuthorName}</span>
+            </div>
+        `;
+            }
+            // Jika 'data.signature_url' adalah null, variabel signatureBlock akan tetap kosong.
+
+            // ==========================================================
+
             return `
-                <div class="cppt-entry-card">
-                    <div class="cppt-card-header">
-                        <div class="info">
-                            <div class="status">${data.tipe_rawat.toUpperCase()}</div>
-                            <div class="title">${cpptTitle} : ${entryTime}</div>
-                            <div class="author">${data.user.name}</div>
-                        </div>
-                        <div class="cppt-card-actions">
-                            <i class="mdi mdi-eye pointer verify-cppt-btn" data-id="${data.id}" title="Verifikasi"></i>
-                            <i class="mdi mdi-pencil pointer ${canModify ? 'edit-cppt-btn' : 'text-muted'}" data-id="${data.id}" title="${canModify ? 'Edit' : 'Hanya pembuat yang bisa edit'}"></i>
-                            <i class="mdi mdi-file-document pointer sbar-btn" data-id="${data.id}" title="Form SBAR"></i>
-                            <i class="mdi mdi-content-copy pointer copy-soap-btn" data-id="${data.id}" title="Copy"></i>
-                            <i class="mdi mdi-delete-forever pointer ${canModify ? 'delete-cppt-btn' : 'text-muted'}" data-id="${data.id}" title="${canModify ? 'Hapus' : 'Hanya pembuat yang bisa hapus'}"></i>
-                        </div>
-                    </div>
-                    <div class="cppt-card-body">
-                        ${data.subjective ? `<div class="soap-section" id="subjective-${data.id}"><span class="soap-label">Subjective :</span><div class="soap-content">${data.subjective}</div></div>` : ''}
-                        ${data.objective ? `<div class="soap-section" id="objective-${data.id}"><span class="soap-label">Objective :</span><div class="soap-content">${data.objective}</div></div>` : ''}
-                        ${data.assesment ? `<div class="soap-section" id="assesment-${data.id}"><span class="soap-label">Assessment :</span><div class="soap-content">${data.assesment}</div></div>` : ''}
-                        ${data.planning ? `<div class="soap-section" id="planning-${data.id}"><span class="soap-label">Plan :</span><div class="soap-content">${data.planning}</div></div>` : ''}
-                        ${data.evaluasi ? `<div class="soap-section"><span class="soap-label">Evaluasi :</span><div class="soap-content">${data.evaluasi}</div></div>` : ''}
-                        ${data.instruksi ? `<div class="soap-section"><span class="soap-label">Instruksi :</span><div class="soap-content">${data.instruksi}</div></div>` : ''}
-                    </div>
-                    ${signatureBlock} {{-- TEMPATKAN BLOK TANDA TANGAN DI SINI --}}
-                </div>`;
+        <div class="cppt-entry-card">
+            <div class="cppt-card-header">
+                <div class="info">
+                    <div class="status">${data.tipe_rawat.toUpperCase()}</div>
+                    <div class="title">${cpptTitle} : ${entryTime}</div>
+                    <div class="author">${data.user.name}</div>
+                </div>
+                <div class="cppt-card-actions">
+                    <i class="mdi mdi-eye pointer verify-cppt-btn" data-id="${data.id}" title="Verifikasi"></i>
+                    <i class="mdi mdi-pencil pointer ${canModify ? 'edit-cppt-btn' : 'text-muted'}" data-id="${data.id}" title="${canModify ? 'Edit' : 'Hanya pembuat yang bisa edit'}"></i>
+                    <i class="mdi mdi-file-document pointer sbar-btn" data-id="${data.id}" title="Form SBAR"></i>
+                    <i class="mdi mdi-content-copy pointer copy-soap-btn" data-id="${data.id}" title="Copy"></i>
+                    <i class="mdi mdi-delete-forever pointer ${canModify ? 'delete-cppt-btn' : 'text-muted'}" data-id="${data.id}" title="${canModify ? 'Hapus' : 'Hanya pembuat yang bisa hapus'}"></i>
+                </div>
+            </div>
+            <div class="cppt-card-body">
+                ${data.subjective ? `<div class="soap-section" id="subjective-${data.id}"><span class="soap-label">Subjective :</span><div class="soap-content">${data.subjective}</div></div>` : ''}
+                ${data.objective ? `<div class="soap-section" id="objective-${data.id}"><span class="soap-label">Objective :</span><div class="soap-content">${data.objective}</div></div>` : ''}
+                ${data.assesment ? `<div class="soap-section" id="assesment-${data.id}"><span class="soap-label">Assessment :</span><div class="soap-content">${data.assesment}</div></div>` : ''}
+                ${data.planning ? `<div class="soap-section" id="planning-${data.id}"><span class="soap-label">Plan :</span><div class="soap-content">${data.planning}</div></div>` : ''}
+                ${data.evaluasi ? `<div class="soap-section"><span class="soap-label">Evaluasi :</span><div class="soap-content">${data.evaluasi}</div></div>` : ''}
+                ${data.instruksi ? `<div class="soap-section"><span class="soap-label">Instruksi :</span><div class="soap-content">${data.instruksi}</div></div>` : ''}
+            </div>
+            ${signatureBlock} {{-- Sisipkan blok tanda tangan di sini --}}
+        </div>`;
         }
-
 
         // ===================================================================
         // FUNGSI FILTER (KINI MEMANGGIL FUNGSI LAYOUT BARU)

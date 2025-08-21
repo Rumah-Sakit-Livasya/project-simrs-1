@@ -27,7 +27,8 @@
             placeholder="Nama Jelas">
 
         <div class="mt-2">
-            <a class="badge badge-primary text-white ttd" onclick="openSignaturePadMany({{ $index }})"
+            <a class="badge badge-primary text-white ttd"
+                onclick="openSignaturePopup('signature_image_{{ $index }}', 'signature_preview_{{ $index }}')"
                 id="ttd_pegawai_{{ $index }}">Tanda tangan</a>
         </div>
     </div>

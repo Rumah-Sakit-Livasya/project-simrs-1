@@ -147,7 +147,7 @@
         (function() {
             const canvasManyElement = document.getElementById('canvas-many');
             console.log(canvasManyElement);
-            
+
             if (!canvasManyElement || window.signaturePadManyInitialized) return;
 
             const ctxMany = canvasManyElement.getContext('2d', {
@@ -331,6 +331,45 @@
                     }
                 });
             });
+
+            // ==========================================================
+            // LOGIKA BARU UNTUK POPUP TANDA TANGAN
+            // ==========================================================
+
+            // Fungsi ini dipanggil dari window popup untuk mengupdate halaman utama
+            window.updateSignature = function(targetInputId, targetPreviewId, dataURL) {
+                // Cari elemen di halaman utama dan isi nilainya
+                const inputField = document.getElementById(targetInputId);
+                const previewImage = document.getElementById(targetPreviewId);
+
+                if (inputField) {
+                    inputField.value = dataURL;
+                }
+                if (previewImage) {
+                    previewImage.src = dataURL;
+                    previewImage.style.display = 'block';
+                }
+            };
+
+            // Fungsi ini dipanggil oleh tombol "Tanda Tangan" untuk membuka popup
+            window.openSignaturePopup = function(targetInputId, targetPreviewId) {
+                const windowWidth = screen.availWidth;
+                const windowHeight = screen.availHeight;
+                const left = 0;
+                const top = 0;
+
+                // Bangun URL dengan query string untuk memberitahu popup elemen mana yang harus diupdate
+                const url =
+                    `{{ route('signature.pad') }}?targetInput=${targetInputId}&targetPreview=${targetPreviewId}`;
+
+                // Buka popup window
+                window.open(
+                    url,
+                    'SignatureWindow',
+                    `width=${windowWidth},height=${windowHeight},top=${top},left=${left},resizable=yes,scrollbars=yes`
+                );
+            };
+
         });
     </script>
 @endsection

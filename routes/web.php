@@ -48,6 +48,10 @@ Route::post('/', [AuthenticatedSessionController::class, 'store']);
 
 Route::middleware([LastSeenUser::class])->group(function () {
     Route::middleware('auth')->group(function () {
+        Route::get('/signature-pad', function () {
+            return view('pages.simrs.erm.partials.signature-pad');
+        })->name('signature.pad');
+
         Route::get('/kunjungan', [KunjunganPageController::class, 'index'])->name('kunjungan.index');
         Route::get('/home', [ApplicationController::class, 'chooseApp'])->name('home');
         Route::post('/set-app', [ApplicationController::class, 'setApp'])->name('set-app');
