@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DischargePlanning;
 use App\Models\Employee;
 use App\Models\HospitalInfectionSurveillance;
+use App\Models\InpatientInitialAssessment;
 use App\Models\NursingActivityChecklist;
 use App\Models\SIMRS\AssesmentKeperawatanGadar;
 use App\Models\SIMRS\CPPT\CPPT;
@@ -352,6 +353,82 @@ class ERMController extends Controller
         }
     }
 
+    // app/Http/Controllers/SIMRS/ERMController.php
+
+    public function storeAsesmenAwalRanap(Request $request)
+    {
+        // Validasi dasar (bisa dibuat lebih detail jika perlu)
+        $request->validate([
+            'registration_id' => 'required|exists:registrations,id',
+            'tgl_masuk' => 'nullable|date_format:Y-m-d',
+            'jam_masuk' => 'nullable|date_format:H:i',
+            'signatures' => 'nullable|array',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // 1. Gabungkan tanggal dan jam menjadi satu timestamp
+            $waktuMasuk = null;
+            if ($request->filled('tgl_masuk') && $request->filled('jam_masuk')) {
+                // Format input 'Y-m-d' (dari type="date") dan 'H:i' (dari type="time")
+                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk . ' ' . $request->jam_masuk)->toDateTimeString();
+            }
+
+            // 2. Siapkan data utama untuk disimpan/diperbarui
+            // Kita mengambil semua data kecuali yang akan ditangani secara terpisah
+            $dataToStore = $request->except(['_token', 'tgl_masuk', 'jam_masuk', 'signatures']);
+            $dataToStore['user_id'] = Auth::id(); // Selalu catat user terakhir yang melakukan aksi
+            $dataToStore['waktu_masuk_ruangan'] = $waktuMasuk;
+
+            // 3. Gunakan updateOrCreate untuk menyimpan data asesmen
+            $asesmen = InpatientInitialAssessment::updateOrCreate(
+                ['registration_id' => $request->registration_id], // Kunci untuk mencari
+                $dataToStore // Data untuk diupdate atau dibuat
+            );
+
+            // 4. Logika lengkap untuk menyimpan tanda tangan
+            if ($request->has('signatures')) {
+                foreach ($request->signatures as $role => $signatureData) {
+                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+
+                        // Cari path file lama sebelum di-update
+                        $oldPath = optional($asesmen->signatures()->where('role', $role)->first())->signature;
+
+                        // Simpan file baru tanpa method lain
+                        $image = $signatureData['signature_image'];
+                        $image_parts = explode(";base64,", $image);
+                        $image_base64 = end($image_parts);
+                        $image_content = base64_decode($image_base64);
+                        $fileName = "asesmen_awal_ranap_{$asesmen->id}_{$role}_" . uniqid() . ".png";
+                        $filePath = "signatures/" . $fileName;
+                        Storage::disk('public')->put($filePath, $image_content);
+                        $newPath = $filePath;
+
+                        // Lakukan Update or Create untuk signature dengan role ini
+                        $asesmen->signatures()->updateOrCreate(
+                            ['role' => $role], // Kunci unik
+                            [
+                                'pic' => $signatureData['pic'], // Data baru
+                                'signature' => $newPath         // Data baru
+                            ]
+                        );
+
+                        // Hapus file tanda tangan lama jika ada
+                        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                            Storage::disk('public')->delete($oldPath);
+                        }
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json(['success' => 'Asesmen Awal Rawat Inap berhasil disimpan!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan Asesmen Awal Ranap: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data. Silakan hubungi administrator.'], 500);
+        }
+    }
 
     public static function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path)
     {
@@ -486,6 +563,10 @@ class ERMController extends Controller
             case 'checklist_keperawatan':
                 $pengkajian = NursingActivityChecklist::firstOrNew(['registration_id' => $registration->id]);
                 return view('pages.simrs.erm.form.perawat.checklist-keperawatan', compact('registration', 'pengkajian', 'path',  'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
+            case 'asesmen_awal_ranap':
+                $pengkajian = InpatientInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
+                return view('pages.simrs.erm.form.perawat.asesmen-awal-ranap-dewasa', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
 
             default:

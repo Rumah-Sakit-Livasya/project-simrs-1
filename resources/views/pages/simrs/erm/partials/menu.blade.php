@@ -236,6 +236,9 @@
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'checklist_keperawatan']) }}">Ceklist
                         Pelaksanaan / Kegiatan Keperawatan</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'asesmen_awal_ranap']) }}">
+                        Pengkajian Awal Keperawatan Rawat Inap Dewasa (New)</a>
 
                 </div>
             </li>
