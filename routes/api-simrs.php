@@ -212,7 +212,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
         Route::prefix('retur-resep')->group(function(){
             Route::post('/store', [FarmasiReturResepController::class, 'store'])->name('farmasi.retur-barang.store');
-            Route::get("/get/item-patient/{id}", [FarmasiReturResepController::class, 'getItemPatient'])->name('farmasi.retur-barang.get.item-patient');
+            Route::get("/get/item-registration/{id}", [FarmasiReturResepController::class, 'getItemRegistration'])->name('farmasi.retur-barang.get.item-registration');
+            Route::get("/get/registrations/{patient_id}", [FarmasiReturResepController::class, 'getRegistrations'])->name('farmasi.retur-barang.get.registrations');
         });
     });
 

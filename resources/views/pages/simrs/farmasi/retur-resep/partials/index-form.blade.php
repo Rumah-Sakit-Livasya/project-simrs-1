@@ -11,6 +11,7 @@
 
                     <form action="{{ route('farmasi.retur-resep') }}" method="get">
                         @csrf
+                        <input type="hidden" name="user_id" value={{ auth()->user()->id }}>
 
                         <div class="row justify-content-center">
                             <div class="col-xl-4">

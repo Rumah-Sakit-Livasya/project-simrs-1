@@ -65,7 +65,7 @@
                                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
 
                                 <div class="row justify-content-center">
-                                    <div class="col-xl-6">
+                                    <div class="col-xl-4">
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-4" style="text-align: right">
@@ -82,7 +82,29 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-xl-6">
+                                    <div class="col-xl-4">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-4" style="text-align: right">
+                                                    <label class="form-label text-end" for="gudang_id">
+                                                        Gudang Penerima*
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <select name="gudang_id" required id="gudang_id"
+                                                        class="form-control select2">
+                                                        <option value="" selected disabled hidden>Pilih Gudang
+                                                        </option>
+                                                        @foreach ($gudangs as $gudang)
+                                                            <option value="{{ $gudang->id }}">{{ $gudang->nama }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xl-4">
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-4" style="text-align: right">
@@ -118,7 +140,8 @@
                                                         </option>
                                                         @foreach ($patients as $patient)
                                                             <option value="{{ $patient->id }}">
-                                                                [{{ $patient->medical_record_number }}] {{ $patient->name }}
+                                                                [{{ $patient->medical_record_number }}]
+                                                                {{ $patient->name }}
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -131,18 +154,15 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="gudang_id">
-                                                        Gudang Penerima*
+                                                    <label class="form-label text-end" for="registration_id">
+                                                        Registrasi*
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select name="gudang_id" required id="gudang_id"
+                                                    <select name="registration_id" required id="registration_id"
                                                         class="form-control select2">
-                                                        <option value="" selected disabled hidden>Pilih Gudang
+                                                        <option value="" selected disabled hidden>Pilih Registrasi
                                                         </option>
-                                                        @foreach ($gudangs as $gudang)
-                                                            <option value="{{ $gudang->id }}">{{ $gudang->nama }}</option>
-                                                        @endforeach
                                                     </select>
                                                 </div>
                                             </div>

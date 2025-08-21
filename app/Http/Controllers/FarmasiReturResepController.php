@@ -6,6 +6,7 @@ use App\Models\FarmasiResepItems;
 use App\Models\FarmasiReturResep;
 use App\Models\FarmasiReturResepItems;
 use App\Models\SIMRS\Patient;
+use App\Models\SIMRS\Registration;
 use App\Models\StoredBarangFarmasi;
 use App\Models\User;
 use App\Models\WarehouseMasterGudang;
@@ -30,11 +31,49 @@ class FarmasiReturResepController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $relations = ["items", "patient", "gudang", "registration"];
+        $query = FarmasiReturResep::query()->with($relations);
+        $filter = false;
+
+        if ($request->filled('tanggal')) {
+            $dateRange = explode(' - ', $request->tanggal);
+            if (count($dateRange) === 2) {
+                $startDate = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
+                $endDate = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
+                $query->whereBetween('tanggal_retur', [$startDate, $endDate]);
+            }
+            $filter = true;
+        }
+
+        if ($request->filled('nama_pasien')) {
+            $query->whereHas("patient", function ($q) use ($request) {
+                $q->where("name", "like", "%{$request->nama_pasien}%");
+            });
+            $filter = true;
+        }
+
+        if ($request->filled("gudang_id")) {
+            $query->where("gudang_id", $request->gudang_id);
+            $filter = true;
+        }
+
+        if ($filter) {
+            $returs = $query->get();
+        } else {
+            $returs = FarmasiReturResep::with($relations)->whereDate('created_at', today())->get();
+        }
+
         return view("pages.simrs.farmasi.retur-resep.index", [
             'gudangs' => WarehouseMasterGudang::where("apotek", 1)->where("warehouse", 0)->get(),
+            'returs' => $returs
         ]);
+    }
+    
+    public function getRegistrations(int $patient_id){
+        $registrations = Registration::with(['patient', 'patient.bed', 'patient.bed.room', 'kelas_rawat'])->where("patient_id", $patient_id)->get()->all();
+        return response()->json($registrations);
     }
 
     /**
@@ -48,7 +87,7 @@ class FarmasiReturResepController extends Controller
         ]);
     }
 
-    public function getItemPatient(int $id)
+    public function getItemRegistration(int $id)
     {
         $items = FarmasiResepItems::with([
             'stored',
@@ -57,8 +96,8 @@ class FarmasiReturResepController extends Controller
             'resep',
             'resep.registration'
         ])
-            ->whereHas('resep.registration', function ($q) use ($id) {
-                $q->where("patient_id", $id);
+            ->whereHas('resep', function ($q) use ($id) {
+                $q->where("registration_id", $id);
             })
             ->where('racikan_id', null)
             ->where('tipe', 'obat')
@@ -92,6 +131,7 @@ class FarmasiReturResepController extends Controller
             "user_id" => "required|exists:users,id",
             "tanggal_retur" => "required|date",
             "patient_id" => "required|exists:patients,id",
+            "registration_id" => "required|exists:registrations,id",
             "gudang_id" => "required|exists:warehouse_master_gudang,id",
             "nominal" => "required|integer",
             "keterangan" => "nullable|string",
@@ -109,8 +149,10 @@ class FarmasiReturResepController extends Controller
             $warehouse = WarehouseMasterGudang::findOrFail($data["gudang_id"]);
 
             $rr = FarmasiReturResep::create([
+                "user_id" => $data["user_id"],
                 "tanggal_retur" => $data["tanggal_retur"],
                 "patient_id" => $data["patient_id"],
+                "registration_id" => $data["registration_id"],
                 "gudang_id" => $data["gudang_id"],
                 "kode_retur" => $this->generate_rf_code(),
                 "keterangan" => $data["keterangan"],

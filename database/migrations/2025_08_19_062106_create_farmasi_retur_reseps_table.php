@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
             $table->date('tanggal_retur');
+            $table->foreignId('registrations_id')->constrained('registrations')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('patient_id')->constrained('patients')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('gudang_id')->constrained('warehouse_master_gudang')->onUpdate('cascade')->onDelete('cascade');
             $table->string('kode_retur')->unique();

@@ -23,12 +23,18 @@ class FarmasiReturResep extends Model
         return $this->belongsTo(Registration::class, 'registration_id');
     }
 
-    public function patient(){
+    public function patient()
+    {
         return $this->belongsTo(Patient::class, 'patient_id');
     }
 
-    public function gudang(){
+    public function gudang()
+    {
         return $this->belongsTo(WarehouseMasterGudang::class, 'gudang_id');
     }
-    
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, "user_id");
+    }
 }
