@@ -11,6 +11,7 @@ use App\Models\HospitalInfectionSurveillance;
 use App\Models\InpatientInitialAssessment;
 use App\Models\MidwiferyInitialAssessment;
 use App\Models\NeonatusInitialAssessment;
+use App\Models\NeonatusInitialAssessmentDoctor;
 use App\Models\NursingActivityChecklist;
 use App\Models\SIMRS\AssesmentKeperawatanGadar;
 use App\Models\SIMRS\CPPT\CPPT;
@@ -642,6 +643,59 @@ class ERMController extends Controller
         }
     }
 
+    public function storeNeonatusInitialAssesmentDoctor(Request $request)
+    {
+        $request->validate([
+            'registration_id' => 'required|exists:registrations,id',
+            'data' => 'required|array'
+        ]);
+        DB::beginTransaction();
+        try {
+            // 1. Siapkan data utama untuk disimpan/diperbarui
+            $dataToStore = [
+                'user_id' => Auth::id(),
+                'data' => $request->data,
+            ];
+
+            // 2. Simpan/update data pengkajian awal neonatus dokter
+            $pengkajian = \App\Models\NeonatusInitialAssessmentDoctor::updateOrCreate(
+                ['registration_id' => $request->registration_id],
+                $dataToStore
+            );
+
+            // 3. Logika lengkap untuk menyimpan tanda tangan
+            if ($request->has('signatures')) {
+                foreach ($request->input('signatures', []) as $role => $signatureData) {
+                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+
+                        $oldPath = optional($pengkajian->signatures()->where('role', $role)->first())->signature;
+
+                        $newPath = $this->saveSignatureFile($signatureData['signature_image'], "pengkajian_awal_neonatus_dokter_{$pengkajian->id}_{$role}");
+
+                        $pengkajian->signatures()->updateOrCreate(
+                            ['role' => $role], // Kunci unik
+                            [
+                                'pic' => $signatureData['pic'] ?? null,
+                                'signature' => $newPath
+                            ]
+                        );
+
+                        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                            Storage::disk('public')->delete($oldPath);
+                        }
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json(['success' => 'Pengkajian Awal Neonatus (Dokter) berhasil disimpan!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan Pengkajian Awal Neonatus (Dokter): ' . $e->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
+        }
+    }
+
     /**
      * Helper function untuk menyimpan file tanda tangan dari data base64.
      * (Pastikan fungsi ini sudah ada di dalam ERMController)
@@ -810,6 +864,11 @@ class ERMController extends Controller
             case 'asesmen_awal_kebidanan':
                 $pengkajian = MidwiferyInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
                 return view('pages.simrs.erm.form.perawat.asesmen-awal-kebidanan', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
+            case 'pengkajian_awal_neonatus':
+                $pengkajian = NeonatusInitialAssessmentDoctor::firstOrNew(['registration_id' => $registration->id]);
+                return view('pages.simrs.erm.form.dokter.pengkajian-awal-neonatus', compact('registration', 'pengkajian',  'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
 
 
             default:

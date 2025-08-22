@@ -259,18 +259,25 @@
                     aria-haspopup="true" aria-expanded="false">Dokter</a>
                 <div class="dropdown-menu">
                     <a class="dropdown-item"
-                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_dokter']) }}">Pengkajian</a>
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'ews_anak']) }}"
+                        role="tab">Early Warning Scoring System (Anak)</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'ews_dewasa']) }}"
+                        role="tab">Early Warning Scoring System (Dewasa)</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'ews_obstetri']) }}"
+                        role="tab">Early Warning Scoring System (Obstetri)</a>
+
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'cppt_dokter']) }}">CPPT</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_dokter']) }}">Pengkajian</a>
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'resume_medis']) }}">Resume
                         Medis</a>
                     <a class="dropdown-item"
-                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'rujuk_antar_rs']) }}">Rujuk
-                        Antar Rumah Sakit</a>
-                    <a class="dropdown-item"
-                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'profil_ringkas_rajal']) }}">Profil
-                        Ringkas Rawat Jalan</a>
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_awal_neonatus']) }}">Pengkajian
+                        Awal Medis Neonatus</a>
                 </div>
             </li>
             <li class="nav-item dropdown">
