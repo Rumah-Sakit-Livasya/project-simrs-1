@@ -134,7 +134,7 @@
                     aria-haspopup="true" aria-expanded="false">Dokter</a>
                 <div class="dropdown-menu">
                     <a class="dropdown-item"
-                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_dokter']) }}">Pengkajian</a>
+                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'asesmen_awal_dokter']) }}">Pengkajian</a>
                     <a class="dropdown-item"
                         href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'cppt_dokter']) }}">CPPT</a>
                     <a class="dropdown-item"

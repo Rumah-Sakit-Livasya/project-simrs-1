@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SIMRS;
 use App\Http\Controllers\Controller;
 use App\Models\ChildInitialAssessment;
 use App\Models\DischargePlanning;
+use App\Models\DoctorInitialAssessment;
 use App\Models\Employee;
 use App\Models\GeriatricInitialAssessment;
 use App\Models\HospitalInfectionSurveillance;
@@ -696,6 +697,95 @@ class ERMController extends Controller
         }
     }
 
+    public function storeAsesmenAwalDokter(Request $request)
+    {
+        // TAMBAHKAN BARIS INI UNTUK MELIHAT DATA MENTAH DI FILE LOG
+        Log::info('Mencoba menyimpan Asesmen Dokter. Data request:', $request->all());
+
+        $request->validate([
+            'registration_id' => 'required|exists:registrations,id',
+            'status' => 'required|in:draft,final',
+
+            // Validasi Tanda Vital (gunakan dot notation untuk array)
+            'tanda_vital.pr' => 'nullable|string|max:100', // Sesuaikan jika harus numeric
+            'tanda_vital.rr' => 'nullable|string|max:100',
+            'tanda_vital.bp' => 'nullable|string|max:100',
+            'tanda_vital.temperatur' => 'nullable|string|max:100',
+            'tanda_vital.height_badan' => 'nullable|numeric',
+            'tanda_vital.weight_badan' => 'nullable|numeric',
+            'tanda_vital.spo2' => 'nullable|string|max:100',
+
+            // Validasi Tanggal dan Waktu
+            'tgl_masuk' => 'required|date_format:d-m-Y',
+            'jam_masuk' => 'required|date_format:H:i',
+            'tgl_dilayani' => 'required|date_format:d-m-Y',
+            'jam_dilayani' => 'required|date_format:H:i',
+
+            // Anda bisa menambahkan validasi lain jika perlu
+            'pemeriksaan_fisik' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $waktuMasuk = $request->filled('tgl_masuk') && $request->filled('jam_masuk')
+                ? Carbon::createFromFormat('d-m-Y H:i', $request->tgl_masuk . ' ' . $request->jam_masuk)->toDateTimeString()
+                : null;
+
+            $waktuDilayani = $request->filled('tgl_dilayani') && $request->filled('jam_dilayani')
+                ? Carbon::createFromFormat('d-m-Y H:i', $request->tgl_dilayani . ' ' . $request->jam_dilayani)->toDateTimeString()
+                : null;
+
+            // Kelompokkan data ke dalam format yang sesuai dengan struktur JSON di database
+            $dataToStore = [
+                'user_id' => Auth::id(),
+                'status' => $request->status,
+                'waktu_masuk' => $waktuMasuk,
+                'waktu_dilayani' => $waktuDilayani,
+                'tanda_vital' => $request->input('tanda_vital', []),
+                'anamnesis' => $request->input('anamnesis', []),
+                'pemeriksaan_fisik' => $request->pemeriksaan_fisik,
+                'pemeriksaan_penunjang' => $request->pemeriksaan_penunjang,
+                'diagnosa_kerja' => $request->diagnosa_kerja,
+                'diagnosa_banding' => $request->diagnosa_banding,
+                'terapi_tindakan' => $request->terapi_tindakan,
+                'gambar_anatomi' => $request->input('gambar_anatomi', []),
+                'edukasi' => $request->input('edukasi', []),
+                'evaluasi_penyakit' => $request->input('evaluasi_penyakit', []),
+                'rencana_tindak_lanjut_pasien' => $request->input('rencana_tindak_lanjut_pasien', []),
+            ];
+
+            $asesmen = DoctorInitialAssessment::updateOrCreate(
+                ['registration_id' => $request->registration_id],
+                $dataToStore
+            );
+
+            // Logika penyimpanan tanda tangan (sama seperti yang sudah ada)
+            if ($request->has('signatures')) {
+                foreach ($request->input('signatures', []) as $role => $signatureData) {
+                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                        $oldPath = optional($asesmen->signatures()->where('role', 'dokter_pemeriksa')->first())->signature;
+                        $newPath = $this->saveSignatureFile($signatureData['signature_image'], "asesmen_awal_dokter_{$asesmen->id}_{$role}");
+                        $asesmen->signatures()->updateOrCreate(
+                            ['role' => $role],
+                            ['pic' => $signatureData['pic'], 'signature' => $newPath]
+                        );
+                        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                            Storage::disk('public')->delete($oldPath);
+                        }
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json(['success' => 'Asesmen Awal Dokter berhasil disimpan sebagai ' . $request->status . '!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan Asesmen Awal Dokter: ' . $e->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
+        }
+    }
+
+
     /**
      * Helper function untuk menyimpan file tanda tangan dari data base64.
      * (Pastikan fungsi ini sudah ada di dalam ERMController)
@@ -868,6 +958,10 @@ class ERMController extends Controller
             case 'pengkajian_awal_neonatus':
                 $pengkajian = NeonatusInitialAssessmentDoctor::firstOrNew(['registration_id' => $registration->id]);
                 return view('pages.simrs.erm.form.dokter.pengkajian-awal-neonatus', compact('registration', 'pengkajian',  'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
+            case 'asesmen_awal_dokter':
+                $pengkajian = DoctorInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
+                return view('pages.simrs.erm.form.dokter.asesmen-awal-dokter', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
 
 
