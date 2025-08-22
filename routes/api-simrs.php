@@ -570,6 +570,12 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::post('/simrs/erm/store-asesmen-awal-dokter', [ERMController::class, 'storeAsesmenAwalDokter'])->name('erm.store.asesmen-awal-dokter');
         Route::post('/simrs/erm/store-echocardiography', [ERMController::class, 'storeEchocardiography'])->name('erm.store.echocardiography');
 
+        // Upload Dokumen
+        Route::get('/simrs/erm/dokumen/data/{registration}', [ERMController::class, 'getUploadedDocuments'])->name('erm.dokumen.data');
+        Route::post('/simrs/erm/dokumen/store', [ERMController::class, 'storeUploadedDocument'])->name('erm.dokumen.store');
+        Route::get('/simrs/erm/dokumen/view/{document}', [ERMController::class, 'viewUploadedDocument'])->name('erm.dokumen.view');
+        Route::delete('/simrs/erm/dokumen/destroy/{document}', [ERMController::class, 'destroyUploadedDocument'])->name('erm.dokumen.destroy');
+
         // ==========================================================
         // DATA UMUM & PENDUKUNG
         // ==========================================================

@@ -2,7 +2,7 @@
 
 @section('erm')
     {{-- Header Pasien --}}
-    <div class="p-3">
+    <div class="p-3 tab-content">
         @include('pages.simrs.erm.partials.detail-pasien')
     </div>
     <hr>
@@ -53,7 +53,7 @@
 
 @push('scripts')
     {{-- Sesuaikan path jika berbeda --}}
-        <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>

@@ -2,7 +2,7 @@
 
 @section('erm')
     {{-- Header Pasien --}}
-    <div class="p-3">
+    <div class="p-3 tab-content">
         @include('pages.simrs.erm.partials.detail-pasien')
     </div>
     <hr>

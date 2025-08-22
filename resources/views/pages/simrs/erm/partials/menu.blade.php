@@ -144,7 +144,7 @@
                         href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'rujuk_antar_rs']) }}">Rujuk
                         Antar Rumah Sakit</a>
                     <a class="dropdown-item"
-                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'echocardiography']) }}">ECHO</a>
+                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'echocardiography4']) }}">ECHO</a>
                     <a class="dropdown-item"
                         href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'profil_ringkas_rajal']) }}">Profil
                         Ringkas Rawat Jalan</a>
@@ -182,6 +182,9 @@
                     aria-haspopup="true" aria-expanded="false">Layanan</a>
                 <div class="dropdown-menu">
                     <a class="dropdown-item"
+                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'rencana_operasi']) }}">Rencana
+                        Operasi</a>
+                    <a class="dropdown-item"
                         href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'tindakan_medis']) }}">Tindakan
                         Medis</a>
                     <a class="dropdown-item"
@@ -192,6 +195,16 @@
                         Klinik</a>
                     <a class="dropdown-item"
                         href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'radiologi']) }}">Radiologi</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"
+                    aria-haspopup="true" aria-expanded="false">Lain-lain</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'upload_dokumen']) }}">Upload Dokumen</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'satu_sehat']) }}">Satu Sehat</a>
                 </div>
             </li>
         </ul>
@@ -329,6 +342,8 @@
                         Klinik</a>
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'radiologi']) }}">Radiologi</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'upload_dokumen']) }}">Upload Dokumen</a>
                 </div>
             </li>
         </ul>

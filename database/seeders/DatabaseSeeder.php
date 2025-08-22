@@ -59,7 +59,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             // NursingDiagnosisSeeder::class,
-            InterventionSeeder::class, // <-- TAMBAHKAN INI
+            // InterventionSeeder::class, // <-- TAMBAHKAN INI
+            DocumentCategorySeeder::class, // <-- TAMBAHKAN INI
             // Anda bisa menambahkan seeder lain di sini
         ]);
 

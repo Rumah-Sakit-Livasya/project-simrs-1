@@ -854,6 +854,91 @@ class ERMController extends Controller
         return $path;
     }
 
+    // Tambahkan metode ini di dalam ERMController
+
+    public function getUploadedDocuments(Request $request, Registration $registration)
+    {
+        if ($request->ajax()) {
+            $data = \App\Models\UploadedDocument::with('user', 'category')
+                ->where('registration_id', $registration->id)
+                ->latest();
+
+            return \Yajra\DataTables\DataTables::of($data)
+                ->addIndexColumn()
+                ->editColumn('created_at', function ($row) {
+                    return $row->created_at->format('d M Y H:i');
+                })
+                ->addColumn('category_name', function ($row) {
+                    return $row->category->name;
+                })
+                ->addColumn('user_name', function ($row) {
+                    return $row->user->name;
+                })
+                ->addColumn('action', function ($row) {
+                    $viewUrl = route('erm.dokumen.view', $row->id);
+                    $btn = '<a href="' . $viewUrl . '" target="_blank" class="btn btn-sm btn-success mr-2" title="Lihat Dokumen"><i class="fas fa-eye"></i></a>';
+                    $btn .= '<button type="button" class="btn btn-sm btn-danger btn-delete-document" data-id="' . $row->id . '" title="Hapus Dokumen"><i class="fas fa-trash"></i></button>';
+                    return $btn;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+    }
+
+    public function storeUploadedDocument(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|max:5120|mimes:pdf,jpg,jpeg,png', // max 5MB
+            'registration_id' => 'required|exists:registrations,id',
+            'document_category_id' => 'required|exists:document_categories,id',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $file = $request->file('file');
+        $registrationId = $request->registration_id;
+        $path = "documents/{$registrationId}";
+        $storedFile = $file->store($path, 'public');
+
+        \App\Models\UploadedDocument::create([
+            'registration_id' => $registrationId,
+            'user_id' => Auth::id(),
+            'document_category_id' => $request->document_category_id,
+            'description' => $request->description,
+            'original_filename' => $file->getClientOriginalName(),
+            'stored_filename' => basename($storedFile),
+            'file_path' => $storedFile,
+            'mime_type' => $file->getMimeType(),
+            'file_size' => $file->getSize(),
+        ]);
+
+        return response()->json(['success' => 'Dokumen berhasil diunggah!']);
+    }
+
+    public function viewUploadedDocument(\App\Models\UploadedDocument $document)
+    {
+        // Pastikan file ada sebelum mencoba menampilkannya
+        if (Storage::disk('public')->exists($document->file_path)) {
+            return Storage::disk('public')->response($document->file_path);
+        }
+        abort(404, 'File tidak ditemukan.');
+    }
+
+    public function destroyUploadedDocument(\App\Models\UploadedDocument $document)
+    {
+        try {
+            // Hapus file dari storage
+            if (Storage::disk('public')->exists($document->file_path)) {
+                Storage::disk('public')->delete($document->file_path);
+            }
+            // Hapus record dari database
+            $document->delete();
+            return response()->json(['success' => 'Dokumen berhasil dihapus!']);
+        } catch (\Exception $e) {
+            Log::error('Gagal menghapus dokumen: ' . $e->getMessage());
+            return response()->json(['error' => 'Gagal menghapus dokumen.'], 500);
+        }
+    }
+
     public static function poliklinikMenu($noRegist, $menu, $departements, $jadwal_dokter, $registration, $registrations, $path)
     {
         Carbon::setLocale('id');
@@ -1020,6 +1105,9 @@ class ERMController extends Controller
                 $pengkajian = Echocardiography::firstOrNew(['registration_id' => $registration->id]);
                 return view('pages.simrs.erm.form.penunjang.echocardiography', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
+            case 'upload_dokumen':
+                $documentCategories = \App\Models\DocumentCategory::orderBy('name')->get();
+                return view('pages.simrs.erm.form.penunjang.upload-dokumen', compact('registration', 'documentCategories', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             default:
                 return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'path'));
