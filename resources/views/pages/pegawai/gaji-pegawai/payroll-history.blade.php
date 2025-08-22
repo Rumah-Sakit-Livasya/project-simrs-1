@@ -9,7 +9,8 @@
             }
 
             .dataTables_scrollBody tbody td:nth-child(1),
-            .dataTables_scrollBody tbody td:nth-child(2) {
+            .dataTables_scrollBody tbody td:nth-child(2),
+            .dataTables_scrollBody tbody td:nth-child(3) {
                 white-space: nowrap;
                 /* Mencegah teks melampaui batas */
                 min-height: 40px !important;
@@ -17,7 +18,7 @@
                 /* Atur tinggi minimum untuk kolom 1 dan 2 */
             }
 
-            .dataTables_scrollBody tbody td:nth-child(2) {
+            .dataTables_scrollBody tbody td:nth-child(3) {
                 min-width: 400px;
             }
 
@@ -113,7 +114,9 @@
                                             <thead>
                                                 <tr>
                                                     <th style="white-space: nowrap">No</th>
-                                                    <th style="white-space: nowrap">employee</th>
+                                                    <th style="white-space: nowrap">Pegawai</th>
+                                                    <th style="white-space: nowrap">Department</th>
+                                                    <th style="white-space: nowrap">NIP</th>
                                                     <th style="white-space: nowrap">Basic Salary</th>
                                                     <th style="white-space: nowrap">Tunjangan Jabatan</th>
                                                     <th style="white-space: nowrap">Tunjangan Profesi</th>
@@ -140,20 +143,9 @@
                                                 @foreach ($payrolls as $payroll)
                                                     <tr>
                                                         <td>{{ $loop->iteration }}</td>
-                                                        <td>
-                                                            <div class="row">
-                                                                <div class="col-3 d-flex justify-content-end">
-                                                                    <img src="{{ $payroll->employee->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
-                                                                        class="rounded-circle img-thumbnail m-auto"
-                                                                        alt="" style="width: 50px; z-index: 100;">
-                                                                </div>
-                                                                <div class="col-9">
-                                                                    <strong>{{ $payroll->employee->fullname }}</strong>
-                                                                    <br>
-                                                                    {{ $payroll->employee->organization->name }}
-                                                                </div>
-                                                            </div>
-                                                        </td>
+                                                        <td>{{ $payroll->employee->fullname }}</td>
+                                                        <td>{{ $payroll->employee->organization->name }}</td>
+                                                        <td>{{ $payroll->employee->employee_code }}</td>
                                                         <td>{{ rp($payroll->basic_salary) }}</td>
                                                         <td>{{ rp($payroll->tunjangan_jabatan) }}</td>
                                                         <td>{{ rp($payroll->tunjangan_profesi) }}</td>
