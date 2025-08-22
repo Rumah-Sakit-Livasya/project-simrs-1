@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ChildInitialAssessment;
 use App\Models\DischargePlanning;
 use App\Models\DoctorInitialAssessment;
+use App\Models\Echocardiography;
 use App\Models\Employee;
 use App\Models\GeriatricInitialAssessment;
 use App\Models\HospitalInfectionSurveillance;
@@ -785,6 +786,58 @@ class ERMController extends Controller
         }
     }
 
+    public function storeEchocardiography(Request $request)
+    {
+        $request->validate([
+            'registration_id' => 'required|exists:registrations,id',
+            'status' => 'required|in:draft,final'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Data sudah terstruktur dalam array dari form, jadi kita bisa langsung menyimpannya.
+            $dataToStore = [
+                'user_id' => Auth::id(),
+                'status' => $request->status,
+                'aorta' => $request->input('aorta', []),
+                'left_atrium' => $request->input('left_atrium', []),
+                'right_ventricle' => $request->input('right_ventricle', []),
+                'left_ventricle' => $request->input('left_ventricle', []),
+                'mitral_valve' => $request->input('mitral_valve', []),
+                'other_valves' => $request->input('other_valves', []),
+                'pericardial_effusion' => $request->input('pericardial_effusion', []),
+                'comments' => $request->input('comments', []),
+                'conclussion' => $request->conclussion,
+                'advice' => $request->advice,
+            ];
+
+            $echo = Echocardiography::updateOrCreate(
+                ['registration_id' => $request->registration_id],
+                $dataToStore
+            );
+
+            // Logic untuk signature (jika ditambahkan di masa depan)
+            if ($request->has('signatures')) {
+                foreach ($request->input('signatures', []) as $role => $signatureData) {
+                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                        $newPath = $this->saveSignatureFile($signatureData['signature_image'], "echocardiography_{$echo->id}_{$role}");
+                        $echo->signatures()->updateOrCreate(
+                            ['role' => $role],
+                            ['pic' => $signatureData['pic'], 'signature' => $newPath]
+                        );
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json(['success' => 'Data Echocardiography berhasil disimpan sebagai ' . $request->status . '!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan Echocardiography: ' . $e->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
+        }
+    }
+
 
     /**
      * Helper function untuk menyimpan file tanda tangan dari data base64.
@@ -963,6 +1016,9 @@ class ERMController extends Controller
                 $pengkajian = DoctorInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
                 return view('pages.simrs.erm.form.dokter.asesmen-awal-dokter', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
+            case 'echocardiography':
+                $pengkajian = Echocardiography::firstOrNew(['registration_id' => $registration->id]);
+                return view('pages.simrs.erm.form.penunjang.echocardiography', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
 
             default:

@@ -568,6 +568,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::post('/erm/asesmen-awal-kebidanan/store', [ERMController::class, 'storeAsesmenAwalKebidanan'])->name('erm.asesmen-awal-kebidanan.store');
         Route::post('/erm/pengkajian-awal-neonatus', [ERMController::class, 'storeNeonatusInitialAssesmentDoctor'])->name('erm.pengkajian-awal-neonatus.store');
         Route::post('/simrs/erm/store-asesmen-awal-dokter', [ERMController::class, 'storeAsesmenAwalDokter'])->name('erm.store.asesmen-awal-dokter');
+        Route::post('/simrs/erm/store-echocardiography', [ERMController::class, 'storeEchocardiography'])->name('erm.store.echocardiography');
 
         // ==========================================================
         // DATA UMUM & PENDUKUNG

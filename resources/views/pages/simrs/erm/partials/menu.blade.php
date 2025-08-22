@@ -144,6 +144,8 @@
                         href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'rujuk_antar_rs']) }}">Rujuk
                         Antar Rumah Sakit</a>
                     <a class="dropdown-item"
+                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'echocardiography']) }}">ECHO</a>
+                    <a class="dropdown-item"
                         href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'profil_ringkas_rajal']) }}">Profil
                         Ringkas Rawat Jalan</a>
                 </div>
