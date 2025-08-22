@@ -1,6 +1,7 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.css" />
     <style>
         main {
             overflow-x: hidden;

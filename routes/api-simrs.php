@@ -569,6 +569,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::post('/erm/pengkajian-awal-neonatus', [ERMController::class, 'storeNeonatusInitialAssesmentDoctor'])->name('erm.pengkajian-awal-neonatus.store');
         Route::post('/simrs/erm/store-asesmen-awal-dokter', [ERMController::class, 'storeAsesmenAwalDokter'])->name('erm.store.asesmen-awal-dokter');
         Route::post('/simrs/erm/store-echocardiography', [ERMController::class, 'storeEchocardiography'])->name('erm.store.echocardiography');
+        Route::post('/simrs/erm/store-pemeriksaan-awal-ranap', [ERMController::class, 'storeInpatientInitialExamination'])->name('erm.store.pemeriksaan-awal-ranap');
 
         // Upload Dokumen
         Route::get('/simrs/erm/dokumen/data/{registration}', [ERMController::class, 'getUploadedDocuments'])->name('erm.dokumen.data');

@@ -231,7 +231,7 @@
                         role="tab">Early Warning Scoring System (Obstetri)</a>
 
                     <a class="dropdown-item"
-                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_perawat']) }}"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'pemeriksaan_awal_ranap']) }}"
                         role="tab">Pengkajian</a>
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'cppt_perawat']) }}">CPPT</a>

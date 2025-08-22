@@ -11,6 +11,7 @@ use App\Models\Employee;
 use App\Models\GeriatricInitialAssessment;
 use App\Models\HospitalInfectionSurveillance;
 use App\Models\InpatientInitialAssessment;
+use App\Models\InpatientInitialExamination;
 use App\Models\MidwiferyInitialAssessment;
 use App\Models\NeonatusInitialAssessment;
 use App\Models\NeonatusInitialAssessmentDoctor;
@@ -838,6 +839,66 @@ class ERMController extends Controller
         }
     }
 
+    public function storeInpatientInitialExamination(Request $request)
+    {
+        // --- PERBAIKI BLOK VALIDASI INI ---
+        $validated = $request->validate([
+            'registration_id' => 'required|exists:registrations,id',
+
+            // Tanda Vital: Sebagian besar harus numerik, kecuali Tensi (BP) yang bisa "120/80"
+            'vital_sign_pr' => 'nullable|numeric',
+            'vital_sign_rr' => 'nullable|numeric',
+            'vital_sign_bp' => 'nullable|string|max:20', // Contoh: "120/80 mmHg"
+            'vital_sign_temperature' => 'nullable|numeric',
+
+            // Antropometri: Semua harus numerik
+            'anthropometry_height' => 'nullable|numeric',
+            'anthropometry_weight' => 'nullable|numeric',
+            'anthropometry_bmi' => 'nullable|numeric',
+            'anthropometry_bmi_category' => 'nullable|string|max:100',
+            'anthropometry_chest_circumference' => 'nullable|numeric',
+            'anthropometry_abdominal_circumference' => 'nullable|numeric',
+
+            // Alergi & Catatan: Boleh string
+            'allergy_medicine' => 'nullable|string',
+            'allergy_food' => 'nullable|string',
+            'diagnosis' => 'nullable|string',
+            'registration_notes' => 'nullable|string',
+        ], [
+            // Tambahkan pesan custom agar lebih jelas bagi pengguna
+            'numeric' => 'Kolom :attribute harus berupa angka.',
+            'string' => 'Kolom :attribute harus berupa teks.',
+            'max' => 'Kolom :attribute tidak boleh lebih dari :max karakter.',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $data = $validated;
+            $data['user_id'] = Auth::id();
+
+            // Ubah string dari tags input menjadi array
+            // Gunakan trim untuk menghapus spasi ekstra jika ada
+            $data['allergy_medicine'] = $request->filled('allergy_medicine')
+                ? array_map('trim', explode(',', $request->allergy_medicine))
+                : null;
+            $data['allergy_food'] = $request->filled('allergy_food')
+                ? array_map('trim', explode(',', $request->allergy_food))
+                : null;
+
+            \App\Models\InpatientInitialExamination::updateOrCreate(
+                ['registration_id' => $request->registration_id],
+                $data
+            );
+
+            DB::commit();
+            return response()->json(['success' => 'Data Pemeriksaan Awal Rawat Inap berhasil disimpan!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan Pemeriksaan Awal Rawat Inap: ' . $e->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
+        }
+    }
 
     /**
      * Helper function untuk menyimpan file tanda tangan dari data base64.
@@ -1108,6 +1169,10 @@ class ERMController extends Controller
             case 'upload_dokumen':
                 $documentCategories = \App\Models\DocumentCategory::orderBy('name')->get();
                 return view('pages.simrs.erm.form.penunjang.upload-dokumen', compact('registration', 'documentCategories', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
+            case 'pemeriksaan_awal_ranap':
+                $pengkajian = InpatientInitialExamination::firstOrNew(['registration_id' => $registration->id]);
+                return view('pages.simrs.erm.form.perawat.pemeriksaan-awal-ranap', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             default:
                 return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'path'));
