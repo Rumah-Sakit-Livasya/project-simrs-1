@@ -63,4 +63,9 @@ class Departement extends Model
     {
         return $this->belongsToMany(TarifRegistrasi::class, 'tarif_registrasi_departements');
     }
+
+    public function plasmaDisplays()
+    {
+        return $this->belongsToMany(PlasmaDisplayRawatJalan::class, 'departement_plasma_display');
+    }
 }

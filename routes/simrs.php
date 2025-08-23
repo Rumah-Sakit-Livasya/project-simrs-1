@@ -14,6 +14,7 @@ use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\NursingDiannosisPageController;
 use App\Http\Controllers\OrderGiziController;
+use App\Http\Controllers\PlasmaDisplayRawatJalanController;
 use App\Http\Controllers\ProcurementPOApprovalCEO;
 use App\Http\Controllers\ProcurementPOApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPOApprovalPharmacy;
@@ -472,6 +473,14 @@ Route::group(['middleware' => ['auth']], function () {
 
 
         Route::prefix('poliklinik')->name('poliklinik.')->group(function () {
+            Route::prefix('antrian-poli')->name('antrian-poli.')->group(function () {
+                Route::get('/setup-plasma', [PlasmaDisplayRawatJalanController::class, 'index'])->name('index');
+                Route::get('/create', [PlasmaDisplayRawatJalanController::class, 'create'])->name('create');
+                Route::post('/', [PlasmaDisplayRawatJalanController::class, 'store'])->name('store');
+                Route::get('/setup-plasma/{id}/edit', [PlasmaDisplayRawatJalanController::class, 'edit'])->name('edit');
+                Route::put('/setup-plasma/{id}', [PlasmaDisplayRawatJalanController::class, 'update'])->name('update');
+                Route::get('/plasma/{id}', [PlasmaDisplayRawatJalanController::class, 'show'])->name('show');
+            });
             // Rute utama untuk daftar pasien poliklinik
             Route::get('/daftar-pasien', [ERMController::class, 'catatanMedis'])
                 ->name('daftar-pasien');

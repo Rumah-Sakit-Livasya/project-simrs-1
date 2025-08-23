@@ -30,6 +30,8 @@ return [
 
     'connections' => [
 
+        // config/broadcasting.php
+
         'pusher' => [
             'driver' => 'pusher',
             'key' => env('PUSHER_APP_KEY'),
@@ -38,14 +40,14 @@ return [
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
                 'useTLS' => true,
-                // --- DI SINI ANDA BISA MENAMBAHKAN SOLUSI UNTUK cURL ERROR 77 ---
+
+                // =================================================================
+                // INI ADALAH SOLUSINYA: Opsi untuk menonaktifkan verifikasi SSL
+                // =================================================================
                 'curl_options' => [
                     CURLOPT_SSL_VERIFYHOST => 0,
                     CURLOPT_SSL_VERIFYPEER => 0,
                 ],
-            ],
-            'client_options' => [
-                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
             ],
         ],
 

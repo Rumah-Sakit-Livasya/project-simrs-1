@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AntrianController;
 use App\Http\Controllers\API\DiagnosisCategoryController;
 use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\API\InfusionMonitorController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\PlasmaDisplayRawatJalanController;
 use App\Http\Controllers\SIMRS\AssesmentGadarController;
 use App\Http\Controllers\SIMRS\RujukAntarRSController;
 use App\Http\Controllers\ProcurementPOApprovalCEO;
@@ -119,6 +121,7 @@ use App\Models\FarmasiReturResep;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\API\TtsController; // Pastikan path ini benar
 
 Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::get('/signature/{filename}', function ($filename) {
@@ -570,6 +573,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
         Route::post('/simrs/erm/store-asesmen-awal-dokter', [ERMController::class, 'storeAsesmenAwalDokter'])->name('erm.store.asesmen-awal-dokter');
         Route::post('/simrs/erm/store-echocardiography', [ERMController::class, 'storeEchocardiography'])->name('erm.store.echocardiography');
         Route::post('/simrs/erm/store-pemeriksaan-awal-ranap', [ERMController::class, 'storeInpatientInitialExamination'])->name('erm.store.pemeriksaan-awal-ranap');
+        Route::get('/plasma-status/{id}', [PlasmaDisplayRawatJalanController::class, 'getStatus']);
 
         // Upload Dokumen
         Route::get('/simrs/erm/dokumen/data/{registration}', [ERMController::class, 'getUploadedDocuments'])->name('erm.dokumen.data');
@@ -935,3 +939,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::get('/getKelurahan', [LocationController::class, 'getKelurahan'])->name('getKelurahan');
     Route::get('/get-kecamatan-by-kelurahan', [LocationController::class, 'getKecamatanByKelurahan'])->name('getKecamatanByKelurahan');
 });
+
+Route::get('/tts', [TtsController::class, 'generateSpeech']);
+Route::post('/antrian/panggil', [AntrianController::class, 'panggilPasien'])->name('api.antrian.panggil');
+Route::get('/plasma-status/rawat-jalan/{plasmaDisplayRawatJalan}', [PlasmaDisplayRawatJalanController::class, 'getStatus']);
