@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\BilinganController;
+use App\Http\Controllers\FarmasiReportEmbalase;
 use App\Http\Controllers\FarmasiReportKartuStock;
 use App\Http\Controllers\FarmasiReportStockDetail;
 use App\Http\Controllers\FarmasiReportStockStatus;
 use App\Http\Controllers\FarmasiResepController;
+use App\Http\Controllers\FarmasiResepResponseController;
 use App\Http\Controllers\FarmasiReturResepController;
 use App\Http\Controllers\FarmasiSignaController;
 use App\Http\Controllers\KategoriGiziController;
@@ -119,6 +121,7 @@ use App\Http\Controllers\WarehouseStockRequestNonPharmacyController;
 use App\Http\Controllers\WarehouseStockRequestPharmacyController;
 use App\Http\Controllers\WarehouseSupplierController;
 use App\Http\Controllers\WarehouseZatAktifController;
+use App\Models\FarmasiResepResponse;
 use App\Models\ProcurementPurchaseRequestPharmacy;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\TagihanPasien;
@@ -880,17 +883,26 @@ Route::group(['middleware' => ['auth']], function () {
                 });
             });
 
+            Route::prefix('laporan')->group(function(){
+                Route::prefix("embalase")->group(function(){
+                    Route::get("/", [FarmasiReportEmbalase::class, "index"])->name("farmasi.laporan.embalase");
+                    Route::get("/view/{startDate}/{endDate}/{gudang_id}/{tipe}", [FarmasiReportEmbalase::class, "show"])->name("farmasi.laporan.embalase.show");
+                });
+            });
+
             Route::prefix("retur-resep")->group(function(){
                 Route::get("/", [FarmasiReturResepController::class, 'index'])->name('farmasi.retur-resep');
                 Route::get("/create", [FarmasiReturResepController::class, 'create'])->name('farmasi.retur-resep.create');
                 Route::get("/print/{id}", [FarmasiReturResepController::class, 'print'])->name('farmasi.retur-resep.print');
             });
 
-
-
-            Route::get('reponse-time', [FarmasiController::class, 'responseTime'])
-                ->name('farmasi.reponse-time');
-
+            Route::prefix("response-time")->group(function(){
+                Route::get("/",[FarmasiResepResponseController::class, 'index'])->name('farmasi.response-time');
+                Route::prefix("popup")->group(function(){
+                    Route::get("/report/{json}", [FarmasiResepResponseController::class, 'report'])->name('farmasi.response-time.print');
+                    Route::get("/telaah-resep/{id}", [FarmasiResepResponseController::class, 'telaahResep'])->name('farmasi.response-time.telaah-resep');
+                });
+            });
 
             Route::prefix('reports')->group(function () {
                 Route::get('stock-status', [FarmasiController::class, 'stokStatus'])

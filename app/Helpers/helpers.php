@@ -228,6 +228,13 @@ if (!function_exists('tgl_waktu')) {
     }
 }
 
+if (!function_exists('tgl_waktu_short')) {
+    function tgl_waktu_short($tanggal)
+    {
+        return date('d-m-Y H:i', strtotime($tanggal));
+    }
+}
+
 function greetings()
 {
     date_default_timezone_set('Asia/Jakarta'); // Sesuaikan dengan zona waktu Anda

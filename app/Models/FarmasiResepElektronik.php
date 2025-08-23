@@ -19,12 +19,18 @@ class FarmasiResepElektronik extends Model
         return $this->belongsTo(Registration::class, 'registration_id');
     }
 
+    public function resep()
+    {
+        return $this->hasOne(FarmasiResep::class, 're_id');
+    }
+
     public function items()
     {
         return $this->hasMany(FarmasiResepElektronikItems::class, "re_id");
     }
 
-    public function cppt(){
+    public function cppt()
+    {
         return $this->belongsTo(CPPT::class, 'cppt_id');
     }
 }

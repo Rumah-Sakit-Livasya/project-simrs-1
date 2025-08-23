@@ -5,6 +5,7 @@ use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\DietGiziController;
 use App\Http\Controllers\FarmasiResepController;
 use App\Http\Controllers\FarmasiResepHarianController;
+use App\Http\Controllers\FarmasiResepResponseController;
 use App\Http\Controllers\FarmasiReturResepController;
 use App\Http\Controllers\FarmasiSignaController;
 use App\Http\Controllers\KategoriGiziController;
@@ -111,6 +112,7 @@ use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\TarifOperasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Models\Employee;
+use App\Models\FarmasiResepResponse;
 use App\Models\FarmasiReturResep;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
@@ -208,6 +210,11 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
         Route::prefix('resep-harian')->group(function(){
             Route::post('/store', [FarmasiResepHarianController::class, 'store'])->name('farmasi.resep-harian.store');
+        });
+
+        Route::prefix('response-time')->group(function(){
+            Route::put("/update/{id}/{btoa}", [FarmasiResepResponseController::class, 'update'])->name('farmasi.response-time.update');
+            Route::put("/update-keterangan/{id}/{btoa}", [FarmasiResepResponseController::class, 'updateKeterangan'])->name('farmasi.response-time.update-keterangan');
         });
 
         Route::prefix('retur-resep')->group(function(){

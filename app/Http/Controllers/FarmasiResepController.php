@@ -531,6 +531,13 @@ class FarmasiResepController extends Controller
                     "processed" => 1
                 ]);
                 $re->save();
+            } else {
+                // create resep response
+                $response = FarmasiResepResponse::create([
+                    "resep_id" => $resep->id,
+                    "input_resep_user_id" => auth()->user()->id,
+                    "input_resep_time" => Carbon::now(),
+                ]);
             }
 
             // sort $data2["type"] so that the top ones are "racikan" first
