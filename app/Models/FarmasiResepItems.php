@@ -29,4 +29,14 @@ class FarmasiResepItems extends Model
     public function resep(){
         return $this->belongsTo(FarmasiResep::class, 'resep_id');
     }
+
+    public function getHargaRacikan(){
+        if ($this->tipe != 'racikan') return 0;
+
+        $harga = 0;
+        foreach($this->detail_racikan as $item){
+            $harga += $item->subtotal;
+        }
+        return $harga;
+    }
 }

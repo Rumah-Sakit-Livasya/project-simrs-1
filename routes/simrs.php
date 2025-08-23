@@ -4,6 +4,7 @@ use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\BilinganController;
 use App\Http\Controllers\FarmasiReportEmbalase;
 use App\Http\Controllers\FarmasiReportKartuStock;
+use App\Http\Controllers\FarmasiReportKronis;
 use App\Http\Controllers\FarmasiReportStockDetail;
 use App\Http\Controllers\FarmasiReportStockStatus;
 use App\Http\Controllers\FarmasiResepController;
@@ -875,7 +876,7 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::get("popup/telaah-resep-raw/{json}", [FarmasiResepController::class, 'telaahResepRaw'])->name('farmasi.transaksi-resep.popup.telaah-resep-raw');
                 Route::get("popup/telaah-resep/{id}", [FarmasiResepController::class, 'telaahResep'])->name('farmasi.transaksi-resep.popup.telaah-resep');
 
-                Route::prefix("print")->group(function(){
+                Route::prefix("print")->group(function () {
                     Route::get("/e-tiket/{id}", [FarmasiResepController::class, 'print_e_tiket'])->name('farmasi.transaksi-resep.print.e-tiket');
                     Route::get("/e-tiket-ranap/{id}", [FarmasiResepController::class, 'print_e_tiket_ranap'])->name('farmasi.transaksi-resep.print.e-tiket-ranap');
                     Route::get("/penjualan/{id}", [FarmasiResepController::class, 'print_penjualan'])->name('farmasi.transaksi-resep.print.penjualan');
@@ -883,22 +884,26 @@ Route::group(['middleware' => ['auth']], function () {
                 });
             });
 
-            Route::prefix('laporan')->group(function(){
-                Route::prefix("embalase")->group(function(){
+            Route::prefix('laporan')->group(function () {
+                Route::prefix("embalase")->group(function () {
                     Route::get("/", [FarmasiReportEmbalase::class, "index"])->name("farmasi.laporan.embalase");
                     Route::get("/view/{startDate}/{endDate}/{gudang_id}/{tipe}", [FarmasiReportEmbalase::class, "show"])->name("farmasi.laporan.embalase.show");
                 });
+                Route::prefix("klaim-kronis")->group(function () {
+                    Route::get("/", [FarmasiReportKronis::class, "index"])->name("farmasi.laporan.kronis");
+                    Route::get("/view/{startDate}/{endDate}/{tipe}/{doctor_id}/{departement_id}/{kelas_rawat_id}/{nama_obat}", [FarmasiReportKronis::class, "show"])->name("farmasi.laporan.kronis.show");
+                });
             });
 
-            Route::prefix("retur-resep")->group(function(){
+            Route::prefix("retur-resep")->group(function () {
                 Route::get("/", [FarmasiReturResepController::class, 'index'])->name('farmasi.retur-resep');
                 Route::get("/create", [FarmasiReturResepController::class, 'create'])->name('farmasi.retur-resep.create');
                 Route::get("/print/{id}", [FarmasiReturResepController::class, 'print'])->name('farmasi.retur-resep.print');
             });
 
-            Route::prefix("response-time")->group(function(){
-                Route::get("/",[FarmasiResepResponseController::class, 'index'])->name('farmasi.response-time');
-                Route::prefix("popup")->group(function(){
+            Route::prefix("response-time")->group(function () {
+                Route::get("/", [FarmasiResepResponseController::class, 'index'])->name('farmasi.response-time');
+                Route::prefix("popup")->group(function () {
                     Route::get("/report/{json}", [FarmasiResepResponseController::class, 'report'])->name('farmasi.response-time.print');
                     Route::get("/telaah-resep/{id}", [FarmasiResepResponseController::class, 'telaahResep'])->name('farmasi.response-time.telaah-resep');
                 });
