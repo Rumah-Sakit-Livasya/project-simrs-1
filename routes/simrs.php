@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\BilinganController;
+use App\Http\Controllers\FarmasiReportDispensing;
 use App\Http\Controllers\FarmasiReportEmbalase;
 use App\Http\Controllers\FarmasiReportKartuStock;
 use App\Http\Controllers\FarmasiReportKronis;
@@ -889,9 +890,15 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get("/", [FarmasiReportEmbalase::class, "index"])->name("farmasi.laporan.embalase");
                     Route::get("/view/{startDate}/{endDate}/{gudang_id}/{tipe}", [FarmasiReportEmbalase::class, "show"])->name("farmasi.laporan.embalase.show");
                 });
+
                 Route::prefix("klaim-kronis")->group(function () {
                     Route::get("/", [FarmasiReportKronis::class, "index"])->name("farmasi.laporan.kronis");
                     Route::get("/view/{startDate}/{endDate}/{tipe}/{doctor_id}/{departement_id}/{kelas_rawat_id}/{nama_obat}", [FarmasiReportKronis::class, "show"])->name("farmasi.laporan.kronis.show");
+                });
+
+                Route::prefix("klaim-dispensing")->group(function () {
+                    Route::get("/", [FarmasiReportDispensing::class, "index"])->name("farmasi.laporan.dispensing");
+                    Route::get("/view/{startDate}/{endDate}/{tipe}/{doctor_id}/{departement_id}/{kelas_rawat_id}/{nama_obat}", [FarmasiReportDispensing::class, "show"])->name("farmasi.laporan.dispensing.show");
                 });
             });
 
