@@ -75,7 +75,7 @@ class FarmasiReportKronis extends Controller
 
         if ($nama_obat != '-') {
             $query->whereHas('items.stored.pbi', function ($q) use ($nama_obat) {
-                $q->where('nama_barang', $nama_obat);
+                $q->where('nama_barang', 'like', '%' . $nama_obat . '%');
             });
         }
 

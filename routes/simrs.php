@@ -6,6 +6,7 @@ use App\Http\Controllers\FarmasiReportDispensing;
 use App\Http\Controllers\FarmasiReportEmbalase;
 use App\Http\Controllers\FarmasiReportKartuStock;
 use App\Http\Controllers\FarmasiReportKronis;
+use App\Http\Controllers\FarmasiReportRekapPenjualan;
 use App\Http\Controllers\FarmasiReportStockDetail;
 use App\Http\Controllers\FarmasiReportStockStatus;
 use App\Http\Controllers\FarmasiResepController;
@@ -899,6 +900,11 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::prefix("klaim-dispensing")->group(function () {
                     Route::get("/", [FarmasiReportDispensing::class, "index"])->name("farmasi.laporan.dispensing");
                     Route::get("/view/{startDate}/{endDate}/{tipe}/{doctor_id}/{departement_id}/{kelas_rawat_id}/{nama_obat}", [FarmasiReportDispensing::class, "show"])->name("farmasi.laporan.dispensing.show");
+                });
+
+                Route::prefix("rekap-penjualan")->group(function () {
+                    Route::get("/", [FarmasiReportRekapPenjualan::class, "index"])->name("farmasi.laporan.rekap-penjualan");
+                    Route::get("/view/{tipe}/{btoa}", [FarmasiReportRekapPenjualan::class, "show"])->name("farmasi.laporan.rekap-penjualan.show");
                 });
             });
 
