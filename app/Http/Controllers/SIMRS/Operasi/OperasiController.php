@@ -261,7 +261,6 @@ class OperasiController extends Controller
     public function getTindakanOperasi($registrationId)
     {
         try {
-            // Sesuaikan dengan model dan relasi yang ada
             $tindakan = []; // Kosong dulu, sesuaikan dengan data real Anda
 
             return response()->json([
@@ -893,11 +892,9 @@ class OperasiController extends Controller
     }
 
 
-    public function deleteOrder(Request $request)
+    public function deleteOrder(OrderOperasi $order) // Terima model OrderOperasi langsung
     {
         try {
-            $orderId = $request->input('id');
-            $order = OrderOperasi::findOrFail($orderId);
 
             if ($order->prosedurOperasi()->count() > 0) {
                 return response()->json([
@@ -913,6 +910,7 @@ class OperasiController extends Controller
                 'message' => 'Order operasi berhasil dihapus.'
             ]);
         } catch (\Exception $e) {
+            // Catch block ini sekarang lebih untuk error tak terduga lainnya
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menghapus order: ' . $e->getMessage()

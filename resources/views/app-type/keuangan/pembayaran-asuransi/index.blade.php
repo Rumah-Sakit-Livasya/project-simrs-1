@@ -11,10 +11,10 @@
         }
 
         /*
-                                ====================================================================
-                                CSS BARU UNTUK DETAILS CONTROL (Disalin dari Konfirmasi Asuransi)
-                                ====================================================================
-                                */
+                                    ====================================================================
+                                    CSS BARU UNTUK DETAILS CONTROL (Disalin dari Konfirmasi Asuransi)
+                                    ====================================================================
+                                    */
         .details-control {
             cursor: pointer;
             text-align: center;

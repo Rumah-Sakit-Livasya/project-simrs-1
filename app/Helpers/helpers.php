@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\SIMRS\Patient;
 use Illuminate\Support\Facades\Request;
 use Carbon\Carbon;
 
@@ -641,5 +642,28 @@ class AgeComparison
 
         // Ganti simbol-simbol di dalam teks dengan kata yang sesuai
         return strtr($text, $replacements);
+    }
+
+    function generate_baby_medical_record_number()
+    {
+        $prefix = 'BY';
+        $datePart = date('ym'); // Tahun dan bulan 2 digit, cth: 2405
+
+        // Cari nomor terakhir di bulan dan tahun ini
+        $lastPatient = Patient::where('medical_record_number', 'like', $prefix . '-' . $datePart . '-%')
+            ->orderBy('medical_record_number', 'desc')
+            ->first();
+
+        $sequence = 1;
+        if ($lastPatient) {
+            // Ambil nomor urut dari RM terakhir dan tambahkan 1
+            $lastSequence = (int) substr($lastPatient->medical_record_number, -4);
+            $sequence = $lastSequence + 1;
+        }
+
+        // Format nomor urut menjadi 4 digit dengan leading zero
+        $paddedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        return $prefix . '-' . $datePart . '-' . $paddedSequence;
     }
 }
