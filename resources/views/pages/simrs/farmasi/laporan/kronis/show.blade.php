@@ -724,33 +724,33 @@
                                 <td align="right">{{ $item->qty }}</td>
                                 <td align="right">{{ rp($item->harga_racikan - $item->embalase) }}</td>
                             </tr>
-                        @endif
 
-                        {{-- inside, the details --}}
-                        @foreach ($resep->items as $item2)
-                            @if (isset($item2->racikan_id) && $item2->racikan_id == $item->id)
-                                @php
-                                    ++$r;
-                                    ++$r_no_header;
-                                    $item2->stored->pbi->item->tipe == 'FN' ? ++$fn : ++$nfn;
-                                    $item2->stored->pbi->item->formularium == 'RS' ? ++$rs : ++$nrs;
-                                @endphp
-                                <tr>
-                                    <td>{{ tgl($resep->order_date) }}</td>
-                                    <td>{{ $doctor }}</td>
-                                    <td>{{ $poly_ruang }}</td>
-                                    <td>{{ $nama_gudang }}</td>
-                                    <td>↪{{ $item2->stored->pbi->nama_barang }}</td>
-                                    <td>{{ $item2->stored->pbi->item->tipe == 'FN' ? 'Formularium Nasional' : 'Non Formularium Nasional' }}
-                                    </td>
-                                    <td>{{ $item2->stored->pbi->item->formularium == 'RS' ? 'Formularium Rumah Sakit' : 'Formularium Non Rumah Sakit' }}
-                                    </td>
-                                    <td>{{ $item2->stored->pbi->item->kode }}</td>
-                                    <td align="right">{{ $item2->qty }}</td>
-                                    <td align="right">{{ rp(0) }}</td>
-                                </tr>
-                            @endif
-                        @endforeach
+                            {{-- inside, the details --}}
+                            @foreach ($resep->items as $item2)
+                                @if (isset($item2->racikan_id) && $item2->racikan_id == $item->id)
+                                    @php
+                                        ++$r;
+                                        ++$r_no_header;
+                                        $item2->stored->pbi->item->tipe == 'FN' ? ++$fn : ++$nfn;
+                                        $item2->stored->pbi->item->formularium == 'RS' ? ++$rs : ++$nrs;
+                                    @endphp
+                                    <tr>
+                                        <td>{{ tgl($resep->order_date) }}</td>
+                                        <td>{{ $doctor }}</td>
+                                        <td>{{ $poly_ruang }}</td>
+                                        <td>{{ $nama_gudang }}</td>
+                                        <td>↪{{ $item2->stored->pbi->nama_barang }}</td>
+                                        <td>{{ $item2->stored->pbi->item->tipe == 'FN' ? 'Formularium Nasional' : 'Non Formularium Nasional' }}
+                                        </td>
+                                        <td>{{ $item2->stored->pbi->item->formularium == 'RS' ? 'Formularium Rumah Sakit' : 'Formularium Non Rumah Sakit' }}
+                                        </td>
+                                        <td>{{ $item2->stored->pbi->item->kode }}</td>
+                                        <td align="right">{{ $item2->qty }}</td>
+                                        <td align="right">{{ rp(0) }}</td>
+                                    </tr>
+                                @endif
+                            @endforeach
+                        @endif
                     @endforeach
                 @endforeach
 

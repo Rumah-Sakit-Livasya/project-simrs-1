@@ -163,8 +163,11 @@ class FarmasiReturResepController extends Controller
 
             foreach ($data["item_id"] as $key => $id) {
                 $item = FarmasiResepItems::findOrFail($id);
+                // find price per item
+                $price = ($item->subtotal - $item->embalase) / $item->qty;
                 $item->update([
-                    "returned_qty" => $item->returned_qty + $data["qty"][$key],
+                    "subtotal" => $price * ($item->qty - ($item->returned_qty + $data["qty"][$key])),
+                    "returned_qty" => $item->returned_qty + $data["qty"][$key]
                 ]);
 
                 if ($data["gudang_id"] != $item->stored->gudang_id) {
@@ -250,7 +253,10 @@ class FarmasiReturResepController extends Controller
             $rr->delete();
 
             foreach ($rr->items as $item) {
+                // find price per item
+                $price = ($item->ri->subtotal - $item->ri->embalase) / $item->ri->qty;
                 $item->ri->update([
+                    "subtotal" => $price * ($item->ri->qty + $item->qty),
                     "returned_qty" => $item->ri->returned_qty - $item->qty
                 ]);
 

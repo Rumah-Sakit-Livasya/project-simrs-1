@@ -83,6 +83,10 @@ class WarehouseBarangFarmasi extends Model implements AuditableContract
         return $this->hasManyThrough(StoredBarangFarmasi::class, WarehousePenerimaanBarangFarmasiItems::class, "barang_id", "pbi_id");
     }
 
+    public function pabrik(){
+        return $this->belongsTo(WarehousePabrik::class, 'principal');
+    }
+
     public function getGudangsAttribute()
     {
         return $this->pb_pharmacy

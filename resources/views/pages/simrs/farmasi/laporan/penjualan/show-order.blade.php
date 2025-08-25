@@ -623,7 +623,7 @@
     <!-- B: Print View -->
     <div id="previews">
         <h2 class="bdr">
-            Laporan Klaim Dispensing
+            Laporan Penjualan
             <span>Periode : {{ tgl($startDate) }} - {{ tgl($endDate) }}</span>
         </h2>
 
@@ -634,6 +634,7 @@
                     <th>Dokter</th>
                     <th>Poly/Ruang</th>
                     <th>Gudang</th>
+                    <th>Principal</th>
                     <th>Nama Barang</th>
                     <th>Tipe Barang</th>
                     <th>Formularium</th>
@@ -648,7 +649,6 @@
                     $r_no_detail = 0;
                     $r = 0;
                     $totalQty = 0;
-                    $grandTotal = 0;
                     $fn = 0;
                     $nfn = 0;
                     $rs = 0;
@@ -656,24 +656,37 @@
                 @endphp
                 @foreach ($reseps as $resep)
                     @php
-                        $nama = $resep->registration->patient->name;
-                        $mrn = $resep->registration->patient->medical_record_number;
-                        $poly_ruang =
-                            $resep->registration->registration_type == 'rawat-inap'
-                                ? $resep->registration->kelas_rawat->kelas
-                                : $resep->registration->departement->name;
+                        $isOTC = isset($resep->otc_id);
+                        if ($isOTC) {
+                            $nama = $resep->otc->nama_pasien;
+                            $mrn = 'OTC';
+                            $poly_ruang = 'APOTIK';
+                        } else {
+                            $nama = $resep->registration->patient->name;
+                            $mrn = $resep->registration->patient->medical_record_number;
+                            $poly_ruang =
+                                $resep->registration->registration_type == 'rawat-inap'
+                                    ? $resep->registration->kelas_rawat->kelas
+                                    : $resep->registration->departement->name;
+                        }
+
                         $nama_gudang = $resep->gudang->nama;
 
                         $doctor = '';
                         if (isset($resep->dokter_id)) {
                             $doctor = $resep->doctor->employee->fullname;
                         } else {
-                            $doctor = $resep->registration->doctor->employee->fullname;
+                            if ($isOTC) {
+                                $doctor = 'OTC';
+                            } else {
+                                $doctor = $resep->registration->doctor->employee->fullname;
+                            }
                         }
                     @endphp
                     <tr>
-                        <td colspan="8"><b>No Resep: {{ $resep->kode_resep }}, {{ $nama }}, RM:
-                                {{ $mrn }} No Registrasi: {{ $resep->registration->registration_number }}</b>
+                        <td colspan="9"><b>No Resep: {{ $resep->kode_resep }}, {{ $nama }}, RM:
+                                {{ $mrn }} No Registrasi:
+                                {{ $isOTC ? $resep->otc->registration_number : $resep->registration->registration_number }}</b>
                         </td>
                         <td></td>
                         <td></td>
@@ -684,10 +697,8 @@
                         {{-- RUN ONLY ONCE --}}
                         @php
                             $totalQty += $item->qty;
-                            // if bpjs, don't count embalase
-                            $grandTotal +=
-                                $item->subtotal - ($resep->registration->penjamin->is_bpjs ? $item->embalase : 0);
                         @endphp
+
                         @if (!isset($item->racikan_id) && $item->tipe == 'obat')
                             @php
                                 ++$r;
@@ -699,16 +710,16 @@
                                 <td>{{ $doctor }}</td>
                                 <td>{{ $poly_ruang }}</td>
                                 <td>{{ $nama_gudang }}</td>
+                                <td>{{ $item->stored->pbi->item->pabrik?->nama }}</td>
                                 <td>{{ $item->stored->pbi->nama_barang }}</td>
                                 <td>{{ $item->stored->pbi->item->tipe == 'FN' ? 'Formularium Nasional' : 'Non Formularium Nasional' }}
                                 </td>
                                 <td>{{ $item->stored->pbi->item->formularium == 'RS' ? 'Formularium Rumah Sakit' : 'Formularium Non Rumah Sakit' }}
                                 </td>
                                 <td>{{ $item->stored->pbi->item->kode }}</td>
-                                <td align="right">{{ $item->qty }}</td>
-                                {{-- if bpjs, don't count embalase --}}
+                                <td align="right">{{ $item->qty - $item->returned_qty }}</td>
                                 <td align="right">
-                                    {{ rp($item->subtotal - ($resep->registration->penjamin->is_bpjs ? $item->embalase : 0)) }}
+                                    {{ rp($item->subtotal) }}
                                 </td>
                             </tr>
                         @endif
@@ -729,14 +740,12 @@
                                 <td>{{ $poly_ruang }}</td>
                                 <td>{{ $nama_gudang }}</td>
                                 <td>RACIKAN</td>
+                                <td>RACIKAN</td>
                                 <td>Non Formularium Nasional </td>
                                 <td>Formularium Rumah Sakit </td>
                                 <td>RACIKAN</td>
-                                <td align="right">{{ $item->qty }}</td>
-                                {{-- if bpjs, don't count embalase --}}
-                                <td align="right">
-                                    {{ rp($item->harga_racikan - ($resep->registration->penjamin->is_bpjs ? $item->embalase : 0)) }}
-                                </td>
+                                <td align="right">{{ $item->qty - $item->returned_qty }}</td>
+                                <td align="right"> {{ rp(0) }} </td>
                             </tr>
 
                             {{-- inside, the details --}}
@@ -753,24 +762,26 @@
                                         <td>{{ $doctor }}</td>
                                         <td>{{ $poly_ruang }}</td>
                                         <td>{{ $nama_gudang }}</td>
+                                        <td>{{ $item2->stored->pbi->item->pabrik?->nama }}</td>
                                         <td>↪{{ $item2->stored->pbi->nama_barang }}</td>
                                         <td>{{ $item2->stored->pbi->item->tipe == 'FN' ? 'Formularium Nasional' : 'Non Formularium Nasional' }}
                                         </td>
                                         <td>{{ $item2->stored->pbi->item->formularium == 'RS' ? 'Formularium Rumah Sakit' : 'Formularium Non Rumah Sakit' }}
                                         </td>
                                         <td>{{ $item2->stored->pbi->item->kode }}</td>
-                                        <td align="right">{{ $item2->qty }}</td>
-                                        <td align="right">{{ rp(0) }}</td>
+                                        <td align="right">{{ $item2->qty - $item2->returned_qty }}</td>
+                                        <td align="right">{{ rp($item2->subtotal) }}</td>
                                     </tr>
                                 @endif
                             @endforeach
                         @endif
                     @endforeach
                 @endforeach
+
                 <tr style="text-align: right; font-weight: bold;">
-                    <td colspan="8">Total</td>
+                    <td colspan="9">Total</td>
                     <td align="right">{{ formatNumber($totalQty) }}</td>
-                    <td align="right">{{ rp($grandTotal) }}</td>
+                    <td align="right">{{ rp($reseps->sum('total')) }}</td>
                 </tr>
                 <tr style="font-weight: bold;">
                     <td colspan="3">Total /R (detail racikan tidak dihitung)</td>

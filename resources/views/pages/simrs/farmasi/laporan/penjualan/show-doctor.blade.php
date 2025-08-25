@@ -595,6 +595,7 @@
 </head>
 
 <body>
+
     <style type="text/css">
         .ui-icon {
             background-image: url("http://192.168.1.253/testing/include/styles/images/ui-icons_72a7cf_256x240.png");
@@ -614,7 +615,7 @@
     <div id="functions">
         <ul>
             <li><a href="#" onclick="window.print();">Print</a></li>
-            <li><a href="index-fancy.html" onclick="window.close()">Close</a></li>
+            <li><a href="#" onclick="window.close()">Close</a></li>
         </ul>
     </div>
     <!-- END LOOPING: button -->
@@ -623,7 +624,7 @@
     <!-- B: Print View -->
     <div id="previews">
         <h2 class="bdr">
-            Laporan Klaim Dispensing
+            Laporan Penjualan Barang Per Dokter
             <span>Periode : {{ tgl($startDate) }} - {{ tgl($endDate) }}</span>
         </h2>
 
@@ -631,12 +632,13 @@
             <thead>
                 <tr>
                     <th width="8%">Tanggal</th>
-                    <th>Dokter</th>
+                    <th>Nama Pasien</th>
+                    <th>No Registrasi</th>
                     <th>Poly/Ruang</th>
                     <th>Gudang</th>
+                    <th>Principal</th>
+                    <th width="8%">No Resep</th>
                     <th>Nama Barang</th>
-                    <th>Tipe Barang</th>
-                    <th>Formularium</th>
                     <th width="5%">UOM</th>
                     <th width="3%">QTY</th>
                     <th width="8%">NOMINAL</th>
@@ -647,6 +649,8 @@
                     $r_no_header = 0;
                     $r_no_detail = 0;
                     $r = 0;
+                    $totalResep = 0;
+                    $totalReturnedQty = 0;
                     $totalQty = 0;
                     $grandTotal = 0;
                     $fn = 0;
@@ -654,147 +658,132 @@
                     $rs = 0;
                     $nrs = 0;
                 @endphp
-                @foreach ($reseps as $resep)
-                    @php
-                        $nama = $resep->registration->patient->name;
-                        $mrn = $resep->registration->patient->medical_record_number;
-                        $poly_ruang =
-                            $resep->registration->registration_type == 'rawat-inap'
-                                ? $resep->registration->kelas_rawat->kelas
-                                : $resep->registration->departement->name;
-                        $nama_gudang = $resep->gudang->nama;
 
-                        $doctor = '';
-                        if (isset($resep->dokter_id)) {
-                            $doctor = $resep->doctor->employee->fullname;
-                        } else {
-                            $doctor = $resep->registration->doctor->employee->fullname;
-                        }
-                    @endphp
+                @foreach ($dictionary as $dict)
                     <tr>
-                        <td colspan="8"><b>No Resep: {{ $resep->kode_resep }}, {{ $nama }}, RM:
-                                {{ $mrn }} No Registrasi: {{ $resep->registration->registration_number }}</b>
-                        </td>
+                        <td colspan="7"><b>{{ $dict->doctor->employee->fullname }}</b></td>
+                        <td></td>
+                        <td></td>
                         <td></td>
                         <td></td>
                     </tr>
-
-                    {{-- standalone first --}}
-                    @foreach ($resep->items as $item)
-                        {{-- RUN ONLY ONCE --}}
+                    @foreach ($dict->reseps as $resep)
                         @php
-                            $totalQty += $item->qty;
-                            // if bpjs, don't count embalase
-                            $grandTotal +=
-                                $item->subtotal - ($resep->registration->penjamin->is_bpjs ? $item->embalase : 0);
+                            $totalResep++;
                         @endphp
-                        @if (!isset($item->racikan_id) && $item->tipe == 'obat')
+                        @foreach ($resep->items as $item)
+                            {{-- standalone first --}}
+                            {{-- RUN ONLY ONCE --}}
                             @php
-                                ++$r;
-                                $item->stored->pbi->item->tipe == 'FN' ? ++$fn : ++$nfn;
-                                $item->stored->pbi->item->formularium == 'RS' ? ++$rs : ++$nrs;
+                                $totalReturnedQty += $item->returned_qty;
+                                $totalQty += $item->qty - $item->returned_qty;
+                                $grandTotal += $item->subtotal;
                             @endphp
-                            <tr>
-                                <td>{{ tgl($resep->order_date) }}</td>
-                                <td>{{ $doctor }}</td>
-                                <td>{{ $poly_ruang }}</td>
-                                <td>{{ $nama_gudang }}</td>
-                                <td>{{ $item->stored->pbi->nama_barang }}</td>
-                                <td>{{ $item->stored->pbi->item->tipe == 'FN' ? 'Formularium Nasional' : 'Non Formularium Nasional' }}
-                                </td>
-                                <td>{{ $item->stored->pbi->item->formularium == 'RS' ? 'Formularium Rumah Sakit' : 'Formularium Non Rumah Sakit' }}
-                                </td>
-                                <td>{{ $item->stored->pbi->item->kode }}</td>
-                                <td align="right">{{ $item->qty }}</td>
-                                {{-- if bpjs, don't count embalase --}}
-                                <td align="right">
-                                    {{ rp($item->subtotal - ($resep->registration->penjamin->is_bpjs ? $item->embalase : 0)) }}
-                                </td>
-                            </tr>
-                        @endif
-                    @endforeach
 
-                    {{-- then racikan --}}
-                    @foreach ($resep->items as $item)
-                        @if ($item->tipe == 'racikan')
-                            @php
-                                ++$r;
-                                ++$r_no_detail;
-                                ++$nfn;
-                                ++$rs;
-                            @endphp
-                            <tr>
-                                <td>{{ tgl($resep->order_date) }}</td>
-                                <td>{{ $doctor }}</td>
-                                <td>{{ $poly_ruang }}</td>
-                                <td>{{ $nama_gudang }}</td>
-                                <td>RACIKAN</td>
-                                <td>Non Formularium Nasional </td>
-                                <td>Formularium Rumah Sakit </td>
-                                <td>RACIKAN</td>
-                                <td align="right">{{ $item->qty }}</td>
-                                {{-- if bpjs, don't count embalase --}}
-                                <td align="right">
-                                    {{ rp($item->harga_racikan - ($resep->registration->penjamin->is_bpjs ? $item->embalase : 0)) }}
-                                </td>
-                            </tr>
+                            @if (!isset($item->racikan_id) && $item->tipe == 'obat')
+                                @php
+                                    ++$r;
+                                    $item->stored->pbi->item->tipe == 'FN' ? ++$fn : ++$nfn;
+                                    $item->stored->pbi->item->formularium == 'RS' ? ++$rs : ++$nrs;
+                                @endphp
+                                <tr>
+                                    <td>{{ tgl($resep->order_date) }}</td>
+                                    <td>{{ $resep->registration->patient->name }}
+                                        [{{ $resep->registration->patient->medical_record_number }}]</td>
+                                    <td>{{ $resep->registration->registration_number }}</td>
+                                    <td>{{ $resep->registration->departement->name }}</td>
+                                    <td>{{ $resep->gudang->nama }}</td>
+                                    <td>{{ $item->pabrik?->nama }}</td>
+                                    <td>{{ $resep->kode_resep }}</td>
+                                    <td>{{ $item->stored->pbi->nama_barang }}</td>
+                                    <td>{{ $item->stored->pbi->item->satuan->kode }}</td>
+                                    <td align="right">{{ $item->qty - $item->returned_qty }}</td>
+                                    <td align="right">{{ rp($item->subtotal) }}</td>
+                                </tr>
+                            @endif
+                        @endforeach
 
-                            {{-- inside, the details --}}
-                            @foreach ($resep->items as $item2)
-                                @if (isset($item2->racikan_id) && $item2->racikan_id == $item->id)
-                                    @php
-                                        ++$r;
-                                        ++$r_no_header;
-                                        $item2->stored->pbi->item->tipe == 'FN' ? ++$fn : ++$nfn;
-                                        $item2->stored->pbi->item->formularium == 'RS' ? ++$rs : ++$nrs;
-                                    @endphp
-                                    <tr>
-                                        <td>{{ tgl($resep->order_date) }}</td>
-                                        <td>{{ $doctor }}</td>
-                                        <td>{{ $poly_ruang }}</td>
-                                        <td>{{ $nama_gudang }}</td>
-                                        <td>↪{{ $item2->stored->pbi->nama_barang }}</td>
-                                        <td>{{ $item2->stored->pbi->item->tipe == 'FN' ? 'Formularium Nasional' : 'Non Formularium Nasional' }}
-                                        </td>
-                                        <td>{{ $item2->stored->pbi->item->formularium == 'RS' ? 'Formularium Rumah Sakit' : 'Formularium Non Rumah Sakit' }}
-                                        </td>
-                                        <td>{{ $item2->stored->pbi->item->kode }}</td>
-                                        <td align="right">{{ $item2->qty }}</td>
-                                        <td align="right">{{ rp(0) }}</td>
-                                    </tr>
-                                @endif
-                            @endforeach
-                        @endif
+                        {{-- then racikan --}}
+                        @foreach ($resep->items as $item)
+                            @if ($item->tipe == 'racikan')
+                                @php
+                                    ++$r;
+                                    ++$r_no_detail;
+                                    ++$nfn;
+                                    ++$rs;
+                                @endphp
+
+                                <tr>
+                                    <td>{{ tgl($resep->order_date) }}</td>
+                                    <td>{{ $resep->registration->patient->name }}
+                                        [{{ $resep->registration->patient->medical_record_number }}]</td>
+                                    <td>{{ $resep->registration->registration_number }}</td>
+                                    <td>{{ $resep->registration->departement->name }}</td>
+                                    <td>{{ $resep->gudang->nama }}</td>
+                                    <td>{{ $item->pabrik?->nama }}</td>
+                                    <td>{{ $resep->kode_resep }}</td>
+                                    <td>RACIKAN</td>
+                                    <td>RACIKAN</td>
+                                    <td align="right">{{ $item->qty }}</td>
+                                    <td align="right">{{ rp(0) }}</td>
+                                </tr>
+
+
+                                {{-- inside, the details --}}
+                                @foreach ($resep->items as $item2)
+                                    @if (isset($item2->racikan_id) && $item2->racikan_id == $item->id)
+                                        @php
+                                            ++$r;
+                                            ++$r_no_header;
+                                            $item2->stored->pbi->item->tipe == 'FN' ? ++$fn : ++$nfn;
+                                            $item2->stored->pbi->item->formularium == 'RS' ? ++$rs : ++$nrs;
+                                        @endphp
+
+                                        <tr>
+                                            <td>{{ tgl($resep->order_date) }}</td>
+                                            <td>{{ $resep->registration->patient->name }}
+                                                [{{ $resep->registration->patient->medical_record_number }}]</td>
+                                            <td>{{ $resep->registration->registration_number }}</td>
+                                            <td>{{ $resep->registration->departement->name }}</td>
+                                            <td>{{ $resep->gudang->nama }}</td>
+                                            <td>{{ $item2->pabrik?->nama }}</td>
+                                            <td>{{ $resep->kode_resep }}</td>
+                                            <td>↪{{ $item2->stored->pbi->nama_barang }}</td>
+                                            <td>{{ $item2->stored->pbi->item->satuan->kode }}</td>
+                                            <td align="right">{{ $item2->qty - $item->returned_qty }}</td>
+                                            <td align="right">{{ rp($item2->subtotal) }}</td>
+                                        </tr>
+                                    @endif
+                                @endforeach
+                            @endif
+                        @endforeach
                     @endforeach
                 @endforeach
+
                 <tr style="text-align: right; font-weight: bold;">
-                    <td colspan="8">Total</td>
+                    <td colspan="9">Total</td>
                     <td align="right">{{ formatNumber($totalQty) }}</td>
                     <td align="right">{{ rp($grandTotal) }}</td>
                 </tr>
                 <tr style="font-weight: bold;">
                     <td colspan="3">Total /R (detail racikan tidak dihitung)</td>
-                    <td colspan="2">: <strong>{{ formatNumber($r + $r_no_detail) }}</strong></td>
-                    <td colspan="2">Total Formularium Nasional</td>
-                    <td colspan="4">: <strong>{{ formatNumber($fn) }}</strong></td>
+                    <td>: <strong>{{ formatNumber($r + $r_no_detail) }}</strong></td>
+                    <td colspan="7">&nbsp;</td>
+                </tr>
+                <tr style="font-weight: bold;">
+                    <td colspan="3">Total /R yang diretur</td>
+                    <td>: <strong>{{ formatNumber($totalReturnedQty) }}</strong></td>
+                    <td colspan="7">&nbsp;</td>
                 </tr>
                 <tr style="font-weight: bold;">
                     <td colspan="3">Total /R (detail racikan dihitung &amp; header racikan tidak dihitung)</td>
-                    <td colspan="2">: <strong>{{ formatNumber($r + $r_no_header) }}</strong></td>
-                    <td colspan="2">Total Non Formularium Nasional</td>
-                    <td colspan="4">: <strong>{{ formatNumber($nfn) }}</strong></td>
+                    <td>: <strong>{{ formatNumber($r + $r_no_header) }}</strong></td>
+                    <td colspan="7">&nbsp;</td>
                 </tr>
                 <tr style="font-weight: bold;">
                     <td colspan="3">Total Lembar Resep</td>
-                    <td colspan="2">: <strong>{{ formatNumber($resep->count()) }}</strong></td>
-                    <td colspan="2">Total Formularium Rumah Sakit</td>
-                    <td colspan="4">: <strong>{{ formatNumber($rs) }}</strong></td>
-                </tr>
-                <tr style="font-weight: bold;">
-                    <td colspan="3"></td>
-                    <td colspan="2"></td>
-                    <td colspan="2">Total Formularium Non Rumah Sakit</td>
-                    <td colspan="4">: <strong>{{ formatNumber($nrs) }}</strong></td>
+                    <td>: <strong>{{ formatNumber($totalResep) }}</strong></td>
+                    <td colspan="7">&nbsp;</td>
                 </tr>
             </tbody>
         </table>

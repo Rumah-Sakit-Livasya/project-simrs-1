@@ -480,7 +480,10 @@ function toRoman($number)
     return $roman;
 }
 
-
+function formatNumber($number)
+{
+    return number_format($number, 0, ',', '.');
+}
 
 function getIndonesianDateFormat($date)
 {
