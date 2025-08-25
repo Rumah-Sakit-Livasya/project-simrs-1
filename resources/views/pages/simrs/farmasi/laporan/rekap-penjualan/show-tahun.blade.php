@@ -617,7 +617,7 @@
     <!-- B: Print View -->
     <div id="previews">
         <h2 class="bdr">
-            Rekap Penjualan Bulanan {{ isset($doctor) ? '(' . $doctor->employee->fullname . ')' : '' }}
+            Rekap Penjualan Tahunan {{ isset($doctor) ? '(' . $doctor->employee->fullname . ')' : '' }}
             <span>{{ $periode }}</span>
         </h2>
 
@@ -625,15 +625,24 @@
             <thead>
                 <tr>
                     <th rowspan="2" width="10%">Kode Barang</th>
-                    <th rowspan="2" width="20%">Nama Barang</th>
+                    <th rowspan="2">Nama Barang</th>
                     <th rowspan="2" width="5%">Satuan</th>
-                    <th style="text-align: center;" colspan="31">Tanggal</th>
+                    <th style="text-align: center;" colspan="12">Bulan</th>
                     <th rowspan="2">Total</th>
                 </tr>
                 <tr>
-                    @for ($i = 1; $i <= 31; $i++)
-                        <th style="width:2%;">{{ $i < 10 ? '0' . $i : $i }}</th>
-                    @endfor
+                    <th style="width:2%;">Jan</th>
+                    <th style="width:2%;">Feb</th>
+                    <th style="width:2%;">Mar</th>
+                    <th style="width:2%;">Apr</th>
+                    <th style="width:2%;">May</th>
+                    <th style="width:2%;">Jun</th>
+                    <th style="width:2%;">Jul</th>
+                    <th style="width:2%;">Aug</th>
+                    <th style="width:2%;">Sep</th>
+                    <th style="width:2%;">Oct</th>
+                    <th style="width:2%;">Nov</th>
+                    <th style="width:2%;">Dec</th>
                 </tr>
             </thead>
             <tbody>
@@ -643,13 +652,13 @@
                         <td>{{ $dict->barang->nama }}</td>
                         <td>{{ $dict->barang->satuan->kode }}</td>
 
-                        @foreach ($dict->dates as $date => $count)
+                        @foreach ($dict->months as $month => $count)
                             @if ($count == 0)
                                 <td style="text-align: center;">0</td>
                             @else
                                 <td style="text-align: center;">
                                     <div style="cursor: pointer;" title="Lihat Detail"
-                                        onclick="detail_penjualan('{{ $date }}-{{ $bulan }}-{{ $tahun }}',{{ $barang_id }});">
+                                        onclick="detail_penjualan({{ $month }},{{ $tahun }},{{ $barang_id }});">
                                         {{ $count }}
                                     </div>
                                 </td>
@@ -660,18 +669,15 @@
 
                     </tr>
                 @endforeach
-
-
-
             </tbody>
         </table>
     </div>
     <script type="text/javascript">
         const DoctorID = {{ $doctor_id }};
 
-        function detail_penjualan(date, id) {
+        function detail_penjualan(month, year, id) {
             const src =
-                `/simrs/farmasi/laporan/rekap-penjualan/view-detail-date/${id}/${date}/${DoctorID}`;
+                `/simrs/farmasi/laporan/rekap-penjualan/view-detail-month/${id}/${month}/${year}/${DoctorID}`;
 
             window.open(
                 src,
@@ -689,7 +695,7 @@
         <div
             style="background-color: rgb(123, 31, 162); width: 0px; height: 100%; clear: both; transition: height 0.3s; float: left;">
         </div>
-    </div><deepl-input-controller translate="no"></deepl-input-controller>
+    </div>
 </body>
 
 </html>

@@ -905,6 +905,8 @@ Route::group(['middleware' => ['auth']], function () {
                 Route::prefix("rekap-penjualan")->group(function () {
                     Route::get("/", [FarmasiReportRekapPenjualan::class, "index"])->name("farmasi.laporan.rekap-penjualan");
                     Route::get("/view/{tipe}/{btoa}", [FarmasiReportRekapPenjualan::class, "show"])->name("farmasi.laporan.rekap-penjualan.show");
+                    Route::get("/view-detail-date/{barang_id}/{date}/{doctor_id}", [FarmasiReportRekapPenjualan::class, "showDetailDate"])->name("farmasi.laporan.rekap-penjualan.show-detail-date");
+                    Route::get("/view-detail-month/{barang_id}/{month}/{year}/{doctor_id}", [FarmasiReportRekapPenjualan::class, "showDetailMonth"])->name("farmasi.laporan.rekap-penjualan.show-detail-month");
                 });
             });
 

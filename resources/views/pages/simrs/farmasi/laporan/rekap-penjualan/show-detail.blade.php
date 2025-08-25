@@ -617,79 +617,55 @@
     <!-- B: Print View -->
     <div id="previews">
         <h2 class="bdr">
-            Rekap Penjualan Bulanan {{ isset($doctor) ? '(' . $doctor->employee->fullname . ')' : '' }}
+            {{ $barang->nama }}
             <span>{{ $periode }}</span>
         </h2>
 
         <table width="100%" class="bdr2 pad">
             <thead>
                 <tr>
-                    <th rowspan="2" width="10%">Kode Barang</th>
-                    <th rowspan="2" width="20%">Nama Barang</th>
-                    <th rowspan="2" width="5%">Satuan</th>
-                    <th style="text-align: center;" colspan="31">Tanggal</th>
-                    <th rowspan="2">Total</th>
-                </tr>
-                <tr>
-                    @for ($i = 1; $i <= 31; $i++)
-                        <th style="width:2%;">{{ $i < 10 ? '0' . $i : $i }}</th>
-                    @endfor
+                    <th>Tgl Transaksi</th>
+                    <th>Nama Dokter</th>
+                    <th>Nama Pasien</th>
+                    <th>No RM</th>
+                    <th>No Registrasi</th>
+                    <th>No Resep</th>
+                    <th>Qty</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($dictionary as $barang_id => $dict)
-                    <tr>
-                        <td>{{ $dict->barang->kode }}</td>
-                        <td>{{ $dict->barang->nama }}</td>
-                        <td>{{ $dict->barang->satuan->kode }}</td>
 
-                        @foreach ($dict->dates as $date => $count)
-                            @if ($count == 0)
-                                <td style="text-align: center;">0</td>
-                            @else
-                                <td style="text-align: center;">
-                                    <div style="cursor: pointer;" title="Lihat Detail"
-                                        onclick="detail_penjualan('{{ $date }}-{{ $bulan }}-{{ $tahun }}',{{ $barang_id }});">
-                                        {{ $count }}
-                                    </div>
-                                </td>
-                            @endif
-                        @endforeach
-
-                        <td style="text-align: center">{{ $dict->total }}</td>
-
+                @foreach ($items as $item)
+                    @php
+                        $isOTC = isset($item->resep->otc_id);
+                    @endphp
+                    <tr style="text-align: center;">
+                        <td>{{ tgl($item->resep->order_date) }}</td>
+                        <td style="text-align: left;">
+                            {{ $isOTC ? 'OTC' : (isset($item->resep->doctor) ? $item->resep->doctor->employee->fullname : $item->resep->registration->doctor->employee->fullname) }}
+                        </td>
+                        <td style="text-align: left;">
+                            {{ $isOTC ? $item->resep->otc->nama_pasien : $item->resep->registration->patient->name }}
+                        </td>
+                        <td>{{ $isOTC ? 'OTC' : $item->resep->registration->patient->medical_record_number }}</td>
+                        <td>{{ $isOTC ? $item->resep->otc->registration_number : $item->resep->registration->registration_number }}
+                        </td>
+                        <td>{{ $item->resep->kode_resep }}</td>
+                        <td style="text-align: right">{{ $item->qty }}</td>
                     </tr>
                 @endforeach
 
-
-
+                <tr style="text-align: right; font-weight: bold;">
+                    <td colspan="6">Total:</td>
+                    <td> {{ $items->sum('qty') }}</td>
+                </tr>
             </tbody>
         </table>
     </div>
-    <script type="text/javascript">
-        const DoctorID = {{ $doctor_id }};
-
-        function detail_penjualan(date, id) {
-            const src =
-                `/simrs/farmasi/laporan/rekap-penjualan/view-detail-date/${id}/${date}/${DoctorID}`;
-
-            window.open(
-                src,
-                "popupWindow_reportFarmasiDetailRekapPenjualan" + id,
-                "width=" + screen.width + ",height=" + screen.height +
-                ",scrollbars=yes,resizable=yes"
-            );
-        }
-    </script>
 
 
 
 
-    <div style="width: 100%; height: 2px; z-index: 9999; top: 0px; float: left; position: fixed;">
-        <div
-            style="background-color: rgb(123, 31, 162); width: 0px; height: 100%; clear: both; transition: height 0.3s; float: left;">
-        </div>
-    </div><deepl-input-controller translate="no"></deepl-input-controller>
 </body>
 
 </html>
