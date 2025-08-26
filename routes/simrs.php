@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\BilinganController;
+use App\Http\Controllers\FarmasiPlasma;
 use App\Http\Controllers\FarmasiReportDispensing;
 use App\Http\Controllers\FarmasiReportEmbalase;
 use App\Http\Controllers\FarmasiReportKartuStock;
@@ -930,28 +931,10 @@ Route::group(['middleware' => ['auth']], function () {
                 });
             });
 
-            Route::prefix('reports')->group(function () {
-                Route::get('stock-status', [FarmasiController::class, 'stokStatus'])
-                    ->name('farmasi.reports.stock-status');
-
-                Route::get('stock-detail', [FarmasiController::class, 'stockDetail'])
-                    ->name('farmasi.reports.stock-detail');
-
-                Route::get('kartu-stok', [FarmasiController::class, 'kartu-stok'])
-                    ->name('farmasi.reports.kartu-stok');
-
-                Route::get('penjualan', [FarmasiController::class, 'reportPenjualan'])
-                    ->name('farmasi.reports.penjualan');
-
-                Route::get('rekap-penjualan', [FarmasiController::class, 'reportRekapPenjualan'])
-                    ->name('farmasi.reports.rekap-penjualan');
-
-                Route::get('embalase', [FarmasiController::class, 'embalase'])
-                    ->name('farmasi.reports.embalase');
+            Route::prefix("antrian-farmasi")->group(function(){
+                Route::get('/', [FarmasiPlasma::class, "index"])->name("farmasi.antrian-farmasi.index");
+                Route::get('/plasma', [FarmasiPlasma::class, "plasma"])->name("farmasi.antrian-farmasi.plasma");
             });
-
-            Route::get('antrian', [FarmasiController::class, 'antrian'])
-                ->name('farmasi.antrian');
         });
 
         // Route::prefix('warehouse')->group(function () {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FarmasiAntrian;
 use App\Models\FarmasiResep;
 use App\Models\FarmasiResepElektronik;
 use App\Models\FarmasiResepHarian;
@@ -421,6 +422,25 @@ class FarmasiResepController extends Controller
         return $kode . $year . $month . $day . $count;
     }
 
+    private function getAntrian(bool $is_bpjs, bool $is_racikan)
+    {
+        // count from FarmasiAntrian where created_at == today
+        $today = Carbon::today();
+        $index = FarmasiAntrian::whereDate('created_at', $today)->where('tipe', $is_bpjs ? 'bpjs' : 'umum')->where('racikan', $is_racikan ? true : false)->count() + 1;
+        $letter = "";
+        if (!$is_bpjs && !$is_racikan) {
+            $letter = "A";
+        } else if (!$is_bpjs && $is_racikan) {
+            $letter = "B";
+        } else if ($is_bpjs && !$is_racikan) {
+            $letter = "C";
+        } else if ($is_bpjs && $is_racikan) {
+            $letter = "D";
+        }
+
+        return $letter . $index;
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -515,6 +535,19 @@ class FarmasiResepController extends Controller
 
             if ($request->filled("re_id")) {
                 $response = FarmasiResepResponse::where("re_id", $request->get("re_id"))->first();
+                $re = FarmasiResepElektronik::findOrFail($request->get('re_id'));
+
+                // create antrian
+                $racikan = isset($re->resep_manual) && !empty($re->resep_manual) ? true : false;
+                /* $antrian = */
+                FarmasiAntrian::create([
+                    "re_id" => $request->get('re_id'),
+                    "resep_id" => $resep->id,
+                    "tipe" => $registration->penjamin->is_bpjs ? "bpjs" : "umum",
+                    "antrian" => $this->getAntrian($registration->penjamin->is_bpjs, $racikan),
+                    "racikan" => $racikan
+                ]);
+
                 // dd($response);
                 if (!$response) {
                     throw new \Exception("Respon resep elektronik tidak ditemukan");

@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\DietGiziController;
+use App\Http\Controllers\FarmasiPlasma;
 use App\Http\Controllers\FarmasiResepController;
 use App\Http\Controllers\FarmasiResepHarianController;
 use App\Http\Controllers\FarmasiResepResponseController;
@@ -222,6 +223,12 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::delete('/destroy/{id}', [FarmasiReturResepController::class, 'destroy'])->name('farmasi.retur-barang.destroy');
             Route::get("/get/item-registration/{id}", [FarmasiReturResepController::class, 'getItemRegistration'])->name('farmasi.retur-barang.get.item-registration');
             Route::get("/get/registrations/{patient_id}", [FarmasiReturResepController::class, 'getRegistrations'])->name('farmasi.retur-barang.get.registrations');
+        });
+
+        Route::prefix('antrian-farmasi')->group(function(){
+            Route::get('/get-antrian/{letter}', [FarmasiPlasma::class, "getAntrian"])->name('farmasi.antrian-farmasi.get-antrian');
+            Route::put('/update-call-status/{id}', [FarmasiPlasma::class, "updateCallStatus"])->name('farmasi.antrian-farmasi.update-call-status');
+            Route::put('/update-give-status/{id}', [FarmasiPlasma::class, "updateGiveStatus"])->name('farmasi.antrian-farmasi.update-give-status');
         });
     });
 

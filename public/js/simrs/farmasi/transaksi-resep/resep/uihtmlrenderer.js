@@ -117,7 +117,7 @@ class UIHTMLRenderer {
                 <option value="${instruksi}" selected>${instruksi}</option>
         `;
 
-        const HasDefault = ["sesudah makan", "sebelum makan", "saat makan"].includes(instruksi.toLowerCase());
+        const HasDefault = ["sesudah makan", "sebelum makan", "saat makan"].includes((instruksi || '').toLowerCase());
 
         const Rhi_IdInput = /*html*/`
             <input type="hidden" name="rhi_id[${key}]" value="${rhi_id}">
@@ -125,9 +125,9 @@ class UIHTMLRenderer {
 
         const Instruksi = /*html*/`
             <select name="instruksi[${key}]" id="instruksi${key}">
-                <option value="Sesudah Makan" ${instruksi.toLowerCase() == 'sesudah makan' ? 'selected' : ''}>Sesudah Makan</option>
-                <option value="Sebelum Makan" ${instruksi.toLowerCase() == 'sebelum makan' ? 'selected' : ''}>Sebelum Makan</option>
-                <option value="Saat Makan" ${instruksi.toLowerCase() == 'saat makan' ? 'selected' : ''}>Saat Makan</option>
+                <option value="Sesudah Makan" ${(instruksi || '').toLowerCase() == 'sesudah makan' ? 'selected' : ''}>Sesudah Makan</option>
+                <option value="Sebelum Makan" ${(instruksi || '').toLowerCase() == 'sebelum makan' ? 'selected' : ''}>Sebelum Makan</option>
+                <option value="Saat Makan" ${(instruksi || '').toLowerCase() == 'saat makan' ? 'selected' : ''}>Saat Makan</option>
                 ${HasDefault ? UniqueInstruksiOption : ''}
             </select>
         `;

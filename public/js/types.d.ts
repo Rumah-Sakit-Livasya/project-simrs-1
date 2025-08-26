@@ -1109,6 +1109,22 @@ interface ResepHarianItems {
 }
 
 
+interface FarmasiAntrian {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  re_id: number;
+  resep_id: number;
+  tipe: string;
+  antrian: string;
+  racikan: 1 | 0;
+  dipanggil: 1 | 0;
+  penyerahan: 1 | 0;
+  re?: ResepElektronik;
+  resep?: FarmasiResep;
+}
+
 type StockTransactionsSources = PenerimaanBarang | DistribusiBarang | ReturBarang | StockOpnameItem;
 type PatientType = "rajal" | "ranap" | "otc";
 type SumberItem = "npr" | "pr";
