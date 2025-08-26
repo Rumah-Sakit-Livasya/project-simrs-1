@@ -1,16 +1,4 @@
 {{-- ========================================================== --}}
-{{-- INDIKATOR LOADING --}}
-{{-- ========================================================== --}}
-<div id="loading-indicator" style="display: none;">
-    <div class="loading-overlay">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-            <span class="sr-only">Loading...</span>
-        </div>
-        <div class="text-primary d-block mt-2">Memproses Panggilan...</div>
-    </div>
-</div>
-
-{{-- ========================================================== --}}
 {{-- DETAIL PASIEN & DOKTER --}}
 {{-- ========================================================== --}}
 <div class="panel">
@@ -22,8 +10,8 @@
                     <div class="row">
                         <div class="col-lg-3 d-flex align-items-center justify-content-center">
                             @if ($registration->patient->gender == 'Laki-laki')
-                                <img src="{{ asset('img/patient/man-icon.png') }}" alt="Pasien Laki-laki"
-                                    class="img-fluid" style="max-height: 120px;">
+                                <img src="{{ asset('img/patient/man-icon.png') }}" alt="Pasien Laki-laki" class="img-fluid"
+                                    style="max-height: 120px;">
                             @else
                                 <img src="{{ asset('img/patient/woman-icon.png') }}" alt="Pasien Perempuan"
                                     class="img-fluid" style="max-height: 120px;">
@@ -136,13 +124,22 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const panggilButton = document.getElementById('tombol-panggil-pasien');
-            const loadingIndicator = document.getElementById('loading-indicator');
 
             panggilButton.addEventListener('click', function() {
                 const registrationId = this.getAttribute('data-registration-id');
                 const plasmaId = this.getAttribute('data-plasma-id');
 
-                loadingIndicator.style.display = 'flex'; // Tampilkan loading
+                // Tampilkan loading dengan SweetAlert2
+                Swal.fire({
+                    title: 'Memproses Panggilan...',
+                    html: '<div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status"></div>',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    customClass: {
+                        popup: 'swal2-loading-popup'
+                    }
+                });
 
                 // Kirim request ke API untuk mengubah status antrian
                 fetch('{{ route('api.antrian.panggil') }}', {
@@ -159,7 +156,6 @@
                     })
                     .then(response => {
                         if (!response.ok) {
-                            // Jika response bukan 200, throw error untuk ditangkap di .catch
                             return response.json().then(err => {
                                 throw new Error(err.message || 'Gagal memanggil pasien.')
                             });
@@ -167,17 +163,25 @@
                         return response.json();
                     })
                     .then(data => {
-                        loadingIndicator.style.display = 'none'; // Sembunyikan loading
+                        Swal.close(); // Sembunyikan loading
                         if (data.success) {
-                            // Tampilkan notifikasi sukses (contoh: menggunakan alert)
-                            // Untuk pengalaman yang lebih baik, gunakan library notifikasi seperti SweetAlert2 atau Toastr
-                            alert(data.message);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: data.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
                         }
                     })
                     .catch(error => {
-                        loadingIndicator.style.display = 'none'; // Sembunyikan loading
+                        Swal.close(); // Sembunyikan loading
                         console.error('Error:', error);
-                        alert('Terjadi kesalahan: ' + error.message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Terjadi Kesalahan',
+                            text: error.message || 'Terjadi kesalahan saat memanggil pasien.'
+                        });
                     });
             });
         });

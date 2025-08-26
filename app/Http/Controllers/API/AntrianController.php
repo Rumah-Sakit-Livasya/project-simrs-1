@@ -20,7 +20,7 @@ class AntrianController extends Controller
         ]);
 
         try {
-            $registration = Registration::with('departement')->findOrFail($validated['registration_id']);
+            $registration = Registration::with(['departement', 'patient'])->findOrFail($validated['registration_id']);
             $plasmaId = $validated['plasma_id'];
 
             // (Opsional) Update status di database untuk pencatatan

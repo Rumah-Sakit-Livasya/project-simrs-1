@@ -95,7 +95,11 @@ class PlasmaDisplayRawatJalanController extends Controller
 
     public function show($id)
     {
-        $plasmaRawatJalan = PlasmaDisplayRawatJalan::with('departements')->findOrFail($id);
+        // Ambil hanya departemen yang memiliki nama mengandung 'klinik' (case-insensitive)
+        $plasmaRawatJalan = PlasmaDisplayRawatJalan::with(['departements' => function ($q) {
+            $q->whereRaw('LOWER(name) LIKE ?', ['%klinik%']);
+        }])->findOrFail($id);
+
         return view('pages.simrs.plasma.rawat-jalan.show', compact('plasmaRawatJalan'));
     }
 
@@ -103,8 +107,6 @@ class PlasmaDisplayRawatJalanController extends Controller
     public function getStatus(PlasmaDisplayRawatJalan $plasmaDisplayRawatJalan)
     {
         $plasmaDisplayRawatJalan->load('departements');
-
-        // TIDAK PERLU LAGI MENCARI 'now_calling' DI SINI
 
         // Hanya ambil nomor antrian terakhir untuk setiap poli sebagai data awal
         $departementQueues = [];

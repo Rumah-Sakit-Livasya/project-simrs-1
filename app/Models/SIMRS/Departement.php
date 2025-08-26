@@ -26,7 +26,7 @@ class Departement extends Model
 
     public function doctors()
     {
-        return $this->hasMany(Doctor::class, 'department_id');
+        return $this->hasMany(Doctor::class, 'departement_id');
     }
 
     public function employees()

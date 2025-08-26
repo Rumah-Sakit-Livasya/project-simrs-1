@@ -113,6 +113,13 @@
             margin-top: 1rem;
         }
 
+        #view_current_pasien {
+            font-size: 5vh;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-top: 1rem;
+        }
+
         #view_current_dokter {
             font-size: 3vh;
             color: var(--text-light);
@@ -124,6 +131,7 @@
             color: var(--text-light);
             text-transform: uppercase;
             letter-spacing: 2px;
+            margin-top: 3rem;
         }
 
         .queue-list-panel {
@@ -277,12 +285,6 @@
 </head>
 
 <body>
-    <button id="test-suara-manual"
-        style="position: fixed; top: 15vh; left: 2rem; z-index: 10000; padding: 1rem; font-size: 1rem;"
-        class="btn btn-success">
-        Test Suara Manual
-    </button>
-
     <div id="start-overlay">
         <div class="start-box">
             <h1>Selamat Datang di Antrian Poliklinik</h1>
@@ -307,6 +309,8 @@
         <div class="now-serving-panel" id="now-serving-panel">
             <div class="panel-label">NOMOR ANTRIAN</div>
             <div id="view_current_antrian">-</div>
+            <div class="panel-label">NAMA PASIEN</div>
+            <div id="view_current_pasien">-</div>
             <div class="panel-label">MENUJU POLI</div>
             <div id="view_current_poli">-</div>
             <div id="view_current_dokter">-</div>
@@ -319,7 +323,15 @@
                     <li class="queue-item">
                         <div class="queue-item-info">
                             <div class="department-name">{{ $departement->name }}</div>
-                            <div class="doctor-name">{{ $departement->default_dokter ?? 'Belum ada dokter' }}</div>
+                            <div class="doctor-name">
+                                @if ($departement->doctors && count($departement->doctors))
+                                    @foreach ($departement->doctors as $doctor)
+                                        <div>{{ $doctor->employee->fullname }}</div>
+                                    @endforeach
+                                @else
+                                    Belum ada dokter
+                                @endif
+                            </div>
                         </div>
                         <div class="queue-number" id="curr_ant_perpoli_{{ $departement->id }}">00</div>
                     </li>
@@ -351,6 +363,7 @@
             const startButton = document.getElementById('start-button');
             const overlay = document.getElementById('start-overlay');
             const antrianDisplay = document.getElementById('view_current_antrian');
+            const pasienDisplay = document.getElementById('view_current_pasien');
             const poliDisplay = document.getElementById('view_current_poli');
             const dokterDisplay = document.getElementById('view_current_dokter');
             const servingPanel = document.getElementById('now-serving-panel');
@@ -390,7 +403,7 @@
                             console.error("GAGAL MEMUTAR AUDIO SECARA OTOMATIS:", error);
                             alert(
                                 "Browser memblokir pemutaran suara. Pastikan situs ini diizinkan untuk memutar audio."
-                                );
+                            );
                             isPlaying = false; // Reset flag karena gagal
                         });
                 }
@@ -438,6 +451,8 @@
                                 'background: #28a745; color: #fff; font-weight: bold; padding: 5px;', e);
 
                             const reg = e.registration;
+                            const pat = reg.patient;
+
                             if (!reg || !reg.departement) {
                                 console.error("Data event tidak lengkap:", e);
                                 return;
@@ -446,11 +461,17 @@
                             const nomorAntrian = reg.no_urut;
                             const namaPoli = reg.departement.name;
                             const namaDokter = reg.nama_dokter;
-                            const nomorFormatted = 'A-' + String(nomorAntrian).padStart(2, '0');
+                            const namaPasien = pat.name ? pat.name : '';
+                            const nomorFormatted = String(nomorAntrian).padStart(2, '0');
 
                             poliDisplay.textContent = namaPoli;
                             antrianDisplay.textContent = nomorFormatted;
                             dokterDisplay.textContent = namaDokter;
+
+                            // Tampilkan nama pasien jika ada elemen untuk itu
+                            if (pasienDisplay) {
+                                pasienDisplay.textContent = namaPasien.toUpperCase();
+                            }
 
                             playCallSound(nomorAntrian, namaPoli);
 
