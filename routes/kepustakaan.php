@@ -17,7 +17,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::prefix('kepustakaan')->name('kepustakaan.')->group(function () {
         Route::get('/dashboard', function () {
             return view('app-type.kepustakaan.dashboard');
-        })->name('');
+        })->name('dashboard');
 
         Route::get('/laporan-dashboard', [KepustakaanController::class, 'laporanDashboard'])
             ->name('laporan.dashboard');

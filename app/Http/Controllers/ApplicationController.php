@@ -25,7 +25,7 @@ class ApplicationController extends Controller
         } else if ($appType == 'keuangan') {
             return redirect()->route('keuangan');
         } else if ($appType == 'kepustakaan') {
-            return redirect()->route('kepustakaan');
+            return redirect()->route('kepustakaan.dashboard');
         } else if ($appType == 'mutu') {
             return redirect()->route('mutu');
         }
