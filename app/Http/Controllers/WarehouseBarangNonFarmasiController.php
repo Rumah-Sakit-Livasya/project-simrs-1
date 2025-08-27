@@ -6,6 +6,7 @@ use App\Models\WarehouseBarangNonFarmasi;
 use App\Models\WarehouseGolonganBarang;
 use App\Models\WarehouseKategoriBarang;
 use App\Models\WarehouseKelompokBarang;
+use App\Models\WarehouseMasterBarangEditLog;
 use App\Models\WarehouseSatuanBarang;
 use App\Models\WarehouseSatuanTambahanBarangNonFarmasi;
 use Illuminate\Http\Request;
@@ -145,11 +146,7 @@ class WarehouseBarangNonFarmasiController extends Controller
             'satuan_id' => 'required|exists:warehouse_satuan_barang,id'
         ]);
 
-        $warehouseBarangNonFarmasi
-            ->where("id", $validatedData['id'])
-            ->update($validatedData);
-
-        $validatedData = $request->validate([
+        $validatedData2 = $request->validate([
             'id' => 'required|integer',
             "satuans_id" => "nullable|array",
             "satuans_id.*" => "exists:warehouse_satuan_barang,id",
@@ -159,20 +156,44 @@ class WarehouseBarangNonFarmasiController extends Controller
             "satuans_status.*" => "boolean"
         ]);
 
+        $validatedData3 = $request->validate([
+            "alasan_edit" => 'required|string',
+            "user_id" => 'required|exists:users,id'
+        ]);
+
+        $warehouseBarangNonFarmasi
+            ->where("id", $validatedData['id'])
+            ->update($validatedData);
+
         // delete all data from WarehouseSatuanTambahanBarangNonFarmasi
-        // where "barang_id" == $validatedData['id']
-        WarehouseSatuanTambahanBarangNonFarmasi::where('barang_id', $validatedData['id'])->forceDelete();
+        // where "barang_id" == $validatedData2['id']
+        WarehouseSatuanTambahanBarangNonFarmasi::where('barang_id', $validatedData2['id'])->forceDelete();
 
         if ($request->has('satuans_id')) {
-            foreach ($validatedData['satuans_id'] as $index => $satuanId) {
+            foreach ($validatedData2['satuans_id'] as $index => $satuanId) {
                 WarehouseSatuanTambahanBarangNonFarmasi::create([
-                    "barang_id" => $validatedData['id'],
+                    "barang_id" => $validatedData2['id'],
                     "satuan_id" => $satuanId,
-                    "isi" => $validatedData['satuans_jumlah'][$index],
-                    "aktif" => isset($validatedData['satuans_status'][$index]) ? $validatedData['satuans_status'][$index] : false,
+                    "isi" => $validatedData2['satuans_jumlah'][$index],
+                    "aktif" => isset($validatedData2['satuans_status'][$index]) ? $validatedData2['satuans_status'][$index] : false,
                 ]);
             }
         }
+
+        // add log
+        WarehouseMasterBarangEditLog::create([
+            "goods_id" => $validatedData['id'],
+            "goods_type" => WarehouseBarangNonFarmasi::class,
+            "nama_barang" => $validatedData["nama"],
+            "kode_barang" => $validatedData["kode"],
+            "keterangan" => $validatedData3["alasan_edit"],
+            "hna" => $validatedData["hna"],
+            "status_aktif" => $validatedData["aktif"],
+            "golongan_id" => $validatedData["golongan_id"] ?? null,
+            "kelompok_id" => $validatedData["kelompok_id"] ?? null,
+            "satuan_id" => $validatedData["satuan_id"],
+            "performed_by" => $validatedData3["user_id"]
+        ]);
 
         return redirect()->back()->with('success', 'Barang Non Farmasi berhasil diupdate');
     }

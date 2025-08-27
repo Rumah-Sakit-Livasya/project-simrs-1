@@ -19,7 +19,7 @@ class WarehousePenerimaanBarangFarmasiItems extends Model implements AuditableCo
     }
 
     public function item(){
-        return $this->belongsTo(WarehouseBarangFarmasi::class, 'item_id');
+        return $this->belongsTo(WarehouseBarangFarmasi::class, 'barang_id');
     }
 
     public function satuan(){

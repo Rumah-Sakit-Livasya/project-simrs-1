@@ -4,15 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\StoredBarangFarmasi;
 use App\Models\StoredBarangNonFarmasi;
+use App\Models\User;
 use App\Models\WarehouseReturBarang;
 use App\Models\WarehouseReturBarangItems;
 use App\Models\WarehouseSupplier;
+use App\Services\GoodsStockService;
+use App\Services\IncreaseDecreaseStockArguments;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class WarehouseReturBarangController extends Controller
 {
+    protected GoodsStockService $goodsStockService;
+
+    public function __construct(GoodsStockService $goodsStockService)
+    {
+        $this->goodsStockService = $goodsStockService;
+        $this->goodsStockService->controller = $this::class;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -144,6 +155,7 @@ class WarehouseReturBarangController extends Controller
 
         try {
             $rb = WarehouseReturBarang::create($validatedData1);
+            $user = User::findOrFail($validatedData1["user_id"]);
 
             foreach ($validatedData2["item_si_id"] as $key => $id) {
                 if ($validatedData2["item_qty"][$key] == 0) {
@@ -160,12 +172,6 @@ class WarehouseReturBarangController extends Controller
                     // throw error
                     throw new \Exception("Qty tidak cukup"); // throw error
                 }
-                $si_item->update([
-                    "qty" => $si_item->qty - $validatedData2["item_qty"][$key]
-                ]);
-                $si_item->save();
-
-                // ...
 
                 WarehouseReturBarangItems::create([
                     "rb_id" => $rb->id,
@@ -173,7 +179,19 @@ class WarehouseReturBarangController extends Controller
                     "harga" => $validatedData2["item_harga"][$key],
                     "subtotal" => $validatedData2["item_subtotal"][$key],
                     $validatedData2["item_type"][$key] => $id
-                ]);
+                ]);                
+
+                // $si_item->update([
+                    // "qty" => $si_item->qty - $validatedData2["item_qty"][$key]
+                // ]);
+                // $si_item->save();
+
+                // ...
+
+                // use the GoodsStockService
+                $qty = $validatedData2["item_qty"][$key];
+                $args = new IncreaseDecreaseStockArguments($user, $rb, $si_item, $qty);
+                $this->goodsStockService->decreaseStock($args);
             }
 
             DB::commit();
@@ -201,10 +219,16 @@ class WarehouseReturBarangController extends Controller
         DB::beginTransaction();
         try {
             foreach ($rb->items as $rbi) {
-                $rbi->stored->update([
-                    'qty' => $rbi->stored->qty + $rbi->qty,
-                ]);
-                $rbi->stored->save();
+                // $rbi->stored->update([
+                //     'qty' => $rbi->stored->qty + $rbi->qty,
+                // ]);
+                // $rbi->stored->save();
+
+                // use the GoodsStockService
+                $user = request()->user();
+                $args = new IncreaseDecreaseStockArguments($user, $rb, $rbi->stored, $rbi->qty);
+                $this->goodsStockService->increaseStock($args);
+                
                 $rbi->delete();
             }
             $rb->delete();

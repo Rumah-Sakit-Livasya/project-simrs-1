@@ -397,7 +397,7 @@
                                                     <td class="subtotal-display">Rp
                                                         {{ rp($item->harga * $item->qty - $item->diskon_nominal) }}</td>
                                                     <td>
-                                                        @if (!isset($pb->po_id) && !$pb->po->is_auto)
+                                                        @if (isset($pb->po_id) && !$pb->po->is_auto)
                                                             <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
                                                                 title="Hapus"
                                                                 onclick="PopupPBNPharmacyClass.deleteItem({{ $item->id }})"></a>

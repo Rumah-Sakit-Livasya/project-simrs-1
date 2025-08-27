@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('konfirmasi_asuransi', function (Blueprint $table) {
             $table->decimal('sisa_tagihan', 15, 2)->default(0)->after('jumlah');
             $table->decimal('total_dibayar', 15, 2)->default(0)->after('sisa_tagihan');
+
             $table->boolean('is_lunas')->default(false)->after('total_dibayar');
             $table->unsignedBigInteger('last_pembayaran_id')->nullable();
 

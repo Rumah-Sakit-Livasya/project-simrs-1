@@ -3,11 +3,16 @@
 use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\DietGiziController;
+use App\Http\Controllers\FarmasiResepController;
+use App\Http\Controllers\FarmasiReturResepController;
+use App\Http\Controllers\FarmasiSignaController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\SIMRS\AssesmentGadarController;
+use App\Http\Controllers\SIMRS\RujukAntarRSController;
 use App\Http\Controllers\ProcurementPOApprovalCEO;
 use App\Http\Controllers\ProcurementPOApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPOApprovalPharmacy;
@@ -18,8 +23,6 @@ use App\Http\Controllers\ProcurementPurchaseOrderPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
 use App\Http\Controllers\ProcurementSetupSupplier;
-use App\Http\Controllers\SIMRS\AssesmentGadarController;
-use App\Http\Controllers\SIMRS\RujukAntarRSController;
 use App\Http\Controllers\SIMRS\Gizi\GiziController;
 use App\Http\Controllers\WarehouseBarangFarmasiController;
 use App\Http\Controllers\WarehouseBarangNonFarmasiController;
@@ -94,10 +97,20 @@ use App\Http\Controllers\SIMRS\Setup\BiayaMateraiController;
 use App\Http\Controllers\SIMRS\Setup\TarifRegistrasiController;
 use App\Http\Controllers\SIMRS\TarifKelasRawatController;
 use App\Http\Controllers\SIMRS\TindakanMedisController;
-use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
+use App\Http\Controllers\WarehouseDistribusiBarangFarmasiController;
+use App\Http\Controllers\WarehouseDistribusiBarangNonFarmasiController;
+use App\Http\Controllers\WarehouseReportStockDetail;
+use App\Http\Controllers\WarehouseStockAdjustmentController;
+use App\Http\Controllers\WarehouseStockOpnameDraft;
+use App\Http\Controllers\WarehouseStockOpnameFinal;
+use App\Http\Controllers\WarehouseStockOpnameGudangController;
+use App\Http\Controllers\WarehouseStockRequestNonPharmacyController;
+use App\Http\Controllers\WarehouseStockRequestPharmacyController;
 use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\TarifOperasiController;
+use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Models\Employee;
+use App\Models\FarmasiReturResep;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Support\Facades\Storage;
@@ -177,6 +190,24 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::get('/store', [DietGiziController::class, 'store'])->name('auto-diet.gizi.store');
             Route::put('/update/{id}/', [DietGiziController::class, 'update'])->name('auto-diet.gizi.update');
             Route::delete('/destroy/{id}/', [DietGiziController::class, 'destroy'])->name('auto-diet.gizi.destroy');
+        });
+    });
+
+    Route::prefix("farmasi")->group(function () {
+        Route::prefix("transaksi-resep")->group(function () {
+            Route::post("/store", [FarmasiResepController::class, 'store'])->name("farmasi.transaksi-resep.store");
+            Route::get("/gudang-default-ranap", [FarmasiResepController::class, "gudang_default_ranap"])->name("farmasi.transaksi-resep.gudang-default-ranap");
+            Route::get("/gudang-default-rajal", [FarmasiResepController::class, "gudang_default_rajal"])->name("farmasi.transaksi-resep.gudang-default-rajal");
+            Route::get('/obat/{gudang_id}', [FarmasiResepController::class, 'get_obat'])->name('farmasi.get-obat');
+            Route::get('/batch/{gudang_id}/{barang_id}', [FarmasiResepController::class, 'get_batch'])->name('farmasi.get-batch');
+            Route::put("/update/telaah/{id}", [FarmasiResepController::class, "update_telaah"])->name("farmasi.update.telaah");
+            Route::put('/update/resep/{id}', [FarmasiResepController::class, 'update'])->name('farmasi.transaksi-resep.update');
+            Route::delete("/destroy/{id}", [FarmasiResepController::class, "destroy"])->name("farmasi.transaksi-resep.delete");
+        });
+
+        Route::prefix('retur-resep')->group(function () {
+            Route::post('/store', [FarmasiReturResepController::class, 'store'])->name('farmasi.retur-barang.store');
+            Route::get("/get/item-patient/{id}", [FarmasiReturResepController::class, 'getItemPatient'])->name('farmasi.retur-barang.get.item-patient');
         });
     });
 
@@ -288,7 +319,86 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::get("/get/item-supplier/{supplier_id}", [WarehouseReturBarangController::class, 'get_items'])->name('warehouse.penerimaan-barang.retur-barang.get.items');
             });
         });
+
+        Route::prefix("stock-request")->group(function () {
+            // prefix "pharmacy"
+            Route::prefix("pharmacy")->group(function () {
+                Route::post("/store", [WarehouseStockRequestPharmacyController::class, 'store'])->name('warehouse.stock-request.pharmacy.store');
+                Route::put("/update/{id}", [WarehouseStockRequestPharmacyController::class, 'update'])->name('warehouse.stock-request.pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehouseStockRequestPharmacyController::class, 'destroy'])->name('warehouse.stock-request.pharmacy.delete');
+                Route::get("/get/item-gudang/{asal_gudang_id}/{tujuan_gudang_id}", [WarehouseStockRequestPharmacyController::class, 'get_item_gudang'])->name('warehouse.stock-request.pharmacy.get.item-gudang');
+            });
+
+            Route::prefix("non-pharmacy")->group(function () {
+                Route::post("/store", [WarehouseStockRequestNonPharmacyController::class, 'store'])->name('warehouse.stock-request.non-pharmacy.store');
+                Route::put("/update/{id}", [WarehouseStockRequestNonPharmacyController::class, 'update'])->name('warehouse.stock-request.non-pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehouseStockRequestNonPharmacyController::class, 'destroy'])->name('warehouse.stock-request.non-pharmacy.delete');
+                Route::get("/get/item-gudang/{asal_gudang_id}/{tujuan_gudang_id}", [WarehouseStockRequestNonPharmacyController::class, 'get_item_gudang'])->name('warehouse.stock-request.non-pharmacy.get.item-gudang');
+            });
+        });
+
+        Route::prefix("distribusi-barang")->group(function () {
+            // prefix "pharmacy"
+            Route::prefix("pharmacy")->group(function () {
+                Route::post("/store", [WarehouseDistribusiBarangFarmasiController::class, 'store'])->name('warehouse.distribusi-barang.pharmacy.store');
+                Route::put("/update/{id}", [WarehouseDistribusiBarangFarmasiController::class, 'update'])->name('warehouse.distribusi-barang.pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehouseDistribusiBarangFarmasiController::class, 'destroy'])->name('warehouse.distribusi-barang.pharmacy.delete');
+                Route::get("/get/item-gudang/{asal_gudang_id}/{tujuan_gudang_id}", [WarehouseDistribusiBarangFarmasiController::class, 'get_item_gudang'])->name('warehouse.distribusi-barang.pharmacy.get.item-gudang');
+                Route::get("/get/stock/{gudang_id}/{barang_id}/{satuan_id}", [WarehouseDistribusiBarangFarmasiController::class, "get_stock"])->name("warehouse.distribusi-barang.pharmacy.get.stock");
+            });
+
+            Route::prefix("non-pharmacy")->group(function () {
+                Route::post("/store", [WarehouseDistribusiBarangNonFarmasiController::class, 'store'])->name('warehouse.distribusi-barang.non-pharmacy.store');
+                Route::put("/update/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, 'update'])->name('warehouse.distribusi-barang.non-pharmacy.update');
+                Route::delete("/destroy/{id}", [WarehouseDistribusiBarangNonFarmasiController::class, 'destroy'])->name('warehouse.distribusi-barang.non-pharmacy.delete');
+                Route::get("/get/item-gudang/{asal_gudang_id}/{tujuan_gudang_id}", [WarehouseDistribusiBarangNonFarmasiController::class, 'get_item_gudang'])->name('warehouse.distribusi-barang.non-pharmacy.get.item-gudang');
+                Route::get("/get/stock/{gudang_id}/{barang_id}/{satuan_id}", [WarehouseDistribusiBarangNonFarmasiController::class, "get_stock"])->name("warehouse.distribusi-barang.non-pharmacy.get.stock");
+            });
+        });
+
+        Route::prefix("revaluasi-stock")->group(function () {
+            Route::prefix("stock-adjustment")->group(function () {
+                Route::post("/login", [WarehouseStockAdjustmentController::class, "login"])->name("warehouse.revaluasi-stock.stock-adjustment.login");
+                Route::get("/get/item-gudang/{token}/{gudang_id}", [WarehouseStockAdjustmentController::class, "get_items"])->name("warehouse.revaluasi-stock.stock-adjustment.get-items");
+                Route::put("/update", [WarehouseStockAdjustmentController::class, 'update'])->name('warehouse.revaluasi-stock.stock-adjustment.update');
+            });
+
+            Route::prefix("stock-opname")->group(function () {
+                Route::prefix("gudang-opname")->group(function () {
+                    Route::put("/update", [WarehouseStockOpnameGudangController::class, "update"])->name("warehouse.revaluasi-stock.stock-opname.gudang-opname.update");
+                });
+
+                Route::prefix("draft")->group(function () {
+                    Route::get("/get/opname-items/{id}", [WarehouseStockOpnameDraft::class, "get_opname_items"])->name("warehouse.revaluasi-stock.stock-opname.draft.get.opname-items");
+                    Route::get("/get/opname-item-movement/{type}/{opname_id}/{si_id}", [WarehouseStockOpnameDraft::class, "get_opname_item_movement"])->name("warehouse.revaluasi-stock.stock-opname.draft.get.opname-item-movement");
+                    Route::post("/store", [WarehouseStockOpnameDraft::class, "store"])->name("warehouse.revaluasi-stock.stock-opname.draft.store");
+                });
+
+                Route::prefix("final")->group(function () {
+                    Route::get("/get/opname-items/{id}", [WarehouseStockOpnameFinal::class, "get_opname_items"])->name("warehouse.revaluasi-stock.stock-opname.final.get.opname-items");
+                    Route::post("/store", [WarehouseStockOpnameFinal::class, "store"])->name("warehouse.revaluasi-stock.stock-opname.final.store");
+                });
+            });
+        });
+
+        Route::prefix("report")->group(function () {
+            Route::prefix("stock-detail")->group(function () {
+                Route::post("/get-items", [WarehouseReportStockDetail::class, "get_items"])->name("warehouse.report.stock-detail.get-items");
+                Route::post("/get-print-template", [WarehouseReportStockDetail::class, "get_print_template"])->name("warehouse.report.stock-detail.get-print-template");
+            });
+        });
     });
+
+    Route::prefix('farmasi')->group(function () {
+        Route::prefix("laporan")->group(function () {
+            Route::prefix("stock-detail")->group(function () {
+                Route::post("/get-items", [WarehouseReportStockDetail::class, "get_items"])->name("warehouse.report.stock-detail.get-items");
+                Route::post("/get-print-template", [WarehouseReportStockDetail::class, "get_print_template"])->name("warehouse.report.stock-detail.get-print-template");
+            });
+        });
+    });
+
+
 
     Route::prefix("procurement")->group(function () {
         Route::prefix("purchase-request")->group(function () {
@@ -296,7 +406,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::post("/store", [ProcurementPurchaseRequestPharmacyController::class, 'store'])->name('procurement.purchase-request.pharmacy.store');
                 Route::put("/update/{id}", [ProcurementPurchaseRequestPharmacyController::class, 'update'])->name('procurement.purchase-request.pharmacy.update');
                 Route::delete("/destroy/{id}", [ProcurementPurchaseRequestPharmacyController::class, 'destroy'])->name('procurement.purchase-request.pharmacy.delete');
-                Route::get("/get/item-gudang/", [ProcurementPurchaseRequestPharmacyController::class, 'get_item_gudang'])->name('procurement.purchase-request.pharmacy.get.item-gudang');
+                Route::get("/get/item-gudang/{gudang_id}", [ProcurementPurchaseRequestPharmacyController::class, 'get_item_gudang'])->name('procurement.purchase-request.pharmacy.get.item-gudang');
             });
 
             Route::prefix("non-pharmacy")->group(function () {
@@ -431,6 +541,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
     Route::prefix('poliklinik')->group(function () {
         Route::post('/filter-pasien', [ERMController::class, 'filterPasien'])->name('poliklinik.filter-pasien');
+        Route::get('/obat/{gudang_id}', [ERMController::class, 'get_obat'])->name('poliklinik.get-obat');
     });
 
     Route::prefix('erm')->group(function () {
@@ -545,6 +656,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::prefix('ethnics')->group(function () {
                 Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');
             });
+
+            Route::prefix('ethnics')->group(function () {
+                Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');
+            });
         });
 
         Route::prefix('penunjang-medis')->group(function () {
@@ -614,6 +729,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::get('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'getNilaiNormal'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.get');
                 Route::patch('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.update');
                 Route::delete('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.delete');
+            });
+
+            Route::prefix("farmasi")->group(function () {
+                Route::prefix("signa")->group(function () {
+                    Route::post("/create", [FarmasiSignaController::class, "store"])->name("master-data.penunjang-medis.farmasi.signa.store");
+                    Route::delete("/delete/{id}", [FarmasiSignaController::class, "destroy"])->name("master-data.penunjang-medis.farmasi.signa.delete");
+                });
             });
         });
 

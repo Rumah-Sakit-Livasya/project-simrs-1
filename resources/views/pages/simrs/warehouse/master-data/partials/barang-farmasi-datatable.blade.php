@@ -58,7 +58,7 @@
                                         {{ $barang->kategori ? $barang->kategori->nama : 'Uncategorized' }}
                                     </td>
                                     <td>
-                                        {{ $barang->kelompok->nama }}
+                                        {{ $barang->kelompok?->nama }}
                                     </td>
                                     <td>
                                         {{ rp($barang->hna) }}

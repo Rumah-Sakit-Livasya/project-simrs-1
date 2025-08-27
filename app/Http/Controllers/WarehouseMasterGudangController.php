@@ -49,13 +49,32 @@ class WarehouseMasterGudangController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge([
+            'apotek' => $request->input('apotek', 0),
+            'rajal_default' => $request->input('rajal_default', 0),
+            'ranap_default' => $request->input('ranap_default', 0),
+            'warehouse' => $request->input('warehouse', 0),
+            'aktif' => $request->input('aktif', 0),
+        ]);
+
         $validatedData = $request->validate([
             'nama' => 'required|string|max:255',
             'cost_center' => 'required|string|max:255',
             'apotek' => 'boolean',
+            'rajal_default' => 'boolean',
+            'ranap_default' => 'boolean',
             'warehouse' => 'boolean',
             'aktif' => 'boolean'
         ]);
+
+        if ($validatedData['rajal_default'] == true && $validatedData['apotek'] == true) {
+            WarehouseMasterGudang::where('rajal_default', true)->update(['rajal_default' => false]);
+        } else if ($validatedData['ranap_default'] == true && $validatedData['apotek'] == true) {
+            WarehouseMasterGudang::where('ranap_default', true)->update(['ranap_default' => false]);
+        } else {
+            $validatedData['rajal_default'] = false;
+            $validatedData['ranap_default'] = false;
+        }
 
         WarehouseMasterGudang::create($validatedData);
         return redirect()->back()->with('success', 'Master Gudang berhasil ditambahkan!');
@@ -82,14 +101,28 @@ class WarehouseMasterGudangController extends Controller
      */
     public function update(Request $request, WarehouseMasterGudang $warehouseMasterGudang)
     {
+        $request->merge([
+            'apotek' => $request->input('apotek', 0),
+            'rajal_default' => $request->input('rajal_default', 0),
+            'warehouse' => $request->input('warehouse', 0),
+            'aktif' => $request->input('aktif', 0),
+        ]);
+
         $validatedData = $request->validate([
             'id' => 'required|integer',
             'nama' => 'required|string|max:255',
             'cost_center' => 'required|string|max:255',
             'apotek' => 'boolean',
+            'rajal_default' => 'boolean',
             'warehouse' => 'boolean',
             'aktif' => 'boolean'
         ]);
+
+        if ($validatedData['rajal_default'] == true && $validatedData['apotek'] == true) {
+            WarehouseMasterGudang::where('rajal_default', true)->update(['rajal_default' => false]);
+        } else {
+            $validatedData['rajal_default'] = false;
+        }
 
         $warehouseMasterGudang
             ->where("id", $validatedData['id'])

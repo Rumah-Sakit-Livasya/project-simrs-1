@@ -5,17 +5,29 @@ namespace App\Http\Controllers;
 use App\Models\ProcurementPurchaseOrderPharmacy;
 use App\Models\ProcurementPurchaseOrderPharmacyItems;
 use App\Models\StoredBarangFarmasi;
+use App\Models\User;
 use App\Models\WarehouseMasterGudang;
 use App\Models\WarehousePenerimaanBarangFarmasi;
 use App\Models\WarehouseSupplier;
 use App\Models\WarehouseBarangFarmasi;
 use App\Models\WarehousePenerimaanBarangFarmasiItems;
+use App\Services\CreateStockArguments;
+use App\Services\GoodsStockService;
+use App\Services\GoodsType;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class WarehousePenerimaanBarangFarmasiController extends Controller
 {
+    protected GoodsStockService $goodsStockService;
+
+    public function __construct(GoodsStockService $goodsStockService)
+    {
+        $this->goodsStockService = $goodsStockService;
+        $this->goodsStockService->controller = $this::class;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -300,11 +312,19 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
                         $poi->save();
                     }
 
-                    StoredBarangFarmasi::create([
-                        "pbi_id" => $pbi->id,
-                        "gudang_id" => $validatedData1["gudang_id"],
-                        "qty" => $validatedData2["qty"][$key]
-                    ]);
+                    // StoredBarangFarmasi::create([
+                    //     "pbi_id" => $pbi->id,
+                    //     "gudang_id" => $validatedData1["gudang_id"],
+                    //     "qty" => $validatedData2["qty"][$key]
+                    // ]);
+
+                    $user = User::findOrFail($validatedData1["user_id"]);
+                    $source = $pb;
+                    $type = GoodsType::Pharmacy;
+                    $warehouse = WarehouseMasterGudang::findOrFail($validatedData1["gudang_id"]);
+                    $qty = $validatedData2["qty"][$key];
+                    $args = new CreateStockArguments($user, $source, $type, $warehouse, $pbi, $qty);
+                    $this->goodsStockService->createStock($args);
                 }
             }
 
@@ -463,11 +483,18 @@ class WarehousePenerimaanBarangFarmasiController extends Controller
                         $poi->save();
                     }
 
-                    StoredBarangFarmasi::create([
-                        "pbi_id" => $pbi->id,
-                        "gudang_id" => $validatedData1["gudang_id"],
-                        "qty" => $validatedData2["qty"][$key]
-                    ]);
+                    // StoredBarangFarmasi::create([
+                    //     "pbi_id" => $pbi->id,
+                    //     "gudang_id" => $validatedData1["gudang_id"],
+                    //     "qty" => $validatedData2["qty"][$key]
+                    // ]);
+                    $user = User::findOrFail($validatedData1["user_id"]);
+                    $source = $pb;
+                    $type = GoodsType::Pharmacy;
+                    $warehouse = WarehouseMasterGudang::findOrFail($validatedData1["gudang_id"]);
+                    $qty = $validatedData2["qty"][$key];
+                    $args = new CreateStockArguments($user, $source, $type, $warehouse, $pbi, $qty);
+                    $this->goodsStockService->createStock($args);
                 }
 
                 $pbi->save();

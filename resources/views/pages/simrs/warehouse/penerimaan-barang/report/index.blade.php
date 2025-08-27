@@ -42,9 +42,9 @@
                 ('0' + today.getSeconds()).slice(-2);
 
             // Set the default date for the datepicker
-            $('#datepicker-1').daterangepicker({
+            $('.datepicker').daterangepicker({
                 opens: 'left',
-                startDate: '1970-01-02',
+                startDate: '{{ date('Y-m-01') }}', // This will give you the 1st day of the current year and month,
                 endDate: moment(today).format('YYYY-MM-DD'),
                 // timePicker: true, // Enable time selection
                 // timePicker24Hour: true, // 24-hour format

@@ -1,292 +1,165 @@
-<script>
-    const ranapBPJS1bulan = {{ $ranapBPJSdalam1bulan }};
+{{-- resources/views/pages/simrs/pendaftaran/form/registrasi-ranap-form.blade.php (Refactored Version) --}}
 
-    function alertRanapBPJS1Bulan() {
-        // fire alert with sweetalert2
+@php
+    // Definisikan semua data statis dan dinamis di satu tempat.
+    $penjaminOptions = $penjamins->pluck('nama_perusahaan', 'id')->all();
+    $paketOptions = ['Paket Skin Care' => 'Paket Skin Care'];
+    $kelasTitipanOptions = $kelasTitipan->pluck('kelas', 'id')->all();
 
-        Swal.fire({
-            icon: 'warning',
-            title: 'Ranap BPJS Dalam 1 Bulan',
-            text: 'Pasien ini telah melakukan rawat inap dengan BPJS dalam 1 bulan terakhir. Pesan ini akan hilang dalam 5 detik.',
-            showConfirmButton: false,
-            timer: 5000
+    $prosedurMasukOptions = [
+        'rawat-jalan' => 'Rawat Jalan',
+        'igd' => 'IGD',
+        'vk' => 'VK',
+        'ok' => 'OK',
+    ];
+
+    // Siapkan opsi rujukan dengan logika kondisional
+    $rujukanOptions = [
+        'inisiatif pribadi' => 'Inisiatif Pribadi',
+        'dalam rs' => 'Dalam RS',
+        'luar rs' => 'Luar RS',
+    ];
+    if (!$ranapBPJSdalam1bulan) {
+        $rujukanOptions['rujukan bpjs'] = 'Rujukan BPJS';
+    }
+@endphp
+
+{{-- Logika Peringatan BPJS --}}
+@if ($ranapBPJSdalam1bulan)
+    <script>
+        // Pastikan SweetAlert2 sudah dimuat sebelum skrip ini dijalankan
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Peringatan Riwayat Rawat Inap',
+                html: 'Pasien ini telah melakukan <strong>rawat inap dengan BPJS</strong> dalam 1 bulan terakhir.<br>Opsi rujukan BPJS dinonaktifkan.',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 7000,
+                timerProgressBar: true,
+            });
         });
-    }
+    </script>
+@endif
 
-    if (ranapBPJS1bulan) {
-        alertRanapBPJS1Bulan();
-    }
-</script>
-
-<form action="{{ route('simpan.registrasi') }}" method="POST" id="form-registrasi">
-    @method('post')
+<form id="form-registrasi" data-action-url="{{ route('simpan.registrasi') }}">
     @csrf
+    {{-- Hidden Inputs --}}
     <input type="hidden" name="patient_id" value="{{ old('patient_id', $patient->id) }}">
     <input type="hidden" name="user_id" value="{{ old('user_id', auth()->user()->id) }}">
     <input type="hidden" name="employee_id" value="{{ old('employee_id', auth()->user()->employee->id) }}">
     <input type="hidden" name="registration_type" value="{{ old('registration_type', 'rawat-inap') }}">
+    {{-- Hidden inputs untuk data dari modal --}}
+    <input type="hidden" id="bed_id_input" name="bed_id" value="{{ old('bed_id') }}">
+    <input type="hidden" id="kelas_rawat_id_input" name="kelas_rawat_id" value="{{ old('kelas_rawat_id') }}">
+
+    {{-- Notifikasi untuk pesan sukses/gagal umum dari AJAX --}}
+    <div id="form-notification" class="alert d-none" role="alert"></div>
+
     <div class="row">
+        {{-- Kolom Kiri --}}
         <div class="col-xl-6">
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="registration_date">Tanggal Registrasi</label>
-                    </div>
-                    <div class="col-xl-8">
-                        <input type="text"
-                            style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                            class="form-control" id="registration_date" readonly
-                            value="{{ old('registration_date', $today) }}" name="registration_date">
-                        @error('registration_date')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+            <x-form-row label="Tanggal Registrasi" for="registration_date">
+                <input type="text" class="form-control form-control-dashed" id="registration_date"
+                    name="registration_date" readonly value="{{ old('registration_date', $today) }}">
+            </x-form-row>
+
+            <x-form-row label="Dokter" for="doctor_id">
+                <x-doctor-select id="doctor_id" name="doctor_id" :doctors="$groupedDoctors" :selected="old('doctor_id')" />
+            </x-form-row>
+
+            <x-form-row label="Kelas / Kamar Rawat" for="kamar_tujuan">
+                {{-- Ini adalah input custom, jadi kita letakkan HTML-nya langsung di dalam slot komponen --}}
+                <div class="input-group bg-white shadow-inset-2">
+                    <input id="kamar_tujuan" readonly name="kamar_tujuan" type="text"
+                        class="form-control border-right-0 bg-transparent pr-0" placeholder="Pilih kamar dari daftar..."
+                        value="{{ old('kamar_tujuan') }}">
+                    <div class="input-group-append">
+                        <span class="input-group-text bg-transparent">
+                            <i class="fal fa-search" style="cursor: pointer" data-toggle="modal"
+                                data-target="#kelas-rawat-form"></i>
+                        </span>
                     </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="doctor_id">Dokter</label>
-                    </div>
-                    <div class="col-xl-8">
-                        <div class="form-group">
-                            <select class="select2 form-control w-100" id="doctor_id" name="doctor_id">
-                                <option value=""></option>
-                                @foreach ($groupedDoctors as $department => $doctors)
-                                    <optgroup label="{{ $department }}">
-                                        @foreach ($doctors as $doctor)
-                                            <option value="{{ $doctor->id }}"
-                                                {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}
-                                                data-departement="{{ $department }}">
-                                                {{ $doctor->employee->fullname }}
-                                            </option>
-                                        @endforeach
-                                    </optgroup>
-                                @endforeach
-                            </select>
+            </x-form-row>
+
+            <x-form-row label="Kartu Pasien" for="patient_card">
+                <div class="custom-control custom-checkbox pt-2">
+                    <input type="checkbox" class="custom-control-input" id="patient_card" name="patient_card"
+                        value="1" {{ old('patient_card') ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="patient_card">Ya</label>
+                </div>
+            </x-form-row>
+
+            <x-form-row label="Prosedur Masuk" for="prosedur_masuk">
+                <div class="frame-wrap pt-2">
+                    @foreach ($prosedurMasukOptions as $value => $label)
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" class="custom-control-input" id="prosedur-{{ Str::slug($value) }}"
+                                name="prosedur_masuk" value="{{ $value }}"
+                                {{ old('prosedur_masuk') == $value ? 'checked' : '' }}>
+                            <label class="custom-control-label"
+                                for="prosedur-{{ Str::slug($value) }}">{{ $label }}</label>
                         </div>
-                    </div>
+                    @endforeach
                 </div>
-            </div>
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="poliklinik">Kelas / Kamar Rawat</label>
-                    </div>
-                    <div class="col-xl-8">
-                        <div class="input-group bg-white shadow-inset-2">
-                            <input id="kelas_rawat_input" readonly name="kamar_tujuan" type="text"
-                                class="form-control border-right-0 bg-transparent pr-0" placeholder=""
-                                value="{{ old('kamar_tujuan') }}">
-                            <input type="hidden" id="bed_id_input" name="bed_id" value="{{ old('bed_id') }}">
-                            <input type="hidden" id="kelas_rawat_id_input" name="kelas_rawat_id"
-                                value="{{ old('kelas_rawat_id') }}">
-                            <div class="input-group-append">
-                                <span class="input-group-text">
-                                    <i class="fal fa-search" style="cursor: pointer" data-toggle="modal"
-                                        data-target="#kelas-rawat-form"></i>
-                                </span>
-                            </div>
-                        </div>
-                        @error('poliklinik')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="kartu_pasien">Kartu Pasien</label>
-                    </div>
-                    <div class="col-xl-8">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="patient_card" name="patient_card"
-                                {{ old('patient_card') ? 'checked' : '' }}>
-                            <label class="custom-control-label" for="patient_card">Ya</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="prosedur_masuk">Prosedur Masuk</label>
-                    </div>
-                    <div class="col-xl-8">
-                        <div class="custom-control custom-checkbox">
-                            <div class="frame-wrap">
-                                <div class="custom-control custom-radio custom-control-inline p-0">
-                                    <input type="radio" class="custom-control-input" id="rawat-jalan"
-                                        name="prosedur_masuk" value="rawat-jalan"
-                                        {{ old('prosedur_masuk') == 'rawat-jalan' ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="rawat-jalan">Rawat Jalan</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" id="igd"
-                                        name="prosedur_masuk" value="igd"
-                                        {{ old('prosedur_masuk') == 'igd' ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="igd">IGD</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" id="vk"
-                                        name="prosedur_masuk" value="vk"
-                                        {{ old('prosedur_masuk') == 'vk' ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="vk">VK</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" id="ok"
-                                        name="prosedur_masuk" value="ok"
-                                        {{ old('prosedur_masuk') == 'ok' ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="ok">OK</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </x-form-row>
         </div>
+
+        {{-- Kolom Kanan --}}
         <div class="col-xl-6">
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="registration_date">Paket</label>
-                    </div>
-                    <div class="col-xl-8">
-                        <div class="form-group">
-                            <select class="form-control w-100" id="paket" name="paket">
-                                <option selected></option>
-                                <option value="Paket Skin Care"
-                                    {{ old('paket') == 'Paket Skin Care' ? 'selected' : '' }}>Paket Skin Care</option>
-                            </select>
+            <x-form-row label="Paket" for="paket">
+                <x-form-select id="paket" name="paket" :options="$paketOptions" placeholder="Tidak ada paket" />
+            </x-form-row>
+
+            <x-form-row label="Penjamin" for="penjamin_id">
+                <x-form-select id="penjamin_id" name="penjamin_id" :options="$penjaminOptions" />
+            </x-form-row>
+
+            <x-form-row label="Kelas Titipan" for="titip_kelas_rawat">
+                <x-form-select id="titip_kelas_rawat" name="titip_kelas_rawat" :options="$kelasTitipanOptions"
+                    placeholder="Tanpa kelas titipan" />
+                <i class="text-danger" style="font-size: 8pt;">Tarif kamar tetap mengikuti tarif kelas yang
+                    diinginkan.</i>
+            </x-form-row>
+
+            <x-form-row label="Rujukan" for="rujukan">
+                <div class="frame-wrap pt-2">
+                    {{-- Loop melalui opsi rujukan yang sudah disiapkan secara kondisional --}}
+                    @foreach ($rujukanOptions as $value => $label)
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" class="custom-control-input" id="rujukan-{{ Str::slug($value) }}"
+                                name="rujukan" value="{{ $value }}"
+                                {{ old('rujukan', 'inisiatif pribadi') == $value ? 'checked' : '' }}>
+                            <label class="custom-control-label"
+                                for="rujukan-{{ Str::slug($value) }}">{{ $label }}</label>
                         </div>
-                    </div>
+                    @endforeach
                 </div>
-            </div>
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="penjamin">Penjamin</label>
-                    </div>
-                    <div class="col-xl-8">
-                        <div class="form-group">
-                            <select class="select2 form-control w-100" id="penjamin" name="penjamin_id">
-                                <option selected></option>
-                                @foreach ($penjamins as $penjamin)
-                                    <option value="{{ $penjamin->id }}"
-                                        {{ old('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
-                                        {{ $penjamin->nama_perusahaan }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="type">Kelas Titipan</label>
-                    </div>
-                    <div class="col-xl-8">
-                        <div class="form-group">
-                            <select class="form-control w-100" id="type" name="titip_kelas_rawat">
-                                <option></option>
-                                @foreach ($kelasTitipan as $item)
-                                    <option value="{{ $item->id }}"
-                                        {{ old('titip_kelas_rawat') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->kelas }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <i class="text-danger" style="font-size: 8pt;">
-                                Secara tarif kamar tetap mengikuti tarif kelas yang diinginkan pasien yaitu: Kelas
-                                Titipan dari
-                            </i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="form-group">
-                    <div class="row align-items-center">
-                        <div class="col-xl-4 text-right">
-                            <label class="form-label" for="rujukan">Rujukan</label>
-                        </div>
-                        <div class="col-xl-8">
-                            <div class="custom-control custom-checkbox">
-                                <div class="frame-wrap">
-                                    <div class="custom-control custom-radio custom-control-inline p-0">
-                                        <input type="radio" class="custom-control-input" id="inisiatif_pribadi"
-                                            name="rujukan" value="inisiatif pribadi"
-                                            {{ old('rujukan') == 'inisiatif pribadi' ? 'checked' : '' }}>
-                                        <label class="custom-control-label" for="inisiatif_pribadi">Inisiatif
-                                            Pribadi</label>
-                                    </div>
-                                    <div class="custom-control custom-radio custom-control-inline">
-                                        <input type="radio" class="custom-control-input" id="dalam_rs"
-                                            name="rujukan" value="dalam rs"
-                                            {{ old('rujukan') == 'dalam rs' ? 'checked' : '' }}>
-                                        <label class="custom-control-label" for="dalam_rs">Dalam RS</label>
-                                    </div>
-                                    <div class="custom-control custom-radio custom-control-inline">
-                                        <input type="radio" class="custom-control-input" id="luar_rs"
-                                            name="rujukan" value="luar rs"
-                                            {{ old('rujukan') == 'luar rs' ? 'checked' : '' }}>
-                                        <label class="custom-control-label" for="luar_rs">Luar RS</label>
-                                    </div>
-                                    @if (!$ranapBPJSdalam1bulan)
-                                        <div class="custom-control custom-radio custom-control-inline">
-                                            <input type="radio" class="custom-control-input" id="rujukan_bpjs"
-                                                name="rujukan" value="rujukan bpjs"
-                                                {{ old('rujukan') == 'rujukan bpjs' ? 'checked' : '' }}>
-                                            <label class="custom-control-label" for="rujukan_bpjs">Rujukan
-                                                BPJS</label>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </x-form-row>
         </div>
+
+        {{-- Skrining Awal --}}
         <div class="col-xl-12 mt-4">
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-2 text-right">
-                        <label class="form-label" for="diagnosa-awal">Diagnosa Awal</label>
-                    </div>
-                    <div class="col-xl-10">
-                        <textarea class="form-control" id="diagnosa-awal" name="diagnosa_awal" rows="5">{{ old('diagnosa_awal') }}</textarea>
-                        @error('diagnosa-awal')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-            </div>
+            <x-form-row label="Diagnosa Awal" for="diagnosa_awal">
+                <textarea class="form-control" id="diagnosa_awal" name="diagnosa_awal" rows="5">{{ old('diagnosa_awal') }}</textarea>
+            </x-form-row>
         </div>
+
+        {{-- Tombol Aksi --}}
         <div class="col-xl-12 mt-5">
             <div class="row">
                 <div class="col-xl-6">
-                    <a href="/patients/{{ $patient->id }}" class="btn btn-lg btn-default waves-effect waves-themed">
+                    <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}"
+                        class="btn btn-lg btn-default waves-effect waves-themed">
                         <span class="fal fa-arrow-left mr-1 text-primary"></span>
                         <span class="text-primary">Kembali</span>
                     </a>
                 </div>
                 <div class="col-xl-6 text-right">
-
-                    @if ($ranapBPJSdalam1bulan)
-                        <a href="#" onclick="alertRanapBPJS1Bulan()"
-                            class="btn btn-lg btn-warning waves-effect waves-themed">
-                            <span class="fal fa-exclamation mr-1 text-black"></span>
-                            <span class="text-black">Peringatan</span>
-                        </a>
-                        {{-- <br> --}}
-                    @endif
-
-                    <button type="submit" class="btn btn-lg btn-primary waves-effect waves-themed" id="simpan-btn"
-                        onclick="disableButton(event)">
+                    {{-- Tombol Simpan --}}
+                    <button type="submit" class="btn btn-lg btn-primary waves-effect waves-themed" id="simpan-btn">
                         <span class="fal fa-save mr-1"></span>
                         Simpan
                     </button>
@@ -295,11 +168,14 @@
         </div>
     </div>
 </form>
+
+{{-- Modal untuk memilih kelas rawat tetap di luar form --}}
 <div class="modal fade" id="kelas-rawat-form" tabindex="-1" role="dialog" aria-hidden="true">
+    {{-- Konten modal Anda tidak berubah dan tetap di sini --}}
     <div class="modal-dialog modal-lg" style="max-width: 80vw" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary">
-                <h5 class="modal-title text-white"><strong>Kelas Rawat</strong></h5>
+                <h5 class="modal-title text-white"><strong>Pilih Tempat Tidur</strong></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true"><i class="fal fa-times"></i></span>
                 </button>
@@ -314,13 +190,12 @@
                             <div class="card-body">
                                 <form id="form-cari-kelas">
                                     <div class="form-group">
-                                        <label class="form-label" for="kelas_rawat_id">Kelas Rawat</label>
-                                        <select class="form-control w-100" id="kelas_rawat_id" name="kelas_rawat_id">
+                                        <label class="form-label" for="kelas_rawat_id_modal">Kelas Rawat</label>
+                                        <select class="form-control w-100" id="kelas_rawat_id_modal"
+                                            name="kelas_rawat_id">
                                             <option value=""></option>
                                             @foreach ($kelas_rawats as $kelas_rawat)
-                                                <option value="{{ $kelas_rawat->id }}"
-                                                    {{ old('kelas_rawat_id') == $kelas_rawat->id ? 'selected' : '' }}>
-                                                    {{ $kelas_rawat->kelas }}
+                                                <option value="{{ $kelas_rawat->id }}">{{ $kelas_rawat->kelas }}
                                                 </option>
                                             @endforeach
                                         </select>

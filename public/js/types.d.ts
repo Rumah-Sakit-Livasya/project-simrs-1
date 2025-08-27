@@ -37,6 +37,7 @@ interface Penjamin {
     jenis_kerjasama: string;
     jenis_kontrak: string;
     pasien_otc: number;
+    is_bpjs: boolean;
     keterangan: string | null;
     deleted_at: string | null;
     created_at: string | null;
@@ -131,10 +132,10 @@ interface Registration {
     deleted_at: string | null;
     created_at: string;
     updated_at: string;
-    penjamin: Penjamin;
-    patient: Patient;
-    doctor: Doctor;
-    departement: Departement;
+    penjamin?: Penjamin;
+    patient?: Patient;
+    doctor?: Doctor;
+    departement?: Departement;
 }
 
 interface Penjamin {
@@ -218,8 +219,8 @@ interface Doctor {
     deleted_at: string | null;
     created_at: string;
     updated_at: string;
-    employee: Employee;
-    department_from_doctors: DepartmentFromDoctors;
+    employee?: Employee;
+    department_from_doctors?: DepartmentFromDoctors;
 }
 
 interface Employee {
@@ -436,6 +437,24 @@ interface Satuan {
     aktif: number;
 }
 
+interface KategoriBarang {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    nama: string;
+    coa_inventory: number;
+    coa_sales_outpatient: number | null;
+    coa_cogs_outpatient: number | null;
+    coa_sales_inpatient: number | null;
+    coa_cogs_inpatient: number | null;
+    coa_adjustment_daily: number | null;
+    coa_adjustment_so: number | null;
+    konsinsyasi: number;
+    aktif: number;
+    kode: string;
+}
+
 interface BarangFarmasi {
     id: number;
     created_at: string;
@@ -457,10 +476,35 @@ interface BarangFarmasi {
     golongan_id: number | null;
     kelompok_id: number | null;
     satuan_id: number;
-    satuan?: Satuan;
     principal: string | null;
     harga_principal: number | null;
     diskon_principal: number | null;
+    restriksi: string | null;
+
+    satuan?: Satuan;
+    golongan?: GolonganBarang;
+    kategori?: KategoriBarang;
+    zat_aktif?: ZatAktifFarmasi[];
+}
+
+interface ZatAktif {
+    id: number;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+    kode: string;
+    nama: string;
+    aktif: number;
+}
+
+interface ZatAktifFarmasi {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    zat_id: number;
+    barang_id: number;
+    zat?: ZatAktif;
 }
 
 interface BarangNonFarmasi {
@@ -479,7 +523,10 @@ interface BarangNonFarmasi {
     golongan_id: number | null;
     kelompok_id: number | null;
     satuan_id: number;
+
     satuan?: Satuan;
+    golongan?: GolonganBarang;
+    kategori?: KategoriBarang;
 }
 
 interface MasterGudang {
@@ -514,7 +561,7 @@ interface ItemPO {
     po_id: number;
     pri_id: number | null;
     barang_id: number;
-    barang?: Barang;
+    barang?: BarangFarmasi | BarangNonFarmasi;
     kode_barang: string;
     nama_barang: string;
     unit_barang: string;
@@ -579,30 +626,14 @@ interface PurchaseOrder {
     supplier: Supplier;
 }
 
-interface Barang {
+interface GolonganBarang {
     id: number;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-    nama: string;
+    deleted_at: Date | null;
+    created_at: string; // Adjusted to string as per the original format
+    updated_at: string; // Adjusted to string as per the original format
     kode: string;
-    keterangan: string;
-    hna: number;
-    ppn: number;
-    ppn_rajal: number;
-    ppn_ranap: number;
-    tipe: string;
-    formularium: string;
-    jenis_obat: string;
-    exp: string;
+    nama: string;
     aktif: number;
-    kategori_id: number;
-    golongan_id: number;
-    kelompok_id: number;
-    satuan_id: number;
-    principal: string;
-    harga_principal: number;
-    diskon_principal: number;
 }
 
 interface StoredItem {
@@ -615,6 +646,89 @@ interface StoredItem {
     qty: number;
 
     pbi?: PenerimaanBarangItem;
+}
+
+
+interface FarmasiResep {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    order_date: string;
+    registration_id: number;
+    otc_id: number;
+    re_id: number;
+    dokter_id: number;
+    user_id: number;
+    gudang_id: number;
+    kode_resep: string;
+    alamat: string;
+    resep_manual: string;
+    embalase: 'tidak' | 'item' | 'racikan';
+    no_telp: string;
+    total: number;
+    bmhp: boolean;
+    kronis: boolean;
+    billed: boolean;
+    handed: boolean;
+    dispensing: boolean;
+
+    items: FarmasiResepItems[];
+}
+
+interface FarmasiResepItems {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    resep_id: number;
+    si_id: number;
+    racikan_id: number;
+    tipe: 'obat' | 'racikan';
+    signa: string;
+    instruksi: string;
+    jam_pemberian: string;
+    qty: number;
+    harga: number;
+    embalase: number;
+    subtotal: number;
+
+    stored?: StoredItem;
+    resep?: FarmasiResep;
+}
+
+interface TelaahResep {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    resep_id: number;
+    kejelasan_tulisan: boolean;
+    benar_pasien: boolean;
+    benar_nama_obat: boolean;
+    benar_dosis: boolean;
+    benar_waktu_dan_frekeunsi_pemberian: boolean;
+    benar_rute_dan_cara_pemberian: boolean;
+    ada_alergi_dengan_obat_yang_diresepkan: boolean;
+    ada_duplikat_obat: boolean;
+    interaksi_obat_yang_mungkin_terjadi: boolean;
+    hal_lain_yang_mungkin_terjadi: boolean;
+    hal_lain_yang_merupakan_masalah_dengan_obat: boolean;
+    perubahan_resep_tertulis_1?: string | null;
+    perubahan_resep_menjadi_1?: string | null;
+    perubahan_resep_petugas_1?: string | null;
+    perubahan_resep_disetujui_1?: string | null;
+    perubahan_resep_tertulis_2?: string | null;
+    perubahan_resep_menjadi_2?: string | null;
+    perubahan_resep_petugas_2?: string | null;
+    perubahan_resep_disetujui_2?: string | null;
+    perubahan_resep_tertulis_3?: string | null;
+    perubahan_resep_menjadi_3?: string | null;
+    perubahan_resep_petugas_3?: string | null;
+    perubahan_resep_disetujui_3?: string | null;
+    alamat_no_telp_pasien?: string | null;
+
+    resep?: FarmasiResep;
 }
 
 interface PenerimaanBarangItem {
@@ -638,6 +752,8 @@ interface PenerimaanBarangItem {
     is_bonus: number;
 
     pb?: PenerimaanBarang;
+    item?: BarangFarmasi | BarangNonFarmasi;
+    satuan?: Satuan;
 }
 
 interface PenerimaanBarang {
@@ -667,6 +783,262 @@ interface PenerimaanBarang {
     kas: string | null; // Nullable if not all entries contain this field or set to undefined
 }
 
+// Define StockRequestItem interface for nested items array
+interface StockRequestItem {
+    id: number;
+    created_at: string; // Timestamp in ISO format
+    updated_at: string; // Timestamp in ISO format
+    deleted_at: string | null; // Nullable timestamp or null
+    sr_id: number;
+    barang_id: number;
+    satuan_id: number;
+    qty: number;
+    qty_fulfilled: number;
+    keterangan: string;
+    barang?: BarangFarmasi | BarangNonFarmasi
+    satuan?: Satuan
+}
+
+// Define the main StockRequest interface
+interface StockRequest {
+    id: number;
+    created_at: string; // Timestamp in ISO format
+    updated_at: string; // Timestamp in ISO format
+    deleted_at: string | null; // Nullable timestamp or null
+    tanggal_sr: string; // Date in YYYY-MM-DD format
+    user_id: number;
+    asal_gudang_id: number;
+    tujuan_gudang_id: number;
+    kode_sr: string;
+    keterangan: string;
+    tipe: "normal" | "urgent"; // String literal if only specific values are allowed
+    status: "final" | "draft"; // Specify all possible statuses; replace 'other_status' as needed
+    items?: StockRequestItem[]; // Array of StockRequestItem
+}
+
+interface StockOpnameItem {
+    kode_so: string;
+    id: number;
+    created_at: Date; // Assuming standard timestamp fields are managed by the ORM/database
+    updated_at: Date;
+    deleted_at?: Date; // Optional for soft deletion support
+    user_id: number;
+    sog_id: number;
+    si_f_id?: number;
+    si_nf_id?: number;
+    qty: number;
+    keterangan?: string;
+    status: 'draft' | 'final';
+}
+
+interface StackedStoredItemOpname {
+    actual?: number;
+    frozen: number;
+    movement: number;
+    qty: number;
+    barang_id: number;
+    satuan_id: number;
+    barang: BarangFarmasi | BarangNonFarmasi;
+    satuan: Satuan
+    type: "f" | "nf";
+    stack: StoredItemOpname[];
+}
+
+interface Employee {
+    id: number;
+    company_id?: number;
+    organization_id?: number;
+    job_position_id?: number;
+    job_level_id?: number;
+    approval_line?: number;
+    approval_line_parent?: number;
+    employee_code?: string;
+    title?: string;
+    fullname?: string;
+    degree?: string;
+    email?: string;
+    mobile_phone?: string;
+    place_of_birth?: string;
+    birthdate?: string;
+    gender?: string;
+    marital_status?: string;
+    blood_type?: string;
+    religion?: string;
+    last_education?: string;
+    identity_type?: string;
+    identity_number?: string;
+    identity_expire_date?: string;
+    postal_code?: string;
+    citizen_id_address?: string;
+    residental_address?: string;
+    barcode?: string;
+    employment_status?: string;
+    join_date?: string;
+    end_status_date?: string;
+    resign_date?: string;
+    basic_salary?: string;
+    salary_type?: string;
+    payment_schedule?: string;
+    protate_setting?: string;
+    allowed_for_overtime?: boolean;
+    npwp?: string;
+    ptkp_status?: string;
+    tax_methode?: string;
+    tax_salary?: string;
+    taxable_date?: string;
+    employment_tax_status?: string;
+    beginning_netto?: string;
+    pph21_paid?: string;
+    bpjs_ker_number?: string;
+    npp_ker_bpjs?: string;
+}
+
+interface User {
+    id: number;
+    name: string;
+    email: string;
+    is_active: boolean;
+    avatar?: string;
+    remember_token?: string;
+    created_at: string; // Assuming this is a timestamp in ISO format
+    updated_at: string; // Assuming this is a timestamp in ISO format
+    employee?: Employee;
+}
+
+interface DistribusiBarang {
+    id: number;
+    created_at: string; // Assuming this is a timestamp in ISO format
+    updated_at: string; // Assuming this is a timestamp in ISO format
+    deleted_at: string | null; // Assuming this is a timestamp in ISO format for soft deletes
+    tanggal_db: string; // Date type for distribution date
+    user_id: number;
+    asal_gudang_id: number;
+    tujuan_gudang_id: number;
+    sr_id: number | null;
+    kode_db: string;
+    keterangan: string | null;
+    status: "draft" | "final";
+}
+
+interface ReturBarang {
+    id: number;
+    created_at: string; // Assuming this is a timestamp in ISO format
+    updated_at: string; // Assuming this is a timestamp in ISO format
+    deleted_at: string | null; // Assuming this is a timestamp in ISO format for soft deletes
+    tanggal_retur: string; // Date type for return date
+    user_id: number;
+    supplier_id: number;
+    keterangan: string | null;
+    kode_retur: string;
+    ppn: number;
+    ppn_nominal: number;
+    nominal: number;
+}
+
+
+
+interface StockTransactions {
+    id: number;
+    created_at: string; // Timestamp in ISO format
+    updated_at: string; // Timestamp in ISO format
+    stock_id: number;
+    stock_model: string;
+    source_id: number;
+    source_model: string;
+    source_controller: string;
+    event_type: "create" | "update";
+    transaction_type: "in" | "out";
+    before_qty: number | null;
+    after_qty: number;
+    before_gudang_id: number | null;
+    after_gudang_id: number;
+    performed_by: number;
+    keterangan?: string;
+    
+    stock?: StoredItem;
+    source?: StockTransactionsSources;
+    user?: User;
+    before_gudang?: MasterGudang;
+    after_gudang?: MasterGudang;
+}
+
+type StockDetails = (BarangFarmasi | BarangNonFarmasi) & {
+    qty_start: number,
+    qty_finish: number,
+    qty_in: number,
+    qty_out: number,
+    adjustment: number,
+    qty_expired: number,
+    logs: StockTransactions[],
+    stored_items: StoredItem[]
+}
+
+
+type StoredItemOpname = StoredItem & {
+    frozen: number;
+    movement: number;
+    type: "f" | "nf";
+    opname?: StockOpnameItem;
+}
+
+interface ResepElektronik {
+    id: number;
+    created_at: string; // Assuming this is a timestamp in ISO format
+    updated_at: string; // Assuming this is a timestamp in ISO format
+    deleted_at: string | null; // Assuming this is a timestamp in ISO format for soft deletes
+    cppt_id: number;
+    user_id: number;
+    registration_id: number;
+    gudang_id: number | null;
+    kode_re: string;
+    resep_manual: string;
+    total: number;
+    processed: number;
+
+    registration?: Registration;
+    cppt?: CPPT;
+    items?: ResepElektronikItem[];
+}
+
+interface CPPT {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    user_id: number;
+    registration_id: number;
+    tipe_cppt: string;
+    tipe_rawat: string;
+    doctor_id: number | null;
+    konsulkan_ke: number | null;
+    subjective: string;
+    objective: string;
+    assesment: string;
+    planning: string;
+    instruksi: string | null;
+    evaluasi: string | null;
+    implementasi: string | null;
+}
+
+interface ResepElektronikItem {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    re_id: number | null;
+    barang_id: number;
+    satuan_id: number;
+    qty: number;
+    harga: number;
+    subtotal: number;
+    signa: string;
+    instruksi: string;
+    billed: number;
+
+    barang?: BarangFarmasi;
+}
+
+
+type StockTransactionsSources = PenerimaanBarang | DistribusiBarang | ReturBarang | StockOpnameItem;
 type PatientType = "rajal" | "ranap" | "otc";
 type SumberItem = "npr" | "pr";
 type TipePR = "all" | "normal" | "urgent";

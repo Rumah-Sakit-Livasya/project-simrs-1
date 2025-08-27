@@ -58,7 +58,40 @@ class WarehouseBarangFarmasi extends Model implements AuditableContract
         return $this->hasMany(ProcurementPurchaseOrderPharmacyItems::class, "barang_id", "id");
     }
 
-    public function pb_pharmacy(){
+    public function pb_pharmacy()
+    {
         return $this->hasMany(WarehousePenerimaanBarangFarmasiItems::class, "barang_id", "id");
+    }
+
+    public function sr_pharmacy()
+    {
+        return $this->hasMany(WarehouseStockRequestPharmacyItems::class, "barang_id", "id");
+    }
+
+    public function db_pharmacy()
+    {
+        return $this->hasMany(WarehouseDistribusiBarangFarmasiItems::class, "barang_id", "id");
+    }
+
+    public function stock_adjustment()
+    {
+        return $this->hasMany(WarehouseStockAdjustment::class, "barang_f_id", "id");
+    }
+
+    public function stored_items()
+    {
+        return $this->hasManyThrough(StoredBarangFarmasi::class, WarehousePenerimaanBarangFarmasiItems::class, "barang_id", "pbi_id");
+    }
+
+    public function getGudangsAttribute()
+    {
+        return $this->pb_pharmacy
+            ->flatMap(function ($pbi) {
+                return $pbi->stored_items->map(function ($item) {
+                    return $item->gudang;
+                });
+            })
+            ->unique('id') // Optional: avoid duplicates
+            ->values();
     }
 }

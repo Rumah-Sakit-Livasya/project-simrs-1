@@ -121,11 +121,9 @@
                             <div class="row">
                                 <div class="col-md-2 biodata-pasien">
                                     @if ($patient->gender == 'Laki-laki')
-                                        <img src="http://103.191.197.117:8888/real/include/avatar/man-icon.png"
-                                            style="width: 120px; height: 120px;">
+                                        <img src="/img/user/man-icon.png" style="width: 120px; height: 120px;">
                                     @else
-                                        <img src="http://103.191.197.117:8888/real/include/avatar/woman-icon.png"
-                                            style="width: 120px; height: 120px;">
+                                        <img src="/img/user/woman-icon.png" style="width: 120px; height: 120px;">
                                     @endif
                                     <div class="btn-biodata">
                                         <button class="btn-flatcx pointer" data-toggle="modal"
@@ -268,85 +266,115 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
+                            {{-- Ganti seluruh blok <ul class="box-menu"> dengan ini --}}
                             <ul class="box-menu">
-                                <div class="tab-pane fade show" id="awal" role="tabpanel" aria-labelledby="awal">
+                                <div class="tab-pane fade show active" id="awal" role="tabpanel"
+                                    aria-labelledby="awal">
                                     <div class="row justify-content-center">
                                         <div class="col-md-8">
                                             <div class="row justify-content-center">
+
+                                                {{-- Rawat Jalan --}}
                                                 <div class="col-md-4">
-                                                    <a class="nav-link" href="/patients/{{ $patient->id }}/rawat-jalan">
-                                                        <li class="menu-layanan blue-box" data-layanan="reg_rajal">
+                                                    <li class="menu-layanan blue-box">
+                                                        <a class="nav-link service-link"
+                                                            href="/patients/{{ $patient->id }}/rawat-jalan"
+                                                            data-layanan="reg_rajal">
                                                             <div
                                                                 class="circle-menu waves-effect waves-light blue darken-3">
                                                                 <i class="mdi mdi-stethoscope"></i>
                                                             </div>
-                                                            <span>Rawat Jalan</span>
-                                                        </li>
-                                                    </a>
+                                                            <p>Rawat Jalan</p>
+                                                        </a>
+                                                    </li>
                                                 </div>
+
+                                                {{-- IGD --}}
                                                 <div class="col-md-4">
-                                                    <a class="nav-link" href="/patients/{{ $patient->id }}/igd">
-                                                        <li class="menu-layanan red-box" data-layanan="reg_igd">
+                                                    <li class="menu-layanan red-box">
+                                                        <a class="nav-link service-link"
+                                                            href="/patients/{{ $patient->id }}/igd"
+                                                            data-layanan="reg_igd">
                                                             <div class="circle-menu waves-effect waves-light red">
                                                                 <i class="mdi mdi-hospital"></i>
                                                             </div>
-                                                            <span>I G D</span>
-                                                        </li>
-                                                    </a>
+                                                            <p>I G D</p>
+                                                        </a>
+                                                    </li>
                                                 </div>
+
+                                                {{-- ODC --}}
                                                 <div class="col-md-4">
-                                                    <a class="nav-link" href="/patients/{{ $patient->id }}/odc">
-                                                        <li class="menu-layanan green-box" data-layanan="reg_odc">
+                                                    <li class="menu-layanan green-box">
+                                                        <a class="nav-link service-link"
+                                                            href="/patients/{{ $patient->id }}/odc"
+                                                            data-layanan="reg_odc">
                                                             <div class="circle-menu waves-effect waves-light greencx">
                                                                 <i class="mdi mdi-bed"></i>
                                                             </div>
-                                                            <span>O D C</span>
-                                                        </li>
-                                                    </a>
+                                                            <p>O D C</p>
+                                                        </a>
+                                                    </li>
                                                 </div>
+
+                                                {{-- Rawat Inap --}}
                                                 <div class="col-md-4">
-                                                    <a class="nav-link" href="/patients/{{ $patient->id }}/rawat-inap">
-                                                        <li class="menu-layanan cyan-box" data-layanan="reg_ranap">
+                                                    <li class="menu-layanan cyan-box">
+                                                        <a class="nav-link service-link"
+                                                            href="/patients/{{ $patient->id }}/rawat-inap"
+                                                            data-layanan="reg_ranap">
                                                             <div class="circle-menu waves-effect waves-light cyan">
                                                                 <i class="mdi mdi-bed"></i>
                                                             </div>
-                                                            <span>Rawat Inap</span>
-                                                        </li>
-                                                    </a>
+                                                            <p>Rawat Inap</p>
+                                                        </a>
+                                                    </li>
                                                 </div>
+
+                                                {{-- Laboratorium --}}
                                                 <div class="col-md-4">
-                                                    <a class="nav-link"
-                                                        href="/patients/{{ $patient->id }}/laboratorium">
-                                                        <li class="menu-layanan orange-box" data-layanan="reg_lab">
+                                                    <li class="menu-layanan orange-box">
+                                                        <a class="nav-link service-link"
+                                                            href="/patients/{{ $patient->id }}/laboratorium"
+                                                            data-layanan="reg_lab">
                                                             <div
                                                                 class="circle-menu waves-effect waves-light orange lighten-2">
                                                                 <i class="mdi mdi-flask-outline"></i>
                                                             </div>
-                                                            <span>Laboratorium</span>
-                                                        </li>
-                                                    </a>
+                                                            <p>Laboratorium</p>
+                                                        </a>
+                                                    </li>
                                                 </div>
+
+                                                {{-- Radiologi --}}
                                                 <div class="col-md-4">
-                                                    <a class="nav-link" href="/patients/{{ $patient->id }}/radiologi">
-                                                        <li class="menu-layanan purple-box" data-layanan="reg_rad">
+                                                    <li class="menu-layanan purple-box">
+                                                        <a class="nav-link service-link"
+                                                            href="/patients/{{ $patient->id }}/radiologi"
+                                                            data-layanan="reg_rad">
                                                             <div
                                                                 class="circle-menu waves-effect waves-light purple lighten-2">
                                                                 <i class="mdi mdi-radioactive"></i>
                                                             </div>
-                                                            <span>Radiologi</span>
-                                                        </li>
-                                                    </a>
+                                                            <p>Radiologi</p>
+                                                        </a>
+                                                    </li>
                                                 </div>
+
+                                                {{-- Hemodialisa --}}
                                                 <div class="col-md-4">
-                                                    <a class="nav-link" href="/patients/{{ $patient->id }}/hemodialisa">
-                                                        <li class="menu-layanan brown-box" data-layanan="reg_hemo">
+                                                    <li class="menu-layanan brown-box">
+                                                        <a class="nav-link service-link"
+                                                            href="/patients/{{ $patient->id }}/hemodialisa"
+                                                            data-layanan="reg_hemo">
                                                             <div class="circle-menu waves-effect waves-light browncx">
                                                                 <i class="mdi mdi-high-definition-box"></i>
                                                             </div>
-                                                            <span>Hemodialisa</span>
-                                                        </li>
-                                                    </a>
+                                                            <p>Hemodialisa</p>
+                                                        </a>
+                                                    </li>
                                                 </div>
+
                                             </div>
                                         </div>
                                     </div>
@@ -391,6 +419,32 @@
             // Membuka pop-up window saat tombol diklik
             window.open('{{ route('history.kunjungan.pasien', $patient->id) }}', '_blank', 'width=500' + width +
                 ',height=' + height);
+        });
+    </script>
+
+    {{-- TAMBAHKAN SCRIPT BARU DI BAWAH INI --}}
+    <script>
+        // Pastikan dokumen sudah dimuat sepenuhnya
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pilih semua tautan menu layanan berdasarkan class yang kita tambahkan
+            const serviceLinks = document.querySelectorAll('.service-link');
+
+            // Loop melalui setiap tautan dan tambahkan event listener 'click'
+            serviceLinks.forEach(function(link) {
+                link.addEventListener('click', function(event) {
+                    // Temukan ikon <i> di dalam tautan yang diklik
+                    const icon = link.querySelector('i');
+
+                    // Jika ikon ditemukan
+                    if (icon) {
+                        // Ganti kelas ikon menjadi kelas spinner dari FontAwesome
+                        // Template Anda sudah menggunakan ikon 'fal', jadi kita gunakan ini
+                        icon.className = 'fal fa-spinner fa-spin';
+                    }
+
+                    // Navigasi ke halaman tujuan akan dilanjutkan secara otomatis
+                });
+            });
         });
     </script>
 @endsection

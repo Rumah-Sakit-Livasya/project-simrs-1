@@ -45,6 +45,7 @@
                                 @csrf
                                 @method('put')
                                 <input type="hidden" name="id" value="{{ $barang->id }}">
+                                <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
                                         <div class="form-group">
@@ -354,6 +355,26 @@
                                                 </div>
                                                 <div class="col-xl">
                                                     <textarea name="keterangan" class="form-control" id="keterangan">{{ $barang->keterangan }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <br>
+
+                                <div class="row justify-content-center">
+                                    <div class="col-xl-12">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-1" style="text-align: right">
+                                                    <label class="form-label text-end" for="alasan_edit">
+                                                        Alasan Edit*
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <input type="text" name="alasan_edit" required
+                                                        class="form-control">
                                                 </div>
                                             </div>
                                         </div>

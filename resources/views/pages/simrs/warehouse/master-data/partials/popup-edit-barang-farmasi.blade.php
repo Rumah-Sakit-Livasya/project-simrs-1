@@ -44,6 +44,7 @@
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="id" value="{{ $barang->id }}">
+                                <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
                                         <div class="form-group">
@@ -228,7 +229,18 @@
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        {{-- /// --}}
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="restriksi">
+                                                        Restriksi
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <textarea name="restriksi" class="form-control" id="restriksi">{{ $barang->restriksi }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="col-xl-6">
@@ -266,9 +278,16 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->principal }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="principal" name="principal">
+                                                    <select name="principal" id="principal" class="form-control">
+                                                        <option value="" disabled hidden>Pilih Principal
+                                                        </option>
+                                                        @foreach ($pabriks as $item)
+                                                            <option value="{{ $item->id }}"
+                                                                {{ $barang->principal == $item->id ? 'selected' : '' }}>
+                                                                {{ $item->nama }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -433,21 +452,34 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody id="table-satuan">
-                                                            <script> const tempIds = []; </script>
+                                                            <script>
+                                                                const tempIds = [];
+                                                            </script>
                                                             @foreach ($barang->satuan_tambahan as $satuan)
-                                                                <script> tempIds.push({{ $satuan->satuan->id }}) </script>
-                                                                <tr id="satuan{{ $loop->iteration }}" data-index={{ $loop->iteration - 1 }}>
+                                                                <script>
+                                                                    tempIds.push({{ $satuan->satuan->id }})
+                                                                </script>
+                                                                <tr id="satuan{{ $loop->iteration }}"
+                                                                    data-index={{ $loop->iteration - 1 }}>
                                                                     <td>{{ $satuan->satuan->nama }}</td>
                                                                     <td>
-                                                                        <input type="hidden" name="satuans_id[{{ $loop->iteration }}]" value="{{ $satuan->satuan->id }}">
-                                                                        <input type="number" name="satuans_jumlah[{{ $loop->iteration }}]" value="{{ $satuan->isi }}" class="form-control" min="1">
+                                                                        <input type="hidden"
+                                                                            name="satuans_id[{{ $loop->iteration }}]"
+                                                                            value="{{ $satuan->satuan->id }}">
+                                                                        <input type="number"
+                                                                            name="satuans_jumlah[{{ $loop->iteration }}]"
+                                                                            value="{{ $satuan->isi }}"
+                                                                            class="form-control" min="1">
                                                                     </td>
                                                                     <td>
-                                                                        <input type="checkbox" name="satuans_status[{{ $loop->iteration }}]" value="1" title="Aktif?" checked>
+                                                                        <input type="checkbox"
+                                                                            name="satuans_status[{{ $loop->iteration }}]"
+                                                                            value="1" title="Aktif?" checked>
                                                                     </td>
                                                                     <td>
                                                                         <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                                                                            title="Hapus" onclick="PopupBarangFarmasiClass.deleteSatuanTambahan({{ $loop->iteration }})"></a>
+                                                                            title="Hapus"
+                                                                            onclick="PopupBarangFarmasiClass.deleteSatuanTambahan({{ $loop->iteration }})"></a>
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
@@ -563,6 +595,26 @@
                                                             {{ $barang->formularium == 'NRS' ? 'selected' : '' }}>
                                                             Formularium Non Rumah Sakit</option>
                                                     </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <br>
+
+                                <div class="row justify-content-center">
+                                    <div class="col-xl-12">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-1" style="text-align: right">
+                                                    <label class="form-label text-end" for="alasan_edit">
+                                                        Alasan Edit*
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <input type="text" name="alasan_edit" required
+                                                        class="form-control">
                                                 </div>
                                             </div>
                                         </div>

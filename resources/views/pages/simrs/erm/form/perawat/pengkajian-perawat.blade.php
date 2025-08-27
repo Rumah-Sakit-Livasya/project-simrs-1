@@ -1061,39 +1061,6 @@
                 $('#js-slide-left').removeClass('slide-on-mobile-left-show');
                 $(this).removeClass('show');
             });
-
-            // Filter Pasien
-            // $('.filter-pasien').on('change', function(e) {
-            //     e.preventDefault(); // Mencegah form submit langsung
-            //     console.log('changed')
-            //     $.ajax({
-            //         url: "{{ route('poliklinik.filter-pasien') }}",
-            //         type: "POST",
-            //         data: {
-            //             _token: "{{ csrf_token() }}", // Tambahkan token CSRF
-            //             route: window.location.href,
-            //             departement_id: $('#filter_pasien #departement_id').val(),
-            //             doctor_id: $('#filter_pasien #doctor_id').val()
-            //         },
-
-            //         dataType: "json",
-            //         beforeSend: function() {
-            //             $('#daftar-pasien .col-12').html(
-            //                 '<p>Sedang memuat...</p>'); // Tambahkan loading
-            //         },
-            //         success: function(response) {
-            //             if (response.success) {
-            //                 $('#daftar-pasien .col-12').html(response.html);
-            //             } else {
-            //                 $('#daftar-pasien .col-12').html(
-            //                     '<p>Tidak ada data pasien.</p>');
-            //             }
-            //         },
-            //         error: function(xhr, status, error) {
-            //             alert("Terjadi kesalahan, silakan coba lagi.");
-            //         }
-            //     });
-            // });
         });
     </script>
 @endsection

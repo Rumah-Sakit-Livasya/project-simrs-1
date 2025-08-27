@@ -26,6 +26,11 @@
     {{-- 1. MUAT LIBRARY SIGNATURE PAD DARI INTERNET (CDN) --}}
     {{-- Ganti link lama Anda dengan yang ini --}}
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.export.js"></script>
+
     <script type="text/javascript">
         // FUNGSI GLOBAL UNTUK DIPANGGIL OLEH POPUP
         window.updateSignature = function(inputTargetId, previewTargetId, dataUrl) {
@@ -44,6 +49,33 @@
 
     <script script type="text/javascript">
         $(document).ready(function() {
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true,
+                orientation: "bottom auto"
+            });
+
+            // Ubah menjadi datepicker
+            function calculateEndDate() {
+                const durasi = parseInt($('#durasi_istirahat').val());
+
+                // Ambil tanggal mulai dari datepicker
+                const tglMulaiDate = $('#tgl_mulai').datepicker('getDate');
+
+                if (!isNaN(durasi) && durasi > 0 && tglMulaiDate) {
+                    // Hitung tanggal selesai berdasarkan durasi
+                    const tglSelesai = new Date(tglMulaiDate);
+                    tglSelesai.setDate(tglSelesai.getDate() + durasi - 1);
+
+                    // Set tanggal selesai ke datepicker
+                    $('#tgl_selesai').datepicker('setDate', tglSelesai);
+                }
+            }
+
+            // Event listener-nya tetap sama
+            $(document).on('change keyup', '#durasi_istirahat, #tgl_mulai', calculateEndDate);
+
             $('body').on('click', '.open-signature-popup', function() {
                 const inputTarget = $(this).data('input-target');
                 const previewTarget = $(this).data('preview-target');
@@ -51,7 +83,7 @@
                     `{{ route('utility.signature.pad') }}?inputTarget=${inputTarget}&previewTarget=${previewTarget}`;
                 window.open(url, 'SignatureWindow',
                     `width=${window.screen.width},height=${window.screen.height},scrollbars=yes,resizable=yes,fullscreen=yes`
-                    );
+                );
             });
 
             const signaturePads = {};

@@ -1,5 +1,5 @@
 @extends('inc.layout')
-@section('title', 'Biaya Administrasi Ranap')
+@section('title', 'Suku')
 @section('extended-css')
     <style>
         hr {

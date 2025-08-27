@@ -5,19 +5,20 @@
                 @csrf
                 @method('post')
                 <div class="modal-header">
-                    
+
                     <h1 class="modal-title fs-5" id="addModalLabel">Tambah Master Gudang</h1>
                 </div>
                 <div class="modal-body">
 
                     <table style="width: 100%">
                         <tr>
-                            <td>Nama Kelompok</td>
+                            <td>Nama Gudang</td>
                             <td>:</td>
                             <td>
                                 <input type="text" value="{{ old('nama') }}"
                                     style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control @error('nama') is-invalid @enderror" id="nama" name="nama">
+                                    class="form-control @error('nama') is-invalid @enderror" id="nama"
+                                    name="nama">
                                 @error('nama')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -29,7 +30,8 @@
                             <td>
                                 <input type="text" value="{{ old('cost_center') }}"
                                     style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                    class="form-control @error('cost_center') is-invalid @enderror" id="cost_center" name="cost_center">
+                                    class="form-control @error('cost_center') is-invalid @enderror" id="cost_center"
+                                    name="cost_center">
                                 @error('cost_center')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -40,10 +42,10 @@
                             <td>:</td>
                             <td>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="apotek"
-                                        id="apotek" value="1" {{ old('apotek') ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="checkbox" name="apotek" id="apotek"
+                                        value="1" {{ old('apotek') ? 'checked' : '' }}>
                                     <label class="form-check-label" for="apotek">
-                                        Apotek
+                                        Gudang adalah Apotek
                                     </label>
                                 </div>
                             </td>
@@ -53,10 +55,36 @@
                             <td>:</td>
                             <td>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="warehouse"
-                                        id="warehouse" value="1" {{ old('warehouse') ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="checkbox" name="warehouse" id="warehouse"
+                                        value="1" {{ old('warehouse') ? 'checked' : '' }}>
                                     <label class="form-check-label" for="warehouse">
-                                        Warehouse
+                                        Gudang adalah penyimpanan
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Default Apotek Rajal</td>
+                            <td>:</td>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="rajal_default"
+                                        id="rajal_default" value="1" {{ old('rajal_default') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="rajal_default">
+                                        Dilihat dokter + apoteker (hanya bisa satu)
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Default Apotek Ranap</td>
+                            <td>:</td>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="ranap_default"
+                                        id="ranap_default" value="1" {{ old('ranap_default') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="ranap_default">
+                                        Dilihat ketika pasien ranap dipilih (hanya bisa satu)
                                     </label>
                                 </div>
                             </td>
@@ -66,8 +94,8 @@
                             <td>:</td>
                             <td>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="aktif"
-                                        id="status_aktif_true" value="1" checked>
+                                    <input class="form-check-input" type="radio" name="aktif" id="status_aktif_true"
+                                        value="1" checked>
                                     <label class="form-check-label" for="status_aktif_true">
                                         Aktif
                                     </label>

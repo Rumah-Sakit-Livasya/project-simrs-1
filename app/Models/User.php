@@ -179,4 +179,39 @@ class User extends Authenticatable
     {
         return $this->hasMany(WarehouseReturBarang::class, 'user_id');
     }
+
+    public function sr_pharmacy()
+    {
+        return $this->hasMany(WarehouseStockRequestPharmacy::class, 'user_id');
+    }
+
+    public function sr_non_pharmacy()
+    {
+        return $this->hasMany(WarehouseStockRequestNonPharmacy::class, 'user_id');
+    }
+
+    public function db_pharmacy()
+    {
+        return $this->hasMany(WarehouseDistribusiBarangFarmasi::class, 'user_id');
+    }
+
+    public function stock_adjustment()
+    {
+        return $this->hasMany(WarehouseStockAdjustment::class, "user_id");
+    }
+
+    public function authorized_stock_adjustment_user()
+    {
+        return $this->hasMany(WarehouseStockAdjustmentUsers::class, "user_id");
+    }
+
+    public function gudang_opname_start()
+    {
+        return $this->hasMany(WarehouseStockOpnameGudang::class, "start_user_id");
+    }
+
+    public function gudang_opname_finish()
+    {
+        return $this->hasMany(WarehouseStockOpnameGudang::class, "finish_user_id");
+    }
 }
