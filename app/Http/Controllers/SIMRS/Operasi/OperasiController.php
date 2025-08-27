@@ -377,7 +377,7 @@ class OperasiController extends Controller
     }
 
 
-    public function editProsedur(OrderOperasi $order, ProsedurOperasi $prosedur)
+    public function editProsedure(OrderOperasi $order, ProsedurOperasi $prosedur)
     {
         // Validasi bahwa prosedur milik order yang benar
         if ($prosedur->order_operasi_id !== $order->id) {

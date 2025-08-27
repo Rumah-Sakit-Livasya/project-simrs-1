@@ -859,8 +859,10 @@ Route::group(['middleware' => ['auth']], function () {
         Route::prefix('ok')->group(function () {
             Route::get('/daftar-pasien', [OperasiController::class, 'index'])->name('ok.daftar-pasien');
             Route::get('/prosedure/{orderId}', [OperasiController::class, 'prosedure'])->name('ok.prosedure');
+            Route::get('/edit/{orderId}/{prosedurId}', [OperasiController::class, 'editProsedure'])->name('ok.prosedure.edit');
             Route::get('/prosedur/{order}/create', [OperasiController::class, 'createProsedur'])->name('ok.prosedur.create');
             Route::post('/prosedur/store', [OperasiController::class, 'storeProsedur'])->name('ok.prosedur.store');
+            Route::put('/prosedur/update', [OperasiController::class, 'updateProsedur'])->name('ok.prosedur.update');
             Route::get('/prosedur/get-jenis-by-kategori/{kategoriId}', [OperasiController::class, 'getJenisByKategori'])->name('ok.prosedur.get-jenis-by-kategori');
             Route::get('/prosedur/get-tindakan-by-jenis/{jenisId}', [OperasiController::class, 'getTindakanByJenis'])->name('ok.prosedur.get-tindakan-by-jenis');
             // Tambahkan route ini di dalam group route operasi
