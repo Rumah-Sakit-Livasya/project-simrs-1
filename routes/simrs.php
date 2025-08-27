@@ -931,7 +931,7 @@ Route::group(['middleware' => ['auth']], function () {
                 });
             });
 
-            Route::prefix("antrian-farmasi")->group(function(){
+            Route::prefix("antrian-farmasi")->group(function () {
                 Route::get('/', [FarmasiPlasma::class, "index"])->name("farmasi.antrian-farmasi.index");
                 Route::get('/plasma', [FarmasiPlasma::class, "plasma"])->name("farmasi.antrian-farmasi.plasma");
             });
