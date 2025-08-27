@@ -19,7 +19,7 @@ class WarehousePenerimaanBarangNonFarmasiItems extends Model implements Auditabl
     }
 
     public function item(){
-        return $this->belongsTo(WarehouseBarangNonFarmasi::class, 'item_id');
+        return $this->belongsTo(WarehouseBarangNonFarmasi::class, 'barang_id');
     }
 
     public function satuan(){

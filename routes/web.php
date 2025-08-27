@@ -7,10 +7,16 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Pages\CompanyController;
 use App\Http\Controllers\API\CompanyController as ApiCompanyController;
 use App\Http\Controllers\API\TimeScheduleController;
+use App\Http\Controllers\API\WasteTransportController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
+use App\Http\Controllers\DailyWasteInputController;
+use App\Http\Controllers\InternalVehiclePageController;
+use App\Http\Controllers\KunjunganPageController;
 use App\Http\Controllers\LaporanInternalController;
+use App\Http\Controllers\Laundry\DailyLinenInputController;
+use App\Http\Controllers\Laundry\LinenTypeController;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\Pages\DashboardController;
 use App\Http\Controllers\Pages\UpdateProfileController;
@@ -22,6 +28,7 @@ use App\Http\Controllers\SwitchUserController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TestingDataController;
 use App\Http\Controllers\UrlShortenerController;
+use App\Http\Controllers\WasteReportController;
 use App\Http\Controllers\WhatsappController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -41,10 +48,9 @@ Route::post('/', [AuthenticatedSessionController::class, 'store']);
 
 Route::middleware([LastSeenUser::class])->group(function () {
     Route::middleware('auth')->group(function () {
-
+        Route::get('/kunjungan', [KunjunganPageController::class, 'index'])->name('kunjungan.index');
         Route::get('/home', [ApplicationController::class, 'chooseApp'])->name('home');
         Route::post('/set-app', [ApplicationController::class, 'setApp'])->name('set-app');
-
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -409,6 +415,58 @@ Route::middleware([LastSeenUser::class])->group(function () {
 });
 
 // routes/web.php
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/daily-waste', [DailyWasteInputController::class, 'index'])->name('daily-waste.index');
+    Route::get('/waste-transports', [DailyWasteInputController::class, 'transport'])->name('daily-waste.transport');
+    Route::post('/waste-transports/store-or-update-batch', [WasteTransportController::class, 'storeOrUpdateBatch'])->name('waste-transports.storeOrUpdateBatch');
+    // Route untuk menampilkan halaman laporan
+    Route::get('/waste-transports/reports', [WasteReportController::class, 'index'])->name('reports.waste.index');
+    // Route untuk mengambil data laporan via AJAX
+    Route::get('/waste-transports/getWasteData', [WasteReportController::class, 'getWasteData'])->name('reports.waste.data');
+
+    Route::get('/daily-waste/reports', [WasteReportController::class, 'dailyIndex'])->name('reports.daily.index');
+    // Route untuk mengambil data laporan via AJAX
+    Route::get('/daily-waste/getDailyWasteData', [WasteReportController::class, 'getDailyWasteData'])->name('reports.daily.data');
+
+    // Laundry
+    Route::get('daily-linens', [DailyLinenInputController::class, 'index'])->name('daily-linens.index');
+    Route::get('daily-linens/create', [DailyLinenInputController::class, 'create'])->name('daily-linens.create');
+    Route::post('daily-linens', [DailyLinenInputController::class, 'store'])->name('daily-linens.store');
+    Route::get('daily-linens/{daily_linen}/edit', [DailyLinenInputController::class, 'edit'])->name('daily-linens.edit');
+    Route::put('daily-linens/{daily_linen}', [DailyLinenInputController::class, 'update'])->name('daily-linens.update');
+    Route::delete('daily-linens/{daily_linen}', [DailyLinenInputController::class, 'destroy'])->name('daily-linens.destroy');
+
+    Route::post('daily-linens-batch', [DailyLinenInputController::class, 'storeOrUpdateBatch'])->name('daily-linens.storeOrUpdateBatch');
+
+    Route::get('/daily-linens/reports', [WasteReportController::class, 'laundryIndex'])->name('laundry.index');
+    Route::get('/daily-linens/getLaundryData', [WasteReportController::class, 'getLaundryData'])->name('laundry.data');
+
+    Route::resource('master/linen-types', LinenTypeController::class);
+
+    // Manajemen Kendaraan
+    Route::prefix('manajemen-kendaraan')->name('vehicles.')->group(function () {
+        // Halaman daftar kendaraan
+        Route::get('/', [InternalVehiclePageController::class, 'index'])->name('index');
+        // Halaman drivers
+        Route::get('/drivers', [InternalVehiclePageController::class, 'drivers'])->name('drivers');
+        // Halaman dashboard manajemen kendaraan
+        Route::get('/dashboard', [InternalVehiclePageController::class, 'dashboard'])->name('dashboard');
+        // Halaman daftar inspection item kendaraan internal
+        Route::get('/inspection-items', [InternalVehiclePageController::class, 'inspection_item'])->name('inspection_items');
+        // Halaman daftar vendor kendaraan internal
+        Route::get('/workshop-vendors', [InternalVehiclePageController::class, 'vendors'])->name('vendors');
+        // Halaman riwayat penggunaan kendaraan
+        Route::get('/vehicle-logs', [InternalVehiclePageController::class, 'vehicle_logs'])->name('vehicle_logs');
+
+        // Halaman daftar inspeksi kendaraan internal
+        Route::get('/inspections', [InternalVehiclePageController::class, 'inspections'])->name('inspections');
+        // Halaman form input inspeksi kendaraan internal
+        Route::get('/inspections/create', [InternalVehiclePageController::class, 'create_inspection'])->name('inspections.create');
+
+        Route::get('/service-tickets', [InternalVehiclePageController::class, 'service_tickets'])->name('service_tickets');
+    });
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/impersonate', [SwitchUserController::class, 'impersonate'])

@@ -2,8 +2,8 @@
 
 namespace App\Models\SIMRS\CPPT;
 
-
 use App\Models\Signature;
+use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Registration;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +17,10 @@ class CPPT extends Model implements AuditableContract
 
     protected $table = 'cppt', $guarded = ['id'];
 
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
+    }
 
     public function user()
     {

@@ -132,6 +132,7 @@
                                                 <th>Kode Barang</th>
                                                 <th>Nama Barang</th>
                                                 <th>No Faktur</th>
+                                                <th>Tanggal Exp</th>
                                                 <th>No Batch</th>
                                                 <th>Satuan</th>
                                                 <th>Qty Terima</th>

@@ -199,8 +199,6 @@ class Registration extends Model
         return $this->hasOne(DietGizi::class, 'registration_id');
     }
 
-
-
     // public function generateNomorRegistrasi()
     // {
     //     $date = Carbon::now();

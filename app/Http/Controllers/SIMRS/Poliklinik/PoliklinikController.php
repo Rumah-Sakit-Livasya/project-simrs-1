@@ -103,8 +103,8 @@ class PoliklinikController extends Controller
     {
         try {
             $id = base64_decode($encryptedID);
-            $formTemplateModel = FormTemplate::findOrFail($id);
-            $registration = Registration::findOrFail($registrationId);
+            $formTemplateModel = FormTemplate::find($id);
+            $registration = Registration::find($registrationId);
             $formSource = $formTemplateModel->form_source;
 
             $data = [

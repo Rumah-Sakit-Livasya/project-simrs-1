@@ -232,8 +232,30 @@
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
+        // Tambahkan fungsi clearCanvas
+
+        function clearCanvas() {
+            // Untuk canvas utama (id="canvas")
+            var canvas = document.getElementById('canvas');
+            if (canvas && canvas.getContext) {
+                var ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            // Untuk canvas many (id="canvas-many")
+            var canvasMany = document.getElementById('canvas-many');
+            if (canvasMany && canvasMany.getContext) {
+                var ctxMany = canvasMany.getContext('2d');
+                ctxMany.clearRect(0, 0, canvasMany.width, canvasMany.height);
+            }
+            // Reset status hasDrawn jika ada
+            if (typeof hasDrawn !== 'undefined') {
+                hasDrawn = false;
+            }
+        }
+
         function openSignaturePad(index, target) {
             $('#btn_save_ttd').attr('data-target', target);
+            clearCanvas();
             $('#signatureModal').modal('show');
         }
 
@@ -273,7 +295,6 @@
             }
         }
 
-
         function saveSignatureMany() {
             if (!hasDrawn) {
                 alert("Silakan buat tanda tangan terlebih dahulu.");
@@ -293,8 +314,8 @@
             }
 
             $('#signatureModalMany').modal('hide');
+            clearCanvas();
         }
-
 
         $(document).ready(function() {
             const pengkajian = @json($pengkajian ?? []);

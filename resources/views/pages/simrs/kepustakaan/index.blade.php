@@ -177,6 +177,8 @@
             @endif
         @endif
 
+
+
         @if ($view == 'parent')
             <!-- Parent Structure (Initial View) -->
             <div class="row">

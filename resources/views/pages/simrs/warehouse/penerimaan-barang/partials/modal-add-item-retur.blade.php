@@ -16,6 +16,7 @@
                         <tr>
                             <th>#</th>
                             <th>Tanggal Terima</th>
+                            <th>Tanggal Expired</th>
                             <th>Kode PB</th>
                             <th>No Faktur</th>
                             <th>No Batch</th>

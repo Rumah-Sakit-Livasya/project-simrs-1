@@ -24,7 +24,7 @@ return new class extends Migration
     {
         Schema::table('transfer_pasien_antar_ruangan', function (Blueprint $table) {
             $table->dropColumn('kondisi_pasien');
-            // $table->renameColumn('pasien_kembali', 'pasien_kelmbali');
+            $table->renameColumn('pasien_kembali', 'pasien_kelmbali');
         });
     }
 };

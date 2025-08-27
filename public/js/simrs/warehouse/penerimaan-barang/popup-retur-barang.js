@@ -200,6 +200,7 @@ class PopupReturBarangHandler {
         // <th>Kode Barang</th>
         // <th>Nama Barang</th>
         // <th>No Faktur</th>
+        // <th>Tanggal Exp</th>
         // <th>No Batch</th>
         // <th>Satuan</th>
         // <th>Qty Terima</th>
@@ -220,6 +221,7 @@ class PopupReturBarangHandler {
                 <td>${item.pbi.kode_barang}</td>
                 <td>${item.pbi.nama_barang}</td>
                 <td>${item.pbi.pb?.no_faktur}</td>
+                <td>${item.pbi.tanggal_exp ? new Date(item.pbi.tanggal_exp).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) : "-"}</td>
                 <td>${item.pbi.batch_no}</td>
                 <td>${item.pbi.unit_barang}</td>
                 <td>${item.pbi.qty}</td>

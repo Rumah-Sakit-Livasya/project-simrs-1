@@ -40,162 +40,122 @@
         }
     </style>
 @endsection
-<form action="{{ route('simpan.registrasi') }}" method="post" name="form-radiologi" id="form-radiologi">
+
+@php
+    // Definisikan semua data untuk komponen di satu tempat.
+    $doctorOptions = $doctors->pluck('employee.fullname', 'id')->all();
+    $orderTypeOptions = [
+        'normal' => 'Normal',
+        'cito' => 'CITO (naik 30%)',
+    ];
+@endphp
+
+{{-- Beri ID yang konsisten agar bisa ditangani oleh skrip AJAX --}}
+<form id="form-registrasi" data-action-url="{{ route('simpan.registrasi') }}">
     @csrf
+    {{-- Hidden Inputs --}}
     <input type="hidden" name="patient_id" value="{{ $patient->id }}">
     <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
     <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
-    <input type="hidden" name="registration_type" value="rawat-jalan">
+    <input type="hidden" name="registration_type" value="radiologi"> {{-- Disesuaikan --}}
     <input type="hidden" name="poliklinik" value="RADIOLOGI">
     <input type="hidden" name="rujukan" value="inisiatif pribadi">
     <input type="hidden" name="penjamin_id" value="{{ $penjamin_standar_id }}">
+
+    {{-- Placeholder untuk notifikasi AJAX --}}
+    <div id="form-notification" class="alert d-none" role="alert"></div>
+
     <div class="row">
+        {{-- Kolom Kiri --}}
         <div class="col-xl-6">
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="registration_date">
-                            Tanggal Registrasi
-                        </label>
-                    </div>
-                    <div class="col-xl-8">
-                        <input type="text"
-                            style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                            class="form-control" id="registration_date" readonly value="{{ $today }}"
-                            name="registration_date">
-                        @error('registration_date')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="doctor_id">Dokter</label>
-                    </div>
-                    <div class="col-xl-8">
-                        <div class="form-group">
-                            <select class="select2 form-control w-100" id="doctor_id" name="doctor_id">
-                                <option value=""></option>
-                                @foreach ($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}">
-                                        {{ $doctor->employee->fullname }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="doctor_id">Tipe Order</label>
-                    </div>
-                    <div class="col-xl-8">
-                        <div class="form-group">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="order_type" id="order_type_normal"
-                                    value="normal" checked>
-                                <label class="form-check-label" for="order_type_normal">
-                                    Normal
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="order_type" id="order_type_cito"
-                                    value="cito">
-                                <label class="form-check-label" for="order_type_cito">
-                                    CITO (naik 30%)
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-6">
-            {{-- <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="registration_date">
-                            Dokter Perujuk
-                        </label>
-                    </div>
-                    <div class="col-xl-8">
-                        <div class="form-group">
-                            <select class="select2 form-control w-100" id="doctor_id" name="doctor_id">
-                                <option value=""></option>
-                                @foreach ($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}">
-                                        {{ $doctor->employee->fullname }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div> --}}
+            <x-form-row label="Tanggal Registrasi" for="registration_date">
+                <input type="text" class="form-control form-control-dashed" id="registration_date"
+                    name="registration_date" readonly value="{{ old('registration_date', $today) }}">
+            </x-form-row>
 
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-xl-4 text-right">
-                        <label class="form-label" for="diagnosa_awal">
-                            Diagnosa*
-                        </label>
-                    </div>
-                    <div class="col-xl-8">
-                        <textarea class="form-control" id="diagnosa_awal" name="diagnosa_awal" rows="5"></textarea>
-                        @error('diagnosa_awal')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-            </div>
-        </div>
+            <x-form-row label="Dokter Penanggung Jawab" for="doctor_id">
+                <x-form-select id="doctor_id" name="doctor_id" :options="$doctorOptions" />
+            </x-form-row>
 
-        <br>&nbsp;
-
-        <div class="col-xl-12">
-            <div class="form-group">
-                <input type="text" class="form-control mb-3" id="searchRadiology" placeholder="Cari tindakan...">
-                <div class="grid">
-                    @foreach ($radiology_categories as $category)
-                        <div class="card">
-                            <h3>{{ $category->nama_kategori }}</h3>
-                            @foreach ($category->parameter_radiologi as $parameter)
-                                <div class="item parameter_radiologi">
-                                    <input type="checkbox" value="{{ $parameter->id }}"
-                                        class="parameter_radiologi_checkbox"
-                                        id="parameter_radiologi_{{ $parameter->id }}"> <label>
-                                        <span class="form-check-label">{{ $parameter->parameter }}</span>(<span
-                                            id="harga_parameter_radiologi_{{ $parameter->id }}">{{ rp(0) }}</span>)
-                                    </label>
-
-                                    <input type="number" value="1"
-                                        class="form-control parameter_radiologi_number"
-                                        id="jumlah_{{ $parameter->id }}">
-                                </div>
-                            @endforeach
+            <x-form-row label="Tipe Order" for="order_type">
+                <div class="frame-wrap pt-2">
+                    @foreach ($orderTypeOptions as $value => $label)
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" class="custom-control-input" id="order_type_{{ $value }}"
+                                name="order_type" value="{{ $value }}"
+                                {{ old('order_type', 'normal') == $value ? 'checked' : '' }}>
+                            <label class="custom-control-label"
+                                for="order_type_{{ $value }}">{{ $label }}</label>
                         </div>
                     @endforeach
                 </div>
+            </x-form-row>
+        </div>
+
+        {{-- Kolom Kanan --}}
+        <div class="col-xl-6">
+            <x-form-row label="Diagnosa*" for="diagnosa_awal">
+                {{-- Nama 'diagnosa_awal' disamakan agar konsisten --}}
+                <textarea class="form-control" id="diagnosa_awal" name="diagnosa_awal" rows="5">{{ old('diagnosa_awal') }}</textarea>
+            </x-form-row>
+        </div>
+
+        {{-- Bagian Custom untuk Pemilihan Tindakan Radiologi --}}
+        <div class="col-xl-12 mt-4">
+            <div class="panel">
+                <div class="panel-hdr">
+                    <h2>Pilih Tindakan Radiologi</h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <input type="text" class="form-control mb-3" id="searchRadiology"
+                            placeholder="Cari tindakan atau kategori...">
+                        <div class="grid">
+                            {{-- Strukturnya tetap sama karena sangat spesifik dan dikontrol oleh JS --}}
+                            @foreach ($radiology_categories as $category)
+                                <div class="card">
+                                    <h3>{{ $category->nama_kategori }}</h3>
+                                    @foreach ($category->parameter_radiologi as $parameter)
+                                        <div class="item parameter_radiologi">
+                                            <div class="d-flex align-items-center">
+                                                {{-- Perbaikan nama input agar menjadi array yang terstruktur --}}
+                                                <input type="checkbox" name="rad_parameters[{{ $parameter->id }}][id]"
+                                                    value="{{ $parameter->id }}" class="parameter_radiologi_checkbox"
+                                                    id="parameter_radiologi_{{ $parameter->id }}">
+                                                <label class="form-check-label ml-2"
+                                                    for="parameter_radiologi_{{ $parameter->id }}">
+                                                    {{ $parameter->parameter }} (<span
+                                                        id="harga_parameter_radiologi_{{ $parameter->id }}">{{ rp(0) }}</span>)
+                                                </label>
+                                            </div>
+                                            <input type="number" name="rad_parameters[{{ $parameter->id }}][qty]"
+                                                value="1" class="form-control parameter_radiologi_number"
+                                                id="jumlah_{{ $parameter->id }}" style="display: none;" disabled>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-xl-12 mt-5">
-            <div class="row">
-                <div class="col-xl-6">
-                    <h3>&nbsp;</h3>
-                    <a href="/patients/{{ $patient->id }}" class="btn btn-lg btn-default waves-effect waves-themed">
+
+        {{-- Tombol Aksi --}}
+        <div class="col-xl-12 mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="{{ route('detail.pendaftaran.pasien', $patient->id) }}"
+                        class="btn btn-lg btn-default waves-effect waves-themed">
                         <span class="fal fa-arrow-left mr-1 text-primary"></span>
                         <span class="text-primary">Kembali</span>
                     </a>
                 </div>
-                <div class="col-xl-6 text-right">
-                    <h3 class="text-success"> <i class="fa fa-calculator"></i> <span id="radiologi-total">Rp
-                            0</span>
-                    </h3>
-                    <button type="submit" class="btn btn-lg btn-primary waves-effect waves-themed">
+                <div class="text-right">
+                    <h4 class="text-success font-weight-bold mb-0">Total Biaya: <span id="radiologi-total">Rp 0</span>
+                    </h4>
+                    <button type="submit" class="btn btn-lg btn-primary waves-effect waves-themed mt-1"
+                        id="simpan-btn">
                         <span class="fal fa-save mr-1"></span>
                         Simpan
                     </button>
@@ -205,8 +165,10 @@
     </div>
 </form>
 
+{{-- Bagian Plugin JavaScript tidak perlu diubah. --}}
 @section('plugin')
     <script>
+        // Data ini diteruskan ke file JS eksternal untuk kalkulasi
         window._kategoriRadiologi = @json($radiology_categories);
         window._tarifRadiologi = @json($tarifs);
     </script>

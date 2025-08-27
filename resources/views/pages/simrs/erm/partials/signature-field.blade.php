@@ -1,6 +1,5 @@
 @props([
     'judul',
-    // 'name_prefix', // <-- BARU: Untuk nama input array, mis: "signature_data"
     'prefix', // <-- TETAP: Untuk ID unik, mis: "perawat_pemeriksa"
     'pic' => '',
     'role' => '',

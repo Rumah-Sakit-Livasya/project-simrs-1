@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS;
 
+use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,7 +12,8 @@ class Kepustakaan extends Model implements \OwenIt\Auditing\Contracts\Auditable
 {
     use HasFactory, SoftDeletes, Auditable;
 
-    protected $table = 'kepustakaan', $fillable = ['name', 'organization_id', 'kategori', 'type', 'parent_id', 'size', 'file'];
+    protected $table = 'kepustakaan';
+    protected $fillable = ['name', 'organization_id', 'kategori', 'month', 'year', 'type', 'parent_id', 'size', 'file'];
 
     // Relasi ke parent
     public function parent()
@@ -28,5 +30,11 @@ class Kepustakaan extends Model implements \OwenIt\Auditing\Contracts\Auditable
     public function allChildren()
     {
         return $this->children()->with('allChildren')->where('type', 'folder');
+    }
+
+    // Relasi ke organization
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class, 'organization_id');
     }
 }

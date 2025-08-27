@@ -19,3 +19,5 @@ yarn-error.log
 /.idea
 /.vscode
 tsconfig.json
+app/Http/Controllers/WarehouseDistribusiBarangNonFarmasiController.php.old
+app/Http/Controllers/WarehouseDistribusiBarangFarmasiController.php.old

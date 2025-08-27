@@ -1,4 +1,80 @@
 @extends('inc.layout-no-side') {{-- Sesuaikan dengan layout Anda --}}
+@section('extended-css')
+    <style>
+        @media print {
+
+            /* --- Pengaturan Dasar Halaman Cetak --- */
+            body {
+                background-color: #fff !important;
+                font-family: 'Times New Roman', Times, serif;
+                font-size: 11pt;
+                color: #000;
+            }
+
+            /* --- Sembunyikan Elemen yang Tidak Perlu --- */
+            .card-header,
+            .btn,
+            .bi,
+            .form-label.text-muted,
+            .d-print-none {
+                display: none !important;
+            }
+
+            /* --- Atur Ulang Tampilan Card Menjadi Dokumen Biasa --- */
+            .card,
+            .card-body {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* --- Tampilkan Elemen Khusus Cetak --- */
+            .d-print-block {
+                display: block !important;
+            }
+
+            .d-print-inline {
+                display: inline !important;
+            }
+
+            /* --- Atur Ulang Tampilan Elemen Form Menjadi Teks Statis --- */
+            .form-control-plaintext {
+                padding-left: 0;
+                padding-right: 0;
+                border-bottom: 1px dotted #888;
+                /* Garis bawah untuk data */
+            }
+
+            /* --- Penataan Layout Khusus Cetak --- */
+            #printableArea {
+                width: 100%;
+            }
+
+            /* Memastikan tidak ada page break di dalam konten yang tidak diinginkan */
+            p,
+            h4,
+            h5 {
+                orphans: 3;
+                widows: 3;
+            }
+
+            h4,
+            h5 {
+                page-break-after: avoid;
+            }
+
+            /* --- Penataan Area Tanda Tangan --- */
+            .row {
+                /* Bootstrap grid tetap bekerja, tidak perlu banyak diubah */
+            }
+
+            .text-center {
+                text-align: center !important;
+            }
+        }
+    </style>
+@endsection
 
 @section('content')
     <div class="card">
@@ -69,6 +145,7 @@
         </div>
     </div>
 @endsection
+
 @section('plugin')
     {{-- Plugin hanya dibutuhkan dalam mode edit --}}
     @if ($isEditMode)
