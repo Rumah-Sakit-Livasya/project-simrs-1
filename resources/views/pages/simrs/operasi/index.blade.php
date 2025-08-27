@@ -86,13 +86,13 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6 mt-3">
+                                    <div class="col-md-6 ">
                                         <label>No.RM</label>
                                         <input type="text" class="form-control" id="medical_record_number"
                                             name="medical_record_number" placeholder="Masukkan No.RM"
                                             value="{{ request('medical_record_number') }}">
                                     </div>
-                                    <div class="col-md-6 mt-3">
+                                    <div class="col-md-6 ">
                                         <label>Nama Pasien</label>
                                         <input type="text" class="form-control" id="nama_pasien" name="nama_pasien"
                                             placeholder="Masukkan Nama Pasien" value="{{ request('nama_pasien') }}">
@@ -109,19 +109,6 @@
                                             @endforeach --}}
                                         </select>
                                     </div>
-
-                                    <div class="col-md-6 mt-3">
-                                        <label>Penjamin</label>
-                                        <select class="form-control select2" id="penjamin_id" name="penjamin_id">
-                                            <option value="">Pilih Penjamin</option>
-                                            @foreach ($penjamins as $penjamin)
-                                                <option value="{{ $penjamin->id }}"
-                                                    {{ request('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
-                                                    {{ $penjamin->nama_perusahaan }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
                                     <div class="col-md-6 mt-3">
                                         <label>Status Registrasi</label>
                                         <select class="form-control select2" id="status_registrasi"
@@ -135,16 +122,34 @@
                                                 Tutup Kunjungan</option>
                                         </select>
                                     </div>
+
+                                    <div class="col-md-12 mt-3">
+                                        <label>Penjamin</label>
+                                        <select class="form-control select2" id="penjamin_id" name="penjamin_id">
+                                            <option value="">Pilih Penjamin</option>
+                                            @foreach ($penjamins as $penjamin)
+                                                <option value="{{ $penjamin->id }}"
+                                                    {{ request('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
+                                                    {{ $penjamin->nama_perusahaan }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
                                 </div>
 
                                 <div class="row justify-content-end mt-3">
+                                    <div class="col">
+                                        <button type="button" class="btn btn-danger mb-3" id="btn-plasma-view">
+                                            <i class="fal fa-desktop-alt mr-1"></i> Tampilan Plasma
+                                        </button>
+                                    </div>
+
+                                    <!-- Tombol kanan -->
                                     <div class="col-auto">
                                         <button type="submit" class="btn bg-primary-600 mb-3">
                                             <span class="fal fa-search mr-1"></span> Cari
                                         </button>
-                                        <a href="#" class="btn bg-primary-600 mb-3" id="create-btn">
-                                            <span class="fal fa-plus mr-1"></span> Order Operasi Baru
-                                        </a>
                                     </div>
                                 </div>
                             </form>
@@ -189,6 +194,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($orders as $key => $order)
+                                        {{-- @dd($order) --}}
                                         <tr data-id="{{ $order->id }}">
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $order->created_at->format('d-m-Y H:i') }}</td>
@@ -200,7 +206,7 @@
                                             <td>{{ $order->registration->penjamin->nama_perusahaan ?? '-' }}</td>
                                             <td>{{ $order->registration->registration_type ?? '-' }}</td>
                                             <td>{{ $order->ruangan->ruangan ?? '-' }}</td>
-                                            <td>{{ $order->doctor->fullname ?? '-' }}</td>
+                                            <td>{{ $order->doctorOperator?->employee?->fullname ?? '-' }}</td>
                                             <td>{{ $order->user->name ?? '-' }}</td>
                                             <td>
                                                 <div class="btn-group" role="group">
@@ -215,17 +221,10 @@
                                                         data-toggle="tooltip" title="Edit">
                                                         <i class="fal fa-edit"></i>
                                                     </a>
-                                                    <form action="{{ route('operasi.order.delete', $order->id) }}"
-                                                        method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            class="btn btn-sm btn-icon btn-danger rounded-circle"
-                                                            data-toggle="tooltip" title="Hapus"
-                                                            onclick="return confirm('Apakah Anda yakin ingin menghapus order ini?')">
-                                                            <i class="fal fa-trash-alt"></i>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-icon btn-danger rounded-circle delete-order-btn"
+                                                        data-id="{{ $order->id }}" title="Hapus"> <i
+                                                            class="fal fa-trash-alt"></i> </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -345,14 +344,14 @@
                                 </thead>
                                 <tbody>
                                     ${d.prosedur_operasi.map(prosedur => `
-                                                                                                                                                    <tr>
-                                                                                                                                                        <td>${prosedur.tindakan}</td>
-                                                                                                                                                        <td>${prosedur.dokter_operator}</td>
-                                                                                                                                                        <td>${prosedur.ass_dokter_operator}</td>
-                                                                                                                                                        <td>${prosedur.dokter_anestesi}</td>
-                                                                                                                                                        <td>${prosedur.ass_dokter_anestesi}</td>
-                                                                                                                                                    </tr>
-                                                                                                                                                `).join('')}
+                                                                                                                                                                                                                                                                <tr>
+                                                                                                                                                                                                                                                                    <td>${prosedur.tindakan}</td>
+                                                                                                                                                                                                                                                                    <td>${prosedur.dokter_operator}</td>
+                                                                                                                                                                                                                                                                    <td>${prosedur.ass_dokter_operator}</td>
+                                                                                                                                                                                                                                                                    <td>${prosedur.dokter_anestesi}</td>
+                                                                                                                                                                                                                                                                    <td>${prosedur.ass_dokter_anestesi}</td>
+                                                                                                                                                                                                                                                                </tr>
+                                                                                                                                                                                                                                                            `).join('')}
                                 </tbody>
                             </table>
                         </div>
@@ -433,6 +432,88 @@
                     });
                 }
             });
+
+            $('#dt-basic-example tbody').on('click', '.delete-order-btn', function(e) {
+                e.preventDefault();
+
+                var button = $(this);
+                var orderId = button.data('id');
+                var row = button.closest('tr'); // Dapatkan baris tabel untuk dihapus nanti
+
+                // Tampilkan konfirmasi menggunakan SweetAlert2
+                Swal.fire({
+                    title: 'Apakah Anda Yakin?',
+                    text: "Order operasi ini akan dihapus secara permanen!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Jika user konfirmasi, buat URL dan kirim request AJAX
+
+                        // Menggunakan template URL dari route Laravel
+                        let urlTemplate =
+                            "{{ route('operasi.order.delete', ['order' => ':id']) }}";
+                        let deleteUrl = urlTemplate.replace(':id', orderId);
+
+                        $.ajax({
+                            url: deleteUrl,
+                            type: 'DELETE',
+                            data: {
+                                // CSRF Token sangat penting
+                                "_token": "{{ csrf_token() }}",
+                            },
+                            dataType: 'json',
+                            success: function(response) {
+                                if (response.success) {
+                                    // Tampilkan notifikasi sukses menggunakan Toastr
+                                    toastr.success(response.message);
+
+                                    // Hapus baris dari DataTable secara visual
+                                    table.row(row).remove().draw(false);
+                                } else {
+                                    // Tampilkan pesan error dari server jika success=false
+                                    Swal.fire(
+                                        'Gagal!',
+                                        response.message,
+                                        'error'
+                                    );
+                                }
+                            },
+                            error: function(xhr) {
+                                // Tangani error teknis (misal: 404, 500, dll)
+                                let errorMessage = xhr.responseJSON ? xhr.responseJSON
+                                    .message : 'Terjadi kesalahan saat menghapus data.';
+                                Swal.fire(
+                                    'Error!',
+                                    errorMessage,
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+
+            $('#btn-plasma-view').on('click', function() {
+                var url = "{{ route('ok.plasma') }}";
+
+                // Ukuran pop-up window, bisa disesuaikan
+                var width = screen.width;
+                var height = screen.height;
+                var left = 0;
+                var top = 0;
+
+                // Buka pop-up window
+                window.open(url, 'PlasmaJadwalOperasi', 'width=' + width + ',height=' + height + ',top=' +
+                    top +
+                    ',left=' + left + ',resizable=yes,scrollbars=yes');
+            });
+
+
         });
     </script>
 @endsection

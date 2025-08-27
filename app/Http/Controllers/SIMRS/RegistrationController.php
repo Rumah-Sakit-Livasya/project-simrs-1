@@ -711,6 +711,7 @@ class RegistrationController extends Controller
         $jenisOperasi = TipeOperasi::orderBy('tipe')->get();
         $kategoriOperasi = KategoriOperasi::orderBy('nama_kategori')->get();
         $ruangans = Room::orderBy('ruangan')->get();
+        $ruangans_operasi = Room::where('ruangan', 'OK')->orderBy('ruangan', 'asc')->get();
 
         $orderOperasi = OrderOperasi::with([
             'tipeOperasi',
@@ -758,7 +759,8 @@ class RegistrationController extends Controller
             'tindakan_medis' => $tindakan_medis,
             'age' => $age,
             'doctors' => $doctors, // <-- PASTIKAN INI DIKIRIM: dibutuhkan untuk dropdown DPJP
-            'ruangans' => $ruangans,
+            // 'ruanganx`s' => $ruangans,
+            'ruangans_operasi' => $ruangans_operasi,
             // === TAMBAHAN BARU YANG DIKIRIM KE VIEW ===
             'jenisOperasi' => $jenisOperasi,
             'kategoriOperasi' => $kategoriOperasi,

@@ -79,23 +79,10 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6 mt-3">
+                        <div class="col-md-12 mt-3">
                             <div class="form-group">
                                 <label class="form-label">Diagnosa <span class="text-danger">*</span></label>
                                 <textarea name="diagnosa_awal" rows="3" class="form-control" required></textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mt-3">
-                            <div class="form-group">
-                                {{-- UBAH LABEL DAN NAMA INPUT --}}
-                                <label class="form-label">Dokter Operator</label>
-                                <select name="dokter_operator_id" class="form-control select2">
-                                    <option value="">Pilih Dokter</option>
-                                    @foreach ($doctors as $doctor)
-                                        <option value="{{ $doctor->id }}">
-                                            {{ $doctor->employee->fullname ?? 'Nama Tidak Tersedia' }}</option>
-                                    @endforeach
-                                </select>
                             </div>
                         </div>
                     </div>
@@ -164,6 +151,15 @@
         // Validasi tambahan untuk memastikan hanya ruangan OK yang dipilih
         $('#form-order-operasi select[name="ruangan_id"]').on('change', function() {
             const selectedRoom = $(this).find('option:selected').text();
+            // if (!selectedRoom.includes('OK')) {
+            //     Swal.fire({
+            //         icon: 'error',
+            //         title: 'Pilihan Tidak Valid',
+            //         text: 'Hanya ruangan dengan nama OK yang dapat dipilih untuk operasi.',
+            //     });
+            //     $(this).val('').trigger('change');
+            // }
         });
     });
 </script>
+```

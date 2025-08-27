@@ -1038,8 +1038,8 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/operasi/tindakan/data/{registrationId}', [OperasiController::class, 'getTindakanOperasi'])
                 ->name('operasi.tindakan.data');
 
-            Route::delete('/operasi/order/delete', [OperasiController::class, 'deleteOrder'])
-                ->name('operasi.order.delete');
+            Route::delete('/operasi/order/{order}', [OperasiController::class, 'deleteOrder'])->name('operasi.order.delete');
+            Route::get('/plasma', [OperasiController::class, 'plasmaView'])->name('ok.plasma');
             // Route::get('data-order/{orderId}', [OperasiController::class, 'getOrderData'])->name('operasi.data-order');
         });
     });
