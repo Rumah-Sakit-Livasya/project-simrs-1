@@ -168,6 +168,17 @@
             </div>
         </div>
     </div>
+
+    @if (str_contains(\Illuminate\Support\Facades\Route::currentRouteName(), 'daftar-registrasi-pasien') ||
+            str_contains(url()->current(), '/daftar-registrasi-pasien/'))
+        <div class="d-flex justify-content-start m-3">
+            <button type="button" data-target-menu="operasi"
+                class="btn btn-outline-primary px-4 shadow-sm d-flex align-items-center btn-back-to-layanan">
+                <i class="fas fa-arrow-left mr-2"></i>
+                <span>Kembali ke Menu</span>
+            </button>
+        </div>
+    @endif
 </div>
 <!-- This will include the modal you create in the next step -->
 @include('pages.simrs.pendaftaran.partials.modal-operasi')
@@ -222,7 +233,7 @@
                     render: function(data, type, row) {
                         return `
                         <div class="btn-group" role="group">
-                        
+
                             <button type="button" class="btn btn-xs btn-outline-danger waves-effect waves-themed btn-delete-order" data-id="${row.id}">
                                 <i class="fal fa-trash"></i> Hapus
                             </button>

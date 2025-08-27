@@ -13,56 +13,6 @@
                 <hr style="border-color: #868686; margin-top: 30px; margin-bottom: 30px;">
                 <div class="row">
                     <div class="col-md-12">
-                        <!-- datatable start -->
-                        {{-- <div class="table-responsive">
-                                    <table id="dt-basic-example"
-                                        class="table table-bordered table-hover table-striped w-100">
-                                        <thead>
-                                            <tr>
-                                                <th style="white-space: nowrap">Tanggal</th>
-                                                <th style="white-space: nowrap">Dokter</th>
-                                                <th style="white-space: nowrap">Tindakan</th>
-                                                <th style="white-space: nowrap">Kelas</th>
-                                                <th style="white-space: nowrap">QTY</th>
-                                                <th style="white-space: nowrap">F.O.C</th>
-                                                <th style="white-space: nowrap">User Entry</th>
-                                                <th style="white-space: nowrap">Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($tindakan_medis_yang_dipakai as $row)
-                                                <tr>
-
-                                                    <td>{{ tgl_waktu($row->created_at) }}</td>
-                                                    <td>{{ $row->doctor_id }}</td>
-                                                    <td>{{ $row->tindakan_medis_id }}</td>
-                                                    <td>{{ $row->kelas_rawat_id }}</td>
-                                                    <td>{{ $row->qty }}</td>
-                                                    <td>{{ $row->total_harga }}</td>
-                                                    <td>{{ $row->user_entry }}</td>
-                                                    <td>
-                                                        <button class="btn btn-danger py-1 px-2">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <th style="white-space: nowrap">Tanggal</th>
-                                                <th style="white-space: nowrap">Dokter</th>
-                                                <th style="white-space: nowrap">Tindakan</th>
-                                                <th style="white-space: nowrap">Kelas</th>
-                                                <th style="white-space: nowrap">QTY</th>
-                                                <th style="white-space: nowrap">F.O.C</th>
-                                                <th style="white-space: nowrap">User Entry</th>
-                                                <th style="white-space: nowrap">Aksi</th>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div> --}}
-
                         <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
                             <thead class="bg-primary-600">
                                 <tr>
