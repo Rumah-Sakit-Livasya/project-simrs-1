@@ -14,7 +14,6 @@ use App\Models\SIMRS\Operasi\JenisOperasi;
 use App\Models\SIMRS\Operasi\KategoriOperasi;
 use App\Models\SIMRS\Operasi\TarifOperasi;
 use App\Models\SIMRS\Operasi\TipeOperasi;
-use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Room;
 use App\Models\SIMRS\TagihanPasien;
 use Carbon\Carbon;
@@ -31,17 +30,18 @@ class OperasiController extends Controller
     public function index(Request $request)
     {
 
+        // Query with necessary relationships
         $query = OrderOperasi::with([
             'registration.patient',
             'registration.penjamin',
             'tipeOperasi',
             'kategoriOperasi',
             'ruangan',
-            'user',
-            'doctorOperator.employee' // <-- TAMBAHKAN RELASI INI untuk memuat dokter operator dan nama lengkapnya
+            'doctor',
+            'user'
         ]);
 
-        // Apply filters (Bagian ini tidak ada perubahan)
+        // Apply filters
         if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
             $query->whereBetween('tgl_operasi', [
                 Carbon::parse($request->tanggal_awal)->startOfDay(),
@@ -78,10 +78,12 @@ class OperasiController extends Controller
         }
 
         $orders = $query->latest('tgl_operasi')->get();
-        $penjamins = Penjamin::all();
+        // $ruangans = \App\Models\SIMRS\Room::where('is_operasi', true)->get();
+        $penjamins = \App\Models\SIMRS\Penjamin::all();
 
         return view('pages.simrs.operasi.index', [
             'orders' => $orders,
+            // 'ruangans' => $ruangans,
             'penjamins' => $penjamins,
             'request' => $request
         ]);
@@ -93,7 +95,6 @@ class OperasiController extends Controller
             $validated = $request->validate([
                 'registration_id' => 'required|exists:registrations,id',
                 'ruangan_id' => 'nullable|exists:rooms,id',
-                'dokter_operator_id' => 'nullable|exists:doctors,id',
                 'tgl_operasi' => 'required|date_format:d-m-Y H:i',
                 'tipe_operasi_id' => 'required|exists:tipe_operasi,id',
                 'kategori_operasi_id' => 'required|exists:kategori_operasi,id',
@@ -129,7 +130,7 @@ class OperasiController extends Controller
     public function getOrderOperasi($registrationId)
     {
         try {
-            $orders = OrderOperasi::with(['registration.patient', 'tipeOperasi', 'kategoriOperasi', 'kelasRawat', 'ruangan'])
+            $orders = OrderOperasi::with(['registration.patient', 'tipeOperasi', 'kategoriOperasi', 'kelasRawat.rooms'])
                 ->where('registration_id', $registrationId)
                 ->latest()
                 ->get();
@@ -139,7 +140,7 @@ class OperasiController extends Controller
                     'id' => $order->id,
                     'tgl_order_formatted' => $order->created_at->format('d-m-Y H:i'),
                     'kelas_name' => $order->kelasRawat ? $order->kelasRawat->kelas : 'N/A',
-                    'ruangan_name' => $order->ruangan ? $order->ruangan->ruangan : 'N/A',
+                    'ruangan_name' => $order->ruangan_id ?? 'N/A',
                     'kategori_operasi_name' =>  $order->kategoriOperasi ? $order->kategoriOperasi->nama_kategori : 'N/A',
                     'jenis_operasi_name' =>  $order->tipeOperasi ? $order->tipeOperasi->tipe : 'N/A',
                     'diagnosa' => $order->diagnosa_awal,
@@ -259,6 +260,7 @@ class OperasiController extends Controller
     public function getTindakanOperasi($registrationId)
     {
         try {
+            // Sesuaikan dengan model dan relasi yang ada
             $tindakan = []; // Kosong dulu, sesuaikan dengan data real Anda
 
             return response()->json([
@@ -893,6 +895,10 @@ class OperasiController extends Controller
     public function deleteOrder(OrderOperasi $order) // Terima model OrderOperasi langsung
     {
         try {
+            // Anda tidak perlu lagi mencari order, Laravel sudah melakukannya untuk Anda.
+            // $orderId = $request->input('id');
+            // $order = OrderOperasi::findOrFail($orderId);
+
             if ($order->prosedurOperasi()->count() > 0) {
                 return response()->json([
                     'success' => false,

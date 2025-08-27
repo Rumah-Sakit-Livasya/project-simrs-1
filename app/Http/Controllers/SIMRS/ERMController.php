@@ -24,7 +24,11 @@ use App\Models\SIMRS\EWSAnak;
 use App\Models\SIMRS\EWSDewasa;
 use App\Models\SIMRS\EWSObstetri;
 use App\Models\SIMRS\JadwalDokter;
+use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
+use App\Models\SIMRS\Operasi\KategoriOperasi;
+use App\Models\SIMRS\Operasi\OrderOperasi;
+use App\Models\SIMRS\Operasi\TipeOperasi;
 use App\Models\SIMRS\OrderTindakanMedis;
 use App\Models\SIMRS\Pelayanan\RujukAntarRS;
 use App\Models\SIMRS\Pelayanan\Triage;
@@ -38,6 +42,7 @@ use App\Models\SIMRS\Peralatan\OrderAlatMedis;
 use App\Models\SIMRS\Peralatan\Peralatan;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\ResumeMedisRajal\ResumeMedisRajal;
+use App\Models\SIMRS\Room;
 use App\Models\SIMRS\TindakanMedis;
 use App\Models\StoredBarangFarmasi;
 use App\Models\WarehouseBarangFarmasi;
@@ -1177,8 +1182,64 @@ class ERMController extends Controller
                 return view('pages.simrs.erm.form.perawat.pemeriksaan-awal-ranap', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'rencana_operasi':
+
                 $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
-                return view('pages.simrs.erm.form.layanan.rencana-operasi', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                return view('pages.simrs.erm.form.perawat.resep-harian', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+
+            case 'rencana_operasi':
+                // 1. [Template Dasar] Mengambil data pengkajian
+                $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
+
+                // 2. [Data Master] Mengambil data untuk dropdown di modal
+                $kelas_rawats = KelasRawat::all();
+                $jenisOperasi = TipeOperasi::orderBy('tipe')->get();
+                $kategoriOperasi = KategoriOperasi::orderBy('nama_kategori')->get();
+                $ruangans_operasi = Room::where('ruangan', 'OK')->orderBy('ruangan', 'asc')->get();
+                $doctors = Doctor::with('employee')->whereHas('employee', function ($q) {
+                    $q->where('is_active', true);
+                })->get();
+
+                $orderOperasi = OrderOperasi::with([
+                    'tipeOperasi',
+                    'kategoriOperasi',
+                    'jenisOperasi',
+                    'doctorOperator.employee', // Memuat relasi dokter operator
+                    'prosedurOperasi' => function ($query) {
+                        $query->with([
+                            'tindakanOperasi',
+                            'dokterOperator.employee',
+                            'assDokterOperator1.employee',
+                            'assDokterOperator2.employee',
+                            'assDokterOperator3.employee',
+                            'dokterAnastesi.employee',
+                            'assDokterAnastesi.employee',
+                            'dokterResusitator.employee',
+                            'createdByUser'
+                            // Anda bisa menambahkan relasi dokter tambahan jika perlu
+                        ]);
+                    }
+                ])->where('registration_id', $registration->id)->get();
+
+
+                // 4. Mengirim SEMUA variabel yang dibutuhkan ke view
+                return view('pages.simrs.erm.form.layanan.rencana-operasi', compact(
+                    // Variabel standar
+                    'pengkajian',
+                    'registration',
+                    'registrations',
+                    'menu',
+                    'departements',
+                    'jadwal_dokter',
+                    'path',
+
+                    // Variabel untuk modal
+                    'kelas_rawats',
+                    'jenisOperasi',
+                    'kategoriOperasi',
+                    'ruangans_operasi',
+                    'doctors',
+                    'orderOperasi'
+                ));
 
             case 'rencana_persalinan':
                 $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();

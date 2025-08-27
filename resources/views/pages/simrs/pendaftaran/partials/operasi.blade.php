@@ -322,20 +322,8 @@
                     data: 'status',
                     name: 'status',
                     render: function(data, type, row) {
-                        let badgeClass = '';
-                        switch (data) {
-                            case 'Draft':
-                                badgeClass = 'badge-warning';
-                                break;
-                            case 'Completed':
-                                badgeClass = 'badge-success';
-                                break;
-                            case 'Cancelled':
-                                badgeClass = 'badge-danger';
-                                break;
-                            default:
-                                badgeClass = 'badge-secondary';
-                        }
+
+                        let badgeClass = data === 'Draft' ? 'badge-warning' : 'badge-success';
                         return `<span class="badge ${badgeClass}">${data}</span>`;
                     }
                 }
@@ -409,7 +397,6 @@
 
             var button = $(this);
             var form = $('#form-order-operasi');
-
             // Validasi form sebelum submit
             if (!form[0].checkValidity()) {
                 form[0].reportValidity();
@@ -419,6 +406,7 @@
             var formData = form.serialize();
 
             // Disable button dan ubah text
+
             button.prop('disabled', true).html(
                 '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...'
             );
@@ -432,38 +420,25 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
-                    console.log('Success response:', response);
 
-                    // === LANGKAH 1: TUTUP MODAL DULU ===
+                    // ======================================================
+                    // === PERUBAHAN UTAMA DI SINI ===
+                    // ======================================================
+
+                    // 1. Langsung tutup modal
                     $('#modal-order-operasi').modal('hide');
 
-                    // === LANGKAH 2: TUNGGU MODAL BENAR-BENAR TERTUTUP, BARU TAMPILKAN ALERT ===
-                    $('#modal-order-operasi').on('hidden.bs.modal.success', function() {
-                        // Unbind event ini agar tidak dipanggil berulang
-                        $(this).off('hidden.bs.modal.success');
-
-                        // Tampilkan Sweet Alert
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: response.message ||
-                                'Order operasi berhasil disimpan.',
-                            showConfirmButton: true,
-                            confirmButtonText: 'OK',
-                            timer: 3000,
-                            timerProgressBar: true
-                        });
+                    // 2. Tampilkan notifikasi sukses SETELAH modal tertutup
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: response.message,
+                        showConfirmButton: true,
+                        confirmButtonText: 'OK'
                     });
 
-                    // Trigger event untuk menampilkan alert setelah modal tertutup
-                    $('#modal-order-operasi').trigger('hidden.bs.modal.success');
-
-                    // === LANGKAH 3: RELOAD DATA TABEL ===
-                    orderOperasiTable.ajax.reload(null,
-                        false); // false = stay on current page
-
-                    // Optional: Juga reload tindakan operasi jika diperlukan
-                    // tindakanOperasiTable.ajax.reload(null, false);
+                    // 3. Reload tabel DataTables
+                    orderOperasiTable.ajax.reload(null, false);
                 },
                 error: function(xhr) {
                     console.error('Error response:', xhr);
@@ -494,14 +469,30 @@
                     });
                 },
                 complete: function() {
-                    console.log('Ajax request completed');
+
+                    // Tombol akan di-reset oleh event 'hidden.bs.modal'
+                    // jadi tidak perlu di-enable secara eksplisit di sini
+                    // kecuali jika terjadi error
+                    if (!this.success) { // Hanya re-enable jika ajax GAGAL
+                        button.prop('disabled', false).html('Simpan Order');
+                    }
                 }
             });
         });
 
-        // =====================================================================
-        // EVENT HANDLER UNTUK DELETE ORDER
-        // =====================================================================
+        <<
+        <<
+        << < HEAD
+
+        // Event handler untuk reset form ketika modal ditutup (TETAP DIPERTAHANKAN)
+        // Ini akan dijalankan secara otomatis setiap kali modal ditutup, baik manual maupun via script
+        $('#modal-order-operasi').on('hidden.bs.modal', function() {
+            $('#form-order-operasi')[0].reset();
+            $('#form-order-operasi .select2').val(null).trigger('change');
+            $('#btn-simpan-order-operasi').prop('disabled', false).html('Simpan Order');
+        });
+
+        // Event handler untuk delete order (Sudah benar dari jawaban sebelumnya)
         $('#dt-order-operasi').on('click', '.btn-delete-order', function() {
             var orderId = $(this).data('id');
             var row = $(this).closest('tr');
@@ -518,11 +509,6 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Tampilkan loading pada tombol
-                    var deleteBtn = row.find('.btn-delete-order');
-                    deleteBtn.html('<i class="fal fa-spin fa-spinner"></i>').prop('disabled',
-                        true);
-
                     let urlTemplate = "{{ route('operasi.order.delete', ['order' => ':id']) }}";
                     let deleteUrl = urlTemplate.replace(':id', orderId);
 
@@ -546,19 +532,10 @@
                             orderOperasiTable.ajax.reload(null, false);
                         },
                         error: function(xhr) {
-                            // Reset button state
-                            deleteBtn.html('<i class="fal fa-trash"></i>').prop(
-                                'disabled', false);
 
-                            let errorMessage = xhr.responseJSON?.message ||
-                                'Terjadi kesalahan saat menghapus data.';
-
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal!',
-                                text: errorMessage,
-                                showConfirmButton: true
-                            });
+                            let errorMessage = xhr.responseJSON ? xhr.responseJSON
+                                .message : 'Terjadi kesalahan saat menghapus data.';
+                            Swal.fire('Gagal!', errorMessage, 'error');
                         }
                     });
                 }

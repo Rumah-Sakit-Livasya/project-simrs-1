@@ -1250,8 +1250,9 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/operasi/tindakan/data/{registrationId}', [OperasiController::class, 'getTindakanOperasi'])
                 ->name('operasi.tindakan.data');
 
-            // Gunakan {order} sebagai parameter. Laravel akan otomatis mencari OrderOperasi berdasarkan ID.
+
             Route::delete('/operasi/order/{order}', [OperasiController::class, 'deleteOrder'])->name('operasi.order.delete');
+            Route::get('/plasma', [OperasiController::class, 'plasmaView'])->name('ok.plasma');
             // Route::get('data-order/{orderId}', [OperasiController::class, 'getOrderData'])->name('operasi.data-order');
         });
 
