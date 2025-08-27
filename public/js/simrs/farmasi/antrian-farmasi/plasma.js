@@ -103,7 +103,7 @@ class PlasmaFarmasiHandler {
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert(`Error: ${error}`);
+                    // alert(`Error: ${error}`);
                     return reject(error);
                 });
         });
@@ -131,26 +131,25 @@ class PlasmaFarmasiHandler {
      */
     async #makeCallAnnouncement(id, queue) {
         this.#announceList.push({ id, queue });
-        if (this.#isAnnouncing) return;
+        if (this.#isAnnouncing) return; // worker already running
+
         this.#isAnnouncing = true;
 
-        // queue format: {{letter}}{{number}}
-        // split letter from number
-        const Split = queue.split(/(\d+)/).filter(Boolean);
-        const Letter = Split[0];
-        const Number = Split[1];
-        const Announcement = `Nomor Antrian, ${Letter}, ${Number}, Menuju Ke Loket, Farmasi`;
+        while (this.#announceList.length > 0) {
+            const { id, queue } = /** @type {{id: number, queue: string}} */ (this.#announceList.shift());
 
-        this.#updateCurrentCall(queue);
-        this.#playTTS(Announcement);
-        this.#updateCallStatus(id);
-        await this.sleep(11 * 1000); // 11s delay
+            // queue format: {{letter}}{{number}}
+            const [Letter, Number] = queue.split(/(\d+)/).filter(Boolean);
+            const Announcement = `Nomor Antrian, ${Letter}, ${Number}, Menuju Ke Loket, Farmasi`;
 
-        this.#isAnnouncing = false;
-        this.#announceList.shift();
-        if (this.#announceList.length > 0) {
-            this.#makeCallAnnouncement(this.#announceList[0].id, this.#announceList[0].queue);
+            this.#updateCurrentCall(queue);
+            this.#playTTS(Announcement);
+            this.#updateCallStatus(id);
+
+            await this.sleep(11 * 1000); // wait before next announcement
         }
+
+        this.#isAnnouncing = false; // done
     }
 
     async #updateCallStatus(id) {
@@ -163,6 +162,8 @@ class PlasmaFarmasiHandler {
             const response = await fetch(`http://liva_simrs_laravel11.test/api/tts?text=${encodeURIComponent(text)}`);
 
             if (!response.ok) {
+                console.log(await response.text());
+
                 throw new Error('Network response was not ok');
             }
 
