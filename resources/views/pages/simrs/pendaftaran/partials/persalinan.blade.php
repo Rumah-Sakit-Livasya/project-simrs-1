@@ -186,7 +186,6 @@
         color: #dc3545;
     }
 
-    /* Style untuk select2 container */
     .select2-container .select2-selection--single {
         height: 38px !important;
         line-height: 36px !important;
@@ -209,19 +208,6 @@
             <i class="fas fa-baby mr-2 text-pink"></i>
             Order Persalinan (VK)
         </h2>
-        <div class="panel-toolbar">
-            <button type="button" class="btn btn-sm btn-outline-primary waves-effect waves-themed"
-                id="btn-tambah-order-persalinan" data-toggle="modal" data-target="#modal-order-vk"
-                data-registration-id="{{ $registration->id ?? 0 }}">
-                <span class="fal fa-plus-circle mr-1"></span>
-                Tambah Order
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-secondary waves-effect waves-themed ml-2"
-                id="btn-reload-persalinan">
-                <span class="fal fa-sync mr-1"></span>
-                Reload
-            </button>
-        </div>
     </div>
     <div class="panel-container show">
         <div class="panel-content">
@@ -229,7 +215,6 @@
                 <table id="dt-order-persalinan" class="table table-bordered table-hover table-striped w-100">
                     <thead class="bg-primary-600">
                         <tr>
-                            {{-- <th>Tgl Order</th> --}}
                             <th>Tgl Persalinan</th>
                             <th>Pasien</th>
                             <th>Tindakan</th>
@@ -242,6 +227,24 @@
                     <tbody>
                         <!-- Data will be loaded by AJAX -->
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4">
+                                <button type="button" class="btn btn-sm btn-outline-primary waves-effect waves-themed"
+                                    id="btn-tambah-order-persalinan" data-toggle="modal" data-target="#modal-order-vk"
+                                    data-registration-id="{{ $registration->id ?? 0 }}">
+                                    <span class="fal fa-plus-circle mr-1"></span>
+                                    Tambah Order
+                                </button>
+                                <button type="button"
+                                    class="btn btn-sm btn-outline-secondary waves-effect waves-themed ml-2"
+                                    id="btn-reload-persalinan">
+                                    <span class="fal fa-sync mr-1"></span>
+                                    Reload
+                                </button>
+                            </th>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -277,7 +280,7 @@
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="kelas_rawat">Kelas Rawat <span class="required">*</span></label>
-                                <select class="form-control" id="kelas_rawat" name="kelas_rawat_id" required>
+                                <select class="form-control select2" id="kelas_rawat" name="kelas_rawat_id" required>
                                     <option value="">Loading...</option>
                                 </select>
                             </div>
@@ -406,7 +409,7 @@
             }
             if (!registrationId || registrationId === 0) {
                 $('#dt-order-persalinan tbody').html(
-                    '<tr><td colspan="8" class="text-center text-muted">Registration ID tidak valid.</td></tr>'
+                    '<tr><td colspan="7" class="text-center text-muted">Registration ID tidak valid.</td></tr>'
                 );
                 return;
             }
@@ -422,7 +425,7 @@
                         Swal.fire('Error', 'Gagal memuat data tabel: ' + (xhr.responseJSON
                             ?.message || xhr.statusText), 'error');
                         $('#dt-order-persalinan tbody').html(
-                            '<tr><td colspan="8" class="text-center text-danger">Gagal memuat data.</td></tr>'
+                            '<tr><td colspan="7" class="text-center text-danger">Gagal memuat data.</td></tr>'
                         );
                     }
                 },
@@ -439,7 +442,7 @@
                         name: 'persalinan.nama_persalinan',
                         orderable: false,
                         searchable: false
-                    }, // [DIUBAH] name disesuaikan
+                    },
                     {
                         data: 'tipe_persalinan',
                         name: 'tipePersalinan.tipe'
@@ -487,7 +490,7 @@
             $('#order_vk_id').val('');
             $('#vk_registration_id').val(registrationId);
             $('#modal-order-vk .select2').val(null).trigger('change');
-            $('#kelas_rawat').val('');
+            $('#kelas_rawat').val(null).trigger('change');
             $('#kelas_rawat, #dokter_bidan_operator, #asisten_operator, #dokter_resusitator, #dokter_anestesi, #asisten_anestesi, #dokter_umum, #tipe_persalinan, #kategori')
                 .html('<option value="">Loading...</option>');
             $('#modal-order-vk .modal-title').text('Input Tindakan Persalinan (VK)');
@@ -522,7 +525,6 @@
                     let tindakanHtml = '';
                     if (data.tindakan && data.tindakan.length > 0) {
                         data.tindakan.forEach(item => {
-                            // [DIUBAH] name diubah dari "tindakan[]" menjadi "tindakan_id"
                             tindakanHtml +=
                                 `<div class="tindakan-item"><input type="radio" name="tindakan_id" id="tindakan-${item.id}" value="${item.id}" required><label for="tindakan-${item.id}">${item.text}</label></div>`;
                         });
@@ -543,13 +545,13 @@
             $select.empty().append(`<option value="">${placeholder}</option>`);
             if (Array.isArray(data) && data.length > 0) {
                 data.forEach(item => {
-                    // [PERBAIKAN] Menggunakan text dan id dari controller
                     $select.append(`<option value="${item.id}">${item.text}</option>`);
                 });
             }
             if ($select.hasClass('select2')) {
                 $select.select2({
-                    dropdownParent: $select.closest('.modal')
+                    dropdownParent: $select.closest('.modal'),
+                    width: '100%'
                 });
             }
         }
@@ -564,7 +566,13 @@
         });
 
         $('#btn-reload-persalinan').on('click', function() {
-            if (dtPersalinan) dtPersalinan.ajax.reload(null, false);
+            $(this).html('<i class="fal fa-spin fa-spinner mr-1"></i>Loading...');
+            if (dtPersalinan) {
+                dtPersalinan.ajax.reload(function() {
+                    $('#btn-reload-persalinan').html(
+                        '<span class="fal fa-sync mr-1"></span>Reload');
+                });
+            }
         });
 
         $('#btn-vk-lanjut').on('click', function() {
@@ -612,7 +620,6 @@
 
         $('#btn-simpan-order-vk').on('click', function() {
             const $button = $(this);
-            // [DIUBAH] Pengecekan diubah ke "tindakan_id"
             if ($('input[name="tindakan_id"]:checked').length === 0) {
                 Swal.fire('Peringatan', 'Anda harus memilih satu tindakan', 'warning');
                 return;
@@ -676,7 +683,6 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        // [DIUBAH] URL disesuaikan dengan standar RESTful
                         url: `/simrs/persalinan/destroy/${orderId}`,
                         type: 'DELETE',
                         success: function(response) {
