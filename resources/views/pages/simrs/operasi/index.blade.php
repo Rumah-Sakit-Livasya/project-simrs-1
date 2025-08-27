@@ -86,13 +86,13 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6 mt-3">
+                                    <div class="col-md-6 ">
                                         <label>No.RM</label>
                                         <input type="text" class="form-control" id="medical_record_number"
                                             name="medical_record_number" placeholder="Masukkan No.RM"
                                             value="{{ request('medical_record_number') }}">
                                     </div>
-                                    <div class="col-md-6 mt-3">
+                                    <div class="col-md-6 ">
                                         <label>Nama Pasien</label>
                                         <input type="text" class="form-control" id="nama_pasien" name="nama_pasien"
                                             placeholder="Masukkan Nama Pasien" value="{{ request('nama_pasien') }}">
@@ -111,18 +111,6 @@
                                     </div>
 
                                     <div class="col-md-6 mt-3">
-                                        <label>Penjamin</label>
-                                        <select class="form-control select2" id="penjamin_id" name="penjamin_id">
-                                            <option value="">Pilih Penjamin</option>
-                                            @foreach ($penjamins as $penjamin)
-                                                <option value="{{ $penjamin->id }}"
-                                                    {{ request('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
-                                                    {{ $penjamin->nama_perusahaan }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 mt-3">
                                         <label>Status Registrasi</label>
                                         <select class="form-control select2" id="status_registrasi"
                                             name="status_registrasi">
@@ -135,6 +123,20 @@
                                                 Tutup Kunjungan</option>
                                         </select>
                                     </div>
+
+                                    <div class="col-md-12 mt-3">
+                                        <label>Penjamin</label>
+                                        <select class="form-control select2" id="penjamin_id" name="penjamin_id">
+                                            <option value="">Pilih Penjamin</option>
+                                            @foreach ($penjamins as $penjamin)
+                                                <option value="{{ $penjamin->id }}"
+                                                    {{ request('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
+                                                    {{ $penjamin->nama_perusahaan }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
                                 </div>
 
                                 <div class="row justify-content-end mt-3">
@@ -215,17 +217,11 @@
                                                         data-toggle="tooltip" title="Edit">
                                                         <i class="fal fa-edit"></i>
                                                     </a>
-                                                    <form action="{{ route('operasi.order.delete', $order->id) }}"
-                                                        method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            class="btn btn-sm btn-icon btn-danger rounded-circle"
-                                                            data-toggle="tooltip" title="Hapus"
-                                                            onclick="return confirm('Apakah Anda yakin ingin menghapus order ini?')">
-                                                            <i class="fal fa-trash-alt"></i>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-icon btn-danger rounded-circle delete-order-btn"
+                                                        data-id="{{ $order->id }}" title="Hapus">
+                                                        <i class="fal fa-trash-alt"></i>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -345,14 +341,14 @@
                                 </thead>
                                 <tbody>
                                     ${d.prosedur_operasi.map(prosedur => `
-                                                                                                                                                    <tr>
-                                                                                                                                                        <td>${prosedur.tindakan}</td>
-                                                                                                                                                        <td>${prosedur.dokter_operator}</td>
-                                                                                                                                                        <td>${prosedur.ass_dokter_operator}</td>
-                                                                                                                                                        <td>${prosedur.dokter_anestesi}</td>
-                                                                                                                                                        <td>${prosedur.ass_dokter_anestesi}</td>
-                                                                                                                                                    </tr>
-                                                                                                                                                `).join('')}
+                                                                                                                                                                                                            <tr>
+                                                                                                                                                                                                                <td>${prosedur.tindakan}</td>
+                                                                                                                                                                                                                <td>${prosedur.dokter_operator}</td>
+                                                                                                                                                                                                                <td>${prosedur.ass_dokter_operator}</td>
+                                                                                                                                                                                                                <td>${prosedur.dokter_anestesi}</td>
+                                                                                                                                                                                                                <td>${prosedur.ass_dokter_anestesi}</td>
+                                                                                                                                                                                                            </tr>
+                                                                                                                                                                                                        `).join('')}
                                 </tbody>
                             </table>
                         </div>
@@ -433,6 +429,47 @@
                     });
                 }
             });
+            $('#dt-basic-example').on('click', '.delete-order-btn', function() {
+                let orderId = $(this).data('id');
+                let $table = $(this).closest('table');
+                let dataTable = $table.DataTable();
+
+                Swal.fire({
+                    title: 'Konfirmasi',
+                    text: 'Apakah Anda yakin ingin menghapus order ini?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let urlTemplate =
+                            "{{ route('operasi.order.delete', ['order' => ':id']) }}";
+                        let deleteUrl = urlTemplate.replace(':id', orderId);
+
+                        $.ajax({
+                            url: deleteUrl,
+                            type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                Swal.fire('Berhasil!', response.message, 'success');
+                                dataTable.ajax.reload(); // reload datatable
+                            },
+                            error: function(xhr) {
+                                let errorMessage = xhr.responseJSON ?
+                                    xhr.responseJSON.message :
+                                    'Terjadi kesalahan saat menghapus data.';
+                                Swal.fire('Gagal!', errorMessage, 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
         });
     </script>
 @endsection

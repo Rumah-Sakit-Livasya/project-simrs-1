@@ -4,6 +4,7 @@ namespace App\Models\SIMRS;
 
 use App\Models\Keuangan\JasaDokter;
 use App\Models\OrderRadiologi;
+use App\Models\SIMRS\Operasi\TindakanOperasi;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -42,8 +43,6 @@ class TagihanPasien extends Model implements AuditableContract
     protected static function booted()
     {
         static::creating(function ($tagihan) {
-            // Kita periksa apakah tagihan ini terkait dengan radiologi.
-            // Anda bisa sesuaikan kondisi ini jika perlu.
             if (str_contains(strtolower($tagihan->tipe_tagihan ?? ''), 'radiologi') || str_contains(strtolower($tagihan->tagihan ?? ''), 'radiologi')) {
 
                 // Buat stack trace menggunakan Exception, tapi jangan di-throw
@@ -67,6 +66,11 @@ class TagihanPasien extends Model implements AuditableContract
     public function tindakan_medis()
     {
         return $this->belongsTo(TindakanMedis::class, 'tindakan_medis_id');
+    }
+
+    public function tindakanOperasi()
+    {
+        return $this->belongsTo(TindakanOperasi::class);
     }
 
     public function registration()

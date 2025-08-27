@@ -64,7 +64,10 @@
                                                 {{ $order->order_date }}
                                             </a>
                                         @else
-                                            @if ($order->registration->patient->orderBy('created_at', 'desc')->first() !== null)
+                                            @if (
+                                                $order->registration &&
+                                                    $order->registration->patient &&
+                                                    $order->registration->patient->orderBy('created_at', 'desc')->first())
                                                 @if ($order->registration->patient->orderBy('created_at', 'desc')->first()->status === 'aktif')
                                                     <a
                                                         href="{{ route('detail.registrasi.pasien', $order->registration->patient->orderBy('created_at', 'desc')->first()->id) }}">

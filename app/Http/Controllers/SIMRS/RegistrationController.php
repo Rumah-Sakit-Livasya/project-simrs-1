@@ -21,6 +21,7 @@ use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Laboratorium\KategoriLaboratorium;
 use App\Models\SIMRS\Laboratorium\TarifParameterLaboratorium;
 use App\Models\SIMRS\Operasi\KategoriOperasi;
+use App\Models\SIMRS\Operasi\OrderOperasi;
 use App\Models\SIMRS\Operasi\TipeOperasi;
 use App\Models\SIMRS\ParameterRadiologi;
 use App\Models\SIMRS\Patient;
@@ -702,9 +703,9 @@ class RegistrationController extends Controller
                     Log::error('Kelas rawat untuk Rawat Inap tidak ditemukan!');
                 }
             }
-
             // Set department based on registration type
             $validatedData['departement_id'] = $this->getDepartmentId($validatedData);
+            // dd($validatedData);
             Log::info('Department ID assigned: ' . $validatedData['departement_id']);
 
             // Update bed if rawat inap
@@ -1164,19 +1165,37 @@ class RegistrationController extends Controller
         $age = displayAge($birthdate);
         $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
 
-        // =================================================================
-        // === TAMBAHAN UNTUK MODAL OPERASI ===
-        // Mengambil data yang dibutuhkan oleh dropdown di modal-order-operasi
-        // Pastikan Anda sudah membuat model untuk TipeOperasi dan KategoriOperasi
-        // dan namespace-nya sudah benar.
-        // =================================================================
         $jenisOperasi = TipeOperasi::orderBy('tipe')->get();
         $kategoriOperasi = KategoriOperasi::orderBy('nama_kategori')->get();
         $ruangans = Room::orderBy('ruangan')->get();
-        // Variabel $doctors dan $kelas_rawats sudah diambil di atas, jadi tidak perlu diambil lagi.
+
+        $orderOperasi = OrderOperasi::with([
+            'tipeOperasi',
+            'kategoriOperasi',
+            'jenisOperasi',
+            'prosedurOperasi' => function ($query) {
+                $query->with([
+                    'tindakanOperasi',
+                    'dokterOperator.employee',
+                    'assDokterOperator1.employee',
+                    'assDokterOperator2.employee',
+                    'assDokterOperator3.employee',
+                    'dokterAnastesi.employee',
+                    'assDokterAnastesi.employee',
+                    'dokterResusitator.employee',
+                    'dokterTambahan1.employee',
+                    'dokterTambahan2.employee',
+                    'dokterTambahan3.employee',
+                    'dokterTambahan4.employee',
+                    'dokterTambahan5.employee',
+                    'createdByUser'
+                ]);
+            }
+        ])->where('registration_id', $id)->get();
 
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
             // Variabel yang sudah ada
+            'orderOperasi' => $orderOperasi,
             'kelasRawat' => $kelasRawat,
             'penjamin' => $penjamin,
             'groupedDoctors' => $groupedDoctors,

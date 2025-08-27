@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\SIMRS\Operasi;
 
 use App\Http\Controllers\Controller;
+use App\Models\SIMRS\Bilingan;
+use App\Models\SIMRS\BilinganTagihanPasien;
 use App\Models\SIMRS\Operasi\OrderOperasi;
 use App\Models\SIMRS\Operasi\ProsedurOperasi;
 use App\Models\SIMRS\Operasi\TindakanOperasi;
@@ -10,10 +12,14 @@ use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Operasi\JenisOperasi;
 use App\Models\SIMRS\Operasi\KategoriOperasi;
+use App\Models\SIMRS\Operasi\TarifOperasi;
 use App\Models\SIMRS\Operasi\TipeOperasi;
 use App\Models\SIMRS\Room;
+use App\Models\SIMRS\TagihanPasien;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -154,6 +160,60 @@ class OperasiController extends Controller
         }
     }
 
+    public function getProsedurData($registrationId)
+    {
+        try {
+            $prosedurs = ProsedurOperasi::with([
+                'tindakanOperasi',
+                'dokterOperator.employee',
+                'orderOperasi.tipeOperasi',
+                'orderOperasi.kategoriOperasi',
+                'createdByUser'
+            ])
+                ->whereHas('orderOperasi', function ($query) use ($registrationId) {
+                    $query->where('registration_id', $registrationId);
+                })
+                ->latest()
+                ->get();
+
+            $data = $prosedurs->map(function ($prosedur) {
+                // Helper function untuk format nama dokter
+                $getDoctorName = function ($doctor) {
+                    return $doctor ? $doctor->employee->fullname : null;
+                };
+
+                return [
+                    'id' => $prosedur->id,
+                    'tindakan_nama' => $prosedur->tindakanOperasi->nama_operasi ?? 'N/A',
+                    'tipe_operasi' => $prosedur->orderOperasi->tipeOperasi->tipe ?? 'N/A',
+                    'kategori_operasi' => $prosedur->orderOperasi->kategoriOperasi->nama_kategori ?? 'N/A',
+                    'dokter_operator' => $getDoctorName($prosedur->dokterOperator) ?? 'N/A',
+                    'tgl_tindakan' => $prosedur->created_at ? $prosedur->created_at->format('d-m-Y H:i') : 'N/A',
+                    'user_create' => $prosedur->createdByUser->name ?? 'N/A',
+                    'status' => ucfirst($prosedur->status ?? 'draft'),
+                    'tim_dokter' => [
+                        'operator' => $getDoctorName($prosedur->dokterOperator) ?? 'N/A',
+                        'ass_operator_1' => $getDoctorName($prosedur->assDokterOperator1) ?? 'N/A',
+                        'ass_operator_2' => $getDoctorName($prosedur->assDokterOperator2) ?? 'N/A',
+                        'ass_operator_3' => $getDoctorName($prosedur->assDokterOperator3) ?? 'N/A',
+                        'anestesi' => $getDoctorName($prosedur->dokterAnastesi) ?? 'N/A',
+                        'ass_anestesi' => $getDoctorName($prosedur->assDokterAnastesi) ?? 'N/A'
+                    ]
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data prosedur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     // Tambahkan method ini di OperasiController
 
     // Tambahkan method ini di OperasiController
@@ -201,7 +261,6 @@ class OperasiController extends Controller
     public function getTindakanOperasi($registrationId)
     {
         try {
-            // Sesuaikan dengan model dan relasi yang ada
             $tindakan = []; // Kosong dulu, sesuaikan dengan data real Anda
 
             return response()->json([
@@ -232,7 +291,6 @@ class OperasiController extends Controller
 
     public function prosedure($orderId)
     {
-        // Ambil data order dengan relasi yang diperlukan
         $order = OrderOperasi::with([
             'registration.patient',
             'prosedurOperasi' => function ($query) {
@@ -257,6 +315,7 @@ class OperasiController extends Controller
             'kategoriOperasi',
             'jenisOperasi'
         ])->findOrFail($orderId);
+        // dd($order);
 
         // Ambil data order dengan relasi yang diperlukan
         $order = OrderOperasi::with([
@@ -285,8 +344,9 @@ class OperasiController extends Controller
             return [
                 'id' => $prosedur->id,
                 'tindakan_nama' => $prosedur->tindakanOperasi->nama_operasi ?? 'N/A',
-                'tipe_operasi' => $prosedur->order->tipeOperasi->tipe ?? 'N/A',
-                'tipe_penggunaan' => $prosedur->tipe_penggunaan ?? 'N/A',
+                'tipe_operasi' => $prosedur->orderOperasi->tipeOperasi->tipe ?? 'N/A',
+                'tipe_penggunaan' => $prosedur->orderOperasi->tipeOperasi->tipe ?? 'N/A',
+                'kategori_operasi' => $prosedur->orderOperasi->kategoriOperasi->nama_kategori ?? 'N/A',
                 'dokter_operator' => $prosedur->dokterOperator->employee->fullname ?? 'N/A',
                 'tgl_tindakan' => $prosedur->created_at ? $prosedur->created_at->format('d-m-Y H:i') : 'N/A',
                 'user_create' => $prosedur->createdByUser->name ?? 'N/A',
@@ -308,6 +368,7 @@ class OperasiController extends Controller
                     'tambahan_4' => $getDoctorName($prosedur->dokter_tambahan_4_id),
                     'tambahan_5' => $getDoctorName($prosedur->dokter_tambahan_5_id),
                 ]
+
             ];
         });
 
@@ -315,6 +376,188 @@ class OperasiController extends Controller
             'order' => $order,
             'prosedurData' => $prosedurData
         ]);
+    }
+
+
+    public function editProsedur(OrderOperasi $order, ProsedurOperasi $prosedur)
+    {
+        // Validasi bahwa prosedur milik order yang benar
+        if ($prosedur->order_operasi_id !== $order->id) {
+            abort(404, 'Prosedur tidak ditemukan untuk order ini.');
+        }
+
+        // Hanya boleh edit jika status draft
+        if ($prosedur->status === 'final') {
+            return redirect()->back()->with('error', 'Prosedur dengan status final tidak dapat diedit.');
+        }
+
+        // Load data yang dibutuhkan
+        $order->load('registration.patient', 'tipeOperasi', 'kelasRawat', 'kategoriOperasi', 'registration.penjamin');
+        $prosedur->load([
+            'tindakanOperasi',
+            'dokterOperator.employee',
+            'assDokterOperator1.employee',
+            'assDokterOperator2.employee',
+            'assDokterOperator3.employee',
+            'dokterAnastesi.employee',
+            'assDokterAnastesi.employee',
+            'dokterResusitator.employee'
+        ]);
+
+        $jenis_operasi = JenisOperasi::orderBy('jenis', 'asc')->get();
+        $ruangan_operasi = Room::all();
+        $tindakan_operasi = TindakanOperasi::with(['kategoriOperasi', 'jenisOperasi'])->orderBy('nama_operasi', 'asc')->get();
+        $kategori_operasi = KategoriOperasi::orderBy('nama_kategori', 'asc')->get();
+        $tipe_operasi = TipeOperasi::orderBy('tipe', 'asc')->get();
+        $kelas_rawat = KelasRawat::orderBy('kelas', 'asc')->get();
+
+        $doctors = Doctor::with(['employee' => function ($query) {
+            $query->where('is_active', true);
+        }])->whereHas('employee', function ($query) {
+            $query->where('is_active', true);
+        })->get()->map(function ($doctor) {
+            return [
+                'id' => $doctor->id,
+                'fullname' => $doctor->employee->fullname ?? 'Tidak Diketahui',
+                'kode_dpjp' => $doctor->kode_dpjp,
+                'departement' => $doctor->departement->name ?? 'Tidak Ada Departemen'
+            ];
+        })->sortBy('fullname');
+
+        return view('pages.simrs.operasi.edit_tindakan_ok', [
+            'order' => $order,
+            'prosedur' => $prosedur,
+            'doctors' => $doctors,
+            'tindakan_operasi' => $tindakan_operasi,
+            'ruangan_operasi' => $ruangan_operasi,
+            'tipe_operasi' => $tipe_operasi,
+            'jenis_operasi' => $jenis_operasi,
+            'kategori_operasi' => $kategori_operasi,
+            'kelas_rawat' => $kelas_rawat,
+            'isEdit' => true
+        ]);
+    }
+
+    /**
+     * Update prosedur operasi
+     */
+    public function updateProsedur(Request $request, ProsedurOperasi $prosedur)
+    {
+        try {
+            // Cek apakah prosedur masih berstatus draft
+            if ($prosedur->status === 'final') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Prosedur dengan status final tidak dapat diedit.'
+                ], 422);
+            }
+
+            // Validasi data yang masuk
+            $validated = $request->validate([
+                'order_operasi_id' => 'required|exists:order_operasi,id',
+                'tgl_operasi' => 'required|date',
+                // 'ruangan_id' => 'required|exists:rooms,id',
+                // 'tipe_operasi_id' => 'required|exists:tipe_operasi,id',
+                // 'tipe_penggunaan' => 'required|in:UMUM,ELEKTIF',
+                'kelas_rawat_id' => 'required|exists:kelas_rawat,id',
+                'kategori_operasi_id' => 'required|exists:kategori_operasi,id',
+                // 'jenis_operasi_id' => 'required|exists:jenis_operasi,id',
+                'tindakan_operasi_id' => 'required|exists:tindakan_operasi,id',
+                'dokter_operator_id' => 'required|exists:doctors,id',
+                'ass_dokter_operator_1_id' => 'nullable|exists:doctors,id|different:dokter_operator_id',
+                'ass_dokter_operator_2_id' => 'nullable|exists:doctors,id|different:dokter_operator_id,ass_dokter_operator_1_id',
+                'ass_dokter_operator_3_id' => 'nullable|exists:doctors,id|different:dokter_operator_id,ass_dokter_operator_1_id,ass_dokter_operator_2_id',
+                'dokter_anastesi_id' => 'nullable|exists:doctors,id',
+                'ass_dokter_anastesi_id' => 'nullable|exists:doctors,id|different:dokter_anastesi_id',
+                'dokter_resusitator_id' => 'nullable|exists:doctors,id',
+                'dokter_tambahan_1_id' => 'nullable|exists:doctors,id',
+                'dokter_tambahan_2_id' => 'nullable|exists:doctors,id',
+                'dokter_tambahan_3_id' => 'nullable|exists:doctors,id',
+                'dokter_tambahan_4_id' => 'nullable|exists:doctors,id',
+                'dokter_tambahan_5_id' => 'nullable|exists:doctors,id',
+                'status' => 'required|in:draft,final',
+            ], [
+                'dokter_operator_id.required' => 'Dokter operator wajib dipilih.',
+                'dokter_operator_id.exists' => 'Dokter operator yang dipilih tidak valid.',
+                'ass_dokter_operator_1_id.different' => 'Asisten operator 1 harus berbeda dengan dokter operator.',
+                'ass_dokter_operator_2_id.different' => 'Asisten operator 2 harus berbeda dengan dokter operator dan asisten operator 1.',
+                'ass_dokter_operator_3_id.different' => 'Asisten operator 3 harus berbeda dengan dokter operator dan asisten operator lainnya.',
+                'ass_dokter_anastesi_id.different' => 'Asisten anestesi harus berbeda dengan dokter anestesi.',
+                'tindakan_operasi_id.required' => 'Tindakan operasi wajib dipilih.',
+                'tindakan_operasi_id.exists' => 'Tindakan operasi yang dipilih tidak valid.',
+                'status.required' => 'Status wajib dipilih.',
+                'status.in' => 'Status harus draft atau final.',
+            ]);
+
+            // 1. Update data dasar pada tabel order_operasi
+            $order = OrderOperasi::findOrFail($validated['order_operasi_id']);
+            $order->update([
+                'tgl_operasi' => $validated['tgl_operasi'],
+                // 'ruangan_id' => $validated['ruangan_id'],
+                // 'tipe_operasi_id' => $validated['tipe_operasi_id'],
+                'kelas_rawat_id' => $validated['kelas_rawat_id'],
+                'kategori_operasi_id' => $validated['kategori_operasi_id'],
+                // 'jenis_operasi_id' => $validated['jenis_operasi_id'],
+                'status' => $validated['status'],
+            ]);
+
+            // 2. Update prosedur operasi
+            $prosedurData = [
+                'order_operasi_id' => $validated['order_operasi_id'],
+                // 'jenis_operasi_id' => $validated['jenis_operasi_id'],
+                'tindakan_operasi_id' => $validated['tindakan_operasi_id'],
+                // 'tipe_penggunaan' => $validated['tipe_penggunaan'],
+                'dokter_operator_id' => $validated['dokter_operator_id'],
+                'ass_dokter_operator_1_id' => $validated['ass_dokter_operator_1_id'] ?? null,
+                'ass_dokter_operator_2_id' => $validated['ass_dokter_operator_2_id'] ?? null,
+                'ass_dokter_operator_3_id' => $validated['ass_dokter_operator_3_id'] ?? null,
+                'dokter_anastesi_id' => $validated['dokter_anastesi_id'] ?? null,
+                'ass_dokter_anastesi_id' => $validated['ass_dokter_anastesi_id'] ?? null,
+                'dokter_resusitator_id' => $validated['dokter_resusitator_id'] ?? null,
+                'dokter_tambahan_1_id' => $validated['dokter_tambahan_1_id'] ?? null,
+                'dokter_tambahan_2_id' => $validated['dokter_tambahan_2_id'] ?? null,
+                'dokter_tambahan_3_id' => $validated['dokter_tambahan_3_id'] ?? null,
+                'dokter_tambahan_4_id' => $validated['dokter_tambahan_4_id'] ?? null,
+                'dokter_tambahan_5_id' => $validated['dokter_tambahan_5_id'] ?? null,
+                'dokter_tambahan_ids' => json_decode($request->dokter_tambahan_ids, true) ?? [],
+                'status' => $validated['status'],
+                'created_by' => auth()->id(),
+                'updated_by' => auth()->id(),
+                'waktu_mulai' => now(), // S
+            ];
+
+            // 3. Jika status berubah menjadi final, set waktu selesai
+            if ($validated['status'] === 'final' && $prosedur->status !== 'final') {
+                $prosedurData['waktu_selesai'] = now();
+            }
+
+            $prosedur->update($prosedurData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tindakan operasi berhasil diperbarui sebagai ' . ucfirst($validated['status']) . '.',
+                'data' => $prosedur
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+                'message' => 'Data yang dimasukkan tidak valid.'
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error updating prosedur operasi: ' . $e->getMessage(), [
+                'prosedur_id' => $prosedur->id,
+                'request_data' => $request->except('password', '_token'),
+                'user_id' => auth()->id(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server. Silakan coba lagi.',
+                'debug' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
     }
 
     public function createProsedur(OrderOperasi $order)
@@ -361,13 +604,7 @@ class OperasiController extends Controller
         try {
             $prosedur = ProsedurOperasi::findOrFail($prosedurId);
 
-            // Hanya bisa hapus jika status masih draft
-            if ($prosedur->status === 'final') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Prosedur dengan status final tidak dapat dihapus.'
-                ], 422);
-            }
+
 
             // Cek apakah user yang login sama dengan yang membuat
             if ($prosedur->created_by !== auth()->id() && !auth()->user()->hasRole('admin')) {
@@ -422,110 +659,123 @@ class OperasiController extends Controller
         }
     }
 
-    // Method untuk mendapatkan tindakan berdasarkan kategori operasi
+
 
 
     public function storeProsedur(Request $request)
     {
         try {
-            // Validasi data yang masuk (tetap sama)
+            // Validate all input fields including additional doctors
             $validated = $request->validate([
                 'order_operasi_id' => 'required|exists:order_operasi,id',
                 'tgl_operasi' => 'required|date',
-                'ruangan_id' => 'required|exists:rooms,id',
-                'tipe_operasi_id' => 'required|exists:tipe_operasi,id',
-                'tipe_penggunaan' => 'required|in:UMUM,ELEKTIF',
                 'kelas_rawat_id' => 'required|exists:kelas_rawat,id',
                 'kategori_operasi_id' => 'required|exists:kategori_operasi,id',
                 'jenis_operasi_id' => 'required|exists:jenis_operasi,id',
                 'tindakan_operasi_id' => 'required|exists:tindakan_operasi,id',
                 'dokter_operator_id' => 'required|exists:doctors,id',
+
+                // Assistant doctors with validation to prevent duplicates
                 'ass_dokter_operator_1_id' => 'nullable|exists:doctors,id|different:dokter_operator_id',
                 'ass_dokter_operator_2_id' => 'nullable|exists:doctors,id|different:dokter_operator_id,ass_dokter_operator_1_id',
                 'ass_dokter_operator_3_id' => 'nullable|exists:doctors,id|different:dokter_operator_id,ass_dokter_operator_1_id,ass_dokter_operator_2_id',
+
+                // Anesthesia team
                 'dokter_anastesi_id' => 'nullable|exists:doctors,id',
                 'ass_dokter_anastesi_id' => 'nullable|exists:doctors,id|different:dokter_anastesi_id',
                 'dokter_resusitator_id' => 'nullable|exists:doctors,id',
+
+                // Additional doctors (1-5)
                 'dokter_tambahan_1_id' => 'nullable|exists:doctors,id',
                 'dokter_tambahan_2_id' => 'nullable|exists:doctors,id',
                 'dokter_tambahan_3_id' => 'nullable|exists:doctors,id',
                 'dokter_tambahan_4_id' => 'nullable|exists:doctors,id',
                 'dokter_tambahan_5_id' => 'nullable|exists:doctors,id',
+
                 'status' => 'required|in:draft,final',
-            ], [
-                // Pesan error yang sama
             ]);
 
-            // 1. Update data dasar pada tabel order_operasi (tetap sama)
+            Log::debug('Validated data:', $validated);
+
+            // 1. Update order operasi
             $order = OrderOperasi::findOrFail($validated['order_operasi_id']);
             $order->update([
                 'tgl_operasi' => $validated['tgl_operasi'],
-                'ruangan_id' => $validated['ruangan_id'],
-                'tipe_operasi_id' => $validated['tipe_operasi_id'],
                 'kelas_rawat_id' => $validated['kelas_rawat_id'],
                 'kategori_operasi_id' => $validated['kategori_operasi_id'],
                 'jenis_operasi_id' => $validated['jenis_operasi_id'],
-                'status' => $validated['status'],
             ]);
 
-            // 2. Siapkan data untuk prosedur baru
-            $prosedurValues = [
+            // 2. Prepare procedure data with explicit mapping
+            $prosedurData = [
                 'order_operasi_id' => $validated['order_operasi_id'],
+                'tgl_operasi' => $validated['tgl_operasi'],
+                'kelas_rawat_id' => $validated['kelas_rawat_id'],
+                'kategori_operasi_id' => $validated['kategori_operasi_id'],
                 'jenis_operasi_id' => $validated['jenis_operasi_id'],
                 'tindakan_operasi_id' => $validated['tindakan_operasi_id'],
-                'tipe_penggunaan' => $validated['tipe_penggunaan'],
                 'dokter_operator_id' => $validated['dokter_operator_id'],
+
+                // Assistant operators
                 'ass_dokter_operator_1_id' => $validated['ass_dokter_operator_1_id'] ?? null,
                 'ass_dokter_operator_2_id' => $validated['ass_dokter_operator_2_id'] ?? null,
                 'ass_dokter_operator_3_id' => $validated['ass_dokter_operator_3_id'] ?? null,
+
+                // Anesthesia team
                 'dokter_anastesi_id' => $validated['dokter_anastesi_id'] ?? null,
                 'ass_dokter_anastesi_id' => $validated['ass_dokter_anastesi_id'] ?? null,
                 'dokter_resusitator_id' => $validated['dokter_resusitator_id'] ?? null,
+
+                // Additional doctors - MAKE SURE THESE MATCH YOUR DB COLUMNS
                 'dokter_tambahan_1_id' => $validated['dokter_tambahan_1_id'] ?? null,
                 'dokter_tambahan_2_id' => $validated['dokter_tambahan_2_id'] ?? null,
                 'dokter_tambahan_3_id' => $validated['dokter_tambahan_3_id'] ?? null,
                 'dokter_tambahan_4_id' => $validated['dokter_tambahan_4_id'] ?? null,
                 'dokter_tambahan_5_id' => $validated['dokter_tambahan_5_id'] ?? null,
-                'dokter_tambahan_ids' => json_decode($request->dokter_tambahan_ids, true) ?? [],
-                'status' => $validated['status'],
+
                 'created_by' => auth()->id(),
                 'updated_by' => auth()->id(),
-                'waktu_mulai' => now(), // Set waktu mulai otomatis
+                'waktu_mulai' => now(),
+                'status' => $validated['status'],
             ];
+            // dd('RAW REQUEST DATA:', $request->all());
 
-            // 3. Buat prosedur baru (CREATE saja, tanpa updateOrCreate)
-            $prosedur = ProsedurOperasi::create($prosedurValues);
+            \Log::debug('Procedure data prepared:', $prosedurData);
 
-            // 4. Jika status final, set waktu selesai
+            // 3. Create procedure
+            $prosedur = ProsedurOperasi::create($prosedurData);
+            Log::info('Procedure created:', $prosedur->toArray());
+
+            // 4. If final, complete procedure
             if ($validated['status'] === 'final') {
-                $prosedur->update([
-                    'waktu_selesai' => now()
-                ]);
+                $prosedur->update(['waktu_selesai' => now()]);
+                $this->createOperationBilling($prosedur);
             }
+
+            DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Tindakan operasi baru berhasil ditambahkan sebagai ' . ucfirst($validated['status']) . '.',
-                'data' => $prosedur,
-                'is_new' => true // Tambahkan flag untuk membedakan create vs update
+                'message' => 'Tindakan operasi berhasil disimpan.',
+                'data' => $prosedur
             ]);
         } catch (ValidationException $e) {
+            DB::rollBack();
+            Log::error('Validation error:', $e->errors());
             return response()->json([
                 'success' => false,
                 'errors' => $e->errors(),
-                'message' => 'Data yang dimasukkan tidak valid.'
+                'message' => 'Validasi gagal'
             ], 422);
         } catch (\Exception $e) {
-            Log::error('Error creating prosedur operasi: ' . $e->getMessage(), [
-                'request_data' => $request->except('password', '_token'),
-                'user_id' => auth()->id(),
-                'trace' => $e->getTraceAsString()
+            DB::rollBack();
+            Log::error('Error in storeProsedur: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'input' => $request->all()
             ]);
-
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada server. Silakan coba lagi.',
-                'debug' => config('app.debug') ? $e->getMessage() : null
+                'message' => 'Server error: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -642,11 +892,9 @@ class OperasiController extends Controller
     }
 
 
-    public function deleteOrder(Request $request)
+    public function deleteOrder(OrderOperasi $order) // Terima model OrderOperasi langsung
     {
         try {
-            $orderId = $request->input('id');
-            $order = OrderOperasi::findOrFail($orderId);
 
             if ($order->prosedurOperasi()->count() > 0) {
                 return response()->json([
@@ -662,6 +910,7 @@ class OperasiController extends Controller
                 'message' => 'Order operasi berhasil dihapus.'
             ]);
         } catch (\Exception $e) {
+            // Catch block ini sekarang lebih untuk error tak terduga lainnya
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menghapus order: ' . $e->getMessage()
@@ -721,5 +970,471 @@ class OperasiController extends Controller
                 'message' => 'Gagal mengambil data detail: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    private function createOperationBilling(ProsedurOperasi $prosedur)
+    {
+        Log::info("============== START OPERATION BILLING ==============");
+        Log::info("Processing Procedure ID: {$prosedur->id}");
+
+        // Prevent concurrent processing
+        if (Cache::has('processing_prosedur_' . $prosedur->id)) {
+            Log::warning("Procedure {$prosedur->id} is already being processed");
+            return [
+                'success' => false,
+                'message' => 'Prosedur sedang diproses'
+            ];
+        }
+        Cache::put('processing_prosedur_' . $prosedur->id, true, now()->addMinutes(5));
+
+        DB::beginTransaction();
+        try {
+            // 1. Load all required relationships
+            $prosedur->load([
+                'orderOperasi.registration.patient',
+                'orderOperasi.registration.penjamin.group_penjamin',
+                'orderOperasi.kelasRawat',
+                'orderOperasi.tipeOperasi',
+                'tindakanOperasi.jenisOperasi',
+                'dokterOperator.employee:id,fullname',
+                'assDokterOperator1.employee:id,fullname',
+                'assDokterOperator2.employee:id,fullname',
+                'assDokterOperator3.employee:id,fullname',
+                'dokterAnastesi.employee:id,fullname',
+                'assDokterAnastesi.employee:id,fullname',
+                'dokterResusitator.employee:id,fullname',
+                'dokterTambahan1.employee:id,fullname',
+                'dokterTambahan2.employee:id,fullname',
+                'dokterTambahan3.employee:id,fullname',
+                'dokterTambahan4.employee:id,fullname',
+                'dokterTambahan5.employee:id,fullname'
+            ]);
+
+            $order = $prosedur->orderOperasi;
+            $registration = $order->registration;
+
+            // 2. Validate essential data
+            if (!$order || !$registration || !$registration->penjamin || !$registration->penjamin->group_penjamin_id) {
+                throw new \Exception("Data penting tidak lengkap (Order/Registration/Asuransi)");
+            }
+
+            // 3. Clean up any existing billing items for this procedure
+            $existingBillingItems = TagihanPasien::where('deskripsi_sistem', 'like', 'prosedur_operasi_' . $prosedur->id . '%')
+                ->get();
+
+            if ($existingBillingItems->isNotEmpty()) {
+                Log::info("Found existing billing items for procedure {$prosedur->id}, deleting them first");
+
+                // Delete from pivot table first
+                BilinganTagihanPasien::whereIn('tagihan_pasien_id', $existingBillingItems->pluck('id'))->delete();
+
+                // Then delete the items
+                TagihanPasien::whereIn('id', $existingBillingItems->pluck('id'))->delete();
+
+                // Update billing total
+                $totalToDeduct = $existingBillingItems->sum('wajib_bayar');
+                $billing = Bilingan::where('registration_id', $registration->id)->first();
+                if ($billing) {
+                    $billing->decrement('wajib_bayar', $totalToDeduct);
+                }
+            }
+
+            // 4. Find or create main billing record
+            $billing = Bilingan::firstOrCreate(
+                ['registration_id' => $registration->id],
+                [
+                    'patient_id' => $registration->patient_id,
+                    'status' => 'belum final',
+                    'wajib_bayar' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            );
+
+            // 5. Find operation tariff
+            $tarif = TarifOperasi::where([
+                'tindakan_operasi_id' => $prosedur->tindakan_operasi_id,
+                'kelas_rawat_id' => $order->kelas_rawat_id,
+                'group_penjamin_id' => $registration->penjamin->group_penjamin_id
+            ])->firstOrFail();
+
+            // 6. Prepare billing items
+            $tindakanName = ($prosedur->tindakanOperasi?->jenisOperasi?->jenis ?? 'Jenis Operasi Tidak Diketahui') . ' - ' .
+                ($prosedur->tindakanOperasi?->nama_operasi ?? 'Nama Operasi Tidak Diketahui');
+
+            $tagihanItems = [];
+            $totalAmount = 0;
+
+            // Helper function to add billing items
+            $addBillingItem = function ($description, $amount, $is_rs_fee = false, $role = null)
+            use (&$tagihanItems, &$totalAmount, $registration, $prosedur, $billing) {
+                if ($amount <= 0) return;
+
+                $finalDescription = $is_rs_fee
+                    ? "[Biaya OT] {$description} (Jasa RS)"
+                    : "[Biaya OT] {$description}";
+
+                // Generate unique descriptor
+                $descriptor = 'prosedur_operasi_' . $prosedur->id;
+                if ($role) {
+                    $descriptor .= '_' . $role;
+                }
+
+                $tagihanItems[] = [
+                    'bilingan_id' => $billing->id,
+                    'user_id' => auth()->id(),
+                    'registration_id' => $registration->id,
+                    'date' => now()->toDateString(),
+                    'tagihan' => $finalDescription,
+                    'deskripsi_sistem' => $descriptor,
+                    'quantity' => 1,
+                    'nominal' => $amount,
+                    'nominal_awal' => $amount,
+                    'wajib_bayar' => $amount,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+                $totalAmount += $amount;
+            };
+
+            // Add CITO tag based on tipe_operasi - DIPERBAIKI TAG
+            $citoTag = '';
+            if ($order->tipeOperasi) {
+                $tipeTeks = strtolower($order->tipeOperasi->tipe);
+                if (
+                    stripos($tipeTeks, 'emergency') !== false ||
+                    stripos($tipeTeks, 'cito') !== false ||
+                    stripos($tipeTeks, 'urgent') !== false
+                ) {
+                    $citoTag = ' [CITO]';
+                }
+            }
+
+            // 7. Add mandatory fees (RUANG OPERASI dan ALAT OPERASI)
+            if ($tarif->ruang_operasi > 0) {
+                $this->addOtherFee($addBillingItem, $tindakanName, 'RUANG OPERASI', $tarif->ruang_operasi, 'ruang_operasi');
+            }
+
+            if ($tarif->alat_rs > 0) {
+                $this->addOtherFee($addBillingItem, $tindakanName, 'ALAT OPERASI', $tarif->alat_rs, 'alat_rs');
+            }
+
+            // 8. Main Doctor Fees
+            $this->addDoctorFeeWithName(
+                $addBillingItem,
+                $prosedur->dokter_operator_id,
+                $prosedur->dokterOperator,
+                $tindakanName,
+                'operator',
+                $tarif->operator_dokter,
+                $citoTag,
+                'operator'
+            );
+
+            $this->addDoctorFeeWithName(
+                $addBillingItem,
+                $prosedur->dokter_anastesi_id,
+                $prosedur->dokterAnastesi,
+                $tindakanName,
+                'anastesi',
+                $tarif->operator_anastesi_dokter,
+                $citoTag,
+                'anestesi'
+            );
+
+            $this->addDoctorFeeWithName(
+                $addBillingItem,
+                $prosedur->dokter_resusitator_id,
+                $prosedur->dokterResusitator,
+                $tindakanName,
+                'resusitator',
+                $tarif->operator_resusitator_dokter,
+                $citoTag,
+                'resusitator'
+            );
+
+            // 9. Assistant Doctors (Asisten Operator) - DIPERBAIKI NAMA DOKTER
+            if ($prosedur->ass_dokter_operator_1_id && $prosedur->assDokterOperator1) {
+                $this->addDoctorFeeWithName(
+                    $addBillingItem,
+                    $prosedur->ass_dokter_operator_1_id,
+                    $prosedur->assDokterOperator1,
+                    $tindakanName,
+                    'ass operator',
+                    $tarif->asisten_operator_1_dokter,
+                    $citoTag,
+                    'ass_op1'
+                );
+            }
+
+            if ($prosedur->ass_dokter_operator_2_id && $prosedur->assDokterOperator2) {
+                $this->addDoctorFeeWithName(
+                    $addBillingItem,
+                    $prosedur->ass_dokter_operator_2_id,
+                    $prosedur->assDokterOperator2,
+                    $tindakanName,
+                    'ass operator',
+                    $tarif->asisten_operator_2_dokter,
+                    $citoTag,
+                    'ass_op2'
+                );
+            }
+
+            if ($prosedur->ass_dokter_operator_3_id && $prosedur->assDokterOperator3) {
+                $this->addDoctorFeeWithName(
+                    $addBillingItem,
+                    $prosedur->ass_dokter_operator_3_id,
+                    $prosedur->assDokterOperator3,
+                    $tindakanName,
+                    'ass operator',
+                    $tarif->asisten_operator_3_dokter,
+                    $citoTag,
+                    'ass_op3'
+                );
+            }
+
+            // 10. Main Anesthesia Assistant - DIPERBAIKI NAMA DOKTER
+            if ($prosedur->ass_dokter_anastesi_id && $prosedur->assDokterAnastesi) {
+                $this->addDoctorFeeWithName(
+                    $addBillingItem,
+                    $prosedur->ass_dokter_anastesi_id,
+                    $prosedur->assDokterAnastesi,
+                    $tindakanName,
+                    'ass anastesi',
+                    $tarif->asisten_anastesi_1_dokter,
+                    $citoTag,
+                    'ass_anes'
+                );
+            }
+
+            // 11. Additional Anesthesia Assistants (Dokter Tambahan 1-5 = Ass Anestesi Tambahan) - DIPERBAIKI
+            if ($prosedur->dokter_tambahan_1_id && $prosedur->dokterTambahan1) {
+                $this->addDoctorFeeWithName(
+                    $addBillingItem,
+                    $prosedur->dokter_tambahan_1_id,
+                    $prosedur->dokterTambahan1,
+                    $tindakanName,
+                    'ass anastesi',
+                    $tarif->asisten_anastesi_2_dokter ?? 0,
+                    $citoTag,
+                    'tambahan_1'
+                );
+            }
+
+            if ($prosedur->dokter_tambahan_2_id && $prosedur->dokterTambahan2) {
+                $this->addDoctorFeeWithName(
+                    $addBillingItem,
+                    $prosedur->dokter_tambahan_2_id,
+                    $prosedur->dokterTambahan2,
+                    $tindakanName,
+                    'ass anastesi',
+                    $tarif->dokter_tambahan_1_dokter ?? 0,
+                    $citoTag,
+                    'tambahan_2'
+                );
+            }
+
+            if ($prosedur->dokter_tambahan_3_id && $prosedur->dokterTambahan3) {
+                $this->addDoctorFeeWithName(
+                    $addBillingItem,
+                    $prosedur->dokter_tambahan_3_id,
+                    $prosedur->dokterTambahan3,
+                    $tindakanName,
+                    'ass anastesi',
+                    $tarif->dokter_tambahan_2_dokter ?? 0,
+                    $citoTag,
+                    'tambahan_3'
+                );
+            }
+
+            if ($prosedur->dokter_tambahan_4_id && $prosedur->dokterTambahan4) {
+                $this->addDoctorFeeWithName(
+                    $addBillingItem,
+                    $prosedur->dokter_tambahan_4_id,
+                    $prosedur->dokterTambahan4,
+                    $tindakanName,
+                    'ass anastesi',
+                    $tarif->dokter_tambahan_3_dokter ?? 0,
+                    $citoTag,
+                    'tambahan_4'
+                );
+            }
+
+            if ($prosedur->dokter_tambahan_5_id && $prosedur->dokterTambahan5) {
+                $this->addDoctorFeeWithName(
+                    $addBillingItem,
+                    $prosedur->dokter_tambahan_5_id,
+                    $prosedur->dokterTambahan5,
+                    $tindakanName,
+                    'ass anastesi',
+                    $tarif->dokter_tambahan_4_dokter ?? 0,
+                    $citoTag,
+                    'tambahan_5'
+                );
+            }
+
+            // 12. Hospital Fees (Jasa RS)
+            if ($tarif->operator_rs > 0 && $prosedur->dokter_operator_id) {
+                $this->addHospitalFee(
+                    $addBillingItem,
+                    $tindakanName,
+                    'Operator',
+                    $tarif->operator_rs,
+                    $citoTag,
+                    'rs_operator'
+                );
+            }
+
+            if ($tarif->asisten_operator_1_rs > 0 && $prosedur->ass_dokter_operator_1_id) {
+                $this->addHospitalFee(
+                    $addBillingItem,
+                    $tindakanName,
+                    'Ass Operator 1',
+                    $tarif->asisten_operator_1_rs,
+                    $citoTag,
+                    'rs_ass_op1'
+                );
+            }
+
+            if ($tarif->asisten_anastesi_1_rs > 0 && $prosedur->ass_dokter_anastesi_id) {
+                $this->addHospitalFee(
+                    $addBillingItem,
+                    $tindakanName,
+                    'Ass Anestesi',
+                    $tarif->asisten_anastesi_1_rs,
+                    $citoTag,
+                    'rs_ass_anes'
+                );
+            }
+
+            // 13. Other Fees
+            if ($tarif->bmhp > 0) {
+                $this->addOtherFee(
+                    $addBillingItem,
+                    $tindakanName,
+                    'BMHP',
+                    $tarif->bmhp,
+                    'bmhp'
+                );
+            }
+
+            if ($tarif->alat_dokter > 0) {
+                $this->addOtherFee(
+                    $addBillingItem,
+                    $tindakanName,
+                    'Jasa Alat (Dokter)',
+                    $tarif->alat_dokter,
+                    'alat_dokter'
+                );
+            }
+
+            // 14. Validate billing items
+            if (empty($tagihanItems)) {
+                throw new \Exception("Tidak ada item tagihan yang dihasilkan");
+            }
+
+            // 15. Create billing records
+            TagihanPasien::insert($tagihanItems);
+
+            // Get inserted IDs
+            $firstId = DB::getPdo()->lastInsertId();
+            $insertedIds = range($firstId, $firstId + count($tagihanItems) - 1);
+
+            // Create billing-item relationships
+            $bilinganTagihanItems = array_map(function ($id) use ($billing) {
+                return [
+                    'tagihan_pasien_id' => $id,
+                    'bilingan_id' => $billing->id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            }, $insertedIds);
+
+            BilinganTagihanPasien::insert($bilinganTagihanItems);
+
+            // Update billing total
+            $billing->update([
+                'wajib_bayar' => DB::raw("wajib_bayar + {$totalAmount}"),
+                'updated_at' => now()
+            ]);
+
+            DB::commit();
+            Cache::forget('processing_prosedur_' . $prosedur->id);
+
+            Log::info("BILLING SUCCESSFUL - Procedure ID: {$prosedur->id}");
+            Log::info("Total Amount: Rp " . number_format($totalAmount, 2));
+            Log::info("Number of Items: " . count($tagihanItems));
+
+            return [
+                'success' => true,
+                'message' => 'Tagihan berhasil dibuat',
+                'data' => [
+                    'billing_id' => $billing->id,
+                    'total_amount' => $totalAmount,
+                    'item_count' => count($tagihanItems)
+                ]
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Cache::forget('processing_prosedur_' . $prosedur->id);
+            Log::error("BILLING FAILED: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Gagal membuat tagihan: ' . $e->getMessage(),
+                'error' => $e->getTraceAsString()
+            ];
+        } finally {
+            Log::info("============== END BILLING PROCESS ==============");
+        }
+    }
+
+    /**
+     * Helper method to add doctor fee with name - DIPERBAIKI LOGGING
+     */
+    private function addDoctorFeeWithName($callback, $doctorId, $doctor, $procedureName, $role, $amount, $tags = '', $roleKey = null)
+    {
+        // Skip if no doctor ID or amount is invalid
+        if (!$doctorId || $amount <= 0) {
+            Log::info("Skipping doctor fee - ID: {$doctorId}, Amount: {$amount}, Role: {$role}");
+            return;
+        }
+
+        // Validate doctor data exists
+        if (!$doctor) {
+            Log::warning("Doctor relation not found for ID: {$doctorId}, role: {$role}");
+            return;
+        }
+
+        if (!$doctor->employee) {
+            Log::warning("Employee relation not found for doctor ID: {$doctorId}, role: {$role}");
+            return;
+        }
+
+        $doctorName = $doctor->employee->fullname;
+        // Format: {procedureName},{role} ({doctorName}){tags}
+        $description = "{$procedureName},{$role} ({$doctorName}){$tags}";
+
+        Log::info("Adding doctor fee - Role: {$role}, Doctor: {$doctorName}, Amount: {$amount}");
+        $callback($description, $amount, false, $roleKey);
+    }
+
+    /**
+     * Helper method to add hospital fee (Jasa RS)
+     */
+    private function addHospitalFee($callback, $procedureName, $service, $amount, $tags = '', $roleKey = null)
+    {
+        if ($amount <= 0) return;
+        $description = "{$procedureName}, {$service}{$tags}";
+        $callback($description, $amount, true, $roleKey);
+    }
+
+    /**
+     * Helper method to add other fees (RUANG OPERASI, ALAT OPERASI, BMHP, etc.)
+     */
+    private function addOtherFee($callback, $procedureName, $feeType, $amount, $roleKey = null)
+    {
+        if ($amount <= 0) return;
+        $description = "{$procedureName}, {$feeType}";
+        $callback($description, $amount, false, $roleKey);
     }
 }

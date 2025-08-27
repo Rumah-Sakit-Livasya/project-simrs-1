@@ -40,6 +40,11 @@ class OrderOperasi extends Model
         return $this->belongsTo(TipeOperasi::class, 'tipe_operasi_id');
     }
 
+    public function jenisOperasi()
+    {
+        return $this->belongsTo(JenisOperasi::class, 'jenis_operasi_id');
+    }
+
     // Relasi ke kategori operasi
     public function kategoriOperasi()
     {

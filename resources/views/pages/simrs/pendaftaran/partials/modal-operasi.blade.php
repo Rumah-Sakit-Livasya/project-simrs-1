@@ -85,7 +85,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-12 mt-3">
                             <div class="form-group">
                                 <label class="form-label">Diagnosa <span class="text-danger">*</span></label>
                                 <textarea name="diagnosa_awal" rows="3" class="form-control" required></textarea>
