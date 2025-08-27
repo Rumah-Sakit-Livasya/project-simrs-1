@@ -271,6 +271,9 @@
                     aria-haspopup="true" aria-expanded="false">Layanan</a>
                 <div class="dropdown-menu">
                     <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'rencana_operasi']) }}">Rencana
+                        Operasi</a>
+                    <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'tindakan_medis']) }}">Tindakan
                         Medis</a>
                     <a class="dropdown-item"

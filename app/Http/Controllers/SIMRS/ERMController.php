@@ -348,6 +348,10 @@ class ERMController extends Controller
                 $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
                 return view('pages.simrs.erm.form.perawat.resep-harian', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
+            case 'rencana_operasi':
+                $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
+                return view('pages.simrs.erm.form.layanan.rencana-operasi', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+
             default:
                 return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'path'));
         }
