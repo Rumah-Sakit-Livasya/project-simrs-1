@@ -133,7 +133,7 @@
                 {{-- content start --}}
                 <div class="tab-content p-3">
                     <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
-                        @include('pages.simrs.poliklinik.partials.detail-pasien')
+                        @include('pages.simrs.erm.partials.detail-pasien')
                         <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
                         <div class="row">
                             <form action="javascript:void(0)" class="w-100" data-tipe-cppt="dokter"
@@ -208,20 +208,20 @@
                                                             <div class="card-body p-0">
                                                                 <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="4"
                                                                     placeholder="Keluhan Utama">
-Alergi obat : 
-Reaksi alergi obat : 
+Alergi obat :
+Reaksi alergi obat :
 Keluhan Utama : KONSULTASI
 PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-DI PUSKESMAS JATITUJUH 
+DI PUSKESMAS JATITUJUH
 Riwayat Penyakit Sekarang : KONSULTASI
 PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-DI PUSKESMAS JATITUJUH 
+DI PUSKESMAS JATITUJUH
 Riwayat Penyakit Dahulu : TIDAK ADA
 Riwayat Penyakit Keluarga : TIDAK ADA
-Alergi makan : 
-Reaksi alergi makan : 
-Alergi lainya : 
-Reaksi alergi lainya : 
+Alergi makan :
+Reaksi alergi makan :
+Alergi lainya :
+Reaksi alergi lainya :
                                                                 </textarea>
                                                             </div>
                                                         </div>
@@ -235,12 +235,12 @@ Reaksi alergi lainya :
                                                             </div>
                                                             <div class="card-body p-0">
                                                                 <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">
-Nadi (PR): 
-Respirasi (RR): 
-Tensi (BP): 
-Suhu (T): 
-Tinggi Badan: 
-Berat Badan: 
+Nadi (PR):
+Respirasi (RR):
+Tensi (BP):
+Suhu (T):
+Tinggi Badan:
+Berat Badan:
 Skrining Nyeri:
                                                             </textarea>
                                                             </div>
@@ -690,7 +690,7 @@ Skrining Nyeri:
                 const registrationNumber = "{{ $registration->registration_number }}";
 
                 const url =
-                    "{{ route('cppt.dokter-rajal.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
+                    "{{ route('cppt.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
                     .replace('__registration_number__', registrationNumber);
 
                 // Now you can use `url` in your form submission or AJAX request

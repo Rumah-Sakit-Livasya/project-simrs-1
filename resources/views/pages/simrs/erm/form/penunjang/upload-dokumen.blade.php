@@ -5,7 +5,9 @@
     {{-- <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" /> --}}
 
     {{-- Header Pasien --}}
-    <div class="p-3">@include('pages.simrs.erm.partials.detail-pasien')</div>
+    <div class="tab-content p-3">
+        @include('pages.simrs.erm.partials.detail-pasien')
+    </div>
     <hr>
 
     <!-- Card untuk Daftar Dokumen -->
@@ -54,25 +56,30 @@
                 <div class="form-group row">
                     <label for="description" class="col-sm-2 col-form-label">Keterangan</label>
                     <div class="col-sm-10">
-                        <textarea name="description" id="description" class="form-control" rows="3" placeholder="Keterangan singkat mengenai file..."></textarea>
+                        <textarea name="description" id="description" class="form-control" rows="3"
+                            placeholder="Keterangan singkat mengenai file..."></textarea>
                     </div>
                 </div>
                 <div class="form-group row align-items-center">
                     <label for="file_upload" class="col-sm-2 col-form-label">Pilih File</label>
                     <div class="col-sm-10">
                         <div class="custom-file">
-                            <input type="file" name="file_upload" id="file_upload" class="custom-file-input" required accept=".pdf,.jpg,.jpeg,.png">
+                            <input type="file" name="file_upload" id="file_upload" class="custom-file-input" required
+                                accept=".pdf,.jpg,.jpeg,.png">
                             <label class="custom-file-label" for="file_upload" id="file_upload_label">Pilih file...</label>
                         </div>
                         <small class="form-text text-muted mt-2">
-                            <i class="fas fa-info-circle"></i> Maks. 5MB &mdash; Tipe: <span class="badge badge-primary">PDF</span> <span class="badge badge-success">JPG</span> <span class="badge badge-info">PNG</span>
+                            <i class="fas fa-info-circle"></i> Maks. 5MB &mdash; Tipe: <span
+                                class="badge badge-primary">PDF</span> <span class="badge badge-success">JPG</span> <span
+                                class="badge badge-info">PNG</span>
                         </small>
                     </div>
                 </div>
             </form>
         </div>
         <div class="card-footer text-right">
-            <button type="button" class="btn btn-primary" id="btn-upload-document"><i class="fas fa-paper-plane"></i> Unggah Sekarang</button>
+            <button type="button" class="btn btn-primary" id="btn-upload-document"><i class="fas fa-paper-plane"></i>
+                Unggah Sekarang</button>
         </div>
     </div>
 @endsection
@@ -89,7 +96,8 @@
             const fileLabel = document.getElementById('file_upload_label');
             if (fileInput) {
                 fileInput.addEventListener('change', function(e) {
-                    const fileName = this.files && this.files.length > 0 ? this.files[0].name : 'Pilih file...';
+                    const fileName = this.files && this.files.length > 0 ? this.files[0].name :
+                        'Pilih file...';
                     fileLabel.textContent = fileName;
                 });
             }

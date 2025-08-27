@@ -72,7 +72,7 @@
             </x-form-row>
 
             <x-form-row label="Tipe Jadwal" for="type">
-                <x-form-select id="type" name="type" :options="$tipeJadwalOptions" :selected="'OR'" />
+                <x-form-select id="type" name="tipe_jadwal" :options="$tipeJadwalOptions" :selected="'OR'" />
             </x-form-row>
 
             <x-form-row label="Kartu Pasien" for="patient_card">

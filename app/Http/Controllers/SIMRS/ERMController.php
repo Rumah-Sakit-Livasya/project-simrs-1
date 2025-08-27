@@ -1068,11 +1068,12 @@ class ERMController extends Controller
 
             case 'tindakan_medis':
                 $tindakan_medis = TindakanMedis::all();
-                $doctors = Doctor::with('employee', 'departements')->get()->groupBy(function ($doctor) {
+                $groupedDoctors = Doctor::with('employee', 'departements')->get()->groupBy(function ($doctor) {
                     return $doctor->department_from_doctors->name;
                 });
                 $tindakan_medis_yang_dipakai = OrderTindakanMedis::where('registration_id', $registration->id)->get();
-                return view('pages.simrs.erm.form.layanan.tindakan-medis', compact('doctors', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai', 'path'));
+                $kelas_rawats = \App\Models\SIMRS\KelasRawat::all();
+                return view('pages.simrs.erm.form.layanan.tindakan-medis', compact('groupedDoctors', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai', 'kelas_rawats', 'path'));
 
             case 'pemakaian_alat':
                 $list_peralatan = Peralatan::all();
@@ -1159,8 +1160,9 @@ class ERMController extends Controller
                 return view('pages.simrs.erm.form.dokter.pengkajian-awal-neonatus', compact('registration', 'pengkajian',  'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'asesmen_awal_dokter':
+                $pengkajianNurse = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
                 $pengkajian = DoctorInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
-                return view('pages.simrs.erm.form.dokter.asesmen-awal-dokter', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
+                return view('pages.simrs.erm.form.dokter.asesmen-awal-dokter', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajianNurse'));
 
             case 'echocardiography':
                 $pengkajian = Echocardiography::firstOrNew(['registration_id' => $registration->id]);

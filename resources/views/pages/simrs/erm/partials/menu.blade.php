@@ -144,10 +144,10 @@
                         href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'rujuk_antar_rs']) }}">Rujuk
                         Antar Rumah Sakit</a>
                     <a class="dropdown-item"
-                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'echocardiography4']) }}">ECHO</a>
-                    <a class="dropdown-item"
+                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'echocardiography']) }}">ECHO</a>
+                    {{-- <a class="dropdown-item"
                         href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'profil_ringkas_rajal']) }}">Profil
-                        Ringkas Rawat Jalan</a>
+                        Ringkas Rawat Jalan</a> --}}
                 </div>
             </li>
             <li class="nav-item dropdown">
@@ -202,9 +202,11 @@
                     aria-haspopup="true" aria-expanded="false">Lain-lain</a>
                 <div class="dropdown-menu">
                     <a class="dropdown-item"
-                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'upload_dokumen']) }}">Upload Dokumen</a>
+                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'upload_dokumen']) }}">Upload
+                        Dokumen</a>
                     <a class="dropdown-item"
-                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'satu_sehat']) }}">Satu Sehat</a>
+                        href="{{ route($path . '.daftar-pasien', ['registration' => $registration->registration_number, 'menu' => 'satu_sehat']) }}">Satu
+                        Sehat</a>
                 </div>
             </li>
         </ul>
@@ -343,7 +345,8 @@
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'radiologi']) }}">Radiologi</a>
                     <a class="dropdown-item"
-                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'upload_dokumen']) }}">Upload Dokumen</a>
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'upload_dokumen']) }}">Upload
+                        Dokumen</a>
                 </div>
             </li>
         </ul>

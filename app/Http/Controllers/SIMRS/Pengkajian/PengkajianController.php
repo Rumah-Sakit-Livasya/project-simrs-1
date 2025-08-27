@@ -84,6 +84,7 @@ class PengkajianController extends Controller
             // Tambahkan validasi lain untuk field PengkajianNurseRajal di sini
             'signature_data' => 'nullable|array',
             'signature_data.pic' => 'nullable|string',
+            'signature_data.role' => 'nullable|string',
             'signature_data.signature_image' => 'nullable|string',
         ]);
 
@@ -113,9 +114,20 @@ class PengkajianController extends Controller
                 $oldPath = optional($pengkajian->signature)->signature;
                 $newPath = $this->saveSignatureFile($signatureData['signature_image'], "pengkajian-rajal_{$pengkajian->id}");
 
+                // Pastikan field 'role' diisi, gunakan default 'perawat' jika tidak ada
+                $role = $signatureData['role'] ?? 'perawat';
+
                 $pengkajian->signature()->updateOrCreate(
-                    ['signable_id' => $pengkajian->id, 'signable_type' => PengkajianNurseRajal::class],
-                    ['signature' => $newPath, 'pic' => $signatureData['pic']]
+                    [
+                        'signable_id' => $pengkajian->id,
+                        'signable_type' => PengkajianNurseRajal::class,
+                        'role' => $role,
+                    ],
+                    [
+                        'signature' => $newPath,
+                        'pic' => $signatureData['pic'],
+                        'role' => $role,
+                    ]
                 );
 
                 if ($oldPath && Storage::disk('public')->exists($oldPath)) {

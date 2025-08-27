@@ -139,7 +139,7 @@
                 {{-- content start --}}
                 <div class="tab-content p-3">
                     <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
-                        @include('pages.simrs.poliklinik.partials.detail-pasien')
+                        @include('pages.simrs.erm.partials.detail-pasien')
                         <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
                         <div class="row">
                             <form action="javascript:void(0)" class="w-100" data-tipe-cppt="perawat"
@@ -693,7 +693,7 @@ Diagnosa Keperawatan: {{ $registration?->pengkajian_nurse_rajal?->diagnosa_keper
                 const registrationNumber = "{{ $registration->registration_number }}";
 
                 const url =
-                    "{{ route('cppt.dokter-rajal.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
+                    "{{ route('cppt.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
                     .replace('__registration_number__', registrationNumber);
 
                 // Now you can use `url` in your form submission or AJAX request

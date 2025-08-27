@@ -442,7 +442,7 @@ Skrining Nyeri:
                 const registrationNumber = "{{ $registration->registration_number }}";
 
                 const url =
-                    "{{ route('cppt.dokter-rajal.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
+                    "{{ route('cppt.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
                     .replace('__registration_number__', registrationNumber);
 
                 // Now you can use `url` in your form submission or AJAX request

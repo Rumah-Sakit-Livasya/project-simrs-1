@@ -435,8 +435,14 @@
 
                     dataType: "json",
                     beforeSend: function() {
-                        $('#daftar-pasien .col-12').html(
-                            '<p>Sedang memuat...</p>'); // Tambahkan loading
+                        $('#daftar-pasien .col-12').html(`
+                            <div class="d-flex flex-column align-items-center justify-content-center" style="height: 40vh;">
+                                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <h6 class="text-muted font-weight-bold mb-0">Memuat daftar pasien...</h6>
+                            </div>
+                        `);
                     },
                     success: function(response) {
                         if (response.success) {

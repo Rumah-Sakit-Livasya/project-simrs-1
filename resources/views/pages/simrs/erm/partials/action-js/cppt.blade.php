@@ -309,7 +309,7 @@
                             penerimaPreview.css('display', 'block'); // <-- Ganti .show() dengan ini
                         } else {
                             penerimaPreview.css('display',
-                            'none'); // <-- Pastikan tersembunyi jika tidak ada data
+                                'none'); // <-- Pastikan tersembunyi jika tidak ada data
                         }
 
                         // Logika untuk TTD Pemberi (index 2)
@@ -321,7 +321,7 @@
                             pemberiPreview.css('display', 'block'); // <-- Ganti .show() dengan ini
                         } else {
                             pemberiPreview.css('display',
-                            'none'); // <-- Pastikan tersembunyi jika tidak ada data
+                                'none'); // <-- Pastikan tersembunyi jika tidak ada data
                         }
                     }
                     modal.modal('show');

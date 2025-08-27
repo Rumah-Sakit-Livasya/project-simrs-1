@@ -6,7 +6,7 @@
                 <form action="javascript:void(0)" id="pengkajian_perawat_form" method="POST">
                     @csrf
                     @method('POST')
-                    @include('pages.simrs.poliklinik.partials.detail-pasien')
+                    @include('pages.simrs.erm.partials.detail-pasien')
                     <hr style="border-color: #868686; margin-bottom: 50px;">
                     <header class="text-primary text-center mt-5">
                         <h2 class="font-weight-bold mt-5">PENGKAJIAN PERAWAT</h2>

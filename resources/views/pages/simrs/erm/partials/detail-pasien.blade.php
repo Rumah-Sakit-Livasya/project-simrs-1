@@ -7,60 +7,106 @@
             <div class="row">
                 {{-- Kolom Informasi Pasien --}}
                 <div class="col-lg-6">
-                    <div class="row">
-                        <div class="col-lg-3 d-flex align-items-center justify-content-center">
-                            @if ($registration->patient->gender == 'Laki-laki')
-                                <img src="{{ asset('img/patient/man-icon.png') }}" alt="Pasien Laki-laki" class="img-fluid"
-                                    style="max-height: 120px;">
-                            @else
-                                <img src="{{ asset('img/patient/woman-icon.png') }}" alt="Pasien Perempuan"
-                                    class="img-fluid" style="max-height: 120px;">
-                            @endif
-                        </div>
-                        <div class="col-lg-9">
-                            <a href="#">
-                                <h5 class="text-danger font-weight-bold">{{ $registration->patient->name }}</h5>
-                            </a>
-                            <p class="text-muted small mb-1">
-                                {{ \Carbon\Carbon::parse($registration->patient->birth_of_date)->isoFormat('DD MMMM YYYY') }}
-                                ({{ \Carbon\Carbon::parse($registration->patient->date_of_birth)->diff(\Carbon\Carbon::now())->format('%y thn %m bln %d hr') }})
-                            </p>
-                            <p class="text-muted small mb-1"><strong>RM:</strong>
-                                {{ $registration->patient->medical_record_number }}</p>
-                            <p class="text-muted small mb-1"><strong>Penjamin:</strong>
-                                {{ $registration->penjamin->nama_perusahaan }}</p>
-                            {{-- TODO: Ganti dengan data billing dinamis --}}
-                            <p class="text-muted small mb-1"><strong>Info Billing:</strong> <span
-                                    class="text-success font-weight-bold">30.000</span></p>
-                            {{-- TODO: Ganti dengan data alergi dinamis --}}
-                            <p class="text-muted small mb-1">Tidak ada alergi</p>
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 mr-3">
+                                    @if ($registration->patient->gender == 'Laki-laki')
+                                        <img src="{{ asset('img/patient/man-icon.png') }}" alt="Pasien Laki-laki"
+                                            class="rounded-circle border"
+                                            style="width: 80px; height: 80px; object-fit: cover;">
+                                    @else
+                                        <img src="{{ asset('img/patient/woman-icon.png') }}" alt="Pasien Perempuan"
+                                            class="rounded-circle border"
+                                            style="width: 80px; height: 80px; object-fit: cover;">
+                                    @endif
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1 font-weight-bold text-primary">{{ $registration->patient->name }}
+                                    </h5>
+                                    <div class="d-flex flex-wrap align-items-center mb-2">
+                                        <span class="badge badge-light border mr-2 mb-1">
+                                            <i class="fas fa-birthday-cake mr-1"></i>
+                                            {{ \Carbon\Carbon::parse($registration->patient->birth_of_date)->isoFormat('DD MMM YYYY') }}
+                                        </span>
+                                        <span class="badge badge-light border mr-2 mb-1">
+                                            <i class="fas fa-hourglass-half mr-1"></i>
+                                            {{ \Carbon\Carbon::parse($registration->patient->date_of_birth)->diff(\Carbon\Carbon::now())->format('%y thn %m bln %d hr') }}
+                                        </span>
+                                        <span class="badge badge-light border mb-1">
+                                            <i
+                                                class="mdi mdi-gender-{{ $registration->patient->gender == 'Laki-laki' ? 'male' : 'female' }} mr-1"></i>
+                                            {{ $registration->patient->gender }}
+                                        </span>
+                                    </div>
+                                    <div class="row mb-1">
+                                        <div class="col-6 px-0">
+                                            <small class="text-muted"><strong>RM:</strong>
+                                                {{ $registration->patient->medical_record_number }}</small>
+                                        </div>
+                                        <div class="col-6 px-0">
+                                            <small class="text-muted"><strong>Penjamin:</strong>
+                                                {{ $registration->penjamin->nama_perusahaan }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-1">
+                                        <div class="col-6 px-0">
+                                            <small class="text-muted"><strong>Billing:</strong>
+                                                <span class="text-success font-weight-bold">30.000</span>
+                                            </small>
+                                        </div>
+                                        <div class="col-6 px-0">
+                                            <small class="text-muted"><strong>Alergi:</strong>
+                                                <span class="text-danger">Tidak ada</span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {{-- Kolom Informasi Dokter & Registrasi --}}
                 <div class="col-lg-6">
-                    <div class="row d-flex align-items-center">
-                        <div class="col-lg-3 d-flex align-items-center justify-content-center">
-                            @if ($registration->doctor->employee->gender == 'Laki-laki')
-                                <img src="{{ asset('img/doctor/man-doctor.png') }}" alt="Dokter Laki-laki"
-                                    class="img-fluid" style="max-height: 120px;">
-                            @else
-                                <img src="{{ asset('img/doctor/woman-doctor.png') }}" alt="Dokter Perempuan"
-                                    class="img-fluid" style="max-height: 120px;">
-                            @endif
-                        </div>
-                        <div class="col-lg-9">
-                            <a href="#">
-                                <h5 class="text-danger font-weight-bold">{{ $registration->doctor->employee->fullname }}
-                                </h5>
-                            </a>
-                            <p class="text-muted small mb-1"><strong>Unit:</strong>
-                                {{ $registration->departement->name }}</p>
-                            <p class="text-muted small mb-1"><strong>Reg:</strong>
-                                {{ $registration->registration_number }}
-                                ({{ \Carbon\Carbon::parse($registration->date)->isoFormat('DD MMM YYYY') }})</p>
-                            <p class="text-muted small mb-1">{{ $registration->registration_type }}</p>
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 mr-3">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                                        style="width: 80px; height: 80px; overflow: hidden;">
+                                        @if ($registration->doctor->employee->gender == 'Laki-laki')
+                                            <img src="{{ asset('img/doctor/man-doctor.png') }}" alt="Dokter Laki-laki"
+                                                class="img-fluid rounded-circle border"
+                                                style="width: 80px; height: 80px; object-fit: cover;;">
+                                        @else
+                                            <img src="{{ asset('img/doctor/woman-doctor.png') }}"
+                                                alt="Dokter Perempuan" class="img-fluid rounded-circle border"
+                                                style="width: 80px; height: 80px; object-fit: cover;;">
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <h5 class="mb-0 font-weight-bold text-danger" style="font-size: 1.25rem;">
+                                            {{ $registration->doctor->employee->fullname }}
+                                        </h5>
+                                        <span class="badge badge-pill badge-primary ml-2" style="font-size: 0.85rem;">
+                                            {{ ucwords(str_replace('-', ' ', $registration->registration_type)) }}
+                                        </span>
+                                    </div>
+                                    <div class="mb-1">
+                                        <span class="text-muted small"><i class="fas fa-hospital mr-1"></i>
+                                            <strong>Unit:</strong> {{ $registration->departement->name }}</span>
+                                    </div>
+                                    <div class="mb-1">
+                                        <span class="text-muted small"><i class="fas fa-id-badge mr-1"></i>
+                                            <strong>Reg:</strong> {{ $registration->registration_number }}</span>
+                                        <span class="text-muted small ml-2"><i class="fas fa-calendar-alt mr-1"></i>
+                                            {{ \Carbon\Carbon::parse($registration->date)->isoFormat('DD MMM YYYY') }}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -71,23 +117,25 @@
             {{-- ========================================================== --}}
             <div class="row mt-4">
                 <div class="col-lg-12">
-                    <div class="d-flex flex-wrap gap-2">
-                        <button type="button" class="btn btn-outline-primary waves-effect waves-themed"
+                    <div class="d-flex flex-wrap gap-2 px-2">
+                        <button type="button" class="btn btn-outline-primary waves-effect waves-themed mx-1 my-1"
                             id="tombol-panggil-pasien" data-registration-id="{{ $registration->id }}"
                             data-plasma-id="{{ $plasmaId ?? 1 }}">
                             <i class="fas fa-bullhorn mr-1"></i> Panggil Antrian
                         </button>
-                        <button class="btn btn-warning text-white waves-effect waves-themed"
+                        <button type="button" class="btn btn-warning text-white waves-effect waves-themed mx-1 my-1"
                             onclick="popupFull('http://192.168.1.253/real/antrol_bpjs/update_waktu_antrean_vclaim/{{ $registration->registration_number }}','p_card', 900,600,'no'); return false;">
                             <i class="fas fa-sync-alt mr-1"></i> Antrol BPJS
                         </button>
-                        <button class="btn btn-danger waves-effect waves-themed" onclick="showIcare();">
+                        <button type="button" class="btn btn-danger waves-effect waves-themed mx-1 my-1"
+                            onclick="showIcare();">
                             <i class="fas fa-notes-medical mr-1"></i> Bridging Icare
                         </button>
-                        <button class="btn btn-info waves-effect waves-themed" id="popup_klpcm">
+                        <button type="button" class="btn btn-info waves-effect waves-themed mx-1 my-1"
+                            id="popup_klpcm">
                             <i class="fas fa-file-alt mr-1"></i> KLPCM
                         </button>
-                        <button class="btn btn-danger waves-effect waves-themed"
+                        <button type="button" class="btn btn-danger waves-effect waves-themed mx-1 my-1"
                             onclick="popupFull('http://192.168.1.253/real/vclaim/form_rencana_kontrol/2/{{ $registration->id }}'); return false;">
                             <i class="fas fa-print mr-1"></i> Rencana Kontrol
                         </button>
@@ -100,7 +148,7 @@
 
 
 @push('styles')
-    {{-- CSS untuk loading indicator --}}
+    {{-- CSS untuk loading indicator dan tombol aksi agar tidak menyebabkan scroll --}}
     <style>
         #loading-indicator {
             position: fixed;
@@ -115,6 +163,23 @@
             align-items: center;
             flex-direction: column;
             pointer-events: all;
+        }
+
+        /* Perkecil tombol aksi dan hilangkan scroll jika melebihi */
+        .d-flex.flex-wrap.gap-2.px-2 {
+            flex-wrap: wrap;
+            gap: 0.25rem !important;
+            padding-left: 0.25rem !important;
+            padding-right: 0.25rem !important;
+            overflow-x: visible !important;
+            overflow-y: visible !important;
+        }
+
+        .d-flex.flex-wrap.gap-2.px-2>.btn {
+            font-size: 0.85rem;
+            padding: 0.3rem 0.7rem;
+            min-width: 0;
+            margin: 0.15rem !important;
         }
     </style>
 @endpush

@@ -15,13 +15,17 @@
 
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                     <h3 class="text-center text-success font-weight-bold">ASESMEN AWAL DOKTER</h3>
-                     <button class="btn btn-info" id="histori_pengkajian" type="button"><i class="fas fa-history"></i> Histori</button>
+                    <h3 class="text-center text-success font-weight-bold">ASESMEN AWAL DOKTER</h3>
+                    <button class="btn btn-info" id="histori_pengkajian" type="button"><i class="fas fa-history"></i>
+                        Histori</button>
                 </div>
                 <hr>
 
                 {{-- Include partials untuk setiap bagian form --}}
-                @include('pages.simrs.erm.form.dokter.component.tanda-vital', ['data' => $data])
+                @include('pages.simrs.erm.form.dokter.component.tanda-vital', [
+                    'data' => $data,
+                    'pengkajian' => $pengkajianNurse,
+                ])
                 @include('pages.simrs.erm.form.dokter.component.info-masuk', ['data' => $data])
                 @include('pages.simrs.erm.form.dokter.component.anamnesis', ['data' => $data])
                 @include('pages.simrs.erm.form.dokter.component.pemeriksaan', ['data' => $data])
@@ -44,8 +48,10 @@
             </div>
 
             <div class="card-footer text-right">
-                <button type="button" class="btn btn-warning save-form" data-status="draft"><i class="fas fa-save"></i> Simpan (Draft)</button>
-                <button type="button" class="btn btn-success save-form" data-status="final"><i class="fas fa-check-circle"></i> Simpan (Final)</button>
+                <button type="button" class="btn btn-warning save-form" data-status="draft"><i class="fas fa-save"></i>
+                    Simpan (Draft)</button>
+                <button type="button" class="btn btn-success save-form" data-status="final"><i
+                        class="fas fa-check-circle"></i> Simpan (Final)</button>
             </div>
         </form>
     </div>
