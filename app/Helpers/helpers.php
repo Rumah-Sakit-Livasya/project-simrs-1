@@ -9,15 +9,15 @@ use Carbon\Carbon;
  * @param string $dob The date of birth in a valid date format (e.g., 'YYYY-MM-DD').
  * @param string $minAgeStr The minimum age range in the format 'years-months-days' (e.g., '18-0-0' for 18 years).
  * @param string $maxAgeStr The maximum age range in the format 'years-months-days' (e.g., '65-0-0' for 65 years).
- * 
+ *
  * @return bool Returns true if the date of birth is within the specified age range, otherwise false.
- * 
+ *
  * @example
  * // Example usage:
  * $dob = '2000-01-01';
  * $minAgeStr = '18-0-0'; // Minimum age: 18 years
  * $maxAgeStr = '65-0-0'; // Maximum age: 65 years
- * 
+ *
  * $isWithinRange = isWithinAgeRange($dob, $minAgeStr, $maxAgeStr);
  * if ($isWithinRange) {
  *     echo "The DOB is within the specified age range.";
@@ -345,8 +345,14 @@ function hitungHari($tanggal)
 function rp($amount)
 {
     // Format angka menjadi mata uang Rupiah
-    $formattedAmount = 'Rp ' . number_format($amount, 0, ',', '.');
+    $formattedAmount = 'Rp ' . number_format($amount, 0, '.', '.');
+    return $formattedAmount;
+}
 
+function rp3($amount)
+{
+    // Format angka tanpa 'Rp', titik menjadi koma
+    $formattedAmount = number_format($amount, 0, ',', ',');
     return $formattedAmount;
 }
 

@@ -146,25 +146,25 @@
                                                         <td>{{ $payroll->employee->fullname }}</td>
                                                         <td>{{ $payroll->employee->organization->name }}</td>
                                                         <td>{{ $payroll->employee->employee_code }}</td>
-                                                        <td>{{ rp($payroll->basic_salary) }}</td>
-                                                        <td>{{ rp($payroll->tunjangan_jabatan) }}</td>
-                                                        <td>{{ rp($payroll->tunjangan_profesi) }}</td>
-                                                        <td>{{ rp($payroll->tunjangan_makan_dan_transport) }}</td>
-                                                        <td>{{ rp($payroll->tunjangan_masa_kerja) }}</td>
-                                                        <td>{{ rp($payroll->guarantee_fee) }}</td>
-                                                        <td>{{ rp($payroll->uang_duduk) }}</td>
-                                                        <td>{{ rp($payroll->tax_allowance) }}</td>
-                                                        <td>{{ rp($payroll->total_allowance) }}</td>
-                                                        <td>{{ rp($payroll->potongan_keterlambatan) }}</td>
-                                                        <td>{{ rp($payroll->potongan_izin) }}</td>
-                                                        <td>{{ rp($payroll->potongan_sakit) }}</td>
-                                                        <td>{{ rp($payroll->simpanan_pokok) }}</td>
-                                                        <td>{{ rp($payroll->potongan_koperasi) }}</td>
-                                                        <td>{{ rp($payroll->potongan_absensi) }}</td>
-                                                        <td>{{ rp($payroll->potongan_bpjs_kesehatan) }}</td>
-                                                        <td>{{ rp($payroll->potongan_bpjs_ketenagakerjaan) }}</td>
-                                                        <td>{{ rp($payroll->total_deduction) }}</td>
-                                                        <td>{{ rp($payroll->take_home_pay) }}</td>
+                                                        <td>{{ rp3($payroll->basic_salary) }}</td>
+                                                        <td>{{ rp3($payroll->tunjangan_jabatan) }}</td>
+                                                        <td>{{ rp3($payroll->tunjangan_profesi) }}</td>
+                                                        <td>{{ rp3($payroll->tunjangan_makan_dan_transport) }}</td>
+                                                        <td>{{ rp3($payroll->tunjangan_masa_kerja) }}</td>
+                                                        <td>{{ rp3($payroll->guarantee_fee) }}</td>
+                                                        <td>{{ rp3($payroll->uang_duduk) }}</td>
+                                                        <td>{{ rp3($payroll->tax_allowance) }}</td>
+                                                        <td>{{ rp3($payroll->total_allowance) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_keterlambatan) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_izin) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_sakit) }}</td>
+                                                        <td>{{ rp3($payroll->simpanan_pokok) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_koperasi) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_absensi) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_bpjs_kesehatan) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_bpjs_ketenagakerjaan) }}</td>
+                                                        <td>{{ rp3($payroll->total_deduction) }}</td>
+                                                        <td>{{ rp3($payroll->take_home_pay) }}</td>
                                                         <td>{{ $payroll->periode }}</td>
                                                     </tr>
                                                 @endforeach
