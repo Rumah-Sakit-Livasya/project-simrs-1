@@ -22,7 +22,11 @@
                                     @endif
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h5 class="mb-1 font-weight-bold text-primary">{{ $registration->patient->name }}
+                                    <h5 class="mb-1 font-weight-bold text-primary">
+                                        <a href="{{ url('/daftar-registrasi-pasien/' . $registration->patient->id) }}"
+                                            class="text-primary">
+                                            {{ $registration->patient->name }}
+                                        </a>
                                     </h5>
                                     <div class="d-flex flex-wrap align-items-center mb-2">
                                         <span class="badge badge-light border mr-2 mb-1">
