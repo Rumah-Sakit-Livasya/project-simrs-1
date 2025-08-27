@@ -268,6 +268,7 @@
             searching: true,
             language: {
                 processing: "Memuat data...",
+                lengthMenu: "Tampilkan _MENU_ data per halaman",
                 info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
                 infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
                 infoFiltered: "(disaring dari _MAX_ total data)",
@@ -322,7 +323,6 @@
                     data: 'status',
                     name: 'status',
                     render: function(data, type, row) {
-
                         let badgeClass = data === 'Draft' ? 'badge-warning' : 'badge-success';
                         return `<span class="badge ${badgeClass}">${data}</span>`;
                     }
@@ -332,6 +332,7 @@
             lengthChange: false,
             language: {
                 processing: "Memuat data...",
+                lengthMenu: "Tampilkan _MENU_ data per halaman",
                 info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
                 infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
                 infoFiltered: "(disaring dari _MAX_ total data)",
@@ -406,7 +407,6 @@
             var formData = form.serialize();
 
             // Disable button dan ubah text
-
             button.prop('disabled', true).html(
                 '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...'
             );
@@ -420,7 +420,6 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
-
                     // ======================================================
                     // === PERUBAHAN UTAMA DI SINI ===
                     // ======================================================
@@ -480,9 +479,6 @@
             });
         });
 
-        <<
-        <<
-        << < HEAD
 
         // Event handler untuk reset form ketika modal ditutup (TETAP DIPERTAHANKAN)
         // Ini akan dijalankan secara otomatis setiap kali modal ditutup, baik manual maupun via script
@@ -509,6 +505,11 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Tampilkan loading pada tombol
+                    var deleteBtn = row.find('.btn-delete-order');
+                    deleteBtn.html('<i class="fal fa-spin fa-spinner"></i>').prop('disabled',
+                        true);
+
                     let urlTemplate = "{{ route('operasi.order.delete', ['order' => ':id']) }}";
                     let deleteUrl = urlTemplate.replace(':id', orderId);
 
@@ -532,7 +533,6 @@
                             orderOperasiTable.ajax.reload(null, false);
                         },
                         error: function(xhr) {
-
                             let errorMessage = xhr.responseJSON ? xhr.responseJSON
                                 .message : 'Terjadi kesalahan saat menghapus data.';
                             Swal.fire('Gagal!', errorMessage, 'error');

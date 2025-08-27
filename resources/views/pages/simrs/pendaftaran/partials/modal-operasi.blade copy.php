@@ -1,4 +1,3 @@
-```blade
 <div class="modal fade" id="modal-order-operasi" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -48,9 +47,9 @@
                                 <select name="kelas_rawat_id" class="form-control select2" required>
                                     <option value="">Pilih Kelas</option>
                                     @foreach ($kelas_rawats as $class)
-                                        <option value="{{ $class->id }}"
-                                            {{ $class->kelas == 'Rawat Jalan' ? 'selected' : '' }}>{{ $class->kelas }}
-                                        </option>
+                                    <option value="{{ $class->id }}"
+                                        {{ $class->kelas == 'Rawat Jalan' ? 'selected' : '' }}>{{ $class->kelas }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -60,7 +59,7 @@
                                 <select name="kategori_operasi_id" class="form-control select2" required>
                                     <option value="">Pilih Tipe Operasi</option>
                                     @foreach ($kategoriOperasi as $kategori)
-                                        <option value="{{ $kategori->id }}">{{ $kategori->nama_kategori }}</option>
+                                    <option value="{{ $kategori->id }}">{{ $kategori->nama_kategori }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -70,8 +69,8 @@
                                 <select name="tipe_operasi_id" class="form-control select2" required>
                                     <option value="">Pilih Tipe Penggunaan</option>
                                     @foreach ($jenisOperasi as $tipe)
-                                        <option value="{{ $tipe->id }}">{{ $tipe->nama_tipe ?? $tipe->tipe }}
-                                        </option>
+                                    <option value="{{ $tipe->id }}">{{ $tipe->nama_tipe ?? $tipe->tipe }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
