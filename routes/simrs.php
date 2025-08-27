@@ -866,18 +866,6 @@ Route::group(['middleware' => ['auth']], function () {
             // Tambahkan route ini di dalam group route operasi
             Route::delete('/prosedur/{prosedurId}', [OperasiController::class, 'deleteProsedur'])->name('ok.prosedur.delete');
 
-<<<<<<< HEAD
-=======
-            // Tampilkan form edit prosedur
-            Route::get('/prosedur/{order}/edit/{prosedur}', [OperasiController::class, 'editProsedur'])->name('ok.prosedur.edit');
-
-            // Proses update prosedur (via POST/PATCH/PUT)
-            Route::put('/prosedur/{prosedur}', [OperasiController::class, 'updateProsedur'])->name('ok.prosedur.update');
-
-
-
-
->>>>>>> 5870867e752d189d4fa03106e06df9d0b271329b
             Route::prefix('reports')->group(function () {
                 Route::get('order-pasien', [IGDController::class, 'orderPasien'])
                     ->name('ok.reports.order-pasien');
