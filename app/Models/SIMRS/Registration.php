@@ -216,4 +216,18 @@ class Registration extends Model
     {
         return $this->hasMany(JasaDokter::class, 'registration_id');
     }
+
+    public function poli()
+    {
+        // Ganti Poli::class dengan nama model yang benar jika berbeda
+        return $this->belongsTo(Departement::class, 'departement_id');
+    }
+
+
+    public function perujuk()
+    {
+        // Ganti Perujuk::class dengan nama model yang benar jika berbeda.
+        // Ganti 'perujuk_id' dengan nama foreign key yang benar jika berbeda.
+        return $this->belongsTo(Perujuk::class, 'perujuk_id');
+    }
 }

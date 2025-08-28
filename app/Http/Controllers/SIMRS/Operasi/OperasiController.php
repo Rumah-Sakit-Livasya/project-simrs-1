@@ -1461,4 +1461,235 @@ class OperasiController extends Controller
         // return view baru yang akan kita buat
         return view('pages.simrs.operasi.plasma', compact('prosedurs'));
     }
+    public function orderPasienReport(Request $request)
+    {
+        // Fungsi ini sekarang hanya mengambil data yang dibutuhkan untuk dropdown filter.
+        $ruangans = Room::where('ruangan', 'OK')
+            ->orderBy('ruangan', 'asc')
+            ->take(1)
+            ->get();
+
+        // Lalu menampilkan view yang berisi form filter.
+        return view('pages.simrs.operasi.laporan.order', [
+            'ruangans' => $ruangans,
+            'request' => $request
+        ]);
+    }
+
+    /**
+     * Menyiapkan dan menampilkan halaman cetak dalam popup window.
+     * FUNGSI INI TIDAK BERUBAH.
+     */
+    // ... (use statements)
+
+    public function printOrderPasienReport(Request $request)
+    {
+        // Eager load relasi yang dibutuhkan, termasuk dokter di dalam prosedur
+        $query = OrderOperasi::with([
+            'registration.patient',
+            'registration.penjamin',
+            'registration.poli',
+            'doctorOperator.employee',
+            'prosedurOperasi' => function ($query) {
+                // Kita hanya butuh data dokter dari prosedur, jadi kita load relasinya
+                $query->with([
+                    'tindakanOperasi',
+                    'dokterAnastesi.employee',
+                    'dokterResusitator.employee'
+                ]);
+            },
+            'user'
+        ]);
+
+        // Filter berdasarkan tanggal operasi (sudah benar)
+        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
+            $start = Carbon::createFromFormat('d-m-Y', $request->tanggal_awal)->startOfDay();
+            $end = Carbon::createFromFormat('d-m-Y', $request->tanggal_akhir)->endOfDay();
+            $query->whereBetween('tgl_operasi', [$start, $end]);
+        }
+
+        // Filter lainnya (sudah benar)
+        if ($request->filled('invoice')) {
+            $query->whereHas('registration.patient', function ($q) use ($request) {
+                $q->where('medical_record_number', 'like', '%' . $request->invoice . '%')
+                    ->orWhere('name', 'like', '%' . $request->invoice . '%');
+            });
+        }
+
+        if ($request->filled('ruangan_id')) {
+            $query->where('ruangan_id', $request->ruangan_id);
+        }
+
+        $data = [];
+        $error = null;
+
+        try {
+            $orders = $query->latest('tgl_operasi')->get();
+
+            $data = $orders->map(function ($order, $index) {
+                if (!$order->registration || !$order->registration->patient) {
+                    return null;
+                }
+                $patient = $order->registration->patient;
+                $registration = $order->registration;
+
+                // Ambil prosedur pertama yang terkait dengan order ini
+                $firstProsedur = $order->prosedurOperasi->first();
+
+                $age = $patient->date_of_birth ? Carbon::parse($patient->date_of_birth)->age : 'N/A';
+
+                // Gabungkan semua nama tindakan dari semua prosedur
+                $tindakan = $order->prosedurOperasi->map(fn($p) => $p->tindakanOperasi->nama_operasi ?? '')->filter()->implode(', ');
+                if (empty($tindakan)) $tindakan = 'N/A';
+
+                return [
+                    'no' => $index + 1,
+                    'tanggal_registrasi' => $registration->registration_date ? Carbon::parse($registration->registration_date)->format('d-m-Y') : 'N/A',
+                    'registration_number' => $registration->registration_number ?? 'N/A',
+                    'medical_record_number' => $patient->medical_record_number ?? 'N/A',
+                    'patient_name' => $patient->name ?? 'N/A',
+                    'gender' => $patient->gender ?? 'N/A',
+                    'age' => $age,
+                    'address' => $patient->address ?? 'N/A',
+                    'poli' => $registration->poli?->nama_poli ?? $registration->poli?->name ?? 'N/A',
+                    'dokter' => $order->doctorOperator->employee->fullname ?? 'N/A',
+                    'penjamin' => $registration->penjamin?->nama_perusahaan ?? 'N/A',
+
+                    // KOREKSI: Ambil dari kolom 'rujukan'
+                    'perujuk' => $registration->rujukan ?? 'N/A',
+
+                    'tindakan' => $tindakan,
+
+                    // UPDATE: Ambil nama dokter dari prosedur pertama
+                    'dr_resusitator' => $firstProsedur?->dokterResusitator?->employee?->fullname ?? 'N/A',
+                    'dr_anestesi' => $firstProsedur?->dokterAnastesi?->employee?->fullname ?? 'N/A',
+
+                    'petugas' => $order->user->name ?? 'N/A'
+                ];
+            })->filter()->values();
+        } catch (\Exception $e) {
+            Log::error('Error fetching order pasien data for print: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            $error = 'Gagal mengambil data. Silakan cek log untuk detail.';
+        }
+
+        return view('pages.simrs.operasi.laporan.print.order-print', [
+            'orders' => $data,
+            'period_start' => $request->tanggal_awal ?? Carbon::today()->format('d-m-Y'),
+            'period_end' => $request->tanggal_akhir ?? Carbon::today()->format('d-m-Y'),
+            'print_date' => Carbon::now()->format('d-m-Y'),
+            'error' => $error
+        ]);
+    }
+
+    public function rekapKunjungan(Request $request)
+    {
+        // Ambil data untuk mengisi dropdown filter
+        $doctors = Doctor::with('employee:id,fullname')
+            ->whereHas('employee', fn($q) => $q->where('is_active', true))
+            ->get() // Ambil semua kolom agar relasi bisa dimuat
+            ->filter(fn($doctor) => $doctor->employee !== null);
+
+        $penjamins = Penjamin::where('status', true)->orderBy('nama_perusahaan')->get(['id', 'nama_perusahaan']);
+        $kelas_rawat = KelasRawat::orderBy('kelas')->get(['id', 'kelas']);
+
+        // MENGGUNAKAN JenisOperasi untuk dropdown Tipe Operasi
+        $jenis_operasi = JenisOperasi::orderBy('jenis')->get(['id', 'jenis']);
+
+        // Data statis untuk dropdown
+        $tipe_rawat = ['RAWAT JALAN', 'RAWAT INAP', 'IGD'];
+        $tipe_penggunaan = ['UMUM', 'ELEKTIF', 'CITO'];
+
+        return view('pages.simrs.operasi.laporan.rekap_kunjungan', [
+            'doctors' => $doctors,
+            'penjamins' => $penjamins,
+            'kelas_rawat' => $kelas_rawat,
+            'jenis_operasi' => $jenis_operasi, // Kirim jenis_operasi ke view
+            'tipe_rawat' => $tipe_rawat,
+            'tipe_penggunaan' => $tipe_penggunaan,
+            'request' => $request
+        ]);
+    }
+
+    /**
+     * Mengambil data, melakukan pivot, dan menampilkan halaman cetak.
+     */
+    public function printRekapKunjungan(Request $request)
+    {
+        $year = $request->filled('tanggal_awal') ? Carbon::createFromFormat('d-m-Y', $request->tanggal_awal)->year : now()->year;
+
+        $query = ProsedurOperasi::query()
+            ->join('tindakan_operasi', 'prosedur_operasi.tindakan_operasi_id', '=', 'tindakan_operasi.id')
+            ->join('order_operasi', 'prosedur_operasi.order_operasi_id', '=', 'order_operasi.id')
+            ->join('registrations', 'order_operasi.registration_id', '=', 'registrations.id')
+            ->whereYear('prosedur_operasi.created_at', $year)
+            ->whereNull('prosedur_operasi.deleted_at'); // Pastikan hanya mengambil data yang tidak dihapus
+
+        // Terapkan filter dari request
+        if ($request->filled('tipe_rawat')) {
+            $query->where('registrations.registration_type', $request->tipe_rawat);
+        }
+        if ($request->filled('jenis_operasi_id')) { // Filter berdasarkan jenis_operasi
+            $query->where('prosedur_operasi.jenis_operasi_id', $request->jenis_operasi_id);
+        }
+        if ($request->filled('kelas_rawat_id')) {
+            $query->where('order_operasi.kelas_rawat_id', $request->kelas_rawat_id);
+        }
+        if ($request->filled('dokter_id')) {
+            $query->where('prosedur_operasi.dokter_operator_id', $request->dokter_id);
+        }
+        if ($request->filled('penjamin_id')) {
+            $query->where('registrations.penjamin_id', $request->penjamin_id);
+        }
+        if ($request->filled('tipe_penggunaan')) {
+            $query->whereHas('orderOperasi.tipeOperasi', function ($q) use ($request) {
+                $q->where('tipe', 'LIKE', '%' . $request->tipe_penggunaan . '%');
+            });
+        }
+
+        $results = [];
+        $error = null;
+
+        try {
+            $results = $query->select(
+                'tindakan_operasi.nama_operasi',
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 1 THEN 1 ELSE 0 END) as jan"),
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 2 THEN 1 ELSE 0 END) as feb"),
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 3 THEN 1 ELSE 0 END) as mar"),
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 4 THEN 1 ELSE 0 END) as apr"),
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 5 THEN 1 ELSE 0 END) as mei"),
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 6 THEN 1 ELSE 0 END) as jun"),
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 7 THEN 1 ELSE 0 END) as jul"),
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 8 THEN 1 ELSE 0 END) as agu"),
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 9 THEN 1 ELSE 0 END) as sep"),
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 10 THEN 1 ELSE 0 END) as okt"),
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 11 THEN 1 ELSE 0 END) as nov"),
+                DB::raw("SUM(CASE WHEN MONTH(prosedur_operasi.created_at) = 12 THEN 1 ELSE 0 END) as des"),
+                DB::raw("COUNT(prosedur_operasi.id) as total")
+            )
+                ->groupBy('tindakan_operasi.nama_operasi')
+                ->orderBy('tindakan_operasi.nama_operasi')
+                ->get();
+        } catch (\Exception $e) {
+            Log::error('Error generating Rekap Kunjungan OK Report: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            $error = 'Gagal memproses laporan. Silakan cek log.';
+        }
+
+        // Ambil nama dari filter untuk ditampilkan di header laporan
+        $filters = [
+            'year' => $year,
+            'tipe_rawat' => $request->tipe_rawat ?? 'Semua',
+            'kelas_rawat' => $request->filled('kelas_rawat_id') ? KelasRawat::find($request->kelas_rawat_id)->kelas : 'Semua',
+            'dokter' => $request->filled('dokter_id') ? Doctor::with('employee:id,fullname')->find($request->dokter_id)->employee->fullname : 'Semua',
+            'jenis_operasi' => $request->filled('jenis_operasi_id') ? JenisOperasi::find($request->jenis_operasi_id)->jenis : 'Semua',
+            'tipe_penggunaan' => $request->tipe_penggunaan ?? 'Semua',
+            'penjamin' => $request->filled('penjamin_id') ? Penjamin::find($request->penjamin_id)->nama_perusahaan : 'Semua',
+        ];
+
+        return view('pages.simrs.operasi.laporan.print.kunjungan-print', [
+            'results' => $results,
+            'filters' => $filters,
+            'error' => $error,
+            'print_date' => now()->format('d-m-Y'),
+        ]);
+    }
 }

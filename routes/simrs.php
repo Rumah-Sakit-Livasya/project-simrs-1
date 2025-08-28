@@ -850,7 +850,6 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/get-beds', [BayiController::class, 'getDataBed'])->name('get_beds');
             Route::get('/get-kelas-rawat', [BayiController::class, 'getKelasRawat'])->name('get_kelas_rawat');
             Route::get('/{order}/bayi-popup', [BayiController::class, 'showBayiPopup'])->name('popup');
-
             Route::resource('/', BayiController::class)->parameters(['' => 'bayi'])->except(['index', 'create', 'edit']);
         });
 
@@ -858,25 +857,26 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('ok')->group(function () {
             Route::get('/daftar-pasien', [OperasiController::class, 'index'])->name('ok.daftar-pasien');
-            Route::get('/prosedure/{orderId}', [OperasiController::class, 'prosedure'])->name('ok.prosedure');
+            Route::get('/prosedur/{orderId}', [OperasiController::class, 'prosedur'])->name('ok.prosedur');
             Route::get('/edit/{orderId}/{prosedurId}', [OperasiController::class, 'editProsedure'])->name('ok.prosedure.edit');
             Route::get('/prosedur/{order}/create', [OperasiController::class, 'createProsedur'])->name('ok.prosedur.create');
             Route::post('/prosedur/store', [OperasiController::class, 'storeProsedur'])->name('ok.prosedur.store');
             Route::put('/prosedur/update', [OperasiController::class, 'updateProsedur'])->name('ok.prosedur.update');
             Route::get('/prosedur/get-jenis-by-kategori/{kategoriId}', [OperasiController::class, 'getJenisByKategori'])->name('ok.prosedur.get-jenis-by-kategori');
             Route::get('/prosedur/get-tindakan-by-jenis/{jenisId}', [OperasiController::class, 'getTindakanByJenis'])->name('ok.prosedur.get-tindakan-by-jenis');
-            // Tambahkan route ini di dalam group route operasi
             Route::delete('/prosedur/{prosedurId}', [OperasiController::class, 'deleteProsedur'])->name('ok.prosedur.delete');
+            Route::prefix('laporan')->group(function () {
+                Route::get('order-pasien', [OperasiController::class, 'orderPasienReport'])->name('ok.laporan.order-pasien');
+                Route::get('rekap-kunjungan', [OperasiController::class, 'rekapKunjungan'])->name('ok.laporan.rekap-kunjungan');
+                Route::get('10-besar-tindakan', [OperasiController::class, '10BesarTindakan'])->name('ok.laporan.10-besar-tindakan');
+                // New route for laporan/order
+                Route::get('rekap-per-tindakan', [OperasiController::class, 'rekapKunjungan'])->name('rekap-per-tindakan');
 
-            Route::prefix('reports')->group(function () {
-                Route::get('order-pasien', [IGDController::class, 'orderPasien'])
-                    ->name('ok.reports.order-pasien');
-
-                Route::get('rekap-kunjungan', [IGDController::class, 'rekapKunjungan'])
-                    ->name('ok.reports.rekap-kunjungan');
-
-                Route::get('10-besar-tindakan', [IGDController::class, '10BesarTindakan'])
-                    ->name('ok.reports.10-besar-tindakan');
+                // URL: /simrs/ok/laporan/rekap-per-tindakan/print
+                Route::get('rekap-per-tindakan/print', [OperasiController::class, 'printRekapKunjungan'])->name('ok.laporan.rekap-kunjungan.print');
+                Route::get('order', [OperasiController::class, 'orderPasienReport'])->name('ok.laporan.order');
+                Route::get('order-data', [OperasiController::class, 'getOrderPasienData'])->name('ok.laporan.order-data');
+                Route::get('order-pasien/print', [OperasiController::class, 'printOrderPasienReport'])->name('ok.laporan.order.print');
             });
         });
 
