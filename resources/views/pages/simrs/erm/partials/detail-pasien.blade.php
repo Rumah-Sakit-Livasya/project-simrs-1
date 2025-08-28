@@ -122,11 +122,13 @@
             <div class="row mt-4">
                 <div class="col-lg-12">
                     <div class="d-flex flex-wrap gap-2 px-2">
-                        <button type="button" class="btn btn-outline-primary waves-effect waves-themed mx-1 my-1"
-                            id="tombol-panggil-pasien" data-registration-id="{{ $registration->id }}"
-                            data-plasma-id="{{ $plasmaId ?? 1 }}">
-                            <i class="fas fa-bullhorn mr-1"></i> Panggil Antrian
-                        </button>
+                        @if ($registration->registration_type == 'rawat-jalan')
+                            <button type="button" class="btn btn-outline-primary waves-effect waves-themed mx-1 my-1"
+                                id="tombol-panggil-pasien" data-registration-id="{{ $registration->id }}"
+                                data-plasma-id="{{ $plasmaId ?? 1 }}">
+                                <i class="fas fa-bullhorn mr-1"></i> Panggil Antrian
+                            </button>
+                        @endif
                         <button type="button" class="btn btn-warning text-white waves-effect waves-themed mx-1 my-1"
                             onclick="popupFull('http://192.168.1.253/real/antrol_bpjs/update_waktu_antrean_vclaim/{{ $registration->registration_number }}','p_card', 900,600,'no'); return false;">
                             <i class="fas fa-sync-alt mr-1"></i> Antrol BPJS
