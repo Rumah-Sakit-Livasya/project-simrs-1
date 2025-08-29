@@ -216,4 +216,10 @@ class Registration extends Model
     {
         return $this->hasMany(JasaDokter::class, 'registration_id');
     }
+
+    public function poli()
+    {
+        // Ganti Departement::class dengan Poli::class jika nama modelnya Poli
+        return $this->belongsTo(Departement::class, 'departement_id');
+    }
 }
