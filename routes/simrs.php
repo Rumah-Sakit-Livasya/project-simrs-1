@@ -873,15 +873,19 @@ Route::group(['middleware' => ['auth']], function () {
             });
 
             // Master data management (optional)
-            Route::prefix('master')->name('master.')->group(function () {
-                // Kategori Persalinan
-                Route::resource('kategori', 'KategoriPersalinanController');
+            Route::prefix('laporan')->name('laporan.')->group(function () {
 
-                // Tipe Persalinan
-                Route::resource('tipe', 'TipePersalinanController');
+                Route::get('order', [PersalinanController::class, 'laporanOrderPasien'])->name('order');
 
-                // Persalinan/Tindakan
-                Route::resource('persalinan', 'PersalinanMasterController');
+                // URL: /simrs/vk/laporan/order/print
+                Route::get('order/print', [PersalinanController::class, 'printLaporanOrderPasien'])->name('order.print');
+
+                // 2. Laporan Rekap Kunjungan per Tindakan
+                // URL: /simrs/vk/laporan/rekap-per-tindakan
+                Route::get('rekap-per-tindakan', [PersalinanController::class, 'laporanRekapTindakan'])->name('rekap-per-tindakan');
+
+                // URL: /simrs/vk/laporan/rekap-per-tindakan/print
+                Route::get('rekap-per-tindakan/print', [PersalinanController::class, 'printLaporanRekapTindakan'])->name('rekap-per-tindakan.print');
             });
         });
 
@@ -1342,6 +1346,8 @@ Route::group(['middleware' => ['auth']], function () {
             // Data tindakan berdasarkan registration ID
             Route::get('/tindakan-data/{registrationId}', [PersalinanController::class, 'getTindakanData'])
                 ->name('tindakan-data');
+
+
 
             // CRUD detail persalinan
 

@@ -199,19 +199,6 @@ class Registration extends Model
         return $this->hasOne(DietGizi::class, 'registration_id');
     }
 
-    // public function generateNomorRegistrasi()
-    // {
-    //     $date = Carbon::now();
-    //     $year = $date->format('y');
-    //     $month = $date->format('m');
-    //     $day = $date->format('d');
-
-    //     $count = Registration::whereDate('created_at', $date->toDateString())->count() + 1;
-    //     $count = str_pad($count, 4, '0', STR_PAD_LEFT);
-
-    //     return $year . $month . $day . $count;
-    // }
-
     public function jasaDokter()
     {
         return $this->hasMany(JasaDokter::class, 'registration_id');
@@ -221,13 +208,5 @@ class Registration extends Model
     {
         // Ganti Poli::class dengan nama model yang benar jika berbeda
         return $this->belongsTo(Departement::class, 'departement_id');
-    }
-
-
-    public function perujuk()
-    {
-        // Ganti Perujuk::class dengan nama model yang benar jika berbeda.
-        // Ganti 'perujuk_id' dengan nama foreign key yang benar jika berbeda.
-        return $this->belongsTo(Perujuk::class, 'perujuk_id');
     }
 }

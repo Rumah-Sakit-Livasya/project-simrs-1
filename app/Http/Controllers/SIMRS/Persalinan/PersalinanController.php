@@ -9,7 +9,9 @@ use App\Models\SIMRS\Persalinan\Persalinan;
 use App\Models\SIMRS\Persalinan\KategoriPersalinan;
 use App\Models\SIMRS\Persalinan\TipePersalinan;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
+use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -410,5 +412,207 @@ class PersalinanController extends Controller
             Log::error('Error in getOrderData: ' . $e->getMessage());
             return response()->json(['error' => 'Terjadi kesalahan saat memuat data.'], 500);
         }
+    }
+
+    public function laporanOrderPasien(Request $request)
+    {
+        // Mengambil semua data yang dibutuhkan oleh view rekap-per-tindakan.blade.php
+        $doctors = Doctor::with('employee:id,fullname')
+            ->whereHas('employee', fn($q) => $q->where('is_active', true))
+            ->get()->filter(fn($d) => $d->employee !== null);
+        $penjamins = Penjamin::where('status', true)->orderBy('nama_perusahaan')->get();
+        $kelas_rawat = KelasRawat::orderBy('kelas')->get();
+        $kategori_persalinan = KategoriPersalinan::orderBy('nama')->get();
+        $tipe_rawat = ['RAWAT JALAN', 'RAWAT INAP', 'IGD'];
+
+        // Me-return view dan mengirimkan semua variabel
+        return view('pages.simrs.persalinan.laporan.order', [
+            'doctors' => $doctors,
+            'penjamins' => $penjamins,
+            'kelas_rawat' => $kelas_rawat,
+            'kategori_persalinan' => $kategori_persalinan,
+            'tipe_rawat' => $tipe_rawat,
+        ]);
+    }
+
+    /**
+     * LAPORAN 1: Mengambil data dan menampilkan halaman cetak Order Pasien Persalinan.
+     */
+    public function printLaporanOrderPasien(Request $request)
+    {
+        $query = OrderPersalinan::with([
+            'registration.patient',
+            'registration.penjamin',
+            'registration.poli',
+            'persalinan', // Relasi ke tindakan persalinan
+            'dokterBidan.employee',
+            'dokterAnestesi.employee',
+            'dokterResusitator.employee',
+            'user'
+        ]);
+
+        // Filter berdasarkan tanggal persalinan
+        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
+            $start = Carbon::createFromFormat('d-m-Y', $request->tanggal_awal)->startOfDay();
+            $end = Carbon::createFromFormat('d-m-Y', $request->tanggal_akhir)->endOfDay();
+            $query->whereBetween('tgl_order', [$start, $end]);
+        }
+
+        // Filter berdasarkan No RM atau Nama Pasien
+        if ($request->filled('invoice')) {
+            $query->whereHas('registration.patient', function ($q) use ($request) {
+                $q->where('medical_record_number', 'like', '%' . $request->invoice . '%')
+                    ->orWhere('name', 'like', '%' . $request->invoice . '%');
+            });
+        }
+
+        $data = [];
+        $error = null;
+
+        try {
+            $orders = $query->latest('tgl_persalinan')->get();
+
+            $data = $orders->map(function ($order) {
+                if (!$order->registration || !$order->registration->patient) return null;
+                $patient = $order->registration->patient;
+                $registration = $order->registration;
+                $age = $patient->date_of_birth ? Carbon::parse($patient->date_of_birth)->age : 'N/A';
+
+                return [
+                    'tanggal_registrasi' => $registration->registration_date ? Carbon::parse($registration->registration_date)->format('d-m-Y') : 'N/A',
+                    'registration_number' => $registration->registration_number ?? 'N/A',
+                    'medical_record_number' => $patient->medical_record_number ?? 'N/A',
+                    'patient_name' => $patient->name ?? 'N/A',
+                    'gender' => $patient->gender ?? 'N/A',
+                    'age' => $age,
+                    'address' => $patient->address ?? 'N/A',
+                    'poli' => $registration->poli?->nama_poli ?? $registration->poli?->name ?? 'N/A',
+                    'dokter' => $order->dokterBidan?->employee?->fullname ?? 'N/A',
+                    'penjamin' => $registration->penjamin?->nama_perusahaan ?? 'N/A',
+                    'perujuk' => $registration->rujukan ?? 'N/A',
+                    'tindakan' => $order->persalinan?->nama_persalinan ?? 'N/A',
+                    'dr_resusitator' => $order->dokterResusitator?->employee?->fullname ?? 'N/A',
+                    'dr_anestesi' => $order->dokterAnestesi?->employee?->fullname ?? 'N/A',
+                    'petugas' => $order->user?->name ?? 'N/A',
+                ];
+            })->filter()->values();
+        } catch (\Exception $e) {
+            Log::error('Error generating Laporan Order Persalinan: ' . $e->getMessage());
+            $error = 'Gagal memproses laporan: ' . $e->getMessage();
+        }
+
+        return view('pages.simrs.persalinan.laporan.order-print', [
+            'orders' => $data,
+            'period_start' => $request->tanggal_awal ?? now()->format('d-m-Y'),
+            'period_end' => $request->tanggal_akhir ?? now()->format('d-m-Y'),
+            'print_date' => now()->format('d-m-Y'),
+            'error' => $error,
+        ]);
+    }
+
+    /**
+     * LAPORAN 2: Menampilkan halaman filter untuk Laporan Rekap Tindakan Persalinan.
+     */
+    public function laporanRekapTindakan(Request $request)
+    {
+        $doctors = Doctor::with('employee:id,fullname')
+            ->whereHas('employee', fn($q) => $q->where('is_active', true))
+            ->get()->filter(fn($d) => $d->employee !== null);
+
+        $penjamins = Penjamin::where('status', true)->orderBy('nama_perusahaan')->get();
+        $kelas_rawat = KelasRawat::orderBy('kelas')->get();
+        $kategori_persalinan = KategoriPersalinan::orderBy('nama')->get();
+
+        $tipe_rawat = ['RAWAT JALAN', 'RAWAT INAP', 'IGD'];
+
+        return view('pages.simrs.persalinan.laporan.rekap-per-tindakan', [
+            'doctors' => $doctors,
+            'penjamins' => $penjamins,
+            'kelas_rawat' => $kelas_rawat,
+            'kategori_persalinan' => $kategori_persalinan,
+            'tipe_rawat' => $tipe_rawat,
+        ]);
+    }
+
+    /**
+     * LAPORAN 2: Mengambil data dan menampilkan halaman cetak Rekap Tindakan Persalinan.
+     * [VERSI PERBAIKAN LENGKAP]
+     */
+    public function printLaporanRekapTindakan(Request $request)
+    {
+        // 1. Menggunakan rentang tanggal untuk filter yang lebih fleksibel
+        $start_date = Carbon::createFromFormat('d-m-Y', $request->tanggal_awal)->startOfDay();
+        $end_date = Carbon::createFromFormat('d-m-Y', $request->tanggal_akhir)->endOfDay();
+
+        $query = OrderPersalinan::query()
+            ->join('persalinan', 'order_persalinan.persalinan_id', '=', 'persalinan.id')
+            ->join('registrations', 'order_persalinan.registration_id', '=', 'registrations.id')
+            // 2. [PERBAIKAN UTAMA] Filter berdasarkan rentang tanggal pada kolom 'tgl_order'
+            ->whereBetween('order_persalinan.tgl_order', [$start_date, $end_date])
+            ->whereNull('order_persalinan.deleted_at');
+
+        // Apply filters
+        if ($request->filled('tipe_rawat')) {
+            $query->where('registrations.registration_type', $request->tipe_rawat);
+        }
+        if ($request->filled('kategori_id')) {
+            $query->where('order_persalinan.kategori_id', $request->kategori_id);
+        }
+        if ($request->filled('kelas_rawat_id')) {
+            $query->where('order_persalinan.kelas_rawat_id', $request->kelas_rawat_id);
+        }
+        if ($request->filled('dokter_id')) {
+            $query->where('order_persalinan.dokter_bidan_operator_id', $request->dokter_id);
+        }
+        if ($request->filled('penjamin_id')) {
+            $query->where('registrations.penjamin_id', $request->penjamin_id);
+        }
+
+        $results = [];
+        $error = null;
+
+        try {
+            $results = $query->select(
+                'persalinan.nama_persalinan',
+                // 3. [PERBAIKAN KEDUA] Menggunakan 'tgl_order' untuk rekapitulasi bulanan
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 1 THEN 1 ELSE 0 END) as jan"),
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 2 THEN 1 ELSE 0 END) as feb"),
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 3 THEN 1 ELSE 0 END) as mar"),
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 4 THEN 1 ELSE 0 END) as apr"),
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 5 THEN 1 ELSE 0 END) as mei"),
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 6 THEN 1 ELSE 0 END) as jun"),
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 7 THEN 1 ELSE 0 END) as jul"),
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 8 THEN 1 ELSE 0 END) as agu"),
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 9 THEN 1 ELSE 0 END) as sep"),
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 10 THEN 1 ELSE 0 END) as okt"),
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 11 THEN 1 ELSE 0 END) as nov"),
+                DB::raw("SUM(CASE WHEN MONTH(order_persalinan.tgl_order) = 12 THEN 1 ELSE 0 END) as des"),
+                DB::raw("COUNT(order_persalinan.id) as total")
+            )
+                ->groupBy('persalinan.nama_persalinan')
+                ->orderBy('persalinan.nama_persalinan')
+                ->get();
+        } catch (\Exception $e) {
+            Log::error('Error generating Rekap Persalinan Report: ' . $e->getMessage());
+            $error = 'Gagal memproses laporan: ' . $e->getMessage();
+        }
+
+        // 4. Menyiapkan data filter untuk ditampilkan di halaman cetak
+        $filters = [
+            'period_start' => $start_date->format('d-m-Y'),
+            'period_end' => $end_date->format('d-m-Y'),
+            'tipe_rawat' => $request->tipe_rawat ?? 'Semua',
+            'kategori' => $request->filled('kategori_id') ? KategoriPersalinan::find($request->kategori_id)->nama : 'Semua',
+            'kelas_rawat' => $request->filled('kelas_rawat_id') ? KelasRawat::find($request->kelas_rawat_id)->kelas : 'Semua',
+            'dokter' => $request->filled('dokter_id') ? Doctor::with('employee:id,fullname')->find($request->dokter_id)->employee->fullname : 'Semua',
+            'penjamin' => $request->filled('penjamin_id') ? Penjamin::find($request->penjamin_id)->nama_perusahaan : 'Semua',
+        ];
+
+        return view('pages.simrs.persalinan.laporan.rekap-per-tindakan-print', [
+            'results' => $results,
+            'filters' => $filters,
+            'error' => $error,
+            'print_date' => now()->format('d-m-Y'),
+        ]);
     }
 }
