@@ -194,7 +194,7 @@
                             </div>
                         </div>
 
-                        @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)')
+                        {{-- @if (auth()->user()->employee->organization->name == 'Informasi Teknologi (IT)') --}}
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="font-weight-bold">Timeline</label>
@@ -220,7 +220,7 @@
                                     </div>
                                 </div>
                             </div>
-                        @endif
+                        {{-- @endif --}}
                     </div>
                     <div class="row mt-3">
                         <div class="col">

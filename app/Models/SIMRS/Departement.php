@@ -26,7 +26,7 @@ class Departement extends Model
 
     public function doctors()
     {
-        return $this->hasMany(Doctor::class, 'department_id');
+        return $this->hasMany(Doctor::class, 'departement_id');
     }
 
     public function employees()
@@ -62,5 +62,10 @@ class Departement extends Model
     public function tarif_registrasi()
     {
         return $this->belongsToMany(TarifRegistrasi::class, 'tarif_registrasi_departements');
+    }
+
+    public function plasmaDisplays()
+    {
+        return $this->belongsToMany(PlasmaDisplayRawatJalan::class, 'departement_plasma_display');
     }
 }

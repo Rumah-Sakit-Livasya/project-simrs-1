@@ -248,8 +248,9 @@
             $(document).on('click', '.btn-edit', function() {
                 var orderId = $(this).data('order-id');
                 var prosedurId = $(this).data('id');
+
                 var url =
-                    "{{ route('ok.prosedur.edit', ['order' => ':orderId', 'prosedur' => ':prosedurId']) }}";
+                    "{{ route('ok.prosedure.edit', ['orderId' => ':orderId', 'prosedurId' => ':prosedurId']) }}";
                 url = url.replace(':orderId', orderId).replace(':prosedurId', prosedurId);
 
                 var width = 1200;
@@ -261,6 +262,7 @@
                     `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`
                 );
             });
+
 
             // Variabel untuk menyimpan ID prosedur yang akan dihapus
             var prosedurToDelete = null;

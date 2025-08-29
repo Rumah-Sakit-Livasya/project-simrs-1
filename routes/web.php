@@ -12,6 +12,8 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ChecklistHarianCategoryController;
 use App\Http\Controllers\ChecklistHarianController;
 use App\Http\Controllers\DailyWasteInputController;
+use App\Http\Controllers\InternalVehiclePageController;
+use App\Http\Controllers\KunjunganPageController;
 use App\Http\Controllers\LaporanInternalController;
 use App\Http\Controllers\Laundry\DailyLinenInputController;
 use App\Http\Controllers\Laundry\LinenTypeController;
@@ -46,10 +48,13 @@ Route::post('/', [AuthenticatedSessionController::class, 'store']);
 
 Route::middleware([LastSeenUser::class])->group(function () {
     Route::middleware('auth')->group(function () {
+        Route::get('/signature-pad', function () {
+            return view('pages.simrs.erm.partials.signature-pad');
+        })->name('signature.pad');
 
+        Route::get('/kunjungan', [KunjunganPageController::class, 'index'])->name('kunjungan.index');
         Route::get('/home', [ApplicationController::class, 'chooseApp'])->name('home');
         Route::post('/set-app', [ApplicationController::class, 'setApp'])->name('set-app');
-
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -442,6 +447,29 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/daily-linens/getLaundryData', [WasteReportController::class, 'getLaundryData'])->name('laundry.data');
 
     Route::resource('master/linen-types', LinenTypeController::class);
+
+    // Manajemen Kendaraan
+    Route::prefix('manajemen-kendaraan')->name('vehicles.')->group(function () {
+        // Halaman daftar kendaraan
+        Route::get('/', [InternalVehiclePageController::class, 'index'])->name('index');
+        // Halaman drivers
+        Route::get('/drivers', [InternalVehiclePageController::class, 'drivers'])->name('drivers');
+        // Halaman dashboard manajemen kendaraan
+        Route::get('/dashboard', [InternalVehiclePageController::class, 'dashboard'])->name('dashboard');
+        // Halaman daftar inspection item kendaraan internal
+        Route::get('/inspection-items', [InternalVehiclePageController::class, 'inspection_item'])->name('inspection_items');
+        // Halaman daftar vendor kendaraan internal
+        Route::get('/workshop-vendors', [InternalVehiclePageController::class, 'vendors'])->name('vendors');
+        // Halaman riwayat penggunaan kendaraan
+        Route::get('/vehicle-logs', [InternalVehiclePageController::class, 'vehicle_logs'])->name('vehicle_logs');
+
+        // Halaman daftar inspeksi kendaraan internal
+        Route::get('/inspections', [InternalVehiclePageController::class, 'inspections'])->name('inspections');
+        // Halaman form input inspeksi kendaraan internal
+        Route::get('/inspections/create', [InternalVehiclePageController::class, 'create_inspection'])->name('inspections.create');
+
+        Route::get('/service-tickets', [InternalVehiclePageController::class, 'service_tickets'])->name('service_tickets');
+    });
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -493,33 +521,42 @@ Route::get('/test', function () {
 
 
 
-Route::get('/test-pusher', function () {
-    $options = [
-        'cluster' => env('PUSHER_APP_CLUSTER'),
-        'useTLS' => true,
-        // --- TAMBAHKAN BARIS INI ---
-        'curl_options' => [
-            CURLOPT_SSL_VERIFYHOST => 0,
-            CURLOPT_SSL_VERIFYPEER => 0,
-        ]
-    ];
-    $pusher = new Pusher(
-        env('PUSHER_APP_KEY'),
-        env('PUSHER_APP_SECRET'),
-        env('PUSHER_APP_ID'),
-        $options
-    );
+Route::get('/test-pusher-connection', function () {
+    try {
+        $options = [
+            'cluster' => env('PUSHER_APP_CLUSTER'),
+            'useTLS' => true,
+            // Opsi SSL yang sama untuk memastikan konsistensi
+            'curl_options' => [
+                CURLOPT_SSL_VERIFYHOST => 0,
+                CURLOPT_SSL_VERIFYPEER => 0,
+            ]
+        ];
 
-    $data['message'] = 'Halo ini pesan dari Laravel!';
-    $pusher->trigger('my-channel', 'my-event', $data);
+        // Buat instance Pusher secara manual
+        $pusher = new \Pusher\Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            $options
+        );
 
-    return 'Event telah dikirim (tanpa verifikasi SSL)!';
+        // Coba kirim event tes yang sangat sederhana
+        $data = ['message' => 'Halo dari Laravel!'];
+        $pusher->trigger('test-channel', 'test-event', $data);
+
+        return "Event tes berhasil dikirim ke Pusher. Silakan periksa Debug Console Anda.";
+    } catch (\Exception $e) {
+        // Jika ada error koneksi, tampilkan di sini
+        return "GAGAL terhubung ke Pusher. Error: <pre>" . $e->getMessage() . "</pre>";
+    }
 });
-
 // routes/web.php
 Route::get('/test-layout', function () {
     return view('test-layout');
 });
+
+
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/simrs.php';

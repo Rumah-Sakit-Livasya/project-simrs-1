@@ -9,11 +9,7 @@
         max-width: 800px;
     }
 
-    /*
-                                ====================================================================
-                                CSS BARU UNTUK DETAILS CONTROL (Disamakan dengan Pertanggung Jawaban)
-                                ====================================================================
-                            */
+
     .details-control {
         cursor: pointer;
         text-align: center;
@@ -116,7 +112,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="7">
+                            <th colspan="4">
                                 <button type="button" class="btn btn-sm btn-outline-primary waves-effect waves-themed"
                                     id="btn-tambah-order-operasi" data-toggle="modal"
                                     data-target="#modal-order-operasi">
@@ -168,6 +164,17 @@
             </div>
         </div>
     </div>
+
+    @if (str_contains(\Illuminate\Support\Facades\Route::currentRouteName(), 'daftar-registrasi-pasien') ||
+            str_contains(url()->current(), '/daftar-registrasi-pasien/'))
+        <div class="d-flex justify-content-start m-3">
+            <button type="button" data-target-menu="operasi"
+                class="btn btn-outline-primary px-4 shadow-sm d-flex align-items-center btn-back-to-layanan">
+                <i class="fas fa-arrow-left mr-2"></i>
+                <span>Kembali ke Menu</span>
+            </button>
+        </div>
+    @endif
 </div>
 <!-- This will include the modal you create in the next step -->
 @include('pages.simrs.pendaftaran.partials.modal-operasi')
@@ -177,19 +184,39 @@
 <script type="text/javascript" src="/js/painterro-1.2.3.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Inisialisasi Select2
+        // =====================================================================
+        // INISIALISASI SELECT2 DAN DATEPICKER
+        // =====================================================================
+
+        // Inisialisasi Select2 untuk modal
         $('#modal-order-operasi .select2').select2({
-            dropdownParent: $('#modal-order-operasi')
+            dropdownParent: $('#modal-order-operasi'),
+            width: '100%'
         });
 
-        // Inisialisasi DataTable untuk Order Operasi
+        // Inisialisasi DatePicker untuk tanggal operasi
+        $('#tgl_operasi').datepicker({
+            format: 'dd-mm-yyyy',
+            autoclose: true,
+            todayHighlight: true,
+            startDate: new Date()
+        });
+
+        // =====================================================================
+        // INISIALISASI DATATABLES
+        // =====================================================================
+
+        // DataTable untuk Order Operasi
         var orderOperasiTable = $('#dt-order-operasi').DataTable({
             processing: true,
-            serverSide: false, // Ubah ke true jika data banyak
+            serverSide: false,
             ajax: {
-                url: "{{ route('operasi.order.data', $registration->id) }}", // Route untuk get data
+                url: "{{ route('operasi.order.data', $registration->id) }}",
                 type: 'GET',
-                dataSrc: 'data'
+                dataSrc: 'data',
+                error: function(xhr, error, code) {
+                    console.error('Error loading order operasi data:', error);
+                }
             },
             columns: [{
                     data: 'tgl_order_formatted',
@@ -213,16 +240,20 @@
                 },
                 {
                     data: 'diagnosa',
-                    name: 'diagnosa'
+                    name: 'diagnosa',
+                    render: function(data, type, row) {
+                        return data ? (data.length > 50 ? data.substring(0, 50) + '...' :
+                            data) : '-';
+                    }
                 },
                 {
                     data: null,
                     orderable: false,
                     searchable: false,
+                    className: 'text-center',
                     render: function(data, type, row) {
                         return `
                         <div class="btn-group" role="group">
-                        
                             <button type="button" class="btn btn-xs btn-outline-danger waves-effect waves-themed btn-delete-order" data-id="${row.id}">
                                 <i class="fal fa-trash"></i> Hapus
                             </button>
@@ -231,9 +262,12 @@
                     }
                 }
             ],
+            pageLength: 10,
+            lengthChange: false,
+            ordering: true,
+            searching: true,
             language: {
                 processing: "Memuat data...",
-                // search: "Pencarian:",
                 lengthMenu: "Tampilkan _MENU_ data per halaman",
                 info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
                 infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
@@ -244,18 +278,22 @@
                     next: "Selanjutnya",
                     previous: "Sebelumnya"
                 },
-                emptyTable: "Tidak ada data order operasi"
+                emptyTable: "Tidak ada data order operasi",
+                zeroRecords: "Tidak ditemukan data yang sesuai"
             }
         });
 
-        // Inisialisasi DataTable untuk Tindakan Operasi
+        // DataTable untuk Tindakan Operasi
         var tindakanOperasiTable = $('#dt-tindakan-operasi').DataTable({
             processing: true,
             serverSide: false,
             ajax: {
-                url: "{{ route('operasi.prosedur.data', $registration->id) }}", // Route untuk get data tindakan
+                url: "{{ route('operasi.prosedur.data', $registration->id) }}",
                 type: 'GET',
-                dataSrc: 'data'
+                dataSrc: 'data',
+                error: function(xhr, error, code) {
+                    console.error('Error loading tindakan operasi data:', error);
+                }
             },
             columns: [{
                     data: 'tindakan_nama',
@@ -285,27 +323,15 @@
                     data: 'status',
                     name: 'status',
                     render: function(data, type, row) {
-                        let badgeClass = '';
-                        let statusText = '';
-
-                        switch (data) {
-                            case 'Draft':
-                                badgeClass = 'badge-warning';
-                                statusText = 'Draft';
-                                break;
-                            case 'Final':
-                                badgeClass = 'badge-success';
-                                statusText = 'Final';
-                                break;
-                        }
-
-                        return `<span class="badge ${badgeClass}">${statusText}</span>`;
+                        let badgeClass = data === 'Draft' ? 'badge-warning' : 'badge-success';
+                        return `<span class="badge ${badgeClass}">${data}</span>`;
                     }
                 }
             ],
+            pageLength: 10,
+            lengthChange: false,
             language: {
                 processing: "Memuat data...",
-                // search: "Pencarian:",
                 lengthMenu: "Tampilkan _MENU_ data per halaman",
                 info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
                 infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
@@ -320,24 +346,72 @@
             }
         });
 
+        // =====================================================================
+        // EVENT HANDLERS
+        // =====================================================================
+
         // Event handler untuk tombol reload
         $('#btn-reload-order').on('click', function() {
-            orderOperasiTable.ajax.reload();
-            tindakanOperasiTable.ajax.reload();
+            $(this).html('<i class="fal fa-spin fa-spinner mr-1"></i>Loading...');
+
+            // Reload kedua tabel
+            orderOperasiTable.ajax.reload(function() {
+                tindakanOperasiTable.ajax.reload(function() {
+                    $('#btn-reload-order').html(
+                        '<span class="fal fa-sync mr-1"></span>Reload');
+                });
+            });
         });
 
-        // Event handler untuk simpan order operasi
+        // Event handler untuk reset form ketika modal dibuka
+        $('#modal-order-operasi').on('show.bs.modal', function() {
+            // Reset form
+            $('#form-order-operasi')[0].reset();
+
+            // Reset Select2
+            $('#form-order-operasi .select2').val(null).trigger('change');
+
+            // Set default tanggal ke hari ini
+            $('#tgl_operasi').val('{{ date('d-m-Y H:i') }}');
+
+            // Reset button
+            $('#btn-simpan-order-operasi').prop('disabled', false).html('Simpan Order');
+        });
+
+        // Event handler untuk reset form ketika modal ditutup
+        $('#modal-order-operasi').on('hidden.bs.modal', function() {
+            // Reset form
+            $('#form-order-operasi')[0].reset();
+
+            // Reset Select2
+            $('#form-order-operasi .select2').val(null).trigger('change');
+
+            // Reset button state
+            $('#btn-simpan-order-operasi').prop('disabled', false).html('Simpan Order');
+        });
+
+        // =====================================================================
+        // EVENT HANDLER UNTUK SIMPAN ORDER OPERASI (PERBAIKAN UTAMA)
+        // =====================================================================
         $('#btn-simpan-order-operasi').on('click', function(e) {
             e.preventDefault();
 
             var button = $(this);
-            var formData = $('#form-order-operasi').serialize();
+            var form = $('#form-order-operasi');
+            // Validasi form sebelum submit
+            if (!form[0].checkValidity()) {
+                form[0].reportValidity();
+                return false;
+            }
 
-            // Disable tombol dan tampilkan loading
+            var formData = form.serialize();
+
+            // Disable button dan ubah text
             button.prop('disabled', true).html(
                 '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...'
             );
 
+            // AJAX Request
             $.ajax({
                 url: "{{ route('operasi.order.store') }}",
                 type: 'POST',
@@ -346,111 +420,169 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
-                    // Jangan tutup modal otomatis, biarkan user melihat pesan sukses dulu
+                    // ======================================================
+                    // === PERUBAHAN UTAMA DI SINI ===
+                    // ======================================================
 
-                    // Tampilkan notifikasi sukses
+                    // 1. Langsung tutup modal
+                    $('#modal-order-operasi').modal('hide');
+
+                    // 2. Tampilkan notifikasi sukses SETELAH modal tertutup
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil!',
                         text: response.message,
                         showConfirmButton: true,
                         confirmButtonText: 'OK'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Tutup modal setelah user klik OK
-                            $('#modal-order-operasi').modal('hide');
-
-                            // Reset form
-                            $('#form-order-operasi')[0].reset();
-                            $('#form-order-operasi .select2').val(null).trigger(
-                                'change');
-                        }
                     });
 
-                    // Reload tabel DataTables
-                    orderOperasiTable.ajax.reload(null,
-                        false); // false = tetap di halaman yang sama
+                    // 3. Reload tabel DataTables
+                    orderOperasiTable.ajax.reload(null, false);
                 },
                 error: function(xhr) {
+                    console.error('Error response:', xhr);
+
+                    // Re-enable button
+                    button.prop('disabled', false).html('Simpan Order');
+
                     var errors = xhr.responseJSON?.errors;
-                    var errorMsg = 'Terjadi kesalahan:\n';
+                    var errorMsg = '';
 
                     if (errors) {
+                        errorMsg = 'Terjadi kesalahan validasi:\n';
                         $.each(errors, function(key, value) {
-                            errorMsg += '- ' + value[0] + '\n';
+                            errorMsg += '• ' + value[0] + '\n';
                         });
                     } else {
                         errorMsg = xhr.responseJSON?.message ||
                             'Gagal menyimpan data. Silakan coba lagi.';
                     }
 
+                    // Tampilkan error alert
                     Swal.fire({
                         icon: 'error',
                         title: 'Gagal!',
                         text: errorMsg,
-                        showConfirmButton: true
+                        showConfirmButton: true,
+                        confirmButtonText: 'OK'
                     });
                 },
                 complete: function() {
-                    // Aktifkan kembali tombol
-                    button.prop('disabled', false).html('Simpan Order');
+
+                    // Tombol akan di-reset oleh event 'hidden.bs.modal'
+                    // jadi tidak perlu di-enable secara eksplisit di sini
+                    // kecuali jika terjadi error
+                    if (!this.success) { // Hanya re-enable jika ajax GAGAL
+                        button.prop('disabled', false).html('Simpan Order');
+                    }
                 }
             });
         });
 
-        // Event handler untuk reset form ketika modal ditutup
+
+        // Event handler untuk reset form ketika modal ditutup (TETAP DIPERTAHANKAN)
+        // Ini akan dijalankan secara otomatis setiap kali modal ditutup, baik manual maupun via script
         $('#modal-order-operasi').on('hidden.bs.modal', function() {
             $('#form-order-operasi')[0].reset();
             $('#form-order-operasi .select2').val(null).trigger('change');
-
-            // Reset tombol jika masih dalam keadaan loading
             $('#btn-simpan-order-operasi').prop('disabled', false).html('Simpan Order');
         });
 
-        // Event handler untuk edit order (opsional)
-        $('#dt-order-operasi').on('click', '.btn-edit-order', function() {
-            var orderId = $(this).data('id');
-            // Implementasi edit order
-            console.log('Edit order ID:', orderId);
-        });
-
-        // Event handler untuk delete order (opsional)
+        // Event handler untuk delete order (Sudah benar dari jawaban sebelumnya)
         $('#dt-order-operasi').on('click', '.btn-delete-order', function() {
             var orderId = $(this).data('id');
+            var row = $(this).closest('tr');
 
             Swal.fire({
-                title: 'Konfirmasi',
-                text: 'Apakah Anda yakin ingin menghapus order ini?',
+                title: 'Konfirmasi Hapus',
+                text: 'Apakah Anda yakin ingin menghapus order operasi ini?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal'
+                cancelButtonText: 'Batal',
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Implementasi delete order
+                    // Tampilkan loading pada tombol
+                    var deleteBtn = row.find('.btn-delete-order');
+                    deleteBtn.html('<i class="fal fa-spin fa-spinner"></i>').prop('disabled',
+                        true);
+
+                    let urlTemplate = "{{ route('operasi.order.delete', ['order' => ':id']) }}";
+                    let deleteUrl = urlTemplate.replace(':id', orderId);
+
                     $.ajax({
-                        url: "{{ route('operasi.order.delete') }}",
+                        url: deleteUrl,
                         type: 'DELETE',
-                        data: {
-                            id: orderId
-                        },
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(response) {
-                            Swal.fire('Berhasil!', response.message, 'success');
-                            orderOperasiTable.ajax.reload();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: response.message ||
+                                    'Order berhasil dihapus.',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+
+                            // Reload tabel
+                            orderOperasiTable.ajax.reload(null, false);
                         },
                         error: function(xhr) {
-                            Swal.fire('Gagal!',
-                                'Terjadi kesalahan saat menghapus data.',
-                                'error');
+                            let errorMessage = xhr.responseJSON ? xhr.responseJSON
+                                .message : 'Terjadi kesalahan saat menghapus data.';
+                            Swal.fire('Gagal!', errorMessage, 'error');
                         }
                     });
                 }
             });
         });
+
+        // =====================================================================
+        // EVENT HANDLER UNTUK EDIT ORDER (BONUS)
+        // =====================================================================
+        $('#dt-order-operasi').on('click', '.btn-edit-order', function() {
+            var orderId = $(this).data('id');
+
+            // Implementasi edit bisa ditambahkan di sini
+            Swal.fire({
+                icon: 'info',
+                title: 'Fitur Edit',
+                text: 'Fitur edit order akan segera tersedia.',
+                showConfirmButton: true
+            });
+        });
+
+        // =====================================================================
+        // UTILITY FUNCTIONS
+        // =====================================================================
+
+        // Function untuk reload semua tabel
+        window.reloadOrderTables = function() {
+            orderOperasiTable.ajax.reload();
+            tindakanOperasiTable.ajax.reload();
+        };
+
+        // Function untuk format tanggal (jika diperlukan)
+        window.formatDate = function(dateString) {
+            if (!dateString) return '-';
+
+            var date = new Date(dateString);
+            var options = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+
+            return date.toLocaleDateString('id-ID', options);
+        };
+
+        console.log('Order Operasi JavaScript initialized successfully');
     });
 </script>

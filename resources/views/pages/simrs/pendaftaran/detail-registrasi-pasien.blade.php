@@ -488,6 +488,27 @@
 
     <script>
         $(document).ready(function() {
+            // Event handler for the "Kembali" button specific to the #laboratorium context
+            // We're targeting the button *within* the #laboratorium container
+            $('.btn-back-to-layanan').on('click', function(e) {
+                e.preventDefault(); // Prevent default link behavior
+                var currentPanelId = $(this).data(
+                    'target-menu'); // Get the ID of the current panel (e.g., 'laboratorium')
+
+                $('#' + currentPanelId).fadeOut(500, function() {
+                    $('#menu-layanan').fadeIn(500);
+                });
+            });
+
+            $('#btn-back-to-menu').on('click', function() {
+                // Tutup semua panel layanan yang bisa muncul
+                $('#pengkajian-nurse-rajal, #tindakan-medis, #operasi, #persalinan, #radiologi, #laboratorium')
+                    .fadeOut(500, function() {
+                        // Setelah semua tertutup, tampilkan kembali menu layanan
+                        $('#menu-layanan').fadeIn(500);
+                    });
+            });
+
             // Set CSRF token untuk semua permintaan AJAX
             $.ajaxSetup({
                 headers: {

@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS\CPPT;
 
+use App\Models\Sbar;
 use App\Models\Signature;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Registration;
@@ -30,6 +31,11 @@ class CPPT extends Model implements AuditableContract
     public function registration()
     {
         return $this->belongsTo(Registration::class);
+    }
+
+    public function sbar()
+    {
+        return $this->hasOne(Sbar::class, 'cppt_id');
     }
 
     public function signature()

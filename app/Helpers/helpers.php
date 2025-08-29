@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\SIMRS\Patient;
 use Illuminate\Support\Facades\Request;
 use Carbon\Carbon;
 
@@ -445,7 +446,39 @@ function phone($phone)
 }
 
 
+function toRoman($number)
+{
+    if ($number <= 0 || $number > 3999) {
+        return "Number must be between 1 and 3999";
+    }
 
+    $romanNumerals = [
+        'M' => 1000,
+        'CM' => 900,
+        'D' => 500,
+        'CD' => 400,
+        'C' => 100,
+        'XC' => 90,
+        'L' => 50,
+        'XL' => 40,
+        'X' => 10,
+        'IX' => 9,
+        'V' => 5,
+        'IV' => 4,
+        'I' => 1
+    ];
+
+    $roman = '';
+
+    foreach ($romanNumerals as $symbol => $value) {
+        while ($number >= $value) {
+            $roman .= $symbol;
+            $number -= $value;
+        }
+    }
+
+    return $roman;
+}
 
 
 
@@ -647,5 +680,28 @@ class AgeComparison
 
         // Ganti simbol-simbol di dalam teks dengan kata yang sesuai
         return strtr($text, $replacements);
+    }
+
+    function generate_baby_medical_record_number()
+    {
+        $prefix = 'BY';
+        $datePart = date('ym'); // Tahun dan bulan 2 digit, cth: 2405
+
+        // Cari nomor terakhir di bulan dan tahun ini
+        $lastPatient = Patient::where('medical_record_number', 'like', $prefix . '-' . $datePart . '-%')
+            ->orderBy('medical_record_number', 'desc')
+            ->first();
+
+        $sequence = 1;
+        if ($lastPatient) {
+            // Ambil nomor urut dari RM terakhir dan tambahkan 1
+            $lastSequence = (int) substr($lastPatient->medical_record_number, -4);
+            $sequence = $lastSequence + 1;
+        }
+
+        // Format nomor urut menjadi 4 digit dengan leading zero
+        $paddedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        return $prefix . '-' . $datePart . '-' . $paddedSequence;
     }
 }

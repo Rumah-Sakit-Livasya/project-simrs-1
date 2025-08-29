@@ -72,19 +72,19 @@
                                         </div>
                                         <div class="card-body p-0">
                                             <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="4"
-                                                placeholder="Keluhan Utama">Alergi obat : 
-Reaksi alergi obat : 
+                                                placeholder="Keluhan Utama">Alergi obat :
+Reaksi alergi obat :
 Keluhan Utama : KONSULTASI
 PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-DI PUSKESMAS JATITUJUH 
+DI PUSKESMAS JATITUJUH
 Riwayat Penyakit Sekarang : KONSULTASI
 PASIEN TELAH PENGOBATAN 6 BULAN TB PARU
-DI PUSKESMAS JATITUJUH 
+DI PUSKESMAS JATITUJUH
 Riwayat Penyakit Dahulu : TIDAK ADA
 Riwayat Penyakit Keluarga : TIDAK ADA
-Alergi makan : 
-Reaksi alergi makan : 
-Alergi lainya : 
+Alergi makan :
+Reaksi alergi makan :
+Alergi lainya :
 Reaksi alergi lainya : </textarea>
                                         </div>
                                     </div>
@@ -97,12 +97,12 @@ Reaksi alergi lainya : </textarea>
                                             <span>Objective</span>
                                         </div>
                                         <div class="card-body p-0">
-                                            <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">Nadi (PR): 
-Respirasi (RR): 
-Tensi (BP): 
-Suhu (T): 
-Tinggi Badan: 
-Berat Badan: 
+                                            <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="4">Nadi (PR):
+Respirasi (RR):
+Tensi (BP):
+Suhu (T):
+Tinggi Badan:
+Berat Badan:
 Skrining Nyeri:
                                         </textarea>
                                         </div>
@@ -508,7 +508,7 @@ Skrining Nyeri:
             const registrationNumber = "{{ $registration->registration_number }}";
 
             const url =
-                "{{ route('cppt.dokter-rajal.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
+                "{{ route('cppt.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
                 .replace('__registration_number__', registrationNumber);
 
             // Now you can use `url` in your form submission or AJAX request

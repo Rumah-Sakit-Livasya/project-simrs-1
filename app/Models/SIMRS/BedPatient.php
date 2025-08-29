@@ -12,4 +12,16 @@ class BedPatient extends Model
 
     protected $table = 'bed_patient';
     protected $guarded = ['id'];
+
+
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class, 'patient_id');
+    }
+
+    // Relasi ke Bed
+    public function bed()
+    {
+        return $this->belongsTo(Bed::class, 'bed_id');
+    }
 }

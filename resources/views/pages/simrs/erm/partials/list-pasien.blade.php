@@ -6,11 +6,23 @@
 <div class="row" id="daftar-pasien" style="overflow-y: auto; height: 75vh;">
     <div class="col-12">
         @if ($registrations->isEmpty())
-            <p class="mt-3">Tidak ada pasien yang terdaftar hari ini.</p>
+            <div class="d-flex flex-column align-items-center justify-content-center" style="height: 40vh;">
+                <h5 class="mt-4 mb-2 text-muted font-weight-bold">Belum ada pasien terdaftar</h5>
+                <p class="text-secondary text-center mb-0">Silakan cek kembali filter tanggal atau lakukan pendaftaran
+                    pasien baru.
+                </p>
+            </div>
         @else
             <ul>
                 @foreach ($registrations as $registration)
                     @php
+                        // Hanya proses registration yang tanggalnya hari ini
+                        $today = \Carbon\Carbon::today()->format('Y-m-d');
+                        $registrationDate = \Carbon\Carbon::parse($registration->registration_date)->format('Y-m-d');
+                        if ($registrationDate !== $today) {
+                            continue;
+                        }
+
                         $menu = request('menu');
                         if (!$menu) {
                             $menu = $path === 'igd' ? 'triage' : 'pengkajian_perawat';

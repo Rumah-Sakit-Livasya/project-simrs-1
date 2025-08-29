@@ -3,7 +3,7 @@
     @if (isset($registration) || $registration != null)
         <div class="tab-content p-3">
             <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
-                @include('pages.simrs.poliklinik.partials.detail-pasien')
+                @include('pages.simrs.erm.partials.detail-pasien')
                 <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
                 <div class="row">
                     <form action="javascript:void(0)" class="w-100" data-tipe-cppt="dokter" data-tipe-cppt="rawat-jalan"
@@ -259,16 +259,6 @@ Skrining Nyeri:
                                         ])
 
 
-                                        <!-- Action Buttons -->
-                                        <div class="d-flex justify-content-between mt-4">
-                                            <button type="button" class="btn btn-outline-secondary" id="tutup">
-                                                <span class="mdi mdi-arrow-up-bold-circle-outline"></span> Tutup
-                                            </button>
-                                            <button type="submit" class="btn btn-primary btn-saves-soap" id="bsSOAP"
-                                                name="save">
-                                                <span class="mdi mdi-content-save"></span> Simpan
-                                            </button>
-                                        </div>
                                     </form>
                                 </div>
 
@@ -294,8 +284,8 @@ Skrining Nyeri:
                                                     <td colspan="8" align="right">Grand Total</td>
                                                     <td align="right"><span id="grand_total" style="text-align: right;"
                                                             class="numeric">0</span>
-                                                        <input type="hidden" name="total_harga_obat" id="total_harga_obat"
-                                                            value="0" readonly="">
+                                                        <input type="hidden" name="total_harga_obat"
+                                                            id="total_harga_obat" value="0" readonly="">
                                                         <input type="hidden" name="total_bpjs" id="total_bpjs"
                                                             value="0" readonly="">
                                                         <input type="hidden" name="is_bpjs" id="is_bpjs"
@@ -305,24 +295,6 @@ Skrining Nyeri:
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
-
-                                @include('pages.simrs.erm.partials.signature-field', [
-                                    'judul' => 'Dokter,',
-                                    'pic' => auth()->user()->employee->fullname,
-                                    'role' => 'dokter',
-                                ])
-
-
-                                <!-- Action Buttons -->
-                                <div class="d-flex justify-content-between mt-4">
-                                    <button type="button" class="btn btn-outline-secondary" id="tutup">
-                                        <span class="mdi mdi-arrow-up-bold-circle-outline"></span> Tutup
-                                    </button>
-                                    <button type="submit" class="btn btn-primary btn-saves-soap" id="bsSOAP"
-                                        name="save">
-                                        <span class="mdi mdi-content-save"></span> Simpan
-                                    </button>
                                 </div>
                     </form>
                 </div>
@@ -470,7 +442,7 @@ Skrining Nyeri:
                 const registrationNumber = "{{ $registration->registration_number }}";
 
                 const url =
-                    "{{ route('cppt.dokter-rajal.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
+                    "{{ route('cppt.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
                     .replace('__registration_number__', registrationNumber);
 
                 // Now you can use `url` in your form submission or AJAX request

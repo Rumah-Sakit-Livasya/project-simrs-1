@@ -1,14 +1,23 @@
 <?php
 
+use App\Http\Controllers\API\AntrianController;
+use App\Http\Controllers\API\DiagnosisCategoryController;
 use App\Http\Controllers\API\EmployeeController;
+use App\Http\Controllers\API\InfusionMonitorController;
+use App\Http\Controllers\API\InterventionController;
+use App\Http\Controllers\API\NursingDiagnosisController;
+use App\Http\Controllers\API\SbarController;
 use App\Http\Controllers\JamMakanGiziController;
 use App\Http\Controllers\DietGiziController;
 use App\Http\Controllers\FarmasiResepController;
+use App\Http\Controllers\FarmasiReturResepController;
+use App\Http\Controllers\FarmasiSignaController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
 use App\Http\Controllers\OrderGiziController;
 use App\Http\Controllers\OrderLaboratoriumController;
+use App\Http\Controllers\PlasmaDisplayRawatJalanController;
 use App\Http\Controllers\SIMRS\AssesmentGadarController;
 use App\Http\Controllers\SIMRS\RujukAntarRSController;
 use App\Http\Controllers\ProcurementPOApprovalCEO;
@@ -108,9 +117,11 @@ use App\Http\Controllers\WarehouseReturBarangController;
 use App\Http\Controllers\TarifOperasiController;
 use App\Http\Controllers\WarehousePenerimaanBarangNonFarmasiController;
 use App\Models\Employee;
+use App\Models\FarmasiReturResep;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\OrderTindakanMedis;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\API\TtsController; // Pastikan path ini benar
 
 Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::get('/signature/{filename}', function ($filename) {
@@ -193,7 +204,18 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::prefix("farmasi")->group(function () {
         Route::prefix("transaksi-resep")->group(function () {
             Route::post("/store", [FarmasiResepController::class, 'store'])->name("farmasi.transaksi-resep.store");
-            Route::get('/obat/{gudang_id}', [ERMController::class, 'get_obat'])->name('farmasi.get-obat');
+            Route::get("/gudang-default-ranap", [FarmasiResepController::class, "gudang_default_ranap"])->name("farmasi.transaksi-resep.gudang-default-ranap");
+            Route::get("/gudang-default-rajal", [FarmasiResepController::class, "gudang_default_rajal"])->name("farmasi.transaksi-resep.gudang-default-rajal");
+            Route::get('/obat/{gudang_id}', [FarmasiResepController::class, 'get_obat'])->name('farmasi.get-obat');
+            Route::get('/batch/{gudang_id}/{barang_id}', [FarmasiResepController::class, 'get_batch'])->name('farmasi.get-batch');
+            Route::put("/update/telaah/{id}", [FarmasiResepController::class, "update_telaah"])->name("farmasi.update.telaah");
+            Route::put('/update/resep/{id}', [FarmasiResepController::class, 'update'])->name('farmasi.transaksi-resep.update');
+            Route::delete("/destroy/{id}", [FarmasiResepController::class, "destroy"])->name("farmasi.transaksi-resep.delete");
+        });
+
+        Route::prefix('retur-resep')->group(function () {
+            Route::post('/store', [FarmasiReturResepController::class, 'store'])->name('farmasi.retur-barang.store');
+            Route::get("/get/item-patient/{id}", [FarmasiReturResepController::class, 'getItemPatient'])->name('farmasi.retur-barang.get.item-patient');
         });
     });
 
@@ -524,6 +546,14 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::post('/', [RujukAntarRSController::class, 'store'])->name('erm.rujuk-antar-rs.store');
             Route::get('/{id}', [RujukAntarRSController::class, 'getData'])->name('erm.rujuk-antar-rs.store');
         });
+
+        Route::prefix('infusion-monitors')->name('api.infusion.')->group(function () {
+            Route::get('/{registration}', [InfusionMonitorController::class, 'index'])->name('index');
+            Route::post('/', [InfusionMonitorController::class, 'store'])->name('store');
+            Route::get('/{monitor}/edit', [InfusionMonitorController::class, 'edit'])->name('edit');
+            Route::put('/{monitor}/update', [InfusionMonitorController::class, 'update'])->name('update');
+            Route::delete('/{monitor}', [InfusionMonitorController::class, 'destroy'])->name('destroy');
+        });
     });
     Route::prefix('poliklinik')->group(function () {
         Route::post('/filter-pasien', [ERMController::class, 'filterPasien'])->name('poliklinik.filter-pasien');
@@ -531,20 +561,106 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     });
 
     Route::prefix('erm')->group(function () {
+        Route::post('/surveilans-infeksi/store', [ERMController::class, 'storeSurveilansInfeksi'])->name('erm.surveilans-infeksi.store');
+        Route::post('/erm/discharge-planning/store', [ERMController::class, 'storeDischargePlanning'])->name('erm.discharge-planning.store');
+        Route::post('/erm/checklist-keperawatan/store', [ERMController::class, 'storeChecklistKeperawatan'])->name('erm.checklist-keperawatan.store');
+        Route::post('/erm/asesmen-awal-ranap/store', [ERMController::class, 'storeAsesmenAwalRanap'])->name('erm.asesmen-awal-ranap.store');
+        Route::post('/erm/asesmen-awal-ranap-anak/store', [ERMController::class, 'storeAsesmenAwalRanapAnak'])->name('erm.asesmen-awal-ranap-anak.store');
+        Route::post('/erm/asesmen-awal-ranap-lansia/store', [ERMController::class, 'storeAsesmenAwalRanapLansia'])->name('erm.asesmen-awal-ranap-lansia.store');
+        Route::post('/erm/asesmen-awal-ranap-neonatus/store', [ERMController::class, 'storeAsesmenAwalRanapNeonatus'])->name('erm.asesmen-awal-ranap-neonatus.store');
+        Route::post('/erm/asesmen-awal-kebidanan/store', [ERMController::class, 'storeAsesmenAwalKebidanan'])->name('erm.asesmen-awal-kebidanan.store');
+        Route::post('/erm/pengkajian-awal-neonatus', [ERMController::class, 'storeNeonatusInitialAssesmentDoctor'])->name('erm.pengkajian-awal-neonatus.store');
+        Route::post('/simrs/erm/store-asesmen-awal-dokter', [ERMController::class, 'storeAsesmenAwalDokter'])->name('erm.store.asesmen-awal-dokter');
+        Route::post('/simrs/erm/store-echocardiography', [ERMController::class, 'storeEchocardiography'])->name('erm.store.echocardiography');
+        Route::post('/simrs/erm/store-pemeriksaan-awal-ranap', [ERMController::class, 'storeInpatientInitialExamination'])->name('erm.store.pemeriksaan-awal-ranap');
+        Route::get('/plasma-status/{id}', [PlasmaDisplayRawatJalanController::class, 'getStatus']);
+
+        // Upload Dokumen
+        Route::get('/simrs/erm/dokumen/data/{registration}', [ERMController::class, 'getUploadedDocuments'])->name('erm.dokumen.data');
+        Route::post('/simrs/erm/dokumen/store', [ERMController::class, 'storeUploadedDocument'])->name('erm.dokumen.store');
+        Route::get('/simrs/erm/dokumen/view/{document}', [ERMController::class, 'viewUploadedDocument'])->name('erm.dokumen.view');
+        Route::delete('/simrs/erm/dokumen/destroy/{document}', [ERMController::class, 'destroyUploadedDocument'])->name('erm.dokumen.destroy');
+
+        // ==========================================================
+        // DATA UMUM & PENDUKUNG
+        // ==========================================================
         Route::get('/get-jadwal-dokter/{departement_id}', [CPPTController::class, 'getJadwalDokter']);
+
+        // ==========================================================
+        // PENGKAJIAN
+        // ==========================================================
         Route::get('/dokter-pengkajian/{type}/{registration_number}/get', [PengkajianDokterRajalController::class, 'getPengkajian'])->name('pengkajian.dokter-rajal.get');
         Route::get('/perawat-pengkajian/{type}/{registration_number}/get', [PengkajianController::class, 'getPengkajianRajal'])->name('pengkajian.perawat-rajal.get');
-        Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
-        Route::get('/dokter-cppt/get', [CPPTController::class, 'getCPPTDokter'])->name('cppt-dokter.get');
-        Route::get('/perawat-cppt/get', [CPPTController::class, 'getCPPT'])->name('cppt.get');
-        Route::post('/dokter-cppt/{type}/{registration_number}/store', [CPPTController::class, 'store'])->name('cppt.dokter-rajal.store');
-        Route::get('/dokter-cppt/{type}/{registration_number}/get', [CPPTController::class, 'getCPPT'])->name('cppt.dokter-rajal.get');
+
+        // ==========================================================
+        // CPPT (CATATAN PERKEMBANGAN PASIEN TERINTEGRASI)
+        // ==========================================================
+
+        // --- CREATE ---
+        // Endpoint ini menangani penyimpanan CPPT baru (bisa untuk dokter/perawat tergantung logika di controller)
+        Route::post('/cppt/{type}/{registration_number}/store', [CPPTController::class, 'store'])->name('cppt.store');
+
+        // --- READ (GET DATA) ---
+        // Endpoint spesifik untuk mengambil data CPPT Dokter
+        Route::get('/cppt/dokter/get', [CPPTController::class, 'getCPPTDokter'])->name('cppt.dokter.get');
+        // Endpoint spesifik untuk mengambil data CPPT Perawat/Lainnya
+        Route::get('/cppt/perawat/get', [CPPTController::class, 'getCPPT'])->name('cppt.perawat.get');
+
+        // --- UPDATE ---
+        // Endpoint untuk mengambil data satu CPPT spesifik yang akan diedit
+        Route::get('/cppt/{cppt}/edit', [CPPTController::class, 'edit'])->name('cppt.edit');
+        // Endpoint untuk menyimpan perubahan setelah diedit
+        Route::put('/cppt/{cppt}/update', [CPPTController::class, 'update'])->name('cppt.update');
+
+        // --- DELETE ---
+        Route::delete('/cppt/{cppt}/destroy', [CPPTController::class, 'destroy'])->name('cppt.destroy');
+
+        // --- AKSI LAINNYA ---
+        Route::get('/cppt/{cpptId}/sbar/get', [CPPTController::class, 'getSbar'])->name('cppt.sbar.get');
+        // Endpoint untuk menyimpan data dari form SBAR
+        Route::post('/cppt/{cpptId}/sbar', [SbarController::class, 'storeSbar'])->name('cppt.sbar.store');
+        // Endpoint untuk verifikasi CPPT
+        Route::post('/cppt/{cppt}/verify', [CPPTController::class, 'verify'])->name('cppt.verify');
+
+        // ==========================================================
+        // RESUME MEDIS
+        // ==========================================================
         Route::post('/dokter-resume-medis/store', [ResumeMedisRajalController::class, 'store'])->name('resume-medis.dokter-rajal.store');
         Route::get('/dokter-resume-medis-rajal/{type}/{registration_number}/get', [ResumeMedisRajalController::class, 'getResumeMedis'])->name('resume-medis.dokter-rajal.get');
-        // Route::post('/transfer/store', [CPPTController::class, 'getCPPT'])->name('pengkajian.transfer-pasien-antar-ruangan.store');
     });
 
     Route::prefix('master-data')->group(function () {
+
+        Route::prefix('interventions')->group(function () {
+            // Routes untuk Master Intervensi (bukan apiResource)
+            Route::get('/', [InterventionController::class, 'index']);
+            Route::post('/', [InterventionController::class, 'store']);
+            Route::get('/{id}/edit', [InterventionController::class, 'edit']);
+            Route::put('/{id}', [InterventionController::class, 'update']);
+            Route::patch('/{id}', [InterventionController::class, 'update']);
+            Route::delete('/{id}', [InterventionController::class, 'destroy']);
+        });
+
+        Route::prefix('diagnosa-keperawatan')->group(function () {
+            Route::get('diagnosis-categories/select-all', [DiagnosisCategoryController::class, 'selectAll']);
+            Route::get('diagnosis-categories', [DiagnosisCategoryController::class, 'index']);
+            Route::post('diagnosis-categories', [DiagnosisCategoryController::class, 'store']);
+            Route::get('diagnosis-categories/{diagnosis_category}', [DiagnosisCategoryController::class, 'show']);
+            Route::get('diagnosis-categories/{diagnosis_category}/edit', [DiagnosisCategoryController::class, 'edit']);
+            Route::put('diagnosis-categories/{diagnosis_category}', [DiagnosisCategoryController::class, 'update']);
+            Route::patch('diagnosis-categories/{diagnosis_category}', [DiagnosisCategoryController::class, 'update']);
+            Route::delete('diagnosis-categories/{diagnosis_category}', [DiagnosisCategoryController::class, 'destroy']);
+
+            // Routes untuk Diagnosa Keperawatan
+            Route::get('nursing-diagnoses', [NursingDiagnosisController::class, 'index']);
+            Route::post('nursing-diagnoses', [NursingDiagnosisController::class, 'store']);
+            Route::get('nursing-diagnoses/{nursing_diagnosis}', [NursingDiagnosisController::class, 'show']);
+            Route::get('nursing-diagnoses/{nursing_diagnosis}/edit', [NursingDiagnosisController::class, 'edit']);
+            Route::put('nursing-diagnoses/{nursing_diagnosis}', [NursingDiagnosisController::class, 'update']);
+            Route::patch('nursing-diagnoses/{nursing_diagnosis}', [NursingDiagnosisController::class, 'update']);
+            Route::delete('nursing-diagnoses/{nursing_diagnosis}', [NursingDiagnosisController::class, 'destroy']);
+        });
+
         Route::prefix('employee')->group(function () {
             Route::get('/doctors', [EmployeeController::class, 'getDoctors']);
         });
@@ -642,6 +758,10 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::prefix('ethnics')->group(function () {
                 Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');
             });
+
+            Route::prefix('ethnics')->group(function () {
+                Route::post('create', [EthnicController::class, 'create'])->name('master-data.ethnics');
+            });
         });
 
         Route::prefix('penunjang-medis')->group(function () {
@@ -711,6 +831,13 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
                 Route::get('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'getNilaiNormal'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.get');
                 Route::patch('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'update'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.update');
                 Route::delete('/nilai-normal-parameter/{id}', [NilaiNormalLaboratoriumController::class, 'delete'])->name('master-data.penunjang-medis.laboratorium.nilai-normal-parameter.delete');
+            });
+
+            Route::prefix("farmasi")->group(function () {
+                Route::prefix("signa")->group(function () {
+                    Route::post("/create", [FarmasiSignaController::class, "store"])->name("master-data.penunjang-medis.farmasi.signa.store");
+                    Route::delete("/delete/{id}", [FarmasiSignaController::class, "destroy"])->name("master-data.penunjang-medis.farmasi.signa.delete");
+                });
             });
         });
 
@@ -812,3 +939,7 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::get('/getKelurahan', [LocationController::class, 'getKelurahan'])->name('getKelurahan');
     Route::get('/get-kecamatan-by-kelurahan', [LocationController::class, 'getKecamatanByKelurahan'])->name('getKecamatanByKelurahan');
 });
+
+Route::get('/tts', [TtsController::class, 'generateSpeech']);
+Route::post('/antrian/panggil', [AntrianController::class, 'panggilPasien'])->name('api.antrian.panggil');
+Route::get('/plasma-status/rawat-jalan/{plasmaDisplayRawatJalan}', [PlasmaDisplayRawatJalanController::class, 'getStatus']);

@@ -229,7 +229,18 @@
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-6">
-                                        {{-- /// --}}
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-xl-2" style="text-align: right">
+                                                    <label class="form-label text-end" for="restriksi">
+                                                        Restriksi
+                                                    </label>
+                                                </div>
+                                                <div class="col-xl">
+                                                    <textarea name="restriksi" class="form-control" id="restriksi">{{ $barang->restriksi }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="col-xl-6">
@@ -267,9 +278,16 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" value="{{ $barang->principal }}"
-                                                        style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
-                                                        class="form-control" id="principal" name="principal">
+                                                    <select name="principal" id="principal" class="form-control">
+                                                        <option value="" disabled hidden>Pilih Principal
+                                                        </option>
+                                                        @foreach ($pabriks as $item)
+                                                            <option value="{{ $item->id }}"
+                                                                {{ $barang->principal == $item->id ? 'selected' : '' }}>
+                                                                {{ $item->nama }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -595,7 +613,8 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" name="alasan_edit" required class="form-control">
+                                                    <input type="text" name="alasan_edit" required
+                                                        class="form-control">
                                                 </div>
                                             </div>
                                         </div>

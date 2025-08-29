@@ -13,6 +13,7 @@ use App\Http\Controllers\API\ShiftController;
 use App\Http\Controllers\API\BankEmployeeController;
 use App\Http\Controllers\API\DailyWasteInputController;
 use App\Http\Controllers\API\DayOffRequestController;
+use App\Http\Controllers\API\DriverController;
 use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\KPIController;
 use App\Http\Controllers\API\StructureController;
@@ -45,10 +46,18 @@ use App\Models\AttendanceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\EmployeeLeaveController;
+use App\Http\Controllers\API\InspectionController;
+use App\Http\Controllers\API\InspectionItemController;
+use App\Http\Controllers\API\InternalVehicleController;
+use App\Http\Controllers\API\InternalVehicleVendorController;
+use App\Http\Controllers\API\KunjunganController;
 use App\Http\Controllers\API\PesanController;
 use App\Http\Controllers\Api\WasteTransportController;
 use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\LaporanInternalController;
+use App\Http\Controllers\API\VehicleLogController;
+use App\Http\Controllers\API\VehicleServiceController;
+use App\Http\Controllers\API\WorkshopVendorController;
 use App\Http\Controllers\WhatsappController;
 
 /*
@@ -394,5 +403,39 @@ Route::apiResource('daily-inputs', DailyWasteInputController::class);
 Route::apiResource('waste-transports', WasteTransportController::class);
 Route::get('waste-transports/{id}/edit', [WasteTransportController::class, 'edit']);
 Route::delete('waste-transports/{id}', [WasteTransportController::class, 'destroy']);
+
+Route::prefix('internal')->group(function () {
+    // Resource untuk kendaraan internal (CRUD internal_vehicles)
+    Route::apiResource('internal-vehicles', InternalVehicleController::class);
+
+    // Resource untuk driver (CRUD drivers)
+    Route::apiResource('drivers', DriverController::class);
+
+    // Resource untuk item inspeksi kendaraan (CRUD inspection_items)
+    Route::apiResource('inspection-items', InspectionItemController::class);
+
+    // Resource untuk vendor kendaraan internal (CRUD internal_vehicle_vendors)
+    Route::apiResource('internal-vehicle-vendors', InternalVehicleVendorController::class);
+
+    // Resource untuk vendor bengkel (CRUD workshop_vendors)
+    Route::apiResource('workshop-vendors', WorkshopVendorController::class);
+
+    // Endpoint untuk mendapatkan odometer terakhir kendaraan tertentu
+    Route::get('internal-vehicles/{vehicle}/last-odometer', [VehicleLogController::class, 'getLastOdometer']);
+
+    // Resource untuk log kendaraan (CRUD vehicle_logs)
+    Route::apiResource('vehicle-logs', VehicleLogController::class);
+
+    // Route resource untuk inspeksi kendaraan internal, hanya mengaktifkan index (list) dan store (buat baru)
+    Route::apiResource('inspections', InspectionController::class)->except(['update']); // Kita tidak perlu update, hanya show & destroy
+
+    Route::get('workshop-vendors-list', [VehicleServiceController::class, 'getWorkshopVendors']);
+
+    Route::apiResource('vehicle-services', VehicleServiceController::class);
+});
+
+Route::apiResource('kunjungan', KunjunganController::class);
+
+
 
 require __DIR__ . '/api-simrs.php';

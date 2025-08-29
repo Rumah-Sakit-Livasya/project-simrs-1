@@ -3,507 +3,307 @@
     @if (isset($registration) || $registration != null)
         <div class="tab-content p-3">
             <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
-                <form action="javascript:void(0)" id="pengkajian_perawat_form" method="POST">
+                <form action="javascript:void(0)" id="pengkajian_perawat_form" method="POST" autocomplete="off">
                     @csrf
                     @method('POST')
                     @include('pages.simrs.erm.partials.detail-pasien')
-                    <hr style="border-color: #868686; margin-bottom: 50px;">
-                    <header class="text-primary text-center mt-5">
-                        <h2 class="font-weight-bold mt-5">PENGKAJIAN PERAWAT</h2>
+                    <hr class="mb-4" style="border-color: #868686;">
+                    <header class="text-primary text-center mb-4">
+                        <h2 class="fw-bold">PENGKAJIAN PERAWAT</h2>
                     </header>
-                    <div class="row mt-5">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="tgl_masuk" class="control-label text-primary">Tanggal &amp;
-                                    jam
-                                    masuk</label>
-                                <div class="form-group mb-3">
-                                    <div class="input-group">
-                                        <input type="date" name="tgl_masuk" class="form-control " placeholder="Tanggal"
-                                            id="tgl_masuk"
-                                            value="{{ $pengkajian?->tgl_masuk?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
-                                        <input type="time" name="jam_masuk" class="form-control " placeholder="Jam"
-                                            id="jam_masuk" value="{{ $pengkajian?->jam_masuk ?? '' }}">
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="tgl_masuk" class="form-label text-primary">Tanggal Masuk</label>
+                            <input type="date" name="tgl_masuk" class="form-control" id="tgl_masuk"
+                                value="{{ $pengkajian?->tgl_masuk?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="tgl_masuk" class="control-label text-primary">Tanggal &amp;
-                                    jam
-                                    dilayani</label>
-                                <div class="input-group">
-                                    <input type="date" name="tgl_dilayani" class="form-control" placeholder="Tanggal"
-                                        id="tgl_dilayani"
-                                        value="{{ $pengkajian?->tgl_dilayani?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
-                                    <input type="time" name="jam_dilayani" class="form-control" placeholder="Jam"
-                                        id="jam_dilayani" value="{{ $pengkajian?->jam_dilayani ?? '' }}">
-                                </div>
-                            </div>
+                        <div class="col-md-3">
+                            <label for="jam_masuk" class="form-label text-primary">Jam Masuk</label>
+                            <input type="time" name="jam_masuk" class="form-control" id="jam_masuk"
+                                value="{{ $pengkajian?->jam_masuk ?? '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="tgl_dilayani" class="form-label text-primary">Tanggal Dilayani</label>
+                            <input type="date" name="tgl_dilayani" class="form-control" id="tgl_dilayani"
+                                value="{{ $pengkajian?->tgl_dilayani?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="jam_dilayani" class="form-label text-primary">Jam Dilayani</label>
+                            <input type="time" name="jam_dilayani" class="form-control" id="jam_dilayani"
+                                value="{{ $pengkajian?->jam_dilayani ?? '' }}">
                         </div>
                         <div class="col-md-12">
-                            <div class="form-group mb-3">
-                                <label for="keluhan_utama" class="control-label text-primary">Keluhan
-                                    utama
-                                    *</label>
-                                <textarea class="form-control" id="keluhan_utama" name="keluhan_utama" rows="3" required=""
-                                    data-label="Keluhan utama">{{ $pengkajian?->keluhan_utama }}</textarea>
-                            </div>
+                            <label for="keluhan_utama" class="form-label text-primary">Keluhan Utama <span
+                                    class="text-danger">*</span></label>
+                            <textarea class="form-control" id="keluhan_utama" name="keluhan_utama" rows="2" required
+                                data-label="Keluhan utama" placeholder="Tuliskan keluhan utama pasien...">{{ $pengkajian?->keluhan_utama }}</textarea>
                         </div>
                     </div>
-                    <header class="text-warning margin-top-lg mt-3">
-                        <h4 class=" mt-5 font-weight-bold">TANDA TANDA VITAL</h4>
-                    </header>
-                    <div class="row mt-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label class="text-primary" for="pr">Nadi (PR)</label>
-                                <div class="input-group">
-                                    <div class="input-group">
-                                        <input id="pr" type="text" name="pr" class="form-control"
-                                            value="{{ $pengkajian?->pr }}">
-                                        <div class="input-group-append">
-                                            <span class="input-group-text">x/menit</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="rr" class="text-primary">Respirasi (RR)</label>
-                                <div class="input-group">
-                                    <input class="form-control numeric" id="rr" name="rr" type="text"
-                                        value="{{ $pengkajian?->rr }}">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">x/menit</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="bp" class="text-primary">Tensi (BP)</label>
-                                <div class="input-group">
-                                    <input class="form-control numeric" id="bp" name="bp" type="text"
-                                        value="{{ $pengkajian?->bp }}">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">mmHg</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="temperatur" class="text-primary">Suhu (T)</label>
-                                <div class="input-group">
-                                    <input class="form-control numeric" id="temperatur" name="temperatur" type="text"
-                                        value="{{ $pengkajian?->temperatur }}">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">C°</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="height" class="text-primary">Tinggi Badan</label>
-                                <div class="input-group">
-                                    <input class="form-control numeric calc-bmi" id="body_height" name="body_height"
-                                        type="text" value="{{ $pengkajian?->body_height }}">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">Cm</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="weight" class="text-primary">Berat Badan</label>
-                                <div class="input-group">
-                                    <input class="form-control numeric calc-bmi" id="body_weight" name="body_weight"
-                                        type="text" value="{{ $pengkajian?->body_weight }}">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">Kg</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="bmi" class="text-primary">Index Massa Tubuh</label>
-                                <div class="input-group">
-                                    <input class="form-control numeric" id="bmi" name="bmi"
-                                        readonly="readonly" type="text" value="{{ $pengkajian?->bmi }}">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">Kg/m²</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="kat_bmi" class="text-primary">Kategori IMT</label>
-                                <div class="input-group">
-                                    <input class="form-control" id="kat_bmi" name="kat_bmi" readonly="readonly"
-                                        type="text" value="{{ $pengkajian?->kat_bmi }}">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="sp02" class="text-primary">SP 02</label>
-                                <div class="input-group">
-                                    <input class="form-control" id="sp02" name="sp02" type="text"
-                                        value="{{ $pengkajian?->sp02 }}">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">%</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="lingkar_kepala" class="text-primary">Lingkar
-                                    Kepala</label>
-                                <div class="input-group">
-                                    <input class="form-control" id="lingkar_kepala" name="lingkar_kepala" type="text"
-                                        value="{{ $pengkajian?->lingkar_kepala }}">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">Cm</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="diagnosa-keperawatan" class="control-label text-primary">Diagnosa
-                                    Keperawatan</label>
-                                <select name="diagnosa_keperawatan" id="diagnosa-keperawatan"
-                                    class="select2 form-select">
-                                    <option value="-">-</option>
-                                    <option value="Gangguan rasa nyaman">Gangguan rasa nyaman</option>`
-                                    <option value="Nyeri">Nyeri</option>
-                                    <option value="Pola Nafas tidak efektif">Pola Nafas tidak efektif
-                                    </option>
-                                    <option value="Bersihan jalan nafas tidak efektif">Bersihan jalan
-                                        nafas
-                                        tidak
-                                        efektif
-                                    </option>
-                                    <option value="Nyeri Akut">Nyeri Akut</option>
-                                    <option value="Nyeri Kronis">Nyeri Kronis</option>
-                                    <option value="Resiko Infeksi">Resiko Infeksi</option>
-                                    <option value="Harga diri Rendah">Harga diri Rendah</option>
-                                    <option value="Resiko Perilaku Kekerasan">Resiko Perilaku Kekerasan
-                                    </option>
-                                    <option value="Halusinasi">Halusinasi</option>
-                                    <option value="Isolasi Sosial">Isolasi Sosial</option>
-                                    <option value="Resiko Bunuh Diri">Resiko Bunuh Diri</option>
-                                    <option value="Waham">Waham</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="rencana-tindak-lanjut" class="control-label text-primary">Rencana
-                                    Tindak
-                                    Lanjut</label>
-                                <select name="rencana_tindak_lanjut" id="rencana-tindak-lanjut"
-                                    class="select2 form-select">
-                                    <option value="-">-</option>
-                                    <option value="Kolaborasi Dokter">Kolaborasi Dokter</option>
-                                    <option value="Perawatan Luka">Perawatan Luka</option>
-                                    <option value="Memberikan Edukasi">Memberikan Edukasi</option>
-                                    <option value="Mengukur tanda - tanda vital">Mengukur tanda - tanda
-                                        vital
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <header class="text-secondary mt-3">
-                        <h4 class="mt-5 font-weight-bold">ALERGI DAN REAKSI</h4>
-                    </header>
-                    <div class="row mt-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <label for="alergi_obat" class="control-label text-primary margin-tb-10 d-block">Alergi
-                                    Obat</label>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" value="Ya" name="alergi_obat"
-                                        id="alergi_obat1" @if ($pengkajian?->alergi_obat == 'Ya') checked @endif>
-                                    <label class="custom-control-label text-primary" for="alergi_obat1">Ya</label>
-                                </div>
-                                <input name="ket_alergi_obat" id="ket_alergi_obat"
-                                    style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
-                                    type="text"
-                                    @if ($pengkajian?->alergi_obat == 'Ya') value="{{ $pengkajian?->ket_alergi_obat }}" @endif>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" value="Tidak" name="alergi_obat"
-                                        id="alergi_obat2" @if ($pengkajian?->alergi_obat == 'Tidak') checked @endif>
-                                    <label class="custom-control-label text-primary" for="alergi_obat2">Tidak</label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="alergi_makanan" class="control-label text-primary margin-tb-10 d-block">Alergi
-                                    Makanan</label>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" value="Ya"
-                                        name="alergi_makanan" id="alergi_makanan1"
-                                        @if ($pengkajian?->alergi_makanan == 'Ya') checked @endif>
-                                    <label class="custom-control-label text-primary" for="alergi_makanan1">Ya</label>
-                                </div>
-                                <input name="ket_alergi_makanan" id="ket_alergi_makanan"
-                                    style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
-                                    type="text"
-                                    @if ($pengkajian?->alergi_makanan == 'Ya') value="{{ $pengkajian?->ket_alergi_makanan }}" @endif>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" value="Tidak"
-                                        name="alergi_makanan" id="alergi_makanan2"
-                                        @if ($pengkajian?->alergi_makanan == 'Tidak') checked @endif>
-                                    <label class="custom-control-label text-primary" for="alergi_makanan2">Tidak</label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="alergi_lainnya" class="control-label text-primary margin-tb-10 d-block">Alergi
-                                    Lainnya</label>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" value="Ya"
-                                        name="alergi_lainnya" id="alergi_lainnya1"
-                                        @if ($pengkajian?->alergi_lainnya == 'Ya') checked @endif>
-                                    <label class="custom-control-label text-primary" for="alergi_lainnya1">Ya</label>
-                                </div>
-                                <input name="ket_alergi_lainnya" id="ket_alergi_lainnya"
-                                    style="margin-right: 10px; width: 200px;border-left: none;border-right: none;border-top: none;border-bottom-color: rgba(12, 12, 12, 0.12);"
-                                    type="text"
-                                    @if ($pengkajian?->alergi_lainnya == 'Ya') value="{{ $pengkajian?->ket_alergi_lainnya }}" @endif>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" class="custom-control-input" value="Tidak"
-                                        name="alergi_lainnya" id="alergi_lainnya2"
-                                        @if ($pengkajian?->alergi_lainnya == 'Tidak') checked @endif>
-                                    <label class="custom-control-label text-primary" for="alergi_lainnya2">Tidak</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group mb-3">
-                                <label for="reaksi_alergi_obat" class="control-label text-primary ">Reaksi
-                                    terhadap
-                                    alergi
-                                    obat</label>
-                                <input name="reaksi_alergi_obat" id="reaksi_alergi_obat" class="form-control alergi"
-                                    type="text" value="{{ $pengkajian?->reaksi_alergi_obat }}">
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="reaksi_alergi_makanan" class="control-label text-primary">Reaksi
-                                    terhadap
-                                    alergi
-                                    makanan</label>
-                                <input name="reaksi_alergi_makanan" id="reaksi_alergi_makanan"
-                                    class="form-control alergi" type="text"
-                                    value="{{ $pengkajian?->reaksi_alergi_makanan }}">
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="reaksi_alergi_lainnya" class="control-label text-primary">Reaksi
-                                    terhadap
-                                    alergi
-                                    lainnya</label>
-                                <input name="reaksi_alergi_lainnya" id="reaksi_alergi_lainnya"
-                                    class="form-control alergi" type="text"
-                                    value="{{ $pengkajian?->reaksi_alergi_lainnya }}">
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="form-group mb-3">
-                                <label for="kondisi_khusus1" class="control-label text-primary margin-tb-10">Gelang tanda
-                                    alergi</label>
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" value="1" name="gelang"
-                                        id="gelang1" {{ $pengkajian?->gelang == 1 ? 'checked' : '' }}>
-                                    <label class="custom-control-label text-primary" for="gelang1">Dipasang
-                                        (warna
-                                        merah)</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <header class="text-secondary">
-                        <h4 class="mt-5 font-weight-bold">SKRINING NYERI</h4>
-                    </header>
-                    <div class="row mt-3">
-                        <div class="col-md-12 mb-4 d-flex flex-wrap justify-content-between">
-                            <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                <img src="{{ asset('img/emoticon/1.jpg') }}" class="mb-2 img-fluid">
-                                <div class="text-center">
-                                    <span class="badge badge-warning text-white" data-skor="0">0</span>
-                                </div>
-                            </div>
-                            <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                <img src="{{ asset('img/emoticon/2.jpg') }}" class="mb-2 img-fluid">
-                                <div class="text-center">
-                                    <span class="badge badge-success" data-skor="1">1</span>
-                                    <span class="badge badge-success" data-skor="2">2</span>
-                                </div>
-                            </div>
-                            <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                <img src="{{ asset('img/emoticon/3.jpg') }}" class="mb-2 img-fluid">
-                                <div class="text-center">
-                                    <span class="badge badge-primary" data-skor="3">3</span>
-                                    <span class="badge badge-primary" data-skor="4">4</span>
-                                </div>
-                            </div>
-                            <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                <img src="{{ asset('img/emoticon/4.jpg') }}" class="mb-2 img-fluid">
-                                <div class="text-center">
-                                    <span class="badge badge-info" data-skor="5">5</span>
-                                    <span class="badge badge-info" data-skor="6">6</span>
-                                </div>
-                            </div>
-                            <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                <img src="{{ asset('img/emoticon/5.jpg') }}" class="mb-2 img-fluid">
-                                <div class="text-center">
-                                    <span class="badge badge-orange" data-skor="7">7</span>
-                                    <span class="badge badge-orange" data-skor="8">8</span>
-                                </div>
-                            </div>
-                            <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                <img src="{{ asset('img/emoticon/6.jpg') }}" class="mb-2 img-fluid">
-                                <div class="text-center">
-                                    <span class="badge badge-red" data-skor="9">9</span>
-                                    <span class="badge badge-red" data-skor="10">10</span>
-                                </div>
-                            </div>
-                            <div class="img-baker d-flex flex-column align-items-center" style="width: 14%;">
-                                <input name="skor_nyeri" id="skor_nyeri" class="form-control text-center mt-3"
-                                    style="font-size: 3rem; height: 60px;" type="text"
-                                    value="{{ $pengkajian?->skor_nyeri }}">
-                                <label for="skor_nyeri" class="control-label text-primary">Skor</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="provokatif" class="control-label text-primary">Provokatif</label>
-                                <input name="provokatif" id="provokatif" class="form-control" type="text"
-                                    value="{{ $pengkajian?->provokatif }}">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="quality" class="control-label text-primary">Quality</label>
-                                <input name="quality" id="quality" class="form-control" type="text"
-                                    value="{{ $pengkajian?->quality }}">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="region" class="control-label text-primary">Region</label>
-                                <input name="region" id="region" class="form-control" type="text"
-                                    value="{{ $pengkajian?->region }}">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="time" class="control-label text-primary">Time</label>
-                                <input name="time" id="time" class="form-control" type="text"
-                                    value="{{ $pengkajian?->time }}">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="nyeri" class="control-label text-primary">Nyeri</label>
-                                <select name="nyeri" id="nyeri" class="select2">
-                                    <option value="-">-</option>
-                                    <option value="Nyeri kronis">Nyeri kronis</option>
-                                    <option value="Nyeri akut">Nyeri akut</option>
-                                    <option value="TIdak ada nyeri">TIdak ada nyeri</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-9 mb-3">
-                            <div class="form-group">
-                                <label for="nyeri_hilang" class="control-label text-primary">Nyeri
-                                    hilang
-                                    apabila</label>
-                                <input name="nyeri_hilang" id="nyeri_hilang" class="form-control"
-                                    value="{{ $pengkajian?->nyeri_hilang }}" type="text">
-                            </div>
-                        </div>
-                    </div>
-                    <header class="text-secondary">
-                        <h4 class="mt-5 font-weight-bold">SKRINING GIZI</h4>
-                    </header>
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="penurunan_bb" class="control-label text-primary">Penurunan
-                                    berat
-                                    badan
-                                    6
-                                    bln
-                                    terakhir</label>
-                                <select name="penurunan_bb" id="penurunan_bb" class="select2">
-                                    <option></option>
-                                    <option value="Tidak">Tidak</option>
-                                    <option value="Tidak yakin / Ragu-ragu">Tidak yakin / Ragu-ragu
-                                    </option>
-                                    <option value="Ya, 1-5 Kg">Ya, 1-5 Kg</option>
-                                    <option value="Ya, 6-10 Kg">Ya, 6-10 Kg</option>
-                                    <option value="Ya, 11-15 Kg">Ya, 11-15 Kg</option>
-                                    <option value="Ya, > 15 Kg">Ya, &gt; 15 Kg</option>
-                                    <option value="Ya, tidak tahu berapa Kg">Ya, tidak tahu berapa Kg
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="asupan_makan" class="control-label text-primary">Asupan
-                                    makanan
-                                    pasien</label>
-                                <select name="asupan_makan" id="asupan_makan" class="select2">
-                                    <option></option>
-                                    <option value="Normal">Normal</option>
-                                    <option value="Berkurang, penurunan nafsu makan/kesulitan menerima makan"
-                                        data-skor="1">
-                                        Berkurang, penurunan nafsu makan/kesulitan menerima makan
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <label for="kondisi_khusus1" class="control-label text-primary mt-3">Pasien dalam
-                        kondisi
-                        khusus</label>
-                    @php
-                        $kondisi_khusus_terpilih = is_array($pengkajian?->kondisi_khusus)
-                            ? $pengkajian?->kondisi_khusus
-                            : json_decode($pengkajian?->kondisi_khusus ?? '[]', true);
-                    @endphp
 
-                    <div class="row mt-3">
-                        @foreach (['Anak usia 1-5 tahun', 'Lansia > 60 tahun', 'Penyakit kronis dengan komplikasi', 'Kanker stadium III/IV', 'HIV/AIDS', 'TB', 'Bedah mayor degestif', 'Luka bakar > 20%'] as $index => $kondisi)
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <div class="form-radio">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="kondisi_khusus[]" id="kondisi_khusus{{ $index + 1 }}"
-                                                value="{{ $kondisi }}" type="checkbox" class="custom-control-input"
-                                                {{ in_array($kondisi, $kondisi_khusus_terpilih) ? 'checked' : '' }}>
-                                            <span class="custom-control-label text-primary">{{ $kondisi }}</span>
-                                        </label>
-                                    </div>
+                    <header class="text-warning mt-4 mb-2">
+                        <h4 class="fw-bold">TANDA TANDA VITAL</h4>
+                    </header>
+                    <div class="row g-3">
+                        @php
+                            $vitalSigns = [
+                                ['label' => 'Nadi (PR)', 'name' => 'pr', 'unit' => 'x/menit'],
+                                ['label' => 'Respirasi (RR)', 'name' => 'rr', 'unit' => 'x/menit'],
+                                ['label' => 'Tensi (BP)', 'name' => 'bp', 'unit' => 'mmHg'],
+                                ['label' => 'Suhu (T)', 'name' => 'temperatur', 'unit' => 'C°'],
+                                [
+                                    'label' => 'Tinggi Badan',
+                                    'name' => 'body_height',
+                                    'unit' => 'Cm',
+                                    'class' => 'calc-bmi',
+                                ],
+                                [
+                                    'label' => 'Berat Badan',
+                                    'name' => 'body_weight',
+                                    'unit' => 'Kg',
+                                    'class' => 'calc-bmi',
+                                ],
+                                [
+                                    'label' => 'Index Massa Tubuh',
+                                    'name' => 'bmi',
+                                    'unit' => 'Kg/m²',
+                                    'readonly' => true,
+                                ],
+                                [
+                                    'label' => 'Kategori IMT',
+                                    'name' => 'kat_bmi',
+                                    'unit' => '',
+                                    'readonly' => true,
+                                    'type' => 'text',
+                                ],
+                                ['label' => 'SP 02', 'name' => 'sp02', 'unit' => '%'],
+                                ['label' => 'Lingkar Kepala', 'name' => 'lingkar_kepala', 'unit' => 'Cm'],
+                            ];
+                        @endphp
+                        @foreach ($vitalSigns as $vs)
+                            <div class="col-md-4 col-6">
+                                <label for="{{ $vs['name'] }}" class="form-label text-primary">{{ $vs['label'] }}</label>
+                                <div class="input-group mb-2">
+                                    <input class="form-control numeric {{ $vs['class'] ?? '' }}" id="{{ $vs['name'] }}"
+                                        name="{{ $vs['name'] }}" type="{{ $vs['type'] ?? 'number' }}"
+                                        value="{{ $pengkajian?->{$vs['name']} }}"
+                                        @if (!empty($vs['readonly'])) readonly @endif>
+                                    @if ($vs['unit'])
+                                        <span class="input-group-text bg-light">{{ $vs['unit'] }}</span>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
+                        <div class="col-md-4 col-12">
+                            <label for="diagnosa-keperawatan" class="form-label text-primary">Diagnosa Keperawatan</label>
+                            <select name="diagnosa_keperawatan" id="diagnosa-keperawatan" class="form-select select2">
+                                <option value="-">-</option>
+                                <option value="Gangguan rasa nyaman">Gangguan rasa nyaman</option>
+                                <option value="Nyeri">Nyeri</option>
+                                <option value="Pola Nafas tidak efektif">Pola Nafas tidak efektif</option>
+                                <option value="Bersihan jalan nafas tidak efektif">Bersihan jalan nafas tidak efektif
+                                </option>
+                                <option value="Nyeri Akut">Nyeri Akut</option>
+                                <option value="Nyeri Kronis">Nyeri Kronis</option>
+                                <option value="Resiko Infeksi">Resiko Infeksi</option>
+                                <option value="Harga diri Rendah">Harga diri Rendah</option>
+                                <option value="Resiko Perilaku Kekerasan">Resiko Perilaku Kekerasan</option>
+                                <option value="Halusinasi">Halusinasi</option>
+                                <option value="Isolasi Sosial">Isolasi Sosial</option>
+                                <option value="Resiko Bunuh Diri">Resiko Bunuh Diri</option>
+                                <option value="Waham">Waham</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-12">
+                            <label for="rencana-tindak-lanjut" class="form-label text-primary">Rencana Tindak Lanjut</label>
+                            <select name="rencana_tindak_lanjut" id="rencana-tindak-lanjut" class="form-select select2">
+                                <option value="-">-</option>
+                                <option value="Kolaborasi Dokter">Kolaborasi Dokter</option>
+                                <option value="Perawatan Luka">Perawatan Luka</option>
+                                <option value="Memberikan Edukasi">Memberikan Edukasi</option>
+                                <option value="Mengukur tanda - tanda vital">Mengukur tanda - tanda vital</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <header class="text-secondary">
-                        <h4 class="mt-5 font-weight-bold">RIWAYAT IMUNISASI DASAR</h4>
+                    <header class="text-secondary mt-4 mb-2">
+                        <h4 class="fw-bold">ALERGI DAN REAKSI</h4>
+                    </header>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            @foreach (['obat' => 'Alergi Obat', 'makanan' => 'Alergi Makanan', 'lainnya' => 'Alergi Lainnya'] as $key => $label)
+                                <div class="mb-3">
+                                    <label class="form-label text-primary">{{ $label }}</label>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio"
+                                                name="alergi_{{ $key }}" id="alergi_{{ $key }}1"
+                                                value="Ya" @if ($pengkajian?->{'alergi_' . $key} == 'Ya') checked @endif>
+                                            <label class="form-check-label" for="alergi_{{ $key }}1">Ya</label>
+                                        </div>
+                                        <input name="ket_alergi_{{ $key }}" id="ket_alergi_{{ $key }}"
+                                            class="form-control form-control-sm mx-2"
+                                            style="max-width: 180px; border-radius: 0.25rem;" type="text"
+                                            @if ($pengkajian?->{'alergi_' . $key} == 'Ya') value="{{ $pengkajian?->{'ket_alergi_' . $key} }}" @endif
+                                            placeholder="Keterangan">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio"
+                                                name="alergi_{{ $key }}" id="alergi_{{ $key }}2"
+                                                value="Tidak" @if ($pengkajian?->{'alergi_' . $key} == 'Tidak') checked @endif>
+                                            <label class="form-check-label"
+                                                for="alergi_{{ $key }}2">Tidak</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" value="1" name="gelang"
+                                    id="gelang1" {{ $pengkajian?->gelang == 1 ? 'checked' : '' }}>
+                                <label class="form-check-label text-primary" for="gelang1">Gelang tanda alergi (warna
+                                    merah)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            @foreach (['obat' => 'Reaksi terhadap alergi obat', 'makanan' => 'Reaksi terhadap alergi makanan', 'lainnya' => 'Reaksi terhadap alergi lainnya'] as $key => $label)
+                                <div class="form-floating mb-3">
+                                    <input name="reaksi_alergi_{{ $key }}"
+                                        id="reaksi_alergi_{{ $key }}" class="form-control" type="text"
+                                        value="{{ $pengkajian?->{'reaksi_alergi_' . $key} }}">
+                                    <label for="reaksi_alergi_{{ $key }}"
+                                        class="text-primary">{{ $label }}</label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <header class="text-secondary mt-4 mb-2">
+                        <h4 class="fw-bold">SKRINING NYERI</h4>
+                    </header>
+                    <div class="row g-3">
+                        <div class="col-12 mb-4">
+                            <div class="d-flex flex-wrap justify-content-between align-items-end">
+                                @for ($i = 1; $i <= 6; $i++)
+                                    <div class="img-baker d-flex flex-column align-items-center" style="width: 13%;">
+                                        <img src="{{ asset('img/emoticon/' . $i . '.jpg') }}" class="mb-2 img-fluid"
+                                            style="max-width: 60px;">
+                                        <div class="text-center">
+                                            @if ($i == 1)
+                                                <span class="badge bg-warning text-white" data-skor="0">0</span>
+                                            @elseif ($i == 2)
+                                                <span class="badge bg-success" data-skor="1">1</span>
+                                                <span class="badge bg-success" data-skor="2">2</span>
+                                            @elseif ($i == 3)
+                                                <span class="badge bg-primary" data-skor="3">3</span>
+                                                <span class="badge bg-primary" data-skor="4">4</span>
+                                            @elseif ($i == 4)
+                                                <span class="badge bg-info" data-skor="5">5</span>
+                                                <span class="badge bg-info" data-skor="6">6</span>
+                                            @elseif ($i == 5)
+                                                <span class="badge" style="background:#ff9800;color:#fff"
+                                                    data-skor="7">7</span>
+                                                <span class="badge" style="background:#ff9800;color:#fff"
+                                                    data-skor="8">8</span>
+                                            @elseif ($i == 6)
+                                                <span class="badge bg-danger" data-skor="9">9</span>
+                                                <span class="badge bg-danger" data-skor="10">10</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endfor
+                                <div class="img-baker d-flex flex-column align-items-center" style="width: 13%;">
+                                    <input name="skor_nyeri" id="skor_nyeri" class="form-control text-center mt-3"
+                                        style="font-size: 2rem; height: 50px;" type="number"
+                                        value="{{ $pengkajian?->skor_nyeri }}">
+                                    <label for="skor_nyeri" class="control-label text-primary">Skor</label>
+                                </div>
+                            </div>
+                        </div>
+                        @foreach ([['provokatif', 'Provokatif'], ['quality', 'Quality'], ['region', 'Region'], ['time', 'Time']] as [$name, $label])
+                            <div class="col-md-3">
+                                <label for="{{ $name }}"
+                                    class="form-label text-primary">{{ $label }}</label>
+                                <input name="{{ $name }}" id="{{ $name }}" class="form-control"
+                                    type="text" value="{{ $pengkajian?->$name }}">
+                            </div>
+                        @endforeach
+                        <div class="col-md-3">
+                            <label for="nyeri" class="form-label text-primary">Nyeri</label>
+                            <select name="nyeri" id="nyeri" class="form-select select2">
+                                <option value="-">-</option>
+                                <option value="Nyeri kronis">Nyeri kronis</option>
+                                <option value="Nyeri akut">Nyeri akut</option>
+                                <option value="TIdak ada nyeri">TIdak ada nyeri</option>
+                            </select>
+                        </div>
+                        <div class="col-md-9">
+                            <label for="nyeri_hilang" class="form-label text-primary">Nyeri hilang apabila</label>
+                            <input name="nyeri_hilang" id="nyeri_hilang" class="form-control"
+                                value="{{ $pengkajian?->nyeri_hilang }}" type="text">
+                        </div>
+                    </div>
+
+                    <header class="text-secondary mt-4 mb-2">
+                        <h4 class="fw-bold">SKRINING GIZI</h4>
+                    </header>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="penurunan_bb" class="form-label text-primary">Penurunan berat badan 6 bln
+                                terakhir</label>
+                            <select name="penurunan_bb" id="penurunan_bb" class="form-select select2">
+                                <option></option>
+                                <option value="Tidak">Tidak</option>
+                                <option value="Tidak yakin / Ragu-ragu">Tidak yakin / Ragu-ragu</option>
+                                <option value="Ya, 1-5 Kg">Ya, 1-5 Kg</option>
+                                <option value="Ya, 6-10 Kg">Ya, 6-10 Kg</option>
+                                <option value="Ya, 11-15 Kg">Ya, 11-15 Kg</option>
+                                <option value="Ya, > 15 Kg">Ya, &gt; 15 Kg</option>
+                                <option value="Ya, tidak tahu berapa Kg">Ya, tidak tahu berapa Kg</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="asupan_makan" class="form-label text-primary">Asupan makanan pasien</label>
+                            <select name="asupan_makan" id="asupan_makan" class="form-select select2">
+                                <option></option>
+                                <option value="Normal">Normal</option>
+                                <option value="Berkurang, penurunan nafsu makan/kesulitan menerima makan" data-skor="1">
+                                    Berkurang, penurunan nafsu makan/kesulitan menerima makan
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="kondisi_khusus1" class="form-label text-primary">Pasien dalam kondisi khusus</label>
+                        <div class="row g-2">
+                            @php
+                                $kondisi_khusus_terpilih = is_array($pengkajian?->kondisi_khusus)
+                                    ? $pengkajian?->kondisi_khusus
+                                    : json_decode($pengkajian?->kondisi_khusus ?? '[]', true);
+                                $kondisi_khusus_list = [
+                                    'Anak usia 1-5 tahun',
+                                    'Lansia > 60 tahun',
+                                    'Penyakit kronis dengan komplikasi',
+                                    'Kanker stadium III/IV',
+                                    'HIV/AIDS',
+                                    'TB',
+                                    'Bedah mayor degestif',
+                                    'Luka bakar > 20%',
+                                ];
+                            @endphp
+                            @foreach ($kondisi_khusus_list as $index => $kondisi)
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input name="kondisi_khusus[]" id="kondisi_khusus{{ $index + 1 }}"
+                                            value="{{ $kondisi }}" type="checkbox" class="form-check-input"
+                                            {{ in_array($kondisi, $kondisi_khusus_terpilih) ? 'checked' : '' }}>
+                                        <label class="form-check-label text-primary"
+                                            for="kondisi_khusus{{ $index + 1 }}">{{ $kondisi }}</label>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <header class="text-secondary mt-4 mb-2">
+                        <h4 class="fw-bold">RIWAYAT IMUNISASI DASAR</h4>
                     </header>
                     @php
                         $imunisasi_dasar_terpilih = [];
@@ -514,229 +314,165 @@
                                 $imunisasi_dasar_terpilih = $pengkajian->imunisasi_dasar;
                             }
                         }
+                        $imunisasi_list = ['BCG', 'DPT', 'Hepatitis B', 'Polio', 'Campak'];
                     @endphp
-
-                    <div class="row mt-3">
-                        @foreach (['BCG', 'DPT', 'Hepatitis B', 'Polio', 'Campak'] as $index => $imunisasi)
-                            <div class="col-md-3 mb-3">
-                                <div class="form-group">
-                                    <div class="form-radio">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input name="imunisasi_dasar[]" id="imunisasi_dasar{{ $index + 1 }}"
-                                                value="{{ $imunisasi }}" type="checkbox" class="custom-control-input"
-                                                {{ in_array($imunisasi, $imunisasi_dasar_terpilih) ? 'checked' : '' }}>
-                                            <span class="custom-control-label text-primary">{{ $imunisasi }}</span>
-                                        </label>
-                                    </div>
+                    <div class="row g-2">
+                        @foreach ($imunisasi_list as $index => $imunisasi)
+                            <div class="col-md-2 col-6">
+                                <div class="form-check">
+                                    <input name="imunisasi_dasar[]" id="imunisasi_dasar{{ $index + 1 }}"
+                                        value="{{ $imunisasi }}" type="checkbox" class="form-check-input"
+                                        {{ in_array($imunisasi, $imunisasi_dasar_terpilih) ? 'checked' : '' }}>
+                                    <label class="form-check-label text-primary"
+                                        for="imunisasi_dasar{{ $index + 1 }}">{{ $imunisasi }}</label>
                                 </div>
                             </div>
                         @endforeach
                     </div>
 
-                    <header class="text-secondary">
-                        <h4 class="mt-5 font-weight-bold">SKRINING RESIKO JATUH - GET UP & GO</h4>
+                    <header class="text-secondary mt-4 mb-2">
+                        <h4 class="fw-bold">SKRINING RESIKO JATUH - GET UP & GO</h4>
                     </header>
                     @php
                         $resiko_jatuh_terpilih = is_array($pengkajian?->resiko_jatuh)
                             ? $pengkajian->resiko_jatuh
                             : json_decode($pengkajian?->resiko_jatuh ?? '[]', true);
+                        $resiko_jatuh_list = [
+                            'Tidak seimbang/sempoyongan/limbung',
+                            'Alat bantu: kruk,kursi roda/dibantu',
+                            'Pegang pinggiran meja/kursi/alat bantu untuk duduk',
+                        ];
                     @endphp
-
-                    <div class="row mt-3">
-                        <div class="col-md-12 mb-3">
-                            <label for="resiko_jatuh3" class="control-label text-primary margin-tb-10">A.
-                                Cara
-                                Berjalan</label>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label text-primary">A. Cara Berjalan</label>
                         </div>
-
-                        @foreach (['Tidak seimbang/sempoyongan/limbung', 'Alat bantu: kruk,kursi roda/dibantu', 'Pegang pinggiran meja/kursi/alat bantu untuk duduk'] as $index => $resiko)
-                            <div class="col-md-6 mb-3">
-                                <div class="form-group">
-                                    @if ($index == 2)
-                                        <label for="resiko_jatuh{{ $index + 1 }}"
-                                            class="control-label mb-3 text-primary margin-tb-10">B.
-                                            Menopang
-                                            saat duduk</label>
-                                    @endif
-                                    <div class="form-radio">
-                                        <label class="custom-control custom-checkbox custom-control-inline">
-                                            <input onclick="resiko_jatuh()" name="resiko_jatuh[]"
-                                                id="resiko_jatuh{{ $index + 1 }}" value="{{ $resiko }}"
-                                                type="checkbox" class="custom-control-input"
-                                                {{ in_array($resiko, $resiko_jatuh_terpilih) ? 'checked' : '' }}>
-                                            <span class="custom-control-label text-primary">{{ $resiko }}</span>
-                                        </label>
-                                    </div>
+                        @foreach ($resiko_jatuh_list as $index => $resiko)
+                            <div class="col-md-6">
+                                @if ($index == 2)
+                                    <label class="form-label text-primary">B. Menopang saat duduk</label>
+                                @endif
+                                <div class="form-check">
+                                    <input onclick="resiko_jatuh()" name="resiko_jatuh[]"
+                                        id="resiko_jatuh{{ $index + 1 }}" value="{{ $resiko }}"
+                                        type="checkbox" class="form-check-input"
+                                        {{ in_array($resiko, $resiko_jatuh_terpilih) ? 'checked' : '' }}>
+                                    <label class="form-check-label text-primary"
+                                        for="resiko_jatuh{{ $index + 1 }}">{{ $resiko }}</label>
                                 </div>
                             </div>
                         @endforeach
-
-                        <div class="col-md-6 mb-3">
-                            <div class="form-group">
-                                <span class="input-group-addon grey-text">Hasil : </span>
-                                <div class="input-group-content">
-                                    <input class="form-control" name="hasil_resiko_jatuh" id="resiko_jatuh_hasil"
-                                        type="text" readonly>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text bg-light">Hasil</span>
+                                <input class="form-control" name="hasil_resiko_jatuh" id="resiko_jatuh_hasil"
+                                    type="text" readonly>
                             </div>
                         </div>
                     </div>
 
-
-                    <header class="text-secondary">
-                        <h4 class="mt-5 font-weight-bold">RIWAYAT PSIKOSOSIAL, SPIRITUAL &amp;
-                            KEPERCAYAAN
-                        </h4>
+                    <header class="text-secondary mt-4 mb-2">
+                        <h4 class="fw-bold">RIWAYAT PSIKOSOSIAL, SPIRITUAL &amp; KEPERCAYAAN</h4>
                     </header>
-                    <div class="row mt-3">
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="status_psikologis" class="control-label text-primary">Status
-                                    psikologis</label>
-                                <select name="status_psikologis" id="status_psikologis" class="select2">
-                                    <option></option>
-                                    <option value="Tenang">Tenang</option>
-                                    <option value="Cemas">Cemas</option>
-                                    <option value="Takut">Takut</option>
-                                    <option value="Marah">Marah</option>
-                                    <option value="Sedih">Sedih</option>
-                                    <option value="Kecenderungan bunuh diri">Kecenderungan bunuh diri
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="status_spiritual" class="control-label text-primary">Status
-                                    spiritual</label>
-                                <select name="status_spiritual" id="status_spiritual" class="select2">
-                                    <option></option>
-                                    <option value="Percaya Nilai-nilai dan kepercayaan">Percaya
-                                        Nilai-nilai
-                                        dan
-                                        kepercayaan
-                                    </option>
-                                    <option value="Tidak Percaya Nilai-nilai dan kepercayaan">Tidak
-                                        Percaya
-                                        Nilai-nilai
-                                        dan
-                                        kepercayaan</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="masalah_prilaku" class="control-label text-primary">Masalah
-                                    prilaku(bila
-                                    ada)</label>
-                                <input name="masalah_prilaku" id="masalah_prilaku" class="form-control"
-                                    value="{{ $pengkajian?->masalah_prilaku }}" type="text">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="kekerasan_dialami" class="control-label text-primary">Kekerasan yg
-                                    pernah
-                                    dialami</label>
-                                <input name="kekerasan_dialami" id="kekerasan_dialami" class="form-control"
-                                    value="{{ $pengkajian?->kekerasan_dialami }}" type="text">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="hub_dengan_keluarga" class="control-label text-primary">Hubungan
-                                    dengan
-                                    anggota
-                                    keluarga</label>
-                                <input name="hub_dengan_keluarga" id="hub_dengan_keluarga"
-                                    value="{{ $pengkajian?->hub_dengan_keluarga }}" class="form-control" type="text">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="tempat_tinggal" class="control-label text-primary">Tempat
-                                    tinggal
-                                    (rumah/panti/kos/dll)</label>
-                                <input name="tempat_tinggal" id="tempat_tinggal" class="form-control"
-                                    value="{{ $pengkajian?->tempat_tinggal }}" type="text">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="kerabat_dihub" class="control-label text-primary">Kerabat
-                                    yang
-                                    dapat
-                                    dihubungi</label>
-                                <input name="kerabat_dihub" id="kerabat_dihub" class="form-control"
-                                    value="{{ $pengkajian?->kerabat_dihub }}" type="text">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="no_kontak_kerabat" class="control-label text-primary">Kontak
-                                    kerabat
-                                    yang
-                                    dapat
-                                    dihubungi</label>
-                                <input name="no_kontak_kerabat" id="no_kontak_kerabat" class="form-control"
-                                    value="{{ $pengkajian?->no_kontak_kerabat }}" type="text">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="status_perkawinan" class="control-label text-primary">Status
-                                    perkawinan</label>
-                                <input name="status_perkawinan" id="status_perkawinan" class="form-control"
-                                    value="{{ $pengkajian?->registration?->patient?->married_status }}" readonly
-                                    type="text">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="pekerjaan" class="control-label text-primary">Pekerjaan</label>
-                                <input name="pekerjaan" id="pekerjaan" class="form-control"
-                                    value="{{ $pengkajian?->registration?->patient?->job }}" readonly type="text">
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="penghasilan" class="control-label text-primary">Penghasilan</label>
-                                <select name="penghasilan" id="penghasilan" class="select2">
-                                    <option></option>
-                                    <option value="< 1 Juta">&lt; 1 Juta</option>
-                                    <option value="1 - 2,9 Juta">1 - 2,9 Juta</option>
-                                    <option value="3 - 4,9 Juta">3 - 4,9 Juta</option>
-                                    <option value="5 - 9,9 Juta">5 - 9,9 Juta</option>
-                                    <option value="10 - 14,9 Juta">10 - 14,9 Juta</option>
-                                    <option value="15 - 19.5 Juta">15 - 19.5 Juta</option>
-                                    <option value="> 20 Juta">&gt; 20 Juta</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="pendidikan" class="control-label text-primary">Pendidikan</label>
-                                <input name="pendidikan" id="pendidikan" class="form-control" type="text"
-                                    value="{{ $pengkajian?->registration?->patient?->last_education }}" readonly>
-                            </div>
-                        </div>
-                    </div>
-                    <header class="text-secondary">
-                        <h4 class="mt-5 font-weight-bold">KEBUTUHAN EDUKASI</h4>
-                        <label for="hambatan_belajar1"
-                            class="control-label font-weight-bold text-primary margin-tb-10">Hambatan
-                            dalam
-                            pembelajaran</label>
-                    </header>
-                    <div class="row mt-3">
+                    <div class="row g-3">
                         @php
-                            // Handle case where hambatan_belajar might be array or string
+                            $psikososial_fields = [
+                                [
+                                    'status_psikologis',
+                                    'Status psikologis',
+                                    'select',
+                                    ['', 'Tenang', 'Cemas', 'Takut', 'Marah', 'Sedih', 'Kecenderungan bunuh diri'],
+                                ],
+                                [
+                                    'status_spiritual',
+                                    'Status spiritual',
+                                    'select',
+                                    [
+                                        '',
+                                        'Percaya Nilai-nilai dan kepercayaan',
+                                        'Tidak Percaya Nilai-nilai dan kepercayaan',
+                                    ],
+                                ],
+                                ['masalah_prilaku', 'Masalah prilaku (bila ada)', 'text'],
+                                ['kekerasan_dialami', 'Kekerasan yg pernah dialami', 'text'],
+                                ['hub_dengan_keluarga', 'Hubungan dengan anggota keluarga', 'text'],
+                                ['tempat_tinggal', 'Tempat tinggal (rumah/panti/kos/dll)', 'text'],
+                                ['kerabat_dihub', 'Kerabat yang dapat dihubungi', 'text'],
+                                ['no_kontak_kerabat', 'Kontak kerabat yang dapat dihubungi', 'text'],
+                                [
+                                    'status_perkawinan',
+                                    'Status perkawinan',
+                                    'text',
+                                    [],
+                                    true,
+                                    $pengkajian?->registration?->patient?->married_status,
+                                ],
+                                [
+                                    'pekerjaan',
+                                    'Pekerjaan',
+                                    'text',
+                                    [],
+                                    true,
+                                    $pengkajian?->registration?->patient?->job,
+                                ],
+                                [
+                                    'penghasilan',
+                                    'Penghasilan',
+                                    'select',
+                                    [
+                                        '',
+                                        '< 1 Juta',
+                                        '1 - 2,9 Juta',
+                                        '3 - 4,9 Juta',
+                                        '5 - 9,9 Juta',
+                                        '10 - 14,9 Juta',
+                                        '15 - 19.5 Juta',
+                                        '> 20 Juta',
+                                    ],
+                                ],
+                                [
+                                    'pendidikan',
+                                    'Pendidikan',
+                                    'text',
+                                    [],
+                                    true,
+                                    $pengkajian?->registration?->patient?->last_education,
+                                ],
+                            ];
+                        @endphp
+                        @foreach ($psikososial_fields as $f)
+                            <div class="col-md-4 col-12">
+                                @if ($f[2] == 'select')
+                                    <label for="{{ $f[0] }}"
+                                        class="form-label text-primary">{{ $f[1] }}</label>
+                                    <select name="{{ $f[0] }}" id="{{ $f[0] }}"
+                                        class="form-select select2">
+                                        @foreach ($f[3] as $opt)
+                                            <option value="{{ $opt }}">{{ $opt }}</option>
+                                        @endforeach
+                                    </select>
+                                @else
+                                    <label for="{{ $f[0] }}"
+                                        class="form-label text-primary">{{ $f[1] }}</label>
+                                    <input name="{{ $f[0] }}" id="{{ $f[0] }}" class="form-control"
+                                        type="text" value="{{ $f[5] ?? $pengkajian?->{$f[0]} }}"
+                                        @if (!empty($f[4])) readonly @endif>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <header class="text-secondary mt-4 mb-2">
+                        <h4 class="fw-bold">KEBUTUHAN EDUKASI</h4>
+                        <label class="fw-bold text-primary">Hambatan dalam pembelajaran</label>
+                    </header>
+                    <div class="row g-3">
+                        @php
                             $hambatan_belajar = $pengkajian?->hambatan_belajar;
                             $hambatan_belajar_terpilih = is_array($hambatan_belajar)
                                 ? $hambatan_belajar
                                 : json_decode($hambatan_belajar ?? '[]', true);
-
-                            $options = [
+                            $hambatan_options = [
                                 'Pendengaran',
                                 'Penglihatan',
                                 'Kognitif',
@@ -748,53 +484,37 @@
                                 'Tidak ada Hambatan',
                             ];
                         @endphp
-
-                        @foreach ($options as $key => $option)
-                            <div class="col-md-3 mb-3">
-                                <div class="form-group">
-                                    <div class="form-radio">
-                                        <div class="custom-control custom-checkbox">
-                                            <input class="custom-control-input" name="hambatan_belajar[]"
-                                                id="hambatan_belajar{{ $key + 1 }}" value="{{ $option }}"
-                                                type="checkbox"
-                                                {{ in_array($option, $hambatan_belajar_terpilih) ? 'checked' : '' }}>
-                                            <label for="hambatan_belajar{{ $key + 1 }}"
-                                                class="custom-control-label text-primary">{{ $option }}</label>
-                                        </div>
-                                    </div>
+                        @foreach ($hambatan_options as $key => $option)
+                            <div class="col-md-3 col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" name="hambatan_belajar[]"
+                                        id="hambatan_belajar{{ $key + 1 }}" value="{{ $option }}"
+                                        type="checkbox"
+                                        {{ in_array($option, $hambatan_belajar_terpilih) ? 'checked' : '' }}>
+                                    <label for="hambatan_belajar{{ $key + 1 }}"
+                                        class="form-check-label text-primary">{{ $option }}</label>
                                 </div>
                             </div>
                         @endforeach
-
-                        <div class="col-md-3 mb-3">
-                            <div class="form-group">
-                                <label for="hambatan_lainnya" class="control-label text-primary">Hambatan
-                                    lainnya</label>
-                                <input name="hambatan_lainnya" id="hambatan_lainnya" class="form-control" type="text"
-                                    value="{{ $pengkajian?->hambatan_lainnya }}">
-                            </div>
+                        <div class="col-md-3 col-12">
+                            <label for="hambatan_lainnya" class="form-label text-primary">Hambatan lainnya</label>
+                            <input name="hambatan_lainnya" id="hambatan_lainnya" class="form-control" type="text"
+                                value="{{ $pengkajian?->hambatan_lainnya }}">
                         </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="kebutuhan_penerjemah" class="control-label text-primary">Kebutuhan
-                                    penerjemah</label>
-                                <input name="kebutuhan_penerjemah" id="kebutuhan_penerjemah" class="form-control"
-                                    type="text" value="{{ $pengkajian?->kebutuhan_penerjemah }}">
-                            </div>
+                        <div class="col-md-3 col-12">
+                            <label for="kebutuhan_penerjemah" class="form-label text-primary">Kebutuhan penerjemah</label>
+                            <input name="kebutuhan_penerjemah" id="kebutuhan_penerjemah" class="form-control"
+                                type="text" value="{{ $pengkajian?->kebutuhan_penerjemah }}">
                         </div>
                         <div class="col-md-12">
-                            <label for="kebuthan_pembelajaran1"
-                                class="control-label font-weight-bold margin-tb-10 text-primary mt-3">Kebutuhan
-                                pembelajaran</label>
+                            <label class="fw-bold text-primary mt-3">Kebutuhan pembelajaran</label>
                         </div>
                         @php
-                            // Handle case where kebutuhan_pembelajaran might be array or string
                             $kebutuhan_pembelajaran = $pengkajian?->kebutuhan_pembelajaran;
                             $kebutuhan_pembelajaran_terpilih = is_array($kebutuhan_pembelajaran)
                                 ? $kebutuhan_pembelajaran
                                 : json_decode($kebutuhan_pembelajaran ?? '[]', true);
-
-                            $options = [
+                            $kebutuhan_options = [
                                 'Diagnosa managemen',
                                 'Obat-obatan',
                                 'Perawatan luka',
@@ -803,146 +523,110 @@
                                 'Tidak ada Hambatan',
                             ];
                         @endphp
-
-                        @foreach ($options as $key => $option)
-                            <div class="col-md-3 mt-3">
-                                <div class="form-group">
-                                    <div class="form-radio">
-                                        <div class="custom-control custom-checkbox">
-                                            <input class="custom-control-input" name="kebutuhan_pembelajaran[]"
-                                                id="kebutuhan_pembelajaran{{ $key + 1 }}"
-                                                value="{{ $option }}" type="checkbox"
-                                                {{ in_array($option, $kebutuhan_pembelajaran_terpilih) ? 'checked' : '' }}>
-                                            <label for="kebutuhan_pembelajaran{{ $key + 1 }}"
-                                                class="custom-control-label text-primary">{{ $option }}</label>
-                                        </div>
-                                    </div>
+                        @foreach ($kebutuhan_options as $key => $option)
+                            <div class="col-md-3 col-6">
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" name="kebutuhan_pembelajaran[]"
+                                        id="kebutuhan_pembelajaran{{ $key + 1 }}" value="{{ $option }}"
+                                        type="checkbox"
+                                        {{ in_array($option, $kebutuhan_pembelajaran_terpilih) ? 'checked' : '' }}>
+                                    <label for="kebutuhan_pembelajaran{{ $key + 1 }}"
+                                        class="form-check-label text-primary">{{ $option }}</label>
                                 </div>
                             </div>
                         @endforeach
                         <div class="col-md-12 mt-3">
-                            <label for="pembelajaran_lainnya"
-                                class="control-label font-weight-bold margin-tb-10 text-primary">Kebutuhan
-                                pembelajaran
+                            <label for="pembelajaran_lainnya" class="fw-bold text-primary">Kebutuhan pembelajaran
                                 lainnya</label>
                         </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <input name="pembelajaran_lainnya" id="pembelajaran_lainnya" class="form-control"
-                                    type="text" value="{{ $pengkajian?->pembelajaran_lainnya }}">
-                            </div>
+                        <div class="col-md-3 col-12">
+                            <input name="pembelajaran_lainnya" id="pembelajaran_lainnya" class="form-control"
+                                type="text" value="{{ $pengkajian?->pembelajaran_lainnya }}">
                         </div>
                     </div>
 
-                    <header class="text-secondary">
-                        <h4 class="mt-5 font-weight-bold">Assesment Fungsional (Pengkajian Fungsi)</h4>
+                    <header class="text-secondary mt-4 mb-2">
+                        <h4 class="fw-bold">Assesment Fungsional (Pengkajian Fungsi)</h4>
                     </header>
-                    <header class="text-danger">
-                        <h4 class="mt-5 font-weight-bold">Sensorik</h4>
+                    <header class="text-danger mt-3 mb-2">
+                        <h4 class="fw-bold">Sensorik</h4>
                     </header>
-                    <div class="row mt-3">
+                    <div class="row g-3">
                         @php
-                            // 1. Logika pengambilan data yang lebih baik
-                            $sensorik_data = [];
-                            if (!empty($pengkajian?->sensorik)) {
-                                $sensorik_data = is_array($pengkajian->sensorik)
-                                    ? $pengkajian->sensorik // Jika sudah array (karena casting), langsung gunakan
-                                    : json_decode($pengkajian->sensorik, true) ?? []; // Jika masih string, decode
-                            }
-
+                            $sensorik_penglihatan = $pengkajian->sensorik_penglihatan ?? '';
+                            $sensorik_penciuman = $pengkajian->sensorik_penciuman ?? '';
+                            $sensorik_pendengaran = $pengkajian->sensorik_pendengaran ?? '';
                             $opsi_sensorik = [
                                 'sensorik_penglihatan' => ['Normal', 'Kabur', 'Kaca Mata', 'Lensa Kontak'],
                                 'sensorik_penciuman' => ['Normal', 'Tidak'],
                                 'sensorik_pendengaran' => ['Normal', 'Tuli Ka / Ki', 'Ada alat bantu dengar ka/ki'],
                             ];
+                            $sensorik_db_value = [
+                                'sensorik_penglihatan' => $sensorik_penglihatan,
+                                'sensorik_penciuman' => $sensorik_penciuman,
+                                'sensorik_pendengaran' => $sensorik_pendengaran,
+                            ];
                         @endphp
-                        <table class="table">
-                            <tbody>
-                                @foreach ($opsi_sensorik as $kategori => $listOpsional)
-                                    <tr>
-                                        <td>{{ Str::of($kategori)->after('sensorik_')->ucfirst() }}
-                                        </td>
-                                        @foreach ($listOpsional as $i => $opsiValue)
-                                            <td {{ $loop->remaining < 3 - count($listOpsional) ? 'colspan=2' : '' }}>
-                                                <div class="custom-control custom-radio custom-control-inline">
-                                                    <input name="{{ $kategori }}" id="{{ $kategori . $i }}"
-                                                        value="{{ $opsiValue }}" data-skor="{{ $i }}"
-                                                        class="custom-control-input" type="radio" {{-- 2. Gunakan variabel baru dan cek dengan @checked --}}
-                                                        @checked(($sensorik_data[$kategori] ?? null) == $opsiValue)>
-                                                    <label class="custom-control-label" for="{{ $kategori . $i }}">
-                                                        {{ $opsiValue }}
-                                                    </label>
-                                                </div>
-                                            </td>
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <tbody>
+                                        @foreach ($opsi_sensorik as $kategori => $listOpsional)
+                                            <tr>
+                                                <td class="fw-bold text-primary" style="width: 180px;">
+                                                    {{ Str::of($kategori)->after('sensorik_')->ucfirst() }}</td>
+                                                @foreach ($listOpsional as $i => $opsiValue)
+                                                    <td>
+                                                        <div class="form-check form-check-inline">
+                                                            <input name="{{ $kategori }}" id="{{ $kategori . $i }}"
+                                                                value="{{ $opsiValue }}"
+                                                                data-skor="{{ $i }}" class="form-check-input"
+                                                                type="radio" @checked(($sensorik_db_value[$kategori] ?? null) == $opsiValue)>
+                                                            <label class="form-check-label" for="{{ $kategori . $i }}">
+                                                                {{ $opsiValue }}
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                @endforeach
+                                            </tr>
                                         @endforeach
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-
-                    <header class="text-danger">
-                        <h4 class="mt-5 font-weight-bold">Kognitif</h4>
+                    <header class="text-danger mt-3 mb-2">
+                        <h4 class="fw-bold">Kognitif</h4>
                     </header>
-                    <div class="row mt-3">
-                        <table class="table">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="custom-control custom-radio custom-control-inline">
-                                            <input name="kognitif" class="custom-control-input" id="kognitif1"
-                                                value="Normal" data-skor="0" type="radio"
-                                                @checked(($pengkajian->kognitif ?? '') == 'Normal')>
-                                            <label class="custom-control-label" for="kognitif1">Normal</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="custom-control custom-radio custom-control-inline">
-                                            <input name="kognitif" class="custom-control-input" id="kognitif2"
-                                                value="Bingung" data-skor="1" type="radio"
-                                                @checked(($pengkajian->kognitif ?? '') == 'Bingung')>
-                                            <label class="custom-control-label" for="kognitif2">Bingung</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="custom-control custom-radio custom-control-inline">
-                                            <input name="kognitif" class="custom-control-input" id="kognitif3"
-                                                value="Pelupa" data-skor="2" type="radio"
-                                                @checked(($pengkajian->kognitif ?? '') == 'Pelupa')>
-                                            <label class="custom-control-label" for="kognitif3">Pelupa</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="custom-control custom-radio custom-control-inline">
-                                            <input name="kognitif" class="custom-control-input" id="kognitif4"
-                                                value="Tidak Dapat dimengerti" data-skor="3" type="radio"
-                                                @checked(($pengkajian->kognitif ?? '') == 'Tidak Dapat dimengerti')>
-                                            <label class="custom-control-label" for="kognitif4">Tidak
-                                                Dapat
-                                                dimengerti</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        &nbsp;
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <tbody>
+                                        <tr>
+                                            @foreach (['Normal', 'Bingung', 'Pelupa', 'Tidak Dapat dimengerti'] as $i => $val)
+                                                <td>
+                                                    <div class="form-check form-check-inline">
+                                                        <input name="kognitif" class="form-check-input"
+                                                            id="kognitif{{ $i + 1 }}" value="{{ $val }}"
+                                                            data-skor="{{ $i }}" type="radio"
+                                                            @checked(($pengkajian->kognitif ?? '') == $val)>
+                                                        <label class="form-check-label"
+                                                            for="kognitif{{ $i + 1 }}">{{ $val }}</label>
+                                                    </div>
+                                                </td>
+                                            @endforeach
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-
-                    <header class="text-danger">
-                        <h4 class="mt-5 font-weight-bold">Motorik</h4>
+                    <header class="text-danger mt-3 mb-2">
+                        <h4 class="fw-bold">Motorik</h4>
                     </header>
-                    <div class="row mt-3">
+                    <div class="row g-3">
                         @php
-                            // 1. Logika pengambilan data yang lebih baik untuk motorik
-                            $motorik_data = [];
-                            if (!empty($pengkajian?->motorik)) {
-                                $motorik_data = is_array($pengkajian->motorik)
-                                    ? $pengkajian->motorik // Jika sudah array, langsung gunakan
-                                    : json_decode($pengkajian->motorik, true) ?? []; // Jika masih string, decode
-                            }
-
                             $opsiMotorik = [
                                 'motorik_aktifitas' => ['Mandiri', 'Bantuan Minimal', 'Bantuan Ketergantungan Total'],
                                 'motorik_berjalan' => [
@@ -953,62 +637,65 @@
                                 ],
                             ];
                         @endphp
-                        <table class="table">
-                            <tbody>
-                                @foreach ($opsiMotorik as $kategori => $opsiList)
-                                    <tr>
-                                        <td>{{ Str::of($kategori)->after('motorik_')->replace('_', ' ')->ucfirst() }}
-                                        </td>
-                                        @foreach ($opsiList as $i => $opsiValue)
-                                            <td @if ($loop->last && $loop->count < 4) colspan="{{ 5 - $loop->count }}" @endif>
-                                                <div class="custom-control custom-radio">
-                                                    <input name="{{ $kategori }}" id="{{ $kategori . $i }}"
-                                                        value="{{ $opsiValue }}" data-skor="{{ $i }}"
-                                                        class="custom-control-input" type="radio" {{-- 2. Gunakan variabel baru dan cek dengan @checked --}}
-                                                        @checked(($motorik_data[$kategori] ?? null) == $opsiValue)>
-                                                    <label class="custom-control-label text-primary"
-                                                        for="{{ $kategori . $i }}">
-                                                        {{ $opsiValue }}
-                                                    </label>
-                                                </div>
-                                            </td>
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <tbody>
+                                        @foreach ($opsiMotorik as $kategori => $opsiList)
+                                            <tr>
+                                                <td class="fw-bold text-primary" style="width: 180px;">
+                                                    {{ Str::of($kategori)->after('motorik_')->replace('_', ' ')->ucfirst() }}
+                                                </td>
+                                                @foreach ($opsiList as $i => $opsiValue)
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input name="{{ $kategori }}" id="{{ $kategori . $i }}"
+                                                                value="{{ $opsiValue }}"
+                                                                data-skor="{{ $i }}" class="form-check-input"
+                                                                type="radio" @checked(($pengkajian?->{$kategori} ?? null) == $opsiValue)>
+                                                            <label class="form-check-label text-primary"
+                                                                for="{{ $kategori . $i }}">
+                                                                {{ $opsiValue }}
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                @endforeach
+                                            </tr>
                                         @endforeach
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
-                    {{-- Contoh pemanggilan yang sudah diperbaiki --}}
                     @include('pages.simrs.erm.partials.signature-field', [
                         'judul' => 'Perawat,',
                         'pic' => auth()->user()->employee->fullname,
                         'role' => 'perawat',
-                        'prefix' => 'pengkajian_nurse', // Berikan prefix unik
-                        'signature_model' => $pengkajian?->signature, // Kirim model data tanda tangan yang relevan
+                        'prefix' => 'pengkajian_nurse',
+                        'signature_model' => $pengkajian?->signature,
                     ])
 
                     <div class="row mt-5">
                         <div class="col-md-12 px-3">
                             <div class="card-actionbar">
-                                <div class="card-actionbar-row d-flex justify-content-between align-items-center">
+                                <div
+                                    class="card-actionbar-row d-flex flex-wrap justify-content-between align-items-center gap-2">
                                     <button type="button"
-                                        class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                        class="btn btn-outline-primary waves-effect save-form d-flex align-items-center"
                                         data-dismiss="modal" data-status="0">
-                                        <span class="mdi mdi-printer mr-2"></span> Print
+                                        <span class="mdi mdi-printer me-2"></span> Print
                                     </button>
-                                    <div style="width: 40%" class="d-flex justify-content-end">
+                                    <div class="d-flex gap-2 flex-wrap">
                                         <button type="button"
-                                            class="btn mr-2 btn-warning waves-effect text-white waves-light save-form d-flex align-items-center"
+                                            class="btn btn-warning text-white waves-effect save-form d-flex align-items-center"
                                             data-dismiss="modal" data-status="0" id="sd-pengkajian-nurse-rajal">
-                                            <span class="mdi mdi-content-save mr-2"></span> Simpan
-                                            (draft)
+                                            <span class="mdi mdi-content-save me-2"></span> Simpan (draft)
                                         </button>
                                         <button type="button"
-                                            class="btn btn-primary waves-effect waves-light save-form d-flex align-items-center"
+                                            class="btn btn-primary waves-effect save-form d-flex align-items-center"
                                             data-dismiss="modal" data-status="1" id="sf-pengkajian-nurse-rajal">
-                                            <span class="mdi mdi-content-save mr-2"></span> Simpan
-                                            (final)
+                                            <span class="mdi mdi-content-save me-2"></span> Simpan (final)
                                         </button>
                                     </div>
                                 </div>
@@ -1021,7 +708,7 @@
     @endif
 @endsection
 @section('plugin-erm')
-    <script script src="/js/formplugins/select2/select2.bundle.js"></script>
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
             const pengkajian = @json($pengkajian ?? []);
@@ -1029,30 +716,27 @@
             $('body').addClass('layout-composed');
             $('.select2').select2({
                 placeholder: 'Pilih Item',
+                width: '100%'
             });
             $('#departement_id').select2({
                 placeholder: 'Pilih Klinik',
+                width: '100%'
             });
-            // $('#doctor_id').select2({
-            //     placeholder: 'Pilih Dokter',
-            // });
 
             if (pengkajian) {
-                $('#diagnosa-keperawatan').val(pengkajian.diagnosa_keperawatan).select2();
-                $('#rencana-tindak-lanjut').val(pengkajian.rencana_tindak_lanjut).select2();
-                $('#nyeri').val(pengkajian.nyeri).select2();
-                $('#penurunan_bb').val(pengkajian.penurunan_bb).select2();
-                $('#asupan_makan').val(pengkajian.asupan_makan).select2();
-                $('#status_psikologis').val(pengkajian.status_psikologis).select2();
-                $('#status_spiritual').val(pengkajian.status_spiritual).select2();
-                $('#penghasilan').val(pengkajian.penghasilan).select2();
+                $('#diagnosa-keperawatan').val(pengkajian.diagnosa_keperawatan).trigger('change');
+                $('#rencana-tindak-lanjut').val(pengkajian.rencana_tindak_lanjut).trigger('change');
+                $('#nyeri').val(pengkajian.nyeri).trigger('change');
+                $('#penurunan_bb').val(pengkajian.penurunan_bb).trigger('change');
+                $('#asupan_makan').val(pengkajian.asupan_makan).trigger('change');
+                $('#status_psikologis').val(pengkajian.status_psikologis).trigger('change');
+                $('#status_spiritual').val(pengkajian.status_spiritual).trigger('change');
+                $('#penghasilan').val(pengkajian.penghasilan).trigger('change');
             }
 
             $('#toggle-pasien').on('click', function() {
-                var target = $('#js-slide-left'); // Mengambil elemen target berdasarkan data-target
-                var backdrop = $('.slide-backdrop'); // Mengambil backdrop
-
-                // Toggle kelas untuk menampilkan atau menyembunyikan panel dan backdrop
+                var target = $('#js-slide-left');
+                var backdrop = $('.slide-backdrop');
                 target.toggleClass('hide');
                 backdrop.toggleClass('show');
             });
@@ -1062,38 +746,7 @@
                 $(this).removeClass('show');
             });
 
-            // Filter Pasien
-            // $('.filter-pasien').on('change', function(e) {
-            //     e.preventDefault(); // Mencegah form submit langsung
-            //     console.log('changed')
-            //     $.ajax({
-            //         url: "{{ route('poliklinik.filter-pasien') }}",
-            //         type: "POST",
-            //         data: {
-            //             _token: "{{ csrf_token() }}", // Tambahkan token CSRF
-            //             route: window.location.href,
-            //             departement_id: $('#filter_pasien #departement_id').val(),
-            //             doctor_id: $('#filter_pasien #doctor_id').val()
-            //         },
-
-            //         dataType: "json",
-            //         beforeSend: function() {
-            //             $('#daftar-pasien .col-12').html(
-            //                 '<p>Sedang memuat...</p>'); // Tambahkan loading
-            //         },
-            //         success: function(response) {
-            //             if (response.success) {
-            //                 $('#daftar-pasien .col-12').html(response.html);
-            //             } else {
-            //                 $('#daftar-pasien .col-12').html(
-            //                     '<p>Tidak ada data pasien.</p>');
-            //             }
-            //         },
-            //         error: function(xhr, status, error) {
-            //             alert("Terjadi kesalahan, silakan coba lagi.");
-            //         }
-            //     });
-            // });
+            // Optional: Add focus/scroll to first invalid input on submit, etc.
         });
     </script>
 @endsection

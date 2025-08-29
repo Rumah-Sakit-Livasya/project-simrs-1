@@ -17,7 +17,7 @@ class EWSAnakController extends Controller
             'registration_id' => 'required|exists:registrations,id',
             'user_id' => 'required|exists:users,id',
             'tgl' => 'required|date',
-            'jam' => 'required|date_format:H:i:s',
+            'jam' => 'required',
             'keadaan_umum' => 'required|string',
             'kardio_vaskular' => 'required|string',
             'respirasi' => 'required|string',

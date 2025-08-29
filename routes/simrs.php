@@ -6,10 +6,15 @@ use App\Http\Controllers\FarmasiReportKartuStock;
 use App\Http\Controllers\FarmasiReportStockDetail;
 use App\Http\Controllers\FarmasiReportStockStatus;
 use App\Http\Controllers\FarmasiResepController;
+use App\Http\Controllers\FarmasiReturResepController;
+use App\Http\Controllers\FarmasiSignaController;
+use App\Http\Controllers\InterventionPageController;
 use App\Http\Controllers\KategoriGiziController;
 use App\Http\Controllers\MakananGiziController;
 use App\Http\Controllers\MenuGiziController;
+use App\Http\Controllers\NursingDiannosisPageController;
 use App\Http\Controllers\OrderGiziController;
+use App\Http\Controllers\PlasmaDisplayRawatJalanController;
 use App\Http\Controllers\ProcurementPOApprovalCEO;
 use App\Http\Controllers\ProcurementPOApprovalNonPharmacy;
 use App\Http\Controllers\ProcurementPOApprovalPharmacy;
@@ -59,8 +64,10 @@ use App\Http\Controllers\SIMRS\PatientController;
 use App\Http\Controllers\SIMRS\Pengkajian\FormBuilderController;
 use App\Http\Controllers\SIMRS\Pengkajian\PengkajianController;
 use App\Http\Controllers\SIMRS\Peralatan\PeralatanController;
+use App\Http\Controllers\SIMRS\Persalinan\BayiController;
 use App\Http\Controllers\SIMRS\Persalinan\DaftarPersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\KategoriPersalinanController;
+use App\Http\Controllers\SIMRS\Persalinan\PersalinanController;
 use App\Http\Controllers\SIMRS\Persalinan\TipePersalinanController;
 use App\Http\Controllers\SIMRS\Poliklinik\PoliklinikController;
 use App\Http\Controllers\SIMRS\UtilityController;
@@ -297,6 +304,13 @@ Route::group(['middleware' => ['auth']], function () {
         |
         */
         Route::prefix('/master-data')->group(function () {
+            Route::prefix('interventions')->group(function () {
+                Route::get('/', [InterventionPageController::class, 'index'])->name('master.interventions');
+            });
+            Route::prefix('diagnosa-keperawatan')->group(function () {
+                Route::get('/categories', [NursingDiannosisPageController::class, 'viewCategories'])->name('master.categories');
+                Route::get('/diagnoses', [NursingDiannosisPageController::class, 'viewDiagnoses'])->name('master.diagnoses');
+            });
             // Setup and configuration routes
             Route::prefix('setup')->group(function () {
                 // Inpatient administration fees
@@ -393,6 +407,11 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('/tipe', [TipeLaboratoriumController::class, 'index'])
                         ->name('master-data.penunjang-medis.laboratorium.tipe');
                 });
+
+                // Pharmacy routes
+                Route::prefix("farmasi")->group(function () {
+                    Route::get("/signa", [FarmasiSignaController::class, "index"])->name("master-data.penunjang-medis.farmasi.signa");
+                });
             });
 
             // Equipment management routes
@@ -454,9 +473,48 @@ Route::group(['middleware' => ['auth']], function () {
             });
         });
 
-        Route::prefix('poliklinik')->group(function () {
-            Route::get('/daftar-pasien', [ERMController::class, 'catatanMedis'])->name('poliklinik.daftar-pasien');
-            Route::get('/pengkajian-lanjutan/{registration_id}/{encryptedID}', [PoliklinikController::class, 'showForm'])->name('poliklinik.pengkajian-lanjutan.show');
+
+        Route::prefix('poliklinik')->name('poliklinik.')->group(function () {
+            Route::prefix('antrian-poli')->name('antrian-poli.')->group(function () {
+                Route::get('/setup-plasma', [PlasmaDisplayRawatJalanController::class, 'index'])->name('index');
+                Route::get('/create', [PlasmaDisplayRawatJalanController::class, 'create'])->name('create');
+                Route::post('/', [PlasmaDisplayRawatJalanController::class, 'store'])->name('store');
+                Route::get('/setup-plasma/{id}/edit', [PlasmaDisplayRawatJalanController::class, 'edit'])->name('edit');
+                Route::put('/setup-plasma/{id}', [PlasmaDisplayRawatJalanController::class, 'update'])->name('update');
+                Route::get('/plasma/{id}', [PlasmaDisplayRawatJalanController::class, 'show'])->name('show');
+            });
+            // Rute utama untuk daftar pasien poliklinik
+            Route::get('/daftar-pasien', [ERMController::class, 'catatanMedis'])
+                ->name('daftar-pasien');
+
+            // === Grup Rute untuk Pengkajian Lanjutan ===
+            // Mengelompokkan semua rute terkait pengkajian lanjutan agar lebih rapi.
+            // Refactored: Gunakan Route::controller dan urutkan rute statis sebelum dinamis
+            Route::prefix('pengkajian-lanjutan')->name('pengkajian-lanjutan.')->group(function () {
+                // Form baru (CREATE)
+                Route::get('/create/{registration_id}/{template_id}', [PoliklinikController::class, 'showForm'])
+                    ->name('create');
+
+                // Simpan form baru (STORE)
+                Route::post('/', [PengkajianController::class, 'storeOrUpdatePengkajianLanjutan'])
+                    ->name('store');
+
+                // Edit form yang sudah diisi (EDIT)
+                Route::get('/{pengkajianLanjutan}/edit', [PoliklinikController::class, 'editFilledForm'])
+                    ->name('edit');
+
+                // Update form yang sudah diisi (UPDATE)
+                Route::put('/{pengkajianLanjutan}', [PengkajianController::class, 'storeOrUpdatePengkajianLanjutan'])
+                    ->name('update');
+
+                // Hapus data pengkajian (DESTROY)
+                Route::delete('/{pengkajianLanjutan}', [PengkajianController::class, 'destroyPengkajianLanjutan'])
+                    ->name('destroy');
+
+                // Tampilkan form yang sudah diisi (SHOW) - letakkan paling bawah agar tidak bentrok dengan rute statis
+                Route::get('/{pengkajianLanjutan}', [PoliklinikController::class, 'showFilledForm'])
+                    ->name('show');
+            });
         });
 
         Route::prefix('farmasi')->group(function () {
@@ -728,50 +786,97 @@ Route::group(['middleware' => ['auth']], function () {
             });
         });
 
-        Route::prefix('vk')->group(function () {
-            Route::get('/daftar-pasien', [IGDController::class, 'index'])
-                ->name('vk.daftar-pasien');
 
-            Route::prefix('reports')->group(function () {
-                Route::get('order-pasien', [IGDController::class, 'orderPasien'])
-                    ->name('vk.reports.order-pasien');
+        Route::prefix('vk')->name('vk.')->group(function () {
+            // Main page
+            Route::get('/daftar-pasien', [PersalinanController::class, 'index'])
+                ->name('daftar-pasien');
 
-                Route::get('rekap-kunjungan', [IGDController::class, 'rekapKunjungan'])
-                    ->name('vk.reports.rekap-kunjungan');
+            // DataTable data
+            Route::get('/get-data', [PersalinanController::class, 'getData'])
+                ->name('get-data');
 
-                Route::get('10-besar-tindakan', [IGDController::class, '10BesarTindakan'])
-                    ->name('vk.reports.10-besar-tindakan');
+            // Tambahkan ini di grup route Anda
+            Route::get('data-bayi/{order_id}', [persalinanController::class, 'dataBayi'])->name('bayi.index');
+
+            // Master data for dropdowns
+            Route::get('/master/{registrationId}', [PersalinanController::class, 'getMasterData'])
+                ->name('master.data');
+
+            // Tindakan data
+            Route::get('/tindakan/{registrationId}', [PersalinanController::class, 'getTindakanData'])
+                ->name('tindakan.data');
+
+
+
+
+            // Order CRUD operations
+            Route::prefix('order')->name('order.')->group(function () {
+                Route::post('/', [PersalinanController::class, 'store'])->name('store');
+                Route::get('/{id}', [PersalinanController::class, 'show'])->name('show');
+                Route::get('/{id}/edit', [PersalinanController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [PersalinanController::class, 'update'])->name('update');
+                Route::delete('/{id}', [PersalinanController::class, 'deleteOrder'])->name('delete');
+                Route::patch('/{id}/status', [PersalinanController::class, 'changeStatus'])->name('change-status');
+                Route::get('/{registrationId}/data', [PersalinanController::class, 'getOrderData'])->name('data');
+            });
+
+            // Reports (if needed)
+            Route::prefix('reports')->name('reports.')->group(function () {
+                Route::get('/daily', [PersalinanController::class, 'dailyReport'])->name('daily');
+                Route::get('/monthly', [PersalinanController::class, 'monthlyReport'])->name('monthly');
+                Route::get('/export/{type}', [PersalinanController::class, 'exportReport'])->name('export');
+            });
+
+            // Master data management (optional)
+            Route::prefix('master')->name('master.')->group(function () {
+                // Kategori Persalinan
+                Route::resource('kategori', 'KategoriPersalinanController');
+
+                // Tipe Persalinan
+                Route::resource('tipe', 'TipePersalinanController');
+
+                // Persalinan/Tindakan
+                Route::resource('persalinan', 'PersalinanMasterController');
             });
         });
 
+        Route::prefix('vk/bayi')->name('bayi.')->group(function () {
+            // Route untuk mengambil data bayi via AJAX untuk ditampilkan di tabel
+            Route::get('data/{order_persalinan_id}', [BayiController::class, 'getDataForOrder'])->name('data');
+            Route::get('get-doctors', [BayiController::class, 'getDoctors'])->name('get_doctors');
+            // Route::get('print/{bayi}', [BayiController::class, 'printCertificate'])->name('print');
+            Route::get('{bayi}/print', [BayiController::class, 'printCertificate'])->name('print_certificate');
+            Route::get('/get-beds', [BayiController::class, 'getDataBed'])->name('get_beds');
+            Route::get('/get-kelas-rawat', [BayiController::class, 'getKelasRawat'])->name('get_kelas_rawat');
+            Route::get('/{order}/bayi-popup', [BayiController::class, 'showBayiPopup'])->name('popup');
+            Route::resource('/', BayiController::class)->parameters(['' => 'bayi'])->except(['index', 'create', 'edit']);
+        });
+
+
+
         Route::prefix('ok')->group(function () {
             Route::get('/daftar-pasien', [OperasiController::class, 'index'])->name('ok.daftar-pasien');
-            Route::get('/prosedure/{orderId}', [OperasiController::class, 'prosedure'])->name('ok.prosedure');
+            Route::get('/prosedur/{orderId}', [OperasiController::class, 'prosedur'])->name('ok.prosedur');
+            Route::get('/edit/{orderId}/{prosedurId}', [OperasiController::class, 'editProsedure'])->name('ok.prosedure.edit');
             Route::get('/prosedur/{order}/create', [OperasiController::class, 'createProsedur'])->name('ok.prosedur.create');
             Route::post('/prosedur/store', [OperasiController::class, 'storeProsedur'])->name('ok.prosedur.store');
+            Route::put('/prosedur/update', [OperasiController::class, 'updateProsedur'])->name('ok.prosedur.update');
             Route::get('/prosedur/get-jenis-by-kategori/{kategoriId}', [OperasiController::class, 'getJenisByKategori'])->name('ok.prosedur.get-jenis-by-kategori');
             Route::get('/prosedur/get-tindakan-by-jenis/{jenisId}', [OperasiController::class, 'getTindakanByJenis'])->name('ok.prosedur.get-tindakan-by-jenis');
-            // Tambahkan route ini di dalam group route operasi
             Route::delete('/prosedur/{prosedurId}', [OperasiController::class, 'deleteProsedur'])->name('ok.prosedur.delete');
+            Route::prefix('laporan')->group(function () {
+                Route::get('order-pasien', [OperasiController::class, 'orderPasienReport'])->name('ok.laporan.order-pasien');
+                Route::get('rekap-kunjungan', [OperasiController::class, 'rekapKunjungan'])->name('ok.laporan.rekap-kunjungan');
+                Route::get('10-besar-tindakan', [OperasiController::class, '10BesarTindakan'])->name('ok.laporan.10-besar-tindakan');
+                // New route for laporan/order
+                Route::get('rekap-per-tindakan', [OperasiController::class, 'rekapKunjungan'])->name('rekap-per-tindakan');
 
-            // Tampilkan form edit prosedur
-            Route::get('/prosedur/{order}/edit/{prosedur}', [OperasiController::class, 'editProsedur'])->name('ok.prosedur.edit');
-
-            // Proses update prosedur (via POST/PATCH/PUT)
-            Route::put('/prosedur/{prosedur}', [OperasiController::class, 'updateProsedur'])->name('ok.prosedur.update');
-
-
-
-
-            Route::prefix('reports')->group(function () {
-                Route::get('order-pasien', [IGDController::class, 'orderPasien'])
-                    ->name('ok.reports.order-pasien');
-
-                Route::get('rekap-kunjungan', [IGDController::class, 'rekapKunjungan'])
-                    ->name('ok.reports.rekap-kunjungan');
-
-                Route::get('10-besar-tindakan', [IGDController::class, '10BesarTindakan'])
-                    ->name('ok.reports.10-besar-tindakan');
+                // URL: /simrs/ok/laporan/rekap-per-tindakan/print
+                Route::get('rekap-per-tindakan/print', [OperasiController::class, 'printRekapKunjungan'])->name('ok.laporan.rekap-kunjungan.print');
+                Route::get('order', [OperasiController::class, 'orderPasienReport'])->name('ok.laporan.order');
+                Route::get('order-data', [OperasiController::class, 'getOrderPasienData'])->name('ok.laporan.order-data');
+                Route::get('order-pasien/print', [OperasiController::class, 'printOrderPasienReport'])->name('ok.laporan.order.print');
             });
         });
 
@@ -874,15 +979,27 @@ Route::group(['middleware' => ['auth']], function () {
             Route::prefix('transaksi-resep')->group(function () {
                 Route::get('/', [FarmasiResepController::class, 'index'])->name('farmasi.transaksi-resep');
                 Route::get('/create', [FarmasiResepController::class, 'create'])->name('farmasi.transaksi-resep.create');
+                Route::get('/edit/{id}', [FarmasiResepController::class, 'edit'])->name('farmasi.transaksi-resep.edit');
                 Route::get("popup/pilih-pasien/{poli}", [FarmasiResepController::class, 'popupPilihPasien'])->name('farmasi.transaksi-resep.popup.pilih-pasien');
                 Route::get("popup/pilih-dokter", [FarmasiResepController::class, 'popupPilihDokter'])->name('farmasi.transaksi-resep.popup.pilih-dokter');
                 Route::get("popup/resep-elektronik", [FarmasiResepController::class, 'popupResepElektronik'])->name('farmasi.transaksi-resep.popup.resep-elektronik');
+                Route::get("popup/telaah-resep-raw/{json}", [FarmasiResepController::class, 'telaahResepRaw'])->name('farmasi.transaksi-resep.popup.telaah-resep-raw');
+                Route::get("popup/telaah-resep/{id}", [FarmasiResepController::class, 'telaahResep'])->name('farmasi.transaksi-resep.popup.telaah-resep');
+
+                Route::prefix("print")->group(function () {
+                    Route::get("/e-tiket/{id}", [FarmasiResepController::class, 'print_e_tiket'])->name('farmasi.transaksi-resep.print.e-tiket');
+                    Route::get("/e-tiket-ranap/{id}", [FarmasiResepController::class, 'print_e_tiket_ranap'])->name('farmasi.transaksi-resep.print.e-tiket-ranap');
+                    Route::get("/penjualan/{id}", [FarmasiResepController::class, 'print_penjualan'])->name('farmasi.transaksi-resep.print.penjualan');
+                    Route::get("/resep/{id}", [FarmasiResepController::class, 'print_resep'])->name('farmasi.transaksi-resep.print.resep');
+                });
+            });
+
+            Route::prefix("retur-resep")->group(function () {
+                Route::get("/", [FarmasiReturResepController::class, 'index'])->name('farmasi.retur-resep');
+                Route::get("/create", [FarmasiReturResepController::class, 'create'])->name('farmasi.retur-resep.create');
             });
 
 
-
-            Route::get('retur-resep', [FarmasiController::class, 'returResep'])
-                ->name('farmasi.retur-resep');
 
             Route::get('reponse-time', [FarmasiController::class, 'responseTime'])
                 ->name('farmasi.reponse-time');
@@ -1135,9 +1252,46 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/operasi/tindakan/data/{registrationId}', [OperasiController::class, 'getTindakanOperasi'])
                 ->name('operasi.tindakan.data');
 
-            Route::delete('/operasi/order/delete', [OperasiController::class, 'deleteOrder'])
-                ->name('operasi.order.delete');
+
+            Route::delete('/operasi/order/{order}', [OperasiController::class, 'deleteOrder'])->name('operasi.order.delete');
+            Route::get('/plasma', [OperasiController::class, 'plasmaView'])->name('ok.plasma');
             // Route::get('data-order/{orderId}', [OperasiController::class, 'getOrderData'])->name('operasi.data-order');
+        });
+
+        // Routes untuk Persalinan (tambahkan ke web.php)
+        Route::prefix('persalinan')->name('persalinan.')->group(function () {
+
+            // Halaman daftar pasien
+            Route::get('/daftar-pasien', [PersalinanController::class, 'index'])
+                ->name('index');
+
+            // Data master untuk form - URL diperbaiki
+            Route::get('/master-data/{registrationId}', [PersalinanController::class, 'getMasterData'])
+                ->name('master-data');
+
+            // Data order berdasarkan registration ID
+            Route::get('/order-data/{registrationId}', [PersalinanController::class, 'getOrderData'])
+                ->name('order-data');
+
+            // Simpan order baru
+            Route::post('/store', [PersalinanController::class, 'store'])
+                ->name('store');
+
+            // Detail order
+            Route::get('/order/{orderId}', [PersalinanController::class, 'show'])
+                ->name('order.show');
+
+            // Hapus order
+            Route::delete('/destroy/{orderId}', [PersalinanController::class, 'destroy'])
+                ->name('destroy');
+
+
+            // Data tindakan berdasarkan registration ID
+            Route::get('/tindakan-data/{registrationId}', [PersalinanController::class, 'getTindakanData'])
+                ->name('tindakan-data');
+
+            // CRUD detail persalinan
+
         });
     });
 });

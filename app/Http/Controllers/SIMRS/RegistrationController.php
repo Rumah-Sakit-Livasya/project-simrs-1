@@ -29,7 +29,6 @@ use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\Room;
-use App\Models\SIMRS\Setup\BiayaAdministrasiRawatInap;
 use App\Models\SIMRS\Setup\HargaTarifRegistrasi;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
@@ -39,13 +38,10 @@ use App\Providers\RouteServiceProvider;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 
 class RegistrationController extends Controller
@@ -357,324 +353,54 @@ class RegistrationController extends Controller
     // Tambahkan di bagian import controller Anda:
     // use App\Models\SIMRS\Setup\BiayaAdministrasiRawatInap;
 
-    // public function store(Request $request)
-    // {
-    //     try {
-    //         $validatedData = $request->validate([
-    //             'patient_id' => 'required',
-    //             'user_id' => 'required',
-    //             'employee_id' => 'required',
-    //             'doctor_id' => 'required',
-    //             'registration_type' => 'required',
-    //             'penjamin_id' => 'required',
-    //             'rujukan' => 'required|string',
-    //             'poliklinik' => 'nullable|string',
-    //             'dokter_perujuk' => 'nullable|integer',
-    //             'tipe_rujukan' => 'nullable|string',
-    //             'igd_type' => 'nullable|string',
-    //             'odc_type' => 'nullable|string',
-    //             'nama_perujuk' => 'nullable|string',
-    //             'telp_perujuk' => 'nullable|string',
-    //             'alamat_perujuk' => 'nullable|string',
-    //             'diagnosa_awal' => 'nullable|string',
-    //             'kelas_rawat_id' => 'nullable|string',
-    //         ], [
-    //             'penjamin_id.required' => 'Kolom Penjamin tidak boleh kosong.',
-    //             'patient_id.required' => 'Kolom Pasien tidak boleh kosong.',
-    //             'user_id.required' => 'Kolom User tidak boleh kosong.',
-    //             'employee_id.required' => 'Kolom Pegawai tidak boleh kosong.',
-    //             'doctor_id.required' => 'Kolom Dokter tidak boleh kosong.',
-    //             'registration_type.required' => 'Kolom Tipe Registrasi tidak boleh kosong.',
-    //             'poliklinik.nullable' => 'Kolom poliklinik boleh kosong.',
-    //             'poliklinik.string' => 'Kolom poliklinik harus berupa teks.',
-    //             'rujukan.required' => 'Kolom rujukan wajib diisi.',
-    //             'rujukan.string' => 'Kolom rujukan harus berupa teks.',
-    //             'dokter_perujuk.nullable' => 'Kolom dokter perujuk boleh kosong.',
-    //             'dokter_perujuk.integer' => 'Kolom dokter perujuk harus berupa angka.',
-    //             'tipe_rujukan.nullable' => 'Kolom tipe rujukan boleh kosong.',
-    //             'tipe_rujukan.string' => 'Kolom tipe rujukan harus berupa teks.',
-    //             'igd_type.nullable' => 'Kolom igd_type boleh kosong.',
-    //             'igd_type.string' => 'Kolom igd_type harus berupa teks.',
-    //             'odc_type.nullable' => 'Kolom odc_type boleh kosong.',
-    //             'odc_type.string' => 'Kolom odc_type harus berupa teks.',
-    //             'nama_perujuk.nullable' => 'Kolom nama perujuk boleh kosong.',
-    //             'nama_perujuk.string' => 'Kolom nama perujuk harus berupa teks.',
-    //             'telp_perujuk.nullable' => 'Kolom telepon perujuk boleh kosong.',
-    //             'telp_perujuk.string' => 'Kolom telepon perujuk harus berupa teks.',
-    //             'alamat_perujuk.nullable' => 'Kolom alamat perujuk boleh kosong.',
-    //             'alamat_perujuk.string' => 'Kolom alamat perujuk harus berupa teks.',
-    //             'diagnosa_awal.nullable' => 'Kolom diagnosa awal boleh kosong.',
-    //             'diagnosa_awal.string' => 'Kolom diagnosa awal harus berupa teks.',
-    //         ]);
-
-    //         // DEBUG: Log validated data
-    //         Log::info('Registration validated data:', $validatedData);
-
-    //         // Set registration date and status
-    //         $validatedData['registration_date'] = Carbon::now();
-    //         $validatedData['date'] = Carbon::now();
-    //         $validatedData['status'] = 'aktif';
-
-    //         // DEBUG: Log registration type
-    //         Log::info('Registration type: ' . $request->registration_type);
-
-    //         if ($request->registration_type == 'rawat-jalan' || $request->registration_type == 'igd') {
-    //             $kelas_rawat = KelasRawat::where('kelas', 'like', '%Rawat Jalan%')->first();
-    //             Log::info('Kelas rawat for rawat-jalan/igd:', $kelas_rawat ? $kelas_rawat->toArray() : 'NOT FOUND');
-    //             if ($kelas_rawat) {
-    //                 $validatedData['kelas_rawat_id'] = $kelas_rawat->id;
-    //             }
-    //         } else if ($request->registration_type == 'rawat-inap') {
-    //             $kelas_rawat = KelasRawat::where('kelas', 'like', '%Rawat Inap%')->first();
-    //             Log::info('Kelas rawat for rawat-inap:', $kelas_rawat ? $kelas_rawat->toArray() : 'NOT FOUND');
-    //             if ($kelas_rawat) {
-    //                 $validatedData['kelas_rawat_id'] = $kelas_rawat->id;
-    //             } else {
-    //                 Log::error('Kelas rawat untuk Rawat Inap tidak ditemukan!');
-    //             }
-    //         }
-
-    //         // Set department based on registration type
-    //         $validatedData['departement_id'] = $this->getDepartmentId($validatedData);
-    //         Log::info('Department ID assigned: ' . $validatedData['departement_id']);
-
-    //         // Update bed if rawat inap
-    //         if ($validatedData['registration_type'] == 'rawat-inap') {
-    //             Log::info('Processing rawat-inap bed assignment');
-    //             Log::info('Bed ID from request: ' . $request->bed_id);
-
-    //             if (!$request->bed_id) {
-    //                 Log::error('Bed ID is required for rawat-inap but not provided!');
-    //                 return redirect()->back()->with('error', 'Bed ID wajib diisi untuk rawat inap!');
-    //             }
-
-    //             $bed = Bed::find($request->bed_id);
-    //             if (!$bed) {
-    //                 Log::error('Bed not found with ID: ' . $request->bed_id);
-    //                 return redirect()->back()->with('error', 'Bed dengan ID tersebut tidak ditemukan!');
-    //             }
-
-    //             $bed->update(['patient_id' => $request->patient_id]);
-    //             $this->assignBedToPatient($request);
-    //             Log::info('Bed assigned successfully');
-    //         }
-
-    //         // Generate registration numbers
-    //         $validatedData['registration_number'] = generate_registration_number();
-    //         $validatedData['no_urut'] = generateDoctorSequenceNumber($request->doctor_id, $request->registration_date);
-
-    //         Log::info('Generated registration number: ' . $validatedData['registration_number']);
-    //         Log::info('Generated sequence number: ' . $validatedData['no_urut']);
-
-    //         // Create registration
-    //         $registration = Registration::create($validatedData);
-    //         Log::info('Registration created with ID: ' . $registration->id);
-
-    //         // Get group penjamin ID
-    //         $penjamin = Penjamin::with('group_penjamin')->find($request->penjamin_id);
-    //         if (!$penjamin) {
-    //             Log::error('Penjamin not found with ID: ' . $request->penjamin_id);
-    //             return redirect()->back()->with('error', 'Penjamin tidak ditemukan!');
-    //         }
-
-    //         if (!$penjamin->group_penjamin) {
-    //             Log::error('Group penjamin not found for penjamin ID: ' . $request->penjamin_id);
-    //             return redirect()->back()->with('error', 'Group penjamin tidak ditemukan!');
-    //         }
-
-    //         $gruop_penjamin_id = $penjamin->group_penjamin->id;
-    //         Log::info('Group penjamin ID: ' . $gruop_penjamin_id);
-
-    //         // Handle billing based on registration type
-    //         if ($validatedData['registration_type'] == 'rawat-jalan') {
-    //             Log::info('Processing rawat-jalan billing');
-
-    //             $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $gruop_penjamin_id)
-    //                 ->where('tarif_registrasi_id', 1)
-    //                 ->first();
-
-    //             if (!$hargaTarifAdmin) {
-    //                 Log::error('Tarif administrasi rawat jalan tidak ditemukan untuk group_penjamin_id: ' . $gruop_penjamin_id);
-    //                 return redirect()->back()->with('error', 'Tarif administrasi rawat jalan tidak ditemukan!');
-    //             }
-
-    //             Log::info('Tarif admin rawat jalan: ' . $hargaTarifAdmin->harga);
-
-    //             // Create billing
-    //             $billing = Bilingan::create([
-    //                 'registration_id' => $registration->id,
-    //                 'patient_id' => $request->patient_id,
-    //                 'status' => 'belum final',
-    //                 'wajib_bayar' => $hargaTarifAdmin->harga
-    //             ]);
-
-    //             // Add registration fee to billing details
-    //             $tagihanPasien = TagihanPasien::create([
-    //                 'user_id' => auth()->user()->id,
-    //                 'bilingan_id' => $billing->id,
-    //                 'registration_id' => $registration->id,
-    //                 'date' => Carbon::now(),
-    //                 'tagihan' => "[Biaya Administrasi] Rawat Jalan",
-    //                 'nominal' => $hargaTarifAdmin->harga,
-    //                 'quantity' => 1,
-    //                 'harga' => $hargaTarifAdmin->harga,
-    //                 'wajib_bayar' => $hargaTarifAdmin->harga
-    //             ]);
-
-    //             BilinganTagihanPasien::create([
-    //                 'tagihan_pasien_id' => $tagihanPasien->id,
-    //                 'bilingan_id' => $billing->id,
-    //             ]);
-    //         } else if ($validatedData['registration_type'] == 'igd') {
-    //             Log::info('Processing IGD billing');
-
-    //             $hargaTarifAdmin = HargaTarifRegistrasi::where('group_penjamin_id', $gruop_penjamin_id)
-    //                 ->where('tarif_registrasi_id', 3) // Masih Statis
-    //                 ->first();
-
-    //             if (!$hargaTarifAdmin) {
-    //                 Log::error('Tarif administrasi IGD tidak ditemukan untuk group_penjamin_id: ' . $gruop_penjamin_id);
-    //                 return redirect()->back()->with('error', 'Tarif administrasi IGD tidak ditemukan!');
-    //             }
-
-    //             Log::info('Tarif admin IGD: ' . $hargaTarifAdmin->harga);
-
-    //             // Create billing
-    //             $billing = Bilingan::create([
-    //                 'registration_id' => $registration->id,
-    //                 'patient_id' => $request->patient_id,
-    //                 'status' => 'belum final',
-    //                 'wajib_bayar' => $hargaTarifAdmin->harga
-    //             ]);
-
-    //             // Add registration fee to billing details
-    //             $tagihanPasien = TagihanPasien::create([
-    //                 'user_id' => auth()->user()->id,
-    //                 'bilingan_id' => $billing->id,
-    //                 'registration_id' => $registration->id,
-    //                 'date' => Carbon::now(),
-    //                 'tagihan' => "[Biaya Administrasi] UGD",
-    //                 'nominal' => $hargaTarifAdmin->harga,
-    //                 'quantity' => 1,
-    //                 'harga' => $hargaTarifAdmin->harga,
-    //                 'wajib_bayar' => $hargaTarifAdmin->harga
-    //             ]);
-
-    //             BilinganTagihanPasien::create([
-    //                 'tagihan_pasien_id' => $tagihanPasien->id,
-    //                 'bilingan_id' => $billing->id,
-    //             ]);
-    //         } else if ($validatedData['registration_type'] == 'rawat-inap') {
-    //             Log::info('Processing rawat-inap billing');
-
-    //             // Cari biaya administrasi rawat inap berdasarkan group penjamin
-    //             $biayaAdminRawatInap = \App\Models\SIMRS\Setup\BiayaAdministrasiRawatInap::where('group_penjamin_id', $gruop_penjamin_id)
-    //                 ->first();
-
-    //             if (!$biayaAdminRawatInap) {
-    //                 Log::error('Biaya administrasi rawat inap tidak ditemukan untuk group_penjamin_id: ' . $gruop_penjamin_id);
-    //                 Log::info(
-    //                     'Available biaya admin rawat inap:',
-    //                     \App\Models\SIMRS\Setup\BiayaAdministrasiRawatInap::all()->toArray()
-    //                 );
-    //                 return redirect()->back()->with('error', 'Biaya administrasi rawat inap tidak ditemukan untuk penjamin ini!');
-    //             }
-
-    //             Log::info('Biaya admin rawat inap config:', $biayaAdminRawatInap->toArray());
-
-    //             // Untuk saat ini, kita bisa menggunakan min_tarif sebagai tarif awal
-    //             // atau Anda bisa menghitung berdasarkan persentase dari total biaya treatment
-    //             $tarifAdmin = $biayaAdminRawatInap->min_tarif ?: 0;
-
-    //             Log::info('Tarif admin rawat inap yang akan digunakan: ' . $tarifAdmin);
-
-    //             // Create billing - untuk rawat inap mungkin tidak langsung ada wajib_bayar
-    //             // karena akan dihitung berdasarkan treatment yang diberikan
-    //             $billing = Bilingan::create([
-    //                 'registration_id' => $registration->id,
-    //                 'patient_id' => $request->patient_id,
-    //                 'status' => 'belum final',
-    //                 'wajib_bayar' => $tarifAdmin // Ini bisa 0 jika menggunakan sistem persentase
-    //             ]);
-
-    //             // Add registration fee to billing details jika ada tarif minimum
-    //             if ($tarifAdmin > 0) {
-    //                 $tagihanPasien = TagihanPasien::create([
-    //                     'user_id' => auth()->user()->id,
-    //                     'bilingan_id' => $billing->id,
-    //                     'registration_id' => $registration->id,
-    //                     'date' => Carbon::now(),
-    //                     'tagihan' => "[Biaya Administrasi] Rawat Inap",
-    //                     'nominal' => $tarifAdmin,
-    //                     'quantity' => 1,
-    //                     'harga' => $tarifAdmin,
-    //                     'wajib_bayar' => $tarifAdmin
-    //                 ]);
-
-    //                 BilinganTagihanPasien::create([
-    //                     'tagihan_pasien_id' => $tagihanPasien->id,
-    //                     'bilingan_id' => $billing->id,
-    //                 ]);
-    //             }
-
-    //             Log::info('Rawat inap billing created successfully');
-    //         }
-
-    //         Log::info('Registration process completed successfully');
-    //         return redirect("/daftar-registrasi-pasien/$registration->id")
-    //             ->with('success', 'Registrasi berhasil ditambahkan!');
-    //     } catch (\Exception $e) {
-    //         Log::error('Registration error: ' . $e->getMessage());
-    //         Log::error('Stack trace: ' . $e->getTraceAsString());
-    //         return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-    //     }
-    // }
-
     public function store(Request $request)
     {
-        // 1. Validasi Input
-        $validator = $this->validateRegistrationRequest($request);
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-        $validatedData = $validator->validated();
-
-        // 2. Gunakan Database Transaction untuk memastikan integritas data
         try {
-            DB::beginTransaction();
-
-            // 3. Persiapkan Data Registrasi
-            $registrationData = $this->prepareRegistrationData($validatedData, $request);
-
-            // 4. Buat record registrasi
-            $registration = Registration::create($registrationData);
-            Log::info('Registration created successfully', ['registration_id' => $registration->id]);
-
-            // 5. Lakukan Aksi Spesifik Berdasarkan Tipe Registrasi (Update Bed, dll)
-            if ($registration->registration_type == 'rawat-inap') {
-                $this->assignBedToPatient($request->bed_id, $request->patient_id);
-            }
-
-            // 6. Buat Billing Awal
-            $this->createInitialBilling($registration, $request->penjamin_id);
-
-            // Jika semua berhasil, commit transaksi
-            DB::commit();
-
-            Log::info('Registration process completed successfully for registration ID: ' . $registration->id);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Registrasi berhasil ditambahkan!',
-                'redirect_url' => url("/daftar-registrasi-pasien/{$registration->id}")
-            ]);
-        } catch (\Exception $e) {
-            // Jika terjadi error, batalkan semua perubahan
-            DB::rollBack();
-
-            Log::error('Registration process failed: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-                'request_data' => $request->all()
+            $validatedData = $request->validate([
+                'patient_id' => 'required',
+                'user_id' => 'required',
+                'employee_id' => 'required',
+                'doctor_id' => 'required',
+                'registration_type' => 'required',
+                'penjamin_id' => 'required',
+                'rujukan' => 'required|string',
+                'poliklinik' => 'nullable|string',
+                'dokter_perujuk' => 'nullable|integer',
+                'tipe_rujukan' => 'nullable|string',
+                'igd_type' => 'nullable|string',
+                'odc_type' => 'nullable|string',
+                'nama_perujuk' => 'nullable|string',
+                'telp_perujuk' => 'nullable|string',
+                'alamat_perujuk' => 'nullable|string',
+                'diagnosa_awal' => 'nullable|string',
+                'kelas_rawat_id' => 'nullable|string',
+            ], [
+                'penjamin_id.required' => 'Kolom Penjamin tidak boleh kosong.',
+                'patient_id.required' => 'Kolom Pasien tidak boleh kosong.',
+                'user_id.required' => 'Kolom User tidak boleh kosong.',
+                'employee_id.required' => 'Kolom Pegawai tidak boleh kosong.',
+                'doctor_id.required' => 'Kolom Dokter tidak boleh kosong.',
+                'registration_type.required' => 'Kolom Tipe Registrasi tidak boleh kosong.',
+                'poliklinik.nullable' => 'Kolom poliklinik boleh kosong.',
+                'poliklinik.string' => 'Kolom poliklinik harus berupa teks.',
+                'rujukan.required' => 'Kolom rujukan wajib diisi.',
+                'rujukan.string' => 'Kolom rujukan harus berupa teks.',
+                'dokter_perujuk.nullable' => 'Kolom dokter perujuk boleh kosong.',
+                'dokter_perujuk.integer' => 'Kolom dokter perujuk harus berupa angka.',
+                'tipe_rujukan.nullable' => 'Kolom tipe rujukan boleh kosong.',
+                'tipe_rujukan.string' => 'Kolom tipe rujukan harus berupa teks.',
+                'igd_type.nullable' => 'Kolom igd_type boleh kosong.',
+                'igd_type.string' => 'Kolom igd_type harus berupa teks.',
+                'odc_type.nullable' => 'Kolom odc_type boleh kosong.',
+                'odc_type.string' => 'Kolom odc_type harus berupa teks.',
+                'nama_perujuk.nullable' => 'Kolom nama perujuk boleh kosong.',
+                'nama_perujuk.string' => 'Kolom nama perujuk harus berupa teks.',
+                'telp_perujuk.nullable' => 'Kolom telepon perujuk boleh kosong.',
+                'telp_perujuk.string' => 'Kolom telepon perujuk harus berupa teks.',
+                'alamat_perujuk.nullable' => 'Kolom alamat perujuk boleh kosong.',
+                'alamat_perujuk.string' => 'Kolom alamat perujuk harus berupa teks.',
+                'diagnosa_awal.nullable' => 'Kolom diagnosa awal boleh kosong.',
+                'diagnosa_awal.string' => 'Kolom diagnosa awal harus berupa teks.',
             ]);
 
             // DEBUG: Log validated data
@@ -900,189 +626,6 @@ class RegistrationController extends Controller
         }
     }
 
-    /**
-     * Method privat untuk validasi request.
-     */
-    private function validateRegistrationRequest(Request $request)
-    {
-        // Ambil tipe registrasi untuk mempermudah penulisan kondisi
-        $registrationType = $request->input('registration_type');
-
-        // -----------------------------------------------------------------
-        // ATURAN VALIDASI
-        // -----------------------------------------------------------------
-        $rules = [
-            // --- Aturan Dasar (Wajib untuk Semua Form) ---
-            'patient_id'        => 'required|integer|exists:patients,id',
-            'user_id'           => 'required|integer|exists:users,id',
-            'employee_id'       => 'required|integer|exists:employees,id',
-            'doctor_id'         => 'required|integer|exists:doctors,id',
-            'registration_type' => ['required', 'string', Rule::in(['rawat-jalan', 'rawat-inap', 'igd', 'odc', 'laboratorium', 'radiologi', 'hemodialisa'])],
-            'penjamin_id'       => 'required|integer|exists:penjamins,id',
-            'diagnosa_awal'     => 'nullable|string|max:1000',
-            'kartu_pasien'      => 'nullable|boolean',
-
-            // --- Aturan untuk Rawat Jalan & Rawat Inap (yang memiliki rujukan) ---
-            'rujukan' => [
-                'required_if:registration_type,rawat-jalan,rawat-inap,odc',
-                'nullable',
-                'string',
-                Rule::in(['inisiatif pribadi', 'dalam rs', 'luar rs', 'rujukan bpjs']),
-            ],
-            // Input rujukan detail hanya wajib jika jenis rujukannya 'luar rs' atau 'rujukan bpjs'
-            'tipe_rujukan'      => 'required_if:rujukan,luar rs,rujukan bpjs|nullable|string|max:255',
-            'nama_perujuk'      => 'required_if:rujukan,luar rs,rujukan bpjs|nullable|string|max:255',
-            'telp_perujuk'      => 'nullable|string|max:50',
-            'alamat_perujuk'    => 'nullable|string|max:500',
-            // 'dokter_perujuk' wajib jika rujukannya dari 'dalam rs'
-            'dokter_perujuk'    => 'required_if:rujukan,dalam rs|nullable|integer|exists:doctors,id',
-
-            // --- Aturan Khusus Rawat Jalan ---
-            'poliklinik'        => 'required_if:registration_type,rawat-jalan|nullable|string|max:255',
-            'paket'             => 'nullable|string|max:255',
-            'tipe_jadwal'       => 'required_if:registration_type,rawat-jalan|nullable|string|max:50',
-
-            // --- Aturan Khusus Rawat Inap ---
-            'bed_id'            => 'required_if:registration_type,rawat-inap|nullable|integer|exists:beds,id', // 'bed_id' dari request, bukan dari tabel registrasi
-            'kamar_tujuan'      => 'required_if:registration_type,rawat-inap|nullable|string|max:255',
-            'prosedur_masuk'    => 'required_if:registration_type,rawat-inap|nullable|string|max:255',
-            'titip_kelas_rawat' => 'nullable|integer|exists:kelas_rawats,id',
-
-            // --- Aturan Khusus IGD ---
-            'igd_type'          => 'required_if:registration_type,igd|nullable|string|max:255',
-            'pelayanan'         => 'required_if:registration_type,igd|nullable|string|max:255',
-
-            // --- Aturan Khusus ODC ---
-            'odc_type'          => 'required_if:registration_type,odc|nullable|string|max:50',
-
-            // --- Aturan Khusus Laboratorium & Radiologi ---
-            'order_type'        => 'required_if:registration_type,laboratorium,radiologi|nullable|string|in:normal,cito',
-            'catatan'           => 'nullable|string|max:1000',
-            'lab_parameters'    => 'nullable|array', // Validasi untuk parameter Lab
-            'rad_parameters'    => 'nullable|array', // Validasi untuk parameter Rad
-        ];
-
-        // -----------------------------------------------------------------
-        // PESAN ERROR KUSTOM (dalam Bahasa Indonesia)
-        // -----------------------------------------------------------------
-        $messages = [
-            'required'          => 'Kolom :attribute tidak boleh kosong.',
-            'required_if'       => 'Kolom :attribute wajib diisi jika :other adalah :value.',
-            'exists'            => ':attribute yang dipilih tidak valid atau tidak ditemukan.',
-            'string'            => 'Kolom :attribute harus berupa teks.',
-            'integer'           => 'Kolom :attribute harus berupa angka.',
-            'boolean'           => 'Kolom :attribute harus bernilai true atau false.',
-
-            // Pesan yang lebih spesifik
-            'penjamin_id.required'  => 'Anda harus memilih penjamin.',
-            'doctor_id.required'    => 'Anda harus memilih dokter.',
-            'bed_id.required_if'    => 'Pemilihan kamar rawat wajib untuk pendaftaran rawat inap.',
-            'poliklinik.required_if' => 'Poliklinik wajib diisi untuk pendaftaran rawat jalan.',
-            'igd_type.required_if'  => 'Tipe IGD wajib diisi untuk pendaftaran IGD.',
-            'pelayanan.required_if' => 'Jenis pelayanan wajib diisi untuk pendaftaran IGD.',
-        ];
-
-        return Validator::make($request->all(), $rules, $messages);
-    }
-
-    /**
-     * Method privat untuk menyiapkan data sebelum dimasukkan ke tabel registrasi.
-     */
-    private function prepareRegistrationData(array $validatedData, Request $request): array
-    {
-        $data = $validatedData;
-
-        $data['registration_date'] = Carbon::now();
-        $data['date'] = Carbon::now();
-        $data['status'] = 'aktif';
-
-        $data['registration_number'] = generate_registration_number();
-        $data['no_urut'] = generateDoctorSequenceNumber($request->doctor_id, $request->registration_date);
-
-        // Menentukan kelas rawat
-        if (in_array($request->registration_type, ['rawat-jalan', 'igd', 'laboratorium', 'radiologi', 'odc'])) {
-            $kelas = KelasRawat::where('kelas', 'like', '%Rawat Jalan%')->first();
-            $data['kelas_rawat_id'] = $kelas->id ?? null;
-        }
-        // untuk rawat-inap, kelas_rawat_id sudah di-supply dari request
-
-        // Menentukan departemen
-        $data['departement_id'] = $this->getDepartmentId($data);
-
-        return $data;
-    }
-
-    /**
-     * Method privat untuk membuat billing awal.
-     */
-    private function createInitialBilling(Registration $registration, int $penjaminId)
-    {
-        $penjamin = Penjamin::with('group_penjamin')->find($penjaminId);
-        if (!$penjamin || !$penjamin->group_penjamin) {
-            throw new \Exception("Grup penjamin untuk penjamin ID {$penjaminId} tidak ditemukan.");
-        }
-        $groupPenjaminId = $penjamin->group_penjamin->id;
-
-        $tarifAdmin = 0;
-        $tagihanLabel = '';
-
-        switch ($registration->registration_type) {
-            case 'rawat-jalan':
-                $tarif = HargaTarifRegistrasi::where('group_penjamin_id', $groupPenjaminId)->where('tarif_registrasi_id', 1)->first();
-                $tarifAdmin = $tarif->harga ?? 0;
-                $tagihanLabel = "[Biaya Administrasi] Rawat Jalan";
-                break;
-
-            case 'igd':
-                $tarif = HargaTarifRegistrasi::where('group_penjamin_id', $groupPenjaminId)->where('tarif_registrasi_id', 3)->first(); // Contoh ID statis untuk IGD
-                $tarifAdmin = $tarif->harga ?? 0;
-                $tagihanLabel = "[Biaya Administrasi] UGD";
-                break;
-
-            case 'rawat-inap':
-                $biayaAdmin = BiayaAdministrasiRawatInap::where('group_penjamin_id', $groupPenjaminId)->first();
-                $tarifAdmin = $biayaAdmin->min_tarif ?? 0;
-                $tagihanLabel = "[Biaya Administrasi] Rawat Inap";
-                break;
-        }
-
-        if ($tarifAdmin <= 0 && $registration->registration_type !== 'rawat-inap') {
-            Log::warning("Tarif admin not found or zero for billing.", ['registration_type' => $registration->registration_type, 'group_penjamin_id' => $groupPenjaminId]);
-            // Anda bisa memutuskan untuk throw exception di sini jika tarif wajib ada
-            // throw new \Exception("Tarif administrasi untuk {$registration->registration_type} tidak ditemukan.");
-        }
-
-        $billing = Bilingan::create([
-            'registration_id' => $registration->id,
-            'patient_id' => $registration->patient_id,
-            'status' => 'belum final',
-            'wajib_bayar' => $tarifAdmin
-        ]);
-
-        if ($tarifAdmin > 0) {
-            $tagihanPasien = TagihanPasien::create([
-                'user_id' => auth()->user()->id,
-                'bilingan_id' => $billing->id,
-                'registration_id' => $registration->id,
-                'date' => Carbon::now(),
-                'tagihan' => $tagihanLabel,
-                'nominal' => $tarifAdmin,
-                'quantity' => 1,
-                'harga' => $tarifAdmin,
-                'wajib_bayar' => $tarifAdmin
-            ]);
-
-            BilinganTagihanPasien::create([
-                'tagihan_pasien_id' => $tagihanPasien->id,
-                'bilingan_id' => $billing->id,
-            ]);
-        }
-
-        Log::info('Initial billing created', ['registration_id' => $registration->id, 'amount' => $tarifAdmin]);
-    }
-
-
-
     private function getDepartmentId($data)
     {
         switch ($data['registration_type']) {
@@ -1168,6 +711,7 @@ class RegistrationController extends Controller
         $jenisOperasi = TipeOperasi::orderBy('tipe')->get();
         $kategoriOperasi = KategoriOperasi::orderBy('nama_kategori')->get();
         $ruangans = Room::orderBy('ruangan')->get();
+        $ruangans_operasi = Room::where('ruangan', 'OK')->orderBy('ruangan', 'asc')->get();
 
         $orderOperasi = OrderOperasi::with([
             'tipeOperasi',
@@ -1215,7 +759,8 @@ class RegistrationController extends Controller
             'tindakan_medis' => $tindakan_medis,
             'age' => $age,
             'doctors' => $doctors, // <-- PASTIKAN INI DIKIRIM: dibutuhkan untuk dropdown DPJP
-            'ruangans' => $ruangans,
+            // 'ruanganx`s' => $ruangans,
+            'ruangans_operasi' => $ruangans_operasi,
             // === TAMBAHAN BARU YANG DIKIRIM KE VIEW ===
             'jenisOperasi' => $jenisOperasi,
             'kategoriOperasi' => $kategoriOperasi,

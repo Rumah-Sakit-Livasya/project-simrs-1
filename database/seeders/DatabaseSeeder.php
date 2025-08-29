@@ -8,8 +8,9 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-     /*
-	Seed the application's database.
+
+    /**
+     * Seed the application's database.
      */
     public function run(): void
     {
@@ -52,18 +53,66 @@ class DatabaseSeeder extends Seeder
         //     WasteCategorySeeder::class,
         //     VehicleSeeder::class,
         // ]);
+        // $this->call([
+        //     LinenCategorySeeder::class,
+        //     LinenTypeSeeder::class,
+        // ]);
+
         $this->call([
-            LinenCategorySeeder::class,
-            LinenTypeSeeder::class,
+            // NursingDiagnosisSeeder::class,
+            // InterventionSeeder::class, // <-- TAMBAHKAN INI
+            DocumentCategorySeeder::class, // <-- TAMBAHKAN INI
+            // Anda bisa menambahkan seeder lain di sini
         ]);
 
 
-        // Membuat 200 data input limbah harian
-        // \App\Models\DailyWasteInput::factory(200)->create();
+        // $this->call([
+        // JenisKegiatanSeeder::class,
+        // InspectionItemSeeder::class,
+        // InternalVehicleSeeder::class,
+        // WorkshopVendorSeeder::class,
+        // DriverSeeder::class,
+        // VehicleLogSeeder::class,
+        // Daftarkan seeder lain di sini jika ada
+        // ]);
 
-        // Membuat 100 data pengangkutan limbah
-        // \App\Models\WasteTransport::factory(100)->create();
+
+        // Type::insert([
+        //     ['id' => 1, 'nama' => 'Pemasukan', 'created_at' => now(), 'updated_at' => now()],
+        //     ['id' => 2, 'nama' => 'Pengeluaran', 'created_at' => now(), 'updated_at' => now()],
+        // ]);
+
+        // $this->call(AccountReceivableSeeder::class);
+        // $this->call([
+        //         RncCenterSeeder::class,
+        // ]);
+        // $this->call([
+        //     WasteCategorySeeder::class,
+        //     VehicleSeeder::class,
+        // ]);
+        // $this->call([
+        //     LinenCategorySeeder::class,
+        //     LinenTypeSeeder::class,
+        // ]);
 
 
+        // $this->call(AccountReceivableSeeder::class);
+        // $this->call([
+        //         RncCenterSeeder::class,
+        // ]);
+
+        $this->call([
+            // 1. Seeder untuk tabel pendukung
+            KategoriPersalinanSeeder::class,
+            TipePersalinanSeeder::class,
+            // KelasRawatSeeder::class,
+            // GroupPenjaminSeeder::class,
+
+            // 2. Seeder untuk data persalinan
+            PersalinanCompleteSeeder::class,
+
+            // 3. Seeder untuk tarif (opsional - bisa dijalankan terpisah karena data besar)
+            // CompleteTarifPersalinanSeeder::class,
+        ]);
     }
 }

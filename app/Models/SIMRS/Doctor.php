@@ -53,4 +53,8 @@ class Doctor extends Model
     {
         return $this->hasMany(OrderTindakanMedis::class);
     }
+    public function getNameAttribute()
+    {
+        return $this->employee->fullname ?? '-';
+    }
 }
