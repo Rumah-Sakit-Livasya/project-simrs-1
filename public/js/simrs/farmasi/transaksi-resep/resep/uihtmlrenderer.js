@@ -107,13 +107,28 @@ class UIHTMLRenderer {
      * @param {BarangFarmasi} item The drug item.
      * @param {number} key The unique key for the item.
      * @param {number} embalaseValue The value for the embalase fee.
+     * @param {number} qty Quantity.
+     * @param {string} signa
+     * @param {string} instruksi
+     * @param {number | null} rhi_id Resep Harian Item id
      */
-    getIncompleteObat(item, key, embalaseValue) {
+    getIncompleteObat(item, key, embalaseValue, qty = 0, signa = "", instruksi = "", rhi_id = null) {
+        const UniqueInstruksiOption = /*html*/`
+                <option value="${instruksi}" selected>${instruksi}</option>
+        `;
+
+        const HasDefault = ["sesudah makan", "sebelum makan", "saat makan"].includes((instruksi || '').toLowerCase());
+
+        const Rhi_IdInput = /*html*/`
+            <input type="hidden" name="rhi_id[${key}]" value="${rhi_id}">
+        `;
+
         const Instruksi = /*html*/`
             <select name="instruksi[${key}]" id="instruksi${key}">
-                <option value="Sesudah Makan">Sesudah Makan</option>
-                <option value="Sebelum Makan">Sebelum Makan</option>
-                <option value="Saat Makan">Saat Makan</option>
+                <option value="Sesudah Makan" ${(instruksi || '').toLowerCase() == 'sesudah makan' ? 'selected' : ''}>Sesudah Makan</option>
+                <option value="Sebelum Makan" ${(instruksi || '').toLowerCase() == 'sebelum makan' ? 'selected' : ''}>Sebelum Makan</option>
+                <option value="Saat Makan" ${(instruksi || '').toLowerCase() == 'saat makan' ? 'selected' : ''}>Saat Makan</option>
+                ${HasDefault ? UniqueInstruksiOption : ''}
             </select>
         `;
         const TombolJamPemberian = /*html*/`
@@ -129,6 +144,11 @@ class UIHTMLRenderer {
                 title="Obat Tidak Lengkap! Pilih Batch Obat!" onclick="ResepClass.pilihBatch(${key}, ${item.id}, '${item.nama}')"></a>
         `;
 
+        const TombolHapus = /*html*/`
+            <a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
+                title="Hapus" onclick="ResepClass.deleteItem(${key})"></a>
+        `;
+
         const restriksiHTML = this._getRestriksiHTML(item);
         const subtotal = item.hna + embalaseValue;
 
@@ -142,6 +162,7 @@ class UIHTMLRenderer {
                 <input type="hidden" name="subtotal[${key}]" value="${subtotal}">
                 <input type="hidden" name="type[${key}]" value="obat">
                 <input type="hidden" name="si_id[${key}]" value="">
+                ${rhi_id != null ? Rhi_IdInput : ''}
 
                 <td class="kode_barang">${item.kode}</td>
                 <td class="nama_barang">${TombolAlertIncomplete}${item.nama}</td>
@@ -149,15 +170,15 @@ class UIHTMLRenderer {
                 <td>${restriksiHTML}</td>
                 <td class="batch">SELECT A BATCH</td>
                 <td class="ed">SELECT A BATCH</td>
-                <td><input type="number" name="qty[${key}]" min="1" step="1" class="form-control" value="1" max="1"></td>
-                <td class="signa">-</td>
+                <td><input type="number" name="qty[${key}]" min="1" step="1" class="form-control" value="${qty ?? 1}" max="${qty ?? 1}"></td>
+                <td class="signa">${signa ?? '-'}</td>
                 <td>${Instruksi}</td>
                 <td class="jam-pemberian">-</td>
                 <td>${Utils.rp(item.hna)}</td>
                 <td class="embalase">${Utils.rp(embalaseValue)}</td>
                 <td class="subtotal">${Utils.rp(subtotal)}</td>
-                <td><a class="mdi mdi-close pointer mdi-24px text-danger delete-btn"
-                    title="Hapus" onclick="ResepClass.deleteItem(${key})"></a>
+                <td>
+                    ${rhi_id == null ? TombolHapus : ''}
                     ${TombolJamPemberian}
                     ${TombolSigna}
                     ${TombolAlertIncomplete}

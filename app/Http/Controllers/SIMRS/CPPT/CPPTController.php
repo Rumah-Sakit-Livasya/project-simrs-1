@@ -63,10 +63,10 @@ class CPPTController extends Controller
             // 1. Validasi input dari filter untuk keamanan
             $request->validate([
                 'registration_id' => 'required|exists:registrations,id',
-                'start_date'      => 'nullable|date_format:Y-m-d',
-                'end_date'        => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
-                'care_status'     => 'nullable|string|in:ri,rj,igd',
-                'cppt_type'       => 'nullable|string|in:dokter,perawat',
+                'start_date' => 'nullable|date_format:Y-m-d',
+                'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
+                'care_status' => 'nullable|string|in:ri,rj,igd',
+                'cppt_type' => 'nullable|string|in:dokter,perawat',
             ]);
 
             // 2. Mulai membangun query, jangan panggil ->get() dulu
@@ -104,8 +104,8 @@ class CPPTController extends Controller
                 // Gunakan whereBetween untuk query yang efisien
                 // Tambahkan waktu untuk memastikan seluruh hari terakhir ter-cover
                 $query->whereBetween('created_at', [
-                    $request->start_date . ' 00:00:00',
-                    $request->end_date . ' 23:59:59'
+                    $request->start_date.' 00:00:00',
+                    $request->end_date.' 23:59:59',
                 ]);
             }
 
@@ -117,7 +117,7 @@ class CPPTController extends Controller
             $formattedCppt = $cppt->map(function ($item) {
                 $item->nama = optional($item->user->employee)->fullname;
 
-                if (!empty($item->tipe_rawat)) {
+                if (! empty($item->tipe_rawat)) {
                     $item->tipe_rawat = $item->tipe_rawat === 'igd'
                         ? 'UGD'
                         : ucwords(str_replace('-', ' ', $item->tipe_rawat));
@@ -136,7 +136,7 @@ class CPPTController extends Controller
             // Tangani error validasi secara spesifik
             return response()->json(['error' => 'Input tidak valid.', 'details' => $e->errors()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan pada server: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Terjadi kesalahan pada server: '.$e->getMessage()], 500);
         }
     }
 
@@ -166,8 +166,8 @@ class CPPTController extends Controller
             // Filter berdasarkan Rentang Tanggal
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 $query->whereBetween('created_at', [
-                    $request->start_date . ' 00:00:00',
-                    $request->end_date . ' 23:59:59'
+                    $request->start_date.' 00:00:00',
+                    $request->end_date.' 23:59:59',
                 ]);
             }
 
@@ -181,7 +181,7 @@ class CPPTController extends Controller
             $formattedCppt = $cppt->map(function ($item) {
                 $item->nama = optional($item->user->employee)->fullname;
 
-                if (!empty($item->tipe_rawat)) {
+                if (! empty($item->tipe_rawat)) {
                     $item->tipe_rawat = $item->tipe_rawat === 'igd'
                         ? 'UGD'
                         : ucwords(str_replace('-', ' ', $item->tipe_rawat));
@@ -198,10 +198,9 @@ class CPPTController extends Controller
             return response()->json($formattedCppt, 200);
         } catch (\Exception $e) {
             // Lebih baik menangkap error spesifik jika memungkinkan, tapi ini sudah cukup
-            return response()->json(['error' => 'Terjadi kesalahan pada server: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Terjadi kesalahan pada server: '.$e->getMessage()], 500);
         }
     }
-
 
     private function generate_pharmacy_re_code()
     {
@@ -209,12 +208,13 @@ class CPPTController extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = FarmasiResepElektronik::whereMonth('created_at', now()->month)
+        $count = FarmasiResepElektronik::withTrashed()
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return "REJ" . $year . $month . $count;
+        return 'REJ'.$year.$month.$count;
     }
 
     public function store(Request $request, $type, $registration_number)
@@ -245,9 +245,9 @@ class CPPTController extends Controller
 
             if (auth()->user()->employee->doctor) {
                 $validatedData['tipe_cppt'] = 'dokter';
-            } else if (str_contains(auth()->user()->name, "A.Md.Kep")) {
+            } elseif (str_contains(auth()->user()->name, 'A.Md.Kep')) {
                 $validatedData['tipe_cppt'] = 'perawat';
-            } else if (str_contains(auth()->user()->name, "A.Md.Keb")) {
+            } elseif (str_contains(auth()->user()->name, 'A.Md.Keb')) {
                 $validatedData['tipe_cppt'] = 'bidan';
             } else {
                 $validatedData['tipe_cppt'] = auth()->user()->employee->organization->name;
@@ -257,11 +257,11 @@ class CPPTController extends Controller
 
             // Logika penyimpanan tanda tangan (signature) - samakan dengan PengkajianController
             $signatureData = $validatedData['signature_data'] ?? null;
-            if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+            if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
                 $oldPath = optional($cppt->signature)->signature;
                 $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', str_replace(' ', '+', $signatureData['signature_image'])));
-                $imageName = 'ttd_cppt_' . $cppt->id . '_' . time() . '.png';
-                $newPath = 'signatures/' . $imageName;
+                $imageName = 'ttd_cppt_'.$cppt->id.'_'.time().'.png';
+                $newPath = 'signatures/'.$imageName;
                 \Storage::disk('public')->put($newPath, $image);
 
                 $cppt->signature()->updateOrCreate(
@@ -283,29 +283,29 @@ class CPPTController extends Controller
 
             // farmasi rajal
             if ($request->has('resep_manual') || $request->has('gudang_id')) {
-                if (!$request->has("gudang_id")) { // manual recipe only
+                if (! $request->has('gudang_id')) { // manual recipe only
                     $re = FarmasiResepElektronik::create([
                         'cppt_id' => $cppt->id,
                         'user_id' => auth()->user()->id,
                         'kode_re' => $this->generate_pharmacy_re_code(),
                         'total' => 0,
                         'resep_manual' => $request->get('resep_manual'),
-                        'registration_id' => $validatedData['registration_id']
+                        'registration_id' => $validatedData['registration_id'],
                     ]);
                 } else {
                     $total = $request->get('total_harga_obat');
                     if ($total == null) {
-                        throw new \Exception("Total harga obat tidak boleh kosong");
+                        throw new \Exception('Total harga obat tidak boleh kosong');
                     }
 
                     $re = FarmasiResepElektronik::create([
                         'cppt_id' => $cppt->id,
                         'user_id' => auth()->user()->id,
                         'kode_re' => $this->generate_pharmacy_re_code(),
-                        'gudang_id' => $request->get("gudang_id"),
+                        'gudang_id' => $request->get('gudang_id'),
                         'total' => $total,
                         'resep_manual' => $request->has('resep_manual') ? $request->get('resep_manual') : null,
-                        'registration_id' => $validatedData['registration_id']
+                        'registration_id' => $validatedData['registration_id'],
                     ]);
 
                     $barang_ids = $request->get('barang_id');
@@ -314,8 +314,8 @@ class CPPTController extends Controller
                     $subtotals = $request->get('subtotal');
                     $instruksi_obats = $request->get('instruksi_obat');
                     $signas = $request->get('signa');
-                    if (!$barang_ids || !$qtys || !$hargas || !$subtotals || !$instruksi_obats || !$signas) {
-                        throw new \Exception("Field tidak lengkap");
+                    if (! $barang_ids || ! $qtys || ! $hargas || ! $subtotals || ! $instruksi_obats || ! $signas) {
+                        throw new \Exception('Field tidak lengkap');
                     }
 
                     foreach ($barang_ids as $key => $barang_id) {
@@ -335,14 +335,16 @@ class CPPTController extends Controller
 
                 // create response
                 FarmasiResepResponse::create([
-                    "re_id" => $re->id
+                    're_id' => $re->id,
                 ]);
             }
 
             DB::commit();
+
             return response()->json(['message' => ' berhasil ditambahkan!'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -377,11 +379,11 @@ class CPPTController extends Controller
         // 2. Validasi (mirip dengan method store, tapi sesuaikan jika perlu)
         $validatedData = $request->validate([
             'subjective' => 'required|string',
-            'objective'  => 'required|string',
-            'assesment'  => 'required|string',
-            'planning'   => 'required|string',
-            'instruksi'  => 'nullable|string',
-            'evaluasi'   => 'nullable|string',
+            'objective' => 'required|string',
+            'assesment' => 'required|string',
+            'planning' => 'required|string',
+            'instruksi' => 'nullable|string',
+            'evaluasi' => 'nullable|string',
             // Tambahkan validasi lain jika ada input baru saat edit
         ]);
 
@@ -394,8 +396,8 @@ class CPPTController extends Controller
             if ($request->filled('signature_image')) {
                 $imageData = $request->input('signature_image');
                 $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $imageData));
-                $imageName = 'ttd_cppt_' . $cppt->id . '_' . time() . '.png';
-                $path = 'signatures/' . $imageName;
+                $imageName = 'ttd_cppt_'.$cppt->id.'_'.time().'.png';
+                $path = 'signatures/'.$imageName;
 
                 // Hapus tanda tangan lama jika ada
                 if ($cppt->signature && Storage::disk('public')->exists($cppt->signature->signature)) {
@@ -408,16 +410,18 @@ class CPPTController extends Controller
                 // Perbarui relasi signature
                 $cppt->signature()->update([
                     'signature' => $path,
-                    'pic'       => $request->input('pic') ?? Auth::user()->name,
-                    'role'      => $request->input('role')
+                    'pic' => $request->input('pic') ?? Auth::user()->name,
+                    'role' => $request->input('role'),
                 ]);
             }
 
             DB::commit();
+
             return response()->json(['success' => 'CPPT berhasil diperbarui!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Gagal memperbarui CPPT: ' . $e->getMessage()], 500);
+
+            return response()->json(['error' => 'Gagal memperbarui CPPT: '.$e->getMessage()], 500);
         }
     }
 
@@ -445,10 +449,12 @@ class CPPTController extends Controller
             $cppt->delete();
 
             DB::commit();
+
             return response()->json(['success' => 'CPPT berhasil dihapus.']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Gagal menghapus CPPT: ' . $e->getMessage()], 500);
+
+            return response()->json(['error' => 'Gagal menghapus CPPT: '.$e->getMessage()], 500);
         }
     }
 
@@ -458,7 +464,7 @@ class CPPTController extends Controller
     public function verify(CPPT $cppt)
     {
         // Otorisasi
-        if (!Gate::allows('verify-cppt', $cppt)) {
+        if (! Gate::allows('verify-cppt', $cppt)) {
             return response()->json(['error' => 'Anda tidak memiliki izin untuk melakukan verifikasi.'], 403);
         }
 
@@ -487,24 +493,24 @@ class CPPTController extends Controller
         // Cari SBAR berdasarkan cppt_id
         $sbar = \App\Models\Sbar::where('cppt_id', $cpptId)->latest()->first();
 
-        if (!$sbar) {
+        if (! $sbar) {
             return response()->json(['error' => 'Data SBAR tidak ditemukan untuk CPPT ini.'], 404);
         }
 
         return response()->json([
-            'id'            => $sbar->id,
-            'cppt_id'       => $sbar->cppt_id,
-            'user_id'       => $sbar->user_id,
-            'situation'     => $sbar->situation,
-            'background'    => $sbar->background,
-            'assessment'    => $sbar->assessment,
+            'id' => $sbar->id,
+            'cppt_id' => $sbar->cppt_id,
+            'user_id' => $sbar->user_id,
+            'situation' => $sbar->situation,
+            'background' => $sbar->background,
+            'assessment' => $sbar->assessment,
             'recommendation' => $sbar->recommendation,
-            'created_at'    => $sbar->created_at,
-            'updated_at'    => $sbar->updated_at,
+            'created_at' => $sbar->created_at,
+            'updated_at' => $sbar->updated_at,
 
             // TAMBAHKAN DUA BARIS INI SECARA EKSPLISIT
             'signature_penerima' => $sbar->signature_penerima,
-            'signature_pemberi'  => $sbar->signature_pemberi,
+            'signature_pemberi' => $sbar->signature_pemberi,
         ]);
     }
 }

@@ -21,8 +21,8 @@ return new class extends Migration
             $table->integer('harga');
             $table->integer('subtotal');
             // string signa, instruksi
-            $table->string('signa');
-            $table->string('instruksi');
+            $table->string('signa')->nullable();
+            $table->string('instruksi')->nullable();
             $table->boolean('billed')->default(false);
         });
     }

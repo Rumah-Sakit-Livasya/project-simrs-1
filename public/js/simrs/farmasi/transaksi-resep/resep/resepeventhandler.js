@@ -57,6 +57,7 @@ class ResepEventHandler {
         this.#addEventListeners("#pilih-pasien-btn", "click", this.#handlePilihPasienButtonClick);
         this.#addEventListeners("#pilih-dokter-btn", "click", this.#handlePilihDokterButtonClick);
         this.#addEventListeners("#resep-elektronik-btn", "click", this.#handleResepElektronikButtonClick);
+        this.#addEventListeners("#resep-harian-btn", "click", this.#handleResepHarianButtonClick);
         this.#addEventListeners("#tambah-racikan-btn", "click", this.#handleTambahRacikanButtonClick);
         this.#addEventListeners("#add-to-racikan", "click", this.#handleCancelAddToRacikanClick);
 
@@ -156,6 +157,16 @@ class ResepEventHandler {
                 $("#embalase_item").prop("checked", true).trigger("change");
             }
         }
+        else if (type == "rh") {
+            const DailyRecipe = /** @type {ResepHarian} */ (data);
+            this.#stateManager.changeDailyRecipe(DailyRecipe);
+            this.#handleCancelAddToRacikanClick();
+
+            if (!DailyRecipe.registration?.penjamin?.is_bpjs) {
+                // check the #embalase_item radio using jquery
+                $("#embalase_item").prop("checked", true).trigger("change");
+            }
+        }
         else if (type === "doctor") this.#stateManager.changeDoctor(data);
         else if (type == "telaah_resep") {
             this.#stateManager.changeTelaahResep(data);
@@ -180,6 +191,13 @@ class ResepEventHandler {
         event.preventDefault();
         this.#handleCancelAddToRacikanClick();
         window.open("popup/resep-elektronik", "popupResepElektronik", `width=${screen.width},height=${screen.height},top=0,left=0`);
+    }
+
+    /** @param {Event} event */
+    #handleResepHarianButtonClick(event) {
+        event.preventDefault();
+        this.#handleCancelAddToRacikanClick();
+        window.open("popup/resep-harian", "popupResepHarian", `width=${screen.width},height=${screen.height},top=0,left=0`);
     }
 
     /** @param {Event} event */

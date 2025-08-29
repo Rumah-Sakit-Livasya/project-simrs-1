@@ -8,6 +8,7 @@ use App\Models\DischargePlanning;
 use App\Models\DoctorInitialAssessment;
 use App\Models\Echocardiography;
 use App\Models\Employee;
+use App\Models\FarmasiResepHarian;
 use App\Models\GeriatricInitialAssessment;
 use App\Models\HospitalInfectionSurveillance;
 use App\Models\InpatientInitialAssessment;
@@ -16,6 +17,7 @@ use App\Models\MidwiferyInitialAssessment;
 use App\Models\NeonatusInitialAssessment;
 use App\Models\NeonatusInitialAssessmentDoctor;
 use App\Models\NursingActivityChecklist;
+use App\Models\OrderRadiologi;
 use App\Models\SIMRS\AssesmentKeperawatanGadar;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Departement;
@@ -23,7 +25,9 @@ use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\EWSAnak;
 use App\Models\SIMRS\EWSDewasa;
 use App\Models\SIMRS\EWSObstetri;
+use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\JadwalDokter;
+use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Operasi\KategoriOperasi;
@@ -39,6 +43,7 @@ use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\TransferPasienAntarRuangan;
 use App\Models\SIMRS\Peralatan\OrderAlatMedis;
 use App\Models\SIMRS\Peralatan\Peralatan;
+use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\ResumeMedisRajal\ResumeMedisRajal;
 use App\Models\SIMRS\Room;
@@ -1296,9 +1301,38 @@ class ERMController extends Controller
                 return view('pages.simrs.erm.form.perawat.rujuk-antar-rs', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'resep_harian':
-                $pengkajian = RujukAntarRS::firstWhere('registration_id', $registration->id);
 
-                return view('pages.simrs.erm.form.perawat.resep-harian', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                $gudangs = WarehouseMasterGudang::where('apotek', 1)->where('warehouse', 0)->get();
+                $barangs = WarehouseBarangFarmasi::with(['stored_items', 'satuan'])->get();
+                $default_column = 'rajal_default';
+                if ($registration->registration_type == 'rawat-inap') {
+                    $default_column = 'ranap_default';
+                }
+                $default_apotek = WarehouseMasterGudang::select('id')->where($default_column, 1)->first();
+                $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
+                $reseps = FarmasiResepHarian::with(['items', 'items.barang', 'doctor', 'doctor.employee', 'gudang'])->where('registration_id', $registration->id)->get();
+
+                return view('pages.simrs.erm.form.perawat.resep-harian', compact('reseps', 'gudangs', 'barangs', 'default_apotek', 'pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+
+            case 'radiologi':
+                $pengkajian = AssesmentKeperawatanGadar::where('registration_id', $registration->id)->first();
+                $radiologyDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
+                    $query->where('name', 'like', '%radiologi%');
+                })->get();
+                $patient = $registration->patient;
+                $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
+
+                $radiologiOrders = [];
+                OrderRadiologi::where('registration_id', $registration->id)
+                    ->get()
+                    ->each(function ($order) use (&$radiologiOrders) {
+                        $radiologiOrders[$order->id] = $order;
+                    });
+                $radiology_categories = KategoriRadiologi::all();
+                $radiology_tarifs = TarifParameterRadiologi::all();
+                $kelas_rawats = KelasRawat::all();
+
+                return view('pages.simrs.erm.form.perawat.radiologi', compact('kelas_rawats', 'groupPenjaminId', 'patient', 'radiology_categories', 'radiology_tarifs', 'radiologiOrders', 'radiologyDoctors', 'pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'infusion_monitor':
                 // Di sini kita tidak perlu mengambil data awal ($pengkajian) karena
@@ -1439,7 +1473,7 @@ class ERMController extends Controller
 
     public function get_obat(int $gudang_id)
     {
-        $query = WarehouseBarangFarmasi::with(['stored_items']);
+        $query = WarehouseBarangFarmasi::with(['stored_items', 'satuan']);
         $query->whereHas('stored_items', function ($q) use ($gudang_id) {
             $q->where('gudang_id', $gudang_id);
             $q->where('warehouse_penerimaan_barang_farmasi_item.qty', '>', 0);

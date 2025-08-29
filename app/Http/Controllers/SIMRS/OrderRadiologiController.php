@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\SIMRS;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\OrderParameterRadiologi;
 use App\Models\OrderRadiologi;
@@ -13,6 +12,7 @@ use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\TagihanPasien;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class OrderRadiologiController extends Controller
 {
@@ -26,20 +26,21 @@ class OrderRadiologiController extends Controller
         $count = OrderRadiologi::whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
-        return 'RAD' . $year . $month . $day . $count;
+        return 'RAD'.$year.$month.$day.$count;
     }
 
-    function generate_otc_registration_number()
+    public function generate_otc_registration_number()
     {
         $date = Carbon::now();
         $year = $date->format('y');
         $month = $date->format('m');
         $day = $date->format('d');
 
-        $count = RegistrationOTC::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = RegistrationOTC::withTrashed()
+            ->whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
-        return "OTC" . $year . $month . $day . $count;
+        return 'OTC'.$year.$month.$day.$count;
     }
 
     // Store a newly created resource in storage.
@@ -88,7 +89,7 @@ class OrderRadiologiController extends Controller
                     'nama_pasien' => $request->get('nama_pasien'),
                     'date_of_birth' => $request->get('date_of_birth'),
                     'no_telp' => $request->get('no_telp'),
-                    'poly_ruang' => "RADIOLOGI",
+                    'poly_ruang' => 'RADIOLOGI',
                     'jenis_kelamin' => $request->get('jenis_kelamin'),
                     'order_date' => Carbon::now(),
                     'registration_number' => $this->generate_otc_registration_number(),
@@ -97,7 +98,7 @@ class OrderRadiologiController extends Controller
                     'doctor' => $request->get('doctor'),
                     'doctor_id' => $validatedData['doctor_id'],
                     'alamat' => $request->get('alamat'),
-                    'diagnosa_klinis' => $validatedData['diagnosa_awal']
+                    'diagnosa_klinis' => $validatedData['diagnosa_awal'],
                 ])->id;
 
                 $orderRadiologi = OrderRadiologi::create([
@@ -111,7 +112,7 @@ class OrderRadiologiController extends Controller
                     'diagnosa_klinis' => $validatedData['diagnosa_awal'],
                     'status_isi_hasil' => 0,
                     'status_billed' => 0,
-                    'is_konfirmasi' => 0
+                    'is_konfirmasi' => 0,
                 ]);
             } catch (\Exception $e) {
                 return response()->json([
@@ -131,16 +132,15 @@ class OrderRadiologiController extends Controller
                     'tipe_pasien' => $validatedData['registration_type'],
                     'diagnosa_klinis' => $validatedData['diagnosa_awal'],
                     'status_isi_hasil' => 0,
-                    'status_billed' => 0
+                    'status_billed' => 0,
                 ]);
             } catch (\Exception $e) {
                 return response()->json([
                     'success' => false,
-                    'message' => $e->getMessage()
+                    'message' => $e->getMessage(),
                 ]);
             }
         }
-
 
         $orderRadiologiId = $orderRadiologi->id;
         foreach ($validatedData['parameters'] as $parameter) {
@@ -161,27 +161,27 @@ class OrderRadiologiController extends Controller
     public function confirmPayment(Request $request)
     {
         $validatedData = $request->validate([
-            'id' => 'required|integer'
+            'id' => 'required|integer',
         ]);
 
         // Find the radiology order with relationships
         $order = OrderRadiologi::with([
             'registration',
-            'order_parameter_radiologi.parameter_radiologi' // Using the correct relationship name
+            'order_parameter_radiologi.parameter_radiologi', // Using the correct relationship name
         ])->findOrFail($validatedData['id']);
 
         // Update confirmation status
         $order->update(['is_konfirmasi' => 1]);
 
         // Only create billing if this is not an OTC order and has registration
-        if (!$order->otc_id && $order->registration_id) {
+        if (! $order->otc_id && $order->registration_id) {
             // Find or create billing for the registration
             $billing = Bilingan::firstOrCreate(
                 ['registration_id' => $order->registration_id],
                 [
                     'patient_id' => $order->registration->patient_id,
                     'status' => 'belum final',
-                    'wajib_bayar' => 0
+                    'wajib_bayar' => 0,
                 ]
             );
 
@@ -190,7 +190,7 @@ class OrderRadiologiController extends Controller
             // Create billing items for each radiology parameter
             foreach ($order->order_parameter_radiologi as $parameter) {
                 // Skip if parameter relation doesn't exist
-                if (!$parameter->parameter_radiologi) {
+                if (! $parameter->parameter_radiologi) {
                     continue;
                 }
 
@@ -199,11 +199,11 @@ class OrderRadiologiController extends Controller
                     'bilingan_id' => $billing->id,
                     'registration_id' => $order->registration_id,
                     'date' => Carbon::now(),
-                    'tagihan' => '[Biaya Radiologi] ' . $parameter->parameter_radiologi->parameter,
+                    'tagihan' => '[Biaya Radiologi] '.$parameter->parameter_radiologi->parameter,
                     'quantity' => 1,
                     'nominal' => $parameter->nominal_rupiah,
                     'harga' => $parameter->nominal_rupiah,
-                    'wajib_bayar' => $parameter->nominal_rupiah
+                    'wajib_bayar' => $parameter->nominal_rupiah,
                 ]);
 
                 BilinganTagihanPasien::create([
@@ -225,7 +225,7 @@ class OrderRadiologiController extends Controller
             }
         }
 
-        return response("ok");
+        return response('ok');
     }
 
     public function verificate(Request $request)
@@ -233,13 +233,13 @@ class OrderRadiologiController extends Controller
         $validatedData = $request->validate([
             'id' => 'required|integer',
             'verifikator_id' => 'required|integer',
-            'verifikasi_date' => 'required|date'
+            'verifikasi_date' => 'required|date',
         ]);
 
         OrderParameterRadiologi::where('id', $validatedData['id'])
             ->update([
                 'verifikator_id' => $validatedData['verifikator_id'],
-                'verifikasi_date' => $validatedData['verifikasi_date']
+                'verifikasi_date' => $validatedData['verifikasi_date'],
             ]);
 
         return response('ok');
@@ -251,7 +251,7 @@ class OrderRadiologiController extends Controller
             'parameter_id' => 'required|integer',
             'user_id' => 'required|integer',
             'employee_id' => 'required|integer',
-            'catatan' => 'required'
+            'catatan' => 'required',
         ]);
 
         OrderParameterRadiologi::where('id', $validatedData['parameter_id'])
@@ -259,7 +259,7 @@ class OrderRadiologiController extends Controller
                 'catatan' => $validatedData['catatan'],
             ]);
 
-        return response("<script>window.close();</script>");
+        return response('<script>window.close();</script>');
     }
 
     public function uploadPhotoParameter(Request $request)
@@ -278,16 +278,16 @@ class OrderRadiologiController extends Controller
 
             foreach ($request->file('photo') as $file) {
                 if ($file->isValid()) {
-                    $fileName = 'rad-param-' . $validatedData['parameter_id'] . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $directory = 'radiologi/parameter-photo/' . now()->format('m-Y') . '/' . now()->format('d-m-Y');
+                    $fileName = 'rad-param-'.$validatedData['parameter_id'].'-'.uniqid().'.'.$file->getClientOriginalExtension();
+                    $directory = 'radiologi/parameter-photo/'.now()->format('m-Y').'/'.now()->format('d-m-Y');
 
-                    $storagePath = storage_path('app/public/' . $directory);
-                    if (!file_exists($storagePath)) {
+                    $storagePath = storage_path('app/public/'.$directory);
+                    if (! file_exists($storagePath)) {
                         mkdir($storagePath, 0755, true);
                     }
 
                     $file->move($storagePath, $fileName);
-                    $uploadedFilePath = $directory . '/' . $fileName;
+                    $uploadedFilePath = $directory.'/'.$fileName;
                     $filePaths[] = $uploadedFilePath; // Store file paths in an array
                 } else {
                     $fails[] = $file->getClientOriginalName();
@@ -307,15 +307,15 @@ class OrderRadiologiController extends Controller
 
             // Optionally, return success with all file paths
             return response()->json([
-                "success" => $filePaths,
-                "fails" => $fails
+                'success' => $filePaths,
+                'fails' => $fails,
             ]);
         }
 
         return response(null, 500)->json([
-            "success" => null,
-            "fails" => null,
-            "error" => "Unknown error"
+            'success' => null,
+            'fails' => null,
+            'error' => 'Unknown error',
         ]);
     }
 
@@ -338,25 +338,25 @@ class OrderRadiologiController extends Controller
 
             foreach ($order->order_parameter_radiologi as $parameter) {
                 $id = $parameter->id;
-                if ($request->get('radiografer_' . $id)) {
+                if ($request->get('radiografer_'.$id)) {
                     OrderParameterRadiologi::find($id)
                         ->update([
-                            'radiografer_id' => $request->get('radiografer_' . $id),
+                            'radiografer_id' => $request->get('radiografer_'.$id),
                         ]);
                 }
-                if ($request->get('jumlah_film_' . $id)) {
+                if ($request->get('jumlah_film_'.$id)) {
                     OrderParameterRadiologi::find($id)
                         ->update([
-                            'film_qty' => $request->get('jumlah_film_' . $id),
+                            'film_qty' => $request->get('jumlah_film_'.$id),
                         ]);
                 }
             }
 
-            return "<script>window.close()</script>";
+            return '<script>window.close()</script>';
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getLine()
+                'message' => $e->getLine(),
             ]);
         }
     }

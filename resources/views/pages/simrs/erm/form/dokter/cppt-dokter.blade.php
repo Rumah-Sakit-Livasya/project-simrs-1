@@ -701,5 +701,128 @@ Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
     <script src="{{ asset('js/simrs/erm/form/dokter/cppt.js') }}?time={{ now() }}"></script>
     <script src="{{ asset('js/simrs/erm/form/dokter/cppt-dokter-form.js') }}?time={{ now() }}"></script>
 
+    <<<<<<< HEAD=======<script>
+        /**
+         * Custom matcher for the Select2 drug dropdown to allow searching
+         * by drug name or active substance (zat aktif).
+         * @param {import("select2").SearchOptions} params
+         * @param {import("select2").OptGroupData | import("select2").OptionData} data
+         * @returns {import("select2").OptGroupData | import("select2").OptionData | null}
+         */
+        function obatMatcher(params, data) {
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+
+            const zatCheck = $("#zat_aktif");
+            console.log(zatCheck.is(':checked'));
+
+            const term = params.term.toLowerCase();
+            const text = data.text.toLowerCase();
+            const $el = $(data.element);
+            const zat = $el.data('zat')?.toString().toLowerCase();
+
+            if (zatCheck.is(':checked')) {
+                if (zat && zat.includes(term)) {
+                    return data;
+                }
+            } else {
+                if (text.includes(term)) {
+                    return data;
+                }
+            }
+
+            return null;
+        }
+
+        $(document).ready(function() {
+            function submitFormCPPT(actionType) {
+                const form = $('#cppt-dokter-rajal-form');
+                const registrationNumber = "{{ $registration->registration_number }}";
+
+                const url =
+                    "{{ route('cppt.dokter-rajal.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
+                    .replace('__registration_number__', registrationNumber);
+
+                // Now you can use `url` in your form submission or AJAX request
+
+                let formData = form.serialize(); // Ambil data dari form
+
+                // Tambahkan tipe aksi (draft atau final) ke data form
+                formData += '&action_type=' + actionType;
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: formData,
+                    success: function(response) {
+                        if (actionType === 'draft') {
+                            showSuccessAlert('Data berhasil disimpan sebagai draft!');
+                        } else {
+                            showSuccessAlert('Data berhasil disimpan sebagai final!');
+                        }
+                        setTimeout(() => {
+                            console.log('Reloading the page now.');
+                            window.location.reload();
+                        }, 1000);
+                    },
+                    error: function(response) {
+                        // Tangani error
+                        var errors = response.responseJSON.errors;
+                        $.each(errors, function(key, value) {
+                            showErrorAlert(value[0]);
+                        });
+                    }
+                });
+            }
+
+            // Saat tombol Save Final diklik
+            $('#bsSOAP').on('click', function() {
+                submitFormCPPT(); // Panggil fungsi submitForm dengan parameter final
+            });
+
+
+            $('body').addClass('layout-composed');
+            $('.select2').select2({
+                placeholder: 'Pilih Item',
+            });
+            $('#departement_id').select2({
+                placeholder: 'Pilih Klinik',
+            });
+
+            // $('#doctor_id').select2({
+            //     placeholder: 'Pilih Dokter',
+            // });
+
+            $("#cppt_barang_id").select2({
+                matcher: obatMatcher,
+                placeholder: 'Pilih Obat'
+            })
+
+            $('#cppt_gudang_id').select2({
+                placeholder: 'Pilih Gudang',
+            });
+
+            $('#cppt_doctor_id').select2({
+                placeholder: 'Pilih Dokter',
+            });
+
+            $('#toggle-pasien').on('click', function() {
+                var target = $('#js-slide-left'); // Mengambil elemen target berdasarkan data-target
+                var backdrop = $('.slide-backdrop'); // Mengambil backdrop
+
+                // Toggle kelas untuk menampilkan atau menyembunyikan panel dan backdrop
+                target.toggleClass('hide');
+                backdrop.toggleClass('show');
+            });
+
+            // Close the panel if the backdrop is clicked
+            $('.slide-backdrop').on('click', function() {
+                $('#js-slide-left').removeClass('slide-on-mobile-left-show');
+                $(this).removeClass('show');
+            });
+        });
+    </script>
+    >>>>>>> 4b5ee787663e10670e66049c56bd68f5277e2f62
     @include('pages.simrs.erm.partials.action-js.cppt')
 @endsection

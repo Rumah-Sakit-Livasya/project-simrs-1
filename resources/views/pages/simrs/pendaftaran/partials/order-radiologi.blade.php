@@ -63,7 +63,7 @@
                         <div class="col-xl-8">
                             <input type="text"
                                 style="border: 0; border-bottom: 1.9px dashed #aaa; margin-top: -.5rem; border-radius: 0"
-                                class="form-control" id="registration_date" readonly value="{{ $today }}"
+                                class="form-control" id="registration_date" readonly value="{{ today() }}"
                                 name="registration_date">
                             @error('registration_date')
                                 <div class="invalid-feedback">{{ $message }}</div>

@@ -21,13 +21,13 @@ class OrderLaboratoriumController extends Controller
         $validatedData = $request->validate([
             'id' => 'required|integer',
             'verifikator_id' => 'required|integer',
-            'verifikasi_date' => 'required|date'
+            'verifikasi_date' => 'required|date',
         ]);
 
         OrderParameterLaboratorium::where('id', $validatedData['id'])
             ->update([
                 'verifikator_id' => $validatedData['verifikator_id'],
-                'verifikasi_date' => $validatedData['verifikasi_date']
+                'verifikasi_date' => $validatedData['verifikasi_date'],
             ]);
 
         return response('ok');
@@ -37,7 +37,7 @@ class OrderLaboratoriumController extends Controller
     {
         $validatedData = $request->validate([
             'order_parameter_id' => 'required|integer',
-            'order_id' => 'required|integer'
+            'order_id' => 'required|integer',
         ]);
 
         // first, get the order
@@ -57,11 +57,15 @@ class OrderLaboratoriumController extends Controller
         foreach ($parameters as $parameter) {
             // don't delete parameters with id that's smaller
             // than id of parameter that's going to be deleted
-            if ($parameter->id <= $parameter_to_delete->id) continue;
+            if ($parameter->id <= $parameter_to_delete->id) {
+                continue;
+            }
 
             // if the next parameter can be ordered
             // it means there's no more sub parameter
-            if ($parameter->parameter_laboratorium->is_order) break;
+            if ($parameter->parameter_laboratorium->is_order) {
+                break;
+            }
 
             // check if this parameter, as "sub_parameter_id"
             // is related to the parameter to delete, as "main_parameter_id"
@@ -76,6 +80,7 @@ class OrderLaboratoriumController extends Controller
         }
 
         $parameter_to_delete->delete();
+
         return response()->json([
             'success' => true,
         ]);
@@ -88,23 +93,23 @@ class OrderLaboratoriumController extends Controller
         $month = $date->format('m');
         $day = $date->format('d');
 
-        $count = OrderLaboratorium::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = OrderLaboratorium::withTrashed()->whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
-        return 'LAB' . $year . $month . $day . $count;
+        return 'LAB'.$year.$month.$day.$count;
     }
 
-    function generate_otc_registration_number()
+    public function generate_otc_registration_number()
     {
         $date = Carbon::now();
         $year = $date->format('y');
         $month = $date->format('m');
         $day = $date->format('d');
 
-        $count = RegistrationOTC::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = RegistrationOTC::withTrashed()->whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
-        return "OTC" . $year . $month . $day . $count;
+        return 'OTC'.$year.$month.$day.$count;
     }
 
     /**
@@ -156,7 +161,7 @@ class OrderLaboratoriumController extends Controller
                     'nama_pasien' => $request->get('nama_pasien'),
                     'date_of_birth' => $request->get('date_of_birth'),
                     'no_telp' => $request->get('no_telp'),
-                    'poly_ruang' => "LABORATORIUM",
+                    'poly_ruang' => 'LABORATORIUM',
                     'jenis_kelamin' => $request->get('jenis_kelamin'),
                     'order_date' => Carbon::now(),
                     'registration_number' => $this->generate_otc_registration_number(),
@@ -165,7 +170,7 @@ class OrderLaboratoriumController extends Controller
                     'doctor' => $request->get('doctor'),
                     'doctor_id' => $validatedData['doctor_id'],
                     'alamat' => $request->get('alamat'),
-                    'diagnosa_klinis' => $validatedData['diagnosa_awal']
+                    'diagnosa_klinis' => $validatedData['diagnosa_awal'],
                 ])->id;
 
                 $orderLaboratorium = OrderLaboratorium::create([
@@ -178,7 +183,7 @@ class OrderLaboratoriumController extends Controller
                     'tipe_pasien' => $validatedData['registration_type'],
                     'diagnosa_klinis' => $validatedData['diagnosa_awal'],
                     'status_isi_hasil' => 0,
-                    'status_billed' => 0
+                    'status_billed' => 0,
                 ]);
             } catch (\Exception $e) {
                 return response()->json([
@@ -198,16 +203,15 @@ class OrderLaboratoriumController extends Controller
                     'tipe_pasien' => $validatedData['registration_type'],
                     'diagnosa_klinis' => $validatedData['diagnosa_awal'],
                     'status_isi_hasil' => 0,
-                    'status_billed' => 0
+                    'status_billed' => 0,
                 ]);
             } catch (\Exception $e) {
                 return response()->json([
                     'success' => false,
-                    'message' => $e->getMessage()
+                    'message' => $e->getMessage(),
                 ]);
             }
         }
-
 
         $orderLaboratoriumId = $orderLaboratorium->id;
         foreach ($validatedData['parameters'] as $parameter) {
@@ -243,31 +247,31 @@ class OrderLaboratoriumController extends Controller
     public function confirmPayment(Request $request)
     {
         $validatedData = $request->validate([
-            'id' => 'required|integer'
+            'id' => 'required|integer',
         ]);
 
         $order = OrderLaboratorium::with([
             'registration',
-            'order_parameter_laboratorium.parameter_laboratorium'
+            'order_parameter_laboratorium.parameter_laboratorium',
         ])->findOrFail($validatedData['id']);
 
         $order->update(['is_konfirmasi' => 1]);
 
-        if (!$order->otc_id && $order->registration_id) {
+        if (! $order->otc_id && $order->registration_id) {
             $billing = Bilingan::firstOrCreate(
 
                 ['registration_id' => $order->registration_id],
                 [
                     'patient_id' => $order->registration->patient_id,
                     'status' => 'belum final',
-                    'wajib_bayar' => 0
+                    'wajib_bayar' => 0,
                 ]
             );
 
             $totalAmount = 0;
 
             foreach ($order->order_parameter_laboratorium as $parameter) {
-                if (!$parameter->parameter_laboratorium || $parameter->nominal_rupiah <= 0) {
+                if (! $parameter->parameter_laboratorium || $parameter->nominal_rupiah <= 0) {
                     continue;
                 }
 
@@ -276,11 +280,11 @@ class OrderLaboratoriumController extends Controller
                     'bilingan_id' => $billing->id,
                     'registration_id' => $order->registration_id,
                     'date' => Carbon::now(),
-                    'tagihan' => '[Biaya Laboratorium] ' . $parameter->parameter_laboratorium->parameter,
+                    'tagihan' => '[Biaya Laboratorium] '.$parameter->parameter_laboratorium->parameter,
                     'quantity' => 1,
                     'nominal' => $parameter->nominal_rupiah,
                     'harga' => $parameter->nominal_rupiah,
-                    'wajib_bayar' => $parameter->nominal_rupiah
+                    'wajib_bayar' => $parameter->nominal_rupiah,
                 ]);
 
                 BilinganTagihanPasien::create([
@@ -302,7 +306,7 @@ class OrderLaboratoriumController extends Controller
             }
         }
 
-        return response("ok");
+        return response('ok');
     }
 
     public function editOrderLaboratorium(Request $request)
@@ -325,25 +329,25 @@ class OrderLaboratoriumController extends Controller
 
             foreach ($order->order_parameter_laboratorium as $parameter) {
                 $id = $parameter->id;
-                if ($request->get('catatan_' . $id)) {
+                if ($request->get('catatan_'.$id)) {
                     OrderParameterLaboratorium::find($id)
                         ->update([
-                            'catatan' => $request->get('catatan_' . $id),
+                            'catatan' => $request->get('catatan_'.$id),
                         ]);
                 }
-                if ($request->get('hasil_' . $id)) {
+                if ($request->get('hasil_'.$id)) {
                     OrderParameterLaboratorium::find($id)
                         ->update([
-                            'hasil' => $request->get('hasil_' . $id),
+                            'hasil' => $request->get('hasil_'.$id),
                         ]);
                 }
             }
 
-            return "<script>window.close()</script>";
+            return '<script>window.close()</script>';
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getLine()
+                'message' => $e->getLine(),
             ]);
         }
     }

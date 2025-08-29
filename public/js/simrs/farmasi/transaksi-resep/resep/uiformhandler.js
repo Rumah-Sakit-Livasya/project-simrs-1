@@ -269,6 +269,7 @@ class UIFormUpdater {
         $("#registration-id").val("");
         $("#dokter-id").val("");
         $("#re-id").val("");
+        $("#rh-id").val("");
         $("#embalase_tidak").prop("checked", true);
         $("#bmhp").prop("checked", false);
         $("#kronis").prop("checked", false);

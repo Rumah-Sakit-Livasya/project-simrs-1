@@ -21,33 +21,33 @@ class WarehouseStockOpnameDraft extends Controller
      */
     public function index()
     {
-        return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.index", [
-            "ogs"       => WarehouseStockOpnameGudang::whereNull("finish")->get(),
-            "kategoris" => WarehouseKategoriBarang::all(),
-            "satuans"   => WarehouseSatuanBarang::all(),
+        return view('pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.index', [
+            'ogs' => WarehouseStockOpnameGudang::whereNull('finish')->get(),
+            'kategoris' => WarehouseKategoriBarang::all(),
+            'satuans' => WarehouseSatuanBarang::all(),
         ]);
     }
 
     /**
      * Compute the quantity movement of a single item since the opname start.
      *
-     * @param  string  $type    'f' for farmasi, 'nf' for non‐farmasi
-     * @param  int     $opname_id
-     * @param  int     $si_id
+     * @param  string  $type  'f' for farmasi, 'nf' for non‐farmasi
+     * @param  int  $opname_id
+     * @param  int  $si_id
      * @return \Illuminate\Http\JsonResponse
      */
     public function get_opname_item_movement($type, $opname_id, $si_id)
     {
-        $item   = $this->findStoredItem($type, $si_id);
+        $item = $this->findStoredItem($type, $si_id);
         $opname = WarehouseStockOpnameGudang::findOrFail($opname_id);
 
         $movement = $this->calculateMovement($item, $opname->start);
 
-        return response()->json(["movement" => $movement]);
+        return response()->json(['movement' => $movement]);
     }
 
     /**
-     * Return all items (farmasi & non‐farmasi) for an opname, 
+     * Return all items (farmasi & non‐farmasi) for an opname,
      * enriched with frozen stock, movement, and attached opname info.
      *
      * @param  int  $id  opname gudang ID
@@ -55,17 +55,17 @@ class WarehouseStockOpnameDraft extends Controller
      */
     public function get_opname_items($id)
     {
-        $opname   = WarehouseStockOpnameGudang::findOrFail($id);
+        $opname = WarehouseStockOpnameGudang::findOrFail($id);
         $gudangId = $opname->gudang->id;
 
-        $itemsF  = StoredBarangFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
+        $itemsF = StoredBarangFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
             ->where('gudang_id', $gudangId)
             ->get();
         $itemsNF = StoredBarangNonFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
             ->where('gudang_id', $gudangId)
             ->get();
 
-        $itemsF  = $this->attachOpnameData($itemsF, $opname);
+        $itemsF = $this->attachOpnameData($itemsF, $opname);
         $itemsNF = $this->attachOpnameData($itemsNF, $opname);
 
         // Merge and sort by pbi.nama_barang
@@ -80,7 +80,6 @@ class WarehouseStockOpnameDraft extends Controller
     /**
      * Store or update draft adjustments for multiple opname items.
      *
-     * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
@@ -93,9 +92,9 @@ class WarehouseStockOpnameDraft extends Controller
         }
 
         $request->validate([
-            'drafts'  => 'required|array',
-            'sog_id'  => 'required|exists:warehouse_stock_opname_gudang,id',
-            'column'  => 'required|string',
+            'drafts' => 'required|array',
+            'sog_id' => 'required|exists:warehouse_stock_opname_gudang,id',
+            'column' => 'required|string',
             'user_id' => 'required|exists:users,id',
         ]);
 
@@ -104,7 +103,7 @@ class WarehouseStockOpnameDraft extends Controller
             $opname = WarehouseStockOpnameGudang::findOrFail($request['sog_id']);
 
             foreach ($request['drafts'] as $draft) {
-                $item     = $this->findStoredItemFromColumn($request['column'], $draft->si_id);
+                $item = $this->findStoredItemFromColumn($request['column'], $draft->si_id);
                 $movement = $this->calculateMovement($item, $opname->start);
 
                 if ($draft->qty + $movement < 0) {
@@ -124,26 +123,28 @@ class WarehouseStockOpnameDraft extends Controller
                         continue;
                     }
                     $wsItem->update([
-                        'qty'        => $draft->qty,
+                        'qty' => $draft->qty,
                         'keterangan' => $draft->keterangan,
-                        'user_id'    => $request['user_id'],
+                        'user_id' => $request['user_id'],
                     ]);
                 } else {
                     WarehouseStockOpnameItems::create([
-                        'kode_so'          => $this->generate_so_code(),
-                        'sog_id'           => $request['sog_id'],
+                        'kode_so' => $this->generate_so_code(),
+                        'sog_id' => $request['sog_id'],
                         $request['column'] => $draft->si_id,
-                        'qty'              => $draft->qty,
-                        'keterangan'       => $draft->keterangan,
-                        'user_id'          => $request['user_id'],
+                        'qty' => $draft->qty,
+                        'keterangan' => $draft->keterangan,
+                        'user_id' => $request['user_id'],
                     ]);
                 }
             }
 
             DB::commit();
+
             return response()->json(['message' => 'Data berhasil disimpan'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
@@ -156,24 +157,24 @@ class WarehouseStockOpnameDraft extends Controller
      */
     public function print_selisih($sog_id)
     {
-        $opname   = WarehouseStockOpnameGudang::findOrFail($sog_id);
+        $opname = WarehouseStockOpnameGudang::findOrFail($sog_id);
         $gudangId = $opname->gudang->id;
 
-        $itemsF  = StoredBarangFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
+        $itemsF = StoredBarangFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
             ->where('gudang_id', $gudangId)
             ->get();
         $itemsNF = StoredBarangNonFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
             ->where('gudang_id', $gudangId)
             ->get();
 
-        $itemsF  = $this->attachOpnameData($itemsF, $opname);
+        $itemsF = $this->attachOpnameData($itemsF, $opname);
         $itemsNF = $this->attachOpnameData($itemsNF, $opname);
 
         $items = array_merge($itemsF->all(), $itemsNF->all());
 
-        return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.partials.so-print-selisih", [
+        return view('pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.partials.so-print-selisih', [
             'items' => $items,
-            'sog'   => $opname,
+            'sog' => $opname,
         ]);
     }
 
@@ -185,24 +186,24 @@ class WarehouseStockOpnameDraft extends Controller
      */
     public function print_so($sog_id)
     {
-        $opname   = WarehouseStockOpnameGudang::findOrFail($sog_id);
+        $opname = WarehouseStockOpnameGudang::findOrFail($sog_id);
         $gudangId = $opname->gudang->id;
 
-        $itemsF  = StoredBarangFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
+        $itemsF = StoredBarangFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
             ->where('gudang_id', $gudangId)
             ->get();
         $itemsNF = StoredBarangNonFarmasi::with(['pbi', 'pbi.item', 'pbi.satuan', 'pbi.pb'])
             ->where('gudang_id', $gudangId)
             ->get();
 
-        $itemsF  = $this->attachOpnameData($itemsF, $opname);
+        $itemsF = $this->attachOpnameData($itemsF, $opname);
         $itemsNF = $this->attachOpnameData($itemsNF, $opname);
 
         $items = array_merge($itemsF->all(), $itemsNF->all());
 
-        return view("pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.partials.so-print-so", [
+        return view('pages.simrs.warehouse.revaluasi-stock.stock-opname.draft.partials.so-print-so', [
             'items' => $items,
-            'sog'   => $opname,
+            'sog' => $opname,
         ]);
     }
 
@@ -212,7 +213,8 @@ class WarehouseStockOpnameDraft extends Controller
 
     /**
      * Generate a unique Stock Opname code based on current year, month, and count.
-     * @return string  Stock Opname code.
+     *
+     * @return string Stock Opname code.
      */
     private function generate_so_code()
     {
@@ -220,19 +222,19 @@ class WarehouseStockOpnameDraft extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = WarehouseStockOpnameItems::whereMonth('created_at', now()->month)
+        $count = WarehouseStockOpnameItems::withTrashed()
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return $count . "/SO" . $year . $month;
+        return $count.'/SO'.$year.$month;
     }
 
     /**
      * Find a stored item instance by type.
      *
      * @param  string  $type  'f' or 'nf'
-     * @param  int     $id
      * @return \Illuminate\Database\Eloquent\Model
      */
     private function findStoredItem(string $type, int $id)
@@ -240,14 +242,14 @@ class WarehouseStockOpnameDraft extends Controller
         if ($type === 'nf') {
             return StoredBarangNonFarmasi::findOrFail($id);
         }
+
         return StoredBarangFarmasi::findOrFail($id);
     }
 
     /**
      * Given a column name, find the corresponding stored‐item model.
      *
-     * @param  string  $column   'si_f_id' or 'si_nf_id'
-     * @param  int     $siId
+     * @param  string  $column  'si_f_id' or 'si_nf_id'
      * @return \Illuminate\Database\Eloquent\Model
      */
     private function findStoredItemFromColumn(string $column, int $siId)
@@ -255,6 +257,7 @@ class WarehouseStockOpnameDraft extends Controller
         if ($column === 'si_nf_id') {
             return StoredBarangNonFarmasi::findOrFail($siId);
         }
+
         return StoredBarangFarmasi::findOrFail($siId);
     }
 
@@ -262,7 +265,7 @@ class WarehouseStockOpnameDraft extends Controller
      * Calculate total movement (sum of qty diffs) since a given timestamp.
      *
      * @param  \Illuminate\Database\Eloquent\Model  $item
-     * @param  \Carbon\Carbon|string               $since
+     * @param  \Carbon\Carbon|string  $since
      * @return int
      */
     private function calculateMovement($item, $since)
@@ -285,18 +288,17 @@ class WarehouseStockOpnameDraft extends Controller
      * Attach 'type', 'opname', 'frozen', and 'movement' properties to each item.
      *
      * @param  \Illuminate\Support\Collection  $items
-     * @param  WarehouseStockOpnameGudang      $opname
      * @return \Illuminate\Support\Collection
      */
     private function attachOpnameData($items, WarehouseStockOpnameGudang $opname)
     {
         return $items->map(function ($item) use ($opname) {
             $typeKey = $item instanceof StoredBarangNonFarmasi ? 'nf' : 'f';
-            $item->type  = $typeKey;
+            $item->type = $typeKey;
             $item->opname = null;
 
             $sogId = $opname->id;
-            $siField = 'si_' . $typeKey . '_id';
+            $siField = 'si_'.$typeKey.'_id';
             $itemOpname = WarehouseStockOpnameItems::where('sog_id', $sogId)
                 ->where($siField, $item->id)
                 ->first();
@@ -325,11 +327,12 @@ class WarehouseStockOpnameDraft extends Controller
             $movement = $auditsQuery->get()->reduce(function ($carry, $audit) {
                 $ov = $audit->old_values;
                 $nv = $audit->new_values;
+
                 return $carry + ((isset($ov['qty'], $nv['qty'])) ? ($nv['qty'] - $ov['qty']) : 0);
             }, 0);
 
             $item->movement = $movement;
-            $item->frozen   = $item->qty - $movement - $discountQty;
+            $item->frozen = $item->qty - $movement - $discountQty;
 
             return $item;
         });
@@ -337,6 +340,8 @@ class WarehouseStockOpnameDraft extends Controller
 
     // Empty stub methods to preserve API
     public function show(string $id) {}
+
     public function update(Request $request, string $id) {}
+
     public function destroy(string $id) {}
 }

@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FarmasiAntrian;
 use App\Models\FarmasiResep;
 use App\Models\FarmasiResepElektronik;
+use App\Models\FarmasiResepHarian;
+use App\Models\FarmasiResepHarianItems;
 use App\Models\FarmasiResepItems;
 use App\Models\FarmasiResepResponse;
 use App\Models\FarmasiSigna;
 use App\Models\FarmasiTelaahResep;
 use App\Models\RegistrationOTC;
+use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\Doctor;
+use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Registration;
 use App\Models\StoredBarangFarmasi;
 use App\Models\User;
@@ -303,7 +308,7 @@ class FarmasiResepController extends Controller
             $res = $query->orderBy('created_at', 'asc')->get();
         } else {
             // Return today's data if no filter is applied
-            $res = FarmasiResepElektronik::with([$relations])->whereDate('created_at', Carbon::today())->orderBy('created_at', 'asc')->get();
+            $res = FarmasiResepElektronik::with($relations)->whereDate('created_at', Carbon::today())->orderBy('created_at', 'asc')->get();
         }
 
 
@@ -328,6 +333,62 @@ class FarmasiResepController extends Controller
         return view('pages.simrs.farmasi.transaksi-resep.partials.popup-resep-elektronik', compact('res'));
     }
 
+    public function popupResepHarian(Request $request)
+    {
+        $relations = [
+            "registration",
+            "registration.penjamin",
+            "registration.departement",
+            "registration.doctor",
+            "registration.doctor.employee",
+            "registration.patient",
+            "registration.patient.bed",
+            "registration.patient.bed.room",
+            "registration.kelas_rawat",
+            "items",
+            "items.barang",
+            "doctor",
+            "doctor.employee",
+            "gudang",
+            "user"
+        ];
+        $query = FarmasiResepHarian::query()->with($relations);
+        $filter = false;
+
+        if ($request->filled("selesai")) {
+            $query->where("selesai", $request->input("selesai"));
+            $filter = true;
+        }
+
+        if ($request->filled("medical_record_number")) {
+            $query->whereHas("registration.patient", function ($q) use ($request) {
+                $q->where("medical_record_number", "LIKE", "%" . $request->input("medical_record_number") . "%");
+            });
+            $filter = true;
+        }
+
+        if ($request->filled("registration_number")) {
+            $query->whereHas("registration", function ($q) use ($request) {
+                $q->where("registration_number", "LIKE", "%" . $request->input("registration_number") . "%");
+            });
+        }
+
+        if ($request->filled("name")) {
+            $query->whereHas("registration.patient", function ($q) use ($request) {
+                $q->where("name", "LIKE", "%" . $request->input("name") . "%");
+            });
+        }
+
+        if ($filter) {
+            $rhs = $query->get();
+        } else {
+            // default value
+            $rhs = FarmasiResepHarian::with($relations)->where("selesai", 0)->get();
+        }
+
+        return view('pages.simrs.farmasi.transaksi-resep.partials.popup-resep-harian', compact('rhs'));
+    }
+
     function generate_otc_registration_number()
     {
         $date = Carbon::now();
@@ -335,7 +396,7 @@ class FarmasiResepController extends Controller
         $month = $date->format('m');
         $day = $date->format('d');
 
-        $count = RegistrationOTC::whereDate('created_at', $date->toDateString())->count() + 1;
+        $count = RegistrationOTC::withTrashed()->whereDate('created_at', $date->toDateString())->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
         return "OTC" . $year . $month . $day . $count;
@@ -348,7 +409,7 @@ class FarmasiResepController extends Controller
         $month = $date->format('m');
         $day = $date->format('d');
 
-        $count = FarmasiResep::whereDate('created_at', $date->toDateString())->where("tipe_pasien", $tipe_pasien)->count() + 1;
+        $count = FarmasiResep::withTrashed()->whereDate('created_at', $date->toDateString())->where("tipe_pasien", $tipe_pasien)->count() + 1;
         $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
         $kode = "FRJ";
@@ -361,6 +422,25 @@ class FarmasiResepController extends Controller
         return $kode . $year . $month . $day . $count;
     }
 
+    private function getAntrian(bool $is_bpjs, bool $is_racikan)
+    {
+        // count from FarmasiAntrian where created_at == today
+        $today = Carbon::today();
+        $index = FarmasiAntrian::whereDate('created_at', $today)->where('tipe', $is_bpjs ? 'bpjs' : 'umum')->where('racikan', $is_racikan ? true : false)->count() + 1;
+        $letter = "";
+        if (!$is_bpjs && !$is_racikan) {
+            $letter = "A";
+        } else if (!$is_bpjs && $is_racikan) {
+            $letter = "B";
+        } else if ($is_bpjs && !$is_racikan) {
+            $letter = "C";
+        } else if ($is_bpjs && $is_racikan) {
+            $letter = "D";
+        }
+
+        return $letter . $index;
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -371,6 +451,7 @@ class FarmasiResepController extends Controller
         $data = $request->validate([
             'order_date' => 'required|date',
             'user_id' => 'required|exists:users,id',
+            'employee_id' => 'required|exists:employees,id',
             'gudang_id' => 'required|exists:warehouse_master_gudang,id',
             // 'kode_resep' => 'required|unique:farmasi_reseps,kode_resep',
             'embalase' => 'required|in:tidak,item,racikan',
@@ -379,6 +460,7 @@ class FarmasiResepController extends Controller
             'registration_id' => 'nullable|exists:registrations,id',
             // 'otc_id' => 'nullable|exists:registration_otc,id',
             're_id' => 'nullable|exists:farmasi_resep_elektroniks,id',
+            'rh_id' => 'nullable|exists:farmasi_resep_harians,id',
             'dokter_id' => 'nullable|exists:employees,id',
             'alamat' => 'nullable|string',
             'resep_manual' => 'nullable|string',
@@ -392,6 +474,7 @@ class FarmasiResepController extends Controller
         $data2 = $request->validate([
             "si_id.*" => "exists:stored_barang_farmasi,id",
             "obat_id.*" => "exists:warehouse_barang_farmasi,id",
+            "rhi_id.*" => "nullable|exists:farmasi_resep_harian_items,id",
             "type.*" => "in:obat,racikan",
             "signa.*" => "nullable|string",
             "jam_pemberian.*" => "nullable|string",
@@ -405,9 +488,9 @@ class FarmasiResepController extends Controller
         ]);
 
         $telaah_resep = null;
-        if (!$request->has("telaah_resep") && $data["tipe_pasien"] != 'otc') {
+        if (!$request->filled("telaah_resep") && $data["tipe_pasien"] != 'otc') {
             back()->with('error', "Telaah resep diperlukan untuk pasien non OTC.");
-        } else if ($request->has("telaah_resep")) {
+        } else if ($request->filled("telaah_resep")) {
             $telaah_resep = json_decode($request->get("telaah_resep"), true);
         }
 
@@ -415,11 +498,25 @@ class FarmasiResepController extends Controller
         try {
             $user = User::findOrFail($data["user_id"]);
 
-            if ($request->has("registration_id")) {
+            if ($request->filled("registration_id")) {
                 $registration = Registration::findOrFail($request->get("registration_id"));
             } else {
                 // OTC
+                $departement = Departement::where("name", "LIKE", "%INSTALASI FARMASI%")->first();
+                if (!$departement) {
+                    throw new \Exception("Departemen Farmasi tidak ditemukan.");
+                }
+
+                $penjamin = Penjamin::where("nama_perusahaan", "LIKE", "%Standar%")->first();
+                if (!$penjamin) {
+                    throw new \Exception("Penjamin standar tidak ditemukan.");
+                }
+
                 $registration = RegistrationOTC::create([
+                    "departement_id" => $departement->id,
+                    "penjamin_id" => $penjamin->id,
+                    "employee_id" => $data["employee_id"],
+                    "user_id" => $data["user_id"],
                     "nama_pasien" => $data["nama_pasien"],
                     "order_date" => $data["order_date"],
                     "registration_number" => $this->generate_otc_registration_number()
@@ -436,8 +533,21 @@ class FarmasiResepController extends Controller
                 FarmasiTelaahResep::create($telaah_resep);
             }
 
-            if ($request->has("re_id")) {
+            if ($request->filled("re_id")) {
                 $response = FarmasiResepResponse::where("re_id", $request->get("re_id"))->first();
+                $re = FarmasiResepElektronik::findOrFail($request->get('re_id'));
+
+                // create antrian
+                $racikan = isset($re->resep_manual) && !empty($re->resep_manual) ? true : false;
+                /* $antrian = */
+                FarmasiAntrian::create([
+                    "re_id" => $request->get('re_id'),
+                    "resep_id" => $resep->id,
+                    "tipe" => $registration->penjamin->is_bpjs ? "bpjs" : "umum",
+                    "antrian" => $this->getAntrian($registration->penjamin->is_bpjs, $racikan),
+                    "racikan" => $racikan
+                ]);
+
                 // dd($response);
                 if (!$response) {
                     throw new \Exception("Respon resep elektronik tidak ditemukan");
@@ -454,6 +564,13 @@ class FarmasiResepController extends Controller
                     "processed" => 1
                 ]);
                 $re->save();
+            } else {
+                // create resep response
+                $response = FarmasiResepResponse::create([
+                    "resep_id" => $resep->id,
+                    "input_resep_user_id" => auth()->user()->id,
+                    "input_resep_time" => Carbon::now(),
+                ]);
             }
 
             // sort $data2["type"] so that the top ones are "racikan" first
@@ -473,7 +590,7 @@ class FarmasiResepController extends Controller
                     }
 
                     // decrease current stock
-                    $keterangan = "PENJUALAN OBAT PS: " . ($data["tipe_pasien"] != 'otc' ? $registration->nama_pasien : $registration->patient->name);
+                    $keterangan = "PENJUALAN OBAT PS: " . ($data["tipe_pasien"] == 'otc' ? $registration->nama_pasien : $registration->patient->name);
                     $args = new IncreaseDecreaseStockArguments($user, $resep, $stored, $data2["qty"][$key], $keterangan);
                     $this->goodsStockService->decreaseStock($args);
                 }
@@ -483,9 +600,32 @@ class FarmasiResepController extends Controller
                     $detail_racikan_id = $resep_dict[$data2["detail_racikan"][$key]];
                 }
 
+                if (isset($data2["rhi_id"][$key])) {
+                    // update ResepHarianItem qty_diberi
+                    $rhi = FarmasiResepHarianItems::findOrFail($data2["rhi_id"][$key]);
+                    $rhi->update([
+                        "qty_diberi" => $rhi->qty_diberi + $data2["qty"][$key]
+                    ]);
+
+                    // check if daily recipe is finished
+                    $rh = $rhi->rh;
+                    $total_selesai = 0;
+                    foreach ($rh->items as $item) {
+                        if ($item->selesai) ++$total_selesai;
+                    }
+
+                    if ($total_selesai == $rh->items->count()) {
+                        // update ResepHarian
+                        $rh->update([
+                            "selesai" => 1
+                        ]);
+                    }
+                }
+
                 $item = FarmasiResepItems::create([
                     "resep_id"      => $resep->id,
                     "tipe"          => $type,
+                    "rhi_id"        => isset($data2["rhi_id"][$key])           ? $data2["rhi_id"][$key]           : null,
                     "si_id"         => isset($data2["si_id"][$key])            ? $data2["si_id"][$key]            : null,
                     "nama_racikan"  => isset($data2["nama_racikan"][$key])     ? $data2["nama_racikan"][$key]     : null,
                     "racikan_id"    => $detail_racikan_id,
@@ -846,6 +986,21 @@ class FarmasiResepController extends Controller
                 $args = new IncreaseDecreaseStockArguments($user, $resep, $item->stored, $item->qty, $keterangan);
                 $this->goodsStockService->decreaseStock($args);
                 $item->delete();
+            }
+
+            // unset response time if exists
+            // also unset electronic recipe
+            if ($resep->re_id != null) {
+                $response = FarmasiResepResponse::findOrFail($resep->re_id);
+                $response->update([
+                    "input_resep_user_id" => null,
+                    "input_resep_time" => null
+                ]);
+
+                $re = FarmasiResepElektronik::findOrFail($resep->re_id);
+                $re->update([
+                    "processed" => 0
+                ]);
             }
 
             // Hapus resep
