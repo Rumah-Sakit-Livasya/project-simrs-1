@@ -89,6 +89,17 @@ interface KategoriLaboratorium {
     parameter_laboratorium: ParameterLaboratorium[];
 }
 
+interface KelasRawat {
+    id: number;
+    kelas: string;
+    urutan: string;
+    keterangan: string;
+    isICU: boolean;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
 interface Registration {
     id: number;
     date: string;
@@ -136,6 +147,7 @@ interface Registration {
     patient?: Patient;
     doctor?: Doctor;
     departement?: Departement;
+    kelas_rawat?: KelasRawat;
 }
 
 interface Penjamin {
@@ -168,6 +180,29 @@ interface Penjamin {
     deleted_at: string | null;
     created_at: string | null;
     updated_at: string | null;
+}
+
+interface Room {
+    id: number;
+    kelas_rawat_id: number;
+    ruangan: string;
+    no_ruang: string;
+    keterangan: string;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+interface Bed {
+    id: number;
+    room_id: number;
+    nama_tt: string;
+    no_tt: string;
+    is_tambahan: boolean;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+    room?: Room;
 }
 
 interface Patient {
@@ -209,6 +244,8 @@ interface Patient {
     deleted_at: string | null;
     created_at: string;
     updated_at: string;
+
+    bed?: Bed
 }
 
 interface Doctor {
@@ -954,7 +991,7 @@ interface StockTransactions {
     after_gudang_id: number;
     performed_by: number;
     keterangan?: string;
-    
+
     stock?: StoredItem;
     source?: StockTransactionsSources;
     user?: User;
@@ -1037,6 +1074,56 @@ interface ResepElektronikItem {
     barang?: BarangFarmasi;
 }
 
+interface ResepHarian {
+    id: number;
+    created_at: string; // Timestamp in ISO format
+    updated_at: string; // Timestamp in ISO format
+    deleted_at: string | null; // Assuming this is a timestamp in ISO format for soft deletes
+    user_id: number;
+    registration_id: number;
+    doctor_id: number;
+    gudang_id: number;
+    kode_resep: string;
+    resep_manual: string;
+    selesai: boolean;
+
+    items?: ResepHarianItems[];
+    registration?: Registration;
+    doctor?: Doctor;
+    gudang?: MasterGudang;
+}
+
+interface ResepHarianItems {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    rh_id: number;
+    barang_id: number;
+    signa: string;
+    qty_perhari: number;
+    qty_hari: number;
+    qty_diberi: number;
+
+    barang?: BarangFarmasi;
+}
+
+
+interface FarmasiAntrian {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  re_id: number;
+  resep_id: number;
+  tipe: string;
+  antrian: string;
+  racikan: 1 | 0;
+  dipanggil: 1 | 0;
+  penyerahan: 1 | 0;
+  re?: ResepElektronik;
+  resep?: FarmasiResep;
+}
 
 type StockTransactionsSources = PenerimaanBarang | DistribusiBarang | ReturBarang | StockOpnameItem;
 type PatientType = "rajal" | "ranap" | "otc";

@@ -39,14 +39,14 @@ class IndexHandler {
         const id = parseInt(button.getAttribute("data-id") || "0");
         if (!id) return;
 
-        const url = "/simrs/procurement/purchase-order/pharmacy/print/" + id;
+        const url = "/simrs/farmasi/retur-resep/print/" + id;
         const width = screen.width;
         const height = screen.height;
         const left = width - (width / 2);
         const top = height - (height / 2);
         window.open(
             url,
-            "popupWindow_printPOFarmasi",
+            "popupWindow_printReturResep",
             "width=" + width + ",height=" + height +
             ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
         );
@@ -87,7 +87,7 @@ class IndexHandler {
         if (!id) return;
 
         Swal.fire({
-            title: 'Hapus Order Resep?',
+            title: 'Hapus Retur Resep?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',

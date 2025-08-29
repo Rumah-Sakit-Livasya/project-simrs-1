@@ -468,18 +468,17 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: `{{ url('cppt') }}/${cpptId}`,
-                        type: 'POST', // Gunakan POST dengan _method spoofing
+                        url: `{{ url('api/simrs/erm/cppt') }}/${cpptId}/destroy`,
+                        type: 'DELETE',
                         data: {
-                            _token: "{{ csrf_token() }}",
-                            _method: 'DELETE'
+                            _token: "{{ csrf_token() }}"
                         },
                         success: function(response) {
                             Swal.fire('Dihapus!', response.success, 'success');
                             applyFilters(); // Muat ulang data
                         },
                         error: function(jqXHR) {
-                            alert(jqXHR.responseJSON.error ||
+                            alert(jqXHR.responseJSON?.error ||
                                 'Gagal menghapus data.');
                         }
                     });
@@ -590,6 +589,11 @@
             });
 
             let cpptTitle = 'Catatan ' + data.tipe_cppt.charAt(0).toUpperCase() + data.tipe_cppt.slice(1);
+
+            // Logika untuk mengubah "dokter" menjadi "perawat" jika bukan dokter
+            if (data.tipe_cppt !== 'dokter') {
+                cpptTitle = 'Catatan Perawat';
+            }
             const canModify = (loggedInUserId === data.user_id);
 
             // ==========================================================

@@ -10,6 +10,8 @@ class ResepStateManager {
     #Registration;
     /** @type {Doctor | undefined} */
     #Doctor;
+    /** @type {ResepHarian | undefined} */
+    #DailyRecipe;
     /** @type {ResepElektronik | undefined} */
     #ElectronicRecipe;
     /** @type {TelaahResep | undefined} */
@@ -63,6 +65,36 @@ class ResepStateManager {
     }
 
     /**
+     * Updates the current daily recipe, which in turn updates the patient and doctor.
+     * @param {ResepHarian} rh 
+     */
+    async changeDailyRecipe(rh) {
+        if (!rh.registration || !rh.registration.doctor || !rh.registration.patient) {
+            showErrorAlertNoRefresh("ResepHarian object is not complete");
+            throw new Error("ResepHarian object is not complete");
+        }
+
+        const currentGudangId = $("#gudang_id").val();
+        if (rh.gudang_id !== null && parseInt(String(currentGudangId)) !== rh.gudang_id) {
+            await this.updateObatSelect(rh.gudang_id);
+        }
+
+        this.resetState();
+
+        this.#uiFormHandler.changeTipePasien("ranap");
+        await this.switchToGudangDefaultRanap();
+
+        this.#DailyRecipe = rh;
+        this.#Registration = rh.registration;
+        this.#Doctor = rh.registration.doctor;
+
+        const exactAge = Utils.calculateExactAge(rh.registration.patient.date_of_birth);
+        this.#uiFormHandler.updatePatientInfo(rh.registration, exactAge);
+        this.#uiFormHandler.updateDoctorInfo(rh.registration.doctor);
+        this.#uiTableHandler.updateDailyRecipeInfo(rh);
+    }
+
+    /**
      * Updates the current electronic recipe, which in turn updates the patient and doctor.
      * @param {ResepElektronik} re
      */
@@ -93,7 +125,7 @@ class ResepStateManager {
         const exactAge = Utils.calculateExactAge(re.registration.patient.date_of_birth);
         this.#uiFormHandler.updatePatientInfo(re.registration, exactAge);
         this.#uiFormHandler.updateDoctorInfo(re.registration.doctor);
-        this.#uiTableHandler.updateRecipeInfo(re);
+        this.#uiTableHandler.updateElectronicRecipeInfo(re);
     }
 
     /**

@@ -51,7 +51,9 @@
                                                         name="perawat_id" id="perawat_id">
                                                         <option value=""></option>
                                                         @foreach ($perawat as $item)
-                                                            <option value="{{ $item->user->id }}">{{ $item->fullname }}
+                                                            <option value="{{ $item->user->id }}"
+                                                                {{ auth()->user()->id == $item->user->id ? 'selected' : '' }}>
+                                                                {{ $item->fullname }}
                                                             </option>
                                                         @endforeach
                                                     </select>

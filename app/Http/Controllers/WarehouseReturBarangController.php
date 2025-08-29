@@ -29,13 +29,13 @@ class WarehouseReturBarangController extends Controller
      */
     public function index(Request $request)
     {
-        $query = WarehouseReturBarang::query()->with(["items", "items.stored", "items.stored.pbi"]);
-        $filters = ["supplier_id", "kode_retur"];
+        $query = WarehouseReturBarang::query()->with(['items', 'items.stored', 'items.stored.pbi']);
+        $filters = ['supplier_id', 'kode_retur'];
         $filterApplied = false;
 
         foreach ($filters as $filter) {
             if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
+                $query->where($filter, 'like', '%'.$request->$filter.'%');
                 $filterApplied = true;
             }
         }
@@ -51,8 +51,8 @@ class WarehouseReturBarangController extends Controller
         }
 
         if ($request->filled('nama_barang')) {
-            $query->whereHas("items.stored.pbi", function ($q) use ($request) {
-                $q->where('nama_barang', 'like', '%' . $request->nama_barang . '%');
+            $query->whereHas('items.stored.pbi', function ($q) use ($request) {
+                $q->where('nama_barang', 'like', '%'.$request->nama_barang.'%');
             });
             $filterApplied = true;
         }
@@ -65,9 +65,9 @@ class WarehouseReturBarangController extends Controller
             $rb = WarehouseReturBarang::all();
         }
 
-        return view("pages.simrs.warehouse.retur-barang.index", [
-            "rbs" => $rb,
-            "suppliers" => WarehouseSupplier::all()
+        return view('pages.simrs.warehouse.retur-barang.index', [
+            'rbs' => $rb,
+            'suppliers' => WarehouseSupplier::all(),
         ]);
     }
 
@@ -77,24 +77,24 @@ class WarehouseReturBarangController extends Controller
     public function create()
     {
 
-        return view("pages.simrs.warehouse.penerimaan-barang.partials.popup-add-rb", [
-            "suppliers" => WarehouseSupplier::all()
+        return view('pages.simrs.warehouse.penerimaan-barang.partials.popup-add-rb', [
+            'suppliers' => WarehouseSupplier::all(),
         ]);
     }
 
     public function get_items(Request $request, $supplier_id)
     {
-        $query1 = StoredBarangFarmasi::query()->with(['pbi', "pbi.pb"]);
-        $query2 = StoredBarangNonFarmasi::query()->with(['pbi', "pbi.pb"]);
+        $query1 = StoredBarangFarmasi::query()->with(['pbi', 'pbi.pb']);
+        $query2 = StoredBarangNonFarmasi::query()->with(['pbi', 'pbi.pb']);
 
-        $query1->where("qty", ">", 0);
-        $query2->where("qty", ">", 0);
+        $query1->where('qty', '>', 0);
+        $query2->where('qty', '>', 0);
 
-        $query1->whereHas("pbi.pb", function ($q) use ($supplier_id) {
+        $query1->whereHas('pbi.pb', function ($q) use ($supplier_id) {
             $q->where('supplier_id', $supplier_id);
         });
 
-        $query2->whereHas("pbi.pb", function ($q) use ($supplier_id) {
+        $query2->whereHas('pbi.pb', function ($q) use ($supplier_id) {
             $q->where('supplier_id', $supplier_id);
         });
 
@@ -104,8 +104,8 @@ class WarehouseReturBarangController extends Controller
         // concat the array
         $sbs = collect(array_merge($sbf, $sbnf));
 
-        return view("pages.simrs.warehouse.penerimaan-barang.partials.table-items-rb", [
-            "sbs" => $sbs
+        return view('pages.simrs.warehouse.penerimaan-barang.partials.table-items-rb', [
+            'sbs' => $sbs,
         ]);
     }
 
@@ -114,11 +114,12 @@ class WarehouseReturBarangController extends Controller
         $date = Carbon::now();
         $year = $date->format('y');
 
-        $count = WarehouseReturBarang::whereYear('created_at', now()->year)
+        $count = WarehouseReturBarang::withTrashed()
+            ->whereYear('created_at', now()->year)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return "NRS" . $year . "-" . $count;
+        return 'NRS'.$year.'-'.$count;
     }
 
     /**
@@ -129,83 +130,85 @@ class WarehouseReturBarangController extends Controller
         // dd($request->all());
 
         $validatedData1 = $request->validate([
-            "user_id" => "required|exists:users,id",
-            "supplier_id" => "required|exists:warehouse_supplier,id",
-            "tanggal_retur" => "required|date",
-            "keterangan" => "nullable|string",
-            "ppn" => "required|integer",
-            "ppn_nominal" => "required|integer",
-            "nominal" => "required|integer"
+            'user_id' => 'required|exists:users,id',
+            'supplier_id' => 'required|exists:warehouse_supplier,id',
+            'tanggal_retur' => 'required|date',
+            'keterangan' => 'nullable|string',
+            'ppn' => 'required|integer',
+            'ppn_nominal' => 'required|integer',
+            'nominal' => 'required|integer',
         ]);
 
         // dd($validatedData1);
 
         $validatedData2 = $request->validate([
-            "item_type.*" => "required|in:si_f_id,si_nf_id",
-            "item_si_id.*" => "required|integer",
-            "item_harga.*" => "required|integer",
-            "item_subtotal.*" => "required|integer",
-            'item_qty.*' => 'required|integer|min:0'
+            'item_type.*' => 'required|in:si_f_id,si_nf_id',
+            'item_si_id.*' => 'required|integer',
+            'item_harga.*' => 'required|integer',
+            'item_subtotal.*' => 'required|integer',
+            'item_qty.*' => 'required|integer|min:0',
         ]);
 
         // dd($validatedData2);
 
-        $validatedData1["kode_retur"] = $this->generate_rb_code();
+        $validatedData1['kode_retur'] = $this->generate_rb_code();
         DB::beginTransaction();
 
         try {
             $rb = WarehouseReturBarang::create($validatedData1);
-            $user = User::findOrFail($validatedData1["user_id"]);
+            $user = User::findOrFail($validatedData1['user_id']);
 
-            foreach ($validatedData2["item_si_id"] as $key => $id) {
-                if ($validatedData2["item_qty"][$key] == 0) {
+            foreach ($validatedData2['item_si_id'] as $key => $id) {
+                if ($validatedData2['item_qty'][$key] == 0) {
                     continue; // ignore if qty is 0
                 }
 
                 $si = StoredBarangFarmasi::query();
-                if ($validatedData2["item_type"][$key] == "si_nf_id") {
+                if ($validatedData2['item_type'][$key] == 'si_nf_id') {
                     $si = StoredBarangNonFarmasi::query();
                 }
 
                 $si_item = $si->findOrFail($id);
-                if ($si_item->qty < $validatedData2["item_qty"][$key]) {
+                if ($si_item->qty < $validatedData2['item_qty'][$key]) {
                     // throw error
-                    throw new \Exception("Qty tidak cukup"); // throw error
+                    throw new \Exception('Qty tidak cukup'); // throw error
                 }
 
                 WarehouseReturBarangItems::create([
-                    "rb_id" => $rb->id,
-                    "qty" => $validatedData2["item_qty"][$key],
-                    "harga" => $validatedData2["item_harga"][$key],
-                    "subtotal" => $validatedData2["item_subtotal"][$key],
-                    $validatedData2["item_type"][$key] => $id
-                ]);                
+                    'rb_id' => $rb->id,
+                    'qty' => $validatedData2['item_qty'][$key],
+                    'harga' => $validatedData2['item_harga'][$key],
+                    'subtotal' => $validatedData2['item_subtotal'][$key],
+                    $validatedData2['item_type'][$key] => $id,
+                ]);
 
                 // $si_item->update([
-                    // "qty" => $si_item->qty - $validatedData2["item_qty"][$key]
+                // "qty" => $si_item->qty - $validatedData2["item_qty"][$key]
                 // ]);
                 // $si_item->save();
 
                 // ...
 
                 // use the GoodsStockService
-                $qty = $validatedData2["item_qty"][$key];
+                $qty = $validatedData2['item_qty'][$key];
                 $args = new IncreaseDecreaseStockArguments($user, $rb, $si_item, $qty);
                 $this->goodsStockService->decreaseStock($args);
             }
 
             DB::commit();
+
             return back()->with('success', 'Data berhasil disimpan');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->with('error', $e->getMessage());
         }
     }
 
     public function print($id)
     {
-        return view("pages.simrs.warehouse.penerimaan-barang.partials.rb-print", [
-            "rb" => WarehouseReturBarang::findorfail($id)
+        return view('pages.simrs.warehouse.penerimaan-barang.partials.rb-print', [
+            'rb' => WarehouseReturBarang::findorfail($id),
         ]);
     }
 
@@ -228,20 +231,22 @@ class WarehouseReturBarangController extends Controller
                 $user = request()->user();
                 $args = new IncreaseDecreaseStockArguments($user, $rb, $rbi->stored, $rbi->qty);
                 $this->goodsStockService->increaseStock($args);
-                
+
                 $rbi->delete();
             }
             $rb->delete();
 
             DB::commit();
+
             return response()->json([
-                "success" => true,
+                'success' => true,
                 'message' => 'Data berhasil dihapus',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
-                "success" => false,
+                'success' => false,
                 'message' => $e->getMessage(),
             ]);
         }

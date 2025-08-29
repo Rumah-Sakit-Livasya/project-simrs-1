@@ -29,11 +29,15 @@
             <div class="row">
                 <div class="col-6">
                     <input type="text" name="tgl_dilayani" class="form-control datepicker"
-                        value="{{ $pengkajian->waktu_dilayani ? $pengkajian->waktu_dilayani->format('d-m-Y') : '' }}">
+                        value="{{ $pengkajian->waktu_dilayani
+                            ? $pengkajian->waktu_dilayani->format('d-m-Y')
+                            : \Carbon\Carbon::now()->format('d-m-Y') }}">
                 </div>
                 <div class="col-6">
                     <input type="time" name="jam_dilayani" class="form-control"
-                        value="{{ $pengkajian->waktu_dilayani ? $pengkajian->waktu_dilayani->format('H:i') : '' }}">
+                        value="{{ $pengkajian->waktu_dilayani
+                            ? $pengkajian->waktu_dilayani->format('H:i')
+                            : \Carbon\Carbon::now()->format('H:i') }}">
                 </div>
             </div>
         </div>

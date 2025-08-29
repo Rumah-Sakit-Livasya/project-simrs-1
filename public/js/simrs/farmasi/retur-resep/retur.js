@@ -45,17 +45,22 @@ class ReturResepHandler {
     /**
      * @type {JQuery<HTMLElement>}
      */
-    #$Patient
+    #$Patient;
 
     /**
      * @type {JQuery<HTMLElement>}
      */
-    #$PatientName
+    #$PatientName;
 
     /**
      * @type {JQuery<HTMLElement>}
      */
-    #$RMReg
+    #$Registration;
+
+    /**
+     * @type {JQuery<HTMLElement>}
+     */
+    #$RMReg;
 
     /**
      * @type {string[]}
@@ -74,6 +79,7 @@ class ReturResepHandler {
         this.#$Nominal = $("input[name='nominal']");
         this.#$Patient = $("#patient_id");
         this.#$PatientName = $("#nama_pasien");
+        this.#$Registration = $("#registration_id");
         this.#$RMReg = $("#rm_reg");
 
         this.#init();
@@ -86,15 +92,55 @@ class ReturResepHandler {
         this.#addEventListeners("#searchNoResepInput", this.#handleItemSearchBar, "keyup");
         $(document).on("change input keyup", "input[type='number']", ReturResepHandler.enforceNumberLimit);
         $(document).on("change input keyup", "input[type='number']", this.refreshTotal.bind(this));
-        $("#patient_id").on('select2:select', this.#reset.bind(this));
+        $("#patient_id").on('select2:select', () => { this.#reset.bind(this)(); this.#updateRegistrationList.bind(this)() });
         this.#showLoading(false);
+    }
+
+    /**
+     * Generates the HTML string for an "obat" (drug) select option.
+     * @param {Registration} registration 
+     * @returns  {string} The HTML string for the Obat Select option.
+     */
+    getRegistrationSelectHTML(registration) {
+        let Tipe = "Rawat Jalan";
+        if (registration.registration_type == "rawat-inap"){
+            Tipe = `Rawat inap [${registration.kelas_rawat?.kelas} / ${registration.patient?.bed?.room?.ruangan} / ${registration.patient?.bed?.nama_tt}]`
+        }
+        return /*html*/`
+                <option value="${registration.id}" class="registrasi">
+                    ${registration.registration_number} (${this.#tgl(registration.registration_date)} - ${Tipe})
+                </option>
+            `;
+    }
+
+    #tgl(tanggal) {
+        // format sql date to local date that outputs like this:
+        // 08 Jan 2025
+        return new Date(tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    async #updateRegistrationList() {
+        this.#showLoading(true);
+        const Registrations = await this.#APIfetch(`/get/registrations/${this.#$Patient.val()}`, null, "GET")
+            .catch(error => showErrorAlertNoRefresh(error.message))
+            .finally(() => this.#showLoading(false));
+
+        this.#$Registration.empty().append(new Option("Pilih Registrasi", ""));
+        Registrations.forEach(registration => {
+            const option = $(this.getRegistrationSelectHTML(registration));
+            this.#$Registration.append(option);
+        });
+
+        this.#$Registration.find('option:first').prop('disabled', true);
+        this.#$Registration.trigger('change');
     }
 
     #reset() {
         this.#SelectedItems = [];
         this.#$Table.empty();
         // this.#$Patient.val('');
-        this.#$PatientName.val('');
+        this.#$PatientName.val('').trigger('change');
+        this.#$Registration.val('').trigger('change');
         this.#$RMReg.val('');
         this.#$Total.text("0");
         this.#$Nominal.val("0");
@@ -298,13 +344,14 @@ class ReturResepHandler {
     async #handleAddButtonClick(event) {
         event.preventDefault();
         const patientId = /** @type {string} */ (this.#$Patient.val());
-        if (!patientId) {
-            showErrorAlertNoRefresh("Pilih pasien terlebih dahulu!");
+        const registrationId = /** @type {string} */ (this.#$Registration.val());
+        if (!patientId || !registrationId) {
+            showErrorAlertNoRefresh("Pilih pasien dan registrasi terlebih dahulu!");
             return;
         }
 
         this.#showLoading(true);
-        const url = "/get/item-patient/" + patientId;
+        const url = "/get/item-registration/" + registrationId;
 
         const HTML = await (await this.#APIfetch(url, null, "GET", true)).text();
         this.#showLoading(false);

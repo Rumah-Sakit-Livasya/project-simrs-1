@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
     use SoftDeletes;
 
     /**
@@ -19,7 +18,8 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->softDeletes();
-            $table->foreignId('re_id')->constrained('farmasi_resep_elektroniks')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('re_id')->nullable()->constrained('farmasi_resep_elektroniks')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('resep_id')->nullable()->constrained('farmasi_reseps')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('input_resep_user_id')->nullable()->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->dateTime('input_resep_time')->nullable();
             $table->foreignId('penyiapan_user_id')->nullable()->constrained('users')->onUpdate('cascade')->onDelete('cascade');

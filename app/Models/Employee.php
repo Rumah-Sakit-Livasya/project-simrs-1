@@ -13,6 +13,8 @@ class Employee extends Model
     use HasFactory;
     protected $guarded = ['id'];
 
+    protected $appends = ['fullname'];
+
 
     public function penilaian_pegawais()
     {
@@ -150,5 +152,13 @@ class Employee extends Model
     public function driver()
     {
         return $this->hasOne(Driver::class);
+    }
+
+    /**
+     * Get the employee's full name
+     */
+    public function getFullnameAttribute()
+    {
+        return trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));
     }
 }

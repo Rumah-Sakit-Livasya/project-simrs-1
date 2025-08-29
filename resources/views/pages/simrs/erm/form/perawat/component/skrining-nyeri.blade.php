@@ -1,47 +1,43 @@
 <header class="text-warning mt-4">
     <h4 class="font-weight-bold">SKRINING NYERI</h4>
 </header>
-<div class="row mt-3 justify-content-center">
-    <div class="col text-center">
-        <img src="/img/nyeri/1.jpg" alt="nyeri 1" class="img-fluid">
-        <br>
-        <p class="badge badge-danger p-1">0</p>
+<div class="row align-items-center">
+    <div class="col-md-11">
+        <div class="d-flex justify-content-around text-center flex-wrap wong-baker-scale">
+            @for ($i = 0; $i < 6; $i++)
+                <div class="p-2">
+                    <img src="/img/nyeri/{{ $i + 1 }}.jpg" class="img-fluid"
+                        style="max-width: 100px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer;"
+                        alt="Skala Nyeri Wong Baker">
+                    <div class="mt-2">
+                        @if ($i == 0)
+                            <span class="badge badge-pill badge-success pointer" data-skor="0">0</span>
+                        @elseif($i == 1)
+                            <span class="badge badge-pill badge-success pointer" data-skor="1">1</span>
+                            <span class="badge badge-pill badge-success pointer" data-skor="2">2</span>
+                        @elseif($i == 2)
+                            <span class="badge badge-pill badge-info pointer" data-skor="3">3</span>
+                            <span class="badge badge-pill badge-info pointer" data-skor="4">4</span>
+                        @elseif($i == 3)
+                            <span class="badge badge-pill badge-primary pointer" data-skor="5">5</span>
+                            <span class="badge badge-pill badge-primary pointer" data-skor="6">6</span>
+                        @elseif($i == 4)
+                            <span class="badge badge-pill badge-warning pointer" data-skor="7">7</span>
+                            <span class="badge badge-pill badge-warning pointer" data-skor="8">8</span>
+                        @else
+                            <span class="badge badge-pill badge-danger pointer" data-skor="9">9</span>
+                            <span class="badge badge-pill badge-danger pointer" data-skor="10">10</span>
+                        @endif
+                    </div>
+                </div>
+            @endfor
+        </div>
     </div>
-    <div class="col text-center">
-        <img src="/img/nyeri/2.jpg" alt="nyeri 2" class="img-fluid">
-        <br>
-        <p class="badge badge-success p-1">1</p>
-        <p class="badge badge-success p-1">2</p>
-    </div>
-    <div class="col text-center">
-        <img src="/img/nyeri/3.jpg" alt="nyeri 3" class="img-fluid">
-        <br>
-        <p class="badge badge-info p-1">3</p>
-        <p class="badge badge-info p-1">4</p>
-    </div>
-    <div class="col text-center">
-        <img src="/img/nyeri/4.jpg" alt="nyeri 4" class="img-fluid">
-        <br>
-        <p class="badge badge-secondary p-1">5</p>
-        <p class="badge badge-secondary p-1">6</p>
-    </div>
-    <div class="col text-center">
-        <img src="/img/nyeri/5.jpg" alt="nyeri 5" class="img-fluid">
-        <br>
-        <p class="badge badge-warning p-1">7</p>
-        <p class="badge badge-warning p-1">8</p>
-    </div>
-    <div class="col text-center">
-        <img src="/img/nyeri/6.jpg" alt="nyeri 6" class="img-fluid">
-        <br>
-        <p class="badge badge-danger p-1">9</p>
-        <p class="badge badge-danger p-1">10</p>
-    </div>
-    <div class="col text-center">
-        <label for="skor-nyeri" class="control-label">Skor</label>
-        <input name="skala_nyeri" id="skor-nyeri" class="form-control m-auto text-center"
-            value="{{ $pengkajian?->skala_nyeri ?? '' }}" style="font-size: 3rem; height: 60px; width: 80px;"
-            type="text">
+    <div class="col-md-1 form-group">
+        <label for="skor_nyeri"><b>Skor</b></label>
+        <input type="text" name="asesmen_nyeri[skor_nyeri]" id="skor_nyeri"
+            class="form-control text-center font-weight-bold" style="font-size: 2rem; height: 60px;"
+            value="{{ $nyeri['skor_nyeri'] ?? '' }}" readonly>
     </div>
 </div>
 <div class="row mt-3">

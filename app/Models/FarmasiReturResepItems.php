@@ -16,7 +16,13 @@ class FarmasiReturResepItems extends Model
         return $this->belongsTo(FarmasiReturResep::class, 'retur_id');
     }
 
-    public function ri(){
+    public function ri()
+    {
         return $this->belongsTo(FarmasiResepItems::class, 'ri_id');
+    }
+
+    public function getHargaAttribute()
+    {
+        return $this->subtotal / $this->qty;
     }
 }

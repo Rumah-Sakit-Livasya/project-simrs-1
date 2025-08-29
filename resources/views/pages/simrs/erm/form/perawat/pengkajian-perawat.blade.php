@@ -180,31 +180,39 @@
                     </header>
                     <div class="row g-3">
                         <div class="col-12 mb-4">
-                            <div class="d-flex flex-wrap justify-content-between align-items-end">
-                                @for ($i = 1; $i <= 6; $i++)
-                                    <div class="img-baker d-flex flex-column align-items-center" style="width: 13%;">
-                                        <img src="{{ asset('img/emoticon/' . $i . '.jpg') }}" class="mb-2 img-fluid"
-                                            style="max-width: 60px;">
-                                        <div class="text-center">
-                                            @if ($i == 1)
-                                                <span class="badge bg-warning text-white" data-skor="0">0</span>
-                                            @elseif ($i == 2)
-                                                <span class="badge bg-success" data-skor="1">1</span>
-                                                <span class="badge bg-success" data-skor="2">2</span>
-                                            @elseif ($i == 3)
-                                                <span class="badge bg-primary" data-skor="3">3</span>
-                                                <span class="badge bg-primary" data-skor="4">4</span>
-                                            @elseif ($i == 4)
-                                                <span class="badge bg-info" data-skor="5">5</span>
-                                                <span class="badge bg-info" data-skor="6">6</span>
-                                            @elseif ($i == 5)
-                                                <span class="badge" style="background:#ff9800;color:#fff"
+                            <div class="d-flex flex-wrap justify-content-between align-items-end wong-baker-scale">
+                                @for ($i = 0; $i < 6; $i++)
+                                    <div class="p-2">
+                                        <img src="/img/nyeri/{{ $i + 1 }}.jpg" class="img-fluid"
+                                            style="max-width: 100px; border-radius: 5px; cursor: pointer;"
+                                            alt="Skala Nyeri Wong Baker">
+                                        <div class="mt-2 d-flex justify-content-center">
+                                            @if ($i == 0)
+                                                <span class="badge badge-pill badge-success pointer"
+                                                    data-skor="0">0</span>
+                                            @elseif($i == 1)
+                                                <span class="badge badge-pill badge-success pointer"
+                                                    data-skor="1">1</span>
+                                                <span class="badge badge-pill badge-success pointer"
+                                                    data-skor="2">2</span>
+                                            @elseif($i == 2)
+                                                <span class="badge badge-pill badge-info pointer" data-skor="3">3</span>
+                                                <span class="badge badge-pill badge-info pointer" data-skor="4">4</span>
+                                            @elseif($i == 3)
+                                                <span class="badge badge-pill badge-primary pointer"
+                                                    data-skor="5">5</span>
+                                                <span class="badge badge-pill badge-primary pointer"
+                                                    data-skor="6">6</span>
+                                            @elseif($i == 4)
+                                                <span class="badge badge-pill badge-warning pointer"
                                                     data-skor="7">7</span>
-                                                <span class="badge" style="background:#ff9800;color:#fff"
+                                                <span class="badge badge-pill badge-warning pointer"
                                                     data-skor="8">8</span>
-                                            @elseif ($i == 6)
-                                                <span class="badge bg-danger" data-skor="9">9</span>
-                                                <span class="badge bg-danger" data-skor="10">10</span>
+                                            @else
+                                                <span class="badge badge-pill badge-danger pointer"
+                                                    data-skor="9">9</span>
+                                                <span class="badge badge-pill badge-danger pointer"
+                                                    data-skor="10">10</span>
                                             @endif
                                         </div>
                                     </div>
@@ -217,6 +225,7 @@
                                 </div>
                             </div>
                         </div>
+
                         @foreach ([['provokatif', 'Provokatif'], ['quality', 'Quality'], ['region', 'Region'], ['time', 'Time']] as [$name, $label])
                             <div class="col-md-3">
                                 <label for="{{ $name }}"
@@ -711,6 +720,11 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            $('.wong-baker-scale .pointer').on('click', function() {
+                const skor = $(this).data('skor');
+                $('#skor_nyeri').val(skor);
+            });
+
             const pengkajian = @json($pengkajian ?? []);
 
             $('body').addClass('layout-composed');

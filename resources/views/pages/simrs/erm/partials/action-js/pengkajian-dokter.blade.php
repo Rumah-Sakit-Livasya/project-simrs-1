@@ -57,6 +57,15 @@
             const form = $('#pengkajian-dokter-rajal-form'); // Ambil form
             const url = "{{ route('pengkajian.dokter-rajal.store') }}" // Ambil URL dari action form
 
+            // Disable buttons and show loading state
+            const draftBtn = $('#sd-pengkajian-dokter-rajal');
+            const finalBtn = $('#sf-pengkajian-dokter-rajal');
+
+            draftBtn.prop('disabled', true).html(
+                '<span class="mdi mdi-loading mdi-spin mr-2"></span> Menyimpan...');
+            finalBtn.prop('disabled', true).html(
+                '<span class="mdi mdi-loading mdi-spin mr-2"></span> Menyimpan...');
+
             let formData = form.serialize(); // Ambil data dari form
 
             // Tambahkan tipe aksi (draft atau final) ke data form
@@ -78,6 +87,12 @@
                     }, 1000);
                 },
                 error: function(response) {
+                    // Re-enable buttons and restore original text
+                    draftBtn.prop('disabled', false).html(
+                        '<span class="mdi mdi-content-save mr-2"></span> Simpan (draft)');
+                    finalBtn.prop('disabled', false).html(
+                        '<span class="mdi mdi-content-save mr-2"></span> Simpan (final)');
+
                     // Tangani error
                     var errors = response.responseJSON.errors;
                     $.each(errors, function(key, value) {

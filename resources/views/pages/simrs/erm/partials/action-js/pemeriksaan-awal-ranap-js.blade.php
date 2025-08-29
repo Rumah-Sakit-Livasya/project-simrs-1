@@ -71,7 +71,8 @@
             const btn = $('#btn-save');
             const formData = new FormData(this);
 
-            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Menyimpan...');
+            btn.prop('disabled', true).html(
+                '<span class="spinner-border spinner-border-sm"></span> Menyimpan...');
 
             $.ajax({
                 url: "{{ route('erm.store.pemeriksaan-awal-ranap') }}",
@@ -91,12 +92,18 @@
                 error: function(xhr) {
                     let errorText = 'Terjadi kesalahan sistem.';
                     if (xhr.status === 422) { // Handle validation errors
-                        errorText = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                        errorText = Object.values(xhr.responseJSON.errors).flat().join(
+                            '<br>');
                     }
-                    Swal.fire({ icon: 'error', title: 'Gagal!', html: errorText });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        html: errorText
+                    });
                 },
                 complete: function() {
-                    btn.prop('disabled', false).html('<i class="fas fa-save"></i> Simpan Data');
+                    btn.prop('disabled', false).html(
+                        '<i class="fas fa-save"></i> Simpan Data');
                 }
             });
         });

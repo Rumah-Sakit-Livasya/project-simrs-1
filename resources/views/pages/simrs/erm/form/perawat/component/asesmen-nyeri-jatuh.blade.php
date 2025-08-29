@@ -20,7 +20,7 @@
                     @for ($i = 0; $i < 6; $i++)
                         <div class="p-2">
                             <img src="/img/nyeri/{{ $i + 1 }}.jpg" class="img-fluid"
-                                style="max-width: 100px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer;"
+                                style="max-width: 100px; border-radius: 5px; cursor: pointer;"
                                 alt="Skala Nyeri Wong Baker">
                             <div class="mt-2">
                                 @if ($i == 0)

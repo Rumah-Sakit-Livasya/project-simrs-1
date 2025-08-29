@@ -16,11 +16,24 @@
             <ul>
                 @foreach ($registrations as $registration)
                     @php
-                        // Hanya proses registration yang tanggalnya hari ini
                         $today = \Carbon\Carbon::today()->format('Y-m-d');
                         $registrationDate = \Carbon\Carbon::parse($registration->registration_date)->format('Y-m-d');
-                        if ($registrationDate !== $today) {
-                            continue;
+
+                        // Jika path IGD, hanya tampilkan yang tanggalnya hari ini
+                        // Jika path poliklinik (rawat jalan), hanya tampilkan yang tanggalnya hari ini
+                        // Jika path lain, hanya tampilkan yang statusnya aktif
+                        if ($path === 'igd') {
+                            if ($registrationDate !== $today) {
+                                continue;
+                            }
+                        } elseif ($path === 'poliklinik') {
+                            if ($registrationDate !== $today) {
+                                continue;
+                            }
+                        } else {
+                            if ($registration->status !== 'aktif') {
+                                continue;
+                            }
                         }
 
                         $menu = request('menu');

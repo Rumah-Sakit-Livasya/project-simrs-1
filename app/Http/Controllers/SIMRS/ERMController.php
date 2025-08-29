@@ -8,6 +8,7 @@ use App\Models\DischargePlanning;
 use App\Models\DoctorInitialAssessment;
 use App\Models\Echocardiography;
 use App\Models\Employee;
+use App\Models\FarmasiResepHarian;
 use App\Models\GeriatricInitialAssessment;
 use App\Models\HospitalInfectionSurveillance;
 use App\Models\InpatientInitialAssessment;
@@ -16,6 +17,7 @@ use App\Models\MidwiferyInitialAssessment;
 use App\Models\NeonatusInitialAssessment;
 use App\Models\NeonatusInitialAssessmentDoctor;
 use App\Models\NursingActivityChecklist;
+use App\Models\OrderRadiologi;
 use App\Models\SIMRS\AssesmentKeperawatanGadar;
 use App\Models\SIMRS\CPPT\CPPT;
 use App\Models\SIMRS\Departement;
@@ -23,7 +25,9 @@ use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\EWSAnak;
 use App\Models\SIMRS\EWSDewasa;
 use App\Models\SIMRS\EWSObstetri;
+use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\JadwalDokter;
+use App\Models\SIMRS\KategoriRadiologi;
 use App\Models\SIMRS\KelasRawat;
 use App\Models\SIMRS\Laboratorium\OrderLaboratorium;
 use App\Models\SIMRS\Operasi\KategoriOperasi;
@@ -33,22 +37,20 @@ use App\Models\SIMRS\OrderTindakanMedis;
 use App\Models\SIMRS\Pelayanan\RujukAntarRS;
 use App\Models\SIMRS\Pelayanan\Triage;
 use App\Models\SIMRS\Pengkajian\FormKategori;
-use App\Models\SIMRS\Pengkajian\FormTemplate;
 use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 use App\Models\SIMRS\Pengkajian\PengkajianLanjutan;
 use App\Models\SIMRS\Pengkajian\PengkajianNurseRajal;
 use App\Models\SIMRS\Pengkajian\TransferPasienAntarRuangan;
 use App\Models\SIMRS\Peralatan\OrderAlatMedis;
 use App\Models\SIMRS\Peralatan\Peralatan;
+use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\ResumeMedisRajal\ResumeMedisRajal;
 use App\Models\SIMRS\Room;
 use App\Models\SIMRS\TindakanMedis;
-use App\Models\StoredBarangFarmasi;
 use App\Models\WarehouseBarangFarmasi;
 use App\Models\WarehouseMasterGudang;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -73,7 +75,7 @@ class ERMController extends Controller
 
         foreach ($filters as $filter) {
             if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
+                $query->where($filter, 'like', '%'.$request->$filter.'%');
                 $filterApplied = true;
             }
         }
@@ -88,7 +90,6 @@ class ERMController extends Controller
                 $filterApplied = true;
             }
         }
-
 
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status == 'aktif' ? 'aktif' : 'tutup_kunjungan');
@@ -134,7 +135,7 @@ class ERMController extends Controller
         } else {
             return view('pages.simrs.igd.daftar-pasien', [
                 'registrations' => $registration,
-                'path' => $path
+                'path' => $path,
             ]);
         }
     }
@@ -147,7 +148,7 @@ class ERMController extends Controller
             if ($path === 'igd') {
                 $query = Registration::where('registration_type', 'igd');
             } else {
-                $query = Registration::where('registration_type', '!=', 'igd');
+                $query = Registration::where('registration_type', '!=', 'igd')->where('status', 'aktif');
             }
 
             // Filter by department first
@@ -163,7 +164,7 @@ class ERMController extends Controller
             // Filter by patient name
             $query->when($request->patient, function ($q) use ($request) {
                 return $q->whereHas('patient', function ($patient) use ($request) {
-                    $patient->where('name', 'like', '%' . $request->patient . '%');
+                    $patient->where('name', 'like', '%'.$request->patient.'%');
                 });
             });
 
@@ -175,13 +176,13 @@ class ERMController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Data retrieved successfully',
-                'html' => $html
+                'html' => $html,
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve data',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -274,7 +275,7 @@ class ERMController extends Controller
             // Gunakan saveSignatureFile untuk menyimpan tanda tangan
             if ($request->has('signatures')) {
                 foreach ($request->signatures as $role => $signatureData) {
-                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                    if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
                         $oldPath = optional($surveilans->signatures()->where('role', $role)->first())->signature;
                         $newPath = $this->saveSignatureFile($signatureData['signature_image'], "surveilans_{$surveilans->id}_{$role}");
 
@@ -291,10 +292,12 @@ class ERMController extends Controller
             }
 
             DB::commit();
+
             return response()->json(['success' => 'Data Surveilans Infeksi berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Surveilans Infeksi: ' . $e->getMessage());
+            Log::error('Gagal menyimpan Surveilans Infeksi: '.$e->getMessage());
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
     }
@@ -311,7 +314,7 @@ class ERMController extends Controller
             // Gabungkan tanggal dan jam penjelasan menjadi satu timestamp
             $waktuPenjelasan = null;
             if ($request->filled('tgl_penjelasan') && $request->filled('jam_penjelasan')) {
-                $waktuPenjelasan = $request->tgl_penjelasan . ' ' . $request->jam_penjelasan;
+                $waktuPenjelasan = $request->tgl_penjelasan.' '.$request->jam_penjelasan;
             }
 
             // Siapkan data untuk disimpan
@@ -325,10 +328,12 @@ class ERMController extends Controller
             );
 
             DB::commit();
+
             return response()->json(['success' => 'Data Rencana Pulang berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Rencana Pulang: ' . $e->getMessage());
+            Log::error('Gagal menyimpan Rencana Pulang: '.$e->getMessage());
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
     }
@@ -347,15 +352,17 @@ class ERMController extends Controller
                 ['registration_id' => $request->registration_id],
                 [
                     'user_id' => Auth::id(),
-                    'checklist_data' => $checklistData
+                    'checklist_data' => $checklistData,
                 ]
             );
 
             DB::commit();
+
             return response()->json(['success' => 'Checklist Kegiatan Keperawatan berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Checklist Keperawatan: ' . $e->getMessage());
+            Log::error('Gagal menyimpan Checklist Keperawatan: '.$e->getMessage());
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
     }
@@ -378,7 +385,7 @@ class ERMController extends Controller
             $waktuMasuk = null;
             if ($request->filled('tgl_masuk') && $request->filled('jam_masuk')) {
                 // Format input 'Y-m-d' (dari type="date") dan 'H:i' (dari type="time")
-                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk . ' ' . $request->jam_masuk)->toDateTimeString();
+                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk.' '.$request->jam_masuk)->toDateTimeString();
             }
 
             // 2. Siapkan data utama untuk disimpan/diperbarui
@@ -396,7 +403,7 @@ class ERMController extends Controller
             // 4. Gunakan saveSignatureFile untuk menyimpan tanda tangan
             if ($request->has('signatures')) {
                 foreach ($request->signatures as $role => $signatureData) {
-                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                    if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
 
                         // Cari path file lama sebelum di-update
                         $oldPath = optional($asesmen->signatures()->where('role', $role)->first())->signature;
@@ -409,7 +416,7 @@ class ERMController extends Controller
                             ['role' => $role], // Kunci unik
                             [
                                 'pic' => $signatureData['pic'], // Data baru
-                                'signature' => $newPath         // Data baru
+                                'signature' => $newPath,         // Data baru
                             ]
                         );
 
@@ -422,10 +429,12 @@ class ERMController extends Controller
             }
 
             DB::commit();
+
             return response()->json(['success' => 'Asesmen Awal Rawat Inap berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Ranap: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Gagal menyimpan Asesmen Awal Ranap: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data. Silakan hubungi administrator.'], 500);
         }
     }
@@ -447,7 +456,7 @@ class ERMController extends Controller
             // Gunakan saveSignatureFile untuk menyimpan tanda tangan jika ada
             if ($request->has('signatures')) {
                 foreach ($request->signatures as $role => $signatureData) {
-                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                    if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
                         $oldPath = optional($asesmen->signatures()->where('role', $role)->first())->signature;
                         $newPath = $this->saveSignatureFile($signatureData['signature_image'], "asesmen_awal_anak_{$asesmen->id}_{$role}");
 
@@ -464,10 +473,12 @@ class ERMController extends Controller
             }
 
             DB::commit();
+
             return response()->json(['success' => 'Asesmen Awal Anak berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Anak: ' . $e->getMessage());
+            Log::error('Gagal menyimpan Asesmen Awal Anak: '.$e->getMessage());
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
     }
@@ -489,7 +500,7 @@ class ERMController extends Controller
             $waktuMasuk = null;
             if ($request->filled('tgl_masuk') && $request->filled('jam_masuk')) {
                 // Format input 'Y-m-d' (dari type="date") dan 'H:i' (dari type="time")
-                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk . ' ' . $request->jam_masuk)->toDateTimeString();
+                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk.' '.$request->jam_masuk)->toDateTimeString();
             }
 
             // 2. Siapkan data utama untuk disimpan/diperbarui
@@ -506,9 +517,9 @@ class ERMController extends Controller
             // 4. Gunakan saveSignatureFile untuk menyimpan tanda tangan
             if ($request->has('signatures')) {
                 foreach ($request->signatures as $role => $signatureData) {
-                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                    if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
 
-                        $oldPath = optional($asesmen->signatures()->where('role', 'like', '%' . $role . '%')->first())->signature;
+                        $oldPath = optional($asesmen->signatures()->where('role', 'like', '%'.$role.'%')->first())->signature;
 
                         $newPath = $this->saveSignatureFile($signatureData['signature_image'], "asesmen_awal_lansia_{$asesmen->id}_{$role}");
 
@@ -516,7 +527,7 @@ class ERMController extends Controller
                             ['role' => $role], // Kunci unik
                             [
                                 'pic' => $signatureData['pic'], // Data baru
-                                'signature' => $newPath         // Data baru
+                                'signature' => $newPath,         // Data baru
                             ]
                         );
 
@@ -528,10 +539,12 @@ class ERMController extends Controller
             }
 
             DB::commit();
+
             return response()->json(['success' => 'Asesmen Awal Lansia berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Lansia: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Gagal menyimpan Asesmen Awal Lansia: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data. Silakan hubungi administrator.'], 500);
         }
     }
@@ -552,7 +565,7 @@ class ERMController extends Controller
             $waktuMasuk = null;
             if ($request->filled('tgl_masuk') && $request->filled('jam_masuk_pasien')) {
                 // Format input 'Y-m-d' (dari type="date") dan 'H:i' (dari type="time")
-                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk . ' ' . $request->jam_masuk_pasien)->toDateTimeString();
+                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk.' '.$request->jam_masuk_pasien)->toDateTimeString();
             }
 
             // 2. Siapkan data utama untuk disimpan/diperbarui
@@ -569,7 +582,7 @@ class ERMController extends Controller
             // 4. Logika lengkap untuk menyimpan tanda tangan
             if ($request->has('signatures')) {
                 foreach ($request->signatures as $role => $signatureData) {
-                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                    if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
 
                         $oldPath = optional($asesmen->signatures()->where('role', $role)->first())->signature;
 
@@ -579,7 +592,7 @@ class ERMController extends Controller
                             ['role' => $role], // Kunci unik
                             [
                                 'pic' => $signatureData['pic'], // Data baru
-                                'signature' => $newPath         // Data baru
+                                'signature' => $newPath,         // Data baru
                             ]
                         );
 
@@ -591,10 +604,12 @@ class ERMController extends Controller
             }
 
             DB::commit();
+
             return response()->json(['success' => 'Asesmen Awal Neonatus berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Neonatus: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Gagal menyimpan Asesmen Awal Neonatus: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data. Silakan hubungi administrator.'], 500);
         }
     }
@@ -607,7 +622,7 @@ class ERMController extends Controller
         try {
             $waktuMasuk = null;
             if ($request->filled('tgl_masuk') && $request->filled('jam_dilayani1')) {
-                $waktuMasuk = Carbon::createFromFormat('d-m-Y H:i', $request->tgl_masuk . ' ' . $request->jam_dilayani1)->toDateTimeString();
+                $waktuMasuk = Carbon::createFromFormat('d-m-Y H:i', $request->tgl_masuk.' '.$request->jam_dilayani1)->toDateTimeString();
             }
 
             $dataToStore = $request->except(['_token', 'tgl_masuk', 'jam_dilayani1', 'signatures']);
@@ -621,7 +636,7 @@ class ERMController extends Controller
 
             if ($request->has('signatures')) {
                 foreach ($request->input('signatures', []) as $role => $signatureData) {
-                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                    if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
 
                         $oldPath = optional($asesmen->signatures()->where('role', $role)->first())->signature;
 
@@ -631,7 +646,7 @@ class ERMController extends Controller
                             ['role' => $role], // Kunci unik
                             [
                                 'pic' => $signatureData['pic'], // Data baru
-                                'signature' => $newPath         // Data baru
+                                'signature' => $newPath,         // Data baru
                             ]
                         );
 
@@ -643,10 +658,12 @@ class ERMController extends Controller
             }
 
             DB::commit();
+
             return response()->json(['success' => 'Asesmen Awal Kebidanan berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Kebidanan: ' . $e->getMessage());
+            Log::error('Gagal menyimpan Asesmen Awal Kebidanan: '.$e->getMessage());
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
     }
@@ -655,7 +672,7 @@ class ERMController extends Controller
     {
         $request->validate([
             'registration_id' => 'required|exists:registrations,id',
-            'data' => 'required|array'
+            'data' => 'required|array',
         ]);
         DB::beginTransaction();
         try {
@@ -674,7 +691,7 @@ class ERMController extends Controller
             // 3. Logika lengkap untuk menyimpan tanda tangan
             if ($request->has('signatures')) {
                 foreach ($request->input('signatures', []) as $role => $signatureData) {
-                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                    if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
 
                         $oldPath = optional($pengkajian->signatures()->where('role', $role)->first())->signature;
 
@@ -684,7 +701,7 @@ class ERMController extends Controller
                             ['role' => $role], // Kunci unik
                             [
                                 'pic' => $signatureData['pic'] ?? null,
-                                'signature' => $newPath
+                                'signature' => $newPath,
                             ]
                         );
 
@@ -696,10 +713,12 @@ class ERMController extends Controller
             }
 
             DB::commit();
+
             return response()->json(['success' => 'Pengkajian Awal Neonatus (Dokter) berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Pengkajian Awal Neonatus (Dokter): ' . $e->getMessage());
+            Log::error('Gagal menyimpan Pengkajian Awal Neonatus (Dokter): '.$e->getMessage());
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
     }
@@ -735,11 +754,11 @@ class ERMController extends Controller
         DB::beginTransaction();
         try {
             $waktuMasuk = $request->filled('tgl_masuk') && $request->filled('jam_masuk')
-                ? Carbon::createFromFormat('d-m-Y H:i', $request->tgl_masuk . ' ' . $request->jam_masuk)->toDateTimeString()
+                ? Carbon::createFromFormat('d-m-Y H:i', $request->tgl_masuk.' '.$request->jam_masuk)->toDateTimeString()
                 : null;
 
             $waktuDilayani = $request->filled('tgl_dilayani') && $request->filled('jam_dilayani')
-                ? Carbon::createFromFormat('d-m-Y H:i', $request->tgl_dilayani . ' ' . $request->jam_dilayani)->toDateTimeString()
+                ? Carbon::createFromFormat('d-m-Y H:i', $request->tgl_dilayani.' '.$request->jam_dilayani)->toDateTimeString()
                 : null;
 
             // Kelompokkan data ke dalam format yang sesuai dengan struktur JSON di database
@@ -769,7 +788,7 @@ class ERMController extends Controller
             // Logika penyimpanan tanda tangan (sama seperti yang sudah ada)
             if ($request->has('signatures')) {
                 foreach ($request->input('signatures', []) as $role => $signatureData) {
-                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                    if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
                         $oldPath = optional($asesmen->signatures()->where('role', 'dokter_pemeriksa')->first())->signature;
                         $newPath = $this->saveSignatureFile($signatureData['signature_image'], "asesmen_awal_dokter_{$asesmen->id}_{$role}");
                         $asesmen->signatures()->updateOrCreate(
@@ -784,10 +803,12 @@ class ERMController extends Controller
             }
 
             DB::commit();
-            return response()->json(['success' => 'Asesmen Awal Dokter berhasil disimpan sebagai ' . $request->status . '!']);
+
+            return response()->json(['success' => 'Asesmen Awal Dokter berhasil disimpan sebagai '.$request->status.'!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Dokter: ' . $e->getMessage());
+            Log::error('Gagal menyimpan Asesmen Awal Dokter: '.$e->getMessage());
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
     }
@@ -796,7 +817,7 @@ class ERMController extends Controller
     {
         $request->validate([
             'registration_id' => 'required|exists:registrations,id',
-            'status' => 'required|in:draft,final'
+            'status' => 'required|in:draft,final',
         ]);
 
         DB::beginTransaction();
@@ -825,7 +846,7 @@ class ERMController extends Controller
             // Logic untuk signature (jika ditambahkan di masa depan)
             if ($request->has('signatures')) {
                 foreach ($request->input('signatures', []) as $role => $signatureData) {
-                    if (!empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                    if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
                         $newPath = $this->saveSignatureFile($signatureData['signature_image'], "echocardiography_{$echo->id}_{$role}");
                         $echo->signatures()->updateOrCreate(
                             ['role' => $role],
@@ -836,41 +857,41 @@ class ERMController extends Controller
             }
 
             DB::commit();
-            return response()->json(['success' => 'Data Echocardiography berhasil disimpan sebagai ' . $request->status . '!']);
+
+            return response()->json(['success' => 'Data Echocardiography berhasil disimpan sebagai '.$request->status.'!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Echocardiography: ' . $e->getMessage());
+            Log::error('Gagal menyimpan Echocardiography: '.$e->getMessage());
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
     }
 
     public function storeInpatientInitialExamination(Request $request)
     {
-        // --- PERBAIKI BLOK VALIDASI INI ---
         $validated = $request->validate([
             'registration_id' => 'required|exists:registrations,id',
 
-            // Tanda Vital: Sebagian besar harus numerik, kecuali Tensi (BP) yang bisa "120/80"
-            'vital_sign_pr' => 'nullable|numeric',
-            'vital_sign_rr' => 'nullable|numeric',
-            'vital_sign_bp' => 'nullable|string|max:20', // Contoh: "120/80 mmHg"
-            'vital_sign_temperature' => 'nullable|numeric',
+            // Tanda Vital: Semua bisa berupa string atau numeric
+            'vital_sign_pr' => 'nullable|string|max:10',
+            'vital_sign_rr' => 'nullable|string|max:10',
+            'vital_sign_bp' => 'nullable|string|max:20',
+            'vital_sign_temperature' => 'nullable|string|max:10',
 
-            // Antropometri: Semua harus numerik
-            'anthropometry_height' => 'nullable|numeric',
-            'anthropometry_weight' => 'nullable|numeric',
-            'anthropometry_bmi' => 'nullable|numeric',
+            // Antropometri: Semua bisa berupa string atau numeric
+            'anthropometry_height' => 'nullable|string|max:10',
+            'anthropometry_weight' => 'nullable|string|max:10',
+            'anthropometry_bmi' => 'nullable|string|max:10',
             'anthropometry_bmi_category' => 'nullable|string|max:100',
-            'anthropometry_chest_circumference' => 'nullable|numeric',
-            'anthropometry_abdominal_circumference' => 'nullable|numeric',
+            'anthropometry_chest_circumference' => 'nullable|string|max:10',
+            'anthropometry_abdominal_circumference' => 'nullable|string|max:10',
 
-            // Alergi & Catatan: Boleh string
+            // Alergi & Catatan: String
             'allergy_medicine' => 'nullable|string',
             'allergy_food' => 'nullable|string',
             'diagnosis' => 'nullable|string',
             'registration_notes' => 'nullable|string',
         ], [
-            // Tambahkan pesan custom agar lebih jelas bagi pengguna
             'numeric' => 'Kolom :attribute harus berupa angka.',
             'string' => 'Kolom :attribute harus berupa teks.',
             'max' => 'Kolom :attribute tidak boleh lebih dari :max karakter.',
@@ -882,14 +903,18 @@ class ERMController extends Controller
             $data = $validated;
             $data['user_id'] = Auth::id();
 
-            // Ubah string dari tags input menjadi array
-            // Gunakan trim untuk menghapus spasi ekstra jika ada
-            $data['allergy_medicine'] = $request->filled('allergy_medicine')
-                ? array_map('trim', explode(',', $request->allergy_medicine))
-                : null;
-            $data['allergy_food'] = $request->filled('allergy_food')
-                ? array_map('trim', explode(',', $request->allergy_food))
-                : null;
+            // Konversi string allergy menjadi array sesuai dengan model casting
+            if ($request->filled('allergy_medicine')) {
+                $data['allergy_medicine'] = array_map('trim', explode(',', $request->allergy_medicine));
+            } else {
+                $data['allergy_medicine'] = null;
+            }
+
+            if ($request->filled('allergy_food')) {
+                $data['allergy_food'] = array_map('trim', explode(',', $request->allergy_food));
+            } else {
+                $data['allergy_food'] = null;
+            }
 
             \App\Models\InpatientInitialExamination::updateOrCreate(
                 ['registration_id' => $request->registration_id],
@@ -897,10 +922,12 @@ class ERMController extends Controller
             );
 
             DB::commit();
+
             return response()->json(['success' => 'Data Pemeriksaan Awal Rawat Inap berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Pemeriksaan Awal Rawat Inap: ' . $e->getMessage());
+            Log::error('Gagal menyimpan Pemeriksaan Awal Rawat Inap: '.$e->getMessage());
+
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
     }
@@ -912,8 +939,8 @@ class ERMController extends Controller
     private function saveSignatureFile(string $base64Image, string $fileNamePrefix): string
     {
         $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
-        $fileName = $fileNamePrefix . '_' . time() . '.png';
-        $path = 'signatures/' . $fileName;
+        $fileName = $fileNamePrefix.'_'.time().'.png';
+        $path = 'signatures/'.$fileName;
 
         Storage::disk('public')->put($path, $imageData);
 
@@ -942,8 +969,9 @@ class ERMController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $viewUrl = route('erm.dokumen.view', $row->id);
-                    $btn = '<a href="' . $viewUrl . '" target="_blank" class="btn btn-sm btn-success mr-2" title="Lihat Dokumen"><i class="fas fa-eye"></i></a>';
-                    $btn .= '<button type="button" class="btn btn-sm btn-danger btn-delete-document" data-id="' . $row->id . '" title="Hapus Dokumen"><i class="fas fa-trash"></i></button>';
+                    $btn = '<a href="'.$viewUrl.'" target="_blank" class="btn btn-sm btn-success mr-2" title="Lihat Dokumen"><i class="fas fa-eye"></i></a>';
+                    $btn .= '<button type="button" class="btn btn-sm btn-danger btn-delete-document" data-id="'.$row->id.'" title="Hapus Dokumen"><i class="fas fa-trash"></i></button>';
+
                     return $btn;
                 })
                 ->rawColumns(['action'])
@@ -998,9 +1026,11 @@ class ERMController extends Controller
             }
             // Hapus record dari database
             $document->delete();
+
             return response()->json(['success' => 'Dokumen berhasil dihapus!']);
         } catch (\Exception $e) {
-            Log::error('Gagal menghapus dokumen: ' . $e->getMessage());
+            Log::error('Gagal menghapus dokumen: '.$e->getMessage());
+
             return response()->json(['error' => 'Gagal menghapus dokumen.'], 500);
         }
     }
@@ -1010,65 +1040,209 @@ class ERMController extends Controller
         Carbon::setLocale('id');
         switch ($menu) {
             case 'triage':
-                $pengkajian = Triage::where('registration_id', $registration->id)->first();
+                $pengkajian = Triage::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.perawat.triage', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajian', 'path'));
 
             case 'pengkajian_perawat':
-                $pengkajian = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
+                $pengkajian = PengkajianNurseRajal::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.perawat.pengkajian-perawat', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajian', 'path'));
 
             case 'pengkajian_dokter':
-                $data = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
-                $pengkajian = PengkajianDokterRajal::where('registration_id', $registration->id)->first();
-                $triage = Triage::where('registration_id', $registration->id)->first();
+                $rawData = null;
+
+                // Ambil data sesuai dengan path
+                if ($path === 'igd') {
+                    $rawData = Triage::firstWhere('registration_id', $registration->id);
+                } elseif ($path === 'rawat-jalan') {
+                    $rawData = PengkajianNurseRajal::firstWhere('registration_id', $registration->id);
+                } elseif ($path === 'rawat-inap') {
+                    $rawData = InpatientInitialExamination::firstWhere('registration_id', $registration->id);
+                }
+
+                // Generalisasi data ke format yang konsisten
+                $data = null;
+                if ($rawData) {
+                    $data = (object) [];
+
+                    // Mapping untuk Triage
+                    if ($rawData instanceof \App\Models\SIMRS\Pelayanan\Triage) {
+                        $data->pr = $rawData->pr;
+                        $data->rr = $rawData->rr;
+                        $data->bp = $rawData->bp;
+                        $data->temperatur = $rawData->temperatur;
+                        $data->body_height = $rawData->body_height;
+                        $data->body_weight = $rawData->body_weight;
+                        $data->sp02 = $rawData->sp02;
+                        $data->skor_nyeri = null; // Triage tidak punya skor nyeri
+                        $data->keluhan_utama = null; // Triage tidak punya keluhan utama
+                        $data->diagnosa_keperawatan = null; // Triage tidak punya diagnosa keperawatan
+                    }
+                    // Mapping untuk PengkajianNurseRajal
+                    elseif ($rawData instanceof \App\Models\SIMRS\Pengkajian\PengkajianNurseRajal) {
+                        $data->pr = $rawData->pr;
+                        $data->rr = $rawData->rr;
+                        $data->bp = $rawData->bp;
+                        $data->temperatur = $rawData->temperatur;
+                        $data->body_height = $rawData->body_height;
+                        $data->body_weight = $rawData->body_weight;
+                        $data->sp02 = $rawData->sp02;
+                        $data->skor_nyeri = $rawData->skor_nyeri;
+                        $data->keluhan_utama = $rawData->keluhan_utama;
+                        $data->diagnosa_keperawatan = $rawData->diagnosa_keperawatan;
+                    }
+                    // Mapping untuk InpatientInitialExamination
+                    elseif ($rawData instanceof \App\Models\InpatientInitialExamination) {
+                        $data->pr = $rawData->vital_sign_pr;
+                        $data->rr = $rawData->vital_sign_rr;
+                        $data->bp = $rawData->vital_sign_bp;
+                        $data->temperatur = $rawData->vital_sign_temperature;
+                        $data->body_height = $rawData->anthropometry_height;
+                        $data->body_weight = $rawData->anthropometry_weight;
+                        $data->sp02 = null; // InpatientInitialExamination tidak punya sp02
+                        $data->skor_nyeri = null; // InpatientInitialExamination tidak punya skor nyeri
+                        $data->keluhan_utama = null; // InpatientInitialExamination tidak punya keluhan utama
+                        $data->diagnosa_keperawatan = null; // InpatientInitialExamination tidak punya diagnosa keperawatan
+                    }
+                }
+
+                $pengkajian = PengkajianDokterRajal::firstWhere('registration_id', $registration->id);
+                $triage = Triage::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.dokter.pengkajian-dokter', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajian', 'triage', 'path', 'data'));
 
             case 'pengkajian_resep':
-                $pengkajian = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
+                $pengkajian = PengkajianNurseRajal::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.farmasi.pengkajian-resep', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajian', 'path'));
 
             case 'cppt_perawat':
-                if ($path !== 'igd') {
-                    $data = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
-                } else {
-                    $data = Triage::where('registration_id', $registration->id)->first();
+                $rawData = null;
+
+                // Ambil data sesuai dengan path
+                if ($path === 'igd') {
+                    $rawData = Triage::firstWhere('registration_id', $registration->id);
+                } elseif ($path === 'rawat-jalan') {
+                    $rawData = PengkajianNurseRajal::firstWhere('registration_id', $registration->id);
+                } elseif ($path === 'rawat-inap') {
+                    $rawData = InpatientInitialExamination::firstWhere('registration_id', $registration->id);
+                }
+
+                // Generalisasi data ke format yang konsisten
+                $data = null;
+                if ($rawData) {
+                    $data = (object) [];
+
+                    // Mapping untuk Triage
+                    if ($rawData instanceof \App\Models\SIMRS\Pelayanan\Triage) {
+                        $data->pr = $rawData->pr;
+                        $data->rr = $rawData->rr;
+                        $data->bp = $rawData->bp;
+                        $data->temperatur = $rawData->temperatur;
+                        $data->body_height = $rawData->body_height;
+                        $data->body_weight = $rawData->body_weight;
+                        $data->sp02 = $rawData->sp02;
+                        $data->skor_nyeri = null; // Triage tidak punya skor nyeri
+                        $data->keluhan_utama = null; // Triage tidak punya keluhan utama
+                        $data->diagnosa_keperawatan = null; // Triage tidak punya diagnosa keperawatan
+                    }
+                    // Mapping untuk PengkajianNurseRajal
+                    elseif ($rawData instanceof \App\Models\SIMRS\Pengkajian\PengkajianNurseRajal) {
+                        $data->pr = $rawData->pr;
+                        $data->rr = $rawData->rr;
+                        $data->bp = $rawData->bp;
+                        $data->temperatur = $rawData->temperatur;
+                        $data->body_height = $rawData->body_height;
+                        $data->body_weight = $rawData->body_weight;
+                        $data->sp02 = $rawData->sp02;
+                        $data->skor_nyeri = $rawData->skor_nyeri;
+                        $data->keluhan_utama = $rawData->keluhan_utama;
+                        $data->diagnosa_keperawatan = $rawData->diagnosa_keperawatan;
+                    }
+                    // Mapping untuk InpatientInitialExamination
+                    elseif ($rawData instanceof \App\Models\InpatientInitialExamination) {
+                        $data->pr = $rawData->vital_sign_pr;
+                        $data->rr = $rawData->vital_sign_rr;
+                        $data->bp = $rawData->vital_sign_bp;
+                        $data->temperatur = $rawData->vital_sign_temperature;
+                        $data->body_height = $rawData->anthropometry_height;
+                        $data->body_weight = $rawData->anthropometry_weight;
+                        $data->sp02 = null; // InpatientInitialExamination tidak punya sp02
+                        $data->skor_nyeri = null; // InpatientInitialExamination tidak punya skor nyeri
+                        $data->keluhan_utama = null; // InpatientInitialExamination tidak punya keluhan utama
+                        $data->diagnosa_keperawatan = null; // InpatientInitialExamination tidak punya diagnosa keperawatan
+                    }
                 }
 
                 $perawat = Employee::whereHas('organization', function ($query) {
                     $query->where('name', 'Rawat Jalan');
                 })->get();
-                $pengkajian = CPPT::where('registration_id', $registration->id)->first();
+                $pengkajian = CPPT::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.perawat.cppt-perawat', compact('registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'perawat', 'path', 'data'));
 
             case 'cppt_farmasi':
                 $dokter = Employee::where('is_doctor', 1)->get();
+
                 return view('pages.simrs.erm.form.farmasi.cppt-farmasi', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
 
             case 'cppt_dokter':
                 $dokter = Employee::where('is_doctor', 1)->get();
-                $pengkajian = CPPT::where('registration_id', $registration->id)->first();
+                $pengkajian = CPPT::firstWhere(['registration_id' => $registration->id, 'tipe_cppt' => 'dokter']);
                 $gudangs = WarehouseMasterGudang::where('apotek', 1)->where('warehouse', 0)->get();
-                $barangs = WarehouseBarangFarmasi::with(["stored_items", "satuan"])->get();
+                $barangs = WarehouseBarangFarmasi::with(['stored_items', 'satuan'])->get();
 
-                $default_column = "rajal_default";
-                if ($registration->registration_type == "rawat-inap") $default_column = "ranap_default";
+                $default_column = 'rajal_default';
+                if ($registration->registration_type == 'rawat-inap') {
+                    $default_column = 'ranap_default';
+                }
                 $default_apotek = WarehouseMasterGudang::select('id')->where($default_column, 1)->first();
 
-                return view('pages.simrs.erm.form.dokter.cppt-dokter', compact('gudangs', 'barangs', 'default_apotek', 'registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
+                if ($registration->registration_type == 'rawat-inap') {
+                    $assesment = PengkajianDokterRajal::firstWhere('registration_id', $registration->id);
+                } else {
+                    $assesment = DoctorInitialAssessment::firstWhere('registration_id', $registration->id);
+                }
+
+                // Flag untuk menampilkan SweetAlert2 jika assesment belum ada
+                $showSwal = false;
+                if (! $assesment || ! $assesment->exists) {
+                    $showSwal = true;
+                }
+
+                return view('pages.simrs.erm.form.dokter.cppt-dokter', compact(
+                    'gudangs',
+                    'barangs',
+                    'default_apotek',
+                    'registration',
+                    'registrations',
+                    'pengkajian',
+                    'menu',
+                    'departements',
+                    'jadwal_dokter',
+                    'dokter',
+                    'path',
+                    'assesment',
+                    'showSwal'
+                ));
 
             case 'resume_medis':
                 $dokter = Employee::where('is_doctor', 1)->get();
-                $pengkajian = ResumeMedisRajal::where('registration_id', $registration->id)->first();
+                $pengkajian = ResumeMedisRajal::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.dokter.resume_medis', compact('registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
 
             case 'rekonsiliasi_obat':
                 $dokter = Employee::where('is_doctor', 1)->get();
+
                 return view('pages.simrs.erm.form.farmasi.rekonsiliasi-obat', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'dokter', 'path'));
 
             case 'pengkajian_lanjutan':
                 $form = FormKategori::all();
                 $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
-                $pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->first();
+                $pengkajian = PengkajianLanjutan::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.pengkajian-lanjutan', compact('pengkajian', 'registration', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian', 'path'));
 
             case 'tindakan_medis':
@@ -1078,6 +1252,7 @@ class ERMController extends Controller
                 });
                 $tindakan_medis_yang_dipakai = OrderTindakanMedis::where('registration_id', $registration->id)->get();
                 $kelas_rawats = \App\Models\SIMRS\KelasRawat::all();
+
                 return view('pages.simrs.erm.form.layanan.tindakan-medis', compact('groupedDoctors', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai', 'kelas_rawats', 'path'));
 
             case 'pemakaian_alat':
@@ -1087,39 +1262,77 @@ class ERMController extends Controller
                     ->whereHas('employee')
                     ->orderBy(Employee::select('fullname')->whereColumn('employees.id', 'doctors.employee_id'))
                     ->get();
+
                 return view('pages.simrs.erm.form.layanan.pemakaian-alat', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'list_peralatan', 'alat_medis_yang_dipakai', 'doctors', 'path'));
 
             case 'patologi_klinik':
                 $order_lab = OrderLaboratorium::where('registration_id', $registration->id)->get();
+
                 return view('pages.simrs.erm.form.layanan.patologi-klinik', compact('order_lab', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'transfer_pasien_perawat':
-                $pengkajian = TransferPasienAntarRuangan::where('registration_id', $registration->id)->first();
+                $pengkajian = TransferPasienAntarRuangan::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.perawat.transfer_pasien_perawat', compact('registration', 'pengkajian', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'ews_anak':
-                $pengkajian = EWSAnak::where('registration_id', $registration->id)->first();
+                $pengkajian = EWSAnak::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.perawat.ews-anak', compact('registration', 'pengkajian', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'ews_dewasa':
-                $pengkajian = EWSDewasa::where('registration_id', $registration->id)->first();
+                $pengkajian = EWSDewasa::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.perawat.ews-dewasa', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'ews_obstetri':
-                $pengkajian = EWSObstetri::where('registration_id', $registration->id)->first();
+                $pengkajian = EWSObstetri::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.perawat.ews-obstetri', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'assesment_gadar':
-                $pengkajian = AssesmentKeperawatanGadar::where('registration_id', $registration->id)->first();
+                $pengkajian = AssesmentKeperawatanGadar::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.perawat.assesment-gadar', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'rujuk_antar_rs':
-                $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
+                $pengkajian = RujukAntarRS::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.perawat.rujuk-antar-rs', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'resep_harian':
+
+                $gudangs = WarehouseMasterGudang::where('apotek', 1)->where('warehouse', 0)->get();
+                $barangs = WarehouseBarangFarmasi::with(['stored_items', 'satuan'])->get();
+                $default_column = 'rajal_default';
+                if ($registration->registration_type == 'rawat-inap') {
+                    $default_column = 'ranap_default';
+                }
+                $default_apotek = WarehouseMasterGudang::select('id')->where($default_column, 1)->first();
                 $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
-                return view('pages.simrs.erm.form.perawat.resep-harian', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+                $reseps = FarmasiResepHarian::with(['items', 'items.barang', 'doctor', 'doctor.employee', 'gudang'])->where('registration_id', $registration->id)->get();
+
+                return view('pages.simrs.erm.form.perawat.resep-harian', compact('reseps', 'gudangs', 'barangs', 'default_apotek', 'pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+
+            case 'radiologi':
+                $pengkajian = AssesmentKeperawatanGadar::where('registration_id', $registration->id)->first();
+                $radiologyDoctors = Doctor::whereHas('department_from_doctors', function ($query) {
+                    $query->where('name', 'like', '%radiologi%');
+                })->get();
+                $patient = $registration->patient;
+                $groupPenjaminId = GroupPenjamin::where('id', $registration->penjamin->group_penjamin_id)->first()->id;
+
+                $radiologiOrders = [];
+                OrderRadiologi::where('registration_id', $registration->id)
+                    ->get()
+                    ->each(function ($order) use (&$radiologiOrders) {
+                        $radiologiOrders[$order->id] = $order;
+                    });
+                $radiology_categories = KategoriRadiologi::all();
+                $radiology_tarifs = TarifParameterRadiologi::all();
+                $kelas_rawats = KelasRawat::all();
+
+                return view('pages.simrs.erm.form.perawat.radiologi', compact('kelas_rawats', 'groupPenjaminId', 'patient', 'radiology_categories', 'radiology_tarifs', 'radiologiOrders', 'radiologyDoctors', 'pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'infusion_monitor':
                 // Di sini kita tidak perlu mengambil data awal ($pengkajian) karena
@@ -1130,60 +1343,73 @@ class ERMController extends Controller
             case 'surveilans_infeksi':
                 // Gunakan firstOrNew untuk menangani form baru dan edit
                 $pengkajian = HospitalInfectionSurveillance::firstOrNew(['registration_id' => $registration->id]);
+
                 return view('pages.simrs.erm.form.perawat.surveilans-infeksi', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'discharge_planning':
                 $pengkajian = DischargePlanning::firstOrNew(['registration_id' => $registration->id]);
+
                 return view('pages.simrs.erm.form.perawat.discharge-planning', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'checklist_keperawatan':
                 $pengkajian = NursingActivityChecklist::firstOrNew(['registration_id' => $registration->id]);
-                return view('pages.simrs.erm.form.perawat.checklist-keperawatan', compact('registration', 'pengkajian', 'path',  'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
+                return view('pages.simrs.erm.form.perawat.checklist-keperawatan', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'asesmen_awal_ranap':
                 $pengkajian = InpatientInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
+
                 return view('pages.simrs.erm.form.perawat.asesmen-awal-ranap-dewasa', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'asesmen_awal_ranap_anak':
                 $pengkajian = ChildInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
-                return view('pages.simrs.erm.form.perawat.asesmen-awal-anak', compact('registration', 'pengkajian', 'path',  'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
+                return view('pages.simrs.erm.form.perawat.asesmen-awal-anak', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'asesmen_awal_ranap_lansia':
                 $pengkajian = GeriatricInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
+
                 return view('pages.simrs.erm.form.perawat.asesmen-awal-lansia', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'asesmen_awal_ranap_neonatus':
                 $pengkajian = NeonatusInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
-                return view('pages.simrs.erm.form.perawat.asesmen-awal-neonatus', compact('registration', 'pengkajian', 'path',  'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
+                return view('pages.simrs.erm.form.perawat.asesmen-awal-neonatus', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'asesmen_awal_kebidanan':
                 $pengkajian = MidwiferyInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
+
                 return view('pages.simrs.erm.form.perawat.asesmen-awal-kebidanan', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'pengkajian_awal_neonatus':
                 $pengkajian = NeonatusInitialAssessmentDoctor::firstOrNew(['registration_id' => $registration->id]);
-                return view('pages.simrs.erm.form.dokter.pengkajian-awal-neonatus', compact('registration', 'pengkajian',  'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
+
+                return view('pages.simrs.erm.form.dokter.pengkajian-awal-neonatus', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'asesmen_awal_dokter':
-                $pengkajianNurse = PengkajianNurseRajal::where('registration_id', $registration->id)->first();
+                $pengkajianNurse = PengkajianNurseRajal::firstWhere('registration_id', $registration->id);
                 $pengkajian = DoctorInitialAssessment::firstOrNew(['registration_id' => $registration->id]);
+
                 return view('pages.simrs.erm.form.dokter.asesmen-awal-dokter', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'pengkajianNurse'));
 
             case 'echocardiography':
                 $pengkajian = Echocardiography::firstOrNew(['registration_id' => $registration->id]);
+
                 return view('pages.simrs.erm.form.penunjang.echocardiography', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'upload_dokumen':
                 $documentCategories = \App\Models\DocumentCategory::orderBy('name')->get();
+
                 return view('pages.simrs.erm.form.penunjang.upload-dokumen', compact('registration', 'documentCategories', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'pemeriksaan_awal_ranap':
                 $pengkajian = InpatientInitialExamination::firstOrNew(['registration_id' => $registration->id]);
+
                 return view('pages.simrs.erm.form.perawat.pemeriksaan-awal-ranap', compact('registration', 'pengkajian', 'path', 'registrations', 'menu', 'departements', 'jadwal_dokter'));
 
             case 'rencana_operasi':
                 // 1. [Template Dasar] Mengambil data pengkajian
-                $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
+                $pengkajian = RujukAntarRS::firstWhere('registration_id', $registration->id);
 
                 // 2. [Data Master] Mengambil data untuk dropdown di modal
                 $kelas_rawats = KelasRawat::all();
@@ -1209,12 +1435,11 @@ class ERMController extends Controller
                             'dokterAnastesi.employee',
                             'assDokterAnastesi.employee',
                             'dokterResusitator.employee',
-                            'createdByUser'
+                            'createdByUser',
                             // Anda bisa menambahkan relasi dokter tambahan jika perlu
                         ]);
-                    }
+                    },
                 ])->where('registration_id', $registration->id)->get();
-
 
                 // 4. Mengirim SEMUA variabel yang dibutuhkan ke view
                 return view('pages.simrs.erm.form.layanan.rencana-operasi', compact(
@@ -1237,7 +1462,8 @@ class ERMController extends Controller
                 ));
 
             case 'rencana_persalinan':
-                $pengkajian = RujukAntarRS::where('registration_id', $registration->id)->first();
+                $pengkajian = RujukAntarRS::firstWhere('registration_id', $registration->id);
+
                 return view('pages.simrs.erm.form.layanan.rencana-persalinan', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             default:
@@ -1247,7 +1473,7 @@ class ERMController extends Controller
 
     public function get_obat(int $gudang_id)
     {
-        $query = WarehouseBarangFarmasi::with(['stored_items']);
+        $query = WarehouseBarangFarmasi::with(['stored_items', 'satuan']);
         $query->whereHas('stored_items', function ($q) use ($gudang_id) {
             $q->where('gudang_id', $gudang_id);
             $q->where('warehouse_penerimaan_barang_farmasi_item.qty', '>', 0);
@@ -1260,7 +1486,7 @@ class ERMController extends Controller
         }
 
         return response()->json([
-            'items' => $items
+            'items' => $items,
         ]);
     }
 
