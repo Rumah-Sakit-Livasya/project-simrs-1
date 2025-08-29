@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Keuangan\ChartOfAccount;
+use App\Models\PembayaranTransfer;
 use Illuminate\Database\Eloquent\Model;
 
 class BankPerusahaan extends Model

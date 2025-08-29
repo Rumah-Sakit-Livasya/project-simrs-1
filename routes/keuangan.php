@@ -130,6 +130,11 @@ Route::group(['middleware' => ['auth']], function () {
                 ->name("chart-of-account.update");
             // ->middleware('can:edit keuangan data kategori');
 
+            Route::get('/chart-of-account/by-group/{group_id}', [ChartOfAccountController::class, 'getByGroup'])->name('coa.byGroup');
+
+            // Pastikan route untuk show, store, update juga ada
+            Route::get('/coa/parents', [ChartOfAccountController::class, 'getParents'])->name('coa.parents');
+
             // Bank
             Route::get("/bank", [BankController::class, 'index'])
                 ->name("bank.index")

@@ -359,35 +359,41 @@ class PembayaranAsuransiController extends Controller
 
             $pembayaran = PembayaranAsuransi::findOrFail($id);
 
-            // Revert related konfirmasi asuransi records
-            KonfirmasiAsuransi::where('pembayaran_id', $id)
-                ->update([
-                    'pembayaran_id' => null,
-                    'status_pembayaran' => null,
-                    'tanggal_pembayaran' => null,
-                    'updated_by' => Auth::id()
-                ]);
+            // Ambil semua tagihan terkait pembayaran ini
+            $konfirmasiList = KonfirmasiAsuransi::where('pembayaran_id', $id)->get();
 
-            // Delete payment details
+            foreach ($konfirmasiList as $konfirmasi) {
+                $konfirmasi->update([
+                    'pembayaran_id'       => null,
+                    'last_pembayaran_id'  => null,
+                    'status_pembayaran'   => null,
+                    'tanggal_pembayaran'  => null,
+                    'total_dibayar'       => 0,                    // reset ke awal
+                    'sisa_tagihan'        => $konfirmasi->jumlah,  // kembali full tagihan
+                    'is_lunas'            => 0,                    // reset lunas
+                    'updated_by'          => Auth::id()
+                ]);
+            }
+
+            // Hapus detail pembayaran
             PembayaranAsuransiDetail::where('pembayaran_asuransi_id', $id)->delete();
 
-            // Delete the main payment record
+            // Hapus record pembayaran
             $pembayaran->delete();
 
             DB::commit();
 
-
-
-            return view('app-type.keuangan.pembayaran-asuransi.index', [
-                'pembayaranAsuransi' => PembayaranAsuransi::with(['penjamin', 'bank', 'details'])->has('details')->orderBy('tanggal', 'desc')->paginate(20),
-                'penjamins' => Penjamin::all(),
-                'hasFilters' => false
-            ])->with('success', 'Pembayaran berhasil dihapus.');
+            return redirect()
+                ->route('keuangan.pembayaran-asuransi.index')
+                ->with('success', 'Pembayaran berhasil dihapus dan tagihan terkait telah direset.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+            return response()->json([
+                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
+
 
     /**
      * Print payment receipt
