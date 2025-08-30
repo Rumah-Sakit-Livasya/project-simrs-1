@@ -857,7 +857,7 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::prefix('ok')->group(function () {
             Route::get('/daftar-pasien', [OperasiController::class, 'index'])->name('ok.daftar-pasien');
-            Route::get('/prosedur/{orderId}', [OperasiController::class, 'prosedur'])->name('ok.prosedur');
+            Route::get('/prosedur/{orderId}', [OperasiController::class, 'prosedure'])->name('ok.prosedur');
             Route::get('/edit/{orderId}/{prosedurId}', [OperasiController::class, 'editProsedure'])->name('ok.prosedure.edit');
             Route::get('/prosedur/{order}/create', [OperasiController::class, 'createProsedur'])->name('ok.prosedur.create');
             Route::post('/prosedur/store', [OperasiController::class, 'storeProsedur'])->name('ok.prosedur.store');
