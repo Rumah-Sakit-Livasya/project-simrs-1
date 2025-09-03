@@ -155,7 +155,7 @@ class APNonGRNController extends Controller
                 // Validasi untuk rincian detail
                 'details' => 'required|array|min:1',
                 'details.*.coa_id' => 'required|exists:chart_of_account,id',
-                'details.*.cost_center_id' => 'required|exists:chart_of_account,id',
+                'details.*.cost_center_id' => 'required|exists:rnc_centers,id',
                 'details.*.nominal' => 'required|numeric|min:1',
                 'details.*.keterangan' => 'nullable|string',
             ]);

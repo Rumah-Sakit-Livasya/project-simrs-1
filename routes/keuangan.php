@@ -19,6 +19,7 @@ use App\Http\Controllers\Keuangan\PembayaranJasaDokterController;
 use App\Http\Controllers\keuangan\PencairanController;
 use App\Http\Controllers\keuangan\PengajuanController;
 use App\Http\Controllers\Keuangan\PertanggungJawabanController;
+use App\Http\Controllers\Keuangan\PettyCashController;
 use App\Http\Controllers\keuangan\ReportAPDokterController;
 use App\Http\Controllers\keuangan\ReportAPSupplierController;
 use App\Http\Controllers\Keuangan\RncCenterController;
@@ -379,6 +380,41 @@ Route::group(['middleware' => ['auth']], function () {
             });
         });
 
+        // Ganti file route Anda menjadi seperti ini
+
+        Route::prefix('petty-cash')->middleware(['can:view petty-cash'])->group(function () {
+            Route::get('/', [PettyCashController::class, 'index'])
+                ->name('keuangan.petty-cash.index');
+            Route::get('/create', [PettyCashController::class, 'create'])
+                ->name('keuangan.petty-cash.create');
+            Route::post('/store', [PettyCashController::class, 'store'])
+                ->name('keuangan.petty-cash.store');
+            Route::get('/laporan', [PettyCashController::class, 'laporan'])
+                ->name('keuangan.petty-cash.laporan');
+            Route::get('/laporan/export', [PettyCashController::class, 'exportReport'])->name('keuangan.petty-cash.export');
+            Route::get('/get-kas-saldo/{id}', [PettyCashController::class, 'getKasSaldo'])
+                ->name('keuangan.petty-cash.saldo');
+
+            // DIUBAH: dari {pettycash} menjadi {id}
+            Route::get('/edit/{id}', [PettyCashController::class, 'edit'])
+                ->name('keuangan.petty-cash.edit');
+            Route::get('/show/{id}', [PettyCashController::class, 'show'])
+                ->name('keuangan.petty-cash.show');
+            Route::put('/update/{id}', [PettyCashController::class, 'update'])
+                ->name('keuangan.petty-cash.update');
+            Route::delete('/{id}', [PettyCashController::class, 'destroy'])
+                ->name('keuangan.petty-cash.destroy');
+
+            // DIUBAH: dari {petty_cash} menjadi {id}
+            Route::patch('/{id}/approve', [PettyCashController::class, 'approve'])
+                ->name('keuangan.petty-cash.approve');
+
+            // DIUBAH: dari {pettycash} menjadi {id}
+            Route::get('/print-jurnal/{id}/', [PettyCashController::class, 'cetakJurnal'])->name('keuangan.petty-cash.print-jurnal');
+            Route::get('/print-voucher/{id}/', [PettyCashController::class, 'cetakVoucher'])->name('keuangan.petty-cash.print-voucher');
+        });
+
+
 
 
 
@@ -474,11 +510,33 @@ Route::group(['middleware' => ['auth']], function () {
         });
     });
 
+    route::prefix('pembayaran-ap-supplier')->middleware(['can:view account payable pembayaran-ap-supplier'])->group(function () {
+        Route::get('/', [PembayaranAPSupplierController::class, 'index'])
+            ->name('keuangan.pembayaran-ap-supplier.index');
+        Route::get('/create', [PembayaranAPSupplierController::class, 'create'])
+            ->name('keuangan.pembayaran-ap-supplier.create');
+        Route::get('/details', [PembayaranAPSupplierController::class, 'details'])
+            ->name('keuangan.pembayaran-ap-supplier.details');
+        Route::post('/store', [PembayaranAPSupplierController::class, 'store'])
+            ->name('keuangan.pembayaran-ap-supplier.store');
+        Route::post('/get-invoice', [PembayaranAPSupplierController::class, 'getInvoice     '])
+            ->name('keuangan.pembayaran-ap-supplier.get-invoice');
+        Route::delete('/{payment}', [PembayaranAPSupplierController::class, 'destroy'])
+            ->name('keuangan.pembayaran-ap-supplier.destroy');
+
+        Route::get('/{payment}/show', [PembayaranAPSupplierController::class, 'show'])->name('keuangan.pembayaran-ap-supplier.show');
+        Route::put('/{payment}', [PembayaranAPSupplierController::class, 'update'])->name('keuangan.pembayaran-ap-supplier.update');
+    });
+
+
+
+
 
 
     Route::prefix('api')->group(function () {
         Route::get('/coa/group/{group_id}', [ChartOfAccountController::class, 'getByGroup'])->name('coa.byGroup');
         Route::get('/coa/{coa:id}', [ChartOfAccountController::class, 'show'])->name('coa.show');
+        Route::get('/chart-of-account-all', [ChartOfAccountController::class, 'getAll'])->name('coa.all');
         Route::delete('/keuangan/setup/chart-of-account/{id}', [ChartOfAccountController::class, 'destroy'])->name('chart-of-account.destroy');
     });
 });
