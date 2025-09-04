@@ -5,9 +5,11 @@ namespace App\Models\SIMRS\Persalinan;
 use App\Models\SIMRS\Bed;
 use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\KelasRawat;
+use App\Models\SIMRS\Operasi\OrderOperasi;
 use App\Models\SIMRS\Patient;
 use App\Models\SIMRS\Registration;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Request;
 
 class Bayi extends Model
 {
@@ -17,6 +19,10 @@ class Bayi extends Model
     public function orderPersalinan()
     {
         return $this->belongsTo(OrderPersalinan::class, 'order_persalinan_id');
+    }
+    public function orderOperasi()
+    {
+        return $this->belongsTo(OrderOperasi::class, 'order_operasi_id');
     }
 
     public function registration()
@@ -38,7 +44,29 @@ class Bayi extends Model
     {
         return $this->belongsTo(Bed::class, 'bed_id');
     }
+    public function getDoctors(Request $request)
+    {
+        try {
+            $search = $request->input('q', ''); // Select2 sends the search term as 'q'
+            $doctors = Doctor::with('employee')
+                ->whereHas('employee', function ($query) use ($search) {
+                    $query->where('fullname', 'like', "%{$search}%");
+                })
+                ->take(10)
+                ->get()
+                ->map(function ($doctor) {
+                    return [
+                        'id' => $doctor->id,
+                        'text' => $doctor->employee->fullname ?? 'Unknown',
+                    ];
+                });
 
+            return response()->json($doctors);
+        } catch (\Exception $e) {
+            Log::error('Error fetching doctors', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Gagal mengambil data dokter.', 'error' => $e->getMessage()], 500);
+        }
+    }
     public function kelasRawat()
     {
         return $this->belongsTo(KelasRawat::class, 'kelas_rawat_id');
