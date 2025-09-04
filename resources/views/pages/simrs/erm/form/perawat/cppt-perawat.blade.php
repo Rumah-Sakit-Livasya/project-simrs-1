@@ -71,7 +71,29 @@
                                                         </div>
                                                         <div class="card-body p-0">
                                                             <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="8"
-                                                                placeholder="Keluhan Utama">Keluhan Utama: {{ $data?->keluhan_utama }}</textarea>
+                                                                placeholder="Keluhan Utama">{{ 'Keluhan Utama: ' .
+                                                                    ($data?->keluhan_utama ?? '') .
+                                                                    "\n" .
+                                                                    'Skor Nyeri: ' .
+                                                                    ($data?->skor_nyeri ?? '') .
+                                                                    "\n" .
+                                                                    'Dokter Pemeriksa: ' .
+                                                                    ($data?->doctor?->employee?->fullname ?? '') .
+                                                                    "\n" .
+                                                                    'Tanggal Pemeriksaan: ' .
+                                                                    ($data?->created_at?->format('d/m/Y H:i') ?? '') .
+                                                                    "\n" .
+                                                                    'Riwayat Alergi: ' .
+                                                                    ($data?->allergy_medicine ? implode(', ', $data->allergy_medicine) : 'Tidak ada') .
+                                                                    "\n" .
+                                                                    'Riwayat Penyakit Sekarang: ' .
+                                                                    ($data?->riwayat_penyakit_sekarang ?? '') .
+                                                                    "\n" .
+                                                                    'Riwayat Penyakit Dahulu: ' .
+                                                                    ($data?->riwayat_penyakit_dahulu ?? '') .
+                                                                    "\n" .
+                                                                    'Riwayat Penyakit Keluarga: ' .
+                                                                    ($data?->riwayat_penyakit_keluarga ?? '') }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -84,16 +106,42 @@
                                                             <span>Objective</span>
                                                         </div>
                                                         <div class="card-body p-0">
-                                                            <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="8">
-Nadi (PR): {{ $data?->pr }}
-Respirasi (RR): {{ $data?->rr }}
-Tensi (BP): {{ $data?->bp }}
-Suhu (T): {{ $data?->temperatur }}
-Tinggi Badan: {{ $data?->body_height }}
-Berat Badan: {{ $data?->body_weight }}
-SPO2 : {{ $data?->sp02 }}
-Skor Nyeri: {{ $data?->skor_nyeri }}
-                                                        </textarea>
+                                                            <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="8">{{ 'Tanda-tanda Vital:' .
+                                                                "\n" .
+                                                                'Nadi (PR): ' .
+                                                                ($data?->pr ?? '') .
+                                                                "\n" .
+                                                                'Respirasi (RR): ' .
+                                                                ($data?->rr ?? '') .
+                                                                "\n" .
+                                                                'Tensi (BP): ' .
+                                                                ($data?->bp ?? '') .
+                                                                "\n" .
+                                                                'Suhu (T): ' .
+                                                                ($data?->temperatur ?? '') .
+                                                                "\n" .
+                                                                'Tinggi Badan: ' .
+                                                                ($data?->body_height ?? '') .
+                                                                ' cm' .
+                                                                "\n" .
+                                                                'Berat Badan: ' .
+                                                                ($data?->body_weight ?? '') .
+                                                                ' kg' .
+                                                                "\n" .
+                                                                'SPO2: ' .
+                                                                ($data?->sp02 ?? '') .
+                                                                '%' .
+                                                                "\n" .
+                                                                'Skor Nyeri: ' .
+                                                                ($data?->skor_nyeri ?? '') .
+                                                                "\n\n" .
+                                                                'Pemeriksaan Fisik:' .
+                                                                "\n" .
+                                                                ($data?->diagnosis ?? '') .
+                                                                "\n\n" .
+                                                                'Catatan Tambahan:' .
+                                                                "\n" .
+                                                                ($data?->registration_notes ?? '') }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -112,10 +160,17 @@ Skor Nyeri: {{ $data?->skor_nyeri }}
                                                                 Keperawatan</span>
                                                         </div>
                                                         <div class="card-body p-0">
-                                                            <textarea class="form-control border-0 rounded-0" id="assesment" name="assesment" rows="8">
-Diagnosa Kerja:
-Diagnosa Keperawatan: {{ $data?->diagnosa_keperawatan }}
-                                                        </textarea>
+                                                            <textarea class="form-control border-0 rounded-0" id="assesment" name="assesment" rows="8">{{ 'Diagnosa Kerja:' .
+                                                                "\n" .
+                                                                ($data?->diagnosis ?? '') .
+                                                                "\n\n" .
+                                                                'Diagnosa Keperawatan:' .
+                                                                "\n" .
+                                                                ($data?->diagnosa_keperawatan ?? '') .
+                                                                "\n\n" .
+                                                                'Analisis Masalah:' .
+                                                                "\n" .
+                                                                ($data?->registration_notes ?? '') }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>

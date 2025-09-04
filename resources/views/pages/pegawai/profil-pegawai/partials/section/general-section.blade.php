@@ -597,6 +597,7 @@
         </div>
     </div>
 </div>
+
 <div class="tab-pane fade" id="v-pills-dokumen-kepegawaian" role="tabpanel"
     aria-labelledby="v-pills-dokumen-kepegawaian-tab">
     <div class="border px-3 pt-3 pb-0 rounded">
@@ -618,6 +619,7 @@
                                         <!-- <th style="white-space: nowrap">Foto</th> -->
                                         <th style="white-space: nowrap">Nama</th>
                                         <th style="white-space: nowrap">File</th>
+                                        <th style="white-space: nowrap">Masa Berlaku</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </thead>
@@ -628,6 +630,9 @@
                                             <td>
                                                 <a href="javascript:void(0)" class="download"
                                                     data-id="{{ $item->id }}">Lihat dokumen</a>
+                                            </td>
+                                            <td>
+                                                {{ $item->expire ? \Carbon\Carbon::parse($item->expire)->locale('id')->isoFormat('DD MMMM YYYY') : 'Tidak ada' }}
                                             </td>
                                             <td>
                                                 <a href="#" data-backdrop="static" data-keyboard="false"
@@ -662,6 +667,7 @@
                                     <tr>
                                         <th style="white-space: nowrap">Nama</th>
                                         <th style="white-space: nowrap">File</th>
+                                        <th style="white-space: nowrap">Masa Berlaku</th>
                                         <th style="white-space: nowrap">Aksi</th>
                                     </tr>
                                 </tfoot>
@@ -674,3 +680,4 @@
             </div>
         </div>
     </div>
+</div>

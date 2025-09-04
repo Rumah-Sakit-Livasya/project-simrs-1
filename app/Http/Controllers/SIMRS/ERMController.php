@@ -75,7 +75,7 @@ class ERMController extends Controller
 
         foreach ($filters as $filter) {
             if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%'.$request->$filter.'%');
+                $query->where($filter, 'like', '%' . $request->$filter . '%');
                 $filterApplied = true;
             }
         }
@@ -109,7 +109,10 @@ class ERMController extends Controller
         if ($menu && $noRegist) {
             $query = Registration::where('registration_type', 'igd');
             $registration = Registration::where('registration_number', $noRegist)->first();
-            $departements = Departement::latest()->get();
+            $departements = Departement::whereRaw('LOWER(name) LIKE ?', ['%klinik%'])
+                ->latest()
+                ->get();
+
             $hariIni = Carbon::now()->translatedFormat('l');
             $jadwal_dokter = JadwalDokter::where('hari', $hariIni)->get();
 
@@ -164,7 +167,7 @@ class ERMController extends Controller
             // Filter by patient name
             $query->when($request->patient, function ($q) use ($request) {
                 return $q->whereHas('patient', function ($patient) use ($request) {
-                    $patient->where('name', 'like', '%'.$request->patient.'%');
+                    $patient->where('name', 'like', '%' . $request->patient . '%');
                 });
             });
 
@@ -296,7 +299,7 @@ class ERMController extends Controller
             return response()->json(['success' => 'Data Surveilans Infeksi berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Surveilans Infeksi: '.$e->getMessage());
+            Log::error('Gagal menyimpan Surveilans Infeksi: ' . $e->getMessage());
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
@@ -314,7 +317,7 @@ class ERMController extends Controller
             // Gabungkan tanggal dan jam penjelasan menjadi satu timestamp
             $waktuPenjelasan = null;
             if ($request->filled('tgl_penjelasan') && $request->filled('jam_penjelasan')) {
-                $waktuPenjelasan = $request->tgl_penjelasan.' '.$request->jam_penjelasan;
+                $waktuPenjelasan = $request->tgl_penjelasan . ' ' . $request->jam_penjelasan;
             }
 
             // Siapkan data untuk disimpan
@@ -332,7 +335,7 @@ class ERMController extends Controller
             return response()->json(['success' => 'Data Rencana Pulang berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Rencana Pulang: '.$e->getMessage());
+            Log::error('Gagal menyimpan Rencana Pulang: ' . $e->getMessage());
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
@@ -361,7 +364,7 @@ class ERMController extends Controller
             return response()->json(['success' => 'Checklist Kegiatan Keperawatan berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Checklist Keperawatan: '.$e->getMessage());
+            Log::error('Gagal menyimpan Checklist Keperawatan: ' . $e->getMessage());
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
@@ -385,7 +388,7 @@ class ERMController extends Controller
             $waktuMasuk = null;
             if ($request->filled('tgl_masuk') && $request->filled('jam_masuk')) {
                 // Format input 'Y-m-d' (dari type="date") dan 'H:i' (dari type="time")
-                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk.' '.$request->jam_masuk)->toDateTimeString();
+                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk . ' ' . $request->jam_masuk)->toDateTimeString();
             }
 
             // 2. Siapkan data utama untuk disimpan/diperbarui
@@ -433,7 +436,7 @@ class ERMController extends Controller
             return response()->json(['success' => 'Asesmen Awal Rawat Inap berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Ranap: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Gagal menyimpan Asesmen Awal Ranap: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data. Silakan hubungi administrator.'], 500);
         }
@@ -477,7 +480,7 @@ class ERMController extends Controller
             return response()->json(['success' => 'Asesmen Awal Anak berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Anak: '.$e->getMessage());
+            Log::error('Gagal menyimpan Asesmen Awal Anak: ' . $e->getMessage());
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
@@ -500,7 +503,7 @@ class ERMController extends Controller
             $waktuMasuk = null;
             if ($request->filled('tgl_masuk') && $request->filled('jam_masuk')) {
                 // Format input 'Y-m-d' (dari type="date") dan 'H:i' (dari type="time")
-                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk.' '.$request->jam_masuk)->toDateTimeString();
+                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk . ' ' . $request->jam_masuk)->toDateTimeString();
             }
 
             // 2. Siapkan data utama untuk disimpan/diperbarui
@@ -519,7 +522,7 @@ class ERMController extends Controller
                 foreach ($request->signatures as $role => $signatureData) {
                     if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
 
-                        $oldPath = optional($asesmen->signatures()->where('role', 'like', '%'.$role.'%')->first())->signature;
+                        $oldPath = optional($asesmen->signatures()->where('role', 'like', '%' . $role . '%')->first())->signature;
 
                         $newPath = $this->saveSignatureFile($signatureData['signature_image'], "asesmen_awal_lansia_{$asesmen->id}_{$role}");
 
@@ -543,7 +546,7 @@ class ERMController extends Controller
             return response()->json(['success' => 'Asesmen Awal Lansia berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Lansia: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Gagal menyimpan Asesmen Awal Lansia: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data. Silakan hubungi administrator.'], 500);
         }
@@ -565,7 +568,7 @@ class ERMController extends Controller
             $waktuMasuk = null;
             if ($request->filled('tgl_masuk') && $request->filled('jam_masuk_pasien')) {
                 // Format input 'Y-m-d' (dari type="date") dan 'H:i' (dari type="time")
-                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk.' '.$request->jam_masuk_pasien)->toDateTimeString();
+                $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk . ' ' . $request->jam_masuk_pasien)->toDateTimeString();
             }
 
             // 2. Siapkan data utama untuk disimpan/diperbarui
@@ -608,7 +611,7 @@ class ERMController extends Controller
             return response()->json(['success' => 'Asesmen Awal Neonatus berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Neonatus: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Gagal menyimpan Asesmen Awal Neonatus: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data. Silakan hubungi administrator.'], 500);
         }
@@ -622,7 +625,7 @@ class ERMController extends Controller
         try {
             $waktuMasuk = null;
             if ($request->filled('tgl_masuk') && $request->filled('jam_dilayani1')) {
-                $waktuMasuk = Carbon::createFromFormat('d-m-Y H:i', $request->tgl_masuk.' '.$request->jam_dilayani1)->toDateTimeString();
+                $waktuMasuk = Carbon::createFromFormat('d-m-Y H:i', $request->tgl_masuk . ' ' . $request->jam_dilayani1)->toDateTimeString();
             }
 
             $dataToStore = $request->except(['_token', 'tgl_masuk', 'jam_dilayani1', 'signatures']);
@@ -662,7 +665,7 @@ class ERMController extends Controller
             return response()->json(['success' => 'Asesmen Awal Kebidanan berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Kebidanan: '.$e->getMessage());
+            Log::error('Gagal menyimpan Asesmen Awal Kebidanan: ' . $e->getMessage());
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
@@ -717,7 +720,7 @@ class ERMController extends Controller
             return response()->json(['success' => 'Pengkajian Awal Neonatus (Dokter) berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Pengkajian Awal Neonatus (Dokter): '.$e->getMessage());
+            Log::error('Gagal menyimpan Pengkajian Awal Neonatus (Dokter): ' . $e->getMessage());
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
@@ -754,11 +757,11 @@ class ERMController extends Controller
         DB::beginTransaction();
         try {
             $waktuMasuk = $request->filled('tgl_masuk') && $request->filled('jam_masuk')
-                ? Carbon::createFromFormat('d-m-Y H:i', $request->tgl_masuk.' '.$request->jam_masuk)->toDateTimeString()
+                ? Carbon::createFromFormat('d-m-Y H:i', $request->tgl_masuk . ' ' . $request->jam_masuk)->toDateTimeString()
                 : null;
 
             $waktuDilayani = $request->filled('tgl_dilayani') && $request->filled('jam_dilayani')
-                ? Carbon::createFromFormat('d-m-Y H:i', $request->tgl_dilayani.' '.$request->jam_dilayani)->toDateTimeString()
+                ? Carbon::createFromFormat('d-m-Y H:i', $request->tgl_dilayani . ' ' . $request->jam_dilayani)->toDateTimeString()
                 : null;
 
             // Kelompokkan data ke dalam format yang sesuai dengan struktur JSON di database
@@ -804,10 +807,10 @@ class ERMController extends Controller
 
             DB::commit();
 
-            return response()->json(['success' => 'Asesmen Awal Dokter berhasil disimpan sebagai '.$request->status.'!']);
+            return response()->json(['success' => 'Asesmen Awal Dokter berhasil disimpan sebagai ' . $request->status . '!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Dokter: '.$e->getMessage());
+            Log::error('Gagal menyimpan Asesmen Awal Dokter: ' . $e->getMessage());
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
@@ -858,10 +861,10 @@ class ERMController extends Controller
 
             DB::commit();
 
-            return response()->json(['success' => 'Data Echocardiography berhasil disimpan sebagai '.$request->status.'!']);
+            return response()->json(['success' => 'Data Echocardiography berhasil disimpan sebagai ' . $request->status . '!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Echocardiography: '.$e->getMessage());
+            Log::error('Gagal menyimpan Echocardiography: ' . $e->getMessage());
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
@@ -926,7 +929,7 @@ class ERMController extends Controller
             return response()->json(['success' => 'Data Pemeriksaan Awal Rawat Inap berhasil disimpan!']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Pemeriksaan Awal Rawat Inap: '.$e->getMessage());
+            Log::error('Gagal menyimpan Pemeriksaan Awal Rawat Inap: ' . $e->getMessage());
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
@@ -939,8 +942,8 @@ class ERMController extends Controller
     private function saveSignatureFile(string $base64Image, string $fileNamePrefix): string
     {
         $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
-        $fileName = $fileNamePrefix.'_'.time().'.png';
-        $path = 'signatures/'.$fileName;
+        $fileName = $fileNamePrefix . '_' . time() . '.png';
+        $path = 'signatures/' . $fileName;
 
         Storage::disk('public')->put($path, $imageData);
 
@@ -969,8 +972,8 @@ class ERMController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $viewUrl = route('erm.dokumen.view', $row->id);
-                    $btn = '<a href="'.$viewUrl.'" target="_blank" class="btn btn-sm btn-success mr-2" title="Lihat Dokumen"><i class="fas fa-eye"></i></a>';
-                    $btn .= '<button type="button" class="btn btn-sm btn-danger btn-delete-document" data-id="'.$row->id.'" title="Hapus Dokumen"><i class="fas fa-trash"></i></button>';
+                    $btn = '<a href="' . $viewUrl . '" target="_blank" class="btn btn-sm btn-success mr-2" title="Lihat Dokumen"><i class="fas fa-eye"></i></a>';
+                    $btn .= '<button type="button" class="btn btn-sm btn-danger btn-delete-document" data-id="' . $row->id . '" title="Hapus Dokumen"><i class="fas fa-trash"></i></button>';
 
                     return $btn;
                 })
@@ -1029,7 +1032,7 @@ class ERMController extends Controller
 
             return response()->json(['success' => 'Dokumen berhasil dihapus!']);
         } catch (\Exception $e) {
-            Log::error('Gagal menghapus dokumen: '.$e->getMessage());
+            Log::error('Gagal menghapus dokumen: ' . $e->getMessage());
 
             return response()->json(['error' => 'Gagal menghapus dokumen.'], 500);
         }
@@ -1120,14 +1123,18 @@ class ERMController extends Controller
             case 'cppt_perawat':
                 $rawData = null;
 
+                // dd($path);
+
                 // Ambil data sesuai dengan path
                 if ($path === 'igd') {
                     $rawData = Triage::firstWhere('registration_id', $registration->id);
-                } elseif ($path === 'rawat-jalan') {
+                } elseif ($path === 'poliklinik') {
                     $rawData = PengkajianNurseRajal::firstWhere('registration_id', $registration->id);
                 } elseif ($path === 'rawat-inap') {
                     $rawData = InpatientInitialExamination::firstWhere('registration_id', $registration->id);
                 }
+
+                // dd($rawData);
 
                 // Generalisasi data ke format yang konsisten
                 $data = null;
@@ -1149,6 +1156,8 @@ class ERMController extends Controller
                     }
                     // Mapping untuk PengkajianNurseRajal
                     elseif ($rawData instanceof \App\Models\SIMRS\Pengkajian\PengkajianNurseRajal) {
+                        $data->created_at = $rawData->created_at;
+                        $data->allergy_medicine = $rawData->allergy_medicine;
                         $data->pr = $rawData->pr;
                         $data->rr = $rawData->rr;
                         $data->bp = $rawData->bp;
@@ -1179,6 +1188,7 @@ class ERMController extends Controller
                     $query->where('name', 'Rawat Jalan');
                 })->get();
                 $pengkajian = CPPT::firstWhere('registration_id', $registration->id);
+                // dd($data);
 
                 return view('pages.simrs.erm.form.perawat.cppt-perawat', compact('registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'perawat', 'path', 'data'));
 

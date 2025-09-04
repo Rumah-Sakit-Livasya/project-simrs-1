@@ -54,9 +54,10 @@ use App\Http\Controllers\API\KunjunganController;
 use App\Http\Controllers\API\PesanController;
 use App\Http\Controllers\API\VehicleLogController;
 use App\Http\Controllers\API\VehicleServiceController;
-use App\Http\Controllers\API\WasteTransportController;
-use App\Http\Controllers\API\WebhookController;
 use App\Http\Controllers\API\WorkshopVendorController;
+use App\Http\Controllers\Api\WasteTransportController;
+use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\LaporanInternalController;
 use App\Http\Controllers\WhatsappController;
 
 /*
@@ -72,6 +73,10 @@ use App\Http\Controllers\WhatsappController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/get-barang-by-room/{roomId}', [LaporanInternalController::class, 'getBarangByRoom'])->name('api.getBarangByRoom');
 });
 
 Route::middleware(['web', 'auth'])->prefix('inventaris')->group(function () {
@@ -144,7 +149,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
     });
 
     Route::prefix('files')->group(function () {
-        Route::post('store', [FileUploadController::class, 'storeKepegawaian']);
+        Route::post('store', [FileUploadController::class, 'storeKepegawaian'])->name('files.store');
         Route::get('/download-document/{id}', [FileUploadController::class, 'downloadDocument'])->name('download.document');
         Route::get('/delete/{id}', [FileUploadController::class, 'destroy'])->name('files.delete');
     });
@@ -371,6 +376,7 @@ Route::post('/whatsapp/process-message', [WhatsappController::class, 'processMes
 Route::post('/whatsapp/confirm-sent', [WhatsappController::class, 'confirmSent'])->name('whatsapp.confirmSent');
 
 Route::post('notify-contract', [BotMessageController::class, 'notifyExpiryContract'])->middleware(CheckAuthorizationBot::class);
+Route::post('notify-expiry-document', [BotMessageController::class, 'notifyExpiryDocumentToHRD'])->middleware(CheckAuthorizationBot::class);
 // Route::get('notify-contract', [BotMessageController::class, 'notifyExpiryContract']);
 
 // Keuangan

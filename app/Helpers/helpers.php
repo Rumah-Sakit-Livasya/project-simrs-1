@@ -7,9 +7,16 @@ use Illuminate\Support\Facades\Request;
 /**
  * Determines if a given date of birth (DOB) falls within a specified age range.
  *
+<<<<<<< HEAD
  * @param  string  $dob  The date of birth in a valid date format (e.g., 'YYYY-MM-DD').
  * @param  string  $minAgeStr  The minimum age range in the format 'years-months-days' (e.g., '18-0-0' for 18 years).
  * @param  string  $maxAgeStr  The maximum age range in the format 'years-months-days' (e.g., '65-0-0' for 65 years).
+=======
+ * @param string $dob The date of birth in a valid date format (e.g., 'YYYY-MM-DD').
+ * @param string $minAgeStr The minimum age range in the format 'years-months-days' (e.g., '18-0-0' for 18 years).
+ * @param string $maxAgeStr The maximum age range in the format 'years-months-days' (e.g., '65-0-0' for 65 years).
+ *
+>>>>>>> 8e7214da5e3d10e8315676acc91e58fbe43f1848
  * @return bool Returns true if the date of birth is within the specified age range, otherwise false.
  *
  * @example
@@ -54,21 +61,21 @@ function displayAge($birthdate)
     $result = '';
 
     if ($years > 0) {
-        $result .= $years.'thn';
+        $result .= $years . 'thn';
     }
 
     if ($months > 0) {
         if ($result !== '') {
             $result .= ', ';
         }
-        $result .= $months.'bln';
+        $result .= $months . 'bln';
     }
 
     if ($days > 0) {
         if ($result !== '') {
             $result .= ', ';
         }
-        $result .= $days.'hr';
+        $result .= $days . 'hr';
     }
 
     return $result;
@@ -161,7 +168,7 @@ if (! function_exists('formatNomorIndo')) {
         // Cek apakah nomor diawali dengan '0'
         if (substr($nomor, 0, 1) === '0') {
             // Ganti '0' dengan '62'
-            $nomor = '62'.substr($nomor, 1);
+            $nomor = '62' . substr($nomor, 1);
         }
 
         return $nomor;
@@ -188,7 +195,7 @@ if (! function_exists('tgl')) {
 
         if ($tanggal !== null) {
             $pecahkan = explode('-', $tanggal);
-            $format = $pecahkan[2].' '.$bulan[(int) $pecahkan[1]].' '.$pecahkan[0];
+            $format = $pecahkan[2] . ' ' . $bulan[(int) $pecahkan[1]] . ' ' . $pecahkan[0];
         } else {
             $format = '*belum disetting';
         }
@@ -226,7 +233,7 @@ if (! function_exists('tgl_waktu')) {
         $time = date('H:i', $timestamp);
 
         // Return the formatted date string
-        return $day.' '.$months[$month].' '.$year.' '.$time;
+        return $day . ' ' . $months[$month] . ' ' . $year . ' ' . $time;
     }
 }
 
@@ -293,7 +300,7 @@ function konversiTanggal($tanggal)
     $bulan = $namaBulan[date('n', strtotime($tanggal))];
 
     // Mengembalikan hasil dalam format yang diinginkan
-    return $hari.', '.$tanggal.' '.$bulan;
+    return $hari . ', ' . $tanggal . ' ' . $bulan;
 }
 
 // hitung radius jarak
@@ -321,7 +328,7 @@ function hitungUmur($tanggal_lahir)
     $umur_tahun = $umur->y;
 
     // Kembalikan umur dalam tahun
-    return $umur_tahun.' Tahun';
+    return $umur_tahun . ' Tahun';
 }
 
 function hitungHari($tanggal)
@@ -341,13 +348,13 @@ function hitungHari($tanggal)
     // Buat string hasil
     $hasil = '';
     if ($tahun > 0) {
-        $hasil .= $tahun.' Tahun ';
+        $hasil .= $tahun . ' Tahun ';
     }
     if ($bulan > 0) {
-        $hasil .= $bulan.' Bulan ';
+        $hasil .= $bulan . ' Bulan ';
     }
     if ($hari > 0) {
-        $hasil .= $hari.' Hari';
+        $hasil .= $hari . ' Hari';
     }
 
     return $hasil;
@@ -356,8 +363,14 @@ function hitungHari($tanggal)
 function rp($amount)
 {
     // Format angka menjadi mata uang Rupiah
-    $formattedAmount = 'Rp '.number_format($amount, 0, ',', '.');
+    $formattedAmount = 'Rp ' . number_format($amount, 0, '.', '.');
+    return $formattedAmount;
+}
 
+function rp3($amount)
+{
+    // Format angka tanpa 'Rp', titik menjadi koma
+    $formattedAmount = number_format($amount, 0, ',', ',');
     return $formattedAmount;
 }
 
@@ -368,24 +381,24 @@ function terbilangRp($angka, $withSuffix = true)
     if ($angka < 12) {
         $result = $satuan[$angka];
     } elseif ($angka < 20) {
-        $result = $satuan[$angka - 10].' belas';
+        $result = $satuan[$angka - 10] . ' belas';
     } elseif ($angka < 100) {
-        $result = terbilangRp(intval($angka / 10), false).' puluh'.(($angka % 10 != 0) ? ' '.terbilangRp($angka % 10, false) : '');
+        $result = terbilangRp(intval($angka / 10), false) . ' puluh' . (($angka % 10 != 0) ? ' ' . terbilangRp($angka % 10, false) : '');
     } elseif ($angka < 200) {
-        $result = 'seratus'.(($angka != 100) ? ' '.terbilangRp($angka - 100, false) : '');
+        $result = 'seratus' . (($angka != 100) ? ' ' . terbilangRp($angka - 100, false) : '');
     } elseif ($angka < 1000) {
-        $result = terbilangRp(intval($angka / 100), false).' ratus'.(($angka % 100 != 0) ? ' '.terbilangRp($angka % 100, false) : '');
+        $result = terbilangRp(intval($angka / 100), false) . ' ratus' . (($angka % 100 != 0) ? ' ' . terbilangRp($angka % 100, false) : '');
     } elseif ($angka < 2000) {
-        $result = 'seribu'.(($angka != 1000) ? ' '.terbilangRp($angka - 1000, false) : '');
+        $result = 'seribu' . (($angka != 1000) ? ' ' . terbilangRp($angka - 1000, false) : '');
     } elseif ($angka < 1000000) {
-        $result = terbilangRp(intval($angka / 1000), false).' ribu'.(($angka % 1000 != 0) ? ' '.terbilangRp($angka % 1000, false) : '');
+        $result = terbilangRp(intval($angka / 1000), false) . ' ribu' . (($angka % 1000 != 0) ? ' ' . terbilangRp($angka % 1000, false) : '');
     } elseif ($angka < 1000000000) {
-        $result = terbilangRp(intval($angka / 1000000), false).' juta'.(($angka % 1000000 != 0) ? ' '.terbilangRp($angka % 1000000, false) : '');
+        $result = terbilangRp(intval($angka / 1000000), false) . ' juta' . (($angka % 1000000 != 0) ? ' ' . terbilangRp($angka % 1000000, false) : '');
     } else {
         $result = 'angka terlalu besar';
     }
 
-    return $withSuffix ? $result.' rupiah' : $result;
+    return $withSuffix ? $result . ' rupiah' : $result;
 }
 
 function rp2($amount)
@@ -410,7 +423,7 @@ function convertPeriodePayroll($period)
     $endMonthIndonesian = date('F Y', strtotime($endMonth));
 
     // Gabungkan kembali periode dengan bulan dalam bahasa Indonesia
-    return $startMonthIndonesian.' - '.$endMonthIndonesian;
+    return $startMonthIndonesian . ' - ' . $endMonthIndonesian;
 }
 
 // Check if function is already declared
@@ -446,7 +459,7 @@ function phone($phone)
 {
     // Remove any leading zero
     if (substr($phone, 0, 1) == '0') {
-        $phone = '62'.substr($phone, 1);
+        $phone = '62' . substr($phone, 1);
     }
 
     return $phone;
@@ -530,9 +543,9 @@ function formatTanggalDetail($tanggal)
     $sekarang = new DateTime;
     $umur = $sekarang->diff($tanggalLahir);
 
-    $umurString = $umur->y.'thn '.$umur->m.'bln '.$umur->d.'hr';
+    $umurString = $umur->y . 'thn ' . $umur->m . 'bln ' . $umur->d . 'hr';
 
-    return $tanggalFormat.' ('.$umurString.')';
+    return $tanggalFormat . ' (' . $umurString . ')';
 }
 
 function tglDefault($tanggal)
@@ -569,7 +582,7 @@ function waktuDefault($tanggalWaktu)
     $date = new DateTime($tanggalWaktu);
 
     // Format waktu menjadi 'H:i WIB' (contoh: 15:11 WIB)
-    return $date->format('H:i').' WIB';
+    return $date->format('H:i') . ' WIB';
 }
 
 function formatTanggalBulan($tanggal)
@@ -701,7 +714,7 @@ class AgeComparison
         $datePart = date('ym'); // Tahun dan bulan 2 digit, cth: 2405
 
         // Cari nomor terakhir di bulan dan tahun ini
-        $lastPatient = Patient::where('medical_record_number', 'like', $prefix.'-'.$datePart.'-%')
+        $lastPatient = Patient::where('medical_record_number', 'like', $prefix . '-' . $datePart . '-%')
             ->orderBy('medical_record_number', 'desc')
             ->first();
 
@@ -715,6 +728,6 @@ class AgeComparison
         // Format nomor urut menjadi 4 digit dengan leading zero
         $paddedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
 
-        return $prefix.'-'.$datePart.'-'.$paddedSequence;
+        return $prefix . '-' . $datePart . '-' . $paddedSequence;
     }
 }

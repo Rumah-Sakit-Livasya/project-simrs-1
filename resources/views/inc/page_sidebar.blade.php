@@ -42,7 +42,7 @@
     </div>
     <!-- BEGIN PRIMARY NAVIGATION -->
     <nav id="js-primary-nav" class="primary-nav" role="navigation" style="height: 100%">
-        <div class="nav-filter">
+        <div class="nav-filter mt-3">
             <div class="position-relative">
                 <input type="text" id="nav_filter_input" placeholder="Filter menu" class="form-control"
                     tabindex="0">

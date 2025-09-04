@@ -9,7 +9,8 @@
             }
 
             .dataTables_scrollBody tbody td:nth-child(1),
-            .dataTables_scrollBody tbody td:nth-child(2) {
+            .dataTables_scrollBody tbody td:nth-child(2),
+            .dataTables_scrollBody tbody td:nth-child(3) {
                 white-space: nowrap;
                 /* Mencegah teks melampaui batas */
                 min-height: 40px !important;
@@ -17,7 +18,7 @@
                 /* Atur tinggi minimum untuk kolom 1 dan 2 */
             }
 
-            .dataTables_scrollBody tbody td:nth-child(2) {
+            .dataTables_scrollBody tbody td:nth-child(3) {
                 min-width: 400px;
             }
 
@@ -113,7 +114,9 @@
                                             <thead>
                                                 <tr>
                                                     <th style="white-space: nowrap">No</th>
-                                                    <th style="white-space: nowrap">employee</th>
+                                                    <th style="white-space: nowrap">Pegawai</th>
+                                                    <th style="white-space: nowrap">Department</th>
+                                                    <th style="white-space: nowrap">NIP</th>
                                                     <th style="white-space: nowrap">Basic Salary</th>
                                                     <th style="white-space: nowrap">Tunjangan Jabatan</th>
                                                     <th style="white-space: nowrap">Tunjangan Profesi</th>
@@ -140,39 +143,28 @@
                                                 @foreach ($payrolls as $payroll)
                                                     <tr>
                                                         <td>{{ $loop->iteration }}</td>
-                                                        <td>
-                                                            <div class="row">
-                                                                <div class="col-3 d-flex justify-content-end">
-                                                                    <img src="{{ $payroll->employee->gender == 'Laki-laki' ? '/img/demo/avatars/avatar-c.png' : '/img/demo/avatars/avatar-p.png' }}"
-                                                                        class="rounded-circle img-thumbnail m-auto"
-                                                                        alt="" style="width: 50px; z-index: 100;">
-                                                                </div>
-                                                                <div class="col-9">
-                                                                    <strong>{{ $payroll->employee->fullname }}</strong>
-                                                                    <br>
-                                                                    {{ $payroll->employee->organization->name }}
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>{{ rp($payroll->basic_salary) }}</td>
-                                                        <td>{{ rp($payroll->tunjangan_jabatan) }}</td>
-                                                        <td>{{ rp($payroll->tunjangan_profesi) }}</td>
-                                                        <td>{{ rp($payroll->tunjangan_makan_dan_transport) }}</td>
-                                                        <td>{{ rp($payroll->tunjangan_masa_kerja) }}</td>
-                                                        <td>{{ rp($payroll->guarantee_fee) }}</td>
-                                                        <td>{{ rp($payroll->uang_duduk) }}</td>
-                                                        <td>{{ rp($payroll->tax_allowance) }}</td>
-                                                        <td>{{ rp($payroll->total_allowance) }}</td>
-                                                        <td>{{ rp($payroll->potongan_keterlambatan) }}</td>
-                                                        <td>{{ rp($payroll->potongan_izin) }}</td>
-                                                        <td>{{ rp($payroll->potongan_sakit) }}</td>
-                                                        <td>{{ rp($payroll->simpanan_pokok) }}</td>
-                                                        <td>{{ rp($payroll->potongan_koperasi) }}</td>
-                                                        <td>{{ rp($payroll->potongan_absensi) }}</td>
-                                                        <td>{{ rp($payroll->potongan_bpjs_kesehatan) }}</td>
-                                                        <td>{{ rp($payroll->potongan_bpjs_ketenagakerjaan) }}</td>
-                                                        <td>{{ rp($payroll->total_deduction) }}</td>
-                                                        <td>{{ rp($payroll->take_home_pay) }}</td>
+                                                        <td>{{ $payroll->employee->fullname }}</td>
+                                                        <td>{{ $payroll->employee->organization->name }}</td>
+                                                        <td>{{ $payroll->employee->employee_code }}</td>
+                                                        <td>{{ rp3($payroll->basic_salary) }}</td>
+                                                        <td>{{ rp3($payroll->tunjangan_jabatan) }}</td>
+                                                        <td>{{ rp3($payroll->tunjangan_profesi) }}</td>
+                                                        <td>{{ rp3($payroll->tunjangan_makan_dan_transport) }}</td>
+                                                        <td>{{ rp3($payroll->tunjangan_masa_kerja) }}</td>
+                                                        <td>{{ rp3($payroll->guarantee_fee) }}</td>
+                                                        <td>{{ rp3($payroll->uang_duduk) }}</td>
+                                                        <td>{{ rp3($payroll->tax_allowance) }}</td>
+                                                        <td>{{ rp3($payroll->total_allowance) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_keterlambatan) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_izin) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_sakit) }}</td>
+                                                        <td>{{ rp3($payroll->simpanan_pokok) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_koperasi) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_absensi) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_bpjs_kesehatan) }}</td>
+                                                        <td>{{ rp3($payroll->potongan_bpjs_ketenagakerjaan) }}</td>
+                                                        <td>{{ rp3($payroll->total_deduction) }}</td>
+                                                        <td>{{ rp3($payroll->take_home_pay) }}</td>
                                                         <td>{{ $payroll->periode }}</td>
                                                     </tr>
                                                 @endforeach
