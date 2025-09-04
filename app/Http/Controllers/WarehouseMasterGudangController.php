@@ -18,7 +18,7 @@ class WarehouseMasterGudangController extends Controller
 
         foreach ($filters as $filter) {
             if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
+                $query->where($filter, 'like', '%'.$request->$filter.'%');
                 $filterApplied = true;
             }
         }
@@ -31,8 +31,8 @@ class WarehouseMasterGudangController extends Controller
             $master_gudangs = WarehouseMasterGudang::all();
         }
 
-        return view("pages.simrs.warehouse.master-data.master-gudang", [
-            "master_gudangs" => $master_gudangs
+        return view('pages.simrs.warehouse.master-data.master-gudang', [
+            'master_gudangs' => $master_gudangs,
         ]);
     }
 
@@ -51,7 +51,8 @@ class WarehouseMasterGudangController extends Controller
     {
         $request->merge([
             'apotek' => $request->input('apotek', 0),
-            'apotek_default' => $request->input('apotek_default', 0),
+            'rajal_default' => $request->input('rajal_default', 0),
+            'ranap_default' => $request->input('ranap_default', 0),
             'warehouse' => $request->input('warehouse', 0),
             'aktif' => $request->input('aktif', 0),
         ]);
@@ -60,18 +61,23 @@ class WarehouseMasterGudangController extends Controller
             'nama' => 'required|string|max:255',
             'cost_center' => 'required|string|max:255',
             'apotek' => 'boolean',
-            'apotek_default' => 'boolean',
+            'rajal_default' => 'boolean',
+            'ranap_default' => 'boolean',
             'warehouse' => 'boolean',
-            'aktif' => 'boolean'
+            'aktif' => 'boolean',
         ]);
 
-        if ($validatedData['apotek_default'] == true && $validatedData['apotek'] == true) {
-            WarehouseMasterGudang::where('apotek_default', true)->update(['apotek_default' => false]);
+        if ($validatedData['rajal_default'] == true && $validatedData['apotek'] == true) {
+            WarehouseMasterGudang::where('rajal_default', true)->update(['rajal_default' => false]);
+        } elseif ($validatedData['ranap_default'] == true && $validatedData['apotek'] == true) {
+            WarehouseMasterGudang::where('ranap_default', true)->update(['ranap_default' => false]);
         } else {
-            $validatedData['apotek_default'] = false;
+            $validatedData['rajal_default'] = false;
+            $validatedData['ranap_default'] = false;
         }
 
         WarehouseMasterGudang::create($validatedData);
+
         return redirect()->back()->with('success', 'Master Gudang berhasil ditambahkan!');
     }
 
@@ -98,7 +104,8 @@ class WarehouseMasterGudangController extends Controller
     {
         $request->merge([
             'apotek' => $request->input('apotek', 0),
-            'apotek_default' => $request->input('apotek_default', 0),
+            'rajal_default' => $request->input('rajal_default', 0),
+            'ranap_default' => $request->input('ranap_default', 0),
             'warehouse' => $request->input('warehouse', 0),
             'aktif' => $request->input('aktif', 0),
         ]);
@@ -108,20 +115,25 @@ class WarehouseMasterGudangController extends Controller
             'nama' => 'required|string|max:255',
             'cost_center' => 'required|string|max:255',
             'apotek' => 'boolean',
-            'apotek_default' => 'boolean',
+            'rajal_default' => 'boolean',
+            'ranap_default' => 'boolean',
             'warehouse' => 'boolean',
-            'aktif' => 'boolean'
+            'aktif' => 'boolean',
         ]);
 
-        if ($validatedData['apotek_default'] == true && $validatedData['apotek'] == true) {
-            WarehouseMasterGudang::where('apotek_default', true)->update(['apotek_default' => false]);
+        if ($validatedData['rajal_default'] == true && $validatedData['apotek'] == true) {
+            WarehouseMasterGudang::where('rajal_default', true)->update(['rajal_default' => false]);
+        } elseif ($validatedData['ranap_default'] == true && $validatedData['apotek'] == true) {
+            WarehouseMasterGudang::where('ranap_default', true)->update(['ranap_default' => false]);
         } else {
-            $validatedData['apotek_default'] = false;
+            $validatedData['rajal_default'] = false;
+            $validatedData['ranap_default'] = false;
         }
 
         $warehouseMasterGudang
-            ->where("id", $validatedData['id'])
+            ->where('id', $validatedData['id'])
             ->update($validatedData);
+
         return redirect()->back()->with('success', 'Master Gudang berhasil diupdate');
     }
 
@@ -132,14 +144,15 @@ class WarehouseMasterGudangController extends Controller
     {
         try {
             $warehouseMasterGudang::destroy($id);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Master Gudang berhasil dihapus!'
+                'message' => 'Master Gudang berhasil dihapus!',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         }
     }

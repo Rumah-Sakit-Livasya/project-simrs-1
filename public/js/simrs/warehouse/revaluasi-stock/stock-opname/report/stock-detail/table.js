@@ -147,7 +147,7 @@ class TableHandler {
                         <td>${code}</td>
                         <td>${item.before_gudang?.nama || item.after_gudang?.nama}</td>
                         <td>${item.after_gudang?.nama}</td>
-                        <td>${item.source?.keterangan || ''}</td>
+                        <td>${item.source?.keterangan || item.keterangan}</td>
                         <td>${start}</td>
                         <td>${sign}${adjustment}</td>
                         <td>${finish}</td>

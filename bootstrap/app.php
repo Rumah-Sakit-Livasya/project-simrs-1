@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Daftarkan provider Anda yang lain di sini jika perlu,
         // tapi untuk kasus ini, kita hanya butuh BroadcastServiceProvider.
         App\Providers\BroadcastServiceProvider::class,
+        App\Providers\AuthServiceProvider::class,
     ])
     // >>>>> PENAMBAHAN SELESAI DI SINI <<<<<
     ->withExceptions(function (Exceptions $exceptions) {

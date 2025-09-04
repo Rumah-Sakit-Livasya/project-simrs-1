@@ -7,7 +7,7 @@
     @if (isset($registration) && $registration != null)
         <div class="tab-content p-3">
             <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
-                @include('pages.simrs.poliklinik.partials.detail-pasien')
+                @include('pages.simrs.erm.partials.detail-pasien')
                 <hr style="border-color: #868686; margin-top: 50px; margin-bottom: 30px;">
                 <div class="row">
                     {{-- Bagian untuk Menambah Form Baru (sudah benar menggunakan popup) --}}

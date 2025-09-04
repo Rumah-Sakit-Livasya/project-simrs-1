@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\SIMRS\Pengkajian\PengkajianDokterRajal;
 use App\Models\SIMRS\Registration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PengkajianDokterRajalController extends Controller
 {
@@ -25,7 +27,7 @@ class PengkajianDokterRajalController extends Controller
             'diagnosa_keperawatan' => 'required',
             'rencana_tindak_lanjut' => 'required',
 
-            //end section ttv
+            // end section ttv
             'asesmen_dilakukan_melalui' => 'required',
             'awal_tgl_rajal' => 'required',
             'awal_jam_rajal' => 'required',
@@ -45,6 +47,10 @@ class PengkajianDokterRajalController extends Controller
             'awal_rencana_tindak_lanjut' => 'nullable',
             'is_verified' => 'nullable',
             'is_final' => 'nullable',
+            // ttd
+            'signature_data' => 'nullable|array',
+            'signature_data.pic' => 'nullable|string',
+            'signature_data.signature_image' => 'nullable|string',
         ]);
 
         try {
@@ -53,8 +59,8 @@ class PengkajianDokterRajalController extends Controller
             $validatedData['awal_evaluasi_penyakit'] = json_encode($request->awal_evaluasi_penyakit);
             $validatedData['awal_edukasi'] = json_encode($request->awal_edukasi);
             $validatedData['asesmen_dilakukan_melalui'] = json_encode($request->asesmen_dilakukan_melalui);
-            $validatedData['user_id'] = auth()->user()->id;
-            if ($request->action_type = 'final') {
+            $validatedData['user_id'] = Auth::user()->id;
+            if ($request->action_type == 'final') {
                 $validatedData['is_final'] = 1;
             }
 
@@ -63,38 +69,30 @@ class PengkajianDokterRajalController extends Controller
                 $validatedData
             );
 
-            // SIGNATURE
-            if ($request->filled('signature_image')) {
-                $imageData = $request->input('signature_image');
-                $pic = $request->input('pic');
-                $role = $request->input('role');
-                $image = str_replace('data:image/png;base64,', '', $imageData);
-                $image = str_replace(' ', '+', $image);
-                $imageName = 'ttd_' . time() . '.png';
-                $path = 'signatures/' . $imageName;
+            // Logika penyimpanan tanda tangan (signature) - samakan dengan CPPTController
+            $signatureData = $validatedData['signature_data'] ?? null;
+            if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                $oldPath = optional($pengkajian->signature)->signature;
+                $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', str_replace(' ', '+', $signatureData['signature_image'])));
+                $imageName = 'ttd_pengkajian_rajal_'.$pengkajian->id.'_'.time().'.png';
+                $newPath = 'signatures/pengkajian_rajal/'.$imageName;
+                Storage::disk('public')->put($newPath, $image);
 
-                // Cek apakah sudah ada tanda tangan lama
-                $existingSignature = $pengkajian->signature;
-
-                if ($existingSignature && \Storage::disk('public')->exists($existingSignature->signature)) {
-                    \Storage::disk('public')->delete($existingSignature->signature);
-                }
-
-                // Simpan file baru ke storage
-                \Storage::disk('public')->put($path, base64_decode($image));
-
-                // Simpan ke tabel `signatures` via relasi
                 $pengkajian->signature()->updateOrCreate(
                     [
                         'signable_id' => $pengkajian->id,
                         'signable_type' => get_class($pengkajian),
                     ],
                     [
-                        'signature' => $path,
-                        'pic' => $pic,
-                        'role' => $role,
+                        'signature' => $newPath,
+                        'pic' => $signatureData['pic'] ?? null,
+                        'role' => $signatureData['role'] ?? 'dokter',
                     ]
                 );
+
+                if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
             }
 
             return response()->json(['message' => ' berhasil ditambahkan!'], 200);

@@ -1,6 +1,7 @@
 @extends('inc.layout')
 @section('tmp_body', 'layout-composed')
 @section('extended-css')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.css" />
     <style>
         main {
             overflow-x: hidden;
@@ -130,6 +131,123 @@
         #js-slide-left .position-fixed {
             width: 18.7%;
         }
+
+        /* Kontainer Utama untuk CPPT */
+        .cppt-container {
+            font-family: Arial, sans-serif;
+        }
+
+        /* Header Tanggal (misal: 20 August 2025) */
+        .daily-cppt-header {
+            background-color: #6a1b9a;
+            /* Warna ungu gelap */
+            color: white;
+            text-align: center;
+            padding: 8px 15px;
+            font-weight: bold;
+            border-radius: 5px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        /* Styling untuk setiap kolom (Dokter/Perawat) */
+        .cppt-column {
+            padding: 0 10px;
+        }
+
+        /* Kartu untuk setiap entri CPPT */
+        .cppt-entry-card {
+            background-color: #f3e5f5;
+            /* Warna latar belakang kartu */
+            border: 1px solid #e1bee7;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
+            margin-bottom: 15px;
+            /* Jarak antar kartu di kolom yang sama */
+        }
+
+        /* Header di dalam kartu */
+        .cppt-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #ce93d8;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .cppt-card-header .info .status {
+            font-weight: bold;
+            color: #4a148c;
+            font-size: 0.9em;
+        }
+
+        .cppt-card-header .info .title {
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .cppt-card-header .info .author {
+            color: #d81b60;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .cppt-card-actions i {
+            margin-left: 10px;
+            font-size: 18px;
+            color: #7b1fa2;
+            cursor: pointer;
+        }
+
+        /* Bagian S-O-A-P-E-I di dalam kartu (tidak berubah) */
+        .cppt-card-body .soap-section {
+            margin-bottom: 15px;
+        }
+
+        .cppt-card-body .soap-label {
+            font-weight: bold;
+            color: #6a1b9a;
+            text-decoration: underline;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .cppt-card-body .soap-content {
+            color: #444;
+            font-size: 0.95em;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        /* Pastikan ada styling untuk footer kartu */
+        .cppt-card-footer {
+            text-align: right;
+            /* Membuat konten rata kanan */
+            margin-top: 25px;
+            /* Jarak dari konten terakhir di atasnya */
+            padding-top: 15px;
+            border-top: 1px solid #e1bee7;
+            /* Garis pemisah tipis */
+        }
+
+        .cppt-card-footer img {
+            display: block;
+            margin-left: auto;
+            /* Gambar rata kanan */
+            margin-right: 0;
+            margin-bottom: 5px;
+            max-width: 150px;
+            /* Lebar maksimum gambar TTD */
+            height: auto;
+        }
+
+        .cppt-card-footer .author-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9em;
+        }
     </style>
 
 @endsection
@@ -227,75 +345,10 @@
         </div>
     </main>
     @include('pages.simrs.erm.partials.ttd-many')
-    @include('pages.simrs.erm.partials.ttd')
 @endsection
 @section('plugin')
     <script script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
-        function openSignaturePad(index, target) {
-            $('#btn_save_ttd').attr('data-target', target);
-            $('#signatureModal').modal('show');
-        }
-
-        function saveSignature() {
-            if (!hasDrawn) {
-                alert("Silakan buat tanda tangan terlebih dahulu.");
-                return;
-            }
-
-            const dataURL = canvas.toDataURL('image/png');
-            const target = $('#btn_save_ttd').attr('data-target');
-
-            // Simpan base64 ke input hidden
-            $('#signature_image').val(dataURL);
-
-            // Tampilkan preview image
-            $('#signature_preview').attr('src', dataURL).show();
-
-            // Tutup modal dan bersihkan canvas
-            $('#signatureModal').modal('hide');
-            clearCanvas();
-        }
-
-        let currentSignatureIndex = null;
-
-        function openSignaturePadMany(index) {
-            currentSignatureIndex = index;
-
-            // Tampilkan modal
-            $('#signatureModalMany').data('target-index', index).modal('show');
-
-            // Atur data-index di canvas
-            const canvasMany = document.getElementById('canvas-many');
-            if (canvasMany) {
-                canvasMany.setAttribute('data-index', index);
-                clearCanvas(); // bersihkan canvas sebelum mulai tanda tangan baru
-            }
-        }
-
-
-        function saveSignatureMany() {
-            if (!hasDrawn) {
-                alert("Silakan buat tanda tangan terlebih dahulu.");
-                return;
-            }
-
-            const dataURL = canvas.toDataURL('image/png');
-
-            // Masukkan ke input sesuai index
-            document.querySelectorAll('input[name="signature_image[]"]')[currentSignatureIndex].value = dataURL;
-
-            // Tampilkan preview (jika kamu pakai ID dinamis, sesuaikan)
-            const previews = document.querySelectorAll('#signature_preview');
-            if (previews[currentSignatureIndex]) {
-                previews[currentSignatureIndex].src = dataURL;
-                previews[currentSignatureIndex].style.display = 'block';
-            }
-
-            $('#signatureModalMany').modal('hide');
-        }
-
-
         $(document).ready(function() {
             const pengkajian = @json($pengkajian ?? []);
 
@@ -382,8 +435,14 @@
 
                     dataType: "json",
                     beforeSend: function() {
-                        $('#daftar-pasien .col-12').html(
-                            '<p>Sedang memuat...</p>'); // Tambahkan loading
+                        $('#daftar-pasien .col-12').html(`
+                            <div class="d-flex flex-column align-items-center justify-content-center" style="height: 40vh;">
+                                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <h6 class="text-muted font-weight-bold mb-0">Memuat daftar pasien...</h6>
+                            </div>
+                        `);
                     },
                     success: function(response) {
                         if (response.success) {
@@ -398,42 +457,11 @@
                     }
                 });
             });
-
-
-            // if ($('#filter_pasien #departement_id').val() != null || $('#filter_pasien #doctor_id').val() !=
-            //     null) {
-            //     $.ajax({
-            //         type: "POST",
-            //         data: {
-            //             _token: "{{ csrf_token() }}", // Tambahkan token CSRF
-            //             route: window.location.href,
-            //             departement_id: $('#filter_pasien #departement_id').val(),
-            //             doctor_id: $('#filter_pasien #doctor_id').val()
-            //         },
-            //         dataType: "json",
-            //         beforeSend: function() {
-            //             $('#daftar-pasien .col-12').html(
-            //                 '<p class="text-center mt-3">Sedang memuat...</p>'); // Tambahkan loading
-            //         },
-            //         success: function(response) {
-
-
-            //             if (response.success) {
-            //                 $('#daftar-pasien .col-12').html(response.html);
-            //             } else {
-            //                 $('#daftar-pasien .col-12').html(
-            //                     '<p>Tidak ada data pasien.</p>');
-            //             }
-            //         },
-            //         error: function(xhr, status, error) {
-            //             console.log(xhr.responseText);
-            //             alert("Terjadi kesalahan, silakan coba lagi.");
-            //         }
-            //     });
-            // }
         });
     </script>
     @yield('signature')
     @yield('plugin-erm')
     @include('pages.simrs.poliklinik.partials.action-js.pengkajian-perawat')
+    @include('pages.simrs.erm.form.ttd.signature')
+    @stack('scripts')
 @endsection

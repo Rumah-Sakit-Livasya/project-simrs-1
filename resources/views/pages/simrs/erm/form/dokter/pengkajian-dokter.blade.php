@@ -4,7 +4,7 @@
     @if (isset($registration) || $registration != null)
         <div class="tab-content p-3">
             <div class="tab-pane fade show active" id="tab_default-1" role="tabpanel">
-                @include('pages.simrs.poliklinik.partials.detail-pasien')
+                @include('pages.simrs.erm.partials.detail-pasien')
                 <hr style="border-color: #868686; margin-bottom: 50px;">
                 <header class="text-primary text-center font-weight-bold mb-4">
                     <div id="alert-pengkajian"></div>
@@ -24,7 +24,7 @@
                                 <div class="input-group">
                                     <div class="input-group">
                                         <input id="pr" type="text" name="pr" class="form-control"
-                                            value="{{ $pengkajian?->pr ?? ($triage?->pr ?? $data?->pr) }}">
+                                            value="{{ $pengkajian?->pr ?? ($data?->pr ?? $triage?->pr) }}">
                                         <div class="input-group-append">
                                             <span class="input-group-text">x/menit</span>
                                         </div>
@@ -37,7 +37,7 @@
                                 <label for="rr" class="text-primary">Respirasi (RR)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="rr" name="rr" type="text"
-                                        value="{{ $pengkajian?->rr ?? ($triage?->rr ?? $data?->rr) }}">
+                                        value="{{ $pengkajian?->rr ?? ($data?->rr ?? $triage?->rr) }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">x/menit</span>
                                     </div>
@@ -50,7 +50,7 @@
                                 <div class="input-group">
                                     <input class="form-control numeric calc-bmi-pd" id="body_height" name="body_height"
                                         type="text"
-                                        value="{{ $pengkajian?->body_height ?? ($triage?->body_height ?? $data?->body_height) }}">">
+                                        value="{{ $pengkajian?->body_height ?? ($data?->body_height ?? $triage?->body_height) }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">cm</span>
                                     </div>
@@ -63,7 +63,7 @@
                                 <div class="input-group">
                                     <input class="form-control numeric calc-bmi-pd" id="body_weight" name="body_weight"
                                         type="text"
-                                        value="{{ $pengkajian?->body_weight ?? ($triage?->body_weight ?? $data?->body_weight) }}">
+                                        value="{{ $pengkajian?->body_weight ?? ($data?->body_weight ?? $triage?->body_weight) }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">kg</span>
                                     </div>
@@ -79,7 +79,7 @@
                                 <label for="bp">Tensi (BP)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="bp" name="bp" type="text"
-                                        value="{{ $pengkajian?->bp ?? ($triage?->bp ?? $data?->bp) }}">
+                                        value="{{ $pengkajian?->bp ?? ($data?->bp ?? $triage?->bp) }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">mmHg</span>
                                     </div>
@@ -91,7 +91,7 @@
                                 <label for="temperatur">Suhu (T)</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="temperatur" name="temperatur" type="text"
-                                        value="{{ $pengkajian?->temperatur ?? ($triage?->temperatur ?? $data?->temperatur) }}">
+                                        value="{{ $pengkajian?->temperatur ?? ($data?->temperatur ?? $triage?->temperatur) }}">
 
                                     <div class="input-group-append">
                                         <span class="input-group-text">°C</span>
@@ -107,7 +107,7 @@
                                 <label for="bmi">Index Massa Tubuh</label>
                                 <div class="input-group">
                                     <input class="form-control numeric" id="bmi" name="bmi" readonly
-                                        type="text" value="{{ $pengkajian?->bmi ?? ($triage?->bmi ?? $data?->bmi) }}">
+                                        type="text" value="{{ $pengkajian?->bmi ?? ($data?->bmi ?? $triage?->bmi) }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text">Kg/m²</span>
                                     </div>
@@ -118,7 +118,7 @@
                             <div class="form-group">
                                 <label for="kat_bmi">Katerogi IMT</label>
                                 <input class="form-control" id="kat_bmi" name="kat_bmi" readonly type="text"
-                                    value="{{ $pengkajian?->kat_bmi ?? ($triage?->kat_bmi ?? $data?->kat_bmi) }}">
+                                    value="{{ $pengkajian?->kat_bmi ?? ($data?->kat_bmi ?? $triage?->kat_bmi) }}">
                             </div>
                         </div>
                     </div>
@@ -128,7 +128,7 @@
                             <label for="sp02">SP 02</label>
                             <div class="input-group">
                                 <input class="form-control" id="sp02" name="sp02" type="text"
-                                    value="{{ $pengkajian?->sp02 ?? ($triage?->sp02 ?? $data?->sp02) }}">
+                                    value="{{ $pengkajian?->sp02 ?? ($data?->sp02 ?? $triage?->sp02) }}">
                                 <div class="input-group-append">
                                     <span class="input-group-text">%</span>
                                 </div>
@@ -237,7 +237,7 @@
                                                 <input type="checkbox" id="alloanamnesa"
                                                     name="asesmen_dilakukan_melalui[]" value="alloanamnesa"
                                                     class="form-check-input"
-                                                    {{ in_array('autoanamnesa', json_decode($pengkajian?->asesmen_dilakukan_melalui ?? '[]')) ? 'checked' : '' }}>
+                                                    {{ in_array('alloanamnesa', json_decode($pengkajian?->asesmen_dilakukan_melalui ?? '[]')) ? 'checked' : '' }}>
                                                 <label for="alloanamnesa" class="form-check-label">Alloanamnesa</label>
                                             </div>
                                         </td>
@@ -252,7 +252,8 @@
                                             /
                                             <input type="time" id="awal_jam_rajal" name="awal_jam_rajal"
                                                 class="form-control d-inline" style="width: 40%;"
-                                                value="{{ $pengkajian?->awal_jam_rajal }}">
+                                                value="{{ $pengkajian?->awal_jam_rajal ?? now()->format('H:i') }}">
+
                                         </td>
                                     </tr>
                                     <tr>
@@ -299,7 +300,7 @@
                                                     Sebutkan</label>
                                                 <input type="text" id="alergiInput"
                                                     name="awal_riwayat_alergi_obat_lain"
-                                                    {{ $pengkajian?->awal_riwayat_alergi_obat_lain }}
+                                                    value="{{ $pengkajian?->awal_riwayat_alergi_obat_lain }}"
                                                     class="form-control d-inline" style="width: 60%;">
                                             </div>
                                         </td>
@@ -352,7 +353,7 @@
                                             <div class="form-check">
                                                 <input type="checkbox" id="edukasi_terapi" name="awal_edukasi[]"
                                                     value="terapi" class="form-check-input"
-                                                    {{ in_array('edukasi_terapi', json_decode($pengkajian?->awal_edukasi) ?? []) ? 'checked' : '' }}>
+                                                    {{ in_array('terapi', json_decode($pengkajian?->awal_edukasi) ?? []) ? 'checked' : '' }}>
                                                 <label for="edukasi_terapi" class="form-check-label">Terapi</label>
                                             </div>
                                             <div class="form-check">
@@ -424,7 +425,7 @@
 
                     {{-- Contoh pemanggilan yang sudah diperbaiki --}}
                     @include('pages.simrs.erm.partials.signature-field', [
-                        'judul' => 'Perawat,',
+                        'judul' => 'Dokter,',
                         'pic' => auth()->user()->employee->fullname,
                         'role' => 'dokter',
                         'prefix' => 'pengkajian_dokter', // Berikan prefix unik

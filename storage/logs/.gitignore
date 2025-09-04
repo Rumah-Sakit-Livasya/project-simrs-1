@@ -1,2 +1,25 @@
 *
 !.gitignore
+
+
+
+
+
+
+
+00);
+
+                            $(`#curr_ant_perpoli_${reg.departement_id}`).text(String(reg.no_urut).padStart(2, '0'));
+                        });
+                } else {
+                    console.log("Waiting for Laravel Echo...");
+                    setTimeout(initializeEchoListener, 2
+                }
+            }
+
+            // Run Both
+            initializeEchoListener(); // Start listening for events
+            checkQueueStatus();     // Get initial data when page loads
+            setInterval(checkQueueStatus, 15000); // Do data sync every 15 seconds (less frequent)
+        });
+    </script>

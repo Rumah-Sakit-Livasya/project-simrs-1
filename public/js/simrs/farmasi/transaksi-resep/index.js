@@ -8,10 +8,118 @@ const Swal = /** @type {import("sweetalert2").default} */ (window.Swal);
 
 class TransaksiResepHandler {
     constructor() {
+        this.#addEventListeners('#tambah-btn', this.#handleTambahButtonClick);
+
         this.#addEventListeners('.delete-btn', this.#handleDeleteButtonClick);
         this.#addEventListeners('.print-btn', this.#handlePrintButtonClick);
         this.#addEventListeners('.edit-btn', this.#handleEditButtonClick);
-        this.#addEventListeners('#tambah-btn', this.#handleTambahButtonClick);
+        this.#addEventListeners('.telaah-btn', this.#handleTelaahButtonClick);
+
+        this.#addEventListeners(".print-e-tiket-btn", this.#handlePrintETiketButtonClick);
+        this.#addEventListeners(".print-e-tiket-btn", this.#handlePrintETiketButtonClick);
+        this.#addEventListeners(".print-e-tiket-ranap-btn", this.#handlePrintETiketRanapButtonClick);
+        this.#addEventListeners(".print-penjualan-btn", this.#handlePrintPenjualanButtonClick);
+        this.#addEventListeners(".print-resep-btn", this.#handlePrintResepButtonClick);
+    }
+
+    /** @param {Event} event */
+    #handleTelaahButtonClick(event) {
+        event.preventDefault();
+        const button = /** @type {HTMLButtonElement} */ (event.target);
+        const id = parseInt(button.getAttribute("data-id") || "0");
+        if (!id) return;
+
+        const url = "/simrs/farmasi/transaksi-resep/popup/telaah-resep/" + id;
+        const width = screen.width;
+        const height = screen.height;
+        const left = width - (width / 2);
+        const top = height - (height / 2);
+        window.open(
+            url,
+            "popupWindow_printFarmasiTelaah" + id,
+            "width=" + width + ",height=" + height +
+            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+        );
+    }
+
+    /** @param {Event} event */
+    #handlePrintResepButtonClick(event) {
+        event.preventDefault();
+        const button = /** @type {HTMLButtonElement} */ (event.target);
+        const id = parseInt(button.getAttribute("data-id") || "0");
+        if (!id) return;
+
+        const url = "/simrs/farmasi/transaksi-resep/print/resep/" + id;
+        const width = screen.width;
+        const height = screen.height;
+        const left = width - (width / 2);
+        const top = height - (height / 2);
+        window.open(
+            url,
+            "popupWindow_printFarmasiResep" + id,
+            "width=" + width + ",height=" + height +
+            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+        );
+    }
+
+    /** @param {Event} event */
+    #handlePrintPenjualanButtonClick(event) {
+        event.preventDefault();
+        const button = /** @type {HTMLButtonElement} */ (event.target);
+        const id = parseInt(button.getAttribute("data-id") || "0");
+        if (!id) return;
+
+        const url = "/simrs/farmasi/transaksi-resep/print/penjualan/" + id;
+        const width = screen.width;
+        const height = screen.height;
+        const left = width - (width / 2);
+        const top = height - (height / 2);
+        window.open(
+            url,
+            "popupWindow_printFarmasiPenjualan" + id,
+            "width=" + width + ",height=" + height +
+            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+        );
+    }
+
+    /** @param {Event} event */
+    #handlePrintETiketRanapButtonClick(event) {
+        event.preventDefault();
+        const button = /** @type {HTMLButtonElement} */ (event.target);
+        const id = parseInt(button.getAttribute("data-id") || "0");
+        if (!id) return;
+
+        const url = "/simrs/farmasi/transaksi-resep/print/e-tiket-ranap/" + id;
+        const width = screen.width;
+        const height = screen.height;
+        const left = width - (width / 2);
+        const top = height - (height / 2);
+        window.open(
+            url,
+            "popupWindow_printFarmasiETiketRanap" + id,
+            "width=" + width + ",height=" + height +
+            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+        );
+    }
+
+    /** @param {Event} event */
+    #handlePrintETiketButtonClick(event) {
+        event.preventDefault();
+        const button = /** @type {HTMLButtonElement} */ (event.target);
+        const id = parseInt(button.getAttribute("data-id") || "0");
+        if (!id) return;
+
+        const url = "/simrs/farmasi/transaksi-resep/print/e-tiket/" + id;
+        const width = screen.width;
+        const height = screen.height;
+        const left = width - (width / 2);
+        const top = height - (height / 2);
+        window.open(
+            url,
+            "popupWindow_printFarmasiETiket" + id,
+            "width=" + width + ",height=" + height +
+            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
+        );
     }
 
     /**
@@ -24,17 +132,8 @@ class TransaksiResepHandler {
         const id = parseInt(button.getAttribute("data-id") || "0");
         if (!id) return;
 
-        const url = "/simrs/procurement/purchase-order/pharmacy/edit/" + id;
-        const width = screen.width;
-        const height = screen.height;
-        const left = width - (width / 2);
-        const top = height - (height / 2);
-        window.open(
-            url,
-            "popupWindow_editPOFarmasi" + id,
-            "width=" + width + ",height=" + height +
-            ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
-        );
+        // navigate to /edit
+        window.location.href = "/simrs/farmasi/transaksi-resep/edit/" + id;
     }
 
     /**
@@ -82,18 +181,6 @@ class TransaksiResepHandler {
 
         // navigate to /create
         window.location.href = "/simrs/farmasi/transaksi-resep/create";
-
-        // const url = "/simrs/farmasi/transaksi-resep/create";
-        // const width = screen.width;
-        // const height = screen.height;
-        // const left = width - (width / 2);
-        // const top = height - (height / 2);
-        // window.open(
-        //     url,
-        //     "popupWindow_addResepFarmasi",
-        //     "width=" + width + ",height=" + height +
-        //     ",scrollbars=yes,resizable=yes,left=" + left + ",top=" + top
-        // );
     }
 
     /**
@@ -107,7 +194,7 @@ class TransaksiResepHandler {
         if (!id) return;
 
         Swal.fire({
-            title: 'Hapus PO?',
+            title: 'Hapus Order Resep?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -130,14 +217,15 @@ class TransaksiResepHandler {
         formData.append('id', String(id));
         formData.append('csrf-token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
 
-        fetch('/api/simrs/procurement/purchase-order/pharmacy/destroy/' + id, {
+        fetch('/api/simrs/farmasi/transaksi-resep/destroy/' + id, {
             method: 'DELETE',
             body: formData,
             headers: {
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || ''
+                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) || '',
+                'Content-Type': 'application/json'
             }
         })
-            .then(async(response) => {
+            .then(async (response) => {
                 const data = await response.json();
                 if (!data.success) {
                     throw new Error(data.message);
@@ -152,4 +240,4 @@ class TransaksiResepHandler {
     }
 }
 
-const TransaksiResepClass = new TransaksiResepHandler();1
+const TransaksiResepClass = new TransaksiResepHandler(); 1

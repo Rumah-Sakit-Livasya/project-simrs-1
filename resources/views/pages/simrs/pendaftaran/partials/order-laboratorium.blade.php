@@ -186,7 +186,9 @@
             <div class="row">
                 <div class="col-xl-6">
                     <h3>&nbsp;</h3>
-                    <a href="/patients/{{ $patient->id }}" class="btn btn-lg btn-default waves-effect waves-themed">
+                    <a href="javascript:void(0);"
+                        class="btn btn-lg btn-default waves-effect waves-themed btn-back-to-layanan"
+                        data-target-menu="laboratorium">
                         <span class="fal fa-arrow-left mr-1 text-primary"></span>
                         <span class="text-primary">Kembali</span>
                     </a>

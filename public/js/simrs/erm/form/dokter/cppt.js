@@ -37,9 +37,21 @@ class CPPTDokterClass {
 
         //get data-item
         const $option = $(`option[value='${selectedId}'].obat`);
-        
+
         const item = /** @type {BarangFarmasi & {qty: number}} */ ($option.data('item'));
-        
+
+        // prevent duplicate
+        const Obat = $("tr.obat-" + item.id);
+        if (Obat.length > 0) {
+            // add qty 1 to input with name^=qty in the row
+            const QtyInput = Obat.find("input[name^=qty_perhari]");
+            QtyInput.val(parseInt(String(QtyInput.val())) + 1);
+            QtyInput.trigger("change");
+            this.refreshTotal();
+            return;
+        }
+
+        const key = Math.round(Math.random() * 100000);
 
         // <th style="width: 1%;">Aksi</th>
         // <th style="width: 25%;">Nama Obat</th>
@@ -50,12 +62,10 @@ class CPPTDokterClass {
         // <th style="width: 15%">Signa</th>
         // <th style="width: 15%">Instruksi</th>
         // <th style="width: 10%;">Subtotal Harga</th>
-
-        const key = Math.round(Math.random() * 100000);
-
+        // 
         // insert to this.#$Table
         this.#$Table.append(/*html*/`
-                <tr id="item${key}" class="item-obat">
+                <tr id="item${key}" class="item-obat obat-${item.id}">
                     <input type="hidden" name="hna[${key}]" value="${item.hna}">
                     <input type="hidden" name="barang_id[${key}]" value="${item.id}">
                     <input type="hidden" name="subtotal[${key}]" value="${item.hna}">
@@ -73,7 +83,7 @@ class CPPTDokterClass {
                     <td class="subtotal">${this.#rp(item.hna)}</td>
                 </tr>
             `);
-        
+
         this.refreshTotal();
     }
 
@@ -82,7 +92,7 @@ class CPPTDokterClass {
         this.#$Table.find("tr.item-obat").each((i, tr) => {
             const qtyEl = $(tr).find("input[name^=qty]");
             const hnaEl = $(tr).find("input[name^=hna]");
-            if (!qtyEl || !hnaEl ) return;
+            if (!qtyEl || !hnaEl) return;
 
             const qty = parseInt(String(qtyEl.val()));
             const hna = parseInt(String(hnaEl.val()));

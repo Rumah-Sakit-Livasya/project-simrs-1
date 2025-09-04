@@ -2,6 +2,7 @@
 
 namespace App\Models\SIMRS\Operasi;
 
+use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\Room;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -24,11 +25,21 @@ class OrderOperasi extends Model
         return $this->belongsTo(\App\Models\SIMRS\Registration::class, 'registration_id');
     }
 
-    // Relasi ke dokter DPJP
+    // Relasi ke dokter DPJP (biarkan jika memang ada kolomnya)
     public function doctor()
     {
-        return $this->belongsTo(\App\Models\SIMRS\Doctor::class, 'doctor_id');
+        return $this->belongsTo(Doctor::class, 'doctor_id');
     }
+
+    // ==========================================================
+    // INI ADALAH BAGIAN YANG DIPERBAIKI
+    // ==========================================================
+    public function doctorOperator()
+    {
+        // Pastikan nama foreign key ini sama persis dengan nama kolom di migrasi
+        return $this->belongsTo(Doctor::class, 'dokter_operator_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id'); // Sesuaikan dengan nama kolom di database
@@ -63,7 +74,7 @@ class OrderOperasi extends Model
         return $this->belongsTo(\App\Models\SIMRS\KelasRawat::class, 'kelas_rawat_id');
     }
 
-    // In OrderOperasi.php
+    // Relasi ke ruangan
     public function ruangan()
     {
         return $this->belongsTo(Room::class, 'ruangan_id');

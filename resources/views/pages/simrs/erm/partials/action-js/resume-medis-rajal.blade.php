@@ -1,71 +1,122 @@
 <script>
     $(document).ready(function() {
+        // Initialize form handlers
+        initializeFormHandlers();
+    });
 
-        // $('.datepicker-input').datepicker({
-        //     format: 'dd/mm/yyyy', // Format tampilan tanggal
-        //     autoclose: true, // Menutup datepicker otomatis setelah memilih tanggal
-        //     todayHighlight: true, // Menyoroti tanggal hari ini
-        //     language: 'id', // Locale Indonesia untuk hari dan bulan
-        // });
-
-
+    /**
+     * Initialize all form event handlers
+     */
+    function initializeFormHandlers() {
+        // Handle draft save button
         $('.bsd-resume-medis-rajal').on('click', function() {
-            submitFormResume('draft'); // Panggil fungsi submitFormResume dengan parameter final
+            submitFormResume('draft');
         });
+
+        // Handle final save button
         $('.bsf-resume-medis-rajal').on('click', function() {
-            submitFormResume('final'); // Panggil fungsi submitForm dengan parameter final
+            submitFormResume('final');
         });
 
+        // Handle signature button
         $('.btn-ttd-resume-medis').on('click', function() {
-            const idUser = $(this).attr('data-id');
-            const token = "{{ csrf_token() }}";
-            // const ttd = "{{ auth()->user()->employee->ttd ? auth()->user()->employee->ttd : '' }}";
-
-            // if (ttd) {
-            //     const path = "/api/simrs/signature/" + ttd + "?token=" + token;
-            //     $(this).hide();
-            //     $('input[name=is_ttd]').val(1);
-            //     $('#signature-display').attr('src', path).show();
-            // } else {
-            //     showErrorAlertNoRefresh('Tanda tangan tidak ditemukan!');
-            // }
+            handleSignature($(this).attr('data-id'));
         });
+    }
 
-        function submitFormResume(actionType) {
-            const form = $('#resume-medis-rajal-form'); // Ambil form
-            const url = "{{ route('resume-medis.dokter-rajal.store') }}" // Ambil URL dari action form
+    /**
+     * Handle signature functionality
+     * @param {string} userId - User ID for signature
+     */
+    function handleSignature(userId) {
+        const token = "{{ csrf_token() }}";
+        const signaturePath = "{{ auth()->user()->employee->ttd ?? '' }}";
 
-            let formData = form.serialize(); // Ambil data dari form
+        if (signaturePath) {
+            const path = "/api/simrs/signature/" + signaturePath + "?token=" + token;
+            $('.btn-ttd-resume-medis').hide();
+            $('input[name=is_ttd]').val(1);
+            $('#signature-display').attr('src', path).show();
+        } else {
+            showErrorAlertNoRefresh('Tanda tangan tidak ditemukan!');
+        }
+    }
 
-            // Tambahkan tipe aksi (draft atau final) ke data form
-            formData += '&action_type=' + actionType + '&registration_id=' + "{{ $registration->id }}";
+    /**
+     * Submit the resume medical form
+     * @param {string} actionType - Either 'draft' or 'final'
+     */
+    function submitFormResume(actionType) {
+        const form = $('#resume-medis-rajal-form');
+        const url = "{{ route('resume-medis.dokter-rajal.store') }}";
 
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: formData,
-                success: function(response) {
-                    if (actionType === 'draft') {
-                        showSuccessAlert('Data berhasil disimpan sebagai draft!');
-                    } else {
-                        showSuccessAlert('Data berhasil disimpan sebagai final!');
-                    }
-                    setTimeout(() => {
-                        console.log('Reloading the page now.');
-                        window.location.reload();
-                    }, 1000);
-                },
-                error: function(response) {
-                    if (response.status == 422) {
-                        showErrorAlertNoRefresh("Kolom yang wajib diisi belum ter isi!");
-                        // console.log(response);
-                    } else {
-                        showErrorAlertNoRefresh(response.responseJSON.error);
-                        // console.log(response.responseJSON.error);
+        // Serialize form data
+        let formData = form.serialize();
+        formData += '&action_type=' + actionType + '&registration_id=' + "{{ $registration->id }}";
 
-                    }
-                }
+        // Show loading state
+        showLoadingState(true);
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: formData,
+            success: function(response) {
+                handleSubmitSuccess(actionType);
+            },
+            error: function(response) {
+                handleSubmitError(response);
+            },
+            complete: function() {
+                showLoadingState(false);
+            }
+        });
+    }
+
+    /**
+     * Handle successful form submission
+     * @param {string} actionType - Action type that was successful
+     */
+    function handleSubmitSuccess(actionType) {
+        const message = actionType === 'draft' ?
+            'Data berhasil disimpan sebagai draft!' :
+            'Data berhasil disimpan sebagai final!';
+
+        showSuccessAlert(message);
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
+
+    /**
+     * Handle form submission error
+     * @param {object} response - AJAX error response
+     */
+    function handleSubmitError(response) {
+        if (response.status === 422) {
+            showErrorAlertNoRefresh("Kolom yang wajib diisi belum ter isi!");
+        } else {
+            const errorMessage = response.responseJSON?.error || 'Terjadi kesalahan saat menyimpan data!';
+            showErrorAlertNoRefresh(errorMessage);
+        }
+    }
+
+    /**
+     * Show or hide loading state on buttons
+     * @param {boolean} isLoading - Whether to show loading state
+     */
+    function showLoadingState(isLoading) {
+        const buttons = $('.bsd-resume-medis-rajal, .bsf-resume-medis-rajal');
+
+        if (isLoading) {
+            buttons.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Menyimpan...');
+        } else {
+            buttons.prop('disabled', false).html(function() {
+                return $(this).hasClass('bsd-resume-medis-rajal') ?
+                    '<span class="mdi mdi-content-save"></span> Simpan (draft)' :
+                    '<span class="mdi mdi-content-save"></span> Simpan (final)';
             });
         }
-    });
+    }
 </script>

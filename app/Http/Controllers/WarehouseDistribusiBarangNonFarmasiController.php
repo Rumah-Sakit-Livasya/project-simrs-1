@@ -65,16 +65,16 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
 
         // Get the filtered results if any filter is applied
         if ($filterApplied) {
-            $db = $query->orderBy('created_at', 'desc')->get();
+            $dbs = $query->orderBy('created_at', 'desc')->get();
         } else {
             // Return all data if no filter is applied
-            $db = WarehouseDistribusiBarangNonFarmasi::all();
+            $dbs = WarehouseDistribusiBarangNonFarmasi::all();
         }
 
         return view("pages.simrs.warehouse.distribusi-barang.non-pharmacy", [
             "gudangs" => WarehouseMasterGudang::all(),
-            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 0)->where("warehouse", 1)->get(),
-            "dbs" => $db
+            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 1)->where("warehouse", 1)->get(),
+            "dbs" => $dbs
         ]);
     }
 
@@ -104,11 +104,11 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
         return view("pages.simrs.warehouse.distribusi-barang.partials.popup-add-db-non-farmasi", [
             "srs" => $srs->get(),
             "gudangs" => WarehouseMasterGudang::all(),
-            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 0)->where("warehouse", 1)->get(),
+            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 1)->where("warehouse", 1)->get(),
         ]);
     }
 
-    private function generate_db_code()
+    private function generateDbCode()
     {
         $date = Carbon::now();
         $year = $date->format('y');
@@ -129,8 +129,8 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
         $si->where("qty", ">", 0);
         $si->whereHas("pbi", function ($q) use ($barang_id, $satuan_id) {
             $q->where("barang_id", $barang_id);
-            // $q->where("satuan_id", $satuan_id);
-            // $q->whereDate("tanggal_exp", ">=", now())->orWhereNull("tanggal_exp");
+            $q->where("satuan_id", $satuan_id);
+            $q->whereDate("tanggal_exp", ">=", now())->orWhereNull("tanggal_exp");
         });
 
         $sis = $si->get();
@@ -160,7 +160,7 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
      */
     public function edit(WarehouseDistribusiBarangNonFarmasi $warehouseDistribusiBarangNonPharmacy, $id)
     {
-        $db =  $warehouseDistribusiBarangNonPharmacy::findorfail($id);
+        $db = $warehouseDistribusiBarangNonPharmacy->findOrFail($id);
         foreach ($db->items as $item) {
             $si = StoredBarangNonFarmasi::query()->with(["pbi"]);
             $si->where("gudang_id", $db->asal_gudang_id);
@@ -189,7 +189,7 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
             "srs" => $srs->get(),
             "db" => $db,
             "gudangs" => WarehouseMasterGudang::all(),
-            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 0)->where("warehouse", 1)->get(),
+            "gudang_asals" => WarehouseMasterGudang::where("aktif", 1)->where("apotek", 1)->where("warehouse", 1)->get(),
         ]);
     }
 
@@ -198,31 +198,25 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-
         $validatedData1 = $request->validate([
             "user_id" => "required|exists:users,id",
             "asal_gudang_id" => "required|exists:warehouse_master_gudang,id",
             "tujuan_gudang_id" => "required|exists:warehouse_master_gudang,id",
             "tanggal_db" => "required|date",
-            "sr_id" => "nullable|exists:warehouse_stock_request_non_pharmacy,id",
+            "sr_id" => "nullable|exists:warehouse_stock_request_pharmacy,id",
             "status" => "required|in:draft,final",
             "keterangan" => "nullable|string"
         ]);
-
-        // dd($validatedData1);
 
         $validatedData2 = $request->validate([
             "barang_id.*" => "required|exists:warehouse_barang_non_farmasi,id",
             "satuan_id.*" => "required|exists:warehouse_satuan_barang,id",
             "qty.*" => "required|integer",
             "keterangan_item.*" => "nullable|string",
-            "sri_id.*" => "nullable|exists:warehouse_stock_request_non_pharmacy_item,id"
+            "sri_id.*" => "nullable|exists:warehouse_stock_request_pharmacy_item,id"
         ]);
 
-        // dd($validatedData2);
-
-        $validatedData1["kode_db"] = $this->generate_db_code();
+        $validatedData1["kode_db"] = $this->generateDbCode();
         DB::beginTransaction();
 
         try {
@@ -231,12 +225,12 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
             $tujuan_gudang_id = $validatedData1["tujuan_gudang_id"];
             $user = User::findOrFail($validatedData1["user_id"]);
 
-
             foreach ($validatedData2["barang_id"] as $index => $barang_id) {
                 $satuan_id = $validatedData2["satuan_id"][$index];
                 $sri_id = $validatedData2["sri_id"][$index] ?? null;
                 $requested_qty = $validatedData2["qty"][$index];
                 $keterangan_item = $validatedData2["keterangan_item"][$index] ?? null;
+                
                 WarehouseDistribusiBarangNonFarmasiItems::create([
                     "db_id" => $db->id,
                     "barang_id" => $barang_id,
@@ -247,124 +241,10 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
                 ]);
 
                 if ($validatedData1["status"] == "final") {
-                    // update stock request item
-                    if (isset($sri_id)) {
-                        $sri = WarehouseStockRequestNonPharmacyItems::findOrFail($sri_id);
-                        $sri->qty_fulfilled += $requested_qty;
-                        if ($sri->qty < $sri->qty_fulfilled) $sri->qty_fulfilled = $sri->qty;
-                        $sri->save();
-                    }
-
-                    // TODO: LOGIC FOR DISTRIBUTE GOODS
-                    $origin_sis = StoredBarangNonFarmasi::query()->with(["pbi"]);
-                    $origin_sis->where("gudang_id", $asal_gudang_id);
-                    $origin_sis->whereHas("pbi", function ($q) use ($barang_id, $satuan_id) {
-                        // barang and satuan
-                        $q->where("barang_id", $barang_id);
-                        $q->where("satuan_id", $satuan_id);
-                        // ensure tanggal_exp is not in the past
-                        $q->whereDate("tanggal_exp", ">=", now())->orWhereNull("tanggal_exp");
-                    });
-                    $origin_sis = $origin_sis->oldest()->get();
-
-                    // ensure there are enough goods in origin warehouse for requested quantity
-                    $available_stock = $origin_sis->sum("qty");
-                    if ($available_stock < $requested_qty) {
-                        // throw exception
-                        throw new \Exception("Stock tidak cukup untuk barang dengan id" . $barang_id);
-                    }
-
-                    $transfered = 0;
-
-                    foreach ($origin_sis as $si) {
-                        if ($transfered >= $requested_qty) break;
-
-                        // option 1: update existing
-                        // check if there is another $si with gudang_id == tujuan_gudang_id
-                        // and pbi the same as $si
-                        $si_tujuan = StoredBarangNonFarmasi::query()->where("gudang_id", $tujuan_gudang_id)
-                            ->where("pbi_id", $si->pbi_id)
-                            ->first();
-                        if ($si_tujuan) {
-                            $qty = $si->qty;
-                            if (($qty + $transfered) > $requested_qty) {
-                                $qty = $requested_qty - $transfered;
-                            }
-
-                            // update existing
-                            // $si_tujuan->qty += $qty;
-                            // $si_tujuan->save();
-                            // $si->qty -= $qty;
-                            // $si->save();
-
-                            // use the GoodsStockService
-                            $args = new TransferStockArguments($user, $db, $si, $si_tujuan, $qty);
-                            $this->goodsStockService->transferStock($args);
-                            $transfered += $qty;
-
-                            // if ($si->qty == 0) { // delete if qty is 0
-                            //     $si->forceDelete(); // force delete
-                            // } else { // update if qty is not 0
-                            //     $si->save();
-                            // }
-                            // 
-                            // 30 June 2025
-                            // don't delete even if qty == 0
-                            // it would cause problem on related data
-
-                            continue;
-                        }
-
-                        // option 2: move the whole $si
-                        // if $si->qty + $transfered is still less than $requested_qty
-                        // then update the $si->gudang_id to $tujuan_gudang_id
-                        if (($si->qty + $transfered) <= $requested_qty) {
-                            // use the GoodsStockService
-                            $warehouse = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
-                            $args = new MoveStockArguments($user, $db, $si, $warehouse);
-                            $this->goodsStockService->moveStock($args);
-                            $transfered += $si->qty;
-
-                            // $si->gudang_id = $tujuan_gudang_id;
-                            // $si->save();
-                            continue;
-                        }
-
-                        // option 3: split
-                        // if $si->qty + $transfered is more than $requested_qty
-                        // then create a new $si with the remaining qty
-                        // and update the existing $si->qty
-                        if (($si->qty + $transfered) > $requested_qty) {
-                            $remaining_qty = $requested_qty - $transfered;
-                            $transfered = $requested_qty;
-
-                            // use the GoodsStockService
-                            // first, decrease the current stock
-                            $decrease_args = new IncreaseDecreaseStockArguments($user, $db, $si, $remaining_qty);
-                            $this->goodsStockService->decreaseStock($decrease_args);
-
-                            // then, create a new stock
-                            $type = GoodsType::NonPharmacy;
-                            $warehouse = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
-                            $pbi = WarehousePenerimaanBarangNonFarmasiItems::findOrFail($si->pbi_id);
-                            $new_stock_args = new CreateStockArguments($user, $db, $type, $warehouse, $pbi, $remaining_qty);
-                            $this->goodsStockService->createStock($new_stock_args);
-
-                            // $si->qty -= $remaining_qty;
-                            // $si->save();
-                            // StoredBarangFarmasi::create([
-                            // "pbi_id" => $si->pbi_id,
-                            // "gudang_id" => $tujuan_gudang_id,
-                            // "qty" => $remaining_qty
-                            // ]);
-
-                            continue;
-                        }
-                    }
+                    $this->processDistribution($user, $db, $asal_gudang_id, $tujuan_gudang_id, $barang_id, 
+                        $satuan_id, $requested_qty, $sri_id);
                 }
             }
-
-
 
             DB::commit();
             return back()->with('success', 'Data berhasil disimpan');
@@ -379,28 +259,25 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
      */
     public function update(Request $request, WarehouseDistribusiBarangNonFarmasi $warehouseDistribusiBarangNonPharmacy, $id)
     {
-        // dd($request->all());
         $validatedData1 = $request->validate([
             "id" => "required|exists:warehouse_distribusi_barang_non_farmasi,id",
             "user_id" => "required|exists:users,id",
             "asal_gudang_id" => "required|exists:warehouse_master_gudang,id",
             "tujuan_gudang_id" => "required|exists:warehouse_master_gudang,id",
             "tanggal_db" => "required|date",
-            "sr_id" => "nullable|exists:warehouse_stock_request_non_pharmacy,id",
+            "sr_id" => "nullable|exists:warehouse_stock_request_pharmacy,id",
             "status" => "required|in:draft,final",
             "keterangan" => "nullable|string"
         ]);
-        // dd($validatedData1);
 
         $validatedData2 = $request->validate([
             "barang_id.*" => "required|exists:warehouse_barang_non_farmasi,id",
             "satuan_id.*" => "required|exists:warehouse_satuan_barang,id",
             "qty.*" => "required|integer",
             "keterangan_item.*" => "nullable|string",
-            "sri_id.*" => "nullable|exists:warehouse_stock_request_non_pharmacy_item,id",
+            "sri_id.*" => "nullable|exists:warehouse_stock_request_pharmacy_item,id",
             "item_id.*" => "nullable|exists:warehouse_distribusi_barang_non_farmasi_item,id",
         ]);
-        // dd($validatedData2);
 
         DB::beginTransaction();
 
@@ -411,12 +288,7 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
             $tujuan_gudang_id = $validatedData1["tujuan_gudang_id"];
             $user = User::findOrFail($validatedData1["user_id"]);
 
-            // $validatedData["item_id"] is a key => pair array
-            // delete everything from WarehouseDistribusiBarangNonFarmasiItems
-            // where db_id == $pr->id
-            // and id IS NOT IN $validatedData["item_id"]
-            // because if it is not in $validatedData["item_id"]
-            // it means it has been deleted
+            // Delete items that are not in the request
             if (isset($validatedData2["item_id"]) && count($validatedData2["item_id"]) > 0) {
                 WarehouseDistribusiBarangNonFarmasiItems::where("db_id", $db->id)
                     ->whereNotIn("id", $validatedData2["item_id"])
@@ -440,127 +312,15 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
                 ];
 
                 if ($request->has("item_id") && isset($validatedData2["item_id"][$index])) {
-                    $dbi = WarehouseDistribusiBarangNonFarmasiItems::findorfail($validatedData2["item_id"][$index]);
+                    $dbi = WarehouseDistribusiBarangNonFarmasiItems::findOrFail($validatedData2["item_id"][$index]);
                     $dbi->update($attributes);
                 } else {
                     $dbi = new WarehouseDistribusiBarangNonFarmasiItems($attributes);
                 }
 
                 if ($validatedData1["status"] == "final") {
-                    // update stock request item
-                    if (isset($sri_id)) {
-                        $sri = WarehouseStockRequestNonPharmacyItems::findOrFail($sri_id);
-                        $sri->qty_fulfilled += $requested_qty;
-                        if ($sri->qty < $sri->qty_fulfilled) $sri->qty_fulfilled = $sri->qty;
-                        $sri->save();
-                    }
-
-                    // TODO: LOGIC FOR DISTRIBUTE GOODS
-                    $origin_sis = StoredBarangNonFarmasi::query()->with(["pbi"]);
-                    $origin_sis->where("gudang_id", $asal_gudang_id);
-                    $origin_sis->whereHas("pbi", function ($q) use ($barang_id, $satuan_id) {
-                        // barang and satuan
-                        $q->where("barang_id", $barang_id);
-                        $q->where("satuan_id", $satuan_id);
-                        // ensure tanggal_exp is not in the past
-                        $q->whereDate("tanggal_exp", ">=", now())->orWhereNull("tanggal_exp");
-                    });
-                    $origin_sis = $origin_sis->oldest()->get();
-
-                    // ensure there are enough goods in origin warehouse for requested quantity
-                    $available_stock = $origin_sis->sum("qty");
-                    if ($available_stock < $requested_qty) {
-                        // throw exception
-                        throw new \Exception("Stock tidak cukup untuk barang dengan id" . $barang_id);
-                    }
-
-                    $transfered = 0;
-
-                    foreach ($origin_sis as $si) {
-                        if ($transfered >= $requested_qty) break;
-
-                        // option 1: update existing
-                        // check if there is another $si with gudang_id == tujuan_gudang_id
-                        // and pbi the same as $si
-                        $si_tujuan = StoredBarangNonFarmasi::query()->where("gudang_id", $tujuan_gudang_id)
-                            ->where("pbi_id", $si->pbi_id)
-                            ->first();
-                        if ($si_tujuan) {
-                            $qty = $si->qty;
-                            if (($qty + $transfered) > $requested_qty) {
-                                $qty = $requested_qty - $transfered;
-                            }
-
-                            // update existing
-                            // $si_tujuan->qty += $qty;
-                            // $si_tujuan->save();
-                            // $si->qty -= $qty;
-                            // $si->save();
-
-                            // use the GoodsStockService
-                            $args = new TransferStockArguments($user, $db, $si, $si_tujuan, $qty);
-                            $this->goodsStockService->transferStock($args);
-                            $transfered += $qty;
-
-                            // if ($si->qty == 0) { // delete if qty is 0
-                            //     $si->forceDelete(); // force delete
-                            // } else { // update if qty is not 0
-                            //     $si->save();
-                            // }
-                            // 
-                            // 30 June 2025
-                            // don't delete even if qty == 0
-                            // it would cause problem on related data
-
-                            continue;
-                        }
-
-                        // option 2: move the whole $si
-                        // if $si->qty + $transfered is still less than $requested_qty
-                        // then update the $si->gudang_id to $tujuan_gudang_id
-                        if (($si->qty + $transfered) <= $requested_qty) {
-                            // use the GoodsStockService
-                            $warehouse = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
-                            $args = new MoveStockArguments($user, $db, $si, $warehouse);
-                            $this->goodsStockService->moveStock($args);
-                            $transfered += $si->qty;
-
-                            // $si->gudang_id = $tujuan_gudang_id;
-                            // $si->save();
-                            continue;
-                        }
-
-                        // option 3: split
-                        // if $si->qty + $transfered is more than $requested_qty
-                        // then create a new $si with the remaining qty
-                        // and update the existing $si->qty
-                        if (($si->qty + $transfered) > $requested_qty) {
-                            $remaining_qty = $requested_qty - $transfered;
-                            $transfered = $requested_qty;
-
-                            // use the GoodsStockService
-                            // first, decrease the current stock
-                            $decrease_args = new IncreaseDecreaseStockArguments($user, $db, $si, $remaining_qty);
-                            $this->goodsStockService->decreaseStock($decrease_args);
-
-                            // then, create a new stock
-                            $type = GoodsType::NonPharmacy;
-                            $warehouse = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
-                            $pbi = WarehousePenerimaanBarangNonFarmasiItems::findOrFail($si->pbi_id);
-                            $new_stock_args = new CreateStockArguments($user, $db, $type, $warehouse, $pbi, $remaining_qty);
-                            $this->goodsStockService->createStock($new_stock_args);
-
-                            // $si->qty -= $remaining_qty;
-                            // $si->save();
-                            // StoredBarangFarmasi::create([
-                            // "pbi_id" => $si->pbi_id,
-                            // "gudang_id" => $tujuan_gudang_id,
-                            // "qty" => $remaining_qty
-                            // ]);
-
-                            continue;
-                        }
-                    }
+                    $this->processDistribution($user, $db, $asal_gudang_id, $tujuan_gudang_id, $barang_id, 
+                        $satuan_id, $requested_qty, $sri_id);
                 }
 
                 $dbi->save(); // save or update
@@ -574,10 +334,105 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
         }
     }
 
+    /**
+     * Process the distribution logic for goods
+     */
+    private function processDistribution(User $user, WarehouseDistribusiBarangNonFarmasi $db, 
+        int $asal_gudang_id, int $tujuan_gudang_id, int $barang_id, int $satuan_id, int $requested_qty, ?int $sri_id)
+    {
+        // update stock request item
+        if (isset($sri_id)) {
+            $sri = WarehouseStockRequestNonPharmacyItems::findOrFail($sri_id);
+            $sri->qty_fulfilled += $requested_qty;
+            if ($sri->qty < $sri->qty_fulfilled) $sri->qty_fulfilled = $sri->qty;
+            $sri->save();
+        }
+
+        // Get origin stock items
+        $origin_sis = StoredBarangNonFarmasi::query()->with(["pbi"]);
+        $origin_sis->where("gudang_id", $asal_gudang_id);
+        $origin_sis->whereHas("pbi", function ($q) use ($barang_id, $satuan_id) {
+            // barang and satuan
+            $q->where("barang_id", $barang_id);
+            $q->where("satuan_id", $satuan_id);
+            // ensure tanggal_exp is not in the past
+            $q->whereDate("tanggal_exp", ">=", now())->orWhereNull("tanggal_exp");
+        });
+        $origin_sis = $origin_sis->oldest()->get();
+
+        // ensure there are enough goods in origin warehouse for requested quantity
+        $available_stock = $origin_sis->sum("qty");
+        if ($available_stock < $requested_qty) {
+            throw new \Exception("Stock tidak cukup untuk barang dengan id " . $barang_id);
+        }
+
+        $transfered = 0;
+
+        foreach ($origin_sis as $si) {
+            if ($transfered >= $requested_qty) break;
+
+            // option 1: update existing
+            // check if there is another $si with gudang_id == tujuan_gudang_id
+            // and pbi the same as $si
+            $si_tujuan = StoredBarangNonFarmasi::query()->where("gudang_id", $tujuan_gudang_id)
+                ->where("pbi_id", $si->pbi_id)
+                ->first();
+            if ($si_tujuan) {
+                $qty = $si->qty;
+                if (($qty + $transfered) > $requested_qty) {
+                    $qty = $requested_qty - $transfered;
+                }
+
+                // use the GoodsStockService
+                $args = new TransferStockArguments($user, $db, $si, $si_tujuan, $qty);
+                $this->goodsStockService->transferStock($args);
+                $transfered += $qty;
+
+                continue;
+            }
+
+            // option 2: move the whole $si
+            // if $si->qty + $transfered is still less than $requested_qty
+            // then update the $si->gudang_id to $tujuan_gudang_id
+            if (($si->qty + $transfered) <= $requested_qty) {
+                // use the GoodsStockService
+                $warehouse = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
+                $args = new MoveStockArguments($user, $db, $si, $warehouse);
+                $this->goodsStockService->moveStock($args);
+                $transfered += $si->qty;
+
+                continue;
+            }
+
+            // option 3: split
+            // if $si->qty + $transfered is more than $requested_qty
+            // then create a new $si with the remaining qty
+            // and update the existing $si->qty
+            if (($si->qty + $transfered) > $requested_qty) {
+                $remaining_qty = $requested_qty - $transfered;
+                $transfered = $requested_qty;
+
+                // use the GoodsStockService
+                // first, decrease the current stock
+                $decrease_args = new IncreaseDecreaseStockArguments($user, $db, $si, $remaining_qty);
+                $this->goodsStockService->decreaseStock($decrease_args);
+
+                // then, create a new stock
+                $type = GoodsType::NonPharmacy;
+                $warehouse = WarehouseMasterGudang::findOrFail($tujuan_gudang_id);
+                $pbi = WarehousePenerimaanBarangNonFarmasiItems::findOrFail($si->pbi_id);
+                $new_stock_args = new CreateStockArguments($user, $db, $type, $warehouse, $pbi, $remaining_qty);
+                $this->goodsStockService->createStock($new_stock_args);
+
+                continue;
+            }
+        }
+    }
+
     public function print($id)
     {
         return view("pages.simrs.warehouse.distribusi-barang.partials.db-print-non-pharmacy", [
-            "db" => WarehouseDistribusiBarangNonFarmasi::findorfail($id)
+            "db" => WarehouseDistribusiBarangNonFarmasi::findOrFail($id)
         ]);
     }
 
@@ -586,8 +441,8 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
      */
     public function destroy(WarehouseDistribusiBarangNonFarmasi $warehouseDistribusiBarangNonPharmacy, $id)
     {
-        $pr = $warehouseDistribusiBarangNonPharmacy->findorfail($id);
-        if ($pr->status == 'final') {
+        $db = $warehouseDistribusiBarangNonPharmacy->findOrFail($id);
+        if ($db->status == 'final') {
             return response()->json([
                 'success' => false,
                 'message' => "DB sudah final, tidak bisa dihapus!"
@@ -595,7 +450,7 @@ class WarehouseDistribusiBarangNonFarmasiController extends Controller
         }
 
         try {
-            $pr->delete();
+            $db->delete();
 
             return response()->json([
                 'success' => true,

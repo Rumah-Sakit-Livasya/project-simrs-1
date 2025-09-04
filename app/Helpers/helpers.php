@@ -1,15 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Request;
+use App\Models\SIMRS\Patient;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Request;
 
 /**
  * Determines if a given date of birth (DOB) falls within a specified age range.
  *
+<<<<<<< HEAD
+ * @param  string  $dob  The date of birth in a valid date format (e.g., 'YYYY-MM-DD').
+ * @param  string  $minAgeStr  The minimum age range in the format 'years-months-days' (e.g., '18-0-0' for 18 years).
+ * @param  string  $maxAgeStr  The maximum age range in the format 'years-months-days' (e.g., '65-0-0' for 65 years).
+=======
  * @param string $dob The date of birth in a valid date format (e.g., 'YYYY-MM-DD').
  * @param string $minAgeStr The minimum age range in the format 'years-months-days' (e.g., '18-0-0' for 18 years).
  * @param string $maxAgeStr The maximum age range in the format 'years-months-days' (e.g., '65-0-0' for 65 years).
  *
+>>>>>>> 8e7214da5e3d10e8315676acc91e58fbe43f1848
  * @return bool Returns true if the date of birth is within the specified age range, otherwise false.
  *
  * @example
@@ -28,12 +35,12 @@ use Carbon\Carbon;
 function isWithinAgeRange($dob, $minAgeStr, $maxAgeStr)
 {
     // Parse the minimum age string
-    list($minYears, $minMonths, $minDays) = explode('-', $minAgeStr);
-    $minAge = new Age((int)$minYears, (int)$minMonths, (int)$minDays);
+    [$minYears, $minMonths, $minDays] = explode('-', $minAgeStr);
+    $minAge = new Age((int) $minYears, (int) $minMonths, (int) $minDays);
 
     // Parse the maximum age string
-    list($maxYears, $maxMonths, $maxDays) = explode('-', $maxAgeStr);
-    $maxAge = new Age((int)$maxYears, (int)$maxMonths, (int)$maxDays);
+    [$maxYears, $maxMonths, $maxDays] = explode('-', $maxAgeStr);
+    $maxAge = new Age((int) $maxYears, (int) $maxMonths, (int) $maxDays);
 
     // Create an AgeComparison object
     $ageComparison = new AgeComparison($minAge, $maxAge);
@@ -88,13 +95,13 @@ function getBreadcrumbs($folder)
 
 function toHijriah($tanggal)
 {
-    $array_month = array("Muharram", "Safar", "Rabiul Awwal", "Rabiul Akhir", "Jumadil Awwal", "Jumadil Akhir", "Rajab", "Sya'ban", "Ramadhan", "Syawwal", "Zulqaidah", "Zulhijjah");
+    $array_month = ['Muharram', 'Safar', 'Rabiul Awwal', 'Rabiul Akhir', 'Jumadil Awwal', 'Jumadil Akhir', 'Rajab', "Sya'ban", 'Ramadhan', 'Syawwal', 'Zulqaidah', 'Zulhijjah'];
 
     $date = intval(substr($tanggal, 8, 2));
     $month = intval(substr($tanggal, 5, 2));
     $year = intval(substr($tanggal, 0, 4));
 
-    if (($year > 1582) || (($year == "1582") && ($month > 10)) || (($year == "1582") && ($month == "10") && ($date > 14))) {
+    if (($year > 1582) || (($year == '1582') && ($month > 10)) || (($year == '1582') && ($month == '10') && ($date > 14))) {
         $jd = intval((1461 * ($year + 4800 + intval(($month - 14) / 12))) / 4) +
             intval((367 * ($month - 2 - 12 * (intval(($month - 14) / 12)))) / 12) -
             intval((3 * (intval(($year + 4900 + intval(($month - 14) / 12)) / 100))) / 4) +
@@ -105,22 +112,22 @@ function toHijriah($tanggal)
     }
 
     $wd = $jd % 7;
-    $l  = $jd - 1948440 + 10632;
-    $n  = intval(($l - 1) / 10631);
-    $l  = $l - 10631 * $n + 354;
-    $z  = (intval((10985 - $l) / 5316)) * (intval((50 * $l) / 17719)) + (intval($l / 5670)) * (intval((43 * $l) / 15238));
-    $l  = $l - (intval((30 - $z) / 15)) * (intval((17719 * $z) / 50)) - (intval($z / 16)) * (intval((15238 * $z) / 43)) + 29;
-    $m  = intval((24 * $l) / 709);
-    $d  = $l - intval((709 * $m) / 24);
-    $y  = 30 * $n + $z - 30;
-    $g  = $m - 1;
+    $l = $jd - 1948440 + 10632;
+    $n = intval(($l - 1) / 10631);
+    $l = $l - 10631 * $n + 354;
+    $z = (intval((10985 - $l) / 5316)) * (intval((50 * $l) / 17719)) + (intval($l / 5670)) * (intval((43 * $l) / 15238));
+    $l = $l - (intval((30 - $z) / 15)) * (intval((17719 * $z) / 50)) - (intval($z / 16)) * (intval((15238 * $z) / 43)) + 29;
+    $m = intval((24 * $l) / 709);
+    $d = $l - intval((709 * $m) / 24);
+    $y = 30 * $n + $z - 30;
+    $g = $m - 1;
 
     $hijriah = "$d $array_month[$g] $y H";
 
     return $hijriah;
 }
 
-if (!function_exists('set_active')) {
+if (! function_exists('set_active')) {
     function set_active($paths, $class = 'active')
     {
         foreach ((array) $paths as $path) {
@@ -128,11 +135,12 @@ if (!function_exists('set_active')) {
                 return $class;
             }
         }
+
         return '';
     }
 }
 
-if (!function_exists('set_active_mainmenu')) {
+if (! function_exists('set_active_mainmenu')) {
     function set_active_mainmenu($paths, $class = 'active open')
     {
         foreach ((array) $paths as $path) {
@@ -149,11 +157,12 @@ if (!function_exists('set_active_mainmenu')) {
                 }
             }
         }
+
         return '';
     }
 }
 
-if (!function_exists('formatNomorIndo')) {
+if (! function_exists('formatNomorIndo')) {
     function formatNomorIndo($nomor)
     {
         // Cek apakah nomor diawali dengan '0'
@@ -166,11 +175,11 @@ if (!function_exists('formatNomorIndo')) {
     }
 }
 
-if (!function_exists('tgl')) {
+if (! function_exists('tgl')) {
     function tgl($tanggal)
     {
-        $bulan = array(
-            1 =>   'Januari',
+        $bulan = [
+            1 => 'Januari',
             'Februari',
             'Maret',
             'April',
@@ -181,21 +190,21 @@ if (!function_exists('tgl')) {
             'September',
             'Oktober',
             'November',
-            'Desember'
-        );
+            'Desember',
+        ];
 
         if ($tanggal !== null) {
             $pecahkan = explode('-', $tanggal);
-            $format = $pecahkan[2] . ' ' . $bulan[(int)$pecahkan[1]] . ' ' . $pecahkan[0];
+            $format = $pecahkan[2] . ' ' . $bulan[(int) $pecahkan[1]] . ' ' . $pecahkan[0];
         } else {
-            $format = "*belum disetting";
+            $format = '*belum disetting';
         }
 
         return $format;
     }
 }
 
-if (!function_exists('tgl_waktu')) {
+if (! function_exists('tgl_waktu')) {
     function tgl_waktu($tanggal)
     {
         // List of months in Indonesian
@@ -228,6 +237,13 @@ if (!function_exists('tgl_waktu')) {
     }
 }
 
+if (! function_exists('tgl_waktu_short')) {
+    function tgl_waktu_short($tanggal)
+    {
+        return date('d-m-Y H:i', strtotime($tanggal));
+    }
+}
+
 function greetings()
 {
     date_default_timezone_set('Asia/Jakarta'); // Sesuaikan dengan zona waktu Anda
@@ -251,17 +267,17 @@ function greetings()
 function konversiTanggal($tanggal)
 {
     // Array nama hari dalam Bahasa Indonesia
-    $namaHari = array(
+    $namaHari = [
         'Minggu',
         'Senin',
         'Selasa',
         'Rabu',
         'Kamis',
         'Jumat',
-        'Sabtu'
-    );
+        'Sabtu',
+    ];
     // Array nama bulan dalam Bahasa Indonesia
-    $namaBulan = array(
+    $namaBulan = [
         1 => 'Januari',
         'Februari',
         'Maret',
@@ -273,8 +289,8 @@ function konversiTanggal($tanggal)
         'September',
         'Oktober',
         'November',
-        'Desember'
-    );
+        'Desember',
+    ];
 
     // Mendapatkan nama hari berdasarkan nilai tanggal
     $hari = $namaHari[date('w', strtotime($tanggal))];
@@ -287,7 +303,7 @@ function konversiTanggal($tanggal)
     return $hari . ', ' . $tanggal . ' ' . $bulan;
 }
 
-//hitung radius jarak
+// hitung radius jarak
 function haversine($lat1, $lon1, $lat2, $lon2)
 {
     $r = 6371; // Radius bumi dalam kilometer
@@ -296,6 +312,7 @@ function haversine($lat1, $lon1, $lat2, $lon2)
     $a = sin($dLat / 2) * sin($dLat / 2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) * sin($dLon / 2);
     $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
     $d = $r * $c; // Jarak dalam kilometer
+
     return $d;
 }
 
@@ -304,13 +321,14 @@ function hitungUmur($tanggal_lahir)
     // Ubah string tanggal lahir menjadi objek DateTime
     $tgl_lahir = new DateTime($tanggal_lahir);
     // Dapatkan tanggal hari ini
-    $today = new DateTime();
+    $today = new DateTime;
     // Hitung selisih antara tanggal lahir dan tanggal hari ini
     $umur = $tgl_lahir->diff($today);
     // Ambil bagian umur dalam tahun
     $umur_tahun = $umur->y;
+
     // Kembalikan umur dalam tahun
-    return $umur_tahun .  " Tahun";
+    return $umur_tahun . ' Tahun';
 }
 
 function hitungHari($tanggal)
@@ -358,29 +376,29 @@ function rp3($amount)
 
 function terbilangRp($angka, $withSuffix = true)
 {
-    $satuan = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
+    $satuan = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
 
     if ($angka < 12) {
         $result = $satuan[$angka];
     } elseif ($angka < 20) {
-        $result = $satuan[$angka - 10] . " belas";
+        $result = $satuan[$angka - 10] . ' belas';
     } elseif ($angka < 100) {
-        $result = terbilangRp(intval($angka / 10), false) . " puluh" . (($angka % 10 != 0) ? " " . terbilangRp($angka % 10, false) : "");
+        $result = terbilangRp(intval($angka / 10), false) . ' puluh' . (($angka % 10 != 0) ? ' ' . terbilangRp($angka % 10, false) : '');
     } elseif ($angka < 200) {
-        $result = "seratus" . (($angka != 100) ? " " . terbilangRp($angka - 100, false) : "");
+        $result = 'seratus' . (($angka != 100) ? ' ' . terbilangRp($angka - 100, false) : '');
     } elseif ($angka < 1000) {
-        $result = terbilangRp(intval($angka / 100), false) . " ratus" . (($angka % 100 != 0) ? " " . terbilangRp($angka % 100, false) : "");
+        $result = terbilangRp(intval($angka / 100), false) . ' ratus' . (($angka % 100 != 0) ? ' ' . terbilangRp($angka % 100, false) : '');
     } elseif ($angka < 2000) {
-        $result = "seribu" . (($angka != 1000) ? " " . terbilangRp($angka - 1000, false) : "");
+        $result = 'seribu' . (($angka != 1000) ? ' ' . terbilangRp($angka - 1000, false) : '');
     } elseif ($angka < 1000000) {
-        $result = terbilangRp(intval($angka / 1000), false) . " ribu" . (($angka % 1000 != 0) ? " " . terbilangRp($angka % 1000, false) : "");
+        $result = terbilangRp(intval($angka / 1000), false) . ' ribu' . (($angka % 1000 != 0) ? ' ' . terbilangRp($angka % 1000, false) : '');
     } elseif ($angka < 1000000000) {
-        $result = terbilangRp(intval($angka / 1000000), false) . " juta" . (($angka % 1000000 != 0) ? " " . terbilangRp($angka % 1000000, false) : "");
+        $result = terbilangRp(intval($angka / 1000000), false) . ' juta' . (($angka % 1000000 != 0) ? ' ' . terbilangRp($angka % 1000000, false) : '');
     } else {
-        $result = "angka terlalu besar";
+        $result = 'angka terlalu besar';
     }
 
-    return $withSuffix ? $result . " rupiah" : $result;
+    return $withSuffix ? $result . ' rupiah' : $result;
 }
 
 function rp2($amount)
@@ -409,7 +427,7 @@ function convertPeriodePayroll($period)
 }
 
 // Check if function is already declared
-if (!function_exists('isActiveMenu')) {
+if (! function_exists('isActiveMenu')) {
     function isActiveMenu($menu)
     {
         $urls = collect([$menu->url]);
@@ -419,6 +437,7 @@ if (!function_exists('isActiveMenu')) {
                 $urls = $urls->merge(isActiveMenuUrls($child));
             }
         }
+
         return set_active_mainmenu($urls->toArray());
     }
 
@@ -431,6 +450,7 @@ if (!function_exists('isActiveMenu')) {
                 $urls = $urls->merge(isActiveMenuUrls($child));
             }
         }
+
         return $urls;
     }
 }
@@ -441,17 +461,53 @@ function phone($phone)
     if (substr($phone, 0, 1) == '0') {
         $phone = '62' . substr($phone, 1);
     }
+
     return $phone;
 }
 
+function toRoman($number)
+{
+    if ($number <= 0 || $number > 3999) {
+        return 'Number must be between 1 and 3999';
+    }
 
+    $romanNumerals = [
+        'M' => 1000,
+        'CM' => 900,
+        'D' => 500,
+        'CD' => 400,
+        'C' => 100,
+        'XC' => 90,
+        'L' => 50,
+        'XL' => 40,
+        'X' => 10,
+        'IX' => 9,
+        'V' => 5,
+        'IV' => 4,
+        'I' => 1,
+    ];
 
+    $roman = '';
 
+    foreach ($romanNumerals as $symbol => $value) {
+        while ($number >= $value) {
+            $roman .= $symbol;
+            $number -= $value;
+        }
+    }
 
+    return $roman;
+}
+
+function formatNumber($number)
+{
+    return number_format($number, 0, ',', '.');
+}
 
 function getIndonesianDateFormat($date)
 {
     $carbonDate = Carbon::parse($date)->locale('id_ID');
+
     return $carbonDate->isoFormat('D MMMM YYYY');
 }
 
@@ -469,14 +525,14 @@ function angkaKeBulan($angka)
         9 => 'September',
         10 => 'Oktober',
         11 => 'November',
-        12 => 'Desember'
+        12 => 'Desember',
     ];
 
     // Periksa apakah angka valid antara 1 dan 12
     if (array_key_exists($angka, $bulan)) {
         return $bulan[$angka];
     } else {
-        return "Bulan tidak valid";
+        return 'Bulan tidak valid';
     }
 }
 
@@ -484,7 +540,7 @@ function formatTanggalDetail($tanggal)
 {
     $tanggalFormat = date('d M Y', strtotime($tanggal));
     $tanggalLahir = new DateTime($tanggal);
-    $sekarang = new DateTime();
+    $sekarang = new DateTime;
     $umur = $sekarang->diff($tanggalLahir);
 
     $umurString = $umur->y . 'thn ' . $umur->m . 'bln ' . $umur->d . 'hr';
@@ -556,11 +612,12 @@ function formatTanggalBulan($tanggal)
     return "{$tanggalFormat} {$bulan}";
 }
 
-
 class Age
 {
     public $years;
+
     public $months;
+
     public $days;
 
     public function __construct($years, $months, $days)
@@ -576,6 +633,7 @@ class Age
 class AgeComparison
 {
     private $minAge;
+
     private $maxAge;
 
     public function __construct(Age $minAge, Age $maxAge)
@@ -587,7 +645,7 @@ class AgeComparison
     public function calculateAge($dob)
     {
         $dob = new DateTime($dob);
-        $now = new DateTime();
+        $now = new DateTime;
         $diff = $now->diff($dob);
 
         return new Age($diff->y, $diff->m, $diff->d);
@@ -608,10 +666,11 @@ class AgeComparison
         if ($age1->months != $age2->months) {
             return $age1->months - $age2->months;
         }
+
         return $age1->days - $age2->days;
     }
 
-    function convertSymbol($text)
+    public function convertSymbol($text)
     {
         // Daftar simbol yang akan diganti dengan kata
         $replacements = [
@@ -647,5 +706,28 @@ class AgeComparison
 
         // Ganti simbol-simbol di dalam teks dengan kata yang sesuai
         return strtr($text, $replacements);
+    }
+
+    public function generate_baby_medical_record_number()
+    {
+        $prefix = 'BY';
+        $datePart = date('ym'); // Tahun dan bulan 2 digit, cth: 2405
+
+        // Cari nomor terakhir di bulan dan tahun ini
+        $lastPatient = Patient::where('medical_record_number', 'like', $prefix . '-' . $datePart . '-%')
+            ->orderBy('medical_record_number', 'desc')
+            ->first();
+
+        $sequence = 1;
+        if ($lastPatient) {
+            // Ambil nomor urut dari RM terakhir dan tambahkan 1
+            $lastSequence = (int) substr($lastPatient->medical_record_number, -4);
+            $sequence = $lastSequence + 1;
+        }
+
+        // Format nomor urut menjadi 4 digit dengan leading zero
+        $paddedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        return $prefix . '-' . $datePart . '-' . $paddedSequence;
     }
 }

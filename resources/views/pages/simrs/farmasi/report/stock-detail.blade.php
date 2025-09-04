@@ -95,10 +95,10 @@
             new bootstrap.Popover(el, opts);
         })
     </script>
-    <script src="{{ asset('js/simrs/farmasi/revaluasi-stock/stock-opname/report/stock-detail/table.js') }}">
+    <script src="{{ asset('js/simrs/farmasi/revaluasi-stock/stock-opname/report/stock-detail/table.js') }}?v={{ time() }}">
     </script>
     <script src="{{ asset('js/simrs/farmasi/revaluasi-stock/stock-opname/report/stock-detail/api.js') }}?v={{ time() }}">
     </script>
-    <script src="{{ asset('js/simrs/farmasi/revaluasi-stock/stock-opname/report/stock-detail/main.js') }}">
+    <script src="{{ asset('js/simrs/farmasi/revaluasi-stock/stock-opname/report/stock-detail/main.js') }}?v={{ time() }}">
     </script>
 @endsection

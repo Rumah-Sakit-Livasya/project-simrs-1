@@ -13,7 +13,6 @@ class Employee extends Model
     use HasFactory;
     protected $guarded = ['id'];
 
-
     public function penilaian_pegawais()
     {
         return $this->hasMany(PenilaianPegawai::class);

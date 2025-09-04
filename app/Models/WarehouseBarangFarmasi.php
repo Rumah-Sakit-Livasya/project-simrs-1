@@ -10,77 +10,84 @@ use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 class WarehouseBarangFarmasi extends Model implements AuditableContract
 {
     use Auditable, SoftDeletes;
-    protected $table = "warehouse_barang_farmasi";
-    protected $guarded = ["id"];
+
+    protected $table = 'warehouse_barang_farmasi';
+
+    protected $guarded = ['id'];
 
     public function satuan()
     {
-        return $this->belongsTo(WarehouseSatuanBarang::class, "satuan_id", "id");
+        return $this->belongsTo(WarehouseSatuanBarang::class, 'satuan_id', 'id');
     }
 
     public function kategori()
     {
-        return $this->belongsTo(WarehouseKategoriBarang::class, "kategori_id", "id");
+        return $this->belongsTo(WarehouseKategoriBarang::class, 'kategori_id', 'id');
     }
 
     public function golongan()
     {
-        return $this->belongsTo(WarehouseGolonganBarang::class, "golongan_id", "id");
+        return $this->belongsTo(WarehouseGolonganBarang::class, 'golongan_id', 'id');
     }
 
     public function kelompok()
     {
-        return $this->belongsTo(WarehouseKelompokBarang::class, "kelompok_id", "id");
+        return $this->belongsTo(WarehouseKelompokBarang::class, 'kelompok_id', 'id');
     }
 
     public function satuan_tambahan()
     {
-        return $this->hasMany(WarehouseSatuanTambahanBarangFarmasi::class, "barang_id", "id");
+        return $this->hasMany(WarehouseSatuanTambahanBarangFarmasi::class, 'barang_id', 'id');
     }
 
     public function zat_aktif()
     {
-        return $this->hasMany(WarehouseZatAktifBarangFarmasi::class, "barang_id", "id");
+        return $this->hasMany(WarehouseZatAktifBarangFarmasi::class, 'barang_id', 'id');
     }
 
     public function smms()
     {
-        return $this->hasMany(WarehouseSetupMinMaxStock::class, "barang_f_id", "id");
+        return $this->hasMany(WarehouseSetupMinMaxStock::class, 'barang_f_id', 'id');
     }
 
     public function pr_pharmacy()
     {
-        return $this->hasMany(ProcurementPurchaseRequestPharmacyItems::class, "barang_id", "id");
+        return $this->hasMany(ProcurementPurchaseRequestPharmacyItems::class, 'barang_id', 'id');
     }
 
     public function po_pharmacy()
     {
-        return $this->hasMany(ProcurementPurchaseOrderPharmacyItems::class, "barang_id", "id");
+        return $this->hasMany(ProcurementPurchaseOrderPharmacyItems::class, 'barang_id', 'id');
     }
 
     public function pb_pharmacy()
     {
-        return $this->hasMany(WarehousePenerimaanBarangFarmasiItems::class, "barang_id", "id");
+        return $this->hasMany(WarehousePenerimaanBarangFarmasiItems::class, 'barang_id', 'id');
     }
 
     public function sr_pharmacy()
     {
-        return $this->hasMany(WarehouseStockRequestPharmacyItems::class, "barang_id", "id");
+        return $this->hasMany(WarehouseStockRequestPharmacyItems::class, 'barang_id', 'id');
     }
 
     public function db_pharmacy()
     {
-        return $this->hasMany(WarehouseDistribusiBarangFarmasiItems::class, "barang_id", "id");
+        return $this->hasMany(WarehouseDistribusiBarangFarmasiItems::class, 'barang_id', 'id');
     }
 
     public function stock_adjustment()
     {
-        return $this->hasMany(WarehouseStockAdjustment::class, "barang_f_id", "id");
+        return $this->hasMany(WarehouseStockAdjustment::class, 'barang_f_id', 'id');
     }
 
     public function stored_items()
     {
-        return $this->hasManyThrough(StoredBarangFarmasi::class, WarehousePenerimaanBarangFarmasiItems::class, "barang_id", "pbi_id");
+        return $this->hasManyThrough(StoredBarangFarmasi::class, WarehousePenerimaanBarangFarmasiItems::class, 'barang_id', 'pbi_id');
+    }
+
+    public function pabrik()
+    {
+        return $this->belongsTo(WarehousePabrik::class, 'principal');
     }
 
     public function getGudangsAttribute()

@@ -42,6 +42,16 @@
                     </table>
                 </div>
                 <!-- datatable end -->
+                @if (str_contains(\Illuminate\Support\Facades\Route::currentRouteName(), 'daftar-registrasi-pasien') ||
+                        str_contains(url()->current(), '/daftar-registrasi-pasien/'))
+                    <div class="d-flex justify-content-start m-3">
+                        <button type="button" data-target-menu="tindakan-medis"
+                            class="btn btn-outline-primary px-4 shadow-sm d-flex align-items-center btn-back-to-layanan">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            <span>Kembali ke Menu</span>
+                        </button>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

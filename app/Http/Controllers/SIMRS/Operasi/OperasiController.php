@@ -14,6 +14,7 @@ use App\Models\SIMRS\Operasi\JenisOperasi;
 use App\Models\SIMRS\Operasi\KategoriOperasi;
 use App\Models\SIMRS\Operasi\TarifOperasi;
 use App\Models\SIMRS\Operasi\TipeOperasi;
+use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Room;
 use App\Models\SIMRS\TagihanPasien;
 use Carbon\Carbon;
@@ -30,18 +31,17 @@ class OperasiController extends Controller
     public function index(Request $request)
     {
 
-        // Query with necessary relationships
         $query = OrderOperasi::with([
             'registration.patient',
             'registration.penjamin',
             'tipeOperasi',
             'kategoriOperasi',
             'ruangan',
-            'doctor',
-            'user'
+            'user',
+            'doctorOperator.employee' // <-- TAMBAHKAN RELASI INI untuk memuat dokter operator dan nama lengkapnya
         ]);
 
-        // Apply filters
+        // Apply filters (Bagian ini tidak ada perubahan)
         if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
             $query->whereBetween('tgl_operasi', [
                 Carbon::parse($request->tanggal_awal)->startOfDay(),
@@ -78,12 +78,10 @@ class OperasiController extends Controller
         }
 
         $orders = $query->latest('tgl_operasi')->get();
-        // $ruangans = \App\Models\SIMRS\Room::where('is_operasi', true)->get();
-        $penjamins = \App\Models\SIMRS\Penjamin::all();
+        $penjamins = Penjamin::all();
 
         return view('pages.simrs.operasi.index', [
             'orders' => $orders,
-            // 'ruangans' => $ruangans,
             'penjamins' => $penjamins,
             'request' => $request
         ]);
@@ -94,7 +92,8 @@ class OperasiController extends Controller
             // Validasi disesuaikan dengan form dan migration baru
             $validated = $request->validate([
                 'registration_id' => 'required|exists:registrations,id',
-                'ruangan_id' => 'nullable|string',
+                'ruangan_id' => 'nullable|exists:rooms,id',
+                'dokter_operator_id' => 'nullable|exists:doctors,id',
                 'tgl_operasi' => 'required|date_format:d-m-Y H:i',
                 'tipe_operasi_id' => 'required|exists:tipe_operasi,id',
                 'kategori_operasi_id' => 'required|exists:kategori_operasi,id',
@@ -105,9 +104,8 @@ class OperasiController extends Controller
             // Konversi format tanggal sebelum disimpan
             $validated['tgl_operasi'] = \Carbon\Carbon::createFromFormat('d-m-Y H:i', $validated['tgl_operasi'])->toDateTimeString();
 
-            // Set default values untuk field yang wajib tapi tidak ada di form
-            // $validated['doctor_id'] = 1; // atau null jika nullable
-            $validated['ruangan_id'] = null;
+
+            // $validated['ruangan_id'] = null;
 
             // Tambahkan user_id dari user yang sedang login
             $validated['user_id'] = auth()->id(); // atau Auth::id()
@@ -131,7 +129,7 @@ class OperasiController extends Controller
     public function getOrderOperasi($registrationId)
     {
         try {
-            $orders = OrderOperasi::with(['registration.patient', 'tipeOperasi', 'kategoriOperasi', 'kelasRawat'])
+            $orders = OrderOperasi::with(['registration.patient', 'tipeOperasi', 'kategoriOperasi', 'kelasRawat', 'ruangan'])
                 ->where('registration_id', $registrationId)
                 ->latest()
                 ->get();
@@ -141,7 +139,7 @@ class OperasiController extends Controller
                     'id' => $order->id,
                     'tgl_order_formatted' => $order->created_at->format('d-m-Y H:i'),
                     'kelas_name' => $order->kelasRawat ? $order->kelasRawat->kelas : 'N/A',
-                    'ruangan_name' => $order->ruangan_id ?? 'N/A',
+                    'ruangan_name' => $order->ruangan ? $order->ruangan->ruangan : 'N/A',
                     'kategori_operasi_name' =>  $order->kategoriOperasi ? $order->kategoriOperasi->nama_kategori : 'N/A',
                     'jenis_operasi_name' =>  $order->tipeOperasi ? $order->tipeOperasi->tipe : 'N/A',
                     'diagnosa' => $order->diagnosa_awal,
@@ -261,7 +259,6 @@ class OperasiController extends Controller
     public function getTindakanOperasi($registrationId)
     {
         try {
-            // Sesuaikan dengan model dan relasi yang ada
             $tindakan = []; // Kosong dulu, sesuaikan dengan data real Anda
 
             return response()->json([
@@ -893,12 +890,9 @@ class OperasiController extends Controller
     }
 
 
-    public function deleteOrder(Request $request)
+    public function deleteOrder(OrderOperasi $order) // Terima model OrderOperasi langsung
     {
         try {
-            $orderId = $request->input('id');
-            $order = OrderOperasi::findOrFail($orderId);
-
             if ($order->prosedurOperasi()->count() > 0) {
                 return response()->json([
                     'success' => false,
@@ -913,12 +907,14 @@ class OperasiController extends Controller
                 'message' => 'Order operasi berhasil dihapus.'
             ]);
         } catch (\Exception $e) {
+            // Catch block ini sekarang lebih untuk error tak terduga lainnya
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menghapus order: ' . $e->getMessage()
             ], 500);
         }
     }
+
 
     public function getOrderDetail($orderId)
     {
@@ -1438,5 +1434,31 @@ class OperasiController extends Controller
         if ($amount <= 0) return;
         $description = "{$procedureName}, {$feeType}";
         $callback($description, $amount, false, $roleKey);
+    }
+
+    public function plasmaView()
+    {
+        // Ambil prosedur operasi yang statusnya 'final' untuk hari ini
+        $prosedurs = ProsedurOperasi::where('status', 'final')
+            ->whereHas('orderOperasi', function ($query) {
+                // Filter berdasarkan tanggal operasi di tabel order_operasi
+                $query->whereDate('tgl_operasi', Carbon::today());
+            })
+            ->with([
+                // Eager load semua relasi yang dibutuhkan untuk tampilan
+                'orderOperasi:id,registration_id,tgl_operasi',
+                'orderOperasi.registration:id,patient_id,penjamin_id',
+                'orderOperasi.registration.patient:id,name,medical_record_number,date_of_birth',
+                'orderOperasi.registration.penjamin:id,nama_perusahaan',
+                'tindakanOperasi:id,nama_operasi',
+                'dokterOperator.employee:id,fullname',
+                'assDokterOperator1.employee:id,fullname',
+                'dokterAnastesi.employee:id,fullname',
+                'assDokterAnastesi.employee:id,fullname',
+            ])
+            ->get();
+
+        // return view baru yang akan kita buat
+        return view('pages.simrs.operasi.plasma', compact('prosedurs'));
     }
 }

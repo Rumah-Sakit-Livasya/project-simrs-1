@@ -34,13 +34,13 @@ class WarehouseStockAdjustmentController extends Controller
      */
     public function index(Request $request)
     {
-        $query = WarehouseStockAdjustment::query()->with(["items", "items.stored", "items.stored.pbi"]);
-        $filters = ["gudang_id", "kode_sa"];
+        $query = WarehouseStockAdjustment::query()->with(['items', 'items.stored', 'items.stored.pbi']);
+        $filters = ['gudang_id', 'kode_sa'];
         $filterApplied = false;
 
         foreach ($filters as $filter) {
             if ($request->filled($filter)) {
-                $query->where($filter, 'like', '%' . $request->$filter . '%');
+                $query->where($filter, 'like', '%'.$request->$filter.'%');
                 $filterApplied = true;
             }
         }
@@ -56,8 +56,8 @@ class WarehouseStockAdjustmentController extends Controller
         }
 
         if ($request->filled('nama_barang')) {
-            $query->whereHas("items.stored.pbi", function ($q) use ($request) {
-                $q->where('nama_barang', 'like', '%' . $request->nama_barang . '%');
+            $query->whereHas('items.stored.pbi', function ($q) use ($request) {
+                $q->where('nama_barang', 'like', '%'.$request->nama_barang.'%');
             });
             $filterApplied = true;
         }
@@ -70,10 +70,10 @@ class WarehouseStockAdjustmentController extends Controller
             $sa = WarehouseStockAdjustment::all();
         }
 
-        return view("pages.simrs.warehouse.revaluasi-stock.stock-adjustment.index", [
-            "sas" => $sa,
-            "gudangs" => WarehouseMasterGudang::all(),
-            "auth_users" => WarehouseStockAdjustmentUsers::all()
+        return view('pages.simrs.warehouse.revaluasi-stock.stock-adjustment.index', [
+            'sas' => $sa,
+            'gudangs' => WarehouseMasterGudang::all(),
+            'auth_users' => WarehouseStockAdjustmentUsers::all(),
         ]);
     }
 
@@ -87,11 +87,11 @@ class WarehouseStockAdjustmentController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        $user = User::where("email", $credentials["email"])->first();
-        if (!$user) {
+        $user = User::where('email', $credentials['email'])->first();
+        if (! $user) {
             return response()->json([
-                "success" => false,
-                "message" => "Email atau password salah!", // Return a JSON response with an error message
+                'success' => false,
+                'message' => 'Email atau password salah!', // Return a JSON response with an error message
             ], 401); // Return a 401 Unauthorized status code
         }
 
@@ -105,16 +105,15 @@ class WarehouseStockAdjustmentController extends Controller
 
             $token = Crypt::encryptString(json_encode($payload));
 
-
             return response([
-                "success" => true,
-                "message" => "Login berhasil!",
-                "token" => $token // Return a JSON response with a success message
+                'success' => true,
+                'message' => 'Login berhasil!',
+                'token' => $token, // Return a JSON response with a success message
             ], 200); // Return a 200 OK status code
         } else {
             return response()->json([
-                "success" => false,
-                "message" => "Email atau password salah!", // Return a JSON response with an error message
+                'success' => false,
+                'message' => 'Email atau password salah!', // Return a JSON response with an error message
             ], 401); // Return a 401 Unauthorized status code
         }
     }
@@ -122,17 +121,17 @@ class WarehouseStockAdjustmentController extends Controller
     private function zimbraLogin($email, $password)
     {
         $data = [
-            "Header" => [
-                "context" => [
-                    "_jsns" => "urn:zimbra",
-                    "userAgent" => ["name" => "curl", "version" => "8.8.15"],
+            'Header' => [
+                'context' => [
+                    '_jsns' => 'urn:zimbra',
+                    'userAgent' => ['name' => 'curl', 'version' => '8.8.15'],
                 ],
             ],
-            "Body" => [
-                "AuthRequest" => [
-                    "_jsns" => "urn:zimbraAccount",
-                    "account" => ["_content" => $email, "by" => "name"],
-                    "password" => $password,
+            'Body' => [
+                'AuthRequest' => [
+                    '_jsns' => 'urn:zimbraAccount',
+                    'account' => ['_content' => $email, 'by' => 'name'],
+                    'password' => $password,
                 ],
             ],
         ];
@@ -143,10 +142,10 @@ class WarehouseStockAdjustmentController extends Controller
             $url = 'https://webmail.livasya.com/service/soap';
             $curl = curl_init($url);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-                'Content-Type:application/json'
-            ));
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+            curl_setopt($curl, CURLOPT_HTTPHEADER, [
+                'Content-Type:application/json',
+            ]);
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_POSTFIELDS, $encodedData);
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -180,9 +179,9 @@ class WarehouseStockAdjustmentController extends Controller
             abort(401, 'Token expired');
         }
 
-        return view("pages.simrs.warehouse.revaluasi-stock.stock-adjustment.partials.popup-add-sa", [
-            "gudangs" => WarehouseMasterGudang::all(),
-            "token" => $token
+        return view('pages.simrs.warehouse.revaluasi-stock.stock-adjustment.partials.popup-add-sa', [
+            'gudangs' => WarehouseMasterGudang::all(),
+            'token' => $token,
         ]);
     }
 
@@ -194,30 +193,30 @@ class WarehouseStockAdjustmentController extends Controller
             abort(401, 'Token expired');
         }
 
-        $sif = StoredBarangFarmasi::query()->with(["pbi", "pbi.satuan", "pbi.pb", "pbi.item",  "pbi.item.golongan", "pbi.item.kategori"]);
-        $sinf = StoredBarangNonFarmasi::query()->with(["pbi", "pbi.satuan", "pbi.pb", "pbi.item",  "pbi.item.golongan", "pbi.item.kategori"]);
+        $sif = StoredBarangFarmasi::query()->with(['pbi', 'pbi.satuan', 'pbi.pb', 'pbi.item',  'pbi.item.golongan', 'pbi.item.kategori']);
+        $sinf = StoredBarangNonFarmasi::query()->with(['pbi', 'pbi.satuan', 'pbi.pb', 'pbi.item',  'pbi.item.golongan', 'pbi.item.kategori']);
 
-        $sif->where("gudang_id", $gudang_id);
-        $sinf->where("gudang_id", $gudang_id);
+        $sif->where('gudang_id', $gudang_id);
+        $sinf->where('gudang_id', $gudang_id);
 
         // $sif->where("qty" , ">" , 0);
         // $sinf->where("qty" , ">" , 0);
 
-        $sif->whereHas("pbi", function ($q) {
+        $sif->whereHas('pbi', function ($q) {
             // where "tanggal_exp" > now()
             // or where "tanggal_exp" is null
             $q->where(function ($q) {
-                $q->where("tanggal_exp", ">", now());
-                $q->orWhereNull("tanggal_exp");
+                $q->where('tanggal_exp', '>', now());
+                $q->orWhereNull('tanggal_exp');
             });
         });
 
-        $sinf->whereHas("pbi", function ($q) {
+        $sinf->whereHas('pbi', function ($q) {
             // where "tanggal_exp" > now()
             // or where "tanggal_exp" is null
             $q->where(function ($q) {
-                $q->where("tanggal_exp", ">", now());
-                $q->orWhereNull("tanggal_exp");
+                $q->where('tanggal_exp', '>', now());
+                $q->orWhereNull('tanggal_exp');
             });
         });
 
@@ -225,8 +224,8 @@ class WarehouseStockAdjustmentController extends Controller
         $sinf = $sinf->get();
 
         return response()->json([
-            "pharmacy" => $sif,
-            "non_pharmacy" => $sinf,
+            'pharmacy' => $sif,
+            'non_pharmacy' => $sinf,
         ]);
     }
 
@@ -259,28 +258,28 @@ class WarehouseStockAdjustmentController extends Controller
         $satuan = WarehouseSatuanBarang::findOrFail($satuan_id);
 
         $barang = WarehouseBarangFarmasi::query();
-        $query = StoredBarangFarmasi::query()->with(["pbi", "pbi.pb", "pbi.item", "pbi.pb.supplier"]);
-        if ($type == "nf") {
-            $query = StoredBarangNonFarmasi::query()->with(["pbi", "pbi.pb", "pbi.item", "pbi.pb.supplier"]);
+        $query = StoredBarangFarmasi::query()->with(['pbi', 'pbi.pb', 'pbi.item', 'pbi.pb.supplier']);
+        if ($type == 'nf') {
+            $query = StoredBarangNonFarmasi::query()->with(['pbi', 'pbi.pb', 'pbi.item', 'pbi.pb.supplier']);
             $barang = WarehouseBarangNonFarmasi::query();
         }
 
-        $query->where("gudang_id", $gudang_id);
+        $query->where('gudang_id', $gudang_id);
 
-        $query->whereHas("pbi", function ($q) use ($barang_id, $satuan_id) {
-            $q->where("barang_id", $barang_id)
-                ->where("satuan_id", $satuan_id);
+        $query->whereHas('pbi', function ($q) use ($barang_id, $satuan_id) {
+            $q->where('barang_id', $barang_id)
+                ->where('satuan_id', $satuan_id);
         });
 
         $sis = $query->get();
 
-        return view("pages.simrs.warehouse.revaluasi-stock.stock-adjustment.partials.popup-edit-sa", [
-            "sis" => $sis,
-            "token" => $token,
-            "gudang" => WarehouseMasterGudang::where("id", $gudang_id)->first(),
-            "barang" => $barang->where("id", $barang_id)->first(),
-            "satuan" => $satuan,
-            "type" => $type
+        return view('pages.simrs.warehouse.revaluasi-stock.stock-adjustment.partials.popup-edit-sa', [
+            'sis' => $sis,
+            'token' => $token,
+            'gudang' => WarehouseMasterGudang::where('id', $gudang_id)->first(),
+            'barang' => $barang->where('id', $barang_id)->first(),
+            'satuan' => $satuan,
+            'type' => $type,
         ]);
     }
 
@@ -290,12 +289,13 @@ class WarehouseStockAdjustmentController extends Controller
         $year = $date->format('y');
         $month = $date->format('m');
 
-        $count = WarehouseStockAdjustment::whereMonth('created_at', now()->month)
+        $count = WarehouseStockAdjustment::withTrashed()
+            ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return $count . "/ADJ/" . $year . $month;
+        return $count.'/ADJ/'.$year.$month;
     }
 
     /**
@@ -304,53 +304,55 @@ class WarehouseStockAdjustmentController extends Controller
     public function update(Request $request)
     {
         $validatedData1 = $request->validate([
-            "user_id" => "required|exists:users,id",
-            "barang_f_id" => "nullable|exists:warehouse_barang_farmasi,id",
-            "barang_nf_id" => "nullable|exists:warehouse_barang_non_farmasi,id",
-            "satuan_id" => "required|exists:warehouse_satuan_barang,id",
-            "gudang_id" => "required|exists:warehouse_master_gudang,id",
-            "tanggal_sa" => "required|date"
+            'user_id' => 'required|exists:users,id',
+            'barang_f_id' => 'nullable|exists:warehouse_barang_farmasi,id',
+            'barang_nf_id' => 'nullable|exists:warehouse_barang_non_farmasi,id',
+            'satuan_id' => 'required|exists:warehouse_satuan_barang,id',
+            'gudang_id' => 'required|exists:warehouse_master_gudang,id',
+            'tanggal_sa' => 'required|date',
         ]);
 
         $validatedData2 = $request->validate([
-            "token" => "required|string",
-            "qty.*" => "required|integer",
-            "si_id.*" => "required|integer",
-            "type" => "required|in:f,nf",
+            'token' => 'required|string',
+            'qty.*' => 'required|integer',
+            'si_id.*' => 'required|integer',
+            'type' => 'required|in:f,nf',
         ]);
 
         // dd($request->all());
-        $data = json_decode(Crypt::decryptString($validatedData2["token"]), true);
+        $data = json_decode(Crypt::decryptString($validatedData2['token']), true);
         if ($data['exp'] < time()) {
             abort(401, 'Token expired');
         }
-        $validatedData1["authorized_user_id"] = $data["user_id"];
-        $validatedData1["kode_sa"] = $this->generate_sa_code();
+        $validatedData1['authorized_user_id'] = $data['user_id'];
+        $validatedData1['kode_sa'] = $this->generate_sa_code();
 
         DB::beginTransaction();
         try {
             $sa = WarehouseStockAdjustment::create($validatedData1);
-            $user = User::findOrFail($validatedData1["authorized_user_id"]);
+            $user = User::findOrFail($validatedData1['authorized_user_id']);
 
-            foreach ($validatedData2["qty"] as $si_id => $qty) {
+            foreach ($validatedData2['qty'] as $si_id => $qty) {
                 $query = StoredBarangFarmasi::query();
-                if ($validatedData2["type"] == "nf") {
+                if ($validatedData2['type'] == 'nf') {
                     $query = StoredBarangNonFarmasi::query();
                 }
 
                 $stored_barang = $query->find($si_id);
-                if (!$stored_barang) {
-                    throw new \Exception("Stored barang not found");
+                if (! $stored_barang) {
+                    throw new \Exception('Stored barang not found');
                 }
 
                 $delta = $qty - $stored_barang->qty;
 
-                if($delta == 0) continue;
+                if ($delta == 0) {
+                    continue;
+                }
 
                 WarehouseStockAdjustmentItems::create([
-                    "sa_id" => $sa->id,
-                    "si_" . $validatedData2["type"] . "_id" => $stored_barang->id,
-                    "qty" => $delta
+                    'sa_id' => $sa->id,
+                    'si_'.$validatedData2['type'].'_id' => $stored_barang->id,
+                    'qty' => $delta,
                 ]);
 
                 // $stored_barang->update([
@@ -368,9 +370,11 @@ class WarehouseStockAdjustmentController extends Controller
             }
 
             DB::commit();
+
             return back()->with('success', 'Data berhasil disimpan');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->with('error', $e->getMessage());
         }
     }

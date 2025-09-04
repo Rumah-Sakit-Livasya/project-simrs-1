@@ -10,8 +10,12 @@
             max-width: 100%;
         }
 
-        .modal-dialog {
-            max-width: 70%;
+        #modal-jam-pemberian-content {
+            max-width: 510px !important;
+        }
+
+        #modal-signa-content {
+            max-width: 700px !important;
         }
 
         .borderless-input {
@@ -52,9 +56,35 @@
             display: inline-block;
             width: 80px;
         }
+
+        /* Define the fade animation */
+        @keyframes fadeInOut {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+                /* or 0 for complete fade out */
+            }
+        }
+
+        /* Apply the animation to the element */
+        #add-to-racikan {
+            animation: fadeInOut 0.75s infinite ease-in-out;
+            position: absolute;
+            text-align: right;
+            width: 100%;
+        }
     </style>
 @endsection
 @section('content')
+    @include('pages.simrs.farmasi.transaksi-resep.partials.modal-jam-pemberian')
+    @include('pages.simrs.farmasi.transaksi-resep.partials.modal-signa')
+    @include('pages.simrs.farmasi.transaksi-resep.partials.modal-pilih-obat')
+
     <main id="js-page-content" role="main" class="page-content">
         <div class="row">
             <div class="col-xl-12">
@@ -64,18 +94,23 @@
                             Form Tambah Resep
                             &nbsp;
                             <i id="loading-spinner-head" class="loading fas fa-spinner fa-spin"></i>
-                            <span class="loading-message loading text-info">Loading...</span>
+                            <span class="loading text-info" id="loading-message">Loading...</span>
                         </h2>
                     </div>
                     <div class="panel-container show">
                         <div id="loading-page" class="loading"></div>
                         <div class="panel-content">
-                            <form id="form-pr" name="form-pr" action="{{ route('farmasi.transaksi-resep.store') }}"
+                            <form id="form-resep" name="form-resep" action="{{ route('farmasi.transaksi-resep.store') }}"
                                 method="post">
                                 @csrf
                                 @method('post')
                                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                                 <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
+                                <input type="hidden" name="registration_id" id="registration-id" value="">
+                                <input type="hidden" name="dokter_id" id="dokter-id" value="">
+                                <input type="hidden" name="re_id" id="re-id" value="">
+                                <input type="hidden" name="rh_id" id="rh-id" value="">
+                                <input type="hidden" name="telaah_resep" id="telaah-resep" value="">
 
                                 <div class="row justify-content-center">
                                     <div class="col-xl-4">
@@ -107,7 +142,7 @@
                                                             class="fal fa-search mr-1"></span></button>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" readonly value=""
+                                                    <input type="text" readonly value="" required
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control otc-change" id="nama_pasien" name="nama_pasien">
                                                     @error('nama_pasien')
@@ -130,7 +165,7 @@
                                                             class="fal fa-search mr-1"></span></button>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <input type="text" readonly value=""
+                                                    <input type="text" readonly value="" required
                                                         style="border: 0; border-bottom: 1.9px solid #eaeaea; margin-top: -.5rem; border-radius: 0"
                                                         class="form-control" id="nama_dokter" name="nama_dokter">
                                                     @error('nama_dokter')
@@ -345,14 +380,14 @@
                                                 <div class="col-xl">
                                                     {{-- create radio with name="embalase" with values "tidak", "item", "racikan" --}}
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="embalase"
-                                                            id="embalase_racikan" value="racikan">
+                                                        <input class="form-check-input unclearable" type="radio"
+                                                            name="embalase" id="embalase_racikan" value="racikan">
                                                         <label class="embalase-label">Racikan</label>
-                                                        <input class="form-check-input" type="radio" name="embalase"
-                                                            id="embalase_item" value="item">
+                                                        <input class="form-check-input unclearable" type="radio"
+                                                            name="embalase" id="embalase_item" value="item">
                                                         <label class="embalase-label">Item</label>
-                                                        <input class="form-check-input" type="radio" name="embalase"
-                                                            checked id="embalase_tidak" value="tidak">
+                                                        <input class="form-check-input unclearable" type="radio"
+                                                            name="embalase" checked id="embalase_tidak" value="tidak">
                                                         <label class="embalase-label">Tidak</label>
                                                     </div>
                                                 </div>
@@ -404,7 +439,7 @@
                                                     </label>
                                                 </div>
                                                 <div class="col-xl">
-                                                    <select id="obat-select" class="form-control unclearable select2">
+                                                    <select id="obat-select" class="form-control unclearable">
                                                         <option value="" selected disabled hidden> Pilih Obat
                                                         </option>
                                                         @if (isset($obats))
@@ -419,6 +454,7 @@
                                                                 @endphp
                                                                 @if ($qty > 0)
                                                                     <option value="{{ $obat->id }}" class="obat"
+                                                                        data-zat="@foreach ($obat->zat_aktif as $zat_aktif) {{ $zat_aktif->zat->nama }}, @endforeach"
                                                                         data-qty="{{ $qty }}"
                                                                         data-item="{{ json_encode($obat) }}">
                                                                         {{ $obat->nama }} (Stock:
@@ -431,6 +467,8 @@
                                                     {{-- create a checkbox with label "Zat Aktif" --}}
                                                     <div class="row">
                                                         <div class="col-xl">
+                                                            <span title="Batal" id="add-to-racikan"
+                                                                class="text-info pointer"></span>
                                                             <input type="checkbox" name="zat_aktif" id="zat_aktif">
                                                             <label for="zat_aktif"> Zat Aktif </label>
                                                         </div>
@@ -444,7 +482,7 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-xl-4" style="text-align: right">
-                                                    <label class="form-label text-end" for="bmhp">
+                                                    <label class="form-label text-end" for="resep_manual">
                                                         Resep Manual
                                                     </label>
                                                 </div>
@@ -467,10 +505,12 @@
                                     <table class="table table-bordered table-hover table-striped w-100">
                                         <thead class="bg-primary-600">
                                             <tr>
-                                                <th>Dijamin</th>
                                                 <th>Kode Barang</th>
                                                 <th>Nama Barang</th>
-                                                <th>UOM</th>
+                                                <th>Unit</th>
+                                                <th>Restriksi</th>
+                                                <th>Batch</th>
+                                                <th>ED</th>
                                                 <th>Qty</th>
                                                 <th>Signa</th>
                                                 <th>Instruksi</th>
@@ -486,8 +526,9 @@
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td class="text-right" colspan="9">
+                                                <td class="text-right" colspan="11">
                                                     <button type="button" id="update-task-id-6-btn" disabled
+                                                        title="Coming Soon!"
                                                         class="btn btn-primary waves-effect waves-themed">
                                                         <span class="fal fa-check mr-1"></span>
                                                         Update Task Id 6
@@ -499,14 +540,20 @@
                                                         Resep Elektronik
                                                     </button>
 
-                                                    <button type="button" id="resep-harian-btn" disabled
+                                                    <button type="button" id="resep-harian-btn"
                                                         class="btn btn-primary waves-effect waves-themed">
                                                         <span class="fal fa-notes-medical mr-1"></span>
                                                         Resep Harian
                                                     </button>
+
+                                                    <button type="button" id="tambah-racikan-btn"
+                                                        class="btn btn-primary waves-effect waves-themed">
+                                                        <span class="fal fa-plus mr-1"></span>
+                                                        Tambah Racikan
+                                                    </button>
                                                 </td>
                                                 <td class="text-right">Total
-                                                    <input type="hidden" value="0" name="nominal">
+                                                    <input type="hidden" value="0" name="total">
                                                 </td>
                                                 <td>
                                                     <span id="total-display">Rp 0</span>
@@ -527,7 +574,12 @@
                                             </a>
                                         </div>
                                         <div class="col-xl text-right">
-                                            <button type="submit" id="order-submit-final"
+                                            <button type="submit" id="telaah-resep-btn"
+                                                class="btn btn-lg btn-info waves-effect waves-themed">
+                                                <span class="fas fa-clipboard-list mr-1"></span>
+                                                Telaah Resep
+                                            </button>
+                                            <button type="submit" id="submit-btn" disabled
                                                 class="btn btn-lg btn-primary waves-effect waves-themed">
                                                 <span class="fal fa-save mr-1"></span>
                                                 Simpan
@@ -545,18 +597,33 @@
 
 @endsection
 @section('plugin')
+    <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
+    <script src="/js/datagrid/datatables/datatables.export.js"></script>
+    {{-- Select 2 --}}
+    <script src="/js/formplugins/select2/select2.bundle.js"></script>
+    {{-- Datepicker --}}
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    {{-- Datepicker Range --}}
+    <script src="/js/dependency/moment/moment.js"></script>
+    <script src="/js/formplugins/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
     {{-- Select 2 --}}
-    <script src="{{ asset('js/jquery.js') }}"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(".select2").select2();
     </script>
     <script src="{{ asset('js/simrs/farmasi/transaksi-resep/resep/api.js') }}?v={{ time() }}"></script>
     <script src="{{ asset('js/simrs/farmasi/transaksi-resep/resep/utils.js') }}?v={{ time() }}"></script>
-    <script src="{{ asset('js/simrs/farmasi/transaksi-resep/resep/ui.js') }}?v={{ time() }}"></script>
-    <script src="{{ asset('js/simrs/farmasi/transaksi-resep/resep/handler.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/farmasi/transaksi-resep/resep/uihtmlrenderer.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/farmasi/transaksi-resep/resep/uiformhandler.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/farmasi/transaksi-resep/resep/uitablehandler.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/farmasi/transaksi-resep/resep/uimischandler.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/simrs/farmasi/transaksi-resep/resep/resepstatehandler.js') }}?v={{ time() }}">
+    </script>
+    <script src="{{ asset('js/simrs/farmasi/transaksi-resep/resep/resepeventhandler.js') }}?v={{ time() }}">
+    </script>
+    <script src="{{ asset('js/simrs/farmasi/transaksi-resep/resep/resephandler.js') }}?v={{ time() }}"></script>
 
 @endsection
