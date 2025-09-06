@@ -173,14 +173,14 @@
         </div>
 
         {{-- Floating Action Bar --}}
-        <div class="floating-action-bar">
+        {{-- <div class="floating-action-bar">
             <button type="button" id="btn-konfirmasi-pilihan" class="btn btn-success">
                 <i class="fal fa-check"></i> Konfirmasi Pilihan
             </button>
             <button type="button" id="btn-batal" class="btn btn-secondary ml-2">
                 <i class="fal fa-times"></i> Batal
             </button>
-        </div>
+        </div> --}}
     </main>
 @endsection
 
@@ -229,6 +229,18 @@
                 // Update counter
                 updateSelectedCounter();
 
+                // Kirim data ke parent window
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({
+                        type: 'INVOICE_SELECTED',
+                        data: [invoiceData] // Kirim hanya invoice yang baru dipilih
+                    }, '*');
+                } else {
+                    alert(
+                        'Tidak dapat mengirim data ke halaman utama. Silakan refresh halaman utama dan coba lagi.'
+                    );
+                }
+
                 console.log('Invoice dipilih:', invoiceData.kode_ap);
             });
 
@@ -236,33 +248,7 @@
             function updateSelectedCounter() {
                 const count = selectedInvoices.length;
                 $('#selected-count').text(count + ' invoice dipilih');
-
-                // Enable/disable tombol konfirmasi
-                $('#btn-konfirmasi-pilihan').prop('disabled', count === 0);
             }
-
-            // Tombol untuk mengirim semua data yang dipilih ke parent window
-            $('#btn-konfirmasi-pilihan').on('click', function() {
-                if (selectedInvoices.length === 0) {
-                    alert('Pilih setidaknya satu invoice terlebih dahulu.');
-                    return;
-                }
-
-                // Kirim data ke parent window
-                if (window.opener && !window.opener.closed) {
-                    window.opener.postMessage({
-                        type: 'INVOICE_SELECTED',
-                        data: selectedInvoices
-                    }, '*');
-
-                    // Tutup popup setelah mengirim data
-                    window.close();
-                } else {
-                    alert(
-                        'Tidak dapat mengirim data ke halaman utama. Silakan refresh halaman utama dan coba lagi.'
-                    );
-                }
-            });
 
             // Event untuk tombol batal
             $('#btn-batal').on('click', function() {

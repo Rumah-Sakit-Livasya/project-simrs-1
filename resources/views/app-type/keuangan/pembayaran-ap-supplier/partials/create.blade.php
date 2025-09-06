@@ -326,7 +326,6 @@
 
 @endsection
 @section('plugin')
-    {{-- Plugin CSS & JS --}}
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/js/formplugins/sweetalert2/sweetalert2.bundle.js"></script>
@@ -353,39 +352,27 @@
             function parseCurrency(value) {
                 if (typeof value === 'number') return value;
                 if (typeof value !== 'string') return 0;
-                // Fungsi ini sekarang hanya untuk USER INPUT yang menggunakan format "1.000.000"
                 return parseFloat(String(value).replace(/\./g, '').replace(/,/g, '.').replace(/[^-0-9.]/g, '')) ||
-                    0;
+                0;
             }
 
             function formatCurrency(number) {
-                // Fungsi ini menerima ANGKA dan memformatnya ke string "1.000.000"
                 return new Intl.NumberFormat('id-ID').format(Math.round(parseCurrency(number)));
             }
 
             function displayCurrency(number) {
-                // Fungsi ini menerima ANGKA dan mengembalikannya sebagai "Rp 1.000.000"
                 return 'Rp ' + new Intl.NumberFormat('id-ID').format(Math.round(number));
             }
 
             // 3. FUNGSI UTAMA KALKULASI & RENDER
-
-            /**
-             * Menghitung Sisa Akhir untuk satu baris invoice.
-             */
             function updateRowCalculation($row) {
                 const sisaHutangAwal = parseCurrency($row.find('.sisa-hutang-awal-display').text());
                 const pembayaran = parseCurrency($row.find('.payment-input').val());
-
                 let sisaHutangAkhir = sisaHutangAwal - pembayaran;
                 sisaHutangAkhir = Math.max(0, sisaHutangAkhir);
-
                 $row.find('.sisa-akhir-display').text(displayCurrency(sisaHutangAkhir));
             }
 
-            /**
-             * Menghitung dan menampilkan semua total di bagian bawah.
-             */
             function updateAllTotals() {
                 let totalPembayaranInvoice = 0;
                 let totalPotongan = 0;
@@ -406,9 +393,6 @@
                 $('#grand-total-display').text(displayCurrency(grandTotal));
             }
 
-            /**
-             * Merender ulang seluruh tabel invoice.
-             */
             function renderInvoiceTable() {
                 const list = $('#invoice-list');
                 list.empty();
@@ -420,12 +404,8 @@
                     );
                 } else {
                     selectedInvoices.forEach((invoice, index) => {
-                        // ================== BAGIAN PERBAIKAN ADA DI SINI ==================
-                        // Gunakan parseFloat() untuk mengubah data dari server menjadi angka.
-                        // Ini akan menangani format "279000000.00" atau 279000000 dengan benar.
                         const grandTotal = parseFloat(invoice.grand_total) || 0;
                         const sisaHutang = parseFloat(invoice.sisa_hutang) || 0;
-                        // ===================================================================
 
                         const row = `
                         <tr data-id="${invoice.id}">
@@ -503,7 +483,6 @@
                     toastr.success(`${addedCount} invoice berhasil ditambahkan.`);
                     renderInvoiceTable();
                 }
-                if (paymentPopupWindow) paymentPopupWindow.close();
             });
 
             $('#invoice-list').on('click', '.btn-remove-invoice', function() {
@@ -563,7 +542,6 @@
             $(window).on('beforeunload', function() {
                 if (paymentPopupWindow && !paymentPopupWindow.closed) paymentPopupWindow.close();
             });
-
 
             // 5. INISIALISASI HALAMAN
             renderInvoiceTable();
