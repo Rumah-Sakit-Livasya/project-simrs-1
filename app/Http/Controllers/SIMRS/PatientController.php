@@ -290,8 +290,7 @@ class PatientController extends Controller
 
     public function detail_registrasi_pasien(Patient $patient)
     {
-
-        return dd($patient);
+        // Hapus return dd($patient); agar bisa menampilkan detail registrasi
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
@@ -303,6 +302,19 @@ class PatientController extends Controller
     public function form_registrasi($id, $registrasi)
     {
         $patient = Patient::where('id', $id)->first();
+        // Cek apakah pasien sudah punya registrasi aktif untuk tipe registrasi yang sama
+        $existingRegistration = Registration::where('patient_id', $patient->id)
+            ->where('registration_type', $registrasi)
+            ->where('status', 'aktif')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($existingRegistration) {
+            // Jika sudah ada registrasi aktif, redirect ke detail registrasi
+            return redirect("/daftar-registrasi-pasien/" . $existingRegistration->id)
+                ->with('info', 'Pasien sudah memiliki registrasi aktif untuk tipe ini.');
+        }
+
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
         $lastRanapRegistration = Registration::where(['patient_id' => $patient->id, 'registration_type' => 'rawat-inap'])->orderBy('created_at', 'desc')->first();
