@@ -81,20 +81,20 @@
         }
 
         /* .box-menu li {
-                                        padding: 20px 30px;
-                                        margin: 20px;
-                                        width: 200px;
-                                        background: #f2f0f5;
-                                        text-align: center;
-                                        cursor: pointer;
-                                        border: 1px solid #e5e5e5;
-                                        border-radius: 8px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        flex-direction: column;
-                                        box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
-                                    } */
+                                                                        padding: 20px 30px;
+                                                                        margin: 20px;
+                                                                        width: 200px;
+                                                                        background: #f2f0f5;
+                                                                        text-align: center;
+                                                                        cursor: pointer;
+                                                                        border: 1px solid #e5e5e5;
+                                                                        border-radius: 8px;
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        justify-content: center;
+                                                                        flex-direction: column;
+                                                                        box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.33);
+                                                                    } */
 
         .box-menu .circle-menu {
             height: 50px;
@@ -639,7 +639,6 @@
                     '<span class="fal fa-spinner fa-spin mr-1"></span> Menyimpan...');
 
                 $.ajax({
-                    // PERUBAHAN UTAMA ADA DI BARIS INI
                     url: form.data('action-url'), // Mengambil URL dari data attribute
                     type: 'POST',
                     data: new FormData(this),
@@ -649,16 +648,18 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: response.message,
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: response.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+
+                        if (response.redirect_url) {
+                            setTimeout(function() {
                                 window.location.href = response.redirect_url;
-                            });
+                            }, 1000); // Redirect setelah 1 detik
                         }
                     },
                     error: function(xhr) {
@@ -676,7 +677,8 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Terjadi Kesalahan',
-                                text: 'Tidak dapat memproses permintaan. Silakan hubungi administrator.',
+                                text: xhr.responseJSON.message ||
+                                    'Tidak dapat memproses permintaan. Silakan hubungi administrator.',
                             });
                         }
                     },
