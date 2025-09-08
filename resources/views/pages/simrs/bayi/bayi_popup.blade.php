@@ -150,7 +150,7 @@
                                 return `<div class="btn-group">
                                         <button class="btn btn-info btn-action btn-print-bayi" data-url="${printUrl}" title="Cetak Akta"><i class='bx bxs-printer'></i></button>
                                         <button class="btn btn-warning btn-action btn-edit-bayi" data-id="${data}" title="Edit Data"><i class='bx bxs-edit'></i></button>
-                                        <button class="btn btn-danger btn-action btn-delete-bayi" data-id="${data}" title="Hapus Data"><i class='bx bxs-trash'></i></button>
+                                   
                                     </div>`;
                             }
                         }

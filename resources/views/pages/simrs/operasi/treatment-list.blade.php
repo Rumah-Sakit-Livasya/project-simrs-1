@@ -211,6 +211,8 @@
             $('#dt-tindakan').DataTable({
                 responsive: true,
                 pageLength: 10,
+                searching: false, // Hilangkan kotak pencarian
+                lengthChange: false, // Hilangkan dropdown jumlah data
                 language: {
                     emptyTable: "Belum ada tindakan operasi yang ditambahkan untuk order ini.",
                     zeroRecords: "Tidak ada data yang cocok dengan pencarian Anda.",
@@ -227,6 +229,7 @@
                     },
                 }
             });
+
 
             // Event listener untuk tombol "Tambah Tindakan"
             $('#btn-tambah-tindakan').on('click', function() {
