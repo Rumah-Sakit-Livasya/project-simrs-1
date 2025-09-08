@@ -81,10 +81,23 @@
                                                                     ($data?->doctor?->employee?->fullname ?? '') .
                                                                     "\n" .
                                                                     'Tanggal Pemeriksaan: ' .
-                                                                    ($data?->created_at?->format('d/m/Y H:i') ?? '') .
+                                                                    (isset($data?->created_at)
+                                                                        ? ($data->created_at instanceof \Illuminate\Support\Carbon
+                                                                            ? $data->created_at->format('d/m/Y H:i')
+                                                                            : (is_string($data->created_at)
+                                                                                ? \Illuminate\Support\Carbon::parse($data->created_at)->format('d/m/Y H:i')
+                                                                                : ''))
+                                                                        : '') .
                                                                     "\n" .
                                                                     'Riwayat Alergi: ' .
-                                                                    ($data?->allergy_medicine ? implode(', ', $data->allergy_medicine) : 'Tidak ada') .
+                                                                    (isset($data) && property_exists($data, 'allergy_medicine')
+                                                                        ? (is_array($data->allergy_medicine)
+                                                                            ? (count($data->allergy_medicine) > 0
+                                                                                ? implode(', ', $data->allergy_medicine)
+                                                                                : 'Tidak ada')
+                                                                            : ($data->allergy_medicine ?:
+                                                                            'Tidak ada'))
+                                                                        : 'Tidak ada') .
                                                                     "\n" .
                                                                     'Riwayat Penyakit Sekarang: ' .
                                                                     ($data?->riwayat_penyakit_sekarang ?? '') .
@@ -134,6 +147,16 @@
                                                                 "\n" .
                                                                 'Skor Nyeri: ' .
                                                                 ($data?->skor_nyeri ?? '') .
+                                                                "\n" .
+                                                                'Riwayat Alergi: ' .
+                                                                (isset($data?->allergy_medicine)
+                                                                    ? (is_array($data->allergy_medicine)
+                                                                        ? (count($data->allergy_medicine) > 0
+                                                                            ? implode(', ', $data->allergy_medicine)
+                                                                            : 'Tidak ada')
+                                                                        : ($data->allergy_medicine ?:
+                                                                        'Tidak ada'))
+                                                                    : 'Tidak ada') .
                                                                 "\n\n" .
                                                                 'Pemeriksaan Fisik:' .
                                                                 "\n" .

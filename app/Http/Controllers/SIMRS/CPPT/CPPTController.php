@@ -104,8 +104,8 @@ class CPPTController extends Controller
                 // Gunakan whereBetween untuk query yang efisien
                 // Tambahkan waktu untuk memastikan seluruh hari terakhir ter-cover
                 $query->whereBetween('created_at', [
-                    $request->start_date.' 00:00:00',
-                    $request->end_date.' 23:59:59',
+                    $request->start_date . ' 00:00:00',
+                    $request->end_date . ' 23:59:59',
                 ]);
             }
 
@@ -136,7 +136,7 @@ class CPPTController extends Controller
             // Tangani error validasi secara spesifik
             return response()->json(['error' => 'Input tidak valid.', 'details' => $e->errors()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan pada server: '.$e->getMessage()], 500);
+            return response()->json(['error' => 'Terjadi kesalahan pada server: ' . $e->getMessage()], 500);
         }
     }
 
@@ -166,8 +166,8 @@ class CPPTController extends Controller
             // Filter berdasarkan Rentang Tanggal
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 $query->whereBetween('created_at', [
-                    $request->start_date.' 00:00:00',
-                    $request->end_date.' 23:59:59',
+                    $request->start_date . ' 00:00:00',
+                    $request->end_date . ' 23:59:59',
                 ]);
             }
 
@@ -198,7 +198,7 @@ class CPPTController extends Controller
             return response()->json($formattedCppt, 200);
         } catch (\Exception $e) {
             // Lebih baik menangkap error spesifik jika memungkinkan, tapi ini sudah cukup
-            return response()->json(['error' => 'Terjadi kesalahan pada server: '.$e->getMessage()], 500);
+            return response()->json(['error' => 'Terjadi kesalahan pada server: ' . $e->getMessage()], 500);
         }
     }
 
@@ -214,11 +214,12 @@ class CPPTController extends Controller
             ->count() + 1;
         $count = str_pad($count, 6, '0', STR_PAD_LEFT);
 
-        return 'REJ'.$year.$month.$count;
+        return 'REJ' . $year . $month . $count;
     }
 
     public function store(Request $request, $type, $registration_number)
     {
+        // dd($request->all());
         $validatedData = $request->validate([
             'registration_id' => 'required',
             'doctor_id' => 'nullable',
@@ -243,7 +244,12 @@ class CPPTController extends Controller
             $validatedData['user_id'] = auth()->user()->id;
             $validatedData['tipe_rawat'] = $registration_type;
 
-            if (auth()->user()->employee->doctor) {
+            if ($request->has('tipe_cppt') && $request->tipe_cppt === 'gizi') {
+                $validatedData['tipe_cppt'] = 'gizi';
+                $validatedData['diagnosa_gizi'] = $request->input('diagnosa_gizi');
+                $validatedData['intervensi_gizi'] = $request->input('intervensi_gizi');
+                $validatedData['monitoring'] = $request->input('monitoring');
+            } elseif (auth()->user()->employee->doctor) {
                 $validatedData['tipe_cppt'] = 'dokter';
             } elseif (str_contains(auth()->user()->name, 'A.Md.Kep')) {
                 $validatedData['tipe_cppt'] = 'perawat';
@@ -260,8 +266,8 @@ class CPPTController extends Controller
             if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
                 $oldPath = optional($cppt->signature)->signature;
                 $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', str_replace(' ', '+', $signatureData['signature_image'])));
-                $imageName = 'ttd_cppt_'.$cppt->id.'_'.time().'.png';
-                $newPath = 'signatures/'.$imageName;
+                $imageName = 'ttd_cppt_' . $cppt->id . '_' . time() . '.png';
+                $newPath = 'signatures/' . $imageName;
                 \Storage::disk('public')->put($newPath, $image);
 
                 $cppt->signature()->updateOrCreate(
@@ -396,8 +402,8 @@ class CPPTController extends Controller
             if ($request->filled('signature_image')) {
                 $imageData = $request->input('signature_image');
                 $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $imageData));
-                $imageName = 'ttd_cppt_'.$cppt->id.'_'.time().'.png';
-                $path = 'signatures/'.$imageName;
+                $imageName = 'ttd_cppt_' . $cppt->id . '_' . time() . '.png';
+                $path = 'signatures/' . $imageName;
 
                 // Hapus tanda tangan lama jika ada
                 if ($cppt->signature && Storage::disk('public')->exists($cppt->signature->signature)) {
@@ -421,7 +427,7 @@ class CPPTController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json(['error' => 'Gagal memperbarui CPPT: '.$e->getMessage()], 500);
+            return response()->json(['error' => 'Gagal memperbarui CPPT: ' . $e->getMessage()], 500);
         }
     }
 
@@ -454,7 +460,7 @@ class CPPTController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json(['error' => 'Gagal menghapus CPPT: '.$e->getMessage()], 500);
+            return response()->json(['error' => 'Gagal menghapus CPPT: ' . $e->getMessage()], 500);
         }
     }
 
