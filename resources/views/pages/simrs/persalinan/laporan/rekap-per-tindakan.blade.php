@@ -16,17 +16,13 @@
                                     <div class="col-md-6 mb-3">
                                         <label>Pilih Rentang Tanggal</label>
                                         <div class="input-daterange input-group" id="datepicker-5">
-                                            <input type="text" class="form-control" name="tanggal_awal"
-                                                value="{{ now()->startOfMonth()->format('d-m-Y') }}" required>
+                                            <input type="text" class="form-control" name="tanggal_awal" value="{{ now()->startOfMonth()->format('d-m-Y') }}" required>
                                             <div class="input-group-append input-group-prepend">
-                                                <span class="input-group-text fs-xl"><i
-                                                        class="fal fa-long-arrow-right"></i></span>
+                                                <span class="input-group-text fs-xl"><i class="fal fa-long-arrow-right"></i></span>
                                             </div>
-                                            <input type="text" class="form-control" name="tanggal_akhir"
-                                                value="{{ now()->endOfMonth()->format('d-m-Y') }}" required>
+                                            <input type="text" class="form-control" name="tanggal_akhir" value="{{ now()->endOfMonth()->format('d-m-Y') }}" required>
                                         </div>
-                                        <span class="help-block">Laporan akan menampilkan rekapitulasi per bulan berdasarkan
-                                            rentang tanggal yang dipilih.</span>
+                                        <span class="help-block">Laporan akan menampilkan rekapitulasi per bulan berdasarkan rentang tanggal yang dipilih.</span>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
@@ -97,7 +93,7 @@
     <script>
         $(document).ready(function() {
             $('.select2').select2();
-
+            
             // [PERBAIKAN] Inisialisasi datepicker untuk rentang tanggal
             $('.input-daterange').datepicker({
                 format: 'dd-mm-yyyy',
