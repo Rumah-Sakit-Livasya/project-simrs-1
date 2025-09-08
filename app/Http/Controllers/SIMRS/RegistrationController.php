@@ -793,10 +793,10 @@ class RegistrationController extends Controller
                 return $bed->room ? $bed->room->ruangan . ' - ' . $bed->room->no_ruang : '-';
             })
             ->addColumn('pasien', function ($bed) {
-                return $bed->patient ? $bed->patient->name : 'Kosong';
+                return $bed->patients ? $bed->patients->first()->name : 'Kosong';
             })
             ->addColumn('fungsi', function ($bed) {
-                return $bed->patient ? '<span class="text-danger">(Terisi)</span>' : '<button type="button" class="btn btn-sm btn-info pilih-bed" data-kelas-id="' . $bed->room->kelas_rawat->id . '" data-bed-id="' . $bed->id . '" data-room-info="' . $bed->room->ruangan . ' - ' . $bed->room->no_ruang . ' (' . $bed->nama_tt . ')">Pilih</button>';
+                return $bed->patients ? '<span class="text-danger">(Terisi)</span>' : '<button type="button" class="btn btn-sm btn-info pilih-bed" data-kelas-id="' . $bed->room->kelas_rawat->id . '" data-bed-id="' . $bed->id . '" data-room-info="' . $bed->room->ruangan . ' - ' . $bed->room->no_ruang . ' (' . $bed->nama_tt . ')">Pilih</button>';
             })
             ->rawColumns(['fungsi'])
             ->filterColumn('ruangan', function ($query, $keyword) {
