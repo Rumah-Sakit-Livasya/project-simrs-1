@@ -48,6 +48,7 @@ use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\ResumeMedisRajal\ResumeMedisRajal;
 use App\Models\SIMRS\Room;
 use App\Models\SIMRS\TindakanMedis;
+use App\Models\SkriningGiziDewasa;
 use App\Models\WarehouseBarangFarmasi;
 use App\Models\WarehouseMasterGudang;
 use Carbon\Carbon;
@@ -56,6 +57,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 
 class ERMController extends Controller
@@ -936,6 +938,116 @@ class ERMController extends Controller
     }
 
     /**
+     * Menyimpan data dari form skrining gizi dewasa.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeSkriningGiziDewasa(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'registration_id' => 'required|integer',
+            'diagnosa_medis' => 'nullable|string|max:255',
+            'bb' => 'nullable|numeric',
+            'tb' => 'nullable|numeric',
+            'imt' => 'nullable|numeric',
+            'tinggi_lutut' => 'nullable|numeric',
+            'lla' => 'nullable|numeric',
+            'skor1' => 'nullable|integer',
+            'skor2' => 'nullable|integer',
+            'skor3' => 'nullable|integer',
+            'hasil_skor' => 'nullable|integer',
+            'analisis_skor' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $data = SkriningGiziDewasa::updateOrCreate(
+                ['registration_id' => $request->registration_id], // Kunci untuk mencari data
+                [
+                    // 'pasien_id' => $request->pasien_id, // Anda harus mendapatkan ini dari data registrasi
+                    'diagnosa_medis' => $request->diagnosa_medis,
+                    'bb' => $request->bb,
+                    'tb' => $request->tb,
+                    'imt' => $request->imt,
+                    'tinggi_lutut' => $request->lutut, // Sesuaikan name di form
+                    'lla' => $request->lla,
+                    'skor1' => $request->skor1,
+                    'skor2' => $request->skor2,
+                    'skor3' => $request->skor3,
+                    'hasil_skor' => $request->hasil_skor,
+                    'analisis_skor' => $request->analisis_skor,
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                ]
+            );
+
+            // Menentukan status penyimpanan (draft atau final)
+            $status = $request->input('status', 0); // 0 untuk draft, 1 untuk final
+            $message = $status == 1 ? 'Data berhasil disimpan (final).' : 'Data berhasil disimpan sebagai draft.';
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $data
+            ], 200);
+        } catch (\Exception $e) {
+            // Tangani error, misalnya log error
+            \Log::error('Error saving skrining gizi dewasa: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan data.'
+            ], 500);
+        }
+    }
+
+    public function GetCpptGizi(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'registration_id' => 'required|integer|exists:registrations,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $registrationId = $request->input('registration_id');
+
+        // Ambil data CPPT dengan tipe_cppt 'gizi' berdasarkan registration_id, urutkan terbaru
+        $cpptGizi = CPPT::where('registration_id', $registrationId)
+            ->where('tipe_cppt', 'gizi')
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Format data untuk frontend (misal: waktu, user, signature, dsb)
+        $result = $cpptGizi->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'registration_id' => $item->registration_id,
+                'created_at' => $item->created_at ? $item->created_at->toDateTimeString() : null,
+                'updated_at' => $item->updated_at ? $item->updated_at->toDateTimeString() : null,
+                'user' => $item->user ? $item->user->name : null,
+                'profesi' => $item->user && $item->user->employee ? $item->user->employee->profession : null,
+                'subjective' => $item->subjective,
+                'objective' => $item->objective,
+                'assessment' => $item->assessment,
+                'plan' => $item->plan,
+                'evaluasi' => $item->evaluasi,
+                'instruksi' => $item->instruksi,
+                'signature_path' => $item->signature_path,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $result,
+        ]);
+    }
+
+    /**
      * Helper function untuk menyimpan file tanda tangan dari data base64.
      * (Pastikan fungsi ini sudah ada di dalam ERMController)
      */
@@ -1345,9 +1457,6 @@ class ERMController extends Controller
                 return view('pages.simrs.erm.form.perawat.radiologi', compact('kelas_rawats', 'groupPenjaminId', 'patient', 'radiology_categories', 'radiology_tarifs', 'radiologiOrders', 'radiologyDoctors', 'pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'infusion_monitor':
-                // Di sini kita tidak perlu mengambil data awal ($pengkajian) karena
-                // datanya akan dimuat oleh Datatables. Kita hanya perlu mengirim
-                // variabel $registration yang penting untuk view.
                 return view('pages.simrs.erm.form.perawat.infusion-monitor', compact('registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             case 'surveilans_infeksi':
@@ -1475,6 +1584,90 @@ class ERMController extends Controller
                 $pengkajian = RujukAntarRS::firstWhere('registration_id', $registration->id);
 
                 return view('pages.simrs.erm.form.layanan.rencana-persalinan', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
+
+            case 'pengkajian_gizi':
+                $form = FormKategori::all();
+                $daftar_pengkajian = PengkajianLanjutan::where('registration_id', $registration->id)->get();
+                $pengkajian = PengkajianLanjutan::firstWhere('registration_id', $registration->id);
+
+                return view('pages.simrs.erm.form.pengkajian-lanjutan', compact('pengkajian', 'registration', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'form', 'daftar_pengkajian', 'path'));
+
+            case 'cppt_gizi':
+                $rawData = null;
+
+                // dd($path);
+
+                // Ambil data sesuai dengan path
+                if ($path === 'igd') {
+                    $rawData = Triage::firstWhere('registration_id', $registration->id);
+                } elseif ($path === 'poliklinik') {
+                    $rawData = PengkajianNurseRajal::firstWhere('registration_id', $registration->id);
+                } elseif ($path === 'rawat-inap') {
+                    $rawData = InpatientInitialExamination::firstWhere('registration_id', $registration->id);
+                }
+
+                // dd($rawData);
+
+                // Generalisasi data ke format yang konsisten
+                $data = null;
+                if ($rawData) {
+                    $data = (object) [];
+
+                    // Mapping untuk Triage
+                    if ($rawData instanceof \App\Models\SIMRS\Pelayanan\Triage) {
+                        $data->pr = $rawData->pr;
+                        $data->rr = $rawData->rr;
+                        $data->bp = $rawData->bp;
+                        $data->temperatur = $rawData->temperatur;
+                        $data->body_height = $rawData->body_height;
+                        $data->body_weight = $rawData->body_weight;
+                        $data->sp02 = $rawData->sp02;
+                        $data->skor_nyeri = null; // Triage tidak punya skor nyeri
+                        $data->keluhan_utama = null; // Triage tidak punya keluhan utama
+                        $data->diagnosa_keperawatan = null; // Triage tidak punya diagnosa keperawatan
+                    }
+                    // Mapping untuk PengkajianNurseRajal
+                    elseif ($rawData instanceof \App\Models\SIMRS\Pengkajian\PengkajianNurseRajal) {
+                        $data->created_at = $rawData->created_at;
+                        $data->allergy_medicine = $rawData->allergy_medicine;
+                        $data->pr = $rawData->pr;
+                        $data->rr = $rawData->rr;
+                        $data->bp = $rawData->bp;
+                        $data->temperatur = $rawData->temperatur;
+                        $data->body_height = $rawData->body_height;
+                        $data->body_weight = $rawData->body_weight;
+                        $data->sp02 = $rawData->sp02;
+                        $data->skor_nyeri = $rawData->skor_nyeri;
+                        $data->keluhan_utama = $rawData->keluhan_utama;
+                        $data->diagnosa_keperawatan = $rawData->diagnosa_keperawatan;
+                    }
+                    // Mapping untuk InpatientInitialExamination
+                    elseif ($rawData instanceof \App\Models\InpatientInitialExamination) {
+                        $data->pr = $rawData->vital_sign_pr;
+                        $data->rr = $rawData->vital_sign_rr;
+                        $data->bp = $rawData->vital_sign_bp;
+                        $data->temperatur = $rawData->vital_sign_temperature;
+                        $data->body_height = $rawData->anthropometry_height;
+                        $data->body_weight = $rawData->anthropometry_weight;
+                        $data->sp02 = null; // InpatientInitialExamination tidak punya sp02
+                        $data->skor_nyeri = null; // InpatientInitialExamination tidak punya skor nyeri
+                        $data->keluhan_utama = null; // InpatientInitialExamination tidak punya keluhan utama
+                        $data->diagnosa_keperawatan = null; // InpatientInitialExamination tidak punya diagnosa keperawatan
+                    }
+                }
+
+                $perawat = Employee::whereHas('organization', function ($query) {
+                    $query->where('name', 'Rawat Jalan');
+                })->get();
+                $pengkajian = CPPT::firstWhere('registration_id', $registration->id);
+                // dd($data);
+
+                return view('pages.simrs.erm.form.gizi.cppt-gizi', compact('registration', 'registrations', 'pengkajian', 'menu', 'departements', 'jadwal_dokter', 'perawat', 'path', 'data'));
+
+            case 'mst_gizi':
+                $pengkajian = SkriningGiziDewasa::firstWhere('registration_id', $registration->id);
+
+                return view('pages.simrs.erm.form.gizi.mst-gizi', compact('pengkajian', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'path'));
 
             default:
                 return view('pages.simrs.poliklinik.index', compact('departements', 'jadwal_dokter', 'path'));

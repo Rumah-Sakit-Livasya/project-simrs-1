@@ -110,9 +110,30 @@
                         allDates.add(date);
                     });
 
-                    // 2. Urutkan tanggal unik dari yang terbaru
-                    const sortedUniqueDates = Array.from(allDates).sort((a, b) => new Date(b) - new Date(
-                        a));
+                    // 2. Urutkan tanggal unik dari yang terbaru ke terlama
+                    const sortedUniqueDates = Array.from(allDates).sort((a, b) => {
+                        // Ubah format tanggal lokal ke format yyyy-mm-dd agar bisa dibandingkan
+                        // Split tanggal lokal: "17 Juni 2024" -> [17, Juni, 2024]
+                        const parseDate = (str) => {
+                            const [day, monthName, year] = str.split(' ');
+                            const monthMap = {
+                                'Januari': 0,
+                                'Februari': 1,
+                                'Maret': 2,
+                                'April': 3,
+                                'Mei': 4,
+                                'Juni': 5,
+                                'Juli': 6,
+                                'Agustus': 7,
+                                'September': 8,
+                                'Oktober': 9,
+                                'November': 10,
+                                'Desember': 11
+                            };
+                            return new Date(Number(year), monthMap[monthName], Number(day));
+                        };
+                        return parseDate(b) - parseDate(a);
+                    });
 
                     // 3. Kelompokkan setiap dataset berdasarkan tanggal
                     const groupDataByDate = (data) => data.reduce((acc, item) => {
@@ -129,7 +150,7 @@
                     const groupedDokterData = groupDataByDate(dokterData);
                     const groupedPerawatData = groupDataByDate(perawatData);
 
-                    // 4. Render HTML untuk setiap tanggal
+                    // 4. Render HTML untuk setiap tanggal, urutan terbaru di atas
                     sortedUniqueDates.forEach(date => {
                         // Tambahkan Header Tanggal yang mencakup kedua kolom
                         targetElement.append(`<div class="daily-cppt-header">${date}</div>`);
@@ -141,7 +162,7 @@
                         // Buat Kolom Kiri (Dokter)
                         const dokterCol = $('<div class="col-md-6 cppt-column"></div>');
                         if (groupedDokterData[date]) {
-                            // Urutkan entri berdasarkan waktu
+                            // Urutkan entri berdasarkan waktu terbaru di atas
                             groupedDokterData[date].sort((a, b) => new Date(b.created_at) -
                                 new Date(a.created_at));
                             groupedDokterData[date].forEach(data => {
@@ -153,7 +174,7 @@
                         // Buat Kolom Kanan (Perawat)
                         const perawatCol = $('<div class="col-md-6 cppt-column"></div>');
                         if (groupedPerawatData[date]) {
-                            // Urutkan entri berdasarkan waktu
+                            // Urutkan entri berdasarkan waktu terbaru di atas
                             groupedPerawatData[date].sort((a, b) => new Date(b.created_at) -
                                 new Date(a.created_at));
                             groupedPerawatData[date].forEach(data => {
@@ -590,8 +611,10 @@
 
             let cpptTitle = 'Catatan ' + data.tipe_cppt.charAt(0).toUpperCase() + data.tipe_cppt.slice(1);
 
-            // Logika untuk mengubah "dokter" menjadi "perawat" jika bukan dokter
-            if (data.tipe_cppt !== 'dokter') {
+            // Logika untuk menentukan judul catatan berdasarkan tipe_cppt
+            if (data.tipe_cppt === 'gizi') {
+                cpptTitle = 'Catatan Ahli Gizi';
+            } else if (data.tipe_cppt !== 'dokter') {
                 cpptTitle = 'Catatan Perawat';
             }
             const canModify = (loggedInUserId === data.user_id);
@@ -620,6 +643,47 @@
 
             // ==========================================================
 
+            let cardBodyHtml = '';
+
+            if (data.tipe_cppt == 'gizi') {
+                // Tampilkan hanya field Gizi sesuai permintaan
+                cardBodyHtml += data.assesment ?
+                    `<div class="soap-section"><span class="soap-label">Assesment Gizi :</span><div class="soap-content">${data.assesment}</div></div>` :
+                    '';
+                cardBodyHtml += data.diagnosa_gizi ?
+                    `<div class="soap-section"><span class="soap-label">Diagnosa Gizi :</span><div class="soap-content">${data.diagnosa_gizi}</div></div>` :
+                    '';
+                cardBodyHtml += data.intervensi_gizi ?
+                    `<div class="soap-section"><span class="soap-label">Intervensi Gizi :</span><div class="soap-content">${data.intervensi_gizi}</div></div>` :
+                    '';
+                cardBodyHtml += data.monitoring ?
+                    `<div class="soap-section"><span class="soap-label">Monitoring :</span><div class="soap-content">${data.monitoring}</div></div>` :
+                    '';
+                cardBodyHtml += data.evaluasi ?
+                    `<div class="soap-section"><span class="soap-label">Evaluasi :</span><div class="soap-content">${data.evaluasi}</div></div>` :
+                    '';
+            } else {
+                // Default: SOAP/CPPT biasa
+                cardBodyHtml += data.subjective ?
+                    `<div class="soap-section" id="subjective-${data.id}"><span class="soap-label">Subjective :</span><div class="soap-content">${data.subjective}</div></div>` :
+                    '';
+                cardBodyHtml += data.objective ?
+                    `<div class="soap-section" id="objective-${data.id}"><span class="soap-label">Objective :</span><div class="soap-content">${data.objective}</div></div>` :
+                    '';
+                cardBodyHtml += data.assesment ?
+                    `<div class="soap-section" id="assesment-${data.id}"><span class="soap-label">Assessment :</span><div class="soap-content">${data.assesment}</div></div>` :
+                    '';
+                cardBodyHtml += data.planning ?
+                    `<div class="soap-section" id="planning-${data.id}"><span class="soap-label">Plan :</span><div class="soap-content">${data.planning}</div></div>` :
+                    '';
+                cardBodyHtml += data.evaluasi ?
+                    `<div class="soap-section"><span class="soap-label">Evaluasi :</span><div class="soap-content">${data.evaluasi}</div></div>` :
+                    '';
+                cardBodyHtml += data.instruksi ?
+                    `<div class="soap-section"><span class="soap-label">Instruksi :</span><div class="soap-content">${data.instruksi}</div></div>` :
+                    '';
+            }
+
             return `
         <div class="cppt-entry-card">
             <div class="cppt-card-header">
@@ -637,12 +701,7 @@
                 </div>
             </div>
             <div class="cppt-card-body">
-                ${data.subjective ? `<div class="soap-section" id="subjective-${data.id}"><span class="soap-label">Subjective :</span><div class="soap-content">${data.subjective}</div></div>` : ''}
-                ${data.objective ? `<div class="soap-section" id="objective-${data.id}"><span class="soap-label">Objective :</span><div class="soap-content">${data.objective}</div></div>` : ''}
-                ${data.assesment ? `<div class="soap-section" id="assesment-${data.id}"><span class="soap-label">Assessment :</span><div class="soap-content">${data.assesment}</div></div>` : ''}
-                ${data.planning ? `<div class="soap-section" id="planning-${data.id}"><span class="soap-label">Plan :</span><div class="soap-content">${data.planning}</div></div>` : ''}
-                ${data.evaluasi ? `<div class="soap-section"><span class="soap-label">Evaluasi :</span><div class="soap-content">${data.evaluasi}</div></div>` : ''}
-                ${data.instruksi ? `<div class="soap-section"><span class="soap-label">Instruksi :</span><div class="soap-content">${data.instruksi}</div></div>` : ''}
+                ${cardBodyHtml}
             </div>
             ${signatureBlock} {{-- Sisipkan blok tanda tangan di sini --}}
         </div>`;

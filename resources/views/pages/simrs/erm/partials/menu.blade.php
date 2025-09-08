@@ -303,6 +303,11 @@
                 <div class="dropdown-menu">
                     <a class="dropdown-item"
                         href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'pengkajian_gizi']) }}">Pengkajian</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'cppt_gizi']) }}">CPPT</a>
+                    <a class="dropdown-item"
+                        href="{{ route($path . '.catatan-medis', ['registration' => $registration->registration_number, 'menu' => 'mst_gizi']) }}">
+                        Gizi dengan MST (Malnutrition Screening Tool) </a>
                 </div>
             </li>
             <li class="nav-item dropdown">

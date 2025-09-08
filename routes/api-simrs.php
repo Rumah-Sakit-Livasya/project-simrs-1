@@ -119,7 +119,7 @@ use Illuminate\Support\Facades\Storage; // Pastikan path ini benar
 Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
     Route::get('/signature/{filename}', function ($filename) {
         // Pastikan user terautentikasi memiliki akses untuk file ini
-        $path = 'employee/ttd/'.$filename;
+        $path = 'employee/ttd/' . $filename;
 
         if (Storage::disk('private')->exists($path)) {
             return Storage::disk('private')->response($path);
@@ -190,6 +190,11 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
             Route::put('/update/{id}/', [DietGiziController::class, 'update'])->name('auto-diet.gizi.update');
             Route::delete('/destroy/{id}/', [DietGiziController::class, 'destroy'])->name('auto-diet.gizi.destroy');
         });
+
+        // Route untuk Skrining Gizi Dewasa
+        // Route::get('/erm/skrining-gizi-dewasa/{registrasi_id}', [ERMController::class, 'createSkriningGiziDewasa'])->name('erm.skrining-gizi-dewasa.create');
+        Route::post('/erm/skrining-gizi-dewasa/store', [ERMController::class, 'storeSkriningGiziDewasa'])->name('erm.skrining-gizi-dewasa.store');
+        Route::get('/erm/cppt/gizi/get', [ERMController::class, 'GetCpptGizi'])->name('cppt.gizi.get');
     });
 
     Route::prefix('farmasi')->group(function () {
