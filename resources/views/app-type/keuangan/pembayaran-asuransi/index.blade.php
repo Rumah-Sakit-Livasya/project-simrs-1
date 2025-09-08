@@ -10,11 +10,6 @@
             max-width: 800px;
         }
 
-        /*
-                                    ====================================================================
-                                    CSS BARU UNTUK DETAILS CONTROL (Disalin dari Konfirmasi Asuransi)
-                                    ====================================================================
-                                    */
         .details-control {
             cursor: pointer;
             text-align: center;
@@ -173,14 +168,6 @@
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
-                            @if (session('success'))
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
-                                    </button>
-                                    <strong>Sukses!</strong> {{ session('success') }}
-                                </div>
-                            @endif
 
                             <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
                                 <thead class="bg-primary-600">

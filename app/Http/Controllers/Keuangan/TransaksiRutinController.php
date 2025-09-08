@@ -25,6 +25,7 @@ class TransaksiRutinController extends Controller
 
         $transaksiRutin = $query->get();
         $chartOfAccounts = ChartOfAccount::where('header', 0)->orderBy('code')->get();
+        // dd($transaksiRutin);
 
         return view('app-type.keuangan.setup.transaksi-rutin.index', [
             'transaksiRutin' => $transaksiRutin,

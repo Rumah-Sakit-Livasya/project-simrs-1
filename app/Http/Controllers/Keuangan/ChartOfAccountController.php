@@ -9,113 +9,42 @@ use Illuminate\Http\Request;
 
 class ChartOfAccountController extends Controller
 {
-
     public function index(Request $request)
     {
+        // Method index sekarang hanya menyiapkan data untuk filter dan modal
         $groupCOA = GroupChartOfAccount::orderBy('id', 'asc')->get();
-
-        // ========================================================
-        //          PERBAIKAN UTAMA: HILANGKAN KOMENTAR
-        // ========================================================
-        // Variabel ini diperlukan oleh modal untuk dropdown 'Parent COA'.
-        // Kita ambil semua COA yang merupakan header.
-        $chartOfAccounts = ChartOfAccount::where('header', true)
-            ->orderBy('code', 'asc')
-            ->get();
 
         return view('app-type.keuangan.chart-of-account.index', [
             'groupCOA' => $groupCOA,
-            'chartOfAccounts' => $chartOfAccounts, // Kirim variabel ini ke view
         ]);
     }
 
-    public function store(Request $request)
+    /**
+     * Metode baru untuk mengambil SEMUA COA (untuk tampilan default).
+     */
+    public function getAll()
     {
-        $validatedData = $request->validate([
-            'group_id' => 'required|exists:group_chart_of_account,id',
-            'code' => 'required|string|max:20|unique:chart_of_account,code',
-            'name' => 'required|string|max:255',
-            'header' => 'required|boolean',
-            'parent_id' => 'nullable|exists:chart_of_account,id',
-            'description' => 'nullable|string',
-        ], [
-            'group_id.required' => 'Field grup wajib diisi',
-            'group_id.exists' => 'Grup yang dipilih tidak valid',
-            'code.required' => 'Field kode wajib diisi',
-            'code.string' => 'Kode harus berupa string',
-            'code.max' => 'Kode tidak boleh lebih dari 20 karakter',
-            'code.unique' => 'Kode sudah digunakan',
-            'name.required' => 'Field nama wajib diisi',
-            'name.string' => 'Nama harus berupa string',
-            'name.max' => 'Nama tidak boleh lebih dari 255 karakter',
-            'header.required' => 'Field header wajib diisi',
-            'header.boolean' => 'Header harus bernilai true atau false',
-            'parent_id.exists' => 'Parent yang dipilih tidak valid',
-        ]);
+        $allCoa = ChartOfAccount::with('childrenRecursive')
+            ->whereNull('parent_id') // Mulai dari root
+            ->orderBy('code', 'asc')
+            ->get();
 
-        $chartOfAccount = ChartOfAccount::create($validatedData);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Chart of Account berhasil dibuat.',
-            'data' => $chartOfAccount
-        ]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $validatedData = $request->validate([
-            'group_id' => 'required|exists:group_chart_of_account,id',
-            'code' => 'required|string|max:20|unique:chart_of_account,code,' . $id,
-            'name' => 'required|string|max:255',
-            'header' => 'required|boolean',
-            'description' => 'nullable|string',
-            'parent_id' => 'nullable|exists:chart_of_account,id',
-        ], [
-            'group_id.required' => 'Grup harus diisi.',
-            'group_id.exists' => 'Grup yang dipilih tidak valid.',
-            'code.required' => 'Kode harus diisi.',
-            'code.string' => 'Kode harus berupa teks.',
-            'code.max' => 'Kode tidak boleh lebih dari 20 karakter.',
-            'code.unique' => 'Kode sudah digunakan, silakan gunakan kode lain.',
-            'name.required' => 'Nama harus diisi.',
-            'name.string' => 'Nama harus berupa teks.',
-            'name.max' => 'Nama tidak boleh lebih dari 255 karakter.',
-            'header.required' => 'Header harus diisi.',
-            'header.boolean' => 'Header harus bernilai true atau false.',
-            'parent_id.exists' => 'Parent yang dipilih tidak valid.',
-        ]);
-
-        $chartOfAccount = ChartOfAccount::findOrFail($id);
-        $chartOfAccount->update($validatedData);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Chart of Account berhasil diperbarui.',
-            'data' => $chartOfAccount
-        ]);
+        return response()->json($this->formatTree($allCoa));
     }
 
     public function getByGroup($group_id)
     {
-        // Query ini sekarang akan bekerja dengan benar karena sudah ada data
-        // yang `parent_id`-nya NULL.
-        $coa = ChartOfAccount::with('childrenRecursive') // Eager load semua turunan
+        $coa = ChartOfAccount::with('childrenRecursive')
             ->where('group_id', $group_id)
-            ->whereNull('parent_id') // Mencari "akar" dari hierarki
+            ->whereNull('parent_id')
             ->orderBy('code', 'asc')
             ->get();
 
-        // Kirim data yang sudah berbentuk hierarki ke fungsi format
         return response()->json($this->formatTree($coa));
     }
 
-    /**
-     * Fungsi rekursif untuk memformat data pohon agar sesuai dengan frontend.
-     */
     private function formatTree($nodes)
     {
-        // Pastikan semua field yang dibutuhkan oleh JavaScript ada di sini
         return $nodes->map(function ($node) {
             return [
                 'id' => $node->id,
@@ -124,44 +53,58 @@ class ChartOfAccountController extends Controller
                 'header' => (bool) $node->header,
                 'status' => (bool) $node->status,
                 'default' => $node->default,
+                'group_name' => $node->group->name, // Tambahkan nama grup untuk kejelasan
                 'children' => $node->childrenRecursive->isNotEmpty() ? $this->formatTree($node->childrenRecursive) : []
             ];
         });
     }
+
+    public function store(Request $request)
+    {
+        // Validasi dan logika store tidak berubah
+        $validatedData = $request->validate([
+            'group_id' => 'required|exists:group_chart_of_account,id',
+            'code' => 'required|string|max:20|unique:chart_of_account,code',
+            'name' => 'required|string|max:255',
+            'header' => 'required|boolean',
+            'parent_id' => 'nullable|exists:chart_of_account,id',
+            'description' => 'nullable|string',
+        ]);
+        $chartOfAccount = ChartOfAccount::create($validatedData);
+        return response()->json(['success' => true, 'message' => 'Chart of Account berhasil dibuat.', 'data' => $chartOfAccount]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        // Validasi dan logika update tidak berubah
+        $validatedData = $request->validate([
+            'group_id' => 'required|exists:group_chart_of_account,id',
+            'code' => 'required|string|max:20|unique:chart_of_account,code,' . $id,
+            'name' => 'required|string|max:255',
+            'header' => 'required|boolean',
+            'description' => 'nullable|string',
+            'parent_id' => 'nullable|exists:chart_of_account,id',
+        ]);
+        $chartOfAccount = ChartOfAccount::findOrFail($id);
+        $chartOfAccount->update($validatedData);
+        return response()->json(['success' => true, 'message' => 'Chart of Account berhasil diperbarui.', 'data' => $chartOfAccount]);
+    }
+
     public function show($id)
     {
-        $coa = ChartOfAccount::findOrFail($id);
+        $coa = ChartOfAccount::with('group')->findOrFail($id); // Eager load group untuk modal edit
         return response()->json($coa);
     }
 
-    // private function formatTree($nodes)
-    // {
-    //     return $nodes->map(function ($node) {
-    //         return [
-    //             'id' => $node->id, // Pastikan ID disertakan
-    //             'code' => $node->code,
-    //             'name' => $node->name,
-    //             'header' => $node->header,
-    //             'children' => $node->children ? $this->formatTree($node->children) : []
-    //         ];
-    //     });
-    // }
-
     public function getParents(Request $request)
     {
-        // Validasi sederhana untuk memastikan group_id adalah angka
+        // Logika getParents tidak berubah
         $request->validate(['group_id' => 'nullable|integer']);
-
-        // Query dasar: Hanya ambil akun yang merupakan 'header'
         $query = ChartOfAccount::where('header', true);
-
-        // Filter berdasarkan grup HANYA JIKA group_id diberikan
         if ($request->filled('group_id')) {
             $query->where('group_id', $request->group_id);
         }
-
         $parents = $query->orderBy('code')->get(['id', 'code', 'name']);
-
         return response()->json($parents);
     }
 }

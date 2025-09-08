@@ -160,10 +160,10 @@
         }
     </style>
     <main id="js-page-content" role="main" class="page-content">
-        <div class="row mb-5">
+        <div class="row mb-3">
             <div class="col-xl-12">
                 <button type="button" class="btn btn-primary waves-effect waves-themed" data-backdrop="static"
-                    data-keyboard="false" data-toggle="modal" data-target="#tambah-bank" title="Tambah">
+                    data-keyboard="false" data-toggle="modal" data-target="#tambah-bank" title="Tambah Bank">
                     <span class="fal fa-plus-circle mr-1"></span>
                     Tambah Bank
                 </button>
@@ -174,219 +174,191 @@
             <div class="col-xl-12">
                 <div id="panel-1" class="panel">
                     <div class="panel-hdr">
-                        <h2>
-                            Table <span class="fw-300"><i>Bank</i></span>
-                        </h2>
+                        <h2>Tabel <span class="fw-300"><i>Bank</i></span></h2>
                     </div>
                     <div class="panel-container show">
                         <div class="panel-content">
                             <div class="table-responsive">
-                                <table class="table table-striped table-bordered">
+                                {{-- ============================================= --}}
+                                {{--            PERBAIKAN UTAMA DI SINI            --}}
+                                {{-- ============================================= --}}
+                                <table class="table table-striped table-bordered" id="dt-basic-example">
+                                    {{-- ID DITAMBAHKAN --}}
                                     <thead>
                                         <tr>
-                                            <th>No</th>
+                                            <th style="width: 15px">No</th>
                                             <th>Nama Bank</th>
                                             <th>Pemilik</th>
                                             <th>Nomor Rekening</th>
                                             <th>Saldo</th>
                                             <th>Status</th>
-                                            <th style="width: 25px">Aksi</th>
+                                            <th class="no-export text-center" style="width: 80px">Aksi</th>
+                                            {{-- class no-export & text-center --}}
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($banks as $bank)
-                                            <tr>
+                                        @forelse ($banks as $bank)
+                                            <tr id="bank-row-{{ $bank->id }}"> {{-- Tambah ID untuk update via AJAX --}}
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $bank->nama }}</td>
                                                 <td>{{ $bank->pemilik }}</td>
                                                 <td>{{ $bank->nomor }}</td>
-                                                <td>{{ number_format($bank->saldo, 0, ',', '.') }}</td>
+                                                <td>{{ number_format($bank->saldo, 2, ',', '.') }}</td>
                                                 <td>
                                                     <span
                                                         class="badge badge-{{ $bank->is_aktivasi ? 'success' : 'secondary' }}">
                                                         {{ $bank->is_aktivasi ? 'Aktif' : 'Tidak Aktif' }}
                                                     </span>
                                                 </td>
-                                                <td>
-                                                    <div class="btn-group" role="group">
-                                                        <!-- Tombol Edit -->
-                                                        <button type="button" class="btn btn-sm btn-primary"
-                                                            data-toggle="modal"
-                                                            data-target="#edit-bank-{{ $bank->id }}">
-                                                            <i class="fal fa-edit"></i> Edit
-                                                        </button>
-
-                                                        <!-- Tombol Hapus -->
-                                                        <button type="button" class="btn btn-sm btn-danger"
-                                                            data-toggle="modal"
-                                                            data-target="#delete-bank-{{ $bank->id }}">
-                                                            <i class="fal fa-trash"></i> Hapus
-                                                        </button>
-                                                    </div>
+                                                <td class="text-center">
+                                                    {{-- Tombol diubah untuk menggunakan data-* attributes --}}
+                                                    <button type="button" class="btn btn-xs btn-primary btn-edit"
+                                                        data-id="{{ $bank->id }}" title="Edit">
+                                                        <i class="fal fa-edit"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-xs btn-danger btn-delete"
+                                                        data-id="{{ $bank->id }}" data-name="{{ $bank->nama }}"
+                                                        title="Hapus">
+                                                        <i class="fal fa-trash"></i>
+                                                    </button>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="text-center">Tidak ada data bank yang ditemukan.
+                                                </td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
-
-                            <!-- Modal Delete untuk setiap bank -->
-                            @foreach ($banks as $bank)
-                                <div class="modal fade" id="delete-bank-{{ $bank->id }}" tabindex="-1" role="dialog"
-                                    aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-danger text-white">
-                                                <h5 class="modal-title">
-                                                    <i class="fal fa-exclamation-triangle mr-2"></i>
-                                                    Konfirmasi Hapus
-                                                </h5>
-                                                <button type="button" class="close text-white" data-dismiss="modal"
-                                                    aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="text-center">
-                                                    <i class="fal fa-exclamation-triangle fa-3x text-danger mb-3"></i>
-                                                    <h4>Apakah Anda yakin?</h4>
-                                                    <p class="text-muted">
-                                                        Anda akan menghapus bank <strong>"{{ $bank->nama }}"</strong><br>
-                                                        Tindakan ini tidak dapat dibatalkan!
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                                    <i class="fal fa-times mr-1"></i> Batal
-                                                </button>
-                                                <form action="{{ route('bank.destroy', $bank->id) }}" method="POST"
-                                                    style="display: inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">
-                                                        <i class="fal fa-trash mr-1"></i> Ya, Hapus
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        {{-- ========================================================== --}}
+        {{--     MODAL SEKARANG DITARUH DI LUAR LOOP, HANYA SATU KALI    --}}
+        {{-- ========================================================== --}}
         @include('app-type.keuangan.setup.bank.partials.create-bank')
-
-        @foreach ($banks as $bank)
-            @include('app-type.keuangan.setup.bank.partials.edit', ['bank' => $bank])
-        @endforeach
+        @include('app-type.keuangan.setup.bank.partials.edit') {{-- Ini modal edit generik --}}
+        @include('app-type.keuangan.setup.bank.partials.delete-bank') {{-- Ini modal hapus generik --}}
     </main>
 @endsection
 
 @section('plugin')
+    {{-- JavaScript section with major updates --}}
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datatable/jszip.min.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
-
     <script>
         $(document).ready(function() {
-            // Initialize select2 for create modal
-            $('.select2').select2({
-                placeholder: 'Pilih Opsi',
-                dropdownParent: $('#tambah-bank'),
+            // Setup CSRF Token untuk semua request AJAX
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
             });
 
-            // Initialize DataTable
-            $('#dt-basic-example').dataTable({
+            // Inisialisasi Select2 untuk modal TAMBAH
+            $('#tambah-bank .select2').select2({
+                placeholder: 'Pilih Opsi',
+                dropdownParent: $('#tambah-bank')
+            });
+
+            // Inisialisasi Select2 untuk modal EDIT
+            $('#edit-bank-modal .select2').select2({
+                placeholder: 'Pilih Opsi',
+                dropdownParent: $('#edit-bank-modal')
+            });
+
+            // Inisialisasi DataTable
+            var table = $('#dt-basic-example').DataTable({
                 responsive: true,
-                dom: 'Bfrtip',
+                dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 buttons: [{
                         extend: 'print',
                         text: 'Print',
-                        className: 'float-right btn btn-primary',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
+                        className: 'btn-sm btn-default'
                     },
                     {
                         extend: 'excel',
-                        text: 'Download as Excel',
-                        className: 'float-right btn btn-success',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                    {
-                        extend: 'colvis',
-                        text: 'Column Visibility',
-                        titleAttr: 'Col visibility',
-                        className: 'float-right mb-3 btn btn-warning',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        },
-                        postfixButtons: [{
-                                extend: 'print',
-                                text: 'Print',
-                                exportOptions: {
-                                    columns: ':visible:not(.no-export)'
-                                }
-                            },
-                            {
-                                extend: 'excel',
-                                text: 'Download as Excel',
-                                exportOptions: {
-                                    columns: ':visible:not(.no-export)'
-                                }
-                            }
-                        ]
+                        text: 'Excel',
+                        className: 'btn-sm btn-default'
                     }
                 ]
             });
 
-            // Initialize select2 for edit modals when they are shown
-            $(document).on('shown.bs.modal', '.edit-bank-modal', function() {
-                $(this).find('.select2').select2({
-                    placeholder: 'Pilih Opsi',
-                    dropdownParent: $(this),
+            // EVENT: Klik tombol EDIT
+            $('#dt-basic-example tbody').on('click', '.btn-edit', function() {
+                var bankId = $(this).data('id');
+                var url = "{{ url('keuangan/setup/bank') }}/" + bankId;
+
+                // Ambil data dari server
+                $.get(url, function(data) {
+                    // Isi form di modal edit
+                    $('#edit-bank-form').attr('action', url); // Set action form
+                    $('#edit-bank-modal #nama').val(data.nama);
+                    $('#edit-bank-modal #pemilik').val(data.pemilik);
+                    $('#edit-bank-modal #nomor').val(data.nomor);
+                    $('#edit-bank-modal #saldo').val(parseFloat(data.saldo));
+                    $('#edit-bank-modal #akun_kas_bank').val(data.akun_kas_bank).trigger('change');
+                    $('#edit-bank-modal #akun_kliring').val(data.akun_kliring).trigger('change');
+                    $('#edit-bank-modal #is_aktivasi').prop('checked', data.is_aktivasi);
+                    $('#edit-bank-modal #is_bank').prop('checked', data.is_bank);
+
+                    // Tampilkan modal
+                    $('#edit-bank-modal').modal('show');
+                }).fail(function() {
+                    alert('Gagal mengambil data bank.');
                 });
             });
 
-            // Handle form submission for edit modals
-            $(document).on('submit', '.edit-bank-form', function(e) {
+            // EVENT: Submit form EDIT
+            $('#edit-bank-form').on('submit', function(e) {
                 e.preventDefault();
                 var form = $(this);
                 var url = form.attr('action');
-                var modalId = form.closest('.modal').attr('id');
 
                 $.ajax({
-                    type: "POST",
+                    type: "PUT", // Gunakan method PUT/PATCH untuk update
                     url: url,
                     data: form.serialize(),
+                    dataType: 'json',
                     success: function(response) {
-                        if (response.redirect) {
-                            window.location.href = response.redirect;
-                        } else {
-                            window.location.reload();
-                        }
+                        $('#edit-bank-modal').modal('hide');
+                        alert(response.message);
+                        // Reload halaman untuk melihat perubahan
+                        // Opsi lebih canggih: update baris tabel dengan DataTables API tanpa reload
+                        window.location.reload();
                     },
                     error: function(xhr) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            $.each(errors, function(key, value) {
-                                form.find('[name="' + key + '"]').addClass(
-                                    'is-invalid');
-                                form.find('[name="' + key + '"]').next(
-                                    '.invalid-feedback').text(value[0]);
-                            });
-                        } else {
-                            alert('Terjadi kesalahan. Silakan coba lagi.');
-                        }
+                        // Tampilkan error validasi
+                        var errors = xhr.responseJSON.errors;
+                        var errorString = 'Terdapat kesalahan:\n';
+                        $.each(errors, function(key, value) {
+                            errorString += '- ' + value[0] + '\n';
+                        });
+                        alert(errorString);
                     }
                 });
+            });
+
+            // EVENT: Klik tombol DELETE
+            $('#dt-basic-example tbody').on('click', '.btn-delete', function() {
+                var bankId = $(this).data('id');
+                var bankName = $(this).data('name');
+                var url = "{{ url('keuangan/setup/bank') }}/" + bankId;
+
+                // Set content modal delete
+                $('#delete-bank-modal #bank-name').text(bankName);
+                $('#delete-bank-form').attr('action', url);
+
+                // Tampilkan modal
+                $('#delete-bank-modal').modal('show');
             });
         });
     </script>
