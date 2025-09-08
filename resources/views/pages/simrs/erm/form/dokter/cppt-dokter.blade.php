@@ -700,8 +700,7 @@ Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="{{ asset('js/simrs/erm/form/dokter/cppt.js') }}?time={{ now() }}"></script>
     <script src="{{ asset('js/simrs/erm/form/dokter/cppt-dokter-form.js') }}?time={{ now() }}"></script>
-
-    <<<<<<< HEAD=======<script>
+    <script>
         /**
          * Custom matcher for the Select2 drug dropdown to allow searching
          * by drug name or active substance (zat aktif).
@@ -741,7 +740,7 @@ Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
                 const registrationNumber = "{{ $registration->registration_number }}";
 
                 const url =
-                    "{{ route('cppt.dokter-rajal.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
+                    "{{ route('cppt.store', ['type' => 'rawat-jalan', 'registration_number' => '__registration_number__']) }}"
                     .replace('__registration_number__', registrationNumber);
 
                 // Now you can use `url` in your form submission or AJAX request
@@ -823,6 +822,5 @@ Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
             });
         });
     </script>
-    >>>>>>> 4b5ee787663e10670e66049c56bd68f5277e2f62
     @include('pages.simrs.erm.partials.action-js.cppt')
 @endsection

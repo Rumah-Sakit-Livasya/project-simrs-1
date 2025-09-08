@@ -475,9 +475,9 @@ class LaporanInternalController extends Controller
     public function exportPPTXHarian(Request $request)
     {
         $laporan = LaporanInternal::with(['organization', 'user'])
-            ->whereMonth('created_at', $request->bulan) // 5 = Mei
-            ->whereYear('created_at', 2025) // ganti tahun sesuai kebutuhan
-            ->orderBy('created_at', 'desc')
+            ->whereMonth('tanggal', $request->bulan) // 5 = Mei
+            ->whereYear('tanggal', 2025) // ganti tahun sesuai kebutuhan
+            ->orderBy('tanggal', 'desc')
             ->get()
             ->groupBy(fn($item) => $item->organization->name)
             ->reject(fn($group, $orgName) => in_array($orgName, ['Sanitasi', 'PSRS']))

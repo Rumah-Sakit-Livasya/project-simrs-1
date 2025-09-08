@@ -52,12 +52,12 @@ use App\Http\Controllers\API\InternalVehicleController;
 use App\Http\Controllers\API\InternalVehicleVendorController;
 use App\Http\Controllers\API\KunjunganController;
 use App\Http\Controllers\API\PesanController;
-use App\Http\Controllers\Api\WasteTransportController;
-use App\Http\Controllers\Api\WebhookController;
-use App\Http\Controllers\LaporanInternalController;
 use App\Http\Controllers\API\VehicleLogController;
 use App\Http\Controllers\API\VehicleServiceController;
 use App\Http\Controllers\API\WorkshopVendorController;
+use App\Http\Controllers\Api\WasteTransportController;
+use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\LaporanInternalController;
 use App\Http\Controllers\WhatsappController;
 
 /*

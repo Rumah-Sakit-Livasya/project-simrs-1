@@ -384,7 +384,7 @@ Route::middleware([LastSeenUser::class])->group(function () {
             Route::get('/laporan-internal/get/{id}', [LaporanInternalController::class, 'getLaporan'])->name('laporan-internal')->middleware('can:view laporan internal');
             Route::post('/laporan-internal-filter', [LaporanInternalController::class, 'index'])->name('laporan-internal.filter');
             Route::post('/laporan-internal', [LaporanInternalController::class, 'store']);
-            Route::post('/laporan-internal/import', [LaporanInternalController::class, 'i`mport'])->name('laporan-internal.import');
+            Route::post('/laporan-internal/import', [LaporanInternalController::class, 'import'])->name('laporan-internal.import');
             Route::post('/laporan-internal/{id}', [LaporanInternalController::class, 'update']);
             Route::get('/laporan-internal-list', [LaporanInternalController::class, 'list']);
             Route::delete('/laporan-internal/{id}', [LaporanInternalController::class, 'destroy']);
