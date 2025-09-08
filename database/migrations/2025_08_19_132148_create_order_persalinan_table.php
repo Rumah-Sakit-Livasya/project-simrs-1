@@ -47,12 +47,12 @@ return new class extends Migration
         });
 
         // Pivot tabel untuk tindakan
-        Schema::create('order_persalinan_detail', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_persalinan_id')->constrained('order_persalinan')->onDelete('cascade');
-            $table->foreignId('persalinan_id')->constrained('persalinan')->onDelete('cascade'); // pilihan tindakan
-            $table->timestamps();
-        });
+        // Schema::create('order_persalinan_detail', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->foreignId('order_persalinan_id')->constrained('order_persalinan')->onDelete('cascade');
+        //     $table->foreignId('persalinan_id')->constrained('persalinan')->onDelete('cascade'); // pilihan tindakan
+        //     $table->timestamps();
+        // });
     }
 
     /**
@@ -62,7 +62,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_persalinan_detail');
+        // Schema::dropIfExists('order_persalinan_detail');
         Schema::dropIfExists('order_persalinan');
     }
 };
