@@ -12,8 +12,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('petty_cash_id'); // relasi ke header
             $table->unsignedBigInteger('coa_id'); // relasi ke chart of account
-            $table->text('keterangan')->nullable(); // keterangan tambahan
-            $table->decimal('nominal', 18, 2)->default(0); // jumlah biaya
+            $table->unsignedBigInteger('cost_center_id')->nullable(); // tambahkan ini
+            $table->text('keterangan')->nullable();
+            $table->decimal('nominal', 18, 2)->default(0);
             $table->timestamps();
 
             // Foreign keys
