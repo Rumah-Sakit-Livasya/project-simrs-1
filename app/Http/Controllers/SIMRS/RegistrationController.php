@@ -29,6 +29,7 @@ use App\Models\SIMRS\Penjamin;
 use App\Models\SIMRS\Radiologi\TarifParameterRadiologi;
 use App\Models\SIMRS\Registration;
 use App\Models\SIMRS\Room;
+use App\Models\SIMRS\Setup\BiayaAdministrasiRawatInap;
 use App\Models\SIMRS\Setup\HargaTarifRegistrasi;
 use App\Models\SIMRS\TagihanPasien;
 use App\Models\SIMRS\TindakanMedis;
