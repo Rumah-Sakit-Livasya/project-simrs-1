@@ -190,9 +190,8 @@
                             <div class="card-body">
                                 <form id="form-cari-kelas">
                                     <div class="form-group">
-                                        <label class="form-label" for="kelas_rawat_id_modal">Kelas Rawat</label>
-                                        <select class="form-control w-100" id="kelas_rawat_id_modal"
-                                            name="kelas_rawat_id">
+                                        <label class="form-label" for="kelas_rawat_id">Kelas Rawat</label>
+                                        <select class="form-control w-100" id="kelas_rawat_id" name="kelas_rawat_id">
                                             <option value=""></option>
                                             @foreach ($kelas_rawats as $kelas_rawat)
                                                 <option value="{{ $kelas_rawat->id }}">{{ $kelas_rawat->kelas }}
