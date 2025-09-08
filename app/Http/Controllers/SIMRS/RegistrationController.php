@@ -153,6 +153,20 @@ class RegistrationController extends Controller
     public function create($id, $registrasi)
     {
         $patient = Patient::where('id', $id)->first();
+
+        // Cek jika sudah ada data registrasi aktif untuk pasien dan jenis registrasi ini
+        $existingRegistration = Registration::where('patient_id', $id)
+            ->where('registration_type', $registrasi)
+            ->where('status', 'aktif')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($existingRegistration) {
+            // Redirect ke detail registrasi jika sudah ada
+            return redirect()->route('detail.registrasi.pasien', $existingRegistration->id)
+                ->with('info', 'Pasien sudah terdaftar pada jenis registrasi ini.');
+        }
+
         $kelas_rawats = KelasRawat::all();
         $birthdate = $patient->date_of_birth;
         $age = displayAge($birthdate);
@@ -161,13 +175,6 @@ class RegistrationController extends Controller
         $groupPenjaminStandarId = GroupPenjamin::where('name', 'like', '%standar%')->first()->id;
         $kelasRawatRajalId = KelasRawat::where('kelas', 'like', '%rawat jalan%')->first()->id;
 
-        // Group doctors by department
-        // $groupedDoctors = [];
-        // foreach ($doctors as $doctor) {
-        //     if ($doctor->department_from_doctors->name !== 'UGD') {
-        //         $groupedDoctors[$doctor->department_from_doctors->name][] = $doctor;
-        //     }
-        // }
         // 1. Ambil hari dan jam sekarang
         $hariIni = ucfirst(Carbon::now()->locale('id')->isoFormat('dddd')); // Contoh: 'Rabu'
         $jamSekarang = Carbon::now()->format('H:i:s'); // Contoh: '14:33:06'
@@ -208,12 +215,6 @@ class RegistrationController extends Controller
         $doctorsIGD = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
             $query->where('name', 'like', '%UGD%');
         })->get();
-
-        // dd($doctorsIGD);
-
-        // $doctorsLAB = Doctor::with('employee', 'department_from_doctors')->whereHas('department_from_doctors', function ($query) {
-        //     $query->where('name', 'like', '%Laboratorium%');
-        // })->get();
 
         $doctorsLAB = Doctor::with('employee', 'departements')->whereHas('department_from_doctors', function ($query) {
             $query->where('name', 'like', '%LABORATORIUM%');
@@ -295,17 +296,6 @@ class RegistrationController extends Controller
 
             case 'laboratorium':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
-                    // 'title' => "Laboratorium",
-                    // 'laboratorium_categories' => KategoriLaboratorium::all(),
-                    // 'tarifs' => TarifParameterLaboratorium::all(),
-                    // 'doctors' => $doctorsLAB,
-                    // 'penjamins' => $penjamins,
-                    // 'case' => 'laboratorium',
-                    // 'groupPenjaminId' => $groupPenjaminStandarId,
-                    // 'kelasRawatId' => $kelasRawatRajalId,
-                    // 'patient' => $patient,
-                    // 'age' => $age
-
                     'title' => "Laboratorium",
                     'doctors' => Doctor::all(),
                     'laboratorium_categories' => KategoriLaboratorium::all(),
@@ -396,6 +386,21 @@ class RegistrationController extends Controller
 
             Log::info('Registration validated data:', $validatedData);
 
+            // CEK JIKA SUDAH ADA REGISTRASI AKTIF UNTUK PASIEN INI
+            $existingRegistration = Registration::where('patient_id', $validatedData['patient_id'])
+                ->where('status', 'aktif')
+                ->first();
+
+            if ($existingRegistration) {
+                Log::warning('Registrasi aktif sudah ada untuk pasien ID: ' . $validatedData['patient_id']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pasien ini masih memiliki registrasi aktif. Tidak dapat melakukan registrasi ganda.',
+                    'registration_id' => $existingRegistration->id,
+                    'redirect_url' => url('/daftar-registrasi-pasien/' . $existingRegistration->id)
+                ], 409);
+            }
+
             // Set registration date and status
             $validatedData['registration_date'] = Carbon::now();
             $validatedData['date'] = Carbon::now(); // Mungkin ini bisa digabung dengan registration_date
@@ -449,14 +454,59 @@ class RegistrationController extends Controller
                     return response()->json(['message' => 'Bed dengan ID tersebut tidak ditemukan!'], 404);
                 }
                 // Pastikan bed tersedia
-                if ($bed->patient_id !== null) { // Atau cek status 'terisi'
+                // Pengecekan ini penting untuk mencegah double booking
+                if ($bed->patient_id !== null) { // Atau cek status 'terisi' di tabel `beds`
                     Log::error('Bed ' . $bed->id . ' sudah terisi.');
                     return response()->json(['message' => 'Bed yang dipilih sudah terisi atau tidak tersedia!'], 400);
                 }
 
+                // ==========================================================
+                // START: MODIFIKASI DAN PENAMBAHAN KODE
+                // ==========================================================
+
+                // 1. Update tabel `beds` untuk menandai pasien saat ini (menjaga fungsionalitas yang ada)
+                // Ini berguna untuk query cepat "siapa yang ada di bed ini sekarang?"
                 $bed->update(['patient_id' => $validatedData['patient_id']]);
-                // Jika assignBedToPatient melakukan hal lain selain update patient_id di Bed, panggil di sini
-                // $this->assignBedToPatient($request); // Perlu disesuaikan jika ini helper
+                Log::info('Bed ' . $bed->id . ' patient_id column updated to ' . $validatedData['patient_id']);
+
+                // 2. Insert ke tabel pivot `bed_patient` untuk mencatat riwayat penggunaan bed
+                // Method attach() adalah cara Eloquent untuk menyisipkan data ke tabel pivot.
+                try {
+                    $patientId = $validatedData['patient_id'];
+                    $pivotData = [
+                        'status' => 'terisi', // Status saat pasien masuk. Bukan 'kosong'.
+                        'tanggal_masuk' => Carbon::now(),
+                        'created_at' => Carbon::now(), // Mengisi timestamp secara eksplisit
+                        'updated_at' => Carbon::now()
+                    ];
+
+                    $bed->patients()->attach($patientId, $pivotData);
+
+                    Log::info('Patient ' . $patientId . ' attached to Bed ' . $bed->id . ' in bed_patient pivot table with status: aktif.');
+                } // Versi BARU (untuk debugging)
+                catch (\Exception $e) {
+                    // Batalkan update pada tabel beds
+                    $bed->update(['patient_id' => null]);
+
+                    // ================== LOGGING LEBIH DETAIL ==================
+                    Log::error('================================================================');
+                    Log::error('GAGAL MENAMBAHKAN RIWAYAT BED PASIEN');
+                    Log::error('Pesan Error: ' . $e->getMessage()); // Ini akan memberi tahu apa masalahnya
+                    Log::error('File: ' . $e->getFile() . ' on line ' . $e->getLine()); // Tahu lokasi error
+                    Log::error('Stack Trace: ' . $e->getTraceAsString()); // Detail lengkap error
+                    Log::error('================================================================');
+
+                    // Kembalikan pesan error yang sebenarnya ke frontend untuk debugging
+                    return response()->json([
+                        'message' => 'Terjadi kesalahan internal. Silakan periksa log.',
+                        'error' => $e->getMessage() // Kirim pesan asli ke frontend
+                    ], 500);
+                }
+
+                // ==========================================================
+                // END: MODIFIKASI DAN PENAMBAHAN KODE
+                // ==========================================================
+
                 Log::info('Bed assigned successfully to patient ' . $validatedData['patient_id']);
             }
 
