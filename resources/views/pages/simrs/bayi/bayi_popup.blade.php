@@ -1,3 +1,4 @@
+<!-- resources/views/pages/simrs/bayi_popup.blade.php -->
 @extends('inc.layout-no-side')
 @section('title', 'Manajemen Data Bayi')
 
@@ -5,7 +6,6 @@
     <!-- Tambahkan Boxicons untuk ikon yang lebih bagus -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
-        /* CSS khusus agar pop-up terlihat rapi */
         .page-content {
             padding: 1.5rem;
             background-color: #f3f3f3;
@@ -17,7 +17,6 @@
 
         .select2-dropdown {
             z-index: 1060 !important;
-            /* Agar dropdown Select2 muncul di atas modal kamar */
         }
 
         .btn-action {
@@ -67,29 +66,25 @@
 
                     <hr class="my-4">
 
-                    <!-- Container untuk Form Bayi (awalnya disembunyikan) -->
+                    <!-- Container untuk Form Bayi -->
                     <div id="bayi-form-container" style="display: none;">
-                        @include('pages.simrs.persalinan.partials.form_bayi')
+                        @include('pages.simrs.bayi.form_bayi')
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Modal untuk Pilih Kamar di-include di sini -->
-    @include('pages.simrs.persalinan.partials.modal_pilih_kamar')
+    <!-- Modal untuk Pilih Kamar -->
+    @include('pages.simrs.bayi.modal_pilih_kamar')
 @endsection
 
 @section('plugin')
-    {{-- Memuat semua plugin JS yang dibutuhkan dari template Anda --}}
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/dependency/moment/moment.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- ========================================================== --}}
-    {{-- SELURUH JAVASCRIPT ADA DI SINI --}}
-    {{-- ========================================================== --}}
     <script>
         $(document).ready(function() {
             // SETUP GLOBAL
@@ -99,6 +94,7 @@
                 }
             });
             const orderId = {{ $order->id }};
+            const type = "{{ $type }}"; // persalinan or operasi
 
             // =====================================================================
             // BAGIAN 1: MANAJEMEN DATA BAYI (TABEL, FORM, CRUD)
@@ -119,12 +115,12 @@
                 }
             });
 
-            function loadDataBayi(orderId) {
+            function loadDataBayi(orderId, type) {
                 dtBayi = $('#dt-bayi-table').DataTable({
                     destroy: true,
                     processing: true,
                     ajax: {
-                        url: `{{ url('simrs/vk/bayi/data') }}/${orderId}`,
+                        url: `{{ route('bayi.data', ['order' => $order->id, 'type' => $type]) }}`,
                         dataSrc: ''
                     },
                     columns: [{
@@ -148,10 +144,13 @@
                             searchable: false,
                             className: 'text-center',
                             render: function(data, type, row) {
-                                const printUrl = `{{ url('simrs/vk/bayi') }}/${data}/print`;
+                                const printUrl =
+                                    `{{ route('bayi.print_certificate', ['bayi' => ':id']) }}`
+                                    .replace(':id', data);
                                 return `<div class="btn-group">
-                                        <button class="btn  btn-info btn-action btn-print-bayi" data-url="${printUrl}" title="Cetak Akta"><i class='bx bxs-printer'></i></button>
-                                        <button class="btn  btn-warning btn-action btn-edit-bayi" data-id="${data}" title="Edit Data"><i class='bx bxs-edit'></i></button>
+                                        <button class="btn btn-info btn-action btn-print-bayi" data-url="${printUrl}" title="Cetak Akta"><i class='bx bxs-printer'></i></button>
+                                        <button class="btn btn-warning btn-action btn-edit-bayi" data-id="${data}" title="Edit Data"><i class='bx bxs-edit'></i></button>
+                                   
                                     </div>`;
                             }
                         }
@@ -164,14 +163,13 @@
                 });
             }
 
-            loadDataBayi(orderId);
+            loadDataBayi(orderId, type);
 
             $('#btn-tambah-bayi').on('click', function() {
                 $('#form-bayi')[0].reset();
                 $('#bayi_id').val('');
                 $('#select-dokter-bayi').val(null).trigger('change');
                 $('#bayi_kelas_kamar_input').val('');
-                console.log('Menampilkan form bayi untuk tambah');
                 $('#bayi-form-container').slideDown();
                 $(this).hide();
                 $('html, body').animate({
@@ -190,17 +188,18 @@
                     '<span class="spinner-border spinner-border-sm"></span> Menyimpan...');
 
                 const formData = $(this).serializeArray();
-
-                // Tambahkan order_id berdasarkan tipe (persalinan atau operasi)
-                const type = "{{ $type }}"; // Ambil tipe dari variabel Blade
+                formData.push({
+                    name: 'type',
+                    value: type
+                });
                 if (type === 'persalinan') {
                     formData.push({
-                        name: "order_persalinan_id",
+                        name: 'order_persalinan_id',
                         value: orderId
                     });
                 } else if (type === 'operasi') {
                     formData.push({
-                        name: "order_operasi_id",
+                        name: 'order_operasi_id',
                         value: orderId
                     });
                 }
@@ -234,13 +233,11 @@
                 window.open($(this).data('url'), '_blank', 'width=800,height=700');
             }).on('click', '.btn-edit-bayi', function() {
                 const bayiId = $(this).data('id');
-                $.get(`{{ url('simrs/vk/bayi') }}/${bayiId}`, (data) => {
+                $.get(`{{ route('bayi.show', ['bayi' => ':id']) }}`.replace(':id', bayiId), (data) => {
                     if (!data) {
                         Swal.fire('Error', 'Data bayi tidak ditemukan.', 'error');
                         return;
                     }
-                    console.log('Data bayi diterima:', data); // Periksa struktur data
-
                     $('#form-bayi')[0].reset();
                     Object.keys(data).forEach(key => {
                         const field = $(`#form-bayi [name="${key}"]`);
@@ -273,7 +270,6 @@
                     }
 
                     $('#bayi_id').val(data.id);
-                    console.log('Menampilkan form bayi untuk edit');
                     $('#bayi-form-container').slideDown();
                     $('#btn-tambah-bayi').hide();
                     $('html, body').animate({
@@ -296,7 +292,8 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: `{{ url('simrs/vk/bayi') }}/${bayiId}`,
+                            url: `{{ route('bayi.destroy', ['bayi' => ':id']) }}`.replace(
+                                ':id', bayiId),
                             type: 'DELETE',
                             success: (res) => {
                                 Swal.fire('Dihapus!', res.message, 'success');

@@ -20,21 +20,21 @@
         }
 
         /* .select2-dropdown {
-                                                                                                                                                        z-index: 1060 !important;
-                                                                                                                                                    }
+                                                                                                                                                                                z-index: 1060 !important;
+                                                                                                                                                                            }
 
-                                                                                                                                                    .swal2-container {
-                                                                                                                                                        z-index: 99999 !important;
-                                                                                                                                                    }
+                                                                                                                                                                            .swal2-container {
+                                                                                                                                                                                z-index: 99999 !important;
+                                                                                                                                                                            }
 
-                                                                                                                                                    /*
-                                                                                                                                                             * [TAMBAHKAN INI - SOLUSI UNTUK MASALAH POSISI]
-                                                                                                                                                             * Membuat container Select2 di dalam modal menjadi titik referensi
-                                                                                                                                                             * untuk posisi dropdown-nya.
-                                                                                                                                                            */
+                                                                                                                                                                            /*
+                                                                                                                                                                                     * [TAMBAHKAN INI - SOLUSI UNTUK MASALAH POSISI]
+                                                                                                                                                                                     * Membuat container Select2 di dalam modal menjadi titik referensi
+                                                                                                                                                                                     * untuk posisi dropdown-nya.
+                                                                                                                                                                                    */
         /* #modal-data-bayi .select2-container {
-                                                                                                                                                    position: relative;
-                                                                                                                                                } */
+                                                                                                                                                                            position: relative;
+                                                                                                                                                                        } */
 
 
         /* [PERBAIKAN] Mengatur z-index Select2 di filter panel agar tidak menembus modal */
@@ -355,9 +355,9 @@
 
     <!-- Meng-include semua modal dari file partials -->
     @include('pages.simrs.persalinan.partials.modal_tambah_order')
-    @include('pages.simrs.persalinan.partials.modal_data_bayi')
-    @include('pages.simrs.persalinan.partials.modal_pilih_kamar')
-    <!-- [BARU] MODAL UNTUK MEMILIH KAMAR BAYI -->
+    @include('pages.simrs.bayi.modal_data_bayi')
+    @include('pages.simrs.bayi.modal_pilih_kamar')
+    <!-- [BARU] MODAL UNT.bayiI -->
 
 @endsection
 

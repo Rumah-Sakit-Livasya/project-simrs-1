@@ -557,6 +557,10 @@ class OperasiController extends Controller
             ], 500);
         }
     }
+    public function BayiPopup(OrderOperasi $order)
+    {
+        return view('pages.simrs.persalinan.partials.bayi_popup', compact('order'));
+    }
 
     public function createProsedur(OrderOperasi $order)
     {
@@ -656,8 +660,6 @@ class OperasiController extends Controller
             ], 500);
         }
     }
-
-
 
 
     public function storeProsedur(Request $request)

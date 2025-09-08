@@ -216,10 +216,11 @@
                                                         title="Lihat/Tambah Tindakan">
                                                         <i class="fal fa-heart"></i>
                                                     </a>
-                                                    <a href="#"
-                                                        class="btn btn-sm btn-icon btn-warning rounded-circle mr-1"
-                                                        data-toggle="tooltip" title="Edit">
-                                                        <i class="fal fa-edit"></i>
+                                                    <a href="{{ route('bayi.popup', ['order' => $order->id, 'type' => 'operasi']) }}"
+                                                        class="btn btn-sm btn-icon btn-info rounded-circle mr-1"
+                                                        data-toggle="tooltip" title="Data Bayi"
+                                                        onclick="openPopup(this.href); return false;">
+                                                        <i class="fal fa-user-plus"></i>
                                                     </a>
                                                     <button type="button"
                                                         class="btn btn-sm btn-icon btn-danger rounded-circle delete-order-btn"
@@ -252,7 +253,19 @@
     <link rel="stylesheet" href="/css/notifications/toastr/toastr.css">
 
     <script>
+        function openPopup(url) {
+            const width = 1400;
+            const height = 550;
+            const left = (screen.width / 2) - (width / 2);
+            const top = (screen.height / 2) - (height / 2);
+            const windowFeatures =
+                `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`;
+            window.open(url, 'bayiPopup', windowFeatures);
+        }
+    </script>
+    <script>
         $(document).ready(function() {
+
 
             $('#dt-basic-example tbody').on('click', '.treatment-list-btn', function(e) {
                 e.preventDefault(); // Mencegah link default berjalan
@@ -344,14 +357,14 @@
                                 </thead>
                                 <tbody>
                                     ${d.prosedur_operasi.map(prosedur => `
-                                                                                                                                                                                                                                                                        <tr>
-                                                                                                                                                                                                                                                                            <td>${prosedur.tindakan}</td>
-                                                                                                                                                                                                                                                                            <td>${prosedur.dokter_operator}</td>
-                                                                                                                                                                                                                                                                            <td>${prosedur.ass_dokter_operator}</td>
-                                                                                                                                                                                                                                                                            <td>${prosedur.dokter_anestesi}</td>
-                                                                                                                                                                                                                                                                            <td>${prosedur.ass_dokter_anestesi}</td>
-                                                                                                                                                                                                                                                                        </tr>
-                                                                                                                                                                                                                                                                    `).join('')}
+                                                                                                                                                                                                                                                                                                                            <tr>
+                                                                                                                                                                                                                                                                                                                                <td>${prosedur.tindakan}</td>
+                                                                                                                                                                                                                                                                                                                                <td>${prosedur.dokter_operator}</td>
+                                                                                                                                                                                                                                                                                                                                <td>${prosedur.ass_dokter_operator}</td>
+                                                                                                                                                                                                                                                                                                                                <td>${prosedur.dokter_anestesi}</td>
+                                                                                                                                                                                                                                                                                                                                <td>${prosedur.ass_dokter_anestesi}</td>
+                                                                                                                                                                                                                                                                                                                            </tr>
+                                                                                                                                                                                                                                                                                                                        `).join('')}
                                 </tbody>
                             </table>
                         </div>
