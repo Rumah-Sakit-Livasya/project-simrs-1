@@ -22,7 +22,6 @@ return new class extends Migration
             $table->foreignId('persalinan_id')
                 ->nullable() // Or use ->required() if a procedure is always mandatory
                 ->after('tipe_penggunaan_id') // Places the column in a logical spot
-                ->constrained('persalinan')
                 ->onDelete('set null');
         });
     }
