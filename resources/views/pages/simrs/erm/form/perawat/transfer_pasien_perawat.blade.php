@@ -93,7 +93,7 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group"><label>Catatan Pasien Kembali</label>
-                            <textarea name="pasien_kelmbali" class="form-control" rows="2">{{ old('pasien_kelmbali', $data->pasien_kelmbali ?? '') }}</textarea>
+                            <textarea name="pasien_kembali" class="form-control" rows="2">{{ old('pasien_kembali', $data->pasien_kembali ?? '') }}</textarea>
                         </div>
                         <div class="row">
                             <div class="col-md-3 form-group"><label>Keadaan Umum</label><input type="text"
