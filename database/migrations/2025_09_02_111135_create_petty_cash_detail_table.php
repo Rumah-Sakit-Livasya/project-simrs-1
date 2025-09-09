@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('petty_cash_detail', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('petty_cash_id'); // relasi ke header
-            $table->unsignedBigInteger('coa_id'); // relasi ke chart of account
-            $table->unsignedBigInteger('cost_center_id')->nullable(); // tambahkan ini
+            $table->unsignedBigInteger('petty_cash_id');
+            $table->unsignedBigInteger('coa_id');
+            $table->unsignedBigInteger('cost_center_id')->nullable();
             $table->text('keterangan')->nullable();
             $table->decimal('nominal', 18, 2)->default(0);
             $table->timestamps();
