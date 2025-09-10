@@ -78,4 +78,28 @@ class JadwalDokterController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function show(JadwalDokter $jadwal)
+    {
+        // Load relasi yang dibutuhkan untuk menampilkan nama dokter
+        $jadwal->load('doctor.employee');
+        return response()->json($jadwal);
+    }
+
+    // TAMBAHKAN METHOD INI
+    public function update(Request $request, JadwalDokter $jadwal)
+    {
+        $validatedData = $request->validate([
+            'jam_mulai' => 'required',
+            'jam_selesai' => 'required',
+            'kuota_regis_online' => 'nullable|integer',
+        ]);
+
+        try {
+            $jadwal->update($validatedData);
+            return response()->json(['message' => 'Jadwal berhasil diperbarui!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }
