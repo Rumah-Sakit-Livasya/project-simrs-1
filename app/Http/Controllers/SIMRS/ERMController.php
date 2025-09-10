@@ -215,7 +215,10 @@ class ERMController extends Controller
                 ->get();
         } elseif ($path === 'poliklinik') {
             $departements = Departement::where('name', '!=', 'ugd')->get();
-            $registrations = Registration::where('registration_type', 'rawat-jalan')->get();
+            $registrations = Registration::where('registration_type', 'rawat-jalan')
+                ->where('status', 'aktif')
+                ->whereNull('registration_close_date')
+                ->get();
 
             $jadwal_dokter = JadwalDokter::where('hari', $hariIni)
                 ->whereHas('doctor', function ($q) {

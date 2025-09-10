@@ -48,7 +48,7 @@
                             $vitalSigns = [
                                 ['label' => 'Nadi (PR)', 'name' => 'pr', 'unit' => 'x/menit'],
                                 ['label' => 'Respirasi (RR)', 'name' => 'rr', 'unit' => 'x/menit'],
-                                ['label' => 'Tensi (BP)', 'name' => 'bp', 'unit' => 'mmHg'],
+                                ['label' => 'Tensi (BP)', 'name' => 'bp', 'unit' => 'mmHg', 'type' => 'text'],
                                 ['label' => 'Suhu (T)', 'name' => 'temperatur', 'unit' => 'C°'],
                                 [
                                     'label' => 'Tinggi Badan',

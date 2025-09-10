@@ -87,7 +87,7 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="submit" class="btn btn-primary mr-auto">
+                                <button type="button" class="btn btn-primary mr-auto" id="button-simpan">
                                     <div class="ikon-tambah">
                                         <span class="fal fa-plus-circle mr-1"></span>
                                         Tambah
@@ -196,6 +196,9 @@
                 const group = $(this).data('group');
                 updateGroupCheckbox(group);
             });
+            // Pastikan form menggunakan method POST secara native
+            $('#assign-permissions-form').attr('method', 'post');
+
             $('#assign-permissions-form').on('submit', async function(event) {
                 event.preventDefault(); // Prevent the default form submission
 
@@ -215,11 +218,12 @@
                 $('#assign-permissions-form').find('.spinner-text').removeClass('d-none');
 
                 try {
-                    // Make the AJAX request using fetch
-                    const response = await fetch('/api/dashboard/user/assign-permissions', {
+                    // Make the AJAX request using fetch with POST method to the named route 'store.permission'
+                    const response = await fetch('{{ route('store.permission') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
                         body: formData,
                     });
