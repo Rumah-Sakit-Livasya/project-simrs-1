@@ -379,7 +379,7 @@ class ERMController extends Controller
 
     public function storeAsesmenAwalRanap(Request $request)
     {
-        // Validasi dasar (bisa dibuat lebih detail jika perlu)
+        // Validasi dasar
         $request->validate([
             'registration_id' => 'required|exists:registrations,id',
             'tgl_masuk' => 'nullable|date_format:Y-m-d',
@@ -389,63 +389,176 @@ class ERMController extends Controller
 
         DB::beginTransaction();
         try {
-            // 1. Gabungkan tanggal dan jam menjadi satu timestamp
+            // 1) Gabungkan tanggal + jam masuk (jika ada)
             $waktuMasuk = null;
             if ($request->filled('tgl_masuk') && $request->filled('jam_masuk')) {
-                // Format input 'Y-m-d' (dari type="date") dan 'H:i' (dari type="time")
                 $waktuMasuk = Carbon::createFromFormat('Y-m-d H:i', $request->tgl_masuk . ' ' . $request->jam_masuk)->toDateTimeString();
+            } elseif ($request->filled('tgl_masuk')) {
+                $waktuMasuk = Carbon::createFromFormat('Y-m-d', $request->tgl_masuk)->startOfDay()->toDateTimeString();
             }
 
-            // 2. Siapkan data utama untuk disimpan/diperbarui
-            // Kita mengambil semua data kecuali yang akan ditangani secara terpisah
+            // 2) Ambil semua input kecuali yang akan ditangani terpisah
             $dataToStore = $request->except(['_token', 'tgl_masuk', 'jam_masuk', 'signatures']);
-            $dataToStore['user_id'] = Auth::id(); // Selalu catat user terakhir yang melakukan aksi
+
+            // simpan user yg melakukan aksi & waktu masuk ruangan
+            $dataToStore['user_id'] = Auth::id();
             $dataToStore['waktu_masuk_ruangan'] = $waktuMasuk;
 
-            // 3. Gunakan updateOrCreate untuk menyimpan data asesmen
+            // 3) Jika ada data nutrisi (bb, tb), hitung BMI dengan aman
+            $nutrisi = $request->input('nutrisi', null);
+            if (is_array($nutrisi)) {
+                // ekstrak bb & tb jika tersedia
+                $rawBB = isset($nutrisi['bb']) ? $nutrisi['bb'] : null;
+                $rawTB = isset($nutrisi['tb']) ? $nutrisi['tb'] : null;
+
+                // fungsi sanitize angka (terima koma atau titik)
+                $sanitizeNumber = function ($v) {
+                    if ($v === null || $v === '') return null;
+                    // hapus semua kecuali digit, koma, titik, tanda minus
+                    $clean = preg_replace('/[^\d\-,\.]/u', '', (string)$v);
+                    $clean = str_replace(',', '.', $clean);
+                    // jika kosong setelah bersih → null
+                    return $clean === '' ? null : (float)$clean;
+                };
+
+                $bb = $sanitizeNumber($rawBB);
+                $tb = $sanitizeNumber($rawTB);
+
+                // Simpan tinggi/berat ke field yang umum (kalau model punya kolom ini)
+                if ($bb !== null) {
+                    $dataToStore['anthropometry_weight'] = $bb;
+                }
+                if ($tb !== null) {
+                    // simpan tinggi dalam satuan cm jika input terlihat > 3 (mis. 170), 
+                    // atau tetap jika kecil (mis. 0.9)
+                    $dataToStore['anthropometry_height'] = $tb;
+                }
+
+                // Hitung BMI dengan asumsi:
+                // - jika tb > 3 treat as cm => convert to meter (tb / 100)
+                // - jika tb <= 3 treat as meter langsung
+                $bmi = null;
+                if ($bb !== null && $tb !== null && $tb > 0) {
+                    $height_m = ($tb > 3) ? ($tb / 100.0) : $tb;
+                    if ($height_m > 0) {
+                        $bmi = $bb / ($height_m * $height_m);
+                        $bmi = round($bmi, 2);
+                        // safety cap: jika hasil ekstrim (mis > 999.99) abaikan untuk menghindari error DB
+                        if (!is_finite($bmi) || $bmi > 999.99) {
+                            Log::warning("Hitungan BMI tidak wajar (diabaikan): bb={$bb}, tb={$tb}, bmi={$bmi}");
+                            $bmi = null;
+                        } elseif ($bmi < 0) {
+                            $bmi = null;
+                        }
+                    }
+                }
+
+                // jika request sudah mengirim anthropometry_bmi numeric yg wajar, prioritaskan itu,
+                // kalau tidak gunakan hasil hitungan
+                $incomingBmi = $request->input('anthropometry_bmi', null);
+                if ($incomingBmi !== null) {
+                    $incomingNum = $sanitizeNumber($incomingBmi);
+                    if ($incomingNum !== null && $incomingNum <= 999.99) {
+                        $dataToStore['anthropometry_bmi'] = $incomingNum;
+                    } else {
+                        // pakai hasil perhitungan (jika ada)
+                        if ($bmi !== null) $dataToStore['anthropometry_bmi'] = $bmi;
+                        else $dataToStore['anthropometry_bmi'] = null;
+                    }
+                } else {
+                    $dataToStore['anthropometry_bmi'] = $bmi;
+                }
+
+                // tetapkan kategori BMI (dalam Bahasa Indonesia)
+                if (isset($dataToStore['anthropometry_bmi']) && $dataToStore['anthropometry_bmi'] !== null) {
+                    $b = (float) $dataToStore['anthropometry_bmi'];
+                    if ($b < 18.5) {
+                        $dataToStore['anthropometry_bmi_category'] = 'Kurus';
+                    } elseif ($b < 25) {
+                        $dataToStore['anthropometry_bmi_category'] = 'Normal';
+                    } elseif ($b < 30) {
+                        $dataToStore['anthropometry_bmi_category'] = 'Gemuk';
+                    } else {
+                        $dataToStore['anthropometry_bmi_category'] = 'Obesitas';
+                    }
+                } else {
+                    // jika tidak tersedia, hindari menulis string kosong — biarkan null agar tidak men-trigger error tipe data
+                    $dataToStore['anthropometry_bmi_category'] = $request->input('anthropometry_bmi_category', null);
+                }
+            } // end nutrisi handling
+
+            // 4) Normalisasi: ubah semua nilai array menjadi JSON (agar aman disimpan ke kolom TEXT/JSON)
+            foreach ($dataToStore as $k => $v) {
+                if (is_array($v)) {
+                    $dataToStore[$k] = json_encode($v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                } elseif ($v === 'null') {
+                    // kadang bentuk string "null" — ubah jadi actual null
+                    $dataToStore[$k] = null;
+                }
+                // else biarkan scalar apa adanya
+            }
+
+            // 5) Simpan dengan updateOrCreate (kunci: registration_id)
             $asesmen = InpatientInitialAssessment::updateOrCreate(
-                ['registration_id' => $request->registration_id], // Kunci untuk mencari
-                $dataToStore // Data untuk diupdate atau dibuat
+                ['registration_id' => $request->registration_id],
+                $dataToStore
             );
 
-            // 4. Gunakan saveSignatureFile untuk menyimpan tanda tangan
-            if ($request->has('signatures')) {
+            // 6) Tangani signatures (jika ada)
+            if ($request->has('signatures') && is_array($request->signatures)) {
                 foreach ($request->signatures as $role => $signatureData) {
-                    if (! empty($signatureData['signature_image']) && str_starts_with($signatureData['signature_image'], 'data:image')) {
+                    // pastikan struktur array
+                    if (!is_array($signatureData)) {
+                        continue;
+                    }
 
-                        // Cari path file lama sebelum di-update
-                        $oldPath = optional($asesmen->signatures()->where('role', $role)->first())->signature;
+                    $pic = $signatureData['pic'] ?? null;
+                    $sigImage = $signatureData['signature_image'] ?? null;
 
-                        // Simpan file baru dengan saveSignatureFile
-                        $newPath = $this->saveSignatureFile($signatureData['signature_image'], "asesmen_awal_ranap_{$asesmen->id}_{$role}");
+                    // Ambil path lama (jika ada) untuk dihapus nanti
+                    $oldRecord = $asesmen->signatures()->where('role', $role)->first();
+                    $oldPath = optional($oldRecord)->signature;
 
-                        // Lakukan Update or Create untuk signature dengan role ini
-                        $asesmen->signatures()->updateOrCreate(
-                            ['role' => $role], // Kunci unik
-                            [
-                                'pic' => $signatureData['pic'], // Data baru
-                                'signature' => $newPath,         // Data baru
-                            ]
-                        );
+                    $updateData = [
+                        'pic' => $pic,
+                    ];
 
-                        // Hapus file tanda tangan lama jika ada
-                        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
-                            Storage::disk('public')->delete($oldPath);
+                    // Jika ada signature image baru dalam format data URI -> simpan file
+                    if (!empty($sigImage) && str_starts_with($sigImage, 'data:image')) {
+                        // saveSignatureFile adalah helper (kamu sudah pakai sebelumnya) yg mengembalikan path
+                        $newPath = $this->saveSignatureFile($sigImage, "asesmen_awal_ranap_{$asesmen->id}_{$role}");
+                        if ($newPath) {
+                            $updateData['signature'] = $newPath;
                         }
+                    }
+
+                    // Update or create record signature relation
+                    $asesmen->signatures()->updateOrCreate(
+                        ['role' => $role],
+                        $updateData
+                    );
+
+                    // Hapus file lama jika ada dan diganti
+                    if (!empty($oldPath) && !empty($newPath) && Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
                     }
                 }
             }
 
             DB::commit();
 
-            return response()->json(['success' => 'Asesmen Awal Rawat Inap berhasil disimpan!']);
+            return response()->json([
+                'success' => 'Asesmen Awal Rawat Inap berhasil disimpan!',
+                'data' => $asesmen
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan Asesmen Awal Ranap: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Gagal menyimpan Asesmen Awal Ranap: ' . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'input' => $request->all()]);
 
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data. Silakan hubungi administrator.'], 500);
         }
     }
+
 
     // app/Http/Controllers/SIMRS/ERMController.php
     public function storeAsesmenAwalRanapAnak(Request $request)
@@ -494,6 +607,7 @@ class ERMController extends Controller
     // app/Http/Controllers/SIMRS/ERMController.php
     public function storeAsesmenAwalRanapLansia(Request $request)
     {
+        // dd($request->all());
         // Validasi dasar
         $request->validate([
             'registration_id' => 'required|exists:registrations,id',
