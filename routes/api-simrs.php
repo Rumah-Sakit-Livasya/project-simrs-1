@@ -702,6 +702,8 @@ Route::middleware(['web', 'auth'])->prefix('simrs')->group(function () {
 
         Route::prefix('jadwal-dokter')->group(function () {
             Route::post('/tambah-jadwal-dokter', [JadwalDokterController::class, 'store']);
+            Route::get('/{jadwal}', [JadwalDokterController::class, 'show']);
+            Route::put('/{jadwal}', [JadwalDokterController::class, 'update']);
         });
 
         Route::prefix('setup')->group(function () {

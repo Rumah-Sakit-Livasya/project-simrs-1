@@ -166,11 +166,15 @@
                                                             <td>
                                                                 @if (isset($scheduleByDay[$day]) && count($scheduleByDay[$day]) > 0)
                                                                     @foreach ($scheduleByDay[$day] as $schedule)
-                                                                        <span class="text-info d-block">
+                                                                        {{-- MODIFIKASI DI SINI --}}
+                                                                        <a href="javascript:void(0)"
+                                                                            class="text-info d-block edit-schedule-trigger"
+                                                                            data-id="{{ $schedule->id }}">
                                                                             {{ \Carbon\Carbon::parse($schedule->jam_mulai)->format('G:i') }}
                                                                             -
                                                                             {{ \Carbon\Carbon::parse($schedule->jam_selesai)->format('G:i') }}
-                                                                        </span>
+                                                                        </a>
+                                                                        {{-- AKHIR MODIFIKASI --}}
                                                                     @endforeach
                                                                 @else
                                                                     <span class="text-muted">-</span>
@@ -213,177 +217,143 @@
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
-            let jadwalId = null;
+            // Setup global AJAX untuk menyertakan token CSRF
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
             $('#loading-spinner').show();
 
+            // Inisialisasi Select2 untuk modal tambah
             $('#modal-tambah-jadwal-dokter .select2').select2({
                 dropdownParent: $('#modal-tambah-jadwal-dokter')
             });
 
+            // --- Tombol & Event Handler ---
+
+            // Tombol untuk membuka modal tambah jadwal
             $('#btn-tambah-jadwal-dokter').click(function() {
                 $('#modal-tambah-jadwal-dokter').modal('show');
             });
 
-            $('.btn-edit').click(function() {
-                console.log('clicked');
-                $('#modal-edit-jadwal-dokter').modal('show');
-                jadwalId = $(this).attr('data-id');
-                $('#modal-edit-jadwal-dokter form').attr('data-id', jadwalId);
+            // Event handler untuk trigger edit jadwal (menggunakan event delegation)
+            $('#dt-basic-example').on('click', '.edit-schedule-trigger', function() {
+                let jadwalId = $(this).data('id');
 
+                // AJAX untuk mengambil data jadwal
                 $.ajax({
-                    url: '/api/simrs/master-data/jadwal-dokter/daftar-jadwal-dokter/' +
-                        jadwalId,
+                    url: '/api/simrs/master-data/jadwal-dokter/' + jadwalId,
                     type: 'GET',
                     success: function(response) {
-                        $('#modal-edit-jadwal-dokter #tipe_edit').val(response.tipe).select2({
-                            dropdownParent: $('#modal-edit-jadwal-dokter')
-                        });
-                        $('#modal-edit-jadwal-dokter input[name="kode"]').val(response.kode);
-                        $('#modal-edit-jadwal-dokter input[name="nama_jadwal-dokter"]').val(
-                            response
-                            .nama_jadwal - dokter);
-                        $('#modal-edit-jadwal-dokter input[name="nama_billing"]').val(response
-                            .nama_billing);
+                        // Isi form di modal edit
+                        $('#edit-jadwal-id').val(response.id);
+                        $('#edit-doctor-name').val(response.doctor.employee.fullname);
+                        $('#edit-hari').val(response.hari);
+                        $('#edit-jam-mulai').val(response.jam_mulai);
+                        $('#edit-jam-selesai').val(response.jam_selesai);
+                        $('#edit-kuota-regis-online').val(response.kuota_regis_online);
+
+                        // Tampilkan modal
+                        $('#modal-edit-jadwal-dokter').modal('show');
                     },
                     error: function(xhr, status, error) {
-                        $('#modal-edit-jadwal-dokter').modal('hide');
-                        showErrorAlert('Terjadi kesalahan: ' + error);
-                    }
-                });
-
-            });
-
-            $('.btn-delete').click(function() {
-                var jadwalId = $(this).attr('data-id');
-
-                // Menggunakan confirm() untuk mendapatkan konfirmasi dari pengguna
-                var userConfirmed = confirm('Anda Yakin ingin menghapus ini?');
-
-                if (userConfirmed) {
-                    // Jika pengguna mengklik "Ya" (OK), maka lakukan AJAX request
-                    $.ajax({
-                        url: '/api/simrs/master-data/jadwal-dokter/daftar-jadwal-dokter/' +
-                            jadwalId +
-                            '/delete',
-                        type: 'DELETE',
-                        success: function(response) {
-                            showSuccessAlert(response.message);
-
-                            setTimeout(() => {
-                                console.log('Reloading the page now.');
-                                window.location.reload();
-                            }, 1000);
-                        },
-                        error: function(xhr, status, error) {
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                        }
-                    });
-                } else {
-                    console.log('Penghapusan dibatalkan oleh pengguna.');
-                }
-            });
-
-            $('#update-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
-
-                var formData = $(this).serialize();
-                jadwalId = $(this).attr('data-id');
-                $.ajax({
-                    url: '/api/simrs/master-data/jadwal-dokter/daftar-jadwal-dokter/' +
-                        jadwalId +
-                        '/update',
-                    type: 'PATCH',
-                    data: formData,
-                    beforeSend: function() {
-                        $('#update-form').find('.ikon-edit').hide();
-                        $('#update-form').find('.spinner-text').removeClass(
-                            'd-none');
-                    },
-                    success: function(response) {
-                        $('#modal-edit-jadwal-dokter').modal('hide');
-                        showSuccessAlert(response.message);
-
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
-                    },
-                    error: function(xhr, status, error) {
-                        if (xhr.status === 422) {
-                            var errors = xhr.responseJSON.errors;
-                            var errorMessages = '';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
-                            });
-
-                            $('#modal-edit-jadwal-dokter').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
-                        } else {
-                            $('#modal-edit-jadwal-dokter').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
-                        }
+                        showErrorAlert('Gagal mengambil data jadwal: ' + error);
                     }
                 });
             });
 
+
+            // --- Form Submissions ---
+
+            // Submit form TAMBAH jadwal
             $('#store-form').on('submit', function(e) {
-                e.preventDefault(); // Mencegah form submit secara default
-
-                var formData = $(this).serialize(); // Mengambil semua data dari form
+                e.preventDefault();
+                var formData = $(this).serialize();
 
                 $.ajax({
-                    url: '/api/simrs/master-data/jadwal-dokter/tambah-jadwal-dokter',
+                    url: '/api/simrs/master-data/jadwal-dokter/tambah-jadwal-dokter', // Sesuaikan dengan route POST Anda
                     type: 'POST',
                     data: formData,
                     beforeSend: function() {
                         $('#store-form').find('.ikon-tambah').hide();
-                        $('#store-form').find('.spinner-text').removeClass(
-                            'd-none');
+                        $('#store-form').find('.spinner-text').removeClass('d-none');
                     },
                     success: function(response) {
                         $('#modal-tambah-jadwal-dokter').modal('hide');
                         showSuccessAlert(response.message);
-
-                        setTimeout(() => {
-                            console.log('Reloading the page now.');
-                            window.location.reload();
-                        }, 1000);
+                        setTimeout(() => window.location.reload(), 1000);
                     },
-                    error: function(xhr, status, error) {
+                    error: function(xhr) {
+                        // Error handling (sama seperti kode asli Anda)
                         if (xhr.status === 422) {
                             var errors = xhr.responseJSON.errors;
                             var errorMessages = '';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += value +
-                                    '\n';
+                            $.each(errors, (key, value) => {
+                                errorMessages += value + '\n';
                             });
-
-                            $('#modal-tambah-jadwal-dokter').modal('hide');
-                            showErrorAlert('Terjadi kesalahan:\n' +
-                                errorMessages);
+                            showErrorAlert('Terjadi kesalahan validasi:\n' + errorMessages);
                         } else {
-                            $('#modal-tambah-jadwal-dokter').modal('hide');
-                            showErrorAlert('Terjadi kesalahan: ' + error);
-                            console.log(error);
+                            showErrorAlert('Terjadi kesalahan: ' + xhr.responseText);
                         }
+                        $('#modal-tambah-jadwal-dokter').modal('hide');
+                    },
+                    complete: function() {
+                        $('#store-form').find('.ikon-tambah').show();
+                        $('#store-form').find('.spinner-text').addClass('d-none');
                     }
                 });
             });
 
-            // initialize datatable
+            // Submit form UPDATE jadwal
+            $('#update-form').on('submit', function(e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+                var jadwalId = $('#edit-jadwal-id').val(); // Ambil ID dari hidden input
+
+                $.ajax({
+                    url: '/api/simrs/master-data/jadwal-dokter/' + jadwalId, // URL dari route PUT
+                    type: 'PUT',
+                    data: formData,
+                    beforeSend: function() {
+                        $('#update-form').find('.ikon-edit').hide();
+                        $('#update-form').find('.spinner-text').removeClass('d-none');
+                    },
+                    success: function(response) {
+                        $('#modal-edit-jadwal-dokter').modal('hide');
+                        showSuccessAlert(response.message);
+                        setTimeout(() => window.location.reload(), 1000);
+                    },
+                    error: function(xhr) {
+                        // Error handling (sama seperti kode asli Anda)
+                        if (xhr.status === 422) {
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessages = '';
+                            $.each(errors, (key, value) => {
+                                errorMessages += value + '\n';
+                            });
+                            showErrorAlert('Terjadi kesalahan validasi:\n' + errorMessages);
+                        } else {
+                            showErrorAlert('Terjadi kesalahan: ' + xhr.responseText);
+                        }
+                        $('#modal-edit-jadwal-dokter').modal('hide');
+                    },
+                    complete: function() {
+                        $('#update-form').find('.ikon-edit').show();
+                        $('#update-form').find('.spinner-text').addClass('d-none');
+                    }
+                });
+            });
+
+            // Inisialisasi DataTable (sama seperti kode asli Anda)
             $('#dt-basic-example').DataTable({
                 "drawCallback": function(settings) {
-                    // Menyembunyikan preloader setelah data berhasil dimuat
                     $('#loading-spinner').hide();
                 },
-                responsive: false, // Responsif diaktifkan
-                paging: false, // hilangkan pages
-                scrollX: true, // Tambahkan scroll horizontal
+                responsive: false,
+                paging: false,
+                scrollX: true,
                 ordering: false,
                 dom: "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end buttons-container'B>>" +
                     "<'row'<'col-sm-12'tr>>" +
@@ -420,7 +390,6 @@
                     }
                 ]
             });
-
         });
     </script>
 @endsection
