@@ -209,7 +209,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard')->group(function () {
         Route::put('/update-akses/{user:id}', [UserController::class, 'updateRole']);
         Route::get('/get/{id}', [UserController::class, 'getUser']);
         Route::get('/delete/{id}', [UserController::class, 'destroy']);
-        Route::post('/assign-permissions', [UserController::class, 'storePermissions']);
+        Route::post('/assign-permissions', [UserController::class, 'storePermissions'])->name('store.permission');
     });
     Route::prefix('job-level')->group(function () {
         Route::post('/store', [JobLevelController::class, 'store']);
