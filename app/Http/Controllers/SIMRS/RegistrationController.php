@@ -228,11 +228,22 @@ class RegistrationController extends Controller
         // get kelas rawat with name "Rawat Jalan"
         $kelasRawatRajal = KelasRawat::where('kelas', 'like', '%rawat jalan%')->first();
 
+        // get Dokter
+        $doctors = [];
+        $dokters = Doctor::with('department_from_doctors', 'employee')->get();
+        foreach ($dokters as $dokter) {
+            if ($dokter->department_from_doctors && $dokter->department_from_doctors->name !== 'UGD') {
+                $deptName = $dokter->department_from_doctors->name;
+                $doctors[$deptName][] = $dokter;
+            }
+        }
+
         switch ($registrasi) {
             case 'rawat-jalan':
                 return view('pages.simrs.pendaftaran.form-registrasi', [
                     'title' => "Rawat Jalan",
                     'groupedDoctors' => $groupedDoctors,
+                    'doctors' => $doctors,
                     'penjamins' => $penjamins,
                     'case' => 'rawat-jalan',
                     'patient' => $patient,
