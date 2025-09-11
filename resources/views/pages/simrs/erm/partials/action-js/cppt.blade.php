@@ -65,10 +65,11 @@
             orientation: 'bottom'
         });
 
+
         // ===================================================================
-        // FUNGSI UTAMA UNTUK MEMUAT DAN MERENDER DATA CPPT (VERSI 2 KOLOM)
+        // FUNGSI BARU: MEMUAT DAN MERENDER DATA CPPT (VERSI 1 KOLOM UNTUK RAWAT JALAN)
         // ===================================================================
-        function loadSideBySideTimeline(filterData) {
+        function loadSingleColumnTimeline(filterData) {
             const targetElement = $('#cppt-container');
             targetElement.html('<div class="text-center p-5">Memuat data CPPT...</div>');
 
@@ -89,17 +90,75 @@
             Promise.all([getDokterData, getPerawatData])
                 .then(([dokterResponse, perawatResponse]) => {
                     targetElement.empty();
-
-                    const dokterData = dokterResponse || [];
-                    const perawatData = perawatResponse || [];
-
-                    if (dokterData.length === 0 && perawatData.length === 0) {
+                    const allData = [...(dokterResponse || []), ...(perawatResponse || [])];
+                    if (allData.length === 0) {
                         targetElement.html(
                             '<div class="text-center p-4">Tidak ada data CPPT yang ditemukan.</div>');
                         return;
                     }
 
-                    // 1. Kumpulkan semua tanggal unik dari kedua dataset
+                    allData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                    const groupedData = allData.reduce((acc, item) => {
+                        const date = new Date(item.created_at).toLocaleDateString('id-ID', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        if (!acc[date]) acc[date] = [];
+                        acc[date].push(item);
+                        return acc;
+                    }, {});
+
+                    const sortedUniqueDates = Object.keys(groupedData);
+
+                    sortedUniqueDates.forEach(date => {
+                        targetElement.append(`<div class="daily-cppt-header">${date}</div>`);
+                        const dailyContainer = $('<div class="single-column-container"></div>');
+                        targetElement.append(dailyContainer);
+                        groupedData[date].forEach(data => {
+                            dailyContainer.append(generateCardHtml(data));
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error("Gagal memuat data CPPT:", error);
+                    targetElement.html(
+                        '<div class="alert alert-danger">Gagal memuat data CPPT. Silakan coba lagi.</div>'
+                    );
+                });
+        }
+
+        // ===================================================================
+        // FUNGSI LAMA: MEMUAT DAN MERENDER DATA CPPT (VERSI 2 KOLOM)
+        // ===================================================================
+        function loadSideBySideTimeline(filterData) {
+            const targetElement = $('#cppt-container');
+            targetElement.html('<div class="text-center p-5">Memuat data CPPT...</div>');
+
+            const getDokterData = $.ajax({
+                url: '{{ route('cppt.dokter.get') }}',
+                type: 'GET',
+                dataType: 'json',
+                data: filterData
+            });
+            const getPerawatData = $.ajax({
+                url: '{{ route('cppt.perawat.get') }}',
+                type: 'GET',
+                dataType: 'json',
+                data: filterData
+            });
+
+            Promise.all([getDokterData, getPerawatData])
+                .then(([dokterResponse, perawatResponse]) => {
+                    targetElement.empty();
+                    const dokterData = dokterResponse || [];
+                    const perawatData = perawatResponse || [];
+                    if (dokterData.length === 0 && perawatData.length === 0) {
+                        targetElement.html(
+                            '<div class="text-center p-4">Tidak ada data CPPT yang ditemukan.</div>');
+                        return;
+                    }
                     const allDates = new Set();
                     [...dokterData, ...perawatData].forEach(item => {
                         const date = new Date(item.created_at).toLocaleDateString('id-ID', {
@@ -109,11 +168,7 @@
                         });
                         allDates.add(date);
                     });
-
-                    // 2. Urutkan tanggal unik dari yang terbaru ke terlama
                     const sortedUniqueDates = Array.from(allDates).sort((a, b) => {
-                        // Ubah format tanggal lokal ke format yyyy-mm-dd agar bisa dibandingkan
-                        // Split tanggal lokal: "17 Juni 2024" -> [17, Juni, 2024]
                         const parseDate = (str) => {
                             const [day, monthName, year] = str.split(' ');
                             const monthMap = {
@@ -134,8 +189,6 @@
                         };
                         return parseDate(b) - parseDate(a);
                     });
-
-                    // 3. Kelompokkan setiap dataset berdasarkan tanggal
                     const groupDataByDate = (data) => data.reduce((acc, item) => {
                         const date = new Date(item.created_at).toLocaleDateString('id-ID', {
                             year: 'numeric',
@@ -146,40 +199,26 @@
                         acc[date].push(item);
                         return acc;
                     }, {});
-
                     const groupedDokterData = groupDataByDate(dokterData);
                     const groupedPerawatData = groupDataByDate(perawatData);
-
-                    // 4. Render HTML untuk setiap tanggal, urutan terbaru di atas
                     sortedUniqueDates.forEach(date => {
-                        // Tambahkan Header Tanggal yang mencakup kedua kolom
                         targetElement.append(`<div class="daily-cppt-header">${date}</div>`);
-
-                        // Buat baris Bootstrap untuk menampung kedua kolom
                         const dailyRow = $('<div class="row"></div>');
                         targetElement.append(dailyRow);
-
-                        // Buat Kolom Kiri (Dokter)
                         const dokterCol = $('<div class="col-md-6 cppt-column"></div>');
                         if (groupedDokterData[date]) {
-                            // Urutkan entri berdasarkan waktu terbaru di atas
                             groupedDokterData[date].sort((a, b) => new Date(b.created_at) -
                                 new Date(a.created_at));
-                            groupedDokterData[date].forEach(data => {
-                                dokterCol.append(generateCardHtml(data));
-                            });
+                            groupedDokterData[date].forEach(data => dokterCol.append(
+                                generateCardHtml(data)));
                         }
                         dailyRow.append(dokterCol);
-
-                        // Buat Kolom Kanan (Perawat)
                         const perawatCol = $('<div class="col-md-6 cppt-column"></div>');
                         if (groupedPerawatData[date]) {
-                            // Urutkan entri berdasarkan waktu terbaru di atas
                             groupedPerawatData[date].sort((a, b) => new Date(b.created_at) -
                                 new Date(a.created_at));
-                            groupedPerawatData[date].forEach(data => {
-                                perawatCol.append(generateCardHtml(data));
-                            });
+                            groupedPerawatData[date].forEach(data => perawatCol.append(
+                                generateCardHtml(data)));
                         }
                         dailyRow.append(perawatCol);
                     });
@@ -190,6 +229,28 @@
                         '<div class="alert alert-danger">Gagal memuat data CPPT. Silakan coba lagi.</div>'
                     );
                 });
+        }
+
+        // ===================================================================
+        // FUNGSI FILTER (MEMANGGIL FUNGSI LAYOUT YANG TEPAT)
+        // ===================================================================
+
+        const registrationType = "{{ $registration->registration_type }}";
+        console.log(registrationType);
+
+        function applyFilters() {
+            const filters = {
+                registration_id: "{{ $registration->id }}",
+                start_date: $('#sdate').val(),
+                end_date: $('#edate').val(),
+                care_status: $('#dept').val(),
+                cppt_type: $('#role').val()
+            };
+            if (registrationType === 'rawat-jalan') {
+                loadSingleColumnTimeline(filters);
+            } else {
+                loadSideBySideTimeline(filters);
+            }
         }
 
         // ===================================================================
@@ -708,22 +769,11 @@
         }
 
         // ===================================================================
-        // FUNGSI FILTER (KINI MEMANGGIL FUNGSI LAYOUT BARU)
+        // EKSEKUSI SAAT HALAMAN DIMUAT
         // ===================================================================
-        function applyFilters() {
-            const filters = {
-                registration_id: "{{ $registration->id }}",
-                start_date: $('#sdate').val(),
-                end_date: $('#edate').val(),
-                care_status: $('#dept').val(),
-                cppt_type: $('#role').val()
-            };
-
-            loadSideBySideTimeline(filters);
-        }
-
         $('#btn-apply-filter').on('click', applyFilters);
-        applyFilters();
 
+        // Inilah yang memastikan layout (1 kolom atau 2 kolom) langsung diterapkan saat halaman dibuka
+        applyFilters();
     });
 </script>
