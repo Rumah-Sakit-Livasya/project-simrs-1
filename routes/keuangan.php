@@ -129,9 +129,13 @@ Route::group(['middleware' => ['auth']], function () {
             // ->middleware('can:tambah keuangan data kategori');
             Route::patch("/chart-of-account/{chartOfAccount:id}", [ChartOfAccountController::class, 'update'])
                 ->name("chart-of-account.update");
+            Route::delete("/chart-of-account/{chartOfAccount:id}", [ChartOfAccountController::class, 'destroy'])
+                ->name("chart-of-account.destroy");
+
+
             // ->middleware('can:edit keuangan data kategori');
 
-            Route::get('/chart-of-account/by-group/{group_id}', [ChartOfAccountController::class, 'getByGroup'])->name('coa.byGroup');
+            // Route::get('/chart-of-account/by-group/{group_id}', [ChartOfAccountController::class, 'getByGroup'])->name('coa.byGroup');
 
             // Pastikan route untuk show, store, update juga ada
             Route::get('/coa/parents', [ChartOfAccountController::class, 'getParents'])->name('coa.parents');
@@ -537,6 +541,6 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/coa/group/{group_id}', [ChartOfAccountController::class, 'getByGroup'])->name('coa.byGroup');
         Route::get('/coa/{coa:id}', [ChartOfAccountController::class, 'show'])->name('coa.show');
         Route::get('/chart-of-account-all', [ChartOfAccountController::class, 'getAll'])->name('coa.all');
-        Route::delete('/keuangan/setup/chart-of-account/{id}', [ChartOfAccountController::class, 'destroy'])->name('chart-of-account.destroy');
+        Route::get('/coa/get-parents', [ChartOfAccountController::class, 'getParents'])->name('coa.getParents');
     });
 });

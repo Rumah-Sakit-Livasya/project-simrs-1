@@ -105,9 +105,14 @@ class Bilingan extends Model implements AuditableContract
                 \Log::info('Processing final bilingan', ['id' => $bilingan->id]);
 
                 // Menggunakan nama variabel yang berbeda untuk koleksi dan item individu
+                // $tagihanPasienItems = $bilingan->tagihanPasien()
+                //     ->where('tagihan', 'LIKE', '[Tindakan Medis]%')
+                //     ->get();
+
                 $tagihanPasienItems = $bilingan->tagihanPasien()
-                    ->where('tagihan', 'LIKE', '[Tindakan Medis]%')
+                    ->where('tagihan', 'NOT LIKE', 'Biaya Administrasi%')
                     ->get();
+
 
                 \Log::info('Found tagihan', ['count' => $tagihanPasienItems->count()]);
 
