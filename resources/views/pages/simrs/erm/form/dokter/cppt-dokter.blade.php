@@ -121,6 +121,26 @@
                                                                         <div class="card-body p-0">
                                                                             <textarea class="form-control border-0 rounded-0" id="subjective" name="subjective" rows="10"
                                                                                 placeholder="Keluhan Utama">
+@if ($registration->registration_type === 'rawat-jalan' && $assesment)
+@php
+    $anamnesis = $assesment->anamnesis ?? '';
+    if (is_array($anamnesis)) {
+        $anamnesisArr = $anamnesis;
+    } else {
+        $anamnesisArr = json_decode($anamnesis, true) ?? [];
+    }
+@endphp
+Alergi obat : {{ $anamnesisArr['alergi']['status'] ?? '-' }}
+Reaksi alergi obat : {{ $anamnesisArr['alergi']['keterangan'] ?? '-' }}
+Keluhan Utama : {{ $anamnesisArr['keluhan_utama'] ?? '-' }}
+Riwayat Penyakit Sekarang : {{ $anamnesisArr['riwayat_penyakit_sekarang'] ?? '-' }}
+Riwayat Penyakit Dahulu : {{ $anamnesisArr['riwayat_penyakit_dahulu'] ?? '-' }}
+Riwayat Penyakit Keluarga : {{ $anamnesisArr['riwayat_penyakit_keluarga'] ?? '-' }}
+Alergi makan :
+Reaksi alergi makan :
+Alergi lainya :
+Reaksi alergi lainya :
+@else
 Alergi obat : {{ $assesment?->awal_riwayat_alergi_obat === 1 ? 'Ya' : 'Tidak' }}
 Reaksi alergi obat : {{ $assesment?->awal_riwayat_alergi_obat_lain ?? '' }}
 Keluhan Utama : {{ $assesment?->awal_keluhan ?? '' }}
@@ -131,6 +151,7 @@ Alergi makan :
 Reaksi alergi makan :
 Alergi lainya :
 Reaksi alergi lainya :
+@endif
 </textarea>
                                                                         </div>
                                                                     </div>
@@ -146,52 +167,69 @@ Reaksi alergi lainya :
                                                                             </h6>
                                                                         </div>
                                                                         <div class="card-body p-0">
-                                                                            <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="10">{{ 'Nadi (PR): ' .
-                                                                                ($assesment?->pr ?? '') .
-                                                                                "\n" .
-                                                                                'Respirasi (RR): ' .
-                                                                                ($assesment?->rr ?? '') .
-                                                                                "\n" .
-                                                                                'Tensi (BP): ' .
-                                                                                ($assesment?->bp ?? '') .
-                                                                                "\n" .
-                                                                                'Suhu (T): ' .
-                                                                                ($assesment?->temperatur ?? '') .
-                                                                                "\n" .
-                                                                                'Tinggi Badan: ' .
-                                                                                ($assesment?->body_height ?? '') .
-                                                                                "\n" .
-                                                                                'Berat Badan: ' .
-                                                                                ($assesment?->body_weight ?? '') .
-                                                                                "\n" .
-                                                                                'BMI: ' .
-                                                                                ($assesment?->bmi ?? '') .
-                                                                                ($assesment?->kat_bmi ? ' (' . $assesment->kat_bmi . ')' : '') .
-                                                                                "\n" .
-                                                                                'SpO2: ' .
-                                                                                ($assesment?->sp02 ?? '') .
-                                                                                "\n" .
-                                                                                'Lingkar Kepala: ' .
-                                                                                ($assesment?->lingkar_kepala ?? '') .
-                                                                                "\n" .
-                                                                                'Pemeriksaan Fisik: ' .
-                                                                                ($assesment?->awal_pemeriksaan_fisik ?? '') .
-                                                                                "\n" .
-                                                                                'Pemeriksaan Penunjang: ' .
-                                                                                ($assesment?->awal_pemeriksaan_penunjang ?? '') }}</textarea>
+                                                                            <textarea class="form-control border-0 rounded-0" id="objective" name="objective" rows="10">
+@if ($registration->registration_type === 'rawat-jalan' && $assesment)
+@php
+    $tanda_vital_raw = $assesment->tanda_vital ?? '';
+    if (is_array($tanda_vital_raw)) {
+        $tanda_vital = $tanda_vital_raw;
+    } else {
+        $tanda_vital = json_decode($tanda_vital_raw, true) ?? [];
+    }
+@endphp
+Nadi (PR): {{ $tanda_vital['pr'] ?? '' }}
+Respirasi (RR): {{ $tanda_vital['rr'] ?? '' }}
+Tensi (BP): {{ $tanda_vital['bp'] ?? '' }}
+Suhu (T): {{ $tanda_vital['temperatur'] ?? '' }}
+Tinggi Badan: {{ $tanda_vital['height_badan'] ?? '' }}
+Berat Badan: {{ $tanda_vital['weight_badan'] ?? '' }}
+BMI: {{ $tanda_vital['bmi'] ?? '' }}{{ isset($tanda_vital['kat_bmi']) ? ' (' . $tanda_vital['kat_bmi'] . ')' : '' }}
+SpO2: {{ $tanda_vital['spo2'] ?? '' }}
+Lingkar Kepala:
+Pemeriksaan Fisik: {{ $assesment->pemeriksaan_fisik ?? '' }}
+Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
+@else
+{{ 'Nadi (PR): ' .
+    ($assesment?->pr ?? '') .
+    "\n" .
+    'Respirasi (RR): ' .
+    ($assesment?->rr ?? '') .
+    "\n" .
+    'Tensi (BP): ' .
+    ($assesment?->bp ?? '') .
+    "\n" .
+    'Suhu (T): ' .
+    ($assesment?->temperatur ?? '') .
+    "\n" .
+    'Tinggi Badan: ' .
+    ($assesment?->body_height ?? '') .
+    "\n" .
+    'Berat Badan: ' .
+    ($assesment?->body_weight ?? '') .
+    "\n" .
+    'BMI: ' .
+    ($assesment?->bmi ?? '') .
+    ($assesment?->kat_bmi ? ' (' . $assesment->kat_bmi . ')' : '') .
+    "\n" .
+    'SpO2: ' .
+    ($assesment?->sp02 ?? '') .
+    "\n" .
+    'Lingkar Kepala: ' .
+    ($assesment?->lingkar_kepala ?? '') .
+    "\n" .
+    'Pemeriksaan Fisik: ' .
+    ($assesment?->awal_pemeriksaan_fisik ?? '') .
+    "\n" .
+    'Pemeriksaan Penunjang: ' .
+    ($assesment?->awal_pemeriksaan_penunjang ?? '') }}
+@endif
+</textarea>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            </div>
 
-                                            <!-- Assessment and Planning -->
-                                            <div class="row">
-                                                <div class="col-12">
-                                                    <div class="card mt-3">
                                                         <div class="card-header bg-light">
                                                             <h6 class="card-title text-white mb-0">
                                                                 <i class="mdi mdi-brain mr-2"></i>Assessment & Planning
