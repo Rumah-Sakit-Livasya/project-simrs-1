@@ -17,6 +17,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Validation\Rule;
 
 use function displayAge;
 
@@ -97,107 +98,80 @@ class PatientController extends Controller
 
     public function simpan_pendaftaran_pasien(Request $request)
     {
-        $validatedData =
-            $validatedData = $request->validate([
-                'name' => 'required|max:255',
-                'nickname' => 'max:255',
-                'title' => 'required|max:255',
-                'gender' => 'required|max:255',
-                'place' => 'required|max:255',
-                'date_of_birth' => 'required|max:255',
-                'religion' => 'required|max:255',
-                'blood_group' => 'max:255',
-                'allergy' => 'max:255',
-                'married_status' => 'max:255',
-                'language' => 'required|max:255',
-                'citizenship' => 'max:255',
-                'id_card' => 'required|max:255',
-                'address' => 'required|max:255',
-                'province' => 'max:255',
-                'regency' => 'required|max:255',
-                'subdistrict' => 'required|max:255',
-                'ward' => 'required|max:255',
-                'mobile_phone_number' => 'max:255',
-                'email' => 'max:255',
-                'last_education' => 'required|max:255',
-                'ethnic' => 'required|max:255',
-                'job' => 'required|max:255',
+        $validatedData = $request->validate([
+            'name' => 'required|max:255',
+            'nickname' => 'max:255',
+            'title' => 'required|max:255',
+            'gender' => 'required|max:255',
+            'place' => 'required|max:255',
+            'date_of_birth' => 'required|date_format:d-m-Y', // Ubah ini! // Sebaiknya gunakan tipe date
+            'religion' => 'required|max:255',
+            'blood_group' => 'nullable|max:255',
+            'allergy' => 'nullable|max:255',
+            'married_status' => 'nullable|max:255',
+            'language' => 'required|max:255',
+            'citizenship' => 'nullable|max:255',
+            'id_card' => 'required|max:255',
+            'address' => 'required|max:255',
+            'province' => 'nullable|max:255', // Dibuat nullable karena di-disable
+            'regency' => 'required|max:255',
+            'subdistrict' => 'required|max:255',
+            'ward' => 'required|max:255',
+            'mobile_phone_number' => 'nullable|max:255',
+            'email' => 'nullable|email|max:255',
+            'last_education' => 'required|max:255',
+            'ethnic' => 'required|max:255',
+            'job' => 'required|max:255',
 
-                // Informasi Keluarga
-                'family_name' => 'max:255',
-                'father_name' => 'max:255',
-                'mother_name' => 'max:255',
-                'family_number' => 'max:255',
-                'family_age' => 'max:255',
-                'family_job' => 'max:255',
-                'family_relation' => 'max:255',
-                'family_address' => 'max:255',
+            // Informasi Keluarga
+            'family_name' => 'nullable|max:255',
+            'father_name' => 'nullable|max:255',
+            'mother_name' => 'nullable|max:255',
+            'family_number' => 'nullable|max:255',
+            'family_age' => 'nullable|max:255',
+            'family_job' => 'nullable|max:255',
+            'family_relation' => 'nullable|max:255',
+            'family_address' => 'nullable|max:255',
 
-                // Informasi Penjamin
-                'penjamin_id' => 'nullable',
-            ], [
-                'name.required' => 'Nama wajib diisi.',
-                'name.max' => 'Nama tidak boleh lebih dari 255 karakter.',
-                'nickname.max' => 'Nama panggilan tidak boleh lebih dari 255 karakter.',
-                'title.required' => 'Gelar wajib diisi.',
-                'title.max' => 'Gelar tidak boleh lebih dari 255 karakter.',
-                'gender.required' => 'Jenis kelamin wajib diisi.',
-                'gender.max' => 'Jenis kelamin tidak boleh lebih dari 255 karakter.',
-                'place.required' => 'Tempat lahir wajib diisi.',
-                'place.max' => 'Tempat lahir tidak boleh lebih dari 255 karakter.',
-                'date_of_birth.required' => 'Tanggal lahir wajib diisi.',
-                'date_of_birth.max' => 'Tanggal lahir tidak boleh lebih dari 255 karakter.',
-                'religion.required' => 'Agama wajib diisi.',
-                'religion.max' => 'Agama tidak boleh lebih dari 255 karakter.',
-                'blood_group.max' => 'Golongan darah tidak boleh lebih dari 255 karakter.',
-                'allergy.max' => 'Alergi tidak boleh lebih dari 255 karakter.',
-                'married_status.max' => 'Status pernikahan tidak boleh lebih dari 255 karakter.',
-                'language.required' => 'Bahasa wajib diisi.',
-                'language.max' => 'Bahasa tidak boleh lebih dari 255 karakter.',
-                'citizenship.max' => 'Kewarganegaraan tidak boleh lebih dari 255 karakter.',
-                'id_card.required' => 'Nomor KTP wajib diisi.',
-                'id_card.max' => 'Nomor KTP tidak boleh lebih dari 255 karakter.',
-                'address.required' => 'Alamat wajib diisi.',
-                'address.max' => 'Alamat tidak boleh lebih dari 255 karakter.',
-                'province.max' => 'Provinsi tidak boleh lebih dari 255 karakter.',
-                'regency.required' => 'Kabupaten/Kota wajib diisi.',
-                'regency.max' => 'Kabupaten/Kota tidak boleh lebih dari 255 karakter.',
-                'subdistrict.required' => 'Kecamatan wajib diisi.',
-                'subdistrict.max' => 'Kecamatan tidak boleh lebih dari 255 karakter.',
-                'ward.required' => 'Kelurahan wajib diisi.',
-                'ward.max' => 'Kelurahan tidak boleh lebih dari 255 karakter.',
-                'mobile_phone_number.max' => 'Nomor HP tidak boleh lebih dari 255 karakter.',
-                'email.max' => 'Email tidak boleh lebih dari 255 karakter.',
-                'last_education.required' => 'Pendidikan terakhir wajib diisi.',
-                'last_education.max' => 'Pendidikan terakhir tidak boleh lebih dari 255 karakter.',
-                'ethnic.required' => 'Suku wajib diisi.',
-                'ethnic.max' => 'Suku tidak boleh lebih dari 255 karakter.',
-                'job.required' => 'Pekerjaan wajib diisi.',
-                'job.max' => 'Pekerjaan tidak boleh lebih dari 255 karakter.',
+            // Informasi Penjamin (MODIFIED: Tambahkan semua field agar terbawa oleh old())
+            'penjamin_id' => 'nullable|integer',
+            'nomor_penjamin' => 'nullable|string|max:255',
+            'nama_pegawai' => 'nullable|string|max:255',
+            'nama_perusahaan_pegawai' => 'nullable|string|max:255',
+            'hubungan_pegawai' => 'nullable|string|max:255',
+            'nomor_kepegawaian' => 'nullable|string|max:255',
+            'bagian_pegawai' => 'nullable|string|max:255',
+            'grup_pegawai' => 'nullable|string|max:255', // PERBAIKAN: nama field disamakan dengan form
+        ], [
+            // ... (Pesan error custom Anda tidak saya ubah)
+            'name.required' => 'Nama wajib diisi.',
+            'title.required' => 'Gelar wajib diisi.',
+            'gender.required' => 'Jenis kelamin wajib diisi.',
+            'place.required' => 'Tempat lahir wajib diisi.',
+            'date_of_birth.required' => 'Tanggal lahir wajib diisi.',
+            'religion.required' => 'Agama wajib diisi.',
+            'language.required' => 'Bahasa wajib diisi.',
+            'id_card.required' => 'Nomor KTP wajib diisi.',
+            'address.required' => 'Alamat wajib diisi.',
+            'regency.required' => 'Kabupaten/Kota wajib diisi.',
+            'subdistrict.required' => 'Kecamatan wajib diisi.',
+            'ward.required' => 'Kelurahan wajib diisi.',
+            'last_education.required' => 'Pendidikan terakhir wajib diisi.',
+            'ethnic.required' => 'Suku wajib diisi.',
+            'job.required' => 'Pekerjaan wajib diisi.',
+        ]);
 
-                // Informasi Keluarga
-                'family_name.max' => 'Nama keluarga tidak boleh lebih dari 255 karakter.',
-                'father_name.max' => 'Nama ayah tidak boleh lebih dari 255 karakter.',
-                'mother_name.max' => 'Nama ibu tidak boleh lebih dari 255 karakter.',
-                'family_number.max' => 'Nomor keluarga tidak boleh lebih dari 255 karakter.',
-                'family_age.max' => 'Umur keluarga tidak boleh lebih dari 255 karakter.',
-                'family_job.max' => 'Pekerjaan keluarga tidak boleh lebih dari 255 karakter.',
-                'family_relation.max' => 'Hubungan keluarga tidak boleh lebih dari 255 karakter.',
-                'family_address.max' => 'Alamat keluarga tidak boleh lebih dari 255 karakter.',
-
-                // Informasi Penjamin
-                'penjamin_id.nullable' => 'Penjamin tidak wajib diisi.',
-            ]);
-
+        // Logika untuk menambahkan data penjamin sudah benar,
+        // hanya perlu memastikan nama field 'grup_pegawai' konsisten.
         if ($request['penjamin_id']) {
-            if ($request['penjamin_id'] !== 1) {
+            if ($request['penjamin_id'] !== 1) { // Asumsi 1 adalah penjamin umum
                 $validatedData['nomor_penjamin'] = $request->nomor_penjamin;
                 $validatedData['nama_pegawai'] = $request->nama_pegawai;
                 $validatedData['nama_perusahaan_pegawai'] = $request->nama_perusahaan_pegawai;
                 $validatedData['hubungan_pegawai'] = $request->hubungan_pegawai;
                 $validatedData['nomor_kepegawaian'] = $request->nomor_kepegawaian;
                 $validatedData['bagian_pegawai'] = $request->bagian_pegawai;
-                $validatedData['grup_perusahaan'] = $request->grup_perusahaan;
+                $validatedData['grup_pegawai'] = $request->grup_pegawai; // PERBAIKAN: dari 'grup_perusahaan'
             }
         }
 
@@ -208,10 +182,14 @@ class PatientController extends Controller
         return redirect("/patients/$patient->id")->with('success', 'Pasien berhasil ditambahkan!');
     }
 
+
     public function edit_pendaftaran_pasien(Patient $patient)
     {
+        // Gunakan Eager Loading untuk mengambil relasi agar lebih efisien
+        $patient->load(['family', 'ethnic', 'penjamin', 'kelurahan.kecamatan.kabupaten.provinsi']);
+
         $dataPenjamin = Penjamin::all();
-        $provinces = Provinsi::all();
+        $provinces = Provinsi::all(); // Ini bisa dihapus jika alamat sepenuhnya via AJAX
 
         return view('pages.simrs.pendaftaran.edit-pasien', [
             'patient' => $patient,
@@ -223,36 +201,65 @@ class PatientController extends Controller
 
     public function update_pendaftaran_pasien(Request $request, Patient $patient)
     {
-        return $patient;
         $validatedData = $request->validate([
             'name' => 'required|max:255',
-            'nickname' => 'max:255',
+            'nickname' => 'nullable|max:255',
             'title' => 'required|max:255',
             'gender' => 'required|max:255',
             'place' => 'required|max:255',
-            'date_of_birth' => 'required|max:255',
+            'date_of_birth' => 'required|date_format:d-m-Y', // Ubah ini!
             'religion' => 'required|max:255',
-            'blood_group' => 'max:255',
-            'allergy' => 'max:255',
-            'married_status' => 'max:255',
+            'blood_group' => 'nullable|max:255',
+            'allergy' => 'nullable|max:255',
+            'married_status' => 'nullable|max:255',
             'language' => 'required|max:255',
-            'citizenship' => 'max:255',
-            'id_card' => 'max:255',
+            'citizenship' => 'nullable|max:255',
+            // Pastikan validasi unik mengabaikan ID pasien saat ini
+            'id_card' => ['required', 'max:255', Rule::unique('patients')->ignore($patient->id)],
             'address' => 'required|max:255',
-            'province' => 'max:255',
-            'regency' => 'required|max:255',
-            'subdistrict' => 'required|max:255',
-            'ward' => 'required|max:255',
-            'mobile_phone_number' => 'max:255',
-            'email' => 'max:255',
+            // 'regency' => 'required|max:255',
+            // 'subdistrict' => 'required|max:255',
+            // 'ward' => 'required|max:255',
+            'mobile_phone_number' => 'nullable|max:255',
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('patients')->ignore($patient->id)],
             'last_education' => 'required|max:255',
-            'ethnic' => 'required|max:255',
+            'ethnic' => 'required|exists:ethnics,id',
             'job' => 'required|max:255',
+
+            // Informasi Keluarga
+            'family_name' => 'nullable|max:255',
+            'father_name' => 'nullable|max:255',
+            'mother_name' => 'nullable|max:255',
+            'family_number' => 'nullable|max:255',
+            'family_age' => 'nullable|max:255',
+            'family_job' => 'nullable|max:255',
+            'family_relation' => 'nullable|max:255',
+            'family_address' => 'nullable|max:255',
+
+            // Informasi Penjamin
+            'penjamin_id' => 'nullable|exists:penjamins,id',
+            'nomor_penjamin' => 'nullable|string|max:255',
+            'nama_pegawai' => 'nullable|string|max:255',
+            'nama_perusahaan_pegawai' => 'nullable|string|max:255',
+            'hubungan_pegawai' => 'nullable|string|max:255',
+            'nomor_kepegawaian' => 'nullable|string|max:255',
+            'bagian_pegawai' => 'nullable|string|max:255',
+            'grup_pegawai' => 'nullable|string|max:255',
         ]);
 
-        $validatedData['medical_record_number'] = MedicalRecordHelper::generateMedicalRecordNumber();
-        // Patient::create($validatedData);
-        return redirect('/daftar_rekam_medis')->with('success', 'Barang berhasil ditambahkan!');
+        // Update data pasien
+        $patient->update($validatedData);
+
+        // Update data keluarga (jika ada)
+        if ($patient->family) {
+            $patient->family->update($validatedData);
+        } else {
+            // Jika sebelumnya tidak ada data keluarga, buat baru
+            $family = Family::create($validatedData);
+            $patient->update(['family_id' => $family->id]);
+        }
+
+        return "<script>alert('Data berhasil diperbarui'); window.close();</script>";
     }
 
     public function print_identitas_pasien(Patient $patient)

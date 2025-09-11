@@ -113,7 +113,7 @@
                                     <i id="loading-spinner" class="fas fa-spinner fa-spin"></i>
                                     <thead class="bg-primary-600">
                                         <tr>
-                                            <th>Departement ID</th>
+                                            <th>Departement</th>
                                             <th>Nama Grup</th>
                                             <th>Status</th>
                                             <th>COA Pendapatan</th>
@@ -124,7 +124,7 @@
                                     <tbody>
                                         @foreach ($grup_tindakan_medis as $row)
                                             <tr>
-                                                <td>{{ $row->departement_id }}</td>
+                                                <td>{{ $row->departement->name }}</td>
                                                 <td>{{ $row->nama_grup }}</td>
                                                 <td>{{ $row->status }}</td>
                                                 <td>{{ $row->coa_pendapatan }}</td>

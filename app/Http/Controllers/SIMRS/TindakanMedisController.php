@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\SIMRS;
 
+use App\Exports\TindakanMedisExport;
 use App\Http\Controllers\Controller;
+use App\Imports\TindakanMedisImport;
+use App\Models\SIMRS\Departement;
 use App\Models\SIMRS\GroupPenjamin;
 use App\Models\SIMRS\GrupTindakanMedis;
 use App\Models\SIMRS\KelasRawat;
@@ -10,6 +13,7 @@ use App\Models\SIMRS\TindakanMedis;
 use App\Models\TarifTindakanMedis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TindakanMedisController extends Controller
 {
@@ -286,5 +290,45 @@ class TindakanMedisController extends Controller
         return response()->json([
             'harga' => $tarif ? $tarif->total : 0
         ]);
+    }
+
+    /**
+     * Handle download template Excel/CSV.
+     */
+    public function export(Request $request)
+    {
+        $request->validate([
+            'did'  => 'required|integer|exists:departements,id',
+            'igid' => 'required|integer|exists:group_penjamin,id', // Sesuaikan nama tabel
+        ]);
+
+        $departmentId = $request->input('did');
+        $grupPenjaminId = $request->input('igid');
+
+        $departmentName = Departement::find($departmentId)->name;
+        $fileName = "MIGRASI_TINDAKAN_{$departmentName}.xlsx";
+
+        return Excel::download(new TindakanMedisExport($grupPenjaminId, $departmentId), $fileName);
+    }
+
+    /**
+     * Handle upload dan import data.
+     */
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xls,xlsx,csv'
+        ]);
+
+        try {
+            // Hapus $filePath dan jangan kirimkan ke constructor
+            Excel::import(new TindakanMedisImport, $request->file('file'));
+
+            return back()->with('success', 'Data tarif tindakan berhasil diimpor!');
+        } catch (\Exception $e) {
+            // Tampilkan pesan error yang lebih spesifik
+            return back()->with('error', 'Terjadi kesalahan saat mengimpor: ' . $e->getMessage());
+        }
     }
 }

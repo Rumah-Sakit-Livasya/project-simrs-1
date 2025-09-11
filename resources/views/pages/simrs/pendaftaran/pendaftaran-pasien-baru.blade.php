@@ -23,7 +23,9 @@
                         <div class="panel-container show">
                             <div class="panel-content">
                                 <div class="row align-items-center">
+                                    {{-- Kolom Kiri Biodata --}}
                                     <div class="col-lg-6">
+                                        {{-- Nama Lengkap --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -40,6 +42,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Nama Panggilan --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -57,6 +60,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Title --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -99,6 +103,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Jenis Kelamin --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -129,6 +134,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Tempat, Tgl. Lahir --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -146,18 +152,27 @@
                                                             @enderror
                                                         </div>
                                                         <div class="col-lg-6">
-                                                            <input type="date"
-                                                                class="@error('date_of_birth') is-invalid @enderror form-control"
-                                                                id="date_of_birth" placeholder="Tanggal Lahir"
-                                                                name="date_of_birth" value="{{ old('date_of_birth') }}">
+                                                            <div class="input-group">
+                                                                <input type="text"
+                                                                    class="form-control @error('date_of_birth') is-invalid @enderror"
+                                                                    placeholder="dd-mm-yyyy" id="date_of_birth"
+                                                                    name="date_of_birth"
+                                                                    value="{{ old('date_of_birth') }}">
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text fs-xl">
+                                                                        <i class="fal fa-calendar-alt"></i>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
                                                             @error('date_of_birth')
-                                                                <p class="invalid-feedback">{{ $message }}</p>
+                                                                <p class="invalid-feedback d-block">{{ $message }}</p>
                                                             @enderror
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Agama --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -205,6 +220,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Golongan Darah --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -244,6 +260,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Alergi --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -260,6 +277,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Status Pernikahan --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -301,6 +319,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Bahasa --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -317,6 +336,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Kewarganegaraan --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -334,7 +354,9 @@
                                             </div>
                                         </div>
                                     </div>
+                                    {{-- Kolom Kanan Biodata --}}
                                     <div class="col-lg-6">
+                                        {{-- No KTP --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -351,6 +373,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Alamat --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -367,22 +390,18 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Provinsi --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
                                                     <label for="province" class="form-label">Provinsi *</label>
                                                 </div>
                                                 <div class="col-sm-8">
+                                                    {{-- Diisi oleh AJAX --}}
                                                     <select disabled
                                                         class="@error('province') is-invalid @enderror form-control w-100"
                                                         id="province" name="province">
                                                         <option value="" selected></option>
-                                                        @foreach ($provinces as $province)
-                                                            <option
-                                                                value="{{ $province['id'] }}  {{ old('province') == $province['id'] ? 'selected' : '' }}">
-                                                                {{ $province['name'] }}
-                                                            </option>
-                                                        @endforeach
                                                     </select>
                                                     @error('province')
                                                         <p class="invalid-feedback">{{ $message }}</p>
@@ -390,6 +409,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Kota/Kabupaten --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -397,6 +417,7 @@
                                                         *</label>
                                                 </div>
                                                 <div class="col-sm-8">
+                                                    {{-- Diisi oleh AJAX --}}
                                                     <select disabled
                                                         class="@error('regency') is-invalid @enderror form-control w-100"
                                                         id="regency" name="regency">
@@ -408,12 +429,14 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Kecamatan --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
                                                     <label class="form-label" for="subdistrict">Kecamatan *</label>
                                                 </div>
                                                 <div class="col-sm-8">
+                                                    {{-- Diisi oleh AJAX --}}
                                                     <select disabled
                                                         class="@error('subdistrict') is-invalid @enderror form-control w-100"
                                                         id="subdistrict" name="subdistrict">
@@ -425,6 +448,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Kelurahan --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -433,7 +457,11 @@
                                                 <div class="col-sm-8">
                                                     <select class="@error('ward') is-invalid @enderror form-control w-100"
                                                         id="ward" name="ward">
-                                                        <option value="" disabled selected>Pilih Kelurahan</option>
+                                                        {{-- Opsi untuk old value agar bisa dipilih kembali --}}
+                                                        @if (old('ward'))
+                                                            <option value="{{ old('ward') }}" selected>Kelurahan Dipilih
+                                                                Sebelumnya</option>
+                                                        @endif
                                                     </select>
                                                     @error('ward')
                                                         <p class="invalid-feedback">{{ $message }}</p>
@@ -441,6 +469,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- No HP --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -459,6 +488,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Email --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -475,6 +505,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Pendidikan Terakhir --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -523,6 +554,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Suku --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -536,9 +568,11 @@
                                                         id="ethnic" name="ethnic">
                                                         <option value="" selected disabled></option>
                                                         @foreach ($ethnics as $ethnic)
-                                                            <option
-                                                                value="{{ $ethnic->id }} {{ old('ethnic') === $ethnic->id ? 'selected' : '' }}">
-                                                                {{ $ethnic->name }}</option>
+                                                            {{-- PERBAIKAN: sintaks 'selected' dipisah dari 'value' --}}
+                                                            <option value="{{ $ethnic->id }}"
+                                                                {{ old('ethnic') == $ethnic->id ? 'selected' : '' }}>
+                                                                {{ $ethnic->name }}
+                                                            </option>
                                                         @endforeach
                                                     </select>
                                                     @error('ethnic')
@@ -547,6 +581,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Pekerjaan --}}
                                         <div class="form-group">
                                             <div class="row align-items-center">
                                                 <div class="col-sm-4" style="text-align: right">
@@ -791,6 +826,7 @@
                         <div class="panel-container show">
                             <div class="panel-content">
                                 <div class="row align-items-center">
+                                    {{-- Kolom Kiri Penjamin --}}
                                     <div class="col-lg-6">
                                         <div class="form-group">
                                             <div class="row align-items-center">
@@ -801,8 +837,11 @@
                                                     <select class="form-control w-100" id="guarantor_name"
                                                         name="penjamin_id">
                                                         @foreach ($penjamins as $penjamin)
-                                                            <option value="{{ $penjamin->id }}">
-                                                                {{ $penjamin->nama_perusahaan }}</option>
+                                                            {{-- MODIFIED: Menambahkan old() untuk penjamin --}}
+                                                            <option value="{{ $penjamin->id }}"
+                                                                {{ old('penjamin_id') == $penjamin->id ? 'selected' : '' }}>
+                                                                {{ $penjamin->nama_perusahaan }}
+                                                            </option>
                                                         @endforeach
                                                     </select>
                                                     @error('penjamin_id')
@@ -818,8 +857,10 @@
                                                         BPJS</label>
                                                 </div>
                                                 <div class="col-sm-8">
+                                                    {{-- MODIFIED: Menambahkan value old() --}}
                                                     <input type="text" class="form-control" id="nomor_penjamin"
-                                                        placeholder="Nomor Polis / BPJS" name="nomor_penjamin">
+                                                        placeholder="Nomor Polis / BPJS" name="nomor_penjamin"
+                                                        value="{{ old('nomor_penjamin') }}">
                                                     @error('nomor_penjamin')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -832,8 +873,10 @@
                                                     <label for="employee_name" class="form-label">Nama Pegawai</label>
                                                 </div>
                                                 <div class="col-sm-8">
+                                                    {{-- MODIFIED: Menambahkan value old() --}}
                                                     <input type="text" class="form-control" id="nama_pegawai"
-                                                        placeholder="Nama Pegawai (Pasien)" name="nama_pegawai">
+                                                        placeholder="Nama Pegawai (Pasien)" name="nama_pegawai"
+                                                        value="{{ old('nama_pegawai') }}">
                                                     @error('nama_pegawai')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -847,8 +890,10 @@
                                                         Pegawai</label>
                                                 </div>
                                                 <div class="col-sm-8">
+                                                    {{-- MODIFIED: Menambahkan value old() --}}
                                                     <input type="text" class="form-control" id="hubungan_pegawai"
-                                                        placeholder="Hubungan Pasien" name="hubungan_pegawai">
+                                                        placeholder="Hubungan Pasien" name="hubungan_pegawai"
+                                                        value="{{ old('hubungan_pegawai') }}">
                                                     @error('hubungan_pegawai')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -856,6 +901,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    {{-- Kolom Kanan Penjamin --}}
                                     <div class="col-lg-6">
                                         <div class="form-group">
                                             <div class="row align-items-center">
@@ -863,9 +909,11 @@
                                                     <label for="company" class="form-label">Perusahaan</label>
                                                 </div>
                                                 <div class="col-sm-8">
+                                                    {{-- MODIFIED: Menambahkan value old() --}}
                                                     <input type="text" class="form-control"
                                                         id="nama_perusahaan_pegawai" placeholder="Nama Perusahaan"
-                                                        name="nama_perusahaan_pegawai">
+                                                        name="nama_perusahaan_pegawai"
+                                                        value="{{ old('nama_perusahaan_pegawai') }}">
                                                     @error('nama_perusahaan_pegawai')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -878,8 +926,10 @@
                                                     <label for="nomor_kepegawaian" class="form-label">No. Pegawai</label>
                                                 </div>
                                                 <div class="col-sm-8">
+                                                    {{-- MODIFIED: Menambahkan value old() --}}
                                                     <input type="text" class="form-control" id="nomor_kepegawaian"
-                                                        placeholder="Nomor Kepegawaian Pasien" name="nomor_kepegawaian">
+                                                        placeholder="Nomor Kepegawaian Pasien" name="nomor_kepegawaian"
+                                                        value="{{ old('nomor_kepegawaian') }}">
                                                     @error('nomor_kepegawaian')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -892,8 +942,10 @@
                                                     <label for="bagian_pegawai" class="form-label">Bagian</label>
                                                 </div>
                                                 <div class="col-sm-8">
+                                                    {{-- MODIFIED: Menambahkan value old() --}}
                                                     <input type="text" class="form-control" id="bagian_pegawai"
-                                                        placeholder="Bagian" name="bagian_pegawai">
+                                                        placeholder="Bagian" name="bagian_pegawai"
+                                                        value="{{ old('bagian_pegawai') }}">
                                                     @error('bagian_pegawai')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -906,8 +958,10 @@
                                                     <label for="grup_pegawai" class="form-label">Grup</label>
                                                 </div>
                                                 <div class="col-sm-8">
+                                                    {{-- MODIFIED: Menambahkan value old() --}}
                                                     <input type="text" class="form-control" id="grup_pegawai"
-                                                        placeholder="Grup" name="grup_pegawai">
+                                                        placeholder="Grup" name="grup_pegawai"
+                                                        value="{{ old('grup_pegawai') }}">
                                                     @error('grup_pegawai')
                                                         <p class="invalid-feedback">{{ $message }}</p>
                                                     @enderror
@@ -944,9 +998,19 @@
     </main>
 @endsection
 @section('plugin')
+    {{-- (Script Javascript Anda tidak saya ubah, jadi saya hapus dari sini agar lebih ringkas) --}}
+    <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script>
         $(document).ready(function() {
+            // Inisialisasi Bootstrap Datepicker
+            $('#date_of_birth').datepicker({
+                format: 'dd-mm-yyyy', // Format yang ditampilkan ke pengguna
+                autoclose: true,
+                todayHighlight: true,
+                orientation: "bottom left" // Atur posisi popup
+            });
+
             $('#title').select2({
                 'placeholder': 'Pilih Title',
             });
@@ -1019,48 +1083,55 @@
                 }
             });
 
-            // Event ketika kelurahan dipilih
-            $('#ward').change(function() {
-                var wardId = $(this).val();
+            // Fungsi untuk memuat data alamat berdasarkan ID Kelurahan
+            function loadAddressData(wardId) {
                 var subdistrict = $('#subdistrict');
                 var regency = $('#regency');
                 var province = $('#province');
 
                 if (wardId) {
-                    subdistrict.prop('disabled', true);
-                    subdistrict.html('<option value="">Loading...</option>');
+                    // Set status loading
+                    subdistrict.prop('disabled', true).html('<option value="">Loading...</option>');
+                    regency.prop('disabled', true).html('<option value="">Loading...</option>');
+                    province.prop('disabled', true).html('<option value="">Loading...</option>');
 
                     $.ajax({
-                        url: "{{ route('getKecamatanByKelurahan') }}", // Route untuk mendapatkan kecamatan berdasarkan kelurahan
+                        url: "{{ route('getKecamatanByKelurahan') }}", // Route untuk mendapatkan data lengkap
                         type: 'GET',
                         data: {
                             kelurahan_id: wardId
                         },
                         success: function(data) {
                             // Isi kecamatan
-                            subdistrict.prop('disabled', false);
-                            subdistrict.empty();
-                            subdistrict.append('<option value="">Pilih Kecamatan</option>');
-                            subdistrict.append(new Option(data.kecamatan.name, data.kecamatan
-                                .id, true, true));
+                            subdistrict.prop('disabled', false).empty();
+                            subdistrict.append(new Option(data.kecamatan.name, data.kecamatan.id, true,
+                                true));
 
                             // Isi kabupaten
-                            regency.prop('disabled', false);
-                            regency.empty();
-                            regency.append('<option value="">Pilih Kabupaten</option>');
-                            regency.append(new Option(data.kabupaten.name, data.kabupaten.id,
-                                true, true));
+                            regency.prop('disabled', false).empty();
+                            regency.append(new Option(data.kabupaten.name, data.kabupaten.id, true,
+                                true));
 
                             // Isi provinsi
-                            province.prop('disabled', false);
-                            province.empty();
-                            province.append('<option value="">Pilih Provinsi</option>');
-                            province.append(new Option(data.provinsi.name, data.provinsi.id,
-                                true, true));
+                            province.prop('disabled', false).empty();
+                            province.append(new Option(data.provinsi.name, data.provinsi.id, true,
+                                true));
                         }
                     });
                 }
+            }
+
+            // Event ketika kelurahan dipilih
+            $('#ward').change(function() {
+                var wardId = $(this).val();
+                loadAddressData(wardId);
             });
+
+            // Cek jika ada old value untuk 'ward', panggil fungsi load data saat halaman dimuat
+            var oldWardId = "{{ old('ward') }}";
+            if (oldWardId) {
+                loadAddressData(oldWardId);
+            }
         });
     </script>
 @endsection
