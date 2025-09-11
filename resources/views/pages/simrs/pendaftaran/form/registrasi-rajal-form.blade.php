@@ -52,7 +52,7 @@
             </x-form-row>
 
             <x-form-row label="Dokter" for="doctor_id">
-                <x-doctor-select id="doctor_id" name="doctor_id" :doctors="$groupedDoctors" :selected="old('doctor_id')" />
+                <x-doctor-select id="doctor_id" name="doctor_id" :doctors="$doctors" :selected="old('doctor_id')" />
             </x-form-row>
 
             <x-form-row label="Poliklinik" for="poliklinik">
