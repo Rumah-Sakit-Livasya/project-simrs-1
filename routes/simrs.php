@@ -33,6 +33,7 @@ use App\Http\Controllers\ProcurementPurchaseRequestNonPharmacyController;
 use App\Http\Controllers\ProcurementPurchaseRequestPharmacyController;
 use App\Http\Controllers\ProcurementSetupSupplier;
 use App\Http\Controllers\SIMRS\BedController;
+use App\Http\Controllers\SIMRS\ControlPanelController;
 use App\Http\Controllers\SIMRS\BPJS\BridgingVclaimController;
 use App\Http\Controllers\SIMRS\DepartementController;
 use App\Http\Controllers\SIMRS\Depo\StokRequestController;
@@ -201,7 +202,7 @@ Route::group(['middleware' => ['auth']], function () {
         // Edit patient information
         Route::get('/{patient:id}/edit', [PatientController::class, 'edit_pendaftaran_pasien'])
             ->name('edit.pendaftaran.pasien');
-        Route::post('/{patient:id}/', [PatientController::class, 'update_pendaftaran_pasien'])
+        Route::put('/{patient:id}/', [PatientController::class, 'update_pendaftaran_pasien'])
             ->name('update.pendaftaran.pasien');
 
         // Print patient documents
@@ -284,8 +285,20 @@ Route::group(['middleware' => ['auth']], function () {
         */
         Route::get('/dashboard', function () {
             return view('app-type.simrs.dashboard');
-        })
-            ->name('dashboard.simrs');
+        })->name('dashboard.simrs');
+
+        Route::prefix('/control-panel')->group(function () {
+            Route::get('/tindakan-rajal', [ControlPanelController::class, 'tindakan_rajal'])->name('control-panel.tindakan-rajal');
+
+            // Rute untuk menampilkan halaman migrasi
+            Route::get('/migrasi-tindakan', [TindakanMedisController::class, 'index'])->name('tindakan.migrasi');
+
+            // Rute untuk proses download template
+            Route::post('/migrasi-tindakan/download', [TindakanMedisController::class, 'export'])->name('tindakan.export');
+
+            // Rute untuk proses upload file
+            Route::post('/migrasi-tindakan/upload', [TindakanMedisController::class, 'import'])->name('tindakan.import');
+        });
 
         /*
         |--------------------------------------------------------------------------

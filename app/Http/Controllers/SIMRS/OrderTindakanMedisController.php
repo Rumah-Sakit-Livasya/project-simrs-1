@@ -81,6 +81,13 @@ class OrderTindakanMedisController extends Controller
             // Simpan tindakan medis
             $medicalAction = OrderTindakanMedis::create($validatedData);
 
+            $medicalAction->load([
+                'doctor.employee',      // Untuk mendapatkan nama dokter
+                'user.employee',        // Untuk mendapatkan nama "Entry By"
+                'tindakan_medis',       // Untuk nama tindakan (best practice)
+                'departement'           // Untuk nama poliklinik (best practice)
+            ]);
+
             $groupPenjaminId = Registration::find($validatedData['registration_id'])->penjamin->group_penjamin->id;
             $kelasId = Registration::find($validatedData['registration_id'])->kelas_rawat;
             if (!$kelasId) {

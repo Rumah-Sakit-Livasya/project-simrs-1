@@ -769,6 +769,8 @@ class RegistrationController extends Controller
         $ruangans = Room::orderBy('ruangan')->get();
         $ruangans_operasi = Room::where('ruangan', 'OK')->orderBy('ruangan', 'asc')->get();
 
+        $dTindakan = \App\Models\SIMRS\Departement::with('grup_tindakan_medis.tindakan_medis')->get();
+
         $orderOperasi = OrderOperasi::with([
             'tipeOperasi',
             'kategoriOperasi',
@@ -795,6 +797,7 @@ class RegistrationController extends Controller
 
         return view('pages.simrs.pendaftaran.detail-registrasi-pasien', [
             // Variabel yang sudah ada
+            'dTindakan' => $dTindakan,
             'orderOperasi' => $orderOperasi,
             'kelasRawat' => $kelasRawat,
             'penjamin' => $penjamin,

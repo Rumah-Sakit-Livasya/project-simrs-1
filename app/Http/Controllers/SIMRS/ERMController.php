@@ -429,7 +429,7 @@ class ERMController extends Controller
                     $dataToStore['anthropometry_weight'] = $bb;
                 }
                 if ($tb !== null) {
-                    // simpan tinggi dalam satuan cm jika input terlihat > 3 (mis. 170), 
+                    // simpan tinggi dalam satuan cm jika input terlihat > 3 (mis. 170),
                     // atau tetap jika kecil (mis. 0.9)
                     $dataToStore['anthropometry_height'] = $tb;
                 }
@@ -1491,8 +1491,9 @@ class ERMController extends Controller
                 });
                 $tindakan_medis_yang_dipakai = OrderTindakanMedis::where('registration_id', $registration->id)->get();
                 $kelas_rawats = \App\Models\SIMRS\KelasRawat::all();
+                $dTindakan = \App\Models\SIMRS\Departement::with('grup_tindakan_medis.tindakan_medis')->get();
 
-                return view('pages.simrs.erm.form.layanan.tindakan-medis', compact('groupedDoctors', 'registration', 'registrations', 'menu', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai', 'kelas_rawats', 'path'));
+                return view('pages.simrs.erm.form.layanan.tindakan-medis', compact('groupedDoctors', 'registration', 'registrations', 'dTindakan', 'menu', 'departements', 'jadwal_dokter', 'tindakan_medis', 'tindakan_medis_yang_dipakai', 'kelas_rawats', 'path'));
 
             case 'pemakaian_alat':
                 $list_peralatan = Peralatan::all();

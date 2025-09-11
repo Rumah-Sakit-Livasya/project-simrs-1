@@ -1,5 +1,28 @@
 @extends('pages.simrs.erm.index')
 @section('erm')
+    <style>
+        .modal-content {
+            position: relative;
+            /* Diperlukan agar overlay bisa diposisikan secara absolut di dalamnya */
+        }
+
+        .modal-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            /* Latar belakang putih semi-transparan */
+            z-index: 10;
+            /* Pastikan berada di atas konten modal */
+            border-radius: .5rem;
+            /* Menyesuaikan dengan radius modal */
+            cursor: wait;
+            /* Menunjukkan status tunggu */
+        }
+    </style>
+
     {{-- content start --}}
     @if (isset($registration) || $registration != null)
         <div class="tab-content p-3">

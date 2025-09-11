@@ -32,6 +32,7 @@ class TindakanMedis extends Model
     {
         return $this->hasMany(TarifTindakanMedis::class, 'tindakan_medis_id');
     }
+
     // public function getTotalTarif($groupPenjaminId, $kelasRawatId)
     // {
     //     // Cari tarif yang sesuai dengan filter
@@ -42,6 +43,7 @@ class TindakanMedis extends Model
 
     //     return $tarif ? $tarif->total : 0;
     // }
+
     public function getTotalTarif($groupPenjaminId, $kelasRawatId)
     {
         $tarif = $this->getTarif($groupPenjaminId, $kelasRawatId);
@@ -54,9 +56,6 @@ class TindakanMedis extends Model
             ->where('kelas_rawat_id', $kelasRawatId)
             ->first();
     }
-
-    // Method untuk mendapatkan hanya total (tetap dipertahankan untuk backward compatibility)
-
 
     // Method untuk mendapatkan share_dr
     public function getShareDr($groupPenjaminId, $kelasRawatId)

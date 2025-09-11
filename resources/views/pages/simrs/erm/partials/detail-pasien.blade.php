@@ -23,7 +23,7 @@
                                 </div>
                                 <div class="flex-grow-1">
                                     <h5 class="mb-1 font-weight-bold text-primary">
-                                        <a href="{{ url('/daftar-registrasi-pasien/' . $registration->patient->id) }}"
+                                        <a href="{{ url('/daftar-registrasi-pasien/' . $registration->id) }}"
                                             class="text-primary">
                                             {{ $registration->patient->name }}
                                         </a>

@@ -175,33 +175,25 @@
             todayHighlight: true,
         });
 
-        // Ambil Tindakan Medis
-        $('#departement').change(function() {
-            var tindakanMedisSelect = $('#tindakanMedis');
-            var selectedOption = $(this).find('option:selected');
-            var groupTindakanMedisData = selectedOption.data('groups');
+        // Pastikan kode ini ada di dalam file JS Anda
+        $('#departement').on('change', function() {
+            const tindakanMedisSelect = $('#tindakanMedis');
+            const selectedOption = $(this).find('option:selected');
+            const groupTindakanMedisData = selectedOption.data('groups');
 
-            // Kosongkan dropdown tindakan medis
-            tindakanMedisSelect.empty();
-            tindakanMedisSelect.append('<option value="" selected>Pilih Tindakan Medis</option>');
+            tindakanMedisSelect.empty().append('<option value="">Pilih Tindakan Medis</option>');
 
-            // Cek apakah data grup tindakan medis ada dan valid
-            if (groupTindakanMedisData && groupTindakanMedisData.length > 0) {
-                // Tambahkan opsi tindakan medis berdasarkan grup
+            if (groupTindakanMedisData && Array.isArray(groupTindakanMedisData)) {
                 $.each(groupTindakanMedisData, function(index, group) {
-                    $.each(group.tindakan_medis, function(i, tindakan) {
-                        tindakanMedisSelect.append(
-                            $('<option></option>').val(tindakan.id).text(tindakan
-                                .nama_tindakan)
-                        );
-                    });
+                    if (group.tindakan_medis) {
+                        $.each(group.tindakan_medis, function(i, tindakan) {
+                            tindakanMedisSelect.append(new Option(tindakan
+                                .nama_tindakan, tindakan.id));
+                        });
+                    }
                 });
-            } else {
-                // Jika tidak ada grup tindakan medis, tambahkan opsi default
-                tindakanMedisSelect.append(
-                    '<option value="" selected>Tidak ada tindakan medis</option>'
-                );
             }
+            tindakanMedisSelect.trigger('change');
         });
 
         // Fungsi untuk menambahkan tindakan medis baru ke tabel
@@ -233,9 +225,14 @@
 
         // Event listener untuk pengiriman form untuk menambahkan tindakan medis baru
         $('#modal-tambah-tindakan #store-form').on('submit', function(event) {
-            event.preventDefault(); // Mencegah pengiriman form default
+            event.preventDefault();
 
-            // Kumpulkan data dari form
+            const modal = $('#modal-tambah-tindakan');
+            const loadingOverlay = modal.find('.modal-loading-overlay');
+
+            // Tampilkan loading overlay
+            loadingOverlay.show();
+
             const formData = {
                 tanggal_tindakan: $('#tglTindakan').val(),
                 registration_id: $('#registration').val(),
@@ -244,162 +241,99 @@
                 kelas: $('#kelas').val(),
                 departement_id: $('#departement').val(),
                 qty: $('#qty').val(),
-                user_id: {{ auth()->user()->id }}, // Ganti dengan data pengguna yang sebenarnya jika tersedia
+                user_id: {{ auth()->user()->id }},
                 foc: $('#diskonDokter').is(':checked') ? 'Yes' : 'No',
             };
 
-            // Kirim data ke server (API)
             $.ajax({
-                url: '/api/simrs/order-tindakan-medis', // Sesuaikan endpoint sesuai kebutuhan
+                url: '/api/simrs/order-tindakan-medis',
                 method: 'POST',
                 data: formData,
-                dataType: 'json', // Pastikan respons diuraikan sebagai JSON
+                dataType: 'json',
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                        'content') // Pastikan CSRF token tersedia
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
-                    console.log('Respons order-tindakan-medis:', response);
                     if (response.success) {
-                        // Tambahkan tindakan medis baru ke tabel
                         addMedicalAction(response.data);
-                        // Reset form
-                        $('#store-form')[0].reset();
-                        $('#store-form select').val(null).trigger('change');
-                        $('#modal-tambah-tindakan').modal('hide');
+                        modal.modal('hide');
                         showSuccessAlert('Tindakan medis berhasil ditambahkan!');
                     } else {
-                        $('#modal-tambah-tindakan').modal('hide');
                         showErrorAlertNoRefresh('Gagal menambahkan tindakan medis: ' +
-                            response
-                            .message);
+                            response.message);
                     }
                 },
                 error: function(xhr) {
-                    $('#modal-tambah-tindakan').modal('hide');
-
-                    let errorMessage =
-                        'Terjadi kesalahan yang tidak diketahui. Silakan coba lagi nanti.';
-
-                    // Cek apakah respons JSON tersedia
+                    let errorMessage = 'Terjadi kesalahan yang tidak diketahui.';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
-                    } else if (xhr.status === 0) {
-                        errorMessage =
-                            'Tidak terhubung ke server. Silakan periksa koneksi internet Anda.';
-                    } else if (xhr.status ===
-                        422) { // Unprocessable Entity, biasanya untuk validasi
-                        if (xhr.responseJSON.errors) {
-                            // Gabungkan semua pesan kesalahan validasi menjadi satu string
-                            errorMessage = Object.values(xhr.responseJSON.errors).flat()
-                                .join('<br>');
-                        } else {
-                            errorMessage = 'Data yang dikirim tidak valid.';
-                        }
-                    } else {
-                        errorMessage =
-                            `Gagal menambahkan tindakan medis. Status: ${xhr.status}, Pesan: ${xhr.statusText}`;
                     }
-
+                    if (xhr.status === 422) {
+                        errorMessage = Object.values(xhr.responseJSON.errors).flat().join(
+                            '<br>');
+                    }
                     showErrorAlertNoRefresh(errorMessage);
+                },
+                complete: function() {
+                    // Sembunyikan loading overlay SETELAH AJAX selesai
+                    loadingOverlay.hide();
                 }
             });
         });
 
-        // Fungsi untuk membuka modal dan memuat data berdasarkan ID
-        $('#modal-tambah-tindakan').on('shown.bs.modal', function(event) {
-            let button = $(event.relatedTarget);
-            let registrasiId = "{{ $registration->id }}"; // Ambil ID dari data-id
 
+        $('#modal-tambah-tindakan').on('shown.bs.modal', function(event) {
+            const modal = $(this);
+            const loadingOverlay = modal.find('.modal-loading-overlay');
+            const registrasiId = "{{ $registration->id }}";
+            let today = new Date();
+            let day = String(today.getDate()).padStart(2, '0');
+            let month = String(today.getMonth() + 1).padStart(2, '0');
+            let year = today.getFullYear();
+            let formattedDate = `${day}-${month}-${year}`;
+
+            // Tampilkan loading overlay SEGERA
+            loadingOverlay.show();
+
+            // Reset form
+            $('#store-form')[0].reset();
+            $('#tglTindakan').val(formattedDate);
             $('#store-form select').val(null).trigger('change');
+
+            // Inisialisasi Select2
+            $('#store-form #dokterPerawat, #store-form #departement, #store-form #kelas, #store-form #tindakanMedis')
+                .select2({
+                    dropdownParent: $('#modal-tambah-tindakan')
+                });
 
             if (registrasiId) {
                 $.ajax({
-                    url: `/api/simrs/get-registrasi-data/${registrasiId}`, // Sesuaikan endpoint
+                    url: `/api/simrs/get-registrasi-data/${registrasiId}`,
                     method: 'GET',
-                    dataType: 'json', // Pastikan respons diuraikan sebagai JSON
+                    dataType: 'json',
                     success: function(response) {
-                        console.log('Respons get-registrasi-data:', response);
                         if (response.success) {
-                            const data = response.data; // Data dari respons API
-
-                            $('#tglTindakan').val(data.tanggal_tindakan ||
-                                formattedDate); // Default ke hari ini jika kosong
+                            const data = response.data;
                             $('#dokterPerawat').val(data.dokter_id).trigger('change');
-                            $('#departement').val(data.departement_id).trigger('change');
                             $('#kelas').val(data.kelas_id).trigger('change');
-                            $('#qty').val(data.qty || 1);
-                            $('#diskonDokter').prop('checked', data.diskon_dokter || false);
-                            $('#tindakanMedis').empty().append(
-                                '<option value="" selected>Pilih Tindakan Medis</option>'
-                            );
-
-                            data.tindakan_medis.forEach(item => {
-                                $('#tindakanMedis').append(
-                                    `<option value="${item.id}">${item.nama_tindakan}</option>`
-                                );
-                            });
-
-                            $('#tindakanMedis').trigger('change');
-
+                            $('#departement').val(data.departement_id).trigger('change');
                         } else {
-                            $('#modal-tambah-tindakan').modal('hide');
                             showErrorAlertNoRefresh('Data registrasi tidak ditemukan: ' +
-                                response
-                                .message);
+                                response.message);
                         }
                     },
                     error: function(xhr) {
-                        console.error('Gagal memuat data registrasi:', xhr);
-                        $('#modal-tambah-tindakan').modal('hide');
-
-                        let errorMessage =
-                            'Terjadi kesalahan yang tidak diketahui. Silakan coba lagi nanti.';
-
-                        // Cek apakah respons JSON tersedia
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            errorMessage = xhr.responseJSON.message;
-                        } else if (xhr.status === 0) {
-                            errorMessage =
-                                'Tidak terhubung ke server. Silakan periksa koneksi internet Anda.';
-                        } else if (xhr.status === 404) {
-                            errorMessage = 'Data registrasi tidak ditemukan.';
-                        } else if (xhr.status === 500) {
-                            errorMessage =
-                                'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
-                        } else {
-                            errorMessage =
-                                `Gagal memuat data registrasi. Status: ${xhr.status}, Pesan: ${xhr.statusText}`;
-                        }
-
-                        showErrorAlertNoRefresh(errorMessage);
+                        showErrorAlertNoRefresh('Gagal memuat data registrasi.');
                     },
+                    complete: function() {
+                        // Sembunyikan loading overlay SETELAH AJAX selesai (baik sukses maupun gagal)
+                        loadingOverlay.hide();
+                    }
                 });
+            } else {
+                // Jika tidak ada ID, langsung sembunyikan overlay
+                loadingOverlay.hide();
             }
-
-            // Initialize Select2 dengan dropdownParent
-            $('#store-form #dokterPerawat').select2({
-                dropdownParent: $('#modal-tambah-tindakan'),
-                placeholder: 'Pilih Dokter/Perawat',
-                allowClear: true,
-            });
-
-            $('#store-form #departement').select2({
-                dropdownParent: $('#modal-tambah-tindakan'),
-                placeholder: 'Pilih Poliklinik',
-                allowClear: true,
-            });
-
-            $('#store-form #kelas').select2({
-                dropdownParent: $('#modal-tambah-tindakan'),
-                placeholder: 'Pilih Kelas',
-                allowClear: true,
-            });
-
-            $('#store-form #tindakanMedis').select2({
-                dropdownParent: $('#modal-tambah-tindakan'),
-                placeholder: 'Pilih Tindakan',
-            });
         });
     });
 </script>

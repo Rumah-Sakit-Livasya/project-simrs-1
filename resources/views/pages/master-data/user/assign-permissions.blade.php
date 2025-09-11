@@ -87,7 +87,7 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" class="btn btn-primary mr-auto" id="button-simpan">
+                                <button type="submit" class="btn btn-primary mr-auto" id="button-simpan">
                                     <div class="ikon-tambah">
                                         <span class="fal fa-plus-circle mr-1"></span>
                                         Tambah
