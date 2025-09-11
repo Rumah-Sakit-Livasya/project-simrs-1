@@ -65,9 +65,7 @@
                                                                             <option value=""></option>
                                                                             @foreach ($jadwal_dokter as $jadwal)
                                                                                 <option value="{{ $jadwal->doctor_id }}"
-                                                                                    @if (auth()->user()->employee &&
-                                                                                            auth()->user()->employee->doctor &&
-                                                                                            auth()->user()->employee->doctor->id == $jadwal->doctor_id) selected @endif>
+                                                                                    @if ($registration->doctor_id == $jadwal->doctor_id) selected @endif>
                                                                                     {{ $jadwal->doctor->employee->fullname }}
                                                                                 </option>
                                                                             @endforeach
@@ -114,8 +112,8 @@
                                                                 <!-- Subjective -->
                                                                 <div class="col-md-6">
                                                                     <div class="card border-primary">
-                                                                        <div class="card-header bg-primary text-white">
-                                                                            <h6 class="card-title mb-0">
+                                                                        <div class="card-header bg-primary">
+                                                                            <h6 class="card-title text-white mb-0">
                                                                                 <i
                                                                                     class="mdi mdi-account-voice mr-2"></i>Subjective
                                                                             </h6>
@@ -141,8 +139,8 @@ Reaksi alergi lainya :
                                                                 <!-- Objective -->
                                                                 <div class="col-md-6">
                                                                     <div class="card border-success">
-                                                                        <div class="card-header bg-success text-white">
-                                                                            <h6 class="card-title mb-0">
+                                                                        <div class="card-header bg-success">
+                                                                            <h6 class="card-title text-white mb-0">
                                                                                 <i
                                                                                     class="mdi mdi-stethoscope mr-2"></i>Objective
                                                                             </h6>
@@ -195,7 +193,7 @@ Reaksi alergi lainya :
                                                 <div class="col-12">
                                                     <div class="card mt-3">
                                                         <div class="card-header bg-light">
-                                                            <h6 class="card-title mb-0">
+                                                            <h6 class="card-title text-white mb-0">
                                                                 <i class="mdi mdi-brain mr-2"></i>Assessment & Planning
                                                             </h6>
                                                         </div>
@@ -205,8 +203,8 @@ Reaksi alergi lainya :
                                                                 <div class="col-md-6">
                                                                     <div class="card border-danger">
                                                                         <div
-                                                                            class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
-                                                                            <h6 class="card-title mb-0">
+                                                                            class="card-header bg-danger d-flex justify-content-between align-items-center">
+                                                                            <h6 class="card-title text-white mb-0">
                                                                                 <i
                                                                                     class="mdi mdi-file-chart mr-2"></i>Assessment
                                                                             </h6>
@@ -226,8 +224,8 @@ Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
                                                                 <div class="col-md-6">
                                                                     <div class="card border-warning">
                                                                         <div
-                                                                            class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
-                                                                            <h6 class="card-title mb-0">
+                                                                            class="card-header bg-warning d-flex justify-content-between align-items-center">
+                                                                            <h6 class="card-title text-white mb-0">
                                                                                 <i
                                                                                     class="mdi mdi-calendar-check mr-2"></i>Planning
                                                                             </h6>
@@ -251,7 +249,7 @@ Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
                                                 <div class="col-12">
                                                     <div class="card mt-3">
                                                         <div class="card-header bg-light">
-                                                            <h6 class="card-title mb-0">
+                                                            <h6 class="card-title text-white mb-0">
                                                                 <i class="mdi mdi-note-edit-outline mr-2"></i>Evaluation &
                                                                 Instructions
                                                             </h6>
@@ -260,8 +258,8 @@ Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
                                                             <div class="row">
                                                                 <div class="col-md-6">
                                                                     <div class="card border-info">
-                                                                        <div class="card-header bg-info text-white">
-                                                                            <h6 class="card-title mb-0">
+                                                                        <div class="card-header bg-info">
+                                                                            <h6 class="card-title text-white mb-0">
                                                                                 <i
                                                                                     class="mdi mdi-information-outline mr-2"></i>Instruksi
                                                                             </h6>
@@ -274,8 +272,8 @@ Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <div class="card border-info">
-                                                                        <div class="card-header bg-info text-white">
-                                                                            <h6 class="card-title mb-0">
+                                                                        <div class="card-header bg-info">
+                                                                            <h6 class="card-title text-white mb-0">
                                                                                 <i
                                                                                     class="mdi mdi-prescription mr-2"></i>Resep
                                                                                 Manual
@@ -322,8 +320,8 @@ Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
                                                             <div class="row mb-3">
                                                                 <div class="col-12">
                                                                     <div class="card border-secondary">
-                                                                        <div class="card-header bg-secondary text-white">
-                                                                            <h6 class="card-title mb-0">
+                                                                        <div class="card-header bg-secondary">
+                                                                            <h6 class="card-title text-white mb-0">
                                                                                 <i
                                                                                     class="mdi mdi-package-variant mr-2"></i>Pilih
                                                                                 Obat
@@ -418,8 +416,8 @@ Diagnosa Banding: {{ $assesment?->awal_diagnosa_banding ?? '' }}</textarea>
                                         <div class="row">
                                             <div class="col-12">
                                                 <div class="card border-success">
-                                                    <div class="card-header bg-success text-white">
-                                                        <h6 class="card-title mb-0">
+                                                    <div class="card-header bg-success">
+                                                        <h6 class="card-title text-white mb-0">
                                                             <i class="mdi mdi-table mr-2"></i>Daftar Resep Elektronik
                                                         </h6>
                                                     </div>
