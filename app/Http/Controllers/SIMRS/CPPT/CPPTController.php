@@ -8,6 +8,7 @@ use App\Models\FarmasiResepElektronikItems;
 use App\Models\FarmasiResepResponse;
 use App\Models\Sbar;
 use App\Models\SIMRS\CPPT\CPPT;
+use App\Models\SIMRS\Doctor;
 use App\Models\SIMRS\JadwalDokter;
 use App\Models\SIMRS\Registration;
 use App\Models\WarehouseBarangFarmasi;
@@ -249,14 +250,11 @@ class CPPTController extends Controller
                 $validatedData['diagnosa_gizi'] = $request->input('diagnosa_gizi');
                 $validatedData['intervensi_gizi'] = $request->input('intervensi_gizi');
                 $validatedData['monitoring'] = $request->input('monitoring');
-            } elseif (auth()->user()->employee->doctor) {
-                $validatedData['tipe_cppt'] = 'dokter';
-            } elseif (str_contains(auth()->user()->name, 'A.Md.Kep')) {
+            } else if ($request->has('perawat_id')) {
                 $validatedData['tipe_cppt'] = 'perawat';
-            } elseif (str_contains(auth()->user()->name, 'A.Md.Keb')) {
-                $validatedData['tipe_cppt'] = 'bidan';
-            } else {
-                $validatedData['tipe_cppt'] = auth()->user()->employee->organization->name;
+            } elseif ($request->has('doctor_id')) {
+                $validatedData['tipe_cppt'] = 'dokter';
+                $validatedData['user_id'] = Doctor::find($request->doctor_id)->employee->id;
             }
 
             $cppt = CPPT::create($validatedData);

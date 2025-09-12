@@ -318,16 +318,83 @@
     @include('pages.pegawai.daftar-pegawai.partials.location')
     @include('pages.pegawai.daftar-pegawai.partials.edit-organization')
     @include('pages.pegawai.daftar-pegawai.partials.payroll.modal-payroll-template')
+    @include('pages.pegawai.daftar-pegawai.partials.signature-modal')
 @endsection
 @section('plugin')
     <script src="/js/datagrid/datatables/datatables.bundle.js"></script>
     <script src="/js/datagrid/datatables/datatables.export.js"></script>
     <script src="/js/formplugins/select2/select2.bundle.js"></script>
     <script src="/js/formplugins/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
     <script>
         // document.getElementById('downloadTemplateBtn').addEventListener('click', function() {
         //     $('#downloadTemplateModal').modal('show');
         // });
+        // Variabel untuk menyimpan ID pegawai yang sedang diproses
+        let currentEmployeeIdForSignature = null;
+
+        /**
+         * Fungsi ini dipanggil oleh tombol di tabel pegawai.
+         * Tugasnya: menyimpan ID pegawai dan membuka jendela popup.
+         */
+        function openSignaturePopup(employeeId) {
+            // 1. Simpan ID pegawai ke variabel global
+            currentEmployeeIdForSignature = employeeId;
+
+            // 2. Tentukan URL untuk popup
+            const url = '{{ route('signature.pad') }}';
+
+            // 3. Tentukan ukuran dan properti jendela popup (fullscreen)
+            const windowFeatures =
+                `width=${screen.availWidth},height=${screen.availHeight},left=0,top=0,resizable=yes,scrollbars=yes,status=no`;
+
+            // 4. Buka jendela baru
+            window.open(url, "TandaTangan", windowFeatures);
+        }
+
+        /**
+         * Fungsi ini akan dipanggil oleh JENDELA POPUP saat tanda tangan disimpan.
+         * Sesuai dengan `window.opener.updateSignature(...)` di template popup.
+         * Kita hanya butuh parameter ketiga (dataURL).
+         */
+        function updateSignature(targetInputId, targetPreviewId, dataURL) {
+            // Pastikan kita tahu pegawai mana yang harus diupdate
+            if (!currentEmployeeIdForSignature) {
+                showErrorAlert('ID Pegawai tidak ditemukan. Silakan coba lagi.');
+                return;
+            }
+
+            // Kirim data ke server menggunakan AJAX
+            $.ajax({
+                url: "{{ route('employee.signature.store') }}",
+                type: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    employee_id: currentEmployeeIdForSignature,
+                    signature: dataURL // dataURL adalah data gambar Base64
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showSuccessAlert(response.message);
+                        // Reload halaman setelah 1.5 detik untuk melihat perubahan
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showErrorAlert(response.message || 'Gagal menyimpan tanda tangan.');
+                    }
+                },
+                error: function(xhr) {
+                    showErrorAlert('Terjadi kesalahan saat menghubungi server.');
+                    console.error(xhr.responseText);
+                },
+                complete: function() {
+                    // Bersihkan ID setelah proses selesai
+                    currentEmployeeIdForSignature = null;
+                }
+            });
+        }
 
         $(document).ready(function() {
             let idPegawai = null;
@@ -378,6 +445,105 @@
                 } else {
                     $('#employee-option').empty();
                 }
+            });
+
+            // Tanda Tangan
+
+            var signaturePadCanvas = document.getElementById('signature-pad');
+            var signaturePad = new SignaturePad(signaturePadCanvas, {
+                backgroundColor: 'rgb(248, 249, 250)', // Sesuai dengan background canvas
+                penColor: 'rgb(0, 0, 0)'
+            });
+
+            // Fungsi untuk resize canvas agar responsif
+            function resizeCanvas() {
+                var ratio = Math.max(window.devicePixelRatio || 1, 1);
+                signaturePadCanvas.width = signaturePadCanvas.offsetWidth * ratio;
+                signaturePadCanvas.height = signaturePadCanvas.offsetHeight * ratio;
+                signaturePadCanvas.getContext("2d").scale(ratio, ratio);
+                signaturePad.clear(); // Clear signature after resize
+            }
+            window.addEventListener("resize", resizeCanvas);
+            resizeCanvas();
+
+
+            // Event saat modal akan ditampilkan
+            $('#signatureModal').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget); // Tombol yang memicu modal
+                var employeeId = button.data('employee-id');
+                var employeeName = button.data('employee-name');
+                var signaturePath = button.data('signature-path');
+
+                var modal = $(this);
+                modal.find('#employeeName').text(employeeName);
+                modal.find('#employeeId').val(employeeId);
+
+                // Tampilkan ttd yang sudah ada
+                if (signaturePath) {
+                    $('#currentSignature').attr('src', signaturePath).show();
+                    $('#noSignatureText').hide();
+                } else {
+                    $('#currentSignature').hide();
+                    $('#noSignatureText').show();
+                }
+
+                // Bersihkan canvas setiap kali modal dibuka
+                signaturePad.clear();
+            });
+
+            // Event untuk tombol hapus/clear canvas
+            $('#clearSignature').on('click', function() {
+                signaturePad.clear();
+            });
+
+            // Event untuk tombol simpan
+            $('#saveSignature').on('click', function() {
+                var button = $(this);
+                if (signaturePad.isEmpty()) {
+                    alert("Tolong bubuhkan tanda tangan terlebih dahulu.");
+                    return;
+                }
+
+                var signatureData = signaturePad.toDataURL('image/png');
+                var employeeId = $('#employeeId').val();
+
+                $.ajax({
+                    url: "{{ route('employee.signature.store') }}",
+                    type: 'POST',
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        employee_id: employeeId,
+                        signature: signatureData
+                    },
+                    beforeSend: function() {
+                        button.prop('disabled', true).html(
+                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...'
+                        );
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#signatureModal').modal('hide');
+                            showSuccessAlert(response
+                                .message); // Menggunakan fungsi notifikasi Anda
+                            // Opsi: reload halaman untuk melihat perubahan
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            showErrorAlert(response
+                                .message); // Menggunakan fungsi notifikasi Anda
+                        }
+                    },
+                    error: function(xhr) {
+                        showErrorAlert(
+                            'Terjadi kesalahan. Silakan coba lagi.'
+                        ); // Menggunakan fungsi notifikasi Anda
+                        console.error(xhr.responseText);
+                    },
+                    complete: function() {
+                        button.prop('disabled', false).html('Simpan');
+                    }
+                });
             });
         });
 

@@ -209,7 +209,10 @@
                             title="Toggle Manajemen">
                             <span class="fas fa-user-secret"></span>
                         </button>
-
+                        <button type="button" class="btn btn-sm btn-outline-info btn-icon btn-inline-block mr-1"
+                            title="Input Tanda Tangan" onclick="openSignaturePopup({{ $employee->id }})">
+                            <i class="fas fa-signature"></i>
+                        </button>
                     </td>
                 </tr>
             @endforeach

@@ -124,7 +124,33 @@
                                     <div class="card mt-3">
                                         <div class="card-header bg-info text-white">Anamnesa</div>
                                         <div class="card-body p-0">
-                                            <textarea class="form-control border-0 rounded-0" id="anamnesa" name="anamnesa" rows="4">{{ $pengkajian?->anamnesa ?? 'Masukkan anamnesa di sini...' }}</textarea>
+                                            <textarea class="form-control border-0 rounded-0" id="anamnesa" name="anamnesa" rows="11">
+@if (empty($pengkajian))
+@if ($registration->registration_type === 'rawat-jalan' && $assesment)
+@php
+    $tanda_vital_raw = $assesment->tanda_vital ?? '';
+    if (is_array($tanda_vital_raw)) {
+        $tanda_vital = $tanda_vital_raw;
+    } else {
+        $tanda_vital = json_decode($tanda_vital_raw, true) ?? [];
+    }
+@endphp
+        Nadi (PR): {{ $tanda_vital['pr'] ?? '' }}
+        Respirasi (RR): {{ $tanda_vital['rr'] ?? '' }}
+        Tensi (BP): {{ $tanda_vital['bp'] ?? '' }}
+        Suhu (T): {{ $tanda_vital['temperatur'] ?? '' }}
+        Tinggi Badan: {{ $tanda_vital['height_badan'] ?? '' }}
+        Berat Badan: {{ $tanda_vital['weight_badan'] ?? '' }}
+        BMI: {{ $tanda_vital['bmi'] ?? '' }}{{ isset($tanda_vital['kat_bmi']) ? ' (' . $tanda_vital['kat_bmi'] . ')' : '' }}
+        SpO2: {{ $tanda_vital['spo2'] ?? '' }}
+        Lingkar Kepala:
+        Pemeriksaan Fisik: {{ $assesment->pemeriksaan_fisik ?? '' }}
+        Pemeriksaan Penunjang: {{ $assesment->pemeriksaan_penunjang ?? '' }}
+@endif
+@else
+{{ $pengkajian->anamnesa ?? '' }}
+@endif
+</textarea>
                                         </div>
                                     </div>
                                 </td>
