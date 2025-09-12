@@ -21,7 +21,6 @@ class ProsedurOperasi extends Model
         'waktu_selesai' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'dokter_tambahan_ids' => 'array',
         'deleted_at' => 'datetime'
     ];
 
@@ -41,18 +40,30 @@ class ProsedurOperasi extends Model
     {
         return $this->belongsTo(Doctor::class, 'dokter_operator_id');
     }
+    public function assDokterOperator1()
+    {
+        return $this->belongsTo(Doctor::class, 'dokter_operator1_id'); // adjust the foreign key as needed
+    }
+    public function assDokterOperator2()
+    {
+        return $this->belongsTo(Doctor::class, 'dokter_operator2_id'); // adjust the foreign key as needed
+    }
+    public function assDokterOperator3()
+    {
+        return $this->belongsTo(Doctor::class, 'dokter_operator3_id'); // adjust the foreign key as needed
+    }
 
     public function assDokterOperator()
     {
         return $this->belongsTo(Doctor::class, 'ass_dokter_operator_id');
     }
 
-    public function dokterAnestesi()
+    public function dokterAnastesi()
     {
         return $this->belongsTo(Doctor::class, 'dokter_anastesi_id');
     }
 
-    public function assDokterAnestesi()
+    public function assDokterAnastesi()
     {
         return $this->belongsTo(Doctor::class, 'ass_dokter_anastesi_id');
     }
@@ -66,9 +77,28 @@ class ProsedurOperasi extends Model
     {
         return $this->belongsTo(Doctor::class, 'dokter_tambahan_id');
     }
-
+    public function dokterTambahan1()
+    {
+        return $this->belongsTo(Doctor::class, 'dokter_tambahan1_id');
+    }
+    public function dokterTambahan2()
+    {
+        return $this->belongsTo(Doctor::class, 'dokter_tambahan2_id');
+    }
+    public function dokterTambahan3()
+    {
+        return $this->belongsTo(Doctor::class, 'dokter_tambahan3_id');
+    }
+    public function dokterTambahan4()
+    {
+        return $this->belongsTo(Doctor::class, 'dokter_tambahan4_id');
+    }
+    public function dokterTambahan5()
+    {
+        return $this->belongsTo(Doctor::class, 'dokter_tambahan5_id');
+    }
     // Audit Relations
-    public function createdBy()
+    public function createdByUser()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
